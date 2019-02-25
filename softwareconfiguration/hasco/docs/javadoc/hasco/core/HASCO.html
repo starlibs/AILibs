@@ -90,7 +90,7 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">hasco.core</div>
-<h2 title="Class HASCO" class="title">Class HASCO&lt;ISearch extends jaicore.search.probleminputs.GraphSearchInput&lt;N,A&gt;,N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</h2>
+<h2 title="Class HASCO" class="title">Class HASCO&lt;S extends jaicore.search.probleminputs.GraphSearchInput&lt;N,A&gt;,N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
@@ -109,7 +109,7 @@ var activeTableTab = "activeTableTab";
 <li><a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.html" title="class in hasco.optimizingfactory">hasco.optimizingfactory.SoftwareConfigurationAlgorithm</a>&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;,V&gt;</li>
 <li>
 <ul class="inheritance">
-<li>hasco.core.HASCO&lt;ISearch,N,A,V&gt;</li>
+<li>hasco.core.HASCO&lt;S,N,A,V&gt;</li>
 </ul>
 </li>
 </ul>
@@ -126,7 +126,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
-<dd><code>ISearch</code> - </dd>
+<dd><code>S</code> - </dd>
 <dd><code>N</code> - </dd>
 <dd><code>A</code> - </dd>
 <dd><code>V</code> - </dd>
@@ -141,7 +141,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <hr>
 <br>
-<pre>public class <span class="typeNameLabel">HASCO&lt;ISearch extends jaicore.search.probleminputs.GraphSearchInput&lt;N,A&gt;,N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
+<pre>public class <span class="typeNameLabel">HASCO&lt;S extends jaicore.search.probleminputs.GraphSearchInput&lt;N,A&gt;,N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
 extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.html" title="class in hasco.optimizingfactory">SoftwareConfigurationAlgorithm</a>&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;,V&gt;</pre>
 <div class="block">Hierarchically create an object of type T</div>
 </li>
@@ -164,8 +164,8 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#HASCO-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-hasco.core.IHASCOPlanningGraphGeneratorDeriver-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-jaicore.basic.algorithm.AlgorithmProblemTransformer-">HASCO</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;configurationProblem,
      <a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>&gt;&nbsp;planningGraphGeneratorDeriver,
-     jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;searchFactory,
-     jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>&gt;&nbsp;searchProblemTransformer)</code>&nbsp;</td>
+     jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;searchFactory,
+     jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;&nbsp;searchProblemTransformer)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -211,15 +211,15 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#getReport--">getReport</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i7" class="rowColor">
-<td class="colFirst"><code>jaicore.search.core.interfaces.IOptimalPathInORGraphSearch&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;</code></td>
+<td class="colFirst"><code>jaicore.search.core.interfaces.IOptimalPathInORGraphSearch&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#getSearch--">getSearch</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i8" class="altColor">
-<td class="colFirst"><code>jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;</code></td>
+<td class="colFirst"><code>jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#getSearchFactory--">getSearchFactory</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i9" class="rowColor">
-<td class="colFirst"><code>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>&gt;</code></td>
+<td class="colFirst"><code>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#getSearchProblemTransformer--">getSearchProblemTransformer</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i10" class="altColor">
@@ -310,8 +310,8 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <h4>HASCO</h4>
 <pre>public&nbsp;HASCO(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;configurationProblem,
              <a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>&gt;&nbsp;planningGraphGeneratorDeriver,
-             jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;searchFactory,
-             jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>&gt;&nbsp;searchProblemTransformer)</pre>
+             jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;searchFactory,
+             jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;&nbsp;searchProblemTransformer)</pre>
 </li>
 </ul>
 </li>
@@ -390,7 +390,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <ul class="blockList">
 <li class="blockList">
 <h4>getSearchProblemTransformer</h4>
-<pre>public&nbsp;jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>&gt;&nbsp;getSearchProblemTransformer()</pre>
+<pre>public&nbsp;jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;&nbsp;getSearchProblemTransformer()</pre>
 </li>
 </ul>
 <a name="getReport--">
@@ -436,7 +436,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <ul class="blockList">
 <li class="blockList">
 <h4>getSearchFactory</h4>
-<pre>public&nbsp;jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;getSearchFactory()</pre>
+<pre>public&nbsp;jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;getSearchFactory()</pre>
 </li>
 </ul>
 <a name="getSearch--">
@@ -445,7 +445,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <ul class="blockList">
 <li class="blockList">
 <h4>getSearch</h4>
-<pre>public&nbsp;jaicore.search.core.interfaces.IOptimalPathInORGraphSearch&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">ISearch</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;getSearch()</pre>
+<pre>public&nbsp;jaicore.search.core.interfaces.IOptimalPathInORGraphSearch&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;getSearch()</pre>
 </li>
 </ul>
 <a name="getLoggerName--">
