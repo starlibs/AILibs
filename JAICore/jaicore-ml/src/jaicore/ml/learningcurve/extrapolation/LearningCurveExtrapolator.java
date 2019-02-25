@@ -140,7 +140,7 @@ public class LearningCurveExtrapolator {
 			throw new AlgorithmException(e, "Error during training/testing the classifier");
 		}
 
-		return extrapolationMethod.extrapolateLearningCurveFromAnchorPoints(anchorPoints, yValues);
+		return extrapolationMethod.extrapolateLearningCurveFromAnchorPoints(anchorPoints, yValues, this.dataset.size());
 	}
 
 	private void createSplit(double trainsplit, long seed) {

@@ -108,7 +108,7 @@ public class LearningCurveTestDataGenerator {
 		configuration.setParameters(modelParams);
 		configuration.setWeights(weights);
 
-		LinearCombinationLearningCurve lc = new LinearCombinationLearningCurve(configuration);
+		LinearCombinationLearningCurve lc = new LinearCombinationLearningCurve(configuration, 2000);
 		return lc;
 
 	}

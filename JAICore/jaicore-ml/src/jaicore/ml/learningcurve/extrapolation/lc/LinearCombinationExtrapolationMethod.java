@@ -20,13 +20,13 @@ public class LinearCombinationExtrapolationMethod implements LearningCurveExtrap
 	private static final String SERVICE_URL = "http://localhost:8080/jaicore/web/api/v1/mcmc/modelparams";
 
 	@Override
-	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues)
+	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
 			throws InvalidAnchorPointsException {
 		// Request model parameters to create learning curve
 		ExtrapolationServiceClient<LinearCombinationConfiguration> client = new ExtrapolationServiceClient<>(
 				SERVICE_URL, LinearCombinationConfiguration.class);
 		LinearCombinationConfiguration configuration = client.getConfigForAnchorPoints(xValues, yValues);
-		return new LinearCombinationLearningCurve(configuration);
+		return new LinearCombinationLearningCurve(configuration, dataSetSize);
 	}
 
 }

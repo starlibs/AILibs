@@ -19,7 +19,7 @@ public class InversePowerLawExtrapolationMethod implements LearningCurveExtrapol
 	private static final String SERVICE_URL = "http://localhost:8081/jaicore/web/api/v1/ipl/modelparams";
 
 	@Override
-	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues)
+	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
 			throws InvalidAnchorPointsException {
 		// Request model parameters to create learning curve
 		ExtrapolationServiceClient<InversePowerLawConfiguration> client = new ExtrapolationServiceClient<>(SERVICE_URL,

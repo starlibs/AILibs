@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
+import org.apache.commons.math3.exception.NoBracketingException;
 
 import jaicore.ml.interfaces.LearningCurve;
 
@@ -18,15 +19,25 @@ import jaicore.ml.interfaces.LearningCurve;
  */
 public class LinearCombinationLearningCurve implements LearningCurve {
 
+	/**
+	 * Constant value describing the number of times the size of the interval in
+	 * which the saturation point is searched is doubled
+	 */
+	private static final int SATURATION_POINT_RETIRES = 3;
+
 	/** The (extrapolated) learning curve function */
 	private LinearCombinationFunction learningCurve;
 
 	/** The derivative of the learning curve */
 	private LinearCombinationFunction derivative;
 
-	public LinearCombinationLearningCurve(LinearCombinationConfiguration configuration) {
+	/** Size of the data set this learning curve was produced on */
+	private int dataSetSize;
+
+	public LinearCombinationLearningCurve(LinearCombinationConfiguration configuration, int dataSetSize) {
 		this.generateLearningCurve(configuration);
 		this.generateDerivative(configuration);
+		this.dataSetSize = dataSetSize;
 	}
 
 	private void generateLearningCurve(LinearCombinationConfiguration configuration) {
@@ -421,7 +432,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 			weights.add(configuration.getWeights().get(LinearCombinationConstants.ILOG_2));
 		}
 
-		this.derivative = new LinearCombinationFunction(functions, weights, -0.2);
+		this.derivative = new LinearCombinationFunction(functions, weights, -0.001);
 	}
 
 	@Override
@@ -432,8 +443,21 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 	@Override
 	public double getSaturationPoint(double epsilon) {
 		UnivariateSolver solver = new BrentSolver(0, epsilon);
-		// TODO: Optimize interval
-		return solver.solve(100, this.derivative, 0, Integer.MAX_VALUE);
+		double saturationPoint = -1;
+		int upperIntervalBound = this.dataSetSize;
+		int retries_left = SATURATION_POINT_RETIRES;
+		while (retries_left > 0 && saturationPoint == -1) {
+			try {
+				saturationPoint = solver.solve(1000, this.derivative, 1, upperIntervalBound);
+			} catch (NoBracketingException e) {
+				retries_left--;
+				upperIntervalBound *= 2;
+			}
+		}
+		if (saturationPoint == -1) {
+			throw new RuntimeException(String.format("No saturation point could be found in interval [1,%d]", upperIntervalBound));
+		}
+		return saturationPoint;
 	}
 
 	@Override
