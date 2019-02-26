@@ -23,7 +23,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 	 * Constant value describing the number of times the size of the interval in
 	 * which a root is searched is doubled
 	 */
-	private static final int ROOT_COMPUTATION_RETIRES = 6;
+	private static final int ROOT_COMPUTATION_RETIRES = 8;
 
 	/**
 	 * Constant value describing the slope at which we assume to have reached the
@@ -84,7 +84,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double c = this.getParams().get(LinearCombinationConstants.C);
-					return c - a * Math.pow(x, -1 * alpha);
+					return c - Math.pow(a * x, -1 * alpha);
 				}
 			};
 			functions.add(pow3);
@@ -280,7 +280,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				public double getValue(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
-					return a * alpha * Math.pow(x, -alpha - 1);
+					return (alpha * Math.pow(a * x, -alpha)) / x;
 				}
 			};
 			functions.add(pow3);
