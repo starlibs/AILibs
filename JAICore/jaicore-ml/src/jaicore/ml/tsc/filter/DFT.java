@@ -25,7 +25,7 @@ public class DFT implements IFilter {
 	private ArrayList<double[][]> DFTCoefficients = new ArrayList<double[][]>();
 	//TODO sinvollen wert finden 
 	
-	
+	private double[] DFTCoefficientsInstance;
 	/**
 	 * default value for the computation of the DFT Coefficients normally set to the wordlength/2
 	 */
@@ -37,13 +37,14 @@ public class DFT implements IFilter {
 	private boolean variableSet = false;
 	
 	/**
-	 * tracks weather the fitt mehtod was called
+	 * tracks weather the fit method was called
 	 */
+	private boolean fittedInstance = false;
 	private boolean fitted = false;
 	
 	/**
 	 *  The variable is set to 1/sqrt(n) in paper "Efficient Retrieval of Similar Time Sequences Using DFT" by Davood Rafieidrafiei and Alberto Mendelzon
-	 *  but in the original "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schï¿½fer
+	 *  but in the original "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
 	 *  it is set to 1/n. By default it is set to 1/n. 
 	 */ 
 	private double paperSpecificVariable;   
@@ -81,64 +82,23 @@ public class DFT implements IFilter {
 
 	//calculates the number of desired DFT coefficients for each instance 
 	@Override
-	public void fit(TimeSeriesDataset input) {
+	public void fit(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception{
 		
 		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
-
-		double InstancesLength = input.getValues(0)[0].length;
-		if(!variableSet) {
-			paperSpecificVariable = (double) 1.0/((double)InstancesLength);
-		}
 		
-		if(numberOfDisieredCoefficients > InstancesLength) {
-			throw new IllegalArgumentException("The number of desired coeficientes must be smaller than the number of data points of an instance.");
-		}
+		double[][] DFTCoefficientsMatrix = new double[input.getNumberOfInstances()][numberOfDisieredCoefficients*2];
 		
-		// go over every matrix in the dataset (if multivirat)
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
-			// matrix to save the calculated DFT vlaues one for every dataset matrix (instances x desired coefficients*2)(real and imaginary pro coefficient)
-			double[][] matrixDFTCoefficient = new double [(int) input.getNumberOfInstances()][numberOfDisieredCoefficients*2];
-			for(int instances = 0; instances < input.getNumberOfInstances(); instances++) {
-				// used to make stepsize of two in an one stepsize loop 
-				int loopcounter = 0;
-				for(int f = 0; f < numberOfDisieredCoefficients; f++) {	
-					
-					Complex result = new Complex(0,0);
-					Complex c = null;
-					//quelle (2) formular 4 
-					for(int t = 0; t<InstancesLength; t++) {
-						
-						double entry = input.getValues(matrix)[instances][t];
-						
-						double realpart = Math.cos(-(1.0/(double)InstancesLength)*2.0*Math.PI*(double)t*(double)f);
-						double imaginarypart = Math.sin(-(1.0/(double)InstancesLength)*2.0*Math.PI*(double)t*(double)f);
-						
-						c= new Complex(realpart, imaginarypart);
-						
-						c = c.multiply(entry);
-						result = result.add(c);
-						
-					}
-					
-					result = result.multiply(paperSpecificVariable);
-					// tries to fix the inaccuracy of the double datatype
-					if(Math.abs(result.getImaginary())<Math.pow(10, -15)) {
-						result = new Complex(result.getReal(),0);
-					}
-					if(Math.abs(result.getReal())<Math.pow(10, -15)){
-						result = new Complex(0,result.getImaginary());
-					}
-					// fills the DFT matrix for the instance
-					matrixDFTCoefficient[instances][loopcounter] = result.getReal();
-					matrixDFTCoefficient[instances][loopcounter+1] = result.getImaginary();
-					loopcounter= loopcounter+2;
-				}
+			for(int instance = 0; instance<input.getNumberOfInstances(); instance++) {
+				double[] DFTCoefficientsOFInstance = fitTransformInstance(input.getValues(matrix)[instance]);
+				fittedInstance = false;
+				DFTCoefficientsMatrix[instance] = DFTCoefficientsOFInstance;
 			}
-			// fills the later dataset for the matrix
-			DFTCoefficients.add(matrixDFTCoefficient);
+			DFTCoefficients.add(DFTCoefficientsMatrix);
 		}
+		
 		fitted = true;
 	}
 
@@ -146,6 +106,70 @@ public class DFT implements IFilter {
 	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
 		return transform(input);
+	}
+
+	
+	@Override
+	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		if(!fitted) {
+			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
+		}
+		return DFTCoefficientsInstance;
+	}
+
+	@Override
+	public void fitInstance(double[] input) throws IllegalArgumentException{
+		
+		if(numberOfDisieredCoefficients > input.length) {
+			throw new IllegalArgumentException("There cannot be more DFT coefficents calcualated than there entrys in the basis instance.");
+		}
+		
+		if(!variableSet) {
+			paperSpecificVariable = (double) 1.0/((double)input.length);
+		}
+		
+		if(input.length == 0) {
+			throw new IllegalArgumentException("The to transform instance can not be of length zero.");
+		}
+		//The buffer for the calculated DFT coefficeients
+		DFTCoefficientsInstance = new double[numberOfDisieredCoefficients*2];
+		
+		//Variable used to make steps of size two in a loop that makes setps of size one
+		int loopcounter = 0;
+		for(int entry = 0; entry < input.length; entry++) {
+			
+			Complex result = new Complex(0,0);
+			Complex tmp = null;
+			
+			for(int coefficient = 0; coefficient<numberOfDisieredCoefficients; coefficient++) {
+				double currentEntry = input[entry];
+				
+				//calculates the real and imaginary part of the entry according to the desired coefficient
+				
+				double realpart = Math.cos(-(1.0/(double)input.length)*2.0*Math.PI*(double)entry*(double)coefficient);
+				double imaginarypart =  Math.sin(-(1.0/(double)input.length)*2.0*Math.PI*(double)entry*(double)coefficient);
+				
+				tmp = new Complex(realpart,imaginarypart);
+				tmp = tmp.multiply(currentEntry);
+				
+				result = result.add(tmp);
+			}
+			
+			result = result.multiply(paperSpecificVariable);
+			
+			//saves the calculated coefficient in the buffer with first the real part and than the imaginary
+			DFTCoefficientsInstance[loopcounter]= result.getReal();
+			DFTCoefficientsInstance[loopcounter+1] = result.getImaginary();
+			
+			loopcounter+=2;
+		}
+		fittedInstance = true;
+	}
+
+	@Override
+	public double[] fitTransformInstance(double[] input)  throws IllegalArgumentException, NoneFittedFilterExeception {
+		fitInstance(input);
+		return transformInstance(input) ;
 	}
 
 }

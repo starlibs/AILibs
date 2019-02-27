@@ -3,6 +3,7 @@
  */
 package jaicore.ml.tsc.filter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
@@ -15,17 +16,22 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
  */
 public class ZTransformer implements IFilter {
 	
-	private double [][] means;
+	
 
-	private double [][] deviation;
-
+	private double mean;
+	private double deviation;
+	private ArrayList <double[][]> ztransformedDataset = new ArrayList<double[][]>();
+	
+	//To get a unbiased estimate for the variance the intermediated results are 
+	//divided by n-1 instead of n(Number of samples of Population)
+	private boolean BasselCorrected = true; 
+	
 	private boolean fitted = false;
+	private boolean fittedInstance = false;
 
-	public double[][] getMeans() {
-		return means;
-	}
-	public double[][] getDeviation() {
-		return deviation;
+	
+	public void setBasselCorrected(boolean basselCorrected) {
+		BasselCorrected = basselCorrected;
 	}
 	/* (non-Javadoc)
 	 * @see jaicore.ml.tsc.filter.IFilter#transform(jaicore.ml.core.dataset.IDataset)
@@ -34,29 +40,24 @@ public class ZTransformer implements IFilter {
 	@Override
 	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception{
 		
-	//TODO is a dataset empty if it has no attributes}
+	//TODO is a dataset empty if it has no attributes ?
 		
 		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
-		if(fitted) {
-			for(int i = 0; i < input.getNumberOfVariables(); i++){			
-					 double[][] matrix =  input.getValues(i);
-					 for(int instance = 0; instance < ((TimeSeriesDataset) input).getNumberOfInstances(); instance++) {
-						double[] row =  matrix[instance];
-						for(int elem = 0; elem < row.length; elem++) {
-							//update every elem by the calculation of elem multiplied by the mean of the according instance
-							row[elem]=((row[elem]*means[i][instance])/deviation[i][instance]);
-						}
-						matrix[instance]= row;
-					 }
-				((TimeSeriesDataset) input).replace(i,matrix,null);
-			}
-		}else {
+		if(!fitted) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
 		}
-		
-		return input;
+		double[][] ztransformedMatrix = new double[input.getNumberOfInstances()][input.getValues(0)[0].length];
+		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++){			
+			for(int instance = 0; instance <input.getNumberOfInstances(); instance++) {
+				ztransformedMatrix[instance] = fitTransformInstance(input.getValues(matrix)[instance]);
+				fittedInstance = false;
+			}
+			ztransformedDataset.add(ztransformedMatrix);
+		}
+
+		return new TimeSeriesDataset(ztransformedDataset);
 	}
 
 	/* (non-Javadoc)
@@ -64,33 +65,13 @@ public class ZTransformer implements IFilter {
 	 */
 	
 	@Override
-	public void fit(TimeSeriesDataset input) {
-		
-		if(!(input instanceof TimeSeriesDataset)){
-			throw new IllegalArgumentException("This mehtod only supports for timeseries datasets.");
-		}	
+	public void fit(TimeSeriesDataset input) throws IllegalArgumentException{
+			
 		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
-		
-		//make suitable means and deviation matrix rows == different attributes columns == different instances
-		
-		means = new double[input.getNumberOfVariables()][(int) input.getNumberOfInstances()];
-		deviation = new double[input.getNumberOfVariables()][(int) input.getNumberOfInstances()];
-		
-		
-		//for every attribute for every instance of this attribute compute mean and deviation and put it in the according cell in matrix 
-		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
-			for(int instance = 0; instance < input.getNumberOfInstances(); instance++) {
-				means[matrix][instance] = Arrays.stream(input.getValues(matrix)[instance]).average().getAsDouble();
-				double sum = 0;
-				for( double elem : input.getValues(matrix)[instance]) {
-					sum += Math.pow((elem - means[matrix][instance]),2);
-				}
-				deviation[matrix][instance] = Math.sqrt(1/(input.getValues(matrix)[instance].length-1)*sum);		
-			}
-		}
-		
+		//TODO should be something done here? Because ztransform can be calculated over all in the transform step
+		//through the fit transform of the single instance
 		fitted = true;
 	}
 
@@ -102,6 +83,52 @@ public class ZTransformer implements IFilter {
 	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
 		return transform(input);
+	}
+	
+	@Override
+	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		if(!fitted) {
+			throw new NoneFittedFilterExeception("The fit method must be called before the transfom method is called");
+		}
+		if(input.length == 0) {
+			throw new IllegalArgumentException("The to transform instance can not be empty");
+		}
+		
+		double[] ztransform = new double[input.length];
+		for(int entry = 0; entry < input.length; entry++) {
+			ztransform[entry] = (entry-mean)/deviation;
+		}
+		return ztransform;
+	}
+	
+	@Override
+	public void fitInstance(double[] input) throws IllegalArgumentException {
+		double SumSq = 0;
+		double SumMean = 0;
+		double NumberEntrys = input.length;
+		
+		if(NumberEntrys == 0) {
+			throw new IllegalArgumentException("The to transform instance can not be empty.");
+		}
+		//TODO can be numarical inaccurate if the data is large
+		for(int entry = 0; entry<input.length;entry++) {
+			SumSq =+ Math.pow(entry,2);
+			SumMean =+ entry;
+		}
+		mean = SumMean/NumberEntrys;
+		if(BasselCorrected) {
+			deviation = Math.sqrt((SumSq/NumberEntrys - Math.pow((SumMean/NumberEntrys),2))* NumberEntrys/(NumberEntrys-1));
+		}
+		else {
+			deviation = Math.sqrt((SumSq - (Math.pow(SumMean,2)/NumberEntrys))/NumberEntrys);
+		}
+		
+		fittedInstance = true;
+	}
+	@Override
+	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		fitInstance(input);
+		return transformInstance(input);
 	}
 
 }

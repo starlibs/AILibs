@@ -13,10 +13,25 @@ public interface IFilter {
 	 */
 	public TimeSeriesDataset transform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception;
 	
+	
+	/**
+	 * This function transforms only a single instance.
+	 * @param input the to transform instance
+	 * @return the transformed instance
+	 * @throws NoneFittedFilterExeception 
+	 */
+	public double[] transformInstance(double [] input) throws IllegalArgumentException, NoneFittedFilterExeception;
+	
 	/** the function computes the needed information for the transform function.
 	 * @param input the dataset that is to transform 
 	 */
-	public void fit(TimeSeriesDataset input);
+	public void fit(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception;
+	
+	
+	/** The function only fits a single instance of the dataset 
+	 * @param input The to fit instance
+	 */
+	public void fitInstance(double [] input) throws IllegalArgumentException;
 	
 	/**	a utility function to avoid the added effort of calling the fit and transform function separate
 	 * @param input the dataset that is to be transfromed 
@@ -25,4 +40,10 @@ public interface IFilter {
 	 * @throws IllegalArgumentException 	used if dataset to transform is empty
 	 */
 	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception;
+	
+	/**the function fit and transforms a single instance 
+	 * @param input the to fit and transform instance
+	 * @return the transformed instance
+	 */
+	public double[] fitTransformInstance(double[] input)throws IllegalArgumentException, NoneFittedFilterExeception;
 }

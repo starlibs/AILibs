@@ -152,9 +152,29 @@ public class SFA implements IFilter {
 
 	@Override
 	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		// TODO Auto-generated method stump
-		fit(input);
-		return transform(input);
+		
+		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+	}
+
+
+	@Override
+	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		
+		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+	}
+
+
+	@Override
+	public void fitInstance(double[] input) throws IllegalArgumentException {
+		
+		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+	}
+
+
+	@Override
+	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		
+		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
 	}
 
 }

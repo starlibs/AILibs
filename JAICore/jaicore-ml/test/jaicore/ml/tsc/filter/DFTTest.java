@@ -44,7 +44,7 @@ public class DFTTest {
 	public ExpectedException thrown = ExpectedException.none();
 	
 	@Test
-	public void testFit() {
+	public void testFit() throws IllegalArgumentException, NoneFittedFilterExeception {
 		DFT testDFT = new DFT();
 //		testDFT.setNumberOfDisieredCoefficients(7);
 		testDFT.setNumberOfDisieredCoefficients(2);

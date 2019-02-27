@@ -9,6 +9,7 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 public class SlidingWindowBuilder implements IFilter{
 	
 	private boolean fitted = false;
+	private boolean fittedInstance = false;
 	
 	//TODO find meaningfull value
 	private int defaultWindowSize = 20;
@@ -58,6 +59,33 @@ public class SlidingWindowBuilder implements IFilter{
 		// TODO Auto-generated method stub
 		fit(input);
 		return transform(input);
+	}
+
+	@Override
+	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void fitInstance(double[] input) throws IllegalArgumentException {
+		/*
+		 * if(defaultWindowSize > input.length) { //TODO Or should than the instance be
+		 * returned throw new
+		 * IllegalArgumentException("The window length can not be greater than the instance length"
+		 * ); } if(input.length == 0) { throw new
+		 * IllegalArgumentException("The input can not be empty."); } double[]
+		 * blownUpEntry = new double[input.length*defaultWindowSize]; for(int entry = 0;
+		 * entry < input.length; entry++) {
+		 * 
+		 * }
+		 */
+	}
+
+	@Override
+	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		fitInstance(input);
+		return transformInstance(input);
 	}
 
 }

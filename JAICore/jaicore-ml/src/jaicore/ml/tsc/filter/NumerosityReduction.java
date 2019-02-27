@@ -9,6 +9,7 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 public class NumerosityReduction implements IFilter {
 	
 	private boolean fitted = false;
+	private boolean fittedInstance = false;
 	private ArrayList<double[][]> reducedDataset = new ArrayList<double[][]>();
 	
 	@Override
@@ -64,6 +65,21 @@ public class NumerosityReduction implements IFilter {
 		throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
 		return transform(input);
+	}
+
+	@Override
+	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		throw new UnsupportedOperationException("Numerity reduction is not reasonable in this context for a single Instance.");
+	}
+
+	@Override
+	public void fitInstance(double[] input) throws IllegalArgumentException {
+		throw new UnsupportedOperationException("Numerity reduction is not reasonable in this context for a single Instance.");
+	}
+
+	@Override
+	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		throw new UnsupportedOperationException("Numerity reduction is not reasonable in this context for a single Instance.");
 	}
 
 }
