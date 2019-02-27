@@ -29,7 +29,13 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 	 * Constant value describing the slope at which we assume to have reached the
 	 * saturation point
 	 */
-	private static final double SLOPE_SATURATION_POINT = 0.001;
+	private static final double SLOPE_SATURATION_POINT = 0.0001;
+
+	/**
+	 * Error tolerance for root computation in case of the convergence value
+	 * calculation.
+	 */
+	private static final double TOLERANCE_CONVERGENCE_VALUE = 1.0;
 
 	/**
 	 * Constant value describing the slope at which we assume that there is no
@@ -84,7 +90,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double c = this.getParams().get(LinearCombinationConstants.C);
-					return c - Math.pow(a * x, -1 * alpha);
+					return c - a * Math.pow(x, -1 * alpha);
 				}
 			};
 			functions.add(pow3);
@@ -196,9 +202,9 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 		}
 
 		// Janoschek
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.JANOSCHECK)) {
+		if (configuration.getParameters().containsKey(LinearCombinationConstants.JANOSCHEK)) {
 			ParametricFunction janoscheck = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.JANOSCHECK)) {
+					configuration.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
 
 				@Override
 				public double getValue(double x) {
@@ -210,7 +216,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(janoscheck);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.JANOSCHECK));
+			weights.add(configuration.getWeights().get(LinearCombinationConstants.JANOSCHEK));
 		}
 
 		// Weibull
@@ -264,7 +270,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
-					return Math.pow(x, c - 2) * Math.exp(a + (b / x)) + (c * x - b);
+					return Math.pow(x, c - 2) * Math.exp(a + b / x) * (c * x - b);
 				}
 			};
 			functions.add(vaporPressure);
@@ -280,7 +286,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				public double getValue(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
-					return (alpha * Math.pow(a * x, -alpha)) / x;
+					return a * alpha * Math.pow(x, -alpha - 1);
 				}
 			};
 			functions.add(pow3);
@@ -331,7 +337,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
-					return (a * c * Math.pow(Math.exp(-b) + x, c))
+					return -1 * (a * c * Math.pow(Math.exp(-b) * x, c))
 							/ (x * Math.pow(Math.pow(Math.exp(-b) * x, c) + 1, 2));
 				}
 			};
@@ -393,9 +399,9 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 		}
 
 		// Janoschek
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.JANOSCHECK)) {
+		if (configuration.getParameters().containsKey(LinearCombinationConstants.JANOSCHEK)) {
 			ParametricFunction janoscheck = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.JANOSCHECK)) {
+					configuration.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
 
 				@Override
 				public double getValue(double x) {
@@ -408,7 +414,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(janoscheck);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.JANOSCHECK));
+			weights.add(configuration.getWeights().get(LinearCombinationConstants.JANOSCHEK));
 		}
 
 		// Weibull
@@ -455,24 +461,27 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 
 	@Override
 	public double getSaturationPoint(double epsilon) {
-		return this.computeDerivativeRoot(epsilon, -1 * SLOPE_SATURATION_POINT);
+		return this.computeDerivativeRoot(epsilon, -1 * SLOPE_SATURATION_POINT, dataSetSize);
 	}
 
 	@Override
 	public double getDerivativeCurveValue(double x) {
+		this.derivative.setOffset(0);
 		return this.derivative.value(x);
 	}
 
 	@Override
 	public double getConvergenceValue() {
-		return this.getCurveValue(this.computeDerivativeRoot(0, -1 * SLOPE_CONVERGENCE_VALUE));
+		int x = (int) this.computeDerivativeRoot(TOLERANCE_CONVERGENCE_VALUE, -1 * SLOPE_CONVERGENCE_VALUE,
+				dataSetSize * 100);
+		return this.getCurveValue(x);
 	}
 
-	private double computeDerivativeRoot(double epsilon, double offset) {
+	private double computeDerivativeRoot(double epsilon, double offset, int upperIntervalBoundStart) {
 		UnivariateSolver solver = new BrentSolver(0, epsilon);
 		this.derivative.setOffset(offset);
 		double result = -1;
-		int upperIntervalBound = this.dataSetSize;
+		int upperIntervalBound = upperIntervalBoundStart;
 		int retries_left = ROOT_COMPUTATION_RETIRES;
 		while (retries_left > 0 && result == -1) {
 			try {

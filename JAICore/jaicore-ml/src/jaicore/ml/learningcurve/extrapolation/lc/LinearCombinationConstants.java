@@ -18,9 +18,9 @@ public class LinearCombinationConstants {
 	public static final String POW_4 = "pow_4";
 	public static final String MMF = "mmf";
 	public static final String EXP_4 = "exp_4";
-	public static final String JANOSCHECK = "janoscheck";
+	public static final String JANOSCHEK = "janoschek";
 	public static final String WEIBULL = "weibull";
-	public static final String ILOG_2 = "ilog_4";
+	public static final String ILOG_2 = "ilog_2";
 
 	// Parameter names
 	public static final String A = "a";
