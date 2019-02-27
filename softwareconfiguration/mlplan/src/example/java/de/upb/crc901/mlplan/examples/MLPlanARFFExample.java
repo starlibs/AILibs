@@ -2,6 +2,7 @@ package de.upb.crc901.mlplan.examples;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.PrintStream;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +13,7 @@ import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.TimeOut;
+import jaicore.concurrent.ThreadObserver;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
@@ -29,6 +31,8 @@ import weka.core.Instances;
 public class MLPlanARFFExample {
 
 	public static void main(final String[] args) throws Exception {
+		
+		new ThreadObserver(new PrintStream(new File("logs/threads.log"))).start();
 
 		/* load data for segment dataset and create a train-test-split */
 		File file = new File("testrsc/car.arff");
