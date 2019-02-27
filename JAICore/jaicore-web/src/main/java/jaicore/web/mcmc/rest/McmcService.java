@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jaicore.web.mcmc.rest.message.ErrorResponse;
+import jaicore.web.mcmc.rest.message.LinearCombinationParameterSet;
 import jaicore.web.mcmc.rest.message.McmcRequest;
 import jaicore.web.mcmc.rest.message.McmcResponse;
 
@@ -34,6 +35,8 @@ public class McmcService {
 	private static final int STAN_SAMPLING_TIMEOUT_MS = 60000;
 	private static final int STAN_SAMPLING_NO_CHECKPOINTS = 10;
 	private static final int STAN_SAMPLING_CHECKPOINT_INTERVAL = 200;
+
+	private static final int NUMBER_OF_RETURNED_SAMPLES = 10;
 
 	@PostMapping("/modelparams")
 	public ResponseEntity<McmcResponse> computeModelParams(@RequestBody McmcRequest request) throws Exception {
@@ -110,22 +113,24 @@ public class McmcService {
 	}
 
 	private McmcResponse parseOutputFile(File outputFile) throws IOException {
+		// Read raw lines from output file
 		List<String> rawLines = FileUtils.readLines(outputFile, Charset.defaultCharset());
 
+		// Include all lines into consideration that contain actual values
 		List<String> lines = new ArrayList<>();
 
+		// The first non-comment row is the header and needs to be skipped
 		boolean skippedHeader = false;
 
-		double[] values = new double[34];
-		for (int i = 0; i < values.length; i++) {
-			values[i] = 0.0;
-		}
-
+		// Read line by line
 		for (String line : rawLines) {
 
+			// Ignore comments
 			if (line.startsWith("#")) {
 				continue;
 			}
+
+			// Skip first non-comment row
 			if (!skippedHeader) {
 				skippedHeader = true;
 				continue;
@@ -135,15 +140,28 @@ public class McmcService {
 
 		}
 
-		String line = lines.get(ThreadLocalRandom.current().nextInt(0, lines.size()));
+		McmcResponse response = new McmcResponse();
+		
+		//Choose samples randomly
+		while (response.getParameterSets().size() < NUMBER_OF_RETURNED_SAMPLES) {
+			int index = ThreadLocalRandom.current().nextInt(0, lines.size());
+			String line = lines.get(index);
+			response.addParameterSet(parseLine(line));
+			lines.remove(index);
+		}
 
+		return response;
+	}
+
+	private LinearCombinationParameterSet parseLine(String line) {
+		double[] values = new double[34];
 		String[] parsedLine = line.split(",");
 		if (parsedLine.length != values.length) {
 			throw new ValidationException(
 					String.format("Line has incorrect number of values (%d) : %s", parsedLine.length, line));
 		}
 		for (int i = 0; i < parsedLine.length; i++) {
-			values[i] += Double.parseDouble(parsedLine[i]);
+			values[i] = Double.parseDouble(parsedLine[i]);
 		}
 
 		// Extract parameters
@@ -194,7 +212,7 @@ public class McmcService {
 		exp4Params.put("alpha", values[32]);
 		modelParams.put("exp_4", exp4Params);
 
-		return new McmcResponse(weights, modelParams);
+		return new LinearCombinationParameterSet(weights, modelParams);
 	}
 
 	@ExceptionHandler({ Exception.class })

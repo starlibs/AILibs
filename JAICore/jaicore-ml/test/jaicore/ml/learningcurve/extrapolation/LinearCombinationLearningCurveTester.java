@@ -1,15 +1,21 @@
 package jaicore.ml.learningcurve.extrapolation;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
 
+import com.google.common.collect.Lists;
+
 import jaicore.ml.interfaces.LearningCurve;
-import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationConfiguration;
+import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationLearningCurve;
+import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationLearningCurveConfiguration;
+import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationParameterSet;
 
 public class LinearCombinationLearningCurveTester {
 
@@ -98,6 +104,13 @@ public class LinearCombinationLearningCurveTester {
 	}
 
 	@Test
+	public void testSaturationPoint2ParameterSets() {
+		LearningCurve lc = generateTestLearningCurve2ParameterSets();
+		double saturationPoint = lc.getSaturationPoint(0.1);
+		assertEquals(462.934, saturationPoint, 0.1, "The computed saturation point is not correct!");
+	}
+
+	@Test
 	public void testConvergenceValuePow3() {
 		LearningCurve lc = generateTestLearningCurvePow3();
 		double convergenceValue = lc.getConvergenceValue();
@@ -174,7 +187,7 @@ public class LinearCombinationLearningCurveTester {
 		double convergenceValue = lc.getConvergenceValue();
 		assertEquals(0.861, convergenceValue, 0.01, "The computed convergence value is not correct!");
 	}
-	
+
 	@Test
 	public void testConvergenceValueCombination() {
 		LearningCurve lc = generateTestLearningCurveCombination();
@@ -182,8 +195,16 @@ public class LinearCombinationLearningCurveTester {
 		assertEquals(0.972, convergenceValue, 0.01, "The computed convergence value is not correct!");
 	}
 
+	@Test
+	public void testConvergenceValue2ParameterSets() {
+		LearningCurve lc = generateTestLearningCurve2ParameterSets();
+		double convergenceValue = lc.getConvergenceValue();
+		assertEquals(0.9562, convergenceValue, 0.01, "The computed convergence value is not correct!");
+	}
+
 	private LinearCombinationLearningCurve generateTestLearningCurvePow3() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("pow_3", 1.0);
 
@@ -194,13 +215,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("alpha", 0.35);
 
 		parameters.put("pow_3", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveVapor() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("vapor_pressure", 1.0);
 
@@ -211,13 +234,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("c", 0.25);
 
 		parameters.put("vapor_pressure", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveLogLogLinear() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("log_log_linear", 1.0);
 
@@ -227,13 +252,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("b", 0.0);
 
 		parameters.put("log_log_linear", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveHill3() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("hill_3", 1.0);
 
@@ -244,13 +271,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("kappa", 200.0);
 
 		parameters.put("hill_3", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveLogPower() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("log_power", 1.0);
 
@@ -261,13 +290,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("c", -0.5);
 
 		parameters.put("log_power", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurvePow4() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("pow_4", 1.0);
 
@@ -279,13 +310,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("alpha", 0.4);
 
 		parameters.put("pow_4", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveMMF() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("mmf", 1.0);
 
@@ -297,13 +330,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("kappa", 0.3);
 
 		parameters.put("mmf", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveExp4() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("exp_4", 1.0);
 
@@ -315,13 +350,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("alpha", 0.5);
 
 		parameters.put("exp_4", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveJanoschek() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("janoschek", 1.0);
 
@@ -333,13 +370,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("kappa", 0.1);
 
 		parameters.put("janoschek", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveWeibull() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("weibull", 1.0);
 
@@ -351,13 +390,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("kappa", 3.0);
 
 		parameters.put("weibull", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveIlog2() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("ilog_2", 1.0);
 
@@ -367,13 +408,15 @@ public class LinearCombinationLearningCurveTester {
 		params.put("c", 0.95);
 
 		parameters.put("ilog_2", params);
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurveCombination() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("pow_3", 1.0 / 3.0);
 		weights.put("log_log_linear", 1.0 / 3.0);
@@ -397,9 +440,78 @@ public class LinearCombinationLearningCurveTester {
 		logPowerParams.put("c", -0.5);
 		parameters.put("log_power", logPowerParams);
 
-		configuration.setWeights(weights);
-		configuration.setParameters(parameters);
+		parameterSet.setWeights(weights);
+		parameterSet.setParameters(parameters);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 		return new LinearCombinationLearningCurve(configuration, 2000);
+	}
+
+	private LinearCombinationLearningCurve generateTestLearningCurve2ParameterSets() {
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+
+		// Parameter set 1
+		LinearCombinationParameterSet parameterSet1 = new LinearCombinationParameterSet();
+		Map<String, Double> weights1 = new HashMap<>();
+		weights1.put("pow_3", 1.0);
+
+		Map<String, Map<String, Double>> parameters1 = new HashMap<>();
+		Map<String, Double> pow3Params1 = new HashMap<>();
+		pow3Params1.put("a", 1.8);
+		pow3Params1.put("c", 0.95);
+		pow3Params1.put("alpha", 0.35);
+		parameters1.put("pow_3", pow3Params1);
+
+		parameterSet1.setParameters(parameters1);
+		parameterSet1.setWeights(weights1);
+
+		// Parameter set 2
+		LinearCombinationParameterSet parameterSet2 = new LinearCombinationParameterSet();
+		Map<String, Double> weights2 = new HashMap<>();
+		weights2.put("pow_3", 1.0);
+
+		Map<String, Map<String, Double>> parameters2 = new HashMap<>();
+		Map<String, Double> pow3Params2 = new HashMap<>();
+		pow3Params2.put("a", 2.0);
+		pow3Params2.put("c", 1.0);
+		pow3Params2.put("alpha", 0.7);
+		parameters2.put("pow_3", pow3Params2);
+
+		parameterSet2.setWeights(weights2);
+		parameterSet2.setParameters(parameters2);
+		configuration.setParameterSets(Lists.newArrayList(parameterSet1, parameterSet2));
+		return new LinearCombinationLearningCurve(configuration, 2000);
+	}
+
+	@Test
+	public void completeTest() throws InvalidAnchorPointsException {
+		// Generate learning curve from real anchor points
+		int[] xValues = { 4, 8, 16, 32, 64, 128, 256 };
+		double[] yValues = { 0.1672, 0.2513, 0.4161, 0.5485, 0.7381, 0.7961, 0.8471 };
+		LinearCombinationExtrapolationMethod method = new LinearCombinationExtrapolationMethod();
+
+		LearningCurve lc = method.extrapolateLearningCurveFromAnchorPoints(xValues, yValues, 2000);
+
+		checkValuesBetween0And1(lc);
+
+		checkMonotoneIncreasing(lc);
+
+		assertTrue(lc.getSaturationPoint(0.1) > 0 && lc.getSaturationPoint(0.1) < 2000);
+
+		assertTrue(lc.getConvergenceValue() > 0 && lc.getConvergenceValue() < 1);
+	}
+
+	private void checkValuesBetween0And1(LearningCurve lc) {
+		for (int x = 2; x < 2000; x++) {
+			double y = lc.getCurveValue(x);
+			assertTrue(String.format("Curve value is not between 0 and 1 for x=%d (y=%f)", x, y), y >= 0 && y <= 1);
+		}
+	}
+
+	private void checkMonotoneIncreasing(LearningCurve lc) {
+		for (int x = 3; x < 2000; x++) {
+			assertTrue(String.format("Curve value is not monotonic increasing between x=%d and x=%d", x, x - 1),
+					lc.getCurveValue(x) >= lc.getCurveValue(x - 1));
+		}
 	}
 
 }

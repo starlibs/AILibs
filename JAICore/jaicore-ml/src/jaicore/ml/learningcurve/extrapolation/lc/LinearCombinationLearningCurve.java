@@ -3,6 +3,7 @@ package jaicore.ml.learningcurve.extrapolation.lc;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
@@ -53,23 +54,37 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 	/** Size of the data set this learning curve was produced on */
 	private int dataSetSize;
 
-	public LinearCombinationLearningCurve(LinearCombinationConfiguration configuration, int dataSetSize) {
-		this.generateLearningCurve(configuration);
-		this.generateDerivative(configuration);
+	public LinearCombinationLearningCurve(LinearCombinationLearningCurveConfiguration configuration, int dataSetSize) {
+		List<UnivariateFunction> learningCurves = new ArrayList<>();
+		List<UnivariateFunction> derivatives = new ArrayList<>();
+
+		for (LinearCombinationParameterSet parameterSet : configuration.getParameterSets()) {
+			learningCurves.add(generateLearningCurve(parameterSet));
+			derivatives.add(generateDerivative(parameterSet));
+		}
+
+		List<Double> weights = new ArrayList<>();
+		for (int i = 0; i < configuration.getParameterSets().size(); i++) {
+			weights.add(1.0 / configuration.getParameterSets().size());
+		}
+
+		this.learningCurve = new LinearCombinationFunction(learningCurves, weights);
+		this.derivative = new LinearCombinationFunction(derivatives, weights);
+
 		this.dataSetSize = dataSetSize;
 	}
 
-	private void generateLearningCurve(LinearCombinationConfiguration configuration) {
-		List<ParametricFunction> functions = new ArrayList<>();
+	private LinearCombinationFunction generateLearningCurve(LinearCombinationParameterSet parameterSet) {
+		List<UnivariateFunction> functions = new ArrayList<>();
 		List<Double> weights = new ArrayList<>();
 
 		// Vapor pressure
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.VAPOR_PRESSURE)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.VAPOR_PRESSURE)) {
 			ParametricFunction vaporPressure = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.VAPOR_PRESSURE)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.VAPOR_PRESSURE)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -77,16 +92,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(vaporPressure);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.VAPOR_PRESSURE));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.VAPOR_PRESSURE));
 		}
 
 		// pow_3
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.POW_3)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.POW_3)) {
 			ParametricFunction pow3 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.POW_3)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.POW_3)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -94,32 +109,32 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(pow3);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.POW_3));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.POW_3));
 		}
 
 		// log log linear
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.LOG_LOG_LINEAR)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.LOG_LOG_LINEAR)) {
 			ParametricFunction logLogLinear = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.LOG_LOG_LINEAR)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.LOG_LOG_LINEAR)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					return Math.log(a * Math.log(x) + b);
 				}
 			};
 			functions.add(logLogLinear);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.LOG_LOG_LINEAR));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.LOG_LOG_LINEAR));
 		}
 
 		// hill3
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.HILL_3)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.HILL_3)) {
 			ParametricFunction hill3 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.HILL_3)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.HILL_3)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double y = this.getParams().get(LinearCombinationConstants.Y);
 					double eta = this.getParams().get(LinearCombinationConstants.ETA);
 					double kappa = this.getParams().get(LinearCombinationConstants.KAPPA);
@@ -127,16 +142,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(hill3);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.HILL_3));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.HILL_3));
 		}
 
 		// log power
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.LOG_POWER)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.LOG_POWER)) {
 			ParametricFunction logPower = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.LOG_POWER)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.LOG_POWER)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -144,16 +159,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(logPower);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.LOG_POWER));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.LOG_POWER));
 		}
 
 		// pow4
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.POW_4)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.POW_4)) {
 			ParametricFunction pow4 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.POW_4)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.POW_4)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -162,16 +177,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(pow4);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.POW_4));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.POW_4));
 		}
 
 		// MMF
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.MMF)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.MMF)) {
 			ParametricFunction mmf = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.MMF)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.MMF)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -180,16 +195,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(mmf);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.MMF));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.MMF));
 		}
 
 		// exp4
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.EXP_4)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.EXP_4)) {
 			ParametricFunction exp4 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.EXP_4)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.EXP_4)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -198,16 +213,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(exp4);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.EXP_4));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.EXP_4));
 		}
 
 		// Janoschek
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.JANOSCHEK)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.JANOSCHEK)) {
 			ParametricFunction janoscheck = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -216,16 +231,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(janoscheck);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.JANOSCHEK));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.JANOSCHEK));
 		}
 
 		// Weibull
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.WEIBULL)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.WEIBULL)) {
 			ParametricFunction weibull = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.WEIBULL)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.WEIBULL)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -234,39 +249,39 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(weibull);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.WEIBULL));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.WEIBULL));
 		}
 
 		// ilog2
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.ILOG_2)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.ILOG_2)) {
 			ParametricFunction ilog2 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.ILOG_2)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.ILOG_2)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double c = this.getParams().get(LinearCombinationConstants.C);
 					return c - (a / Math.log(x));
 				}
 			};
 			functions.add(ilog2);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.ILOG_2));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.ILOG_2));
 		}
 
-		this.learningCurve = new LinearCombinationFunction(functions, weights);
+		return new LinearCombinationFunction(functions, weights);
 	}
 
-	private void generateDerivative(LinearCombinationConfiguration configuration) {
-		List<ParametricFunction> functions = new ArrayList<>();
+	private LinearCombinationFunction generateDerivative(LinearCombinationParameterSet parameterSet) {
+		List<UnivariateFunction> functions = new ArrayList<>();
 		List<Double> weights = new ArrayList<>();
 
 		// Vapor pressure
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.VAPOR_PRESSURE)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.VAPOR_PRESSURE)) {
 			ParametricFunction vaporPressure = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.VAPOR_PRESSURE)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.VAPOR_PRESSURE)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -274,48 +289,48 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(vaporPressure);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.VAPOR_PRESSURE));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.VAPOR_PRESSURE));
 		}
 
 		// pow_3
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.POW_3)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.POW_3)) {
 			ParametricFunction pow3 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.POW_3)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.POW_3)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					return a * alpha * Math.pow(x, -alpha - 1);
 				}
 			};
 			functions.add(pow3);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.POW_3));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.POW_3));
 		}
 
 		// log log linear
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.LOG_LOG_LINEAR)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.LOG_LOG_LINEAR)) {
 			ParametricFunction logLogLinear = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.LOG_LOG_LINEAR)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.LOG_LOG_LINEAR)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					return a / (a * x * Math.log(x) + b * x);
 				}
 			};
 			functions.add(logLogLinear);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.LOG_LOG_LINEAR));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.LOG_LOG_LINEAR));
 		}
 
 		// hill3
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.HILL_3)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.HILL_3)) {
 			ParametricFunction hill3 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.HILL_3)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.HILL_3)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double y = this.getParams().get(LinearCombinationConstants.Y);
 					double eta = this.getParams().get(LinearCombinationConstants.ETA);
 					double kappa = this.getParams().get(LinearCombinationConstants.KAPPA);
@@ -324,16 +339,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(hill3);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.HILL_3));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.HILL_3));
 		}
 
 		// log power
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.LOG_POWER)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.LOG_POWER)) {
 			ParametricFunction logPower = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.LOG_POWER)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.LOG_POWER)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double c = this.getParams().get(LinearCombinationConstants.C);
@@ -342,16 +357,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(logPower);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.LOG_POWER));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.LOG_POWER));
 		}
 
 		// pow4
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.POW_4)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.POW_4)) {
 			ParametricFunction pow4 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.POW_4)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.POW_4)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
@@ -359,16 +374,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(pow4);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.POW_4));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.POW_4));
 		}
 
 		// MMF
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.MMF)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.MMF)) {
 			ParametricFunction mmf = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.MMF)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.MMF)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -378,16 +393,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(mmf);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.MMF));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.MMF));
 		}
 
 		// exp4
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.EXP_4)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.EXP_4)) {
 			ParametricFunction exp4 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.EXP_4)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.EXP_4)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					double b = this.getParams().get(LinearCombinationConstants.B);
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
@@ -395,16 +410,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(exp4);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.EXP_4));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.EXP_4));
 		}
 
 		// Janoschek
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.JANOSCHEK)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.JANOSCHEK)) {
 			ParametricFunction janoscheck = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.JANOSCHEK)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -414,16 +429,16 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(janoscheck);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.JANOSCHEK));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.JANOSCHEK));
 		}
 
 		// Weibull
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.WEIBULL)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.WEIBULL)) {
 			ParametricFunction weibull = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.WEIBULL)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.WEIBULL)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double alpha = this.getParams().get(LinearCombinationConstants.ALPHA);
 					double beta = this.getParams().get(LinearCombinationConstants.BETA);
 					double delta = this.getParams().get(LinearCombinationConstants.DELTA);
@@ -433,30 +448,30 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 				}
 			};
 			functions.add(weibull);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.WEIBULL));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.WEIBULL));
 		}
 
 		// ilog2
-		if (configuration.getParameters().containsKey(LinearCombinationConstants.ILOG_2)) {
+		if (parameterSet.getParameters().containsKey(LinearCombinationConstants.ILOG_2)) {
 			ParametricFunction ilog2 = new ParametricFunction(
-					configuration.getParameters().get(LinearCombinationConstants.ILOG_2)) {
+					parameterSet.getParameters().get(LinearCombinationConstants.ILOG_2)) {
 
 				@Override
-				public double getValue(double x) {
+				public double value(double x) {
 					double a = this.getParams().get(LinearCombinationConstants.A);
 					return a / (x * Math.pow(Math.log(x), 2));
 				}
 			};
 			functions.add(ilog2);
-			weights.add(configuration.getWeights().get(LinearCombinationConstants.ILOG_2));
+			weights.add(parameterSet.getWeights().get(LinearCombinationConstants.ILOG_2));
 		}
 
-		this.derivative = new LinearCombinationFunction(functions, weights);
+		return new LinearCombinationFunction(functions, weights);
 	}
 
 	@Override
 	public double getCurveValue(double x) {
-		return this.learningCurve.value(x);
+		return learningCurve.value(x);
 	}
 
 	@Override
@@ -487,6 +502,7 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 			try {
 				result = solver.solve(1000, this.derivative, 1, upperIntervalBound);
 			} catch (NoBracketingException e) {
+				System.out.println(e.getMessage());
 				retries_left--;
 				upperIntervalBound *= 2;
 			}

@@ -1,25 +1,27 @@
-package jaicore.web.mcmc.rest.message;
+package jaicore.ml.learningcurve.extrapolation.lc;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class McmcResponse {
+/**
+ * A configuration for a linear combination learning curve consists of
+ * parameterizations for at least one linear combination function. If multiple
+ * parameterizations are given, the value of the learning curve can be
+ * calculated by averaging the values of the individual linear combination
+ * functions.
+ * 
+ * @author Felix Weiland
+ *
+ */
+public class LinearCombinationLearningCurveConfiguration {
 
 	private List<LinearCombinationParameterSet> parameterSets;
 
 	public List<LinearCombinationParameterSet> getParameterSets() {
-		if (this.parameterSets == null) {
-			this.parameterSets = new ArrayList<>();
-		}
 		return parameterSets;
 	}
 
 	public void setParameterSets(List<LinearCombinationParameterSet> parameterSets) {
 		this.parameterSets = parameterSets;
-	}
-
-	public void addParameterSet(LinearCombinationParameterSet parameterSet) {
-		this.getParameterSets().add(parameterSet);
 	}
 
 	@Override
@@ -38,7 +40,7 @@ public class McmcResponse {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		McmcResponse other = (McmcResponse) obj;
+		LinearCombinationLearningCurveConfiguration other = (LinearCombinationLearningCurveConfiguration) obj;
 		if (parameterSets == null) {
 			if (other.parameterSets != null)
 				return false;
@@ -49,7 +51,7 @@ public class McmcResponse {
 
 	@Override
 	public String toString() {
-		return "McmcResponse [parameterSets=" + parameterSets + "]";
+		return "LinearCombinationLearningCurveConfiguration [parameterSets=" + parameterSets + "]";
 	}
 
 }

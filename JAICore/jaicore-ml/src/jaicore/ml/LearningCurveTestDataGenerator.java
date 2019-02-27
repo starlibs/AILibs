@@ -1,5 +1,6 @@
 package jaicore.ml;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -7,8 +8,9 @@ import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationConfiguration;
 import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationLearningCurve;
+import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationLearningCurveConfiguration;
+import jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationParameterSet;
 import weka.core.UnsupportedAttributeTypeException;
 
 /**
@@ -50,7 +52,8 @@ public class LearningCurveTestDataGenerator {
 	}
 
 	private static LinearCombinationLearningCurve generateFunction() {
-		LinearCombinationConfiguration configuration = new LinearCombinationConfiguration();
+		LinearCombinationLearningCurveConfiguration configuration = new LinearCombinationLearningCurveConfiguration();
+		LinearCombinationParameterSet parameterSet = new LinearCombinationParameterSet();
 		Map<String, Double> weights = new HashMap<>();
 		weights.put("pow_3", 1.0 / 6.0);
 		weights.put("log_log_linear", 1.0 / 6.0);
@@ -105,8 +108,9 @@ public class LearningCurveTestDataGenerator {
 		exp4Params.put("alpha", 0.5);
 		modelParams.put("exp_4", exp4Params);
 
-		configuration.setParameters(modelParams);
-		configuration.setWeights(weights);
+		parameterSet.setParameters(modelParams);
+		parameterSet.setWeights(weights);
+		configuration.setParameterSets(Collections.singletonList(parameterSet));
 
 		LinearCombinationLearningCurve lc = new LinearCombinationLearningCurve(configuration, 2000);
 		return lc;

@@ -14,7 +14,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 public class LinearCombinationFunction implements UnivariateFunction {
 
 	/** Functions the linear combination consists of */
-	private List<ParametricFunction> functions;
+	private List<UnivariateFunction> functions;
 
 	/**
 	 * Weights of the individual functions. For reasonable results, the sum of the
@@ -25,17 +25,17 @@ public class LinearCombinationFunction implements UnivariateFunction {
 	/** Offset, which is added to the value of the linear combination */
 	private double offset;
 
-	public LinearCombinationFunction(List<ParametricFunction> functions, List<Double> weights) {
+	public LinearCombinationFunction(List<UnivariateFunction> functions, List<Double> weights) {
 		super();
 		this.functions = functions;
 		this.weights = weights;
 	}
 
-	public List<ParametricFunction> getFunctions() {
+	public List<UnivariateFunction> getFunctions() {
 		return functions;
 	}
 
-	public void setFunctions(List<ParametricFunction> functions) {
+	public void setFunctions(List<UnivariateFunction> functions) {
 		this.functions = functions;
 	}
 
@@ -59,7 +59,7 @@ public class LinearCombinationFunction implements UnivariateFunction {
 	public double value(double x) {
 		double value = 0;
 		for (int i = 0; i < functions.size(); i++) {
-			value += functions.get(i).getValue(x) * weights.get(i);
+			value += functions.get(i).value(x) * weights.get(i);
 		}
 		return value + offset;
 	}

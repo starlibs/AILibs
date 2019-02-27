@@ -15,6 +15,8 @@ public class ExtrapolationRequest {
 
 	private List<Double> yValues;
 
+	private Integer numSamples;
+
 	public List<Integer> getxValues() {
 		return xValues;
 	}
@@ -31,10 +33,19 @@ public class ExtrapolationRequest {
 		this.yValues = yValues;
 	}
 
+	public Integer getNumSamples() {
+		return numSamples;
+	}
+
+	public void setNumSamples(Integer numSamples) {
+		this.numSamples = numSamples;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((numSamples == null) ? 0 : numSamples.hashCode());
 		result = prime * result + ((xValues == null) ? 0 : xValues.hashCode());
 		result = prime * result + ((yValues == null) ? 0 : yValues.hashCode());
 		return result;
@@ -49,6 +60,11 @@ public class ExtrapolationRequest {
 		if (getClass() != obj.getClass())
 			return false;
 		ExtrapolationRequest other = (ExtrapolationRequest) obj;
+		if (numSamples == null) {
+			if (other.numSamples != null)
+				return false;
+		} else if (!numSamples.equals(other.numSamples))
+			return false;
 		if (xValues == null) {
 			if (other.xValues != null)
 				return false;
@@ -64,7 +80,7 @@ public class ExtrapolationRequest {
 
 	@Override
 	public String toString() {
-		return "ExtrapolationRequest [xValues=" + xValues + ", yValues=" + yValues + "]";
+		return "ExtrapolationRequest [xValues=" + xValues + ", yValues=" + yValues + ", numSamples=" + numSamples + "]";
 	}
 
 }

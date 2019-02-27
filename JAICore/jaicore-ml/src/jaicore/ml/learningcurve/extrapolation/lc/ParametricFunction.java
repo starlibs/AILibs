@@ -2,6 +2,8 @@ package jaicore.ml.learningcurve.extrapolation.lc;
 
 import java.util.Map;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+
 /**
  * This is a basic class that describes a function that can be parameterized
  * with a set of parameters.
@@ -9,7 +11,7 @@ import java.util.Map;
  * @author Felix Weiland
  *
  */
-public abstract class ParametricFunction {
+public abstract class ParametricFunction implements UnivariateFunction{
 
 	private Map<String, Double> params;
 
@@ -29,7 +31,5 @@ public abstract class ParametricFunction {
 	public void setParams(Map<String, Double> params) {
 		this.params = params;
 	}
-
-	public abstract double getValue(double x);
 
 }
