@@ -39,7 +39,7 @@ public class AnchorpointsCreationTest {
 
 		IDataset<IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
 		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(
-				(x, y) -> {
+				(x, y, ds) -> {
 					Assert.assertArrayEquals(x, xValues);
 					for (int i = 0; i < y.length; i++) {
 						Assert.assertTrue(y[i] > 0.0d);
