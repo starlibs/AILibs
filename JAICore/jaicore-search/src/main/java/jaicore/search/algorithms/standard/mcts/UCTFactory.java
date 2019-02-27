@@ -13,6 +13,7 @@ public class UCTFactory<T, A> extends MCTSFactory<T, A, Double> {
 
 	@Override
 	public UCT<T, A> getAlgorithm() {
-		return new UCT<>(getInput(), seed);
+		assert getEvaluationFailurePenalty() != null : "The evaluationFailurePenalty must not be null!";
+		return new UCT<>(getInput(), seed, getEvaluationFailurePenalty(), isForbidDoublePaths());
 	}
 }

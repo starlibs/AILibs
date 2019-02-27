@@ -266,7 +266,7 @@ extends <a href="../../../../hasco/optimizingfactory/SoftwareConfigurationAlgori
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, checkAndConductTermination, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, checkAndConductTermination, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -357,12 +357,14 @@ extends <a href="../../../../hasco/optimizingfactory/SoftwareConfigurationAlgori
 <pre>public&nbsp;jaicore.basic.algorithm.events.AlgorithmEvent&nbsp;nextWithException()
                                                                 throws java.lang.InterruptedException,
                                                                        java.util.concurrent.TimeoutException,
-                                                                       jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmException,
+                                                                       jaicore.basic.algorithm.AlgorithmExecutionCanceledException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>java.util.concurrent.TimeoutException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
+<dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 </dl>
 </li>
 </ul>

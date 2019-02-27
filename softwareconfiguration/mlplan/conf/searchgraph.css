@@ -39,6 +39,14 @@ node.or_closed {
 	fill-color: purple;
 }
 
+node.or_exhausted {
+	fill-color: tomato;
+}
+
+node.or_rollout {
+	fill-color: cyan;
+}
+
 node.or_pruned {
 	shape: cross;
 	fill-color: darkred;

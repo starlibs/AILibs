@@ -1,5 +1,7 @@
 package jaicore.basic.algorithm;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -45,6 +47,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private AlgorithmState state = AlgorithmState.created;
 	private final EventBus eventBus = new EventBus();
+	private final Collection<Thread> threadsInterruptedByShutdown = new ArrayList<>(); 
 
 	/**
 	 * C'tor providing the input for the algorithm already.
@@ -187,6 +190,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		if (this.isCanceled()) {
 			this.logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this.getId());
 			this.unregisterThreadAndShutdown(); // calling cancel() usually already shutdowns, but this behavior may have been overwritten
+			if (hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
+				Thread t = Thread.currentThread();
+				logger.debug("Reset interrupt flag of thread {} since thread has been interrupted during shutdown but not from the outside. Current interrupt flag is {}", t, t.isInterrupted());
+				Thread.interrupted(); // reset interrupted flag
+			}
 			AlgorithmExecutionCanceledException e = new AlgorithmExecutionCanceledException(); // for a controlled cancel from outside on the algorithm
 			if (System.currentTimeMillis() - this.canceled > 100) {
 				throw new DelayedCancellationCheckException(e, System.currentTimeMillis() - this.canceled);
@@ -225,12 +233,17 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.activeThreads.forEach(t -> {
 			this.logger.info("Interrupting {} on behalf of shutdown of {}", t, this.getId());
 			t.interrupt();
+			threadsInterruptedByShutdown.add(t);
 		});
 		if (this.timer != null) {
 			this.logger.info("Canceling timer {}", this.timer);
 			this.timer.cancel();
 		}
 		this.logger.info("Shutdown of {} completed.", this.getId());
+	}
+	
+	public boolean hasThreadBeenInterruptedDuringShutdown(Thread t) {
+		return threadsInterruptedByShutdown.contains(t);
 	}
 
 	public boolean isShutdownInitialized() {
@@ -312,6 +325,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 * @return The algorithm finished event.
 	 */
 	protected AlgorithmFinishedEvent terminate() {
+		logger.info("Terminating algorithm {}.", getId());
 		this.state = AlgorithmState.inactive;
 		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent(getId());
 		this.unregisterThreadAndShutdown();
