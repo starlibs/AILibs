@@ -6,8 +6,8 @@ import java.util.List;
 import jaicore.graph.TreeNode;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
-import jaicore.ml.tsc.classifier.trees.TimeSeriesTreeAlgorithm.FeatureType;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import jaicore.ml.tsc.features.TimeSeriesFeature;
 
 /**
  * Time series tree as described in Deng, Houtao et al. “A Time Series Forest
@@ -21,7 +21,7 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 	 * Decision information for a tree node within a <code>TimeSeriesTree</code>.
 	 */
 	static class TimeSeriesTreeNodeDecisionFunction {
-		FeatureType f;
+		TimeSeriesFeature.FeatureType f;
 		int t1;
 		int t2;
 		double threshold;
@@ -147,7 +147,7 @@ public class TimeSeriesTree extends ASimplifiedTSClassifier<Integer> {
 		}
 
 		// Check decision function
-		if (TimeSeriesTreeAlgorithm.calculateFeature(treeNode.getValue().f, instance, treeNode.getValue().t1,
+		if (TimeSeriesFeature.calculateFeature(treeNode.getValue().f, instance, treeNode.getValue().t1,
 				treeNode.getValue().t2, TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION) <= treeNode.getValue().threshold) {
 			return treeNode.getChildren().get(0);
 		} else {

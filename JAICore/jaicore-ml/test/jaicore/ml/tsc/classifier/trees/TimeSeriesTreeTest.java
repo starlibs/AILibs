@@ -17,9 +17,10 @@ import jaicore.graph.TreeNode;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.classifier.trees.TimeSeriesTree.TimeSeriesTreeNodeDecisionFunction;
-import jaicore.ml.tsc.classifier.trees.TimeSeriesTreeAlgorithm.FeatureType;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
+import jaicore.ml.tsc.features.TimeSeriesFeature;
+import jaicore.ml.tsc.features.TimeSeriesFeature.FeatureType;
 import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 import junit.framework.Assert;
@@ -115,22 +116,22 @@ public class TimeSeriesTreeTest {
 	public void calculateFeatureTest() {
 		double[] instance = new double[] { 1, 2, 3 };
 		// Mean
-		Assert.assertEquals(2d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 2,
+		Assert.assertEquals(2d, TimeSeriesFeature.calculateFeature(FeatureType.MEAN, instance, 0, 2,
 				TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION), EPS_DELTA);
 		Assert.assertEquals(1.5d,
-				TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.MEAN, instance, 0, 1,
+				TimeSeriesFeature.calculateFeature(FeatureType.MEAN, instance, 0, 1,
 						TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION),
 				EPS_DELTA);
 		// Standard deviation
 		Assert.assertEquals(1d,
-				TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.STDDEV, instance, 0, 2,
+				TimeSeriesFeature.calculateFeature(FeatureType.STDDEV, instance, 0, 2,
 						TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION),
 				EPS_DELTA);
 		// Slope
-		Assert.assertEquals(1d, TimeSeriesTreeAlgorithm.calculateFeature(FeatureType.SLOPE, instance, 0, 2,
+		Assert.assertEquals(1d, TimeSeriesFeature.calculateFeature(FeatureType.SLOPE, instance, 0, 2,
 				TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION), EPS_DELTA);
 
-		double[] features = TimeSeriesTreeAlgorithm.getFeatures(instance, 0, 2,
+		double[] features = TimeSeriesFeature.getFeatures(instance, 0, 2,
 				TimeSeriesTreeAlgorithm.USE_BIAS_CORRECTION);
 		Assert.assertEquals(2d, features[0], EPS_DELTA);
 		Assert.assertEquals(1d, features[1], EPS_DELTA);
