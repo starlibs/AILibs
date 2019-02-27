@@ -10,8 +10,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.SubsamplingMethod;
-import jaicore.ml.core.dataset.sampling.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
+import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawLearningCurve;
 import weka.classifiers.trees.J48;
