@@ -430,6 +430,24 @@ public class SetUtil {
 		return out;
 	}
 	
+	/**
+	 * @param a
+	 *            The set A.
+	 * @param b
+	 *            The set B.
+	 * @return The difference A \ B.
+	 */
+	public static <S, T extends S, U extends S> List<S> difference(List<T> a, Collection<U> b) {
+
+		List<S> out = new ArrayList<>();
+
+		for (S item : a)
+			if (b == null || !b.contains(item))
+				out.add(item);
+
+		return out;
+	}
+	
 	public static <S, T extends S, U extends S> boolean differenceEmpty(Collection<T> a, Collection<U> b) {
 		if (a == null || a.isEmpty())
 			return true;
