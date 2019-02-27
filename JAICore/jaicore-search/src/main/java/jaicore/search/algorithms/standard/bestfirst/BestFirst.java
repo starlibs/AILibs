@@ -1154,6 +1154,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		}
 		if (this.additionalThreadsForNodeAttachment < 1) {
 			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", getConfig().threads());
+			this.additionalThreadsForNodeAttachment = 0;
 			return;
 		}
 		AtomicInteger counter = new AtomicInteger(0);
