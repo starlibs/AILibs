@@ -21,24 +21,24 @@ public class MLPlanARFFExample {
 		
 		/* load data for segment dataset and create a train-test-split */
 		File file = new File("testrsc/car.arff");
-		System.out.println(file.getAbsolutePath());
 		Instances data = new Instances(new FileReader(file));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration();
+		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(10, TimeUnit.SECONDS));
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
-		mlplan.setPortionOfDataForPhase2(0.3f);
+		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(6);
+		mlplan.setNumCPUs(1);
 
-//		new JFXPanel();
-//		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
-//		Platform.runLater(window);
+		new JFXPanel();
+		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+				new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+		Platform.runLater(window);
 
 		try {
 			long start = System.currentTimeMillis();

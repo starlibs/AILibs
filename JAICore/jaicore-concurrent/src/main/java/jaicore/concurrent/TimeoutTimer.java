@@ -66,11 +66,14 @@ public class TimeoutTimer {
 			return this.scheduleTask(new TimerTask() {
 				@Override
 				public void run() {
+					final TimerTask thisTask = this;
+					int taskId = tasks.keySet().stream().filter(id -> tasks.get(id) == thisTask).findFirst().get();
+					logger.info("Job {} for interruption of {} after delay of {}ms triggered.", taskId, thread, delay);
 					if (preInterruptionHook != null) {
-						logger.info("Executing pre-interruption hook.");
+						logger.debug("Job {} now invokes pre-interruption.", taskId);
 						preInterruptionHook.run();
 					}
-					logger.info("interrupting thread {} after delay {}ms", thread, delay);
+					logger.debug("Job {} now interrupts thread {}", taskId, thread);
 					thread.interrupt();
 				}
 			}, delay);
@@ -102,7 +105,7 @@ public class TimeoutTimer {
 					throw new IllegalStateException("Cannot submit interrupt job to submitter " + this + " since it has already been closed!");
 				}
 				if (TimeoutTimer.this.timer == null) {
-					TimeoutTimer.this.timer = new Timer(TimeoutTimer.class.getName() + " - Timer");
+					TimeoutTimer.this.timer = new Timer(TimeoutTimer.class.getName() + " - Timer", true);
 					logger.info("Created new timer");
 				}
 				TimeoutTimer.this.timer.schedule(task, delay);

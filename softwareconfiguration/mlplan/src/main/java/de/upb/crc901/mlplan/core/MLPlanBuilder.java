@@ -22,12 +22,16 @@ import hasco.core.HASCOFactory;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
+import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;
 import jaicore.basic.TimeOut;
+import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import weka.core.Instances;
 
@@ -56,7 +60,7 @@ public class MLPlanBuilder {
 
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
-	private HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory;
+	private HASCOViaFDFactory<? extends GraphSearchInput<TFDNode, String>, Double> hascoFactory = new HASCOViaFDFactory<>();
 
 	public MLPlanBuilder() {
 		super();
@@ -155,7 +159,8 @@ public class MLPlanBuilder {
 	@SuppressWarnings("unchecked")
 	public void prepareNodeEvaluatorInFactoryWithData(Instances data) {
 		if (!(hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
-			throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
+			return;
+//			throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
 		}
 		if (factoryPreparedWithData) {
 			throw new IllegalStateException("Factory has already been prepared with data. This can only be done once!");
@@ -188,17 +193,29 @@ public class MLPlanBuilder {
 	}
 
 	public HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> getHASCOFactory() {
-		if (!factoryPreparedWithData) {
-			throw new IllegalStateException("Data have not been set on the factory yet.");
-		}
+//		if (!factoryPreparedWithData) {
+//			throw new IllegalStateException("Data have not been set on the factory yet.");
+//		}
 		return hascoFactory;
 	}
-
-	public void setHascoFactory(
-			HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory) {
-		this.hascoFactory = hascoFactory;
+	
+	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") IOptimalPathInORGraphSearchFactory searchFactory) {
+		return withSearchFactory(searchFactory, n -> n);
 	}
 	
+	@SuppressWarnings("unchecked")
+	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") IOptimalPathInORGraphSearchFactory searchFactory, AlgorithmProblemTransformer transformer) {
+		this.hascoFactory.setSearchFactory(searchFactory);
+		this.hascoFactory.setSearchProblemTransformer(transformer);
+		return this;
+	}
+	
+	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
+		this.hascoFactory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(algorithmConfig.randomSeed(),
+				algorithmConfig.numberOfRandomCompletions(), algorithmConfig.timeoutForCandidateEvaluation(),
+				algorithmConfig.timeoutForNodeEvaluation());
+		return this;
+	}
 
 	public void withTimeoutForSingleSolutionEvaluation(final TimeOut timeout) {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,

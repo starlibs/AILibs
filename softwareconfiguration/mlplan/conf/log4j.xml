@@ -82,20 +82,24 @@
   </logger>
   
   <logger name="mlplan">
-    <level value="trace" />
+    <level value="info" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
   </logger>
-
+  
+  <logger name="jaicore.search.algorithms.standard.mcts.MCTS">
+  	 <level value="info" />
+  </logger>
+  
   <logger name="mlplan.optimizingfactory.optAlgo">
     <level value="warn" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
@@ -110,7 +114,15 @@
     <level value="warn" />
   </logger>
   
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
+    <level value="warn" />
+  </logger>
+  
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
     <level value="warn" />
   </logger>
   
