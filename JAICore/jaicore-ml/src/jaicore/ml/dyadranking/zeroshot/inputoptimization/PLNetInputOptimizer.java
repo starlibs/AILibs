@@ -32,6 +32,10 @@ public class PLNetInputOptimizer {
 	}
 	
 	public INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double learningRate, int numSteps, INDArray inputMask) {
+		return optimizeInput(plNet, input, loss, learningRate, learningRate, numSteps, inputMask);
+	}
+	
+	public INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double initialLearningRate, double finalLearningRate, int numSteps, INDArray inputMask) {
 		INDArray inp = input.dup();
 		INDArray alphas = Nd4j.zeros(inp.shape());
 		INDArray betas = Nd4j.zeros(inp.shape());
@@ -43,6 +47,8 @@ public class PLNetInputOptimizer {
 		INDArray incumbent = inp.dup();
 		//System.out.println("PLNet output: " + output + " ");
 		for(int i = 0; i < numSteps; i++) {
+			double lrDecayTerm = (double) i / (double) numSteps;
+			double learningRate = (1 - lrDecayTerm) * initialLearningRate + lrDecayTerm * finalLearningRate;			
 			// Gradient of PLNet
 			INDArray grad = computeInputDerivative(plNet, inp, loss);
 			// Gradient of L2 norm
@@ -59,7 +65,7 @@ public class PLNetInputOptimizer {
 			BooleanIndexing.replaceWhere(betas, 0.0d, Conditions.lessThan(0.0d));
 			grad.muli(inputMask);
 			grad.muli(learningRate);
-			inp.subi(grad);
+			inp.subi(grad);			
 			
 			output = plNet.getPlNet().output(inp).getDouble(0);
 			//System.out.print("inps: " + inp.getDouble(input.length() - 2) + ", " + inp.getDouble(input.length() - 1));
