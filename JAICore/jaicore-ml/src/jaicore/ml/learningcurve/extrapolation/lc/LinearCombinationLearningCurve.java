@@ -7,6 +7,8 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.ml.interfaces.LearningCurve;
 
@@ -19,6 +21,8 @@ import jaicore.ml.interfaces.LearningCurve;
  *
  */
 public class LinearCombinationLearningCurve implements LearningCurve {
+
+	private static Logger LOG = LoggerFactory.getLogger(LinearCombinationLearningCurve.class);
 
 	/**
 	 * Constant value describing the number of times the size of the interval in
@@ -494,19 +498,41 @@ public class LinearCombinationLearningCurve implements LearningCurve {
 
 	private double computeDerivativeRoot(double epsilon, double offset, int upperIntervalBoundStart) {
 		UnivariateSolver solver = new BrentSolver(0, epsilon);
-		this.derivative.setOffset(offset);
+
 		double result = -1;
+		int lowerIntervalBound = 1;
 		int upperIntervalBound = upperIntervalBoundStart;
 		int retries_left = ROOT_COMPUTATION_RETIRES;
+
+		this.derivative.setOffset(offset);
+
 		while (retries_left > 0 && result == -1) {
 			try {
-				result = solver.solve(1000, this.derivative, 1, upperIntervalBound);
+				LOG.info("Trying to find root with offset {} in interval [{}/{}]", offset, lowerIntervalBound,
+						upperIntervalBound);
+				result = solver.solve(1000, this.derivative, lowerIntervalBound, upperIntervalBound);
 			} catch (NoBracketingException e) {
-				System.out.println(e.getMessage());
+				LOG.warn("Cannot find root in interval [{},{}]: {}", lowerIntervalBound, upperIntervalBound,
+						e.getMessage());
 				retries_left--;
+				LOG.warn("Retries left: {} / {}", retries_left, ROOT_COMPUTATION_RETIRES);
 				upperIntervalBound *= 2;
 			}
 		}
+
+		// Try higher lower bound (sometimes functions behave unexpected close to 0)
+		if (result == -1) {
+			try {
+				LOG.info("Trying to find root with offset {} in interval [{}/{}]", offset, lowerIntervalBound,
+						upperIntervalBound);
+
+				result = solver.solve(1000, this.derivative, 10, upperIntervalBound);
+			} catch (NoBracketingException e) {
+				LOG.warn("Cannot find root in interval [{},{}]: {}", lowerIntervalBound, upperIntervalBound,
+						e.getMessage());
+			}
+		}
+
 		if (result == -1) {
 			throw new RuntimeException(
 					String.format("No solution could be found in interval [1,%d]", upperIntervalBound));

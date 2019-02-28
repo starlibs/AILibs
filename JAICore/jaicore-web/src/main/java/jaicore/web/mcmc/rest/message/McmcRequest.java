@@ -2,12 +2,21 @@ package jaicore.web.mcmc.rest.message;
 
 import java.util.List;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 public class McmcRequest {
 
+	@NotNull
+	@NotEmpty
 	private List<Integer> xValues;
 
+	@NotNull
+	@NotEmpty
 	private List<Double> yValues;
 
+	@Min(0)
 	private Integer numSamples;
 
 	public List<Integer> getxValues() {
