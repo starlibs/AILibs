@@ -24,6 +24,7 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.concurrent.ThreadGroupObserver;
 
 /**
  *

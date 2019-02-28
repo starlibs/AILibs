@@ -1,10 +1,6 @@
-package jaicore.basic.algorithm;
-
-import java.util.ArrayList;
-import java.util.Collection;
+package jaicore.concurrent;
 
 public class ThreadGroupObserver extends Thread {
-	private final String name;
 	private final ThreadGroup group;
 	private int maxObservedThreads = 0;
 	private boolean active = true;
@@ -14,7 +10,6 @@ public class ThreadGroupObserver extends Thread {
 	
 	public ThreadGroupObserver(ThreadGroup group, int maxAllowedThreads, Runnable hookOnConstraintViolation) {
 		super();
-		this.name = "Observer of ThreadGroup " + group;
 		this.group = group;
 		this.maxAllowedThreads = maxAllowedThreads;
 		this.hookOnConstraintViolation = hookOnConstraintViolation;
@@ -42,7 +37,7 @@ public class ThreadGroupObserver extends Thread {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				return;
+				Thread.currentThread().interrupt();
 			}
 		}
 	}

@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 import jaicore.basic.sets.SetUtil;
 
 public class ThreadObserver extends Thread {
-	private final List<Thread> currentlyActiveThreads = new ArrayList<>();
+	private final List<Thread> threadsThatHaveBeenActiveAtLastObservation = new ArrayList<>();
 	private final PrintStream stream;
 
 	public ThreadObserver(PrintStream stream) {
@@ -16,13 +16,14 @@ public class ThreadObserver extends Thread {
 		this.stream = stream;
 	}
 
+	@Override
 	public void run() {
 		try {
 			while (true) {
 				List<Thread> currentlyActiveThreads = Thread.getAllStackTraces().keySet().stream()
 						.sorted((t1, t2) -> t1.getName().compareTo(t2.getName())).collect(Collectors.toList());
-				List<Thread> newThreads = SetUtil.difference(currentlyActiveThreads, this.currentlyActiveThreads);
-				List<Thread> goneThreads = SetUtil.difference(this.currentlyActiveThreads, currentlyActiveThreads);
+				List<Thread> newThreads = SetUtil.difference(currentlyActiveThreads, this.threadsThatHaveBeenActiveAtLastObservation);
+				List<Thread> goneThreads = SetUtil.difference(this.threadsThatHaveBeenActiveAtLastObservation, currentlyActiveThreads);
 				if (!newThreads.isEmpty()) {
 					stream.println("" + System.currentTimeMillis());
 					stream.println("New Threads:");
@@ -34,13 +35,12 @@ public class ThreadObserver extends Thread {
 					for (Thread t : goneThreads)
 						stream.println("\t" + t.getName() + ": " + t.getThreadGroup());
 				}
-				this.currentlyActiveThreads.clear();
-				this.currentlyActiveThreads.addAll(currentlyActiveThreads);
+				this.threadsThatHaveBeenActiveAtLastObservation.clear();
+				this.threadsThatHaveBeenActiveAtLastObservation.addAll(currentlyActiveThreads);
 				Thread.sleep(1000);
 			}
 		} catch (InterruptedException e) {
-
-			e.printStackTrace();
+			Thread.currentThread().interrupt();
 		}
 	}
 }
