@@ -10,7 +10,7 @@ import org.apache.commons.math3.exception.NoBracketingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.ml.interfaces.LearningCurve;
+import jaicore.ml.interfaces.AnalyticalLearningCurve;
 
 /**
  * The LinearCombinationLearningCurve consists of the actual linear combination
@@ -20,7 +20,7 @@ import jaicore.ml.interfaces.LearningCurve;
  * @author Felix Weiland
  *
  */
-public class LinearCombinationLearningCurve implements LearningCurve {
+public class LinearCombinationLearningCurve implements AnalyticalLearningCurve {
 
 	private static Logger LOG = LoggerFactory.getLogger(LinearCombinationLearningCurve.class);
 

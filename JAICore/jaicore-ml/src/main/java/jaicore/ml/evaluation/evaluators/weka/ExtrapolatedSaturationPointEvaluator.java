@@ -11,7 +11,7 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
 import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
-import jaicore.ml.interfaces.LearningCurve;
+import jaicore.ml.interfaces.AnalyticalLearningCurve;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolator;
 import weka.classifiers.Classifier;
@@ -92,7 +92,8 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 		try {
 			// Create the extrapolator and calculate sample size of the saturation point
 			// with the given epsilon
-			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve(this.anchorpoints);
+			AnalyticalLearningCurve learningCurve = (AnalyticalLearningCurve) extrapolator
+					.extrapolateLearningCurve(this.anchorpoints);
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size

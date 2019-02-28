@@ -6,17 +6,17 @@ import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
 
-import jaicore.ml.interfaces.LearningCurve;
+import jaicore.ml.interfaces.AnalyticalLearningCurve;
 
 /**
  * Representation of a learning curve with the Inverse Power Law function, which
  * has three parameters named a, b and c. The function is f(x) = (1-a) - b *
- * x^c.
+ * x^c. O
  * 
  * @author Lukas Brandt
  *
  */
-public class InversePowerLawLearningCurve implements LearningCurve {
+public class InversePowerLawLearningCurve implements AnalyticalLearningCurve {
 
 	private double a, b, c;
 
@@ -69,7 +69,8 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 		int retries_left = 8;
 		while (retries_left > 0 && convergencePoint == -1) {
 			try {
-				convergencePoint = solver.solve(1000, (x) -> this.getDerivativeCurveValue(x) - 0.0000001, 1, upperIntervalBound);
+				convergencePoint = solver.solve(1000, (x) -> this.getDerivativeCurveValue(x) - 0.0000001, 1,
+						upperIntervalBound);
 			} catch (NoBracketingException e) {
 				System.out.println(e.getMessage());
 				retries_left--;
