@@ -10,9 +10,12 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -28,38 +31,63 @@ import jaicore.web.mcmc.rest.message.McmcResponse;
 
 @RestController
 @RequestMapping("/mcmc")
+/**
+ * A simple web service which internally calls the tool cmdStan to run MCMC
+ * sampling on a precompiled model with the delivered x- and y-coordinates.
+ * 
+ * @author Felix Weiland
+ *
+ */
 public class McmcService {
 
+	private static Logger LOG = LoggerFactory.getLogger(McmcService.class);
+
+	/**
+	 * Name of the file in which the input data are stored in order to be read from
+	 * Stan
+	 */
 	private static final String INPUT_DATA_FILENAME = "input.data.R";
 
+	/** Timeout in ms given to Stan for sampling */
 	private static final int STAN_SAMPLING_TIMEOUT_MS = 60000;
+
+	/**
+	 * Number of checkpoints at which the sampled function is checked for validity
+	 */
 	private static final int STAN_SAMPLING_NO_CHECKPOINTS = 10;
+
+	/** Step width between checkpoints */
 	private static final int STAN_SAMPLING_CHECKPOINT_INTERVAL = 200;
 
+	/** Number of samples (= curves) to be returned */
 	private static final int NUMBER_OF_RETURNED_SAMPLES = 10;
 
 	@PostMapping("/modelparams")
-	public ResponseEntity<McmcResponse> computeModelParams(@RequestBody McmcRequest request) throws Exception {
+	public ResponseEntity<McmcResponse> computeModelParams(@RequestBody @Valid McmcRequest request) throws Exception {
 		validateRequest(request);
+		LOG.info("Received valid request: {}", request);
 		List<Integer> xValues = request.getxValues();
 		List<Double> yValues = request.getyValues();
 		Integer numSamples = request.getNumSamples();
 
 		generateInputDataFile(xValues, yValues);
 
+		// Redirect Stan output to a file for debugging purposes
 		File outFile = new File("out.log");
 		ProcessBuilder pb;
 		if (numSamples == null) {
-			pb = new ProcessBuilder("stan/lc", "sample", "data", "file=" + INPUT_DATA_FILENAME);
+			pb = new ProcessBuilder("stan/lc", "sample", "init=stan/init.R", "data", "file=" + INPUT_DATA_FILENAME);
 		} else {
-			pb = new ProcessBuilder("stan/lc", "sample", "num_samples=" + numSamples, "data",
+			pb = new ProcessBuilder("stan/lc", "sample", "num_samples=" + numSamples, "init=stan/init.R", "data",
 					"file=" + INPUT_DATA_FILENAME);
 		}
 		pb.redirectError(outFile);
 		pb.redirectOutput(outFile);
+		LOG.info("Starting Stan. Timeout is {}ms", STAN_SAMPLING_TIMEOUT_MS);
 		Process p = pb.start();
 		p.waitFor(STAN_SAMPLING_TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
+		LOG.info("Stan finished work. Parsing output..");
 		File outputFile = new File("output.csv");
 
 		if (!outFile.exists()) {
@@ -68,6 +96,7 @@ public class McmcService {
 
 		McmcResponse response = parseOutputFile(outputFile);
 
+		LOG.info("Finished request processing");
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -141,8 +170,8 @@ public class McmcService {
 		}
 
 		McmcResponse response = new McmcResponse();
-		
-		//Choose samples randomly
+
+		// Choose samples randomly
 		while (response.getParameterSets().size() < NUMBER_OF_RETURNED_SAMPLES) {
 			int index = ThreadLocalRandom.current().nextInt(0, lines.size());
 			String line = lines.get(index);
@@ -217,6 +246,7 @@ public class McmcService {
 
 	@ExceptionHandler({ Exception.class })
 	public ResponseEntity<ErrorResponse> handleException(Exception e) {
+		LOG.error("Exception in request processing. Returning error message!", e);
 		ErrorResponse er = new ErrorResponse(e.getLocalizedMessage());
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(er);
 	}
