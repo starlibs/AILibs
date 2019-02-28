@@ -38,7 +38,7 @@ public class MLPlanOpenMLExample {
 	//	SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
       //  PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
-		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
+		MLPlanBuilder builder = new MLPlanBuilder(
 				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),
 				MultiClassPerformanceMeasure.ERRORRATE);
 
