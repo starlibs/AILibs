@@ -1,13 +1,13 @@
 sourceSets {
     main {
       java {
-          srcDir 'src'
+          srcDir 'src/main/java'
           srcDir 'ext'
       }
     }
     test {
      	java {
-     		srcDir 'test'
+     		srcDir 'test/main/java'
      	}
     }
 }
