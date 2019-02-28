@@ -14,6 +14,7 @@ RUN curl -OL https://github.com/stan-dev/cmdstan/releases/download/v$CSVER/cmdst
  && mv cmdstan-$CSVER cmdstan
  
 ADD /stan/lc.stan stan/
+ADD /stan/init.R stan/
 
 RUN cd cmdstan \
 && make build ../stan/lc

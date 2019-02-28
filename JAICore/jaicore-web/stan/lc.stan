@@ -35,21 +35,26 @@ functions{
 	
 	real curveSlopeDist_log(real[] e, int c, int s){
 		if(e[1] < 0)
-			return 0;
+			return log(0);
 		if(e[4] < 0)
-			return 0;
+			return log(0);
 		if(e[8] < 0)
-			return 0;
+			return log(0);
 		if(e[12] < 0)
-			return 0;
+			return log(0);
 		if(e[17] < 0)
-			return 0;
+			return log(0);
 		if(e[22] < 0)
-			return 0;	
+			return log(0);
+		// additional constraints to get reasonable curves
+		if(e[11] < 0)
+			return log(0);
+		if(f_comb(e, 10000) > 1)
+			return log(0);
 		for(k in 1:c)
 			if(f_comb(e, k*s) > f_comb(e, s*k+s) )
-				return 0;
-		return 1;
+				return log(0);
+		return 0;
 	}
 }
 
