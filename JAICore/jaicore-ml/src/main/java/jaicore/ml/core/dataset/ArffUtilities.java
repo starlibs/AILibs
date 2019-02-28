@@ -26,6 +26,9 @@ public class ArffUtilities {
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = bufferedReader.readLine()) != null) {
+			if (line.trim().charAt(0) == '%') {
+				continue;
+			}
 			header += line.trim() + "\n";
 			if (line.trim().equals("@data")) {
 				break;
@@ -41,6 +44,9 @@ public class ArffUtilities {
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = bufferedReader.readLine()) != null) {
+			if (line.trim().charAt(0) == '%') {
+				continue;
+			}
 			if (startCounting) {
 				result++;
 			} else {
