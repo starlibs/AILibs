@@ -1139,8 +1139,16 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
 		}
 		this.additionalThreadsForNodeAttachment = threadsForExpansion;
+		if (this.additionalThreadsForNodeAttachment > getConfig().threads() - 2) { // timer and main thread must not add up here
+			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, getConfig().threads() - 2);
+		}
+		if (this.additionalThreadsForNodeAttachment < 1) {
+			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", getConfig().threads());
+			this.additionalThreadsForNodeAttachment = 0;
+			return;
+		}
 		AtomicInteger counter = new AtomicInteger(0);
-		this.pool = Executors.newFixedThreadPool(threadsForExpansion, r -> {
+		this.pool = Executors.newFixedThreadPool(this.additionalThreadsForNodeAttachment, r -> {
 			Thread t = new Thread(r);
 			t.setName("ORGraphSearch-worker-" + counter.incrementAndGet());
 			return t;
