@@ -34,5 +34,23 @@ public class ArffUtilities {
 		bufferedReader.close();
 		return header;
 	}
+	
+	public static int countDatasetEntries(File file) throws IOException {
+		int result = 0;
+		boolean startCounting = false;
+		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+		String line;
+		while ((line = bufferedReader.readLine()) != null) {
+			if (startCounting) {
+				result++;
+			} else {
+				if (line.trim().equals("@data")) {
+					startCounting = true;
+				}
+			}
+		}
+		bufferedReader.close();
+		return result;
+	}
 
 }
