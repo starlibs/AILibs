@@ -17,6 +17,7 @@ public class ArffUtilities {
 
 	/**
 	 * Extract the header of an ARFF file as a string.
+	 * 
 	 * @param file Given ARFF file of which the header shall be extracted.
 	 * @return Header of the given ARFF file.
 	 * @throws IOException Could not read from the given file.
@@ -37,10 +38,20 @@ public class ArffUtilities {
 		bufferedReader.close();
 		return header;
 	}
-	
-	public static int countDatasetEntries(File file) throws IOException {
+
+	/**
+	 * Counts the amount of datapoint entries in an ARFF file.
+	 * 
+	 * @param file      Given ARFF file where the entries are written in.
+	 * @param hasHeader If true the count will start after an '@data' annotation,
+	 *                  otherwise it will just count every line, which is not a
+	 *                  comment.
+	 * @return Amount of datapoint entries.
+	 * @throws IOException Could not read from the given file.
+	 */
+	public static int countDatasetEntries(File file, boolean hasHeader) throws IOException {
 		int result = 0;
-		boolean startCounting = false;
+		boolean startCounting = !hasHeader;
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = bufferedReader.readLine()) != null) {

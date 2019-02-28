@@ -36,7 +36,7 @@ public class ArffUtilitiesTest {
 	
 	@Test
 	public void testArffDataentryCount() throws IOException {
-		int countedEntries = ArffUtilities.countDatasetEntries(new File("testsrc/ml/orig/letter.arff"));
+		int countedEntries = ArffUtilities.countDatasetEntries(new File("testsrc/ml/orig/letter.arff"), true);
 		int trueEntries = 20000;
 		assertEquals(trueEntries, countedEntries);
 	}
