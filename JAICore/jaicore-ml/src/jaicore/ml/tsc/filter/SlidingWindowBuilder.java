@@ -52,7 +52,28 @@ public class SlidingWindowBuilder implements IFilter{
 		}
 		fitted = true;
 	}
-
+	
+	
+	public TimeSeriesDataset specialFitTransform(double[] instance){
+		if(instance.length==0) {
+			throw new IllegalArgumentException("The input instance can not be empty");
+		}
+		if(instance.length < defaultWindowSize) {
+			throw new IllegalArgumentException("The input instance can not be smaller than the windowsize");
+		}
+		
+		double [][] newMatrix = new double[instance.length][defaultWindowSize];
+		
+		for(int entry = 0; entry < instance.length-(defaultWindowSize); entry++) {
+			newMatrix[entry] = Arrays.copyOfRange(instance, entry, entry+defaultWindowSize);
+		}
+		ArrayList<double[][]> newDataset= new ArrayList<double[][]>();
+		newDataset.add(newMatrix);
+		TimeSeriesDataset blownUpInstance = new TimeSeriesDataset(newDataset);
+		
+		return blownUpInstance;
+	}
+	
 	@Override
 	public TimeSeriesDataset fitTransform(TimeSeriesDataset input)
 			throws IllegalArgumentException, NoneFittedFilterExeception {
