@@ -381,6 +381,9 @@ public class TimeSeriesUtil {
 		return sum(T) / T.length;
 	}
 
+	/**
+	 * Calculates the (population) variance of the values of a times series.
+	 */
 	public static double variance(double T[]) {
 		double mean = mean(T);
 		double squaredDeviations = 0;
@@ -390,6 +393,10 @@ public class TimeSeriesUtil {
 		return squaredDeviations / T.length;
 	}
 
+	/**
+	 * Calculates the (population) standard deviation of the values of a times
+	 * series.
+	 */
 	public static double standardDeviation(double[] T) {
 		return Math.sqrt(variance(T));
 	}
@@ -397,11 +404,27 @@ public class TimeSeriesUtil {
 	public static double[] zTransform(double[] T) {
 		double mean = mean(T);
 		double standardDeviation = standardDeviation(T);
+		if (standardDeviation == 0) { // TODO: How to handle zero standard deviation properly.
+			return new double[T.length]; // All zeros.
+		}
 		double[] zTransformedT = new double[T.length];
 		for (int i = 0; i < T.length; i++) {
 			zTransformedT[i] = (T[i] - mean) / standardDeviation;
 		}
 		return zTransformedT;
+	}
+
+	public static double[] normalizeByStandardDeviation(double[] T) {
+		double standardDeviation = standardDeviation(T);
+		if (standardDeviation == 0) {
+			return new double[T.length];
+		}
+		double[] normalizedT = new double[T.length];
+		for (int i = 0; i < T.length; i++) {
+			normalizedT[i] = T[i] / standardDeviation;
+		}
+		return normalizedT;
+
 	}
 
 }
