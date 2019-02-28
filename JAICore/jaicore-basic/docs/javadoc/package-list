@@ -6,4 +6,5 @@ jaicore.basic.algorithm.events
 jaicore.basic.algorithm.exceptions
 jaicore.basic.kvstore
 jaicore.basic.sets
+jaicore.concurrent
 jaicore.logging
