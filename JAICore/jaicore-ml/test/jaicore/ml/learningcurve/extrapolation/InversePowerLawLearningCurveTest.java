@@ -1,5 +1,6 @@
 package jaicore.ml.learningcurve.extrapolation;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.Test;
@@ -68,6 +69,14 @@ public class InversePowerLawLearningCurveTest {
 		for (int i = 0; i < epsilonValues.length; i++) {
 			assertEquals(expectedSaturationPoints[i], Math.floor(curve.getSaturationPoint(epsilonValues[i]) * 100) / 100.0d);
 		}
+	}
+	
+	@Test
+	public void testConvergenceValueCalculation() {
+		InversePowerLawLearningCurve curve = new InversePowerLawLearningCurve(0.15d, 0.5d, -0.4d);
+		double convergenceValue = curve.getConvergenceValue();
+		System.out.println(convergenceValue);
+		assertTrue(convergenceValue > 0.8 && convergenceValue < 0.9);
 	}
 
 }

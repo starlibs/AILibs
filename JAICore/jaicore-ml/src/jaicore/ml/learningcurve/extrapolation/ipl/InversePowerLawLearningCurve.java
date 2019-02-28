@@ -2,6 +2,10 @@ package jaicore.ml.learningcurve.extrapolation.ipl;
 
 import java.math.BigDecimal;
 
+import org.apache.commons.math3.analysis.solvers.BrentSolver;
+import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
+import org.apache.commons.math3.exception.NoBracketingException;
+
 import jaicore.ml.interfaces.LearningCurve;
 
 /**
@@ -59,7 +63,24 @@ public class InversePowerLawLearningCurve implements LearningCurve {
 
 	@Override
 	public double getConvergenceValue() {
-		throw new UnsupportedOperationException("Not implemented yet!");
+		UnivariateSolver solver = new BrentSolver(0, 1.0d);
+		double convergencePoint = -1;
+		int upperIntervalBound = 10000;
+		int retries_left = 8;
+		while (retries_left > 0 && convergencePoint == -1) {
+			try {
+				convergencePoint = solver.solve(1000, (x) -> this.getDerivativeCurveValue(x) - 0.0000001, 1, upperIntervalBound);
+			} catch (NoBracketingException e) {
+				System.out.println(e.getMessage());
+				retries_left--;
+				upperIntervalBound *= 2;
+			}
+		}
+		if (convergencePoint == -1) {
+			throw new RuntimeException(
+					String.format("No solution could be found in interval [1,%d]", upperIntervalBound));
+		}
+		return this.getCurveValue(convergencePoint);
 	}
 
 }
