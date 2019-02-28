@@ -1,0 +1,116 @@
+{
+	"repository": "MediumRecursiveProblem",
+	"components": [
+		{
+			"name": "A",
+			"requiredInterface": [
+				{
+					"id": "ri1",
+					"name": "Q"
+				}
+			],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameter": [
+				{
+					"name": "a",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "B",
+			"requiredInterface": [],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameter": [
+				{
+					"name": "b",
+					"type": "cat",
+					"default": "v2",
+					"values": [
+						"v3",
+						"v4"
+					]
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "C",
+			"requiredInterface": [
+				{
+					"id": "ric1",
+					"name": "R"
+				},
+				{
+					"id": "ric2",
+					"name": "R"
+				}],
+			"providedInterface": [
+				"Q"
+			],
+			"parameter": [],
+			"dependencies": []
+		},
+		{
+			"name": "D",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"Q"
+			],
+			"parameter": [
+				{
+					"name": "d1",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "d2",
+					"type": "cat",
+					"default": "v2",
+					"values": [
+						"v3",
+						"v4"
+					]
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "E",
+			"requiredInterface": [],
+			"providedInterface": [
+				"R"
+			],
+			"parameter": [
+				{
+					"name": "e",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "F",
+			"requiredInterface": [],
+			"providedInterface": [
+				"R"
+			],
+			"parameter": [
+				{
+					"name": "f",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

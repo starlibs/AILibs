@@ -1,22 +1,8 @@
-plugins {
-	id 'eclipse-wtp'
-}
-
 sourceSets {
     main {
-        java {
-            srcDir 'src'
-        }
         resources {
-        	srcDir 'conf'
         	srcDir 'resources'
     	}
-    }
-    test {
-		java {
-			srcDir 'test'
-			srcDir 'examples'
-		}
     }
 }
 
@@ -50,6 +36,8 @@ dependencies {
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
 	}
+
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
 	
 }
 
