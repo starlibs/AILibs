@@ -47,7 +47,23 @@ functions{
 		if(e[22] < 0)
 			return log(0);
 		// additional constraints to get reasonable curves
+		if(e[2] < 0)
+			return log(0);
+		if(e[6] < 0)
+			return log(0);
+		if(e[7] < 0)
+			return log(0);
+		if(e[9] > 0)
+			return log(0);
 		if(e[11] < 0)
+			return log(0);
+		if(e[13] < 0)
+			return log(0);
+		if(e[16] < 0)
+			return log(0);
+		if(e[20] < 0)
+			return log(0);
+		if(e[21] < 0)
 			return log(0);
 		if(f_comb(e, 10000) > 1)
 			return log(0);
