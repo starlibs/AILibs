@@ -92,9 +92,9 @@
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithm.html#activate--">activate()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></dt>
 <dd>
 <div class="block">This method
-  - defines the definite deadline for when the algorithm must have finished
-  - sets the algorithm state to ACTIVE
-  - sends the mandatory AlgorithmInitializedEvent over the event bus.</div>
+ - defines the definite deadline for when the algorithm must have finished
+ - sets the algorithm state to ACTIVE
+ - sends the mandatory AlgorithmInitializedEvent over the event bus.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/kvstore/Table.html#add-java.lang.String-java.lang.String-V-">add(String, String, V)</a></span> - Method in class jaicore.basic.kvstore.<a href="jaicore/basic/kvstore/Table.html" title="class in jaicore.basic.kvstore">Table</a></dt>
 <dd>
@@ -138,7 +138,9 @@
 <dd>&nbsp;</dd>
 <dt><a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">AlgorithmExecutionCanceledException</span></a> - Exception in <a href="jaicore/basic/algorithm/package-summary.html">jaicore.basic.algorithm</a></dt>
 <dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#AlgorithmExecutionCanceledException--">AlgorithmExecutionCanceledException()</a></span> - Constructor for exception jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></dt>
+<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#AlgorithmExecutionCanceledException-long-">AlgorithmExecutionCanceledException(long)</a></span> - Constructor for exception jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#AlgorithmExecutionCanceledException-java.lang.String-long-">AlgorithmExecutionCanceledException(String, long)</a></span> - Constructor for exception jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="jaicore/basic/algorithm/events/AlgorithmFinishedEvent.html" title="class in jaicore.basic.algorithm.events"><span class="typeNameLink">AlgorithmFinishedEvent</span></a> - Class in <a href="jaicore/basic/algorithm/events/package-summary.html">jaicore.basic.algorithm.events</a></dt>
 <dd>&nbsp;</dd>
@@ -155,6 +157,10 @@
 <dt><a href="jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">AlgorithmProblemTransformer</span></a>&lt;<a href="jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="type parameter in AlgorithmProblemTransformer">A</a>,<a href="jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="type parameter in AlgorithmProblemTransformer">B</a>&gt; - Interface in <a href="jaicore/basic/algorithm/package-summary.html">jaicore.basic.algorithm</a></dt>
 <dd>&nbsp;</dd>
 <dt><a href="jaicore/basic/algorithm/AlgorithmState.html" title="enum in jaicore.basic.algorithm"><span class="typeNameLink">AlgorithmState</span></a> - Enum in <a href="jaicore/basic/algorithm/package-summary.html">jaicore.basic.algorithm</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions"><span class="typeNameLink">AlgorithmTimeoutedException</span></a> - Exception in <a href="jaicore/basic/algorithm/exceptions/package-summary.html">jaicore.basic.algorithm.exceptions</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html#AlgorithmTimeoutedException-long-">AlgorithmTimeoutedException(long)</a></span> - Constructor for exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/sets/SetUtil.html#allFuntionsFromFunctionallyDenotedRelation-java.util.Map-">allFuntionsFromFunctionallyDenotedRelation(Map&lt;K, Collection&lt;V&gt;&gt;)</a></span> - Static method in class jaicore.basic.sets.<a href="jaicore/basic/sets/SetUtil.html" title="class in jaicore.basic.sets">SetUtil</a></dt>
 <dd>&nbsp;</dd>
@@ -246,6 +252,14 @@
 <dd>&nbsp;</dd>
 <dt><a href="jaicore/basic/Cancelable.html" title="interface in jaicore.basic"><span class="typeNameLink">Cancelable</span></a> - Interface in <a href="jaicore/basic/package-summary.html">jaicore.basic</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="jaicore/concurrent/CancellationTimerTask.html" title="class in jaicore.concurrent"><span class="typeNameLink">CancellationTimerTask</span></a> - Class in <a href="jaicore/concurrent/package-summary.html">jaicore.concurrent</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/CancellationTimerTask.html#CancellationTimerTask-java.lang.String-jaicore.basic.Cancelable-java.lang.Runnable-">CancellationTimerTask(String, Cancelable, Runnable)</a></span> - Constructor for class jaicore.concurrent.<a href="jaicore/concurrent/CancellationTimerTask.html" title="class in jaicore.concurrent">CancellationTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/CancellationTimerTask.html#CancellationTimerTask-java.lang.String-jaicore.basic.Cancelable-">CancellationTimerTask(String, Cancelable)</a></span> - Constructor for class jaicore.concurrent.<a href="jaicore/concurrent/CancellationTimerTask.html" title="class in jaicore.concurrent">CancellationTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html#cancelTimeout-int-">cancelTimeout(int)</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent">TimeoutTimer.TimeoutSubmitter</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/sets/SetUtil.html#cartesianProduct-java.util.Collection-java.util.Collection-">cartesianProduct(Collection&lt;S&gt;, Collection&lt;T&gt;)</a></span> - Static method in class jaicore.basic.sets.<a href="jaicore/basic/sets/SetUtil.html" title="class in jaicore.basic.sets">SetUtil</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/sets/SetUtil.html#cartesianProduct-java.util.List-">cartesianProduct(List&lt;? extends Collection&lt;T&gt;&gt;)</a></span> - Static method in class jaicore.basic.sets.<a href="jaicore/basic/sets/SetUtil.html" title="class in jaicore.basic.sets">SetUtil</a></dt>
@@ -268,6 +282,8 @@
 <dd>
 <div class="block">Close the connection.</div>
 </dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html#close--">close()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent">TimeoutTimer.TimeoutSubmitter</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/ASolutionCandidateIterator.html#collectAllSolutions--">collectAllSolutions()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="class in jaicore.basic.algorithm">ASolutionCandidateIterator</a></dt>
 <dd>
 <div class="block">Gathers all solutions that exist</div>
@@ -279,6 +295,8 @@
 <dt><span class="memberNameLink"><a href="jaicore/basic/ListHelper.html#commaSeparatedStringToList-java.lang.String-">commaSeparatedStringToList(String)</a></span> - Static method in class jaicore.basic.<a href="jaicore/basic/ListHelper.html" title="class in jaicore.basic">ListHelper</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/kvstore/KVStoreSequentialComparator.html#compare-jaicore.basic.kvstore.KVStore-jaicore.basic.kvstore.KVStore-">compare(KVStore, KVStore)</a></span> - Method in class jaicore.basic.kvstore.<a href="jaicore/basic/kvstore/KVStoreSequentialComparator.html" title="class in jaicore.basic.kvstore">KVStoreSequentialComparator</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithm.html#computeTimeoutAware-java.util.concurrent.Callable-">computeTimeoutAware(Callable&lt;T&gt;)</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/IAlgorithmConfig.html#cpus--">cpus()</a></span> - Method in interface jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/IAlgorithmConfig.html" title="interface in jaicore.basic.algorithm">IAlgorithmConfig</a></dt>
 <dd>&nbsp;</dd>
@@ -292,20 +310,12 @@
 <dl>
 <dt><span class="memberNameLink"><a href="jaicore/basic/TimeOut.html#days--">days()</a></span> - Method in class jaicore.basic.<a href="jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a></dt>
 <dd>&nbsp;</dd>
-<dt><a href="jaicore/basic/algorithm/exceptions/DelayedCancellationCheckException.html" title="class in jaicore.basic.algorithm.exceptions"><span class="typeNameLink">DelayedCancellationCheckException</span></a> - Exception in <a href="jaicore/basic/algorithm/exceptions/package-summary.html">jaicore.basic.algorithm.exceptions</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/DelayedCancellationCheckException.html#DelayedCancellationCheckException-jaicore.basic.algorithm.AlgorithmExecutionCanceledException-long-">DelayedCancellationCheckException(AlgorithmExecutionCanceledException, long)</a></span> - Constructor for exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/DelayedCancellationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedCancellationCheckException</a></dt>
-<dd>&nbsp;</dd>
 <dt><a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions"><span class="typeNameLink">DelayedTerminationCheckException</span></a> - Exception in <a href="jaicore/basic/algorithm/exceptions/package-summary.html">jaicore.basic.algorithm.exceptions</a></dt>
 <dd>
 <div class="block">The purpose of this exception is to indicate that the checkTermination method
  of AAlgorithm was invoked too late.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html#DelayedTerminationCheckException-java.lang.String-long-">DelayedTerminationCheckException(String, long)</a></span> - Constructor for exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTerminationCheckException</a></dt>
-<dd>&nbsp;</dd>
-<dt><a href="jaicore/basic/algorithm/exceptions/DelayedTimeoutCheckException.html" title="class in jaicore.basic.algorithm.exceptions"><span class="typeNameLink">DelayedTimeoutCheckException</span></a> - Exception in <a href="jaicore/basic/algorithm/exceptions/package-summary.html">jaicore.basic.algorithm.exceptions</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/DelayedTimeoutCheckException.html#DelayedTimeoutCheckException-java.util.concurrent.TimeoutException-long-">DelayedTimeoutCheckException(TimeoutException, long)</a></span> - Constructor for exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/DelayedTimeoutCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTimeoutCheckException</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/FileUtil.html#deleteFolderRecursively-java.io.File-">deleteFolderRecursively(File)</a></span> - Static method in class jaicore.basic.<a href="jaicore/basic/FileUtil.html" title="class in jaicore.basic">FileUtil</a></dt>
 <dd>&nbsp;</dd>
@@ -441,6 +451,8 @@
 </dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AOptimizer.html#getBestSeenSolution--">getBestSeenSolution()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AOptimizer.html" title="class in jaicore.basic.algorithm">AOptimizer</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/CancellationTimerTask.html#getCancelable--">getCancelable()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/CancellationTimerTask.html" title="class in jaicore.concurrent">CancellationTimerTask</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/sets/SetUtil.html#getCartesianProductOfSetsOfSameClass-java.util.Collection-">getCartesianProductOfSetsOfSameClass(Collection&lt;Collection&lt;T&gt;&gt;)</a></span> - Static method in class jaicore.basic.sets.<a href="jaicore/basic/sets/SetUtil.html" title="class in jaicore.basic.sets">SetUtil</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/kvstore/KVStore.html#getCollection--">getCollection()</a></span> - Method in class jaicore.basic.kvstore.<a href="jaicore/basic/kvstore/KVStore.html" title="class in jaicore.basic.kvstore">KVStore</a></dt>
@@ -455,19 +467,25 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/IAlgorithm.html#getConfig--">getConfig()</a></span> - Method in interface jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#getDelay--">getDelay()</a></span> - Method in exception jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html#getDelay--">getDelay()</a></span> - Method in exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html#getDelay--">getDelay()</a></span> - Method in exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTerminationCheckException</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/NamedTimerTask.html#getDescriptor--">getDescriptor()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/NamedTimerTask.html" title="class in jaicore.concurrent">NamedTimerTask</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/SQLAdapter.html#getDriver--">getDriver()</a></span> - Method in class jaicore.basic.<a href="jaicore/basic/SQLAdapter.html" title="class in jaicore.basic">SQLAdapter</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/DelayedCancellationCheckException.html#getException--">getException()</a></span> - Method in exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/DelayedCancellationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedCancellationCheckException</a></dt>
-<dd>&nbsp;</dd>
-<dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/DelayedTimeoutCheckException.html#getException--">getException()</a></span> - Method in exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/DelayedTimeoutCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTimeoutCheckException</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/logging/LoggerUtil.html#getExceptionInfo-java.lang.Throwable-">getExceptionInfo(Throwable)</a></span> - Static method in class jaicore.logging.<a href="jaicore/logging/LoggerUtil.html" title="class in jaicore.logging">LoggerUtil</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/logging/LoggerUtil.html#getExceptionInfo-java.lang.Throwable-java.util.List-">getExceptionInfo(Throwable, List&lt;SetUtil.Pair&lt;String, Object&gt;&gt;)</a></span> - Static method in class jaicore.logging.<a href="jaicore/logging/LoggerUtil.html" title="class in jaicore.logging">LoggerUtil</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/FileUtil.html#getFilesOfFolder-java.io.File-">getFilesOfFolder(File)</a></span> - Static method in class jaicore.basic.<a href="jaicore/basic/FileUtil.html" title="class in jaicore.basic">FileUtil</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/CancellationTimerTask.html#getHookToExecutePriorToInterruption--">getHookToExecutePriorToInterruption()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/CancellationTimerTask.html" title="class in jaicore.concurrent">CancellationTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/InterruptionTimerTask.html#getHookToExecutePriorToInterruption--">getHookToExecutePriorToInterruption()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent">InterruptionTimerTask</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithm.html#getId--">getId()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></dt>
 <dd>&nbsp;</dd>
@@ -480,6 +498,8 @@
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithmFactory.html#getInput--">getInput()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithmFactory.html" title="class in jaicore.basic.algorithm">AAlgorithmFactory</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/IAlgorithm.html#getInput--">getInput()</a></span> - Method in interface jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.html#getInstance--">getInstance()</a></span> - Static method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.html" title="class in jaicore.concurrent">TimeoutTimer</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/MathExt.html#getIntegersFromTo-int-int-">getIntegersFromTo(int, int)</a></span> - Static method in class jaicore.basic.<a href="jaicore/basic/MathExt.html" title="class in jaicore.basic">MathExt</a></dt>
 <dd>&nbsp;</dd>
@@ -559,7 +579,11 @@
 <dd>
 <div class="block">Allows to get a string representation of this KVStore incorporating only key value pairs for the named</div>
 </dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.html#getSubmitter--">getSubmitter()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.html" title="class in jaicore.concurrent">TimeoutTimer</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/concurrent/ThreadGroupObserver.html#getThreadsAtPointOfViolation--">getThreadsAtPointOfViolation()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/ThreadGroupObserver.html" title="class in jaicore.concurrent">ThreadGroupObserver</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/InterruptionTimerTask.html#getThreadToBeInterrupted--">getThreadToBeInterrupted()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent">InterruptionTimerTask</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithm.html#getTimeout--">getTimeout()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></dt>
 <dd>&nbsp;</dd>
@@ -669,6 +693,26 @@
 <div class="block">Simple example of an Instrumentation Agent adapted from blog post "Instrumentation: querying the memory usage of a Java object" (http://www.javamex.com/tutorials/memory/instrumentation.shtml).</div>
 </dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/InstrumentationAgent.html#InstrumentationAgent--">InstrumentationAgent()</a></span> - Constructor for class jaicore.basic.<a href="jaicore/basic/InstrumentationAgent.html" title="class in jaicore.basic">InstrumentationAgent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent"><span class="typeNameLink">InterruptionTimerTask</span></a> - Class in <a href="jaicore/concurrent/package-summary.html">jaicore.concurrent</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/InterruptionTimerTask.html#InterruptionTimerTask-java.lang.String-java.lang.Thread-java.lang.Runnable-">InterruptionTimerTask(String, Thread, Runnable)</a></span> - Constructor for class jaicore.concurrent.<a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent">InterruptionTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/InterruptionTimerTask.html#InterruptionTimerTask-java.lang.String-java.lang.Thread-">InterruptionTimerTask(String, Thread)</a></span> - Constructor for class jaicore.concurrent.<a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent">InterruptionTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/InterruptionTimerTask.html#InterruptionTimerTask-java.lang.String-java.lang.Runnable-">InterruptionTimerTask(String, Runnable)</a></span> - Constructor for class jaicore.concurrent.<a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent">InterruptionTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/InterruptionTimerTask.html#InterruptionTimerTask-java.lang.String-">InterruptionTimerTask(String)</a></span> - Constructor for class jaicore.concurrent.<a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent">InterruptionTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html#interruptJobAfterMS-java.util.concurrent.Future-long-">interruptJobAfterMS(Future&lt;?&gt;, long)</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent">TimeoutTimer.TimeoutSubmitter</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html#interruptMeAfterMS-long-">interruptMeAfterMS(long)</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent">TimeoutTimer.TimeoutSubmitter</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html#interruptMeAfterMS-long-java.lang.Runnable-">interruptMeAfterMS(long, Runnable)</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent">TimeoutTimer.TimeoutSubmitter</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html#interruptThreadAfterMS-java.lang.Thread-long-">interruptThreadAfterMS(Thread, long)</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent">TimeoutTimer.TimeoutSubmitter</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html#interruptThreadAfterMS-java.lang.Thread-long-java.lang.Runnable-">interruptThreadAfterMS(Thread, long, Runnable)</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent">TimeoutTimer.TimeoutSubmitter</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/sets/SetUtil.html#intersection-java.util.Collection-java.util.Collection-">intersection(Collection&lt;T&gt;, Collection&lt;U&gt;)</a></span> - Static method in class jaicore.basic.sets.<a href="jaicore/basic/sets/SetUtil.html" title="class in jaicore.basic.sets">SetUtil</a></dt>
 <dd>&nbsp;</dd>
@@ -902,6 +946,10 @@
 </a>
 <h2 class="title">N</h2>
 <dl>
+<dt><a href="jaicore/concurrent/NamedTimerTask.html" title="class in jaicore.concurrent"><span class="typeNameLink">NamedTimerTask</span></a> - Class in <a href="jaicore/concurrent/package-summary.html">jaicore.concurrent</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/NamedTimerTask.html#NamedTimerTask-java.lang.String-">NamedTimerTask(String)</a></span> - Constructor for class jaicore.concurrent.<a href="jaicore/concurrent/NamedTimerTask.html" title="class in jaicore.concurrent">NamedTimerTask</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/TimeOut.html#nanoseconds--">nanoseconds()</a></span> - Method in class jaicore.basic.<a href="jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithm.html#next--">next()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></dt>
@@ -1083,6 +1131,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/ValueUtil.html#round-double-int-">round(double, int)</a></span> - Static method in class jaicore.basic.<a href="jaicore/basic/ValueUtil.html" title="class in jaicore.basic">ValueUtil</a></dt>
 <dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/CancellationTimerTask.html#run--">run()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/CancellationTimerTask.html" title="class in jaicore.concurrent">CancellationTimerTask</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/InterruptionTimerTask.html#run--">run()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/InterruptionTimerTask.html" title="class in jaicore.concurrent">InterruptionTimerTask</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/concurrent/ThreadGroupObserver.html#run--">run()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/ThreadGroupObserver.html" title="class in jaicore.concurrent">ThreadGroupObserver</a></dt>
 <dd>&nbsp;</dd>
 </dl>
@@ -1126,6 +1178,8 @@
 <div class="block">Sets the config object to the new config object.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html#setDelay-long-">setDelay(long)</a></span> - Method in exception jaicore.basic.algorithm.exceptions.<a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTerminationCheckException</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/NamedTimerTask.html#setDescriptor-java.lang.String-">setDescriptor(String)</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/NamedTimerTask.html" title="class in jaicore.concurrent">NamedTimerTask</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithm.html#setLoggerName-java.lang.String-">setLoggerName(String)</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></dt>
 <dd>&nbsp;</dd>
@@ -1184,7 +1238,7 @@
 <dt><span class="memberNameLink"><a href="jaicore/basic/algorithm/AAlgorithm.html#shutdown--">shutdown()</a></span> - Method in class jaicore.basic.algorithm.<a href="jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></dt>
 <dd>
 <div class="block">This method does two things:
-   1.</div>
+ 1.</div>
 </dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/kvstore/KVStoreStatisticsUtil.html#singleBest-jaicore.basic.kvstore.KVStoreCollection-java.lang.String-java.lang.String-java.lang.String-">singleBest(KVStoreCollection, String, String, String)</a></span> - Static method in class jaicore.basic.kvstore.<a href="jaicore/basic/kvstore/KVStoreStatisticsUtil.html" title="class in jaicore.basic.kvstore">KVStoreStatisticsUtil</a></dt>
 <dd>&nbsp;</dd>
@@ -1260,6 +1314,10 @@
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/TimeOut.html#TimeOut-long-java.util.concurrent.TimeUnit-">TimeOut(long, TimeUnit)</a></span> - Constructor for class jaicore.basic.<a href="jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a></dt>
 <dd>&nbsp;</dd>
+<dt><a href="jaicore/concurrent/TimeoutTimer.html" title="class in jaicore.concurrent"><span class="typeNameLink">TimeoutTimer</span></a> - Class in <a href="jaicore/concurrent/package-summary.html">jaicore.concurrent</a></dt>
+<dd>&nbsp;</dd>
+<dt><a href="jaicore/concurrent/TimeoutTimer.TimeoutSubmitter.html" title="class in jaicore.concurrent"><span class="typeNameLink">TimeoutTimer.TimeoutSubmitter</span></a> - Class in <a href="jaicore/concurrent/package-summary.html">jaicore.concurrent</a></dt>
+<dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/kvstore/Table.html#toCSV-java.lang.String-">toCSV(String)</a></span> - Method in class jaicore.basic.kvstore.<a href="jaicore/basic/kvstore/Table.html" title="class in jaicore.basic.kvstore">Table</a></dt>
 <dd>
 <div class="block">Converts the table into CSV format.</div>
@@ -1291,6 +1349,8 @@
 <dt><span class="memberNameLink"><a href="jaicore/basic/sets/SetUtil.Pair.html#toString--">toString()</a></span> - Method in class jaicore.basic.sets.<a href="jaicore/basic/sets/SetUtil.Pair.html" title="class in jaicore.basic.sets">SetUtil.Pair</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/TimeOut.html#toString--">toString()</a></span> - Method in class jaicore.basic.<a href="jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a></dt>
+<dd>&nbsp;</dd>
+<dt><span class="memberNameLink"><a href="jaicore/concurrent/TimeoutTimer.html#toString--">toString()</a></span> - Method in class jaicore.concurrent.<a href="jaicore/concurrent/TimeoutTimer.html" title="class in jaicore.concurrent">TimeoutTimer</a></dt>
 <dd>&nbsp;</dd>
 <dt><span class="memberNameLink"><a href="jaicore/basic/FileUtil.html#touch-java.lang.String-">touch(String)</a></span> - Static method in class jaicore.basic.<a href="jaicore/basic/FileUtil.html" title="class in jaicore.basic">FileUtil</a></dt>
 <dd>&nbsp;</dd>

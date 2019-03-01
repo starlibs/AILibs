@@ -13,8 +13,6 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 
 /**
  * This algorithms allows to compute an ordered Cartesian product. It is ordered
@@ -119,11 +117,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			return activate();
 		}
 		case active: {
-			try {
-				checkAndConductTermination();
-			} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
-				e.printStackTrace();
-			}
+			checkAndConductTermination();
 			if (open.isEmpty())
 				return terminate();
 
@@ -137,11 +131,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 				int n = set.size();
 				next.fillTupleArrayWithValues(currentTuple); // get current tuple
 				for (int j = 0; j < n; j++) {
-					try {
-						checkAndConductTermination();
-					} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
-						e.printStackTrace();
-					}
+					checkAndConductTermination();
 					long innerTimePoint = System.currentTimeMillis();
 					currentTuple.add(set.get(j));
 					assert (System.currentTimeMillis() - innerTimePoint) < 5 : "Copying the " + (next.indexOfSet) + "-tuple " + currentTuple + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";

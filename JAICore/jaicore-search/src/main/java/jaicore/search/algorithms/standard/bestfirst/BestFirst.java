@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,8 +54,8 @@ import jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEva
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -583,8 +581,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	 * @throws InterruptedException
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws TimeoutException
+	 * @throws AlgorithmException
 	 */
-	protected NodeExpansionJobSubmittedEvent<N, A, V> expandNextNode() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	protected NodeExpansionJobSubmittedEvent<N, A, V> expandNextNode() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 
 		/*
 		 * Preliminarily check that the active jobs are less than the additional threads
@@ -650,51 +649,18 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.logger.info("Expanding node {} with f-value {}", nodeSelectedForExpansion, nodeSelectedForExpansion.getInternalLabel());
 		this.logger.debug("Start computation of successors");
 		final List<NodeExpansionDescription<N, A>> successorDescriptions;
-		{
-			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
-			long remainingTime = getRemainingTimeToDeadline().milliseconds();
-			if (remainingTime > 500) {
-				Timer t = getTimerAndCreateIfNotExistent(); // this is used, because the timeout is not checked within the successor generation
-				AtomicBoolean timeoutTriggered = new AtomicBoolean(false);
-				TimerTask task = new InterruptionTimerTask("Timeout triggered", () -> {
-					logger.debug("Timeout detected {} prior to deadline, interrupting successor generation.", getRemainingTimeToDeadline());
-					timeoutTriggered.set(true);
-				});
-				try {
-					t.schedule(task, remainingTime - 500);
-				} catch (IllegalStateException e) { // apparently the algorithm has terminated
-					this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
-				}
-				try {
-					logger.trace("Invoking getSuccessors");
-					tmpSuccessorDescriptions = BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
-					logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
-					task.cancel();
-				} catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
-					logger.debug("Received intterrupt. Cancel flag is {}", isCanceled());
-
-					/* if the timeout has been triggered (with caution), just sleep until */
-					remainingTime = getRemainingTimeToDeadline().milliseconds();
-					if (timeoutTriggered.get()) {
-						if (remainingTime > 0) {
-							Thread.interrupted(); // clear the interrupted field
-							logger.debug("Artificially sleeping {}ms to trigger the correct behavior in the checker.", remainingTime);
-							Thread.sleep(remainingTime);
-						} else
-							logger.debug("Gained back control from successor generation, but remaining time is now only {}ms. Algorithm should terminate now.", remainingTime);
-					} else if (!isCanceled())
-						Thread.currentThread().interrupt(); // reset the interrupt
-					this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
-				}
-				successorDescriptions = tmpSuccessorDescriptions;
-			} else {
-				logger.debug("Only {}ms left, which is not enough to reliably compute more successors. Terminating search at this point", remainingTime);
-				if (remainingTime > 0) {
-					Thread.sleep(remainingTime);
-				}
-				successorDescriptions = null;
-			}
+		List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
+		try {
+			tmpSuccessorDescriptions = computeTimeoutAware(() -> {
+				logger.trace("Invoking getSuccessors");
+				return BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
+			});
+			logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
+		} catch (Exception e) {
+			checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion); // make sure that we unregister from expand
 		}
+		successorDescriptions = tmpSuccessorDescriptions;
+
 		this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
 		this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), nodeSelectedForExpansion);
 		this.post(new SuccessorComputationCompletedEvent<>(getId(), nodeSelectedForExpansion, successorDescriptions));

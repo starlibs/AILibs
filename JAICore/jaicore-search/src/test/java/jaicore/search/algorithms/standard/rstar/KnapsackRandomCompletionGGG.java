@@ -1,24 +1,26 @@
 package jaicore.search.algorithms.standard.rstar;
 
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.core.interfaces.ISolutionEvaluator;
-import jaicore.search.model.travesaltree.Node;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.testproblems.knapsack.KnapsackProblem;
-import jaicore.search.testproblems.npuzzle.standard.NPuzzleGenerator;
-import jaicore.search.testproblems.npuzzle.standard.NPuzzleNode;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.testproblems.knapsack.KnapsackNode;
+import jaicore.search.testproblems.knapsack.KnapsackProblem;
+import jaicore.search.testproblems.knapsack.KnapsackProblemGraphGenerator;
 
 public class KnapsackRandomCompletionGGG {
 
-    static SerializableGraphGenerator<KnapsackProblem.KnapsackNode, String> graphGenerator;
-    static RandomCompletionGammaGraphGenerator<KnapsackProblem.KnapsackNode> ggg;
-    static ISolutionEvaluator<KnapsackProblem.KnapsackNode, Double> solutionEvaluator;
+    static SerializableGraphGenerator<KnapsackNode, String> graphGenerator;
+    static RandomCompletionGammaGraphGenerator<KnapsackNode> ggg;
+    static ISolutionEvaluator<KnapsackNode, Double> solutionEvaluator;
 
 
     @BeforeClass
@@ -69,7 +71,7 @@ public class KnapsackRandomCompletionGGG {
         /**
          * Setup RandomCompletionGammaGraphGenerator.
          */
-        graphGenerator = knapsackProblem.getGraphGenerator();
+        graphGenerator = new KnapsackProblemGraphGenerator(knapsackProblem);
         solutionEvaluator = knapsackProblem.getSolutionEvaluator();
         ggg = new RandomCompletionGammaGraphGenerator(graphGenerator, solutionEvaluator, 5, 42 );
 
@@ -77,7 +79,7 @@ public class KnapsackRandomCompletionGGG {
 
     //@Test
     public void testRandom() {
-        RStar<KnapsackProblem.KnapsackNode, String, Integer> rStar = new RStar<>(ggg, 0, 5, 2, solutionEvaluator);
+        RStar<KnapsackNode, String, Integer> rStar = new RStar<>(ggg, 0, 5, 2, solutionEvaluator);
         rStar.start();
 
         try {
@@ -92,9 +94,9 @@ public class KnapsackRandomCompletionGGG {
 //        for (Node<KnapsackProblem.KnapsackNode, RStarK> pos : solution)
 //            costOfSolution += 5;
 
-        List<GammaNode<KnapsackProblem.KnapsackNode, RStarK>> gammaSolution = rStar.getGammaSolutionPath();
+        List<GammaNode<KnapsackNode, RStarK>> gammaSolution = rStar.getGammaSolutionPath();
         //List<GridWorld> intermediateHopsChosenByGammaSolution = gammaSolution.stream().map(n -> n.getPoint()).collect(Collectors.toList());
-        for (GammaNode<KnapsackProblem.KnapsackNode,?> g : gammaSolution) {
+        for (GammaNode<KnapsackNode,?> g : gammaSolution) {
             System.out.println(g);
         }
         System.out.println(rStar.getGoalState());
@@ -115,7 +117,7 @@ public class KnapsackRandomCompletionGGG {
         delta = 5;
         int timeout = 10;  // seconds
 
-        RStar<KnapsackProblem.KnapsackNode, String, Integer> rstarSearch = new RStar<>(ggg, 0, k, delta, solutionEvaluator);
+        RStar<KnapsackNode, String, Integer> rstarSearch = new RStar<>(ggg, 0, k, delta, solutionEvaluator);
 
         try {
             rstarSearch.start();
@@ -124,7 +126,7 @@ public class KnapsackRandomCompletionGGG {
             System.out.println("Interrupted while joining RStar.");
             e.printStackTrace();
         }
-        List<KnapsackProblem.KnapsackNode> solution = null;
+        List<KnapsackNode> solution = null;
         if (rstarSearch.getGoalState() != null) {
             try {
                 solution = rstarSearch.getSolutionPath();
@@ -154,7 +156,7 @@ public class KnapsackRandomCompletionGGG {
 
     @Test
     public void testHashing() {
-        SingleRootGenerator<GammaNode<KnapsackProblem.KnapsackNode, RStarK>> rg = (SingleRootGenerator)  ggg.getRootGenerator();
+        SingleRootGenerator<GammaNode<KnapsackNode, RStarK>> rg = (SingleRootGenerator)  ggg.getRootGenerator();
         System.out.println(rg.getRoot().getPoint().hashCode());
     }
 

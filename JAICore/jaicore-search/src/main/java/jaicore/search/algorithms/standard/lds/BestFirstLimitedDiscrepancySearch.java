@@ -27,11 +27,13 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 /**
- * This class conducts a limited discrepancy search by running a best first algorithm with list-based node evaluations Since the f-values are lists too, we do not simply extend BestFirst but rather forward all commands to it
+ * This class conducts a limited discrepancy search by running a best first algorithm with list-based node evaluations.
+ * Since the f-values are lists too, we do not simply extend BestFirst but rather forward all commands to it.
  *
  * @author fmohr
  *
@@ -71,7 +73,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 
 		@Subscribe
 		public void receiveSuccessorsCreatedEvent(final SuccessorComputationCompletedEvent<T, ?> successorDescriptions) {
-			List<T> successors = successorDescriptions.getSuccessorDescriptions().stream().map(n -> n.getTo()).sorted(this.heuristic).collect(Collectors.toList());
+			List<T> successors = successorDescriptions.getSuccessorDescriptions().stream().map(NodeExpansionDescription::getTo).sorted(this.heuristic).collect(Collectors.toList());
 			this.childOrdering.put(successorDescriptions.getNode(), successors);
 		}
 	}
@@ -101,7 +103,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException  {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		checkAndConductTermination();
 		if (getState().equals(AlgorithmState.created)) {
 			this.bestFirst.setTimeout(getTimeout());
@@ -115,19 +117,12 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 		else if (e instanceof SolutionCandidateFoundEvent) {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((SolutionCandidateFoundEvent) e).getSolutionCandidate();
-			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
+			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<>(solution.getNodes(), solution.getEdges(), null);
 			return new ASolutionCandidateFoundEvent<>(getId(), modifiedSolution);
-		}
-		else
+		} else {
 			return e;
+		}
 	}
-
-//	@Override
-//	public EvaluatedSearchGraphPath<T, A, V> call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException  {
-//		EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = this.bestFirst.call();
-//		EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<T, A, V>(solution.getNodes(), solution.getEdges(), null);
-//		return modifiedSolution;
-//	}
 
 	@Override
 	public String getLoggerName() {

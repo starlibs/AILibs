@@ -19,6 +19,7 @@ public class MCTSNQueenTester extends NQueenTester<GraphSearchWithPathEvaluation
 	public IGraphSearchFactory<GraphSearchWithPathEvaluationsInput<QueenNode, String, Double>, EvaluatedSearchGraphPath<QueenNode, String,Double>, QueenNode, String> getFactory() {
 		UCTFactory<QueenNode, String> factory = new UCTFactory<>();
 		factory.setEvaluationFailurePenalty(0.0);
+		factory.setForbidDoublePaths(true);
 		return factory;
 	}
 

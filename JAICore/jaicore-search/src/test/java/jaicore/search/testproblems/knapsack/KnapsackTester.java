@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
@@ -21,10 +23,11 @@ import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSoluti
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.testproblems.knapsack.KnapsackProblem.KnapsackNode;
 
 public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, String>, O> extends GraphSearchTester<KnapsackProblem, I, O, KnapsackNode, String>  {
 
+	private static final Logger logger = LoggerFactory.getLogger(KnapsackTester.class);
+	
 	private Map<String, Double> weights;
 	private Map<String, Double> values;
 	private Map<Set<String>, Double> bonusPoints;
@@ -32,7 +35,7 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 	public IGraphSearch<I, O, KnapsackNode, String> getSearch() {
 		
 		/* create knapsack problem */
-		Set<String> objects = new HashSet<String>();
+		Set<String> objects = new HashSet<>();
 		for (int i = 0; i < 10; i++) {
 			objects.add(String.valueOf(i));
 		}
@@ -119,12 +122,10 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 		KnapsackNode bestSolution = null;
 		double bestValue = 0.0d;
 		IGraphSearch<I, O, KnapsackNode, String> search = getSearch();
-//		new SimpleGraphVisualizationWindow<>(search);
 		Iterator<AlgorithmEvent> iterator = search.iterator();
 		assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 		boolean initialized = false;
 		boolean terminated = false;
-		int solutions = 0;
 		while (iterator.hasNext()) {
 			AlgorithmEvent e = search.next();
 			assertNotNull("The search iterator has returned NULL even though hasNext suggested that more event should come.", e);
@@ -136,10 +137,9 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 			} else {
 				assertTrue(!terminated);
 				if (e instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
-					solutions++;
 					List<KnapsackNode> solution = ((EvaluatedSearchSolutionCandidateFoundEvent<KnapsackNode,String,Double>) e).getSolutionCandidate().getNodes();
 					double value = getValueOfKnapsack(solution.get(solution.size() - 1));
-					System.out.println("New solution with value "+ value);
+					logger.info("New solution with value "+ value);
 					if (value > bestValue) {
 						bestSolution = solution.get(solution.size() - 1);
 						bestValue = value;
@@ -161,7 +161,7 @@ public abstract class KnapsackTester<I extends GraphSearchInput<KnapsackNode, St
 				bestPacking += "0";
 			}
 		}
-		System.out.println("Best knapsack has the value: " + bestValue);
+		logger.info("Best knapsack has the value: {}", bestValue);
 		assertEquals("1111010000", bestPacking);
 	}
 

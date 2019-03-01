@@ -155,7 +155,6 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		print("Conduct random experiment...");
 		runner.randomlyConductExperiments(1, false);
 		print("Experiment conducted, stop timeout timer.");
-		TimeoutTimer.getInstance().stop();
 		print("Timer stopped.");
 	}
 }
