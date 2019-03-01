@@ -158,7 +158,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			if (availableActions.isEmpty()) {
 				this.logger.debug("Node {} has only dead-end successors and hence is a dead-end itself. Adding it to the list of dead ends.", current);
 				if (current == exploredGraph.getRoot()) {
-					this.logger.info("No more action available in root node. Returning null.");
+					this.logger.info("No more action available in root node. Throwing exception.");
 					throw new NoSuchElementException();
 				}
 				this.deadLeafNodes.add(current);
@@ -394,6 +394,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 							closePath(path); // visualize that path rollout has been completed
 						}
 					}
+
 				}
 			} catch (NoSuchElementException e) {
 				this.logger.info("No more playouts exist. Terminating.");

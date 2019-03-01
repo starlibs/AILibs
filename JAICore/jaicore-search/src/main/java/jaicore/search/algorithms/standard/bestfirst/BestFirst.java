@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,8 +54,8 @@ import jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEva
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -1107,8 +1105,16 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
 		}
 		this.additionalThreadsForNodeAttachment = threadsForExpansion;
+		if (this.additionalThreadsForNodeAttachment > getConfig().threads() - 2) { // timer and main thread must not add up here
+			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, getConfig().threads() - 2);
+		}
+		if (this.additionalThreadsForNodeAttachment < 1) {
+			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", getConfig().threads());
+			this.additionalThreadsForNodeAttachment = 0;
+			return;
+		}
 		AtomicInteger counter = new AtomicInteger(0);
-		this.pool = Executors.newFixedThreadPool(threadsForExpansion, r -> {
+		this.pool = Executors.newFixedThreadPool(this.additionalThreadsForNodeAttachment, r -> {
 			Thread t = new Thread(r);
 			t.setName("ORGraphSearch-worker-" + counter.incrementAndGet());
 			return t;

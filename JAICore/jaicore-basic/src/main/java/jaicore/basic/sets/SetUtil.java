@@ -69,7 +69,7 @@ public class SetUtil {
 			if (getClass() != obj.getClass())
 				return false;
 			@SuppressWarnings("unchecked")
-			Pair<X,Y> other = (Pair<X,Y>) obj;
+			Pair<X, Y> other = (Pair<X, Y>) obj;
 			if (x == null) {
 				if (other.x != null)
 					return false;
@@ -253,8 +253,7 @@ public class SetUtil {
 		private Semaphore semThreads, semComplete;
 		private long goalSize;
 
-		public SubSetComputer(List<T> superSet, int k, int idx, Set<T> current, List<Set<T>> allSolutions, ExecutorService pool, Semaphore sem, long goalSize,
-				Semaphore semComplete) {
+		public SubSetComputer(List<T> superSet, int k, int idx, Set<T> current, List<Set<T>> allSolutions, ExecutorService pool, Semaphore sem, long goalSize, Semaphore semComplete) {
 			super();
 			this.superSet = superSet;
 			this.pool = pool;
@@ -358,8 +357,7 @@ public class SetUtil {
 		Semaphore solutionSemaphore = new Semaphore(1);
 		try {
 			solutionSemaphore.acquire();
-			pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k),
-					solutionSemaphore));
+			pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
 			solutionSemaphore.acquire();
 			pool.shutdown();
 		} catch (InterruptedException e) {
@@ -429,22 +427,40 @@ public class SetUtil {
 
 		return out;
 	}
-	
+
+	/**
+	 * @param a
+	 *            The set A.
+	 * @param b
+	 *            The set B.
+	 * @return The difference A \ B.
+	 */
+	public static <S, T extends S, U extends S> List<S> difference(List<T> a, Collection<U> b) {
+
+		List<S> out = new ArrayList<>();
+
+		for (S item : a)
+			if (b == null || !b.contains(item))
+				out.add(item);
+
+		return out;
+	}
+
 	public static <S, T extends S, U extends S> boolean differenceEmpty(Collection<T> a, Collection<U> b) {
 		if (a == null || a.isEmpty())
 			return true;
 		for (S item : a)
 			if (!b.contains(item))
-				return false; 
+				return false;
 		return true;
 	}
-	
+
 	public static <S, T extends S, U extends S> boolean differenceNotEmpty(Collection<T> a, Collection<U> b) {
 		if (b == null)
 			return !a.isEmpty();
 		for (S item : a)
 			if (!b.contains(item))
-				return true; 
+				return true;
 		return false;
 	}
 
@@ -494,8 +510,7 @@ public class SetUtil {
 				tupleOfSize1.add(obj);
 				product.add(tupleOfSize1);
 			}
-			assert product.size() == expectedSize : "Invalid number of expected entries! Expected " + expectedSize + " but computed " + product.size() + " for a single set: "
-					+ listOfSets.get(0);
+			assert product.size() == expectedSize : "Invalid number of expected entries! Expected " + expectedSize + " but computed " + product.size() + " for a single set: " + listOfSets.get(0);
 			return product;
 		}
 
@@ -582,8 +597,7 @@ public class SetUtil {
 	}
 
 	/* FUNCTIONS */
-	public static <K, V> Collection<Map<K, V>> allMappings(Collection<K> domain, Collection<V> range, boolean totalsOnly, boolean injectivesOnly, boolean surjectivesOnly)
-			throws InterruptedException {
+	public static <K, V> Collection<Map<K, V>> allMappings(Collection<K> domain, Collection<V> range, boolean totalsOnly, boolean injectivesOnly, boolean surjectivesOnly) throws InterruptedException {
 
 		Collection<Map<K, V>> mappings = new ArrayList<>();
 
@@ -654,8 +668,7 @@ public class SetUtil {
 	 *            The predicate that is evaluated for every partial
 	 * @return All partial mappings from the domain set to the range set.
 	 */
-	public static <K, V> Set<Map<K, V>> allTotalAndInjectiveMappingsWithConstraint(Collection<K> domain, Collection<V> range, Predicate<Map<K, V>> pPredicate)
-			throws InterruptedException {
+	public static <K, V> Set<Map<K, V>> allTotalAndInjectiveMappingsWithConstraint(Collection<K> domain, Collection<V> range, Predicate<Map<K, V>> pPredicate) throws InterruptedException {
 		Set<Map<K, V>> mappings = new HashSet<>();
 		if (domain.isEmpty())
 			return mappings;
@@ -696,8 +709,7 @@ public class SetUtil {
 
 	}
 
-	public static <K, V> Set<Map<K, V>> allTotalMappingsWithLocalConstraints(Collection<K> domain, Collection<V> range, Predicate<Pair<K, V>> pPredicate)
-			throws InterruptedException {
+	public static <K, V> Set<Map<K, V>> allTotalMappingsWithLocalConstraints(Collection<K> domain, Collection<V> range, Predicate<Pair<K, V>> pPredicate) throws InterruptedException {
 		Map<K, Collection<V>> pairsThatSatisfyCondition = relationAsFunction(domain, range, pPredicate);
 		return allFuntionsFromFunctionallyDenotedRelation(pairsThatSatisfyCondition);
 
@@ -969,7 +981,7 @@ public class SetUtil {
 		double min = Double.valueOf(interval.get(0));
 		return new Interval(min, interval.size() == 1 ? min : Double.valueOf(interval.get(1)));
 	}
-	
+
 	public static <T> List<T> getInvertedCopyOfList(List<T> list) {
 		List<T> copy = new ArrayList<>();
 		int n = list.size();
@@ -977,14 +989,14 @@ public class SetUtil {
 			copy.add(list.get(n - i - 1));
 		return copy;
 	}
-	
+
 	public static <T> List<T> addAndGet(List<T> list, T item) {
 		list.add(item);
 		return list;
 	}
-	
-	public static <T,U> Map<U,Collection<T>> groupCollectionByAttribute(Collection<T> collection, IGetter<T,U> getter) {
-		Map<U,Collection<T>> groupedCollection = new HashMap<>();
+
+	public static <T, U> Map<U, Collection<T>> groupCollectionByAttribute(Collection<T> collection, IGetter<T, U> getter) {
+		Map<U, Collection<T>> groupedCollection = new HashMap<>();
 		collection.forEach(i -> {
 			U val = getter.getPropertyOf(i);
 			if (!groupedCollection.containsKey(val))

@@ -26,7 +26,6 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.InterruptionTimerTask;
-import jaicore.concurrent.TimeoutTimer;
 
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
@@ -52,10 +51,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private AlgorithmState state = AlgorithmState.created;
 	private final EventBus eventBus = new EventBus();
-	private final Collection<Thread> threadsInterruptedByShutdown = new ArrayList<>();
 	
 	private int timeoutPrecautionOffset = 2000; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
 	private static int MIN_RUNTIME_FOR_OBSERVED_TASK = 50;
+	private final Collection<Thread> threadsInterruptedByShutdown = new ArrayList<>(); 
 
 	/**
 	 * C'tor providing the input for the algorithm already.
@@ -119,6 +118,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	@Override
 	public void setNumCPUs(final int numberOfCPUs) {
 		this.getConfig().setProperty(IAlgorithmConfig.K_CPUS, numberOfCPUs + "");
+	}
+	
+	@Override
+	public void setMaxNumThreads(int maxNumberOfThreads) {
+		this.getConfig().setProperty(IAlgorithmConfig.K_THREADS, maxNumberOfThreads + "");
 	}
 
 	@Override
@@ -238,7 +242,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		}
 		this.logger.info("Shutdown of {} completed.", this.getId());
 	}
-
+	
 	public boolean hasThreadBeenInterruptedDuringShutdown(Thread t) {
 		return threadsInterruptedByShutdown.contains(t);
 	}
@@ -259,6 +263,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void unregisterActiveThread() {
 		logger.trace("Unregistering current thread {}", Thread.currentThread());
 		this.activeThreads.remove(Thread.currentThread());
+	}
+
+	public long getActivationTime() {
+		return activationTime;
 	}
 
 	/**
