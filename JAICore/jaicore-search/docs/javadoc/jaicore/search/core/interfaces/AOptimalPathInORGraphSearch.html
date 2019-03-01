@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -188,26 +188,22 @@ implements <a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORG
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#checkAndConductTermination--">checkAndConductTermination</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getGraphGenerator--">getGraphGenerator</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getLoggerName--">getLoggerName</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../jaicore/search/algorithms/standard/bestfirst/events/EvaluatedSearchSolutionCandidateFoundEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events">EvaluatedSearchSolutionCandidateFoundEvent</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>protected <a href="../../../../jaicore/search/algorithms/standard/bestfirst/events/EvaluatedSearchSolutionCandidateFoundEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events">EvaluatedSearchSolutionCandidateFoundEvent</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#registerSolution-jaicore.search.model.other.EvaluatedSearchGraphPath-">registerSolution</a></span>(<a href="../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">V</a>&gt;&nbsp;path)</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#setLoggerName-java.lang.String-">setLoggerName</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
@@ -231,7 +227,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORG
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, cancel, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, cancel, checkAndConductTermination, computeTimeoutAware, getActivationTime, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -245,7 +241,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORG
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setNumCPUs, setTimeout, setTimeout</code></li>
+<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
@@ -363,26 +359,6 @@ implements <a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORG
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html#getGraphGenerator--">getGraphGenerator</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">I</a> extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>&gt;,<a href="../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">V</a> extends java.lang.Comparable&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">V</a>&gt;&gt;,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>&gt;</code></dd>
-</dl>
-</li>
-</ul>
-<a name="checkAndConductTermination--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>checkAndConductTermination</h4>
-<pre>protected&nbsp;void&nbsp;checkAndConductTermination()
-                                   throws java.util.concurrent.TimeoutException,
-                                          jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                          java.lang.InterruptedException</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>checkAndConductTermination</code>&nbsp;in class&nbsp;<code>jaicore.basic.algorithm.AAlgorithm&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">I</a> extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>&gt;,<a href="../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">A</a>,<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">V</a> extends java.lang.Comparable&lt;<a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="type parameter in AOptimalPathInORGraphSearch">V</a>&gt;&gt;&gt;</code></dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
-<dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.lang.InterruptedException</code></dd>
 </dl>
 </li>
 </ul>

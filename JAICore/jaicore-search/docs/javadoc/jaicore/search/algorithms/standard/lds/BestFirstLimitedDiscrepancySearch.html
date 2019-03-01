@@ -138,7 +138,8 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public class <span class="typeNameLabel">BestFirstLimitedDiscrepancySearch&lt;T,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
 extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;T,A&gt;,T,A,V&gt;</pre>
-<div class="block">This class conducts a limited discrepancy search by running a best first algorithm with list-based node evaluations Since the f-values are lists too, we do not simply extend BestFirst but rather forward all commands to it</div>
+<div class="block">This class conducts a limited discrepancy search by running a best first algorithm with list-based node evaluations.
+ Since the f-values are lists too, we do not simply extend BestFirst but rather forward all commands to it.</div>
 </li>
 </ul>
 </div>
@@ -204,7 +205,7 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a></h3>
-<code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#checkAndConductTermination--">checkAndConductTermination</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getGraphGenerator--">getGraphGenerator</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#registerSolution-jaicore.search.model.other.EvaluatedSearchGraphPath-">registerSolution</a></code></li>
+<code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getGraphGenerator--">getGraphGenerator</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#registerSolution-jaicore.search.model.other.EvaluatedSearchGraphPath-">registerSolution</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.AOptimizer">
@@ -225,7 +226,7 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, setConfig, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, checkAndConductTermination, computeTimeoutAware, getActivationTime, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, setConfig, setMaxNumThreads, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -239,7 +240,7 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, setTimeout, setTimeout</code></li>
+<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, setMaxNumThreads, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
