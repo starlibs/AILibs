@@ -29,7 +29,7 @@ import weka.core.Instances;
 public class MLPlanARFFExample {
 
 	public static void main(final String[] args) throws Exception {
-		
+
 		/* load data for segment dataset and create a train-test-split */
 		File file = new File("testrsc/car.arff");
 		Instances data = new Instances(new FileReader(file));
