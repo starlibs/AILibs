@@ -131,6 +131,17 @@
 <!--   -->
 </a>
 <h3>Class <a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">jaicore.basic.algorithm.AlgorithmExecutionCanceledException</a> extends java.lang.Exception implements Serializable</h3>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>delay</h4>
+<pre>long delay</pre>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -142,17 +153,17 @@
 </a>
 <h3>Class <a href="jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.AlgorithmException</a> extends java.lang.Exception implements Serializable</h3>
 </li>
-<li class="blockList"><a name="jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException">
+<li class="blockList"><a name="jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException">
 <!--   -->
 </a>
-<h3>Class <a href="jaicore/basic/algorithm/exceptions/DelayedCancellationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException</a> extends <a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTerminationCheckException</a> implements Serializable</h3>
+<h3>Class <a href="jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</a> extends java.util.concurrent.TimeoutException implements Serializable</h3>
 <ul class="blockList">
 <li class="blockList">
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockListLast">
-<h4>exception</h4>
-<pre><a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a> exception</pre>
+<h4>delay</h4>
+<pre>long delay</pre>
 </li>
 </ul>
 </li>
@@ -169,22 +180,6 @@
 <li class="blockListLast">
 <h4>delay</h4>
 <pre>long delay</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException">
-<!--   -->
-</a>
-<h3>Class <a href="jaicore/basic/algorithm/exceptions/DelayedTimeoutCheckException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException</a> extends <a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTerminationCheckException</a> implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>exception</h4>
-<pre>java.util.concurrent.TimeoutException exception</pre>
 </li>
 </ul>
 </li>
