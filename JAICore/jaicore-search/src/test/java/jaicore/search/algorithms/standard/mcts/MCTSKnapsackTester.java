@@ -4,8 +4,8 @@ import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import jaicore.search.testproblems.knapsack.KnapsackNode;
 import jaicore.search.testproblems.knapsack.KnapsackProblem;
-import jaicore.search.testproblems.knapsack.KnapsackProblem.KnapsackNode;
 import jaicore.search.testproblems.knapsack.KnapsackTester;
 import jaicore.search.testproblems.knapsack.KnapsackToGraphSearchProblemInputReducer;
 
@@ -20,6 +20,7 @@ public class MCTSKnapsackTester extends KnapsackTester<GraphSearchWithPathEvalua
 	public IGraphSearchFactory<GraphSearchWithPathEvaluationsInput<KnapsackNode, String, Double>, EvaluatedSearchGraphPath<KnapsackNode, String, Double>, KnapsackNode, String> getFactory() {
 		UCTFactory<KnapsackNode, String> factory = new UCTFactory<>();
 		factory.setEvaluationFailurePenalty(0.0);
+		factory.setForbidDoublePaths(true);
 		return factory;
 	}
 

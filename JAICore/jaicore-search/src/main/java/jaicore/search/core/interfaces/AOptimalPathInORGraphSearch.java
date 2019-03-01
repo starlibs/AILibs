@@ -10,8 +10,6 @@ import jaicore.basic.algorithm.AOptimizer;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
@@ -63,18 +61,6 @@ public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<N, 
 	@Override
 	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
-	}
-	
-	protected void checkAndConductTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
-		try {
-			super.checkAndConductTermination();
-		} catch (DelayedTimeoutCheckException e) {
-			e.printStackTrace();
-			throw e.getException();
-		} catch (DelayedCancellationCheckException e) {
-			e.printStackTrace();
-			throw e.getException();
-		}
 	}
 
 	@Override

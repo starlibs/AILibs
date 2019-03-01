@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
+import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -117,8 +117,9 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	 * @throws InterruptedException
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws TimeoutException
+	 * @throws AlgorithmException 
 	 */
-	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		this.logger.debug("Computing a new playout ...");
 		N current = this.root;
 		N next;
@@ -156,6 +157,10 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			/* if every applicable action is known to yield a dead-end, mark this node to be a dead-end itself and return */
 			if (availableActions.isEmpty()) {
 				this.logger.debug("Node {} has only dead-end successors and hence is a dead-end itself. Adding it to the list of dead ends.", current);
+				if (current == exploredGraph.getRoot()) {
+					this.logger.info("No more action available in root node. Returning null.");
+					throw new NoSuchElementException();
+				}
 				this.deadLeafNodes.add(current);
 				return getPlayout();
 			}
@@ -260,7 +265,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			this.post(new NodeTypeSwitchEvent<N>(getId(), node, fullyExploredNodes.contains(node) ? "or_exhausted" : "or_closed"));
 		}
 	}
-	
+
 	/**
 	 * This method does NOT change the state of nodes via an event since it is assumed that closePath will be called later and assumes this task.
 	 * 
@@ -270,12 +275,13 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		if (fullyExploredNodes.containsAll(exploredGraph.getSuccessors(node))) {
 			fullyExploredNodes.add(node);
 			assert exploredGraph.getPredecessors(node).size() <= 1;
-			N parent = exploredGraph.getPredecessors(node).iterator().next();
-			propagateFullyKnownNodes(parent);
+			if (exploredGraph.getPredecessors(node).isEmpty())
+				return;
+			propagateFullyKnownNodes(exploredGraph.getPredecessors(node).iterator().next());
 		}
 	}
 
-	private Map<A, N> expandNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	private Map<A, N> expandNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		this.logger.debug("Starting expansion of node {}", node);
 		this.checkAndConductTermination();
 		if (!this.unexpandedNodes.contains(node)) {
@@ -283,14 +289,9 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		}
 		this.logger.trace("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
 		this.unexpandedNodes.remove(node);
-		Collection<NodeExpansionDescription<N, A>> availableActions = null;
-		try {
-			availableActions = this.successorGenerator.generateSuccessors(node);
-			assert availableActions.stream().map(n -> n.getAction()).collect(Collectors.toList()).size() == availableActions.stream().map(n -> n.getAction()).collect(Collectors.toSet())
-					.size() : "The actions under this node don't have unique names";
-		} catch (InterruptedException e) {
-			this.checkAndConductTermination();
-		}
+		Collection<NodeExpansionDescription<N, A>> availableActions = computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node));
+		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(n -> n.getAction()).collect(Collectors.toSet())
+				.size() : "The actions under this node don't have unique names";
 		Map<A, N> successorStates = new HashMap<>();
 		for (NodeExpansionDescription<N, A> d : availableActions) {
 			this.checkAndConductTermination();
@@ -335,11 +336,11 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, CancellationException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, TimeoutException {
 		switch (this.getState()) {
 		case created:
 			this.post(new GraphInitializedEvent<N>(getId(), this.root));
-			logger.info("Starting MCTS with node class {} and edge (action) class {}", this.root.getClass().getName());
+			logger.info("Starting MCTS with node class {}", this.root.getClass().getName());
 			return activate();
 
 		case active:
@@ -360,7 +361,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 						/* compute a playout and, if the path is a solution, compute its score and update the path */
 						this.logger.debug("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
 						List<N> path = this.getPlayout();
-						assert path != null : "Paths must never be null!";
+						assert path != null : "The playout must never be null!";
 						if (!this.scoreCache.containsKey(path)) {
 							this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
 							try {
@@ -370,8 +371,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 								this.scoreCache.put(path, playoutScore);
 								this.treePolicy.updatePath(path, playoutScore);
 								if (isSolutionPlayout) {
-									AlgorithmEvent solutionEvent = this.registerSolution(new EvaluatedSearchGraphPath<>(path, getActionListForPath(path), playoutScore));
-									return solutionEvent;
+									return this.registerSolution(new EvaluatedSearchGraphPath<>(path, getActionListForPath(path), playoutScore));
 								}
 							} catch (InterruptedException e) { // don't forward this directly since this could come indirectly through a cancel. Rather invoke checkTermination
 								Thread.interrupted(); // reset interrupt field
@@ -381,9 +381,8 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 								this.scoreCache.put(path, penaltyForFailedEvaluation);
 								post(new NodeTypeSwitchEvent<>(getId(), path.get(path.size() - 1), "or_ffail"));
 								this.treePolicy.updatePath(path, penaltyForFailedEvaluation);
-								this.logger.warn("Could not evaluate playout " + e.toString());
-							}
-							finally {
+								this.logger.warn("Could not evaluate playout {}", e);
+							} finally {
 								closePath(path); // visualize that path rollout has been completed
 							}
 						} else {
@@ -395,14 +394,14 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 							closePath(path); // visualize that path rollout has been completed
 						}
 					}
-
 				}
-			} catch (TimeoutException e) {
-				this.unregisterThreadAndShutdown();
-				Thread.interrupted(); // unset interrupted flag
-				this.logger.info("Finishing MCTS due to timeout.");
+			} catch (NoSuchElementException e) {
+				this.logger.info("No more playouts exist. Terminating.");
 				return terminate();
 			}
+
+			/* the algorithm should never come here */
+			throw new IllegalStateException("The algorithm has reached the end of the active-block, which shall never happen.");
 
 		default:
 			throw new UnsupportedOperationException("Cannot do anything in state " + this.getState());
@@ -430,10 +429,21 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
+		
+		/* set logger of graph generator */
+		if (graphGenerator instanceof ILoggingCustomizable) {
+			logger.info("Setting logger of graph generator to {}.graphgenerator", name);
+			((ILoggingCustomizable) graphGenerator).setLoggerName(name + ".graphgenerator");
+		} else {
+			logger.info("Not setting logger of graph generator");
+		}
+		
+		/* set logger of tree policy */
 		if (treePolicy instanceof ILoggingCustomizable) {
-			logger.info("Setting logger of tree policy to {}", name + ".treepolicy");
+			logger.info("Setting logger of tree policy to {}.treepolicy", name);
 			((ILoggingCustomizable) treePolicy).setLoggerName(name + ".treepolicy");
-		} else
+		} else {
 			logger.info("Not setting logger of tree policy");
+		}
 	}
 }

@@ -21,6 +21,7 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 /**
  *
@@ -196,7 +197,12 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 			assert false : ("Algorithm terminated without exception but with regular output: " + output);
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
+				AlgorithmExecutionCanceledException ex = (AlgorithmExecutionCanceledException)e.getCause();
 				cancellationExceptionSeen = true;
+				if (ex.getDelay() > 500) {
+					logger.error("The algorithm has sent an AlgorithmExceutionCanceledException, which is correct, but the cancel was triggered with a delay of {}ms, which exceeds the allowed time of 500ms.", ex.getDelay());
+					throw e;
+				}
 			}
 			else {
 				throw e;
@@ -205,6 +211,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 			timeoutTriggered = true;
 		}
 		int runtime = (int) (System.currentTimeMillis() - start);
+		assertFalse("Thread must not be interrupted after cancel!", Thread.currentThread().isInterrupted());
 		logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", timeoutTriggered);
@@ -239,8 +246,13 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 			O output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
 			assert false : ("Algorithm terminated without exception but with regular output: " + output);
 		} catch (ExecutionException e) {
-			if (e.getCause() instanceof TimeoutException) {
+			if (e.getCause() instanceof AlgorithmTimeoutedException) {
 				timeoutedExceptionSeen = true;
+				AlgorithmTimeoutedException ex = (AlgorithmTimeoutedException)e.getCause();
+				if (ex.getDelay() > 500) {
+					logger.error("The algorithm has sent a TimeoutException, which is correct, but the timeout was triggered with a delay of {}ms, which exceeds the allowed time of 500ms.", ex.getDelay());
+					throw e;
+				}
 			}
 			else {
 				throw e;
@@ -250,6 +262,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
+		assertFalse("Thread must not be interrupted after timeout!", Thread.currentThread().isInterrupted());
 		logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.", timeoutTriggered);

@@ -24,8 +24,6 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.ea.algorithm.AEvolutionaryAlgorithm;
 import jaicore.ea.algorithm.moea.moeaframework.event.MOEAFrameworkAlgorithmResultEvent;
 import jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
@@ -43,13 +41,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		try {
-			this.checkAndConductTermination();
-		} catch (DelayedTimeoutCheckException e) {
-			e.printStackTrace();
-		} catch (DelayedCancellationCheckException e) {
-			throw new TimeoutException(e.getMessage());
-		}
+		this.checkAndConductTermination();
 
 		if (this.getClass().getName().equals("ndea.core.simplend.nd.NDOptimizationEA")) {
 			System.out.println(this.getClass().getName() + " step1: " + this.getState());

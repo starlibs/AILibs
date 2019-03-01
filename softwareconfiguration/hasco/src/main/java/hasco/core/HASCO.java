@@ -31,8 +31,6 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
@@ -126,15 +124,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 
 		/* check on termination */
 		this.logger.trace("Conducting next step in {}.", this.getId());
-		try {
-			this.checkAndConductTermination();
-		} catch (DelayedTimeoutCheckException e) {
-			this.logger.warn("Delayed timeout exception has been thrown", e);
-			throw new TimeoutException(e.getException().getMessage());
-		} catch (DelayedCancellationCheckException e) {
-			this.logger.warn("HASCO was cancelled with significant delay.", e);
-			throw new AlgorithmExecutionCanceledException();
-		}
+		this.checkAndConductTermination();
 		this.logger.trace("No stop criteria have caused HASCO to stop up to now. Proceeding ...");
 
 		/* act depending on state */

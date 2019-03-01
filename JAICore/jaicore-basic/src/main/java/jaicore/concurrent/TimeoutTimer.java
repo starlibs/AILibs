@@ -1,24 +1,23 @@
 package jaicore.concurrent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TimeoutTimer {
+public class TimeoutTimer extends Timer {
 	private final static Logger logger = LoggerFactory.getLogger(TimeoutTimer.class);
 	private final static TimeoutTimer instance = new TimeoutTimer();
-	private Timer timer = null;
 	private final List<TimeoutSubmitter> emittedSubmitters = new ArrayList<>();
-	private final Map<Integer, TimerTask> tasks = new HashMap<>();
+	private final ConcurrentHashMap<Integer, TimerTask> tasks = new ConcurrentHashMap<>();
 
 	private TimeoutTimer() {
+		super(true);
 	}
 
 	public static TimeoutTimer getInstance() {
@@ -33,12 +32,6 @@ public class TimeoutTimer {
 	@Override
 	public String toString() {
 		return this.tasks.toString();
-	}
-
-	public void stop() {
-		if (this.timer != null) {
-			this.timer.cancel();
-		}
 	}
 
 	public class TimeoutSubmitter {
@@ -104,11 +97,7 @@ public class TimeoutTimer {
 				if (!TimeoutTimer.this.emittedSubmitters.contains(this)) {
 					throw new IllegalStateException("Cannot submit interrupt job to submitter " + this + " since it has already been closed!");
 				}
-				if (TimeoutTimer.this.timer == null) {
-					TimeoutTimer.this.timer = new Timer(TimeoutTimer.class.getName() + " - Timer", true);
-					logger.info("Created new timer");
-				}
-				TimeoutTimer.this.timer.schedule(task, delay);
+				TimeoutTimer.this.schedule(task, delay);
 
 				/* create id for job and return it */
 				int id;
@@ -124,10 +113,6 @@ public class TimeoutTimer {
 		public void close() {
 			synchronized (instance) {
 				TimeoutTimer.this.emittedSubmitters.remove(this);
-				if (TimeoutTimer.this.timer != null && TimeoutTimer.this.emittedSubmitters.isEmpty()) {
-					TimeoutTimer.this.timer.cancel();
-					TimeoutTimer.this.timer = null;
-				}
 				logger.info("Canceled timer");
 			}
 		}
