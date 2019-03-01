@@ -34,8 +34,6 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -172,15 +170,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 			/* phase 2: select model */
 			this.logger.info("Entering phase 2");
-			try {
-				checkAndConductTermination();
-			} catch (DelayedTimeoutCheckException e) {
-				this.logger.warn("Timeout was detected with a delay of {}", e.getDelay());
-				throw e.getException();
-			} catch (DelayedCancellationCheckException e) {
-				this.logger.warn("Cancel was detected with a delay of {}", e.getDelay());
-				throw e.getException();
-			}
+			checkAndConductTermination();
 			this.selectedHASCOSolution = this.selectModel();
 			this.updateBestSeenSolution(this.selectedHASCOSolution);
 			return this.terminate();
