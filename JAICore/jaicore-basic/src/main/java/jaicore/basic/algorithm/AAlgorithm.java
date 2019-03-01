@@ -113,6 +113,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public void setNumCPUs(final int numberOfCPUs) {
 		this.getConfig().setProperty(IAlgorithmConfig.K_CPUS, numberOfCPUs + "");
 	}
+	
+	@Override
+	public void setMaxNumThreads(int maxNumberOfThreads) {
+		this.getConfig().setProperty(IAlgorithmConfig.K_THREADS, maxNumberOfThreads + "");
+	}
 
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
@@ -182,10 +187,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			logger.debug("Throwing TimeoutException");
 			TimeoutException e = new TimeoutException();
 			if (this.timeOfTimeoutDetection - this.deadline > 500) {
-				throw new DelayedTimeoutCheckException(e, this.timeOfTimeoutDetection - this.deadline);
-			} else {
-				throw e;
+				logger.warn("Timeout was triggered with a delay of {}ms.", this.timeOfTimeoutDetection - this.deadline);
 			}
+			throw e;
 		}
 		if (this.isCanceled()) {
 			this.logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this.getId());
@@ -262,6 +266,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void unregisterActiveThread() {
 		logger.trace("Unregistering current thread {}", Thread.currentThread());
 		this.activeThreads.remove(Thread.currentThread());
+	}
+
+	public long getActivationTime() {
+		return activationTime;
 	}
 
 	/**
