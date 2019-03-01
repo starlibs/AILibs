@@ -11,13 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TimeoutTimer extends Timer {
-	private final static Logger logger = LoggerFactory.getLogger(TimeoutTimer.class);
-	private final static TimeoutTimer instance = new TimeoutTimer();
+	private static final Logger logger = LoggerFactory.getLogger(TimeoutTimer.class);
+	private static final TimeoutTimer instance = new TimeoutTimer();
 	private final List<TimeoutSubmitter> emittedSubmitters = new ArrayList<>();
 	private final ConcurrentHashMap<Integer, TimerTask> tasks = new ConcurrentHashMap<>();
 
 	private TimeoutTimer() {
-		super(true);
+		super("Global TimeoutTimer", true);
 	}
 
 	public static TimeoutTimer getInstance() {
@@ -25,8 +25,12 @@ public class TimeoutTimer extends Timer {
 	}
 
 	public TimeoutSubmitter getSubmitter() {
-		TimeoutSubmitter submitter = new TimeoutSubmitter();
-		return submitter;
+		return new TimeoutSubmitter();
+	}
+
+	@Override
+	public void cancel() {
+		throw new UnsupportedOperationException("The TimeoutTimer must not be canceled manually!");
 	}
 
 	@Override
@@ -45,22 +49,22 @@ public class TimeoutTimer extends Timer {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay);
 		}
-		
-		public int interruptMeAfterMS(final long delay, Runnable preInterruptionHook) {
+
+		public int interruptMeAfterMS(final long delay, final Runnable preInterruptionHook) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay, preInterruptionHook);
 		}
-		
+
 		public int interruptThreadAfterMS(final Thread thread, final long delay) {
-			return interruptThreadAfterMS(thread, delay, null);
+			return this.interruptThreadAfterMS(thread, delay, null);
 		}
 
-		public int interruptThreadAfterMS(final Thread thread, final long delay, Runnable preInterruptionHook) {
+		public int interruptThreadAfterMS(final Thread thread, final long delay, final Runnable preInterruptionHook) {
 			return this.scheduleTask(new TimerTask() {
 				@Override
 				public void run() {
 					final TimerTask thisTask = this;
-					int taskId = tasks.keySet().stream().filter(id -> tasks.get(id) == thisTask).findFirst().get();
+					int taskId = TimeoutTimer.this.tasks.keySet().stream().filter(id -> TimeoutTimer.this.tasks.get(id) == thisTask).findFirst().get();
 					logger.info("Job {} for interruption of {} after delay of {}ms triggered.", taskId, thread, delay);
 					if (preInterruptionHook != null) {
 						logger.debug("Job {} now invokes pre-interruption.", taskId);

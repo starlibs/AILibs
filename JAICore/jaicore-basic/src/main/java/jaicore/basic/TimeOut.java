@@ -41,4 +41,33 @@ public class TimeOut {
 		return this.milliseconds() + "ms";
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (this.duration ^ (this.duration >>> 32));
+		result = prime * result + ((this.unit == null) ? 0 : this.unit.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		TimeOut other = (TimeOut) obj;
+		if (this.duration != other.duration) {
+			return false;
+		}
+		if (this.unit != other.unit) {
+			return false;
+		}
+		return true;
+	}
 }

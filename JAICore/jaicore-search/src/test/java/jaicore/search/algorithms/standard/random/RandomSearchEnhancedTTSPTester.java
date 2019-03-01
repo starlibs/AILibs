@@ -12,7 +12,7 @@ import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPTester;
 
 public class RandomSearchEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>> {
 
-	
+
 
 	@Override
 	public IGraphSearchFactory<GraphSearchInput<EnhancedTTSPNode, String>, SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String> getFactory() {
@@ -24,25 +24,30 @@ public class RandomSearchEnhancedTTSPTester extends EnhancedTTSPTester<GraphSear
 		return new AlgorithmProblemTransformer<EnhancedTTSP, GraphSearchInput<EnhancedTTSPNode,String>>() {
 
 			@Override
-			public GraphSearchInput<EnhancedTTSPNode, String> transform(EnhancedTTSP problem) {
+			public GraphSearchInput<EnhancedTTSPNode, String> transform(final EnhancedTTSP problem) {
 				return new GraphSearchInput<>(problem.getGraphGenerator());
 			}
 		};
 	}
 
+	@Override
 	@Test
 	public void testQuickTimeout() throws Exception {
-		
+
+		/* we cannot create sufficiently difficult instances of this problem in general for this algorithm to require at least 5 seconds */
 	}
-	
+
+	@Override
 	@Test
 	public void testCancel() throws Exception {
-		
+
+		/* we cannot create sufficiently difficult instances of this problem in general for this algorithm to require at least 5 seconds */
 	}
-	
+
+	@Override
 	@Test
 	public void testInterrupt() throws Exception {
-		
+
 		/* we cannot create sufficiently difficult instances of this problem in general for this algorithm to require at least 5 seconds */
 	}
 }
