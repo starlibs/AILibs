@@ -38,7 +38,6 @@ import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
-import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
@@ -247,7 +246,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 			throw new IllegalArgumentException(
 					"Can only make prediction for dyad ranking instances using the Plackett-Luce net dyad ranker!");
 		}
-		DyadRankingInstance drInstance = (DyadRankingInstance) instance;
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
