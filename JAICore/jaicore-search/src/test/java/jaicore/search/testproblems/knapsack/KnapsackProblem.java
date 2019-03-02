@@ -83,4 +83,9 @@ public class KnapsackProblem implements Serializable {
 	public Map<Set<String>, Double> getBonusPoints() {
 		return bonusPoints;
 	}
+
+	@Override
+	public String toString() {
+		return "KnapsackProblem [objects=" + objects + ", values=" + values + ", weights=" + weights + ", bonusPoints=" + bonusPoints + ", knapsackCapacity=" + knapsackCapacity + "]";
+	}
 }

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -45,8 +46,11 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 
 			private List<String> getPossiblePackingObjects(KnapsackNode n) {
 				List<String> possibleObjects = new ArrayList<>();
+				Optional<String> objectWithHighestName = n.getPackedObjects().stream().max((o1,o2) -> o1.compareTo(o2));
+//				if (objectWithHighestName.isPresent())
+//				System.out.println(objectWithHighestName.get());
 				for (String object : n.getRemainingObjects()) {
-					if (n.getUsedCapacity() + problem.getWeights().get(object) <= problem.getKnapsackCapacity()) {
+					if ((!objectWithHighestName.isPresent() || objectWithHighestName.get().compareTo(object) <= 0) && n.getUsedCapacity() + problem.getWeights().get(object) <= problem.getKnapsackCapacity()) {
 						possibleObjects.add(object);
 					}
 				}

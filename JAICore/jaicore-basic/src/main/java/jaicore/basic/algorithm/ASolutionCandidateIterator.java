@@ -18,7 +18,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
  * @param <I>
  * @param <O>
  */
-public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> implements ISolutionCandidateIterator<O> {
+public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> implements ISolutionCandidateIterator<I, O> {
 
 	public ASolutionCandidateIterator(final I input) {
 		super(input);

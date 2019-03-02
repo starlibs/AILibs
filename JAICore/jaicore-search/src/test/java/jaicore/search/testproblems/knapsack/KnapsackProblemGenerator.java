@@ -10,6 +10,7 @@ public class KnapsackProblemGenerator {
 	public static KnapsackProblem getKnapsackProblem(int numObjects) {
 		return getKnapsackProblem(numObjects, 0);
 	}
+	
 	public static KnapsackProblem getKnapsackProblem(int numObjects, int seed) {
 		
 		/* create knapsack problem */

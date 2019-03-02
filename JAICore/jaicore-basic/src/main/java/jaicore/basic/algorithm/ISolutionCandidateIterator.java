@@ -5,7 +5,7 @@ import java.util.concurrent.TimeoutException;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 
-public interface ISolutionCandidateIterator<O> {
+public interface ISolutionCandidateIterator<I, O> extends IAlgorithm<I, O> {
 	public O nextSolutionCandidate() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException;
 	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException;
 }

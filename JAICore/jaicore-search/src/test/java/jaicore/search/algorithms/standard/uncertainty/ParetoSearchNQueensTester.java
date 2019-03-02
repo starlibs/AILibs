@@ -5,11 +5,11 @@ import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.
 import jaicore.search.core.interfaces.IGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
-import jaicore.search.testproblems.nqueens.NQueenTester;
+import jaicore.search.testproblems.nqueens.NQueenProblemSet;
 import jaicore.search.testproblems.nqueens.NQueensToUncertainlyEvaluatedTravesalTreeReducer;
 import jaicore.search.testproblems.nqueens.QueenNode;
 
-public class ParetoSearchNQueensTester extends NQueenTester<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<QueenNode,String,Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>> {
+public class ParetoSearchNQueensTester extends NQueenProblemSet<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<QueenNode,String,Double>, EvaluatedSearchGraphPath<QueenNode, String, Double>> {
 
 	@Override
 	public AlgorithmProblemTransformer<Integer, GraphSearchWithUncertaintyBasedSubpathEvaluationInput<QueenNode, String, Double>> getProblemReducer() {

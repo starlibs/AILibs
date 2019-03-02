@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.HomogeneousGeneralAlgorithmTester;
+import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 
-public class LDSRelationComputerTester extends HomogeneousGeneralAlgorithmTester<RelationComputationProblem<Integer>, List<List<Integer>>> {
+public class LDSRelationComputerTester extends GeneralAlgorithmTester {
 
 	@Test
 	public void testOutputSizeForCartesianProducts() throws Exception {

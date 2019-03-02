@@ -7,10 +7,10 @@ import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSP;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPNode;
-import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPTester;
+import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPProblemSet;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer;
 
-public class TwoPhaseEnhancedTTSPTester extends EnhancedTTSPTester<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>> {
+public class TwoPhaseEnhancedTTSPTester extends EnhancedTTSPProblemSet<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>> {
 	
 	@Override
 	public IGraphSearchFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, EnhancedTTSPNode, String> getFactory() {
