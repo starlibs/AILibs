@@ -15,10 +15,12 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.features.TimeSeriesFeature;
+import jaicore.ml.tsc.util.MathUtil;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.trees.RandomForest;
 
@@ -64,6 +66,10 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 					"Only univariate data is used for training (matrix index 0), although multivariate data is available.");
 
 		double[][] data = dataset.getValuesOrNull(0);
+		int[] targets = dataset.getTargets();
+		
+		// TODO: Get num classes
+		int C = 0;
 
 		// TODO Standardize each time series to zero mean and unit standard deviation (z
 		// transformation)
@@ -107,29 +113,123 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 
 		// TODO Generate class probability estimate (CPE) for each instance using a
 		// classifier
-		RandomForest[] forests = new RandomForest[r - d];
+		RandomForest rf = new RandomForest();
+		double[][] subSeqValueMatrix = new double[(r - d) * data.length][d * 3];
+		int[] targetMatrix = new int[(r - d) * data.length];
+
 		for (int i = 0; i < r - d; i++) {
-
-			double[][] subSeqValueMatrix = new double[data.length][d * 3];
-			int[] targetMatrix = new int[data.length];
-			for (int j = 0; j < r - d; j++) {
-
+			
+			for (int j = 0; j < data.length; j++) {
+				double[] intervalFeatures = new double[d*3];
+				for(int k=0; k<d; k++) {
+					intervalFeatures[k * d] = generatedFeatures[j][i][k][0];
+					intervalFeatures[k * d + 1] = generatedFeatures[j][i][k][1]; 
+					intervalFeatures[k * d + 2] = generatedFeatures[j][i][k][2]; 
+				}
+				subSeqValueMatrix[i * data.length + j] = intervalFeatures;
+				
+				targetMatrix[i * data.length + j] = targets[j];
 			}
-			ArrayList<double[][]> valueMatrices = new ArrayList<>();
-			valueMatrices.add(subSeqValueMatrix);
-			TimeSeriesDataset subSeqDataset = new TimeSeriesDataset(valueMatrices, targetMatrix);
+		}
+		ArrayList<double[][]> valueMatrices = new ArrayList<>();
+		valueMatrices.add(subSeqValueMatrix);
+		TimeSeriesDataset subSeqDataset = new TimeSeriesDataset(valueMatrices, targetMatrix);
 
-			forests[i] = new RandomForest();
-			try {
-				WekaUtil.buildWekaClassifierFromSimplifiedTS(forests[i], subSeqDataset);
-			} catch (TrainingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			WekaUtil.buildWekaClassifierFromSimplifiedTS(rf, subSeqDataset);
+		} catch (TrainingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		double[][] probs = new double[(r - d) * data.length][C];
+		// rf.measureOutOfBagError()
+		// TODO: Measure OOB probabilities
 
+		// TODO: Discretize probability and form histogram
+		int[][] discretizedProbs = discretizeProbs(numBins, probs);
+
+		// TODO: Form histogram
+		Pair<int[][][], int[][]> histFreqPair = formHistogramsAndRelativeFreqs(discretizedProbs, targets, data.length,
+				C, numBins);
+		int[][][] histograms = histFreqPair.getX();
+		int[][] relativeFrequencies = histFreqPair.getY();
+
+		// TODO: Build final classifier
+		double[][] finalInstances = generateHistogramInstances(histograms, relativeFrequencies);
+		ArrayList<double[][]> finalMatrices = new ArrayList<>();
+		finalMatrices.add(finalInstances);
+
+		TimeSeriesDataset finalDataset = new TimeSeriesDataset(finalMatrices, targets);
+		RandomForest finalRf = new RandomForest();
+		try {
+			WekaUtil.buildWekaClassifierFromSimplifiedTS(finalRf, finalDataset);
+		} catch (TrainingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return null;
+	}
+
+	public static double[][] generateHistogramInstances(final int[][][] histograms,
+			final int[][] relativeFreqsOfClasses) {
+		int featureLength = histograms[0].length * histograms[1].length + relativeFreqsOfClasses[0].length;
+		final double[][] results = new double[histograms.length][featureLength];
+
+		for (int i = 0; i < results.length; i++) {
+			double[] instFeatures = new double[featureLength];
+			int featureIdx = 0;
+			for (int j = 0; j < histograms[i].length; j++) {
+				for (int k = 0; k < histograms[i][j].length; k++) {
+					instFeatures[featureIdx++] = histograms[i][j][k];
+				}
+			}
+
+			for (int j = 0; j < relativeFreqsOfClasses[i].length; j++) {
+				instFeatures[featureIdx++] = relativeFreqsOfClasses[i][j];
+			}
+		}
+
+		return results;
+	}
+
+	public static Pair<int[][][], int[][]> formHistogramsAndRelativeFreqs(final int[][] discretizedProbs,
+			final int[] targets, final int numInstances,
+			final int numClasses,
+			final int numBins) {
+		final int[][][] histograms = new int[numInstances][numClasses][numBins];
+		final int[][] relativeFrequencies = new int[numInstances][numClasses];
+
+		for (int i = 0; i < discretizedProbs.length; i++) {
+			// Index of the instance
+			int instanceIdx = (int) (i / numInstances);
+			// int instanceClass = targets[instanceIdx];
+			for (int c = 0; c < numClasses; c++) {
+				int bin = discretizedProbs[i][c];
+				histograms[instanceIdx][c][bin]++;
+			}
+			
+			int predClass = MathUtil.argmax(discretizedProbs[i]);
+			relativeFrequencies[instanceIdx][predClass]++;
+		}
+
+		return new Pair<int[][][], int[][]>(histograms, relativeFrequencies);
+	}
+
+	public static int[][] discretizeProbs(final int numBins, final double[][] probs) {
+		int[][] results = new int[probs.length][probs[0].length];
+		
+		final double steps = 1 / numBins;
+
+		for (int i = 0; i < results.length; i++) {
+			int[] discretizedProbs = new int[probs[i].length];
+			for (int j = 0; j < discretizedProbs.length; j++) {
+				discretizedProbs[j] = (int) (probs[i][j] / steps);
+			}
+			results[i] = discretizedProbs;
+		}
+
+		return results;
 	}
 
 	/**

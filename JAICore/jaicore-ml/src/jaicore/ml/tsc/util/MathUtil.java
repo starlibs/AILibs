@@ -156,4 +156,27 @@ public class MathUtil {
 		if (t2 < t1)
 			throw new IllegalArgumentException("End index t2 of the interval must be greater equals start index t1!");
 	}
+
+	/**
+	 * Calculates the index of the maximum value in the given <code>array</code>
+	 * (argmax).
+	 * 
+	 * @param array
+	 *            Array to be checked. Must not be null or empty
+	 * @return Returns the index of the maximum value
+	 */
+	public static int argmax(final int[] array) {
+		if (array == null || array.length == 0)
+			throw new IllegalArgumentException("Given parameter 'array' must not be null or empty for argmax.");
+
+		int maxValue = array[0];
+		int index = 0;
+		for (int i = 1; i < array.length; i++) {
+			if (array[i] > maxValue) {
+				maxValue = array[i];
+				index = i;
+			}
+		}
+		return index;
+	}
 }
