@@ -11,6 +11,7 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**
  * Implementation of a sampling method using kmeans-clustering. This algorithm

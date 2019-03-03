@@ -18,6 +18,7 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
 import jaicore.ml.core.dataset.standard.SimpleInstance;
 

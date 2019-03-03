@@ -8,7 +8,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.SampleElementAddedEvent;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.Logistic;

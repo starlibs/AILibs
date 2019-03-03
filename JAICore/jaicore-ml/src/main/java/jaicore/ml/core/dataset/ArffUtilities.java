@@ -70,4 +70,22 @@ public class ArffUtilities {
 		return result;
 	}
 
+	/**
+	 * Skips with a given reader all comment lines and the header lines of an ARFF
+	 * file until the first datapoint is reached.
+	 * 
+	 * @param reader Reader that should be skipped to the data.
+	 * @throws IOException Reader was not able to read the file.
+	 */
+	public static void skipWithReaderToDatapoints(BufferedReader reader) throws IOException {
+		String line;
+		while ((line = reader.readLine()) != null) {
+			if (line.trim().charAt(0) == '%') {
+				continue;
+			} else if (line.trim().equals("@data")) {
+				return;
+			}
+		}
+	}
+
 }

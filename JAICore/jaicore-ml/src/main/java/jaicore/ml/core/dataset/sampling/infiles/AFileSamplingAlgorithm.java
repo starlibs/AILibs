@@ -92,6 +92,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			}
 		}
 		try {
+			outputFileWriter.flush();
 			outputFileWriter.close();
 		} catch (IOException e) {
 			throw new AlgorithmException(e, "Could not close File writer for sampling output file");

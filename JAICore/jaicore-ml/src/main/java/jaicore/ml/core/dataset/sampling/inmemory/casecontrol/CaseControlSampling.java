@@ -3,7 +3,7 @@ package jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.HashMap;
 import java.util.Random;
 import jaicore.ml.core.dataset.*;
-import jaicore.ml.core.dataset.sampling.inmemory.SampleElementAddedEvent;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 

@@ -159,5 +159,9 @@ public class TempFileHandler implements Closeable {
 	public void close() throws IOException {
 		cleanUp();
 	}
+	
+	public String getTempFileDirPath() {
+		return this.tempFileDirectory.getAbsolutePath();
+	}
 
 }

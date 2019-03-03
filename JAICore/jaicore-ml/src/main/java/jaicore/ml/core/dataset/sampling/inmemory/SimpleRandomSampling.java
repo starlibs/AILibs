@@ -6,6 +6,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 

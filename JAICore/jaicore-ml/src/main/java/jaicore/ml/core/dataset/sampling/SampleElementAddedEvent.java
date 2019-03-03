@@ -1,4 +1,4 @@
-package jaicore.ml.core.dataset.sampling.inmemory;
+package jaicore.ml.core.dataset.sampling;
 
 import jaicore.basic.algorithm.events.AAlgorithmEvent;
 
