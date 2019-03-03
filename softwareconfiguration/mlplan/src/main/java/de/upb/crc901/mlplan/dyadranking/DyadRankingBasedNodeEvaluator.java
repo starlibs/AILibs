@@ -21,10 +21,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.apache.commons.collections.BidiMap;
+import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
+import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
+import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.ManualPatternMiner;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -34,6 +37,7 @@ import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.exception.PredictionException;
@@ -43,16 +47,20 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.evaluation.evaluators.weka.FixedSplitClassifierEvaluator;
 import jaicore.ml.metafeatures.LandmarkerCharacterizer;
-import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IGraphDependentNodeEvaluator;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomizedDepthFirstNodeEvaluator;
+import jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import weka.core.Instances;
 
 /**
@@ -70,9 +78,12 @@ import weka.core.Instances;
  *
  */
 public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
-		implements IGraphDependentNodeEvaluator<T, String, V> {
+		implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DyadRankingBasedNodeEvaluator.class);
+
+	/* Key is a path (hence, List<T>) value is a ComponentInstance */
+	private BidiMap pathToPipelines = new DualHashBidiMap();
 
 	/* Used to draw random completions for nodes that are not in the final state */
 	private RandomSearch<T, String> randomPathCompleter;
@@ -80,15 +91,22 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	/* The evaluator that can be used to get the performance of the paths */
 	private IObjectEvaluator<ComponentInstance, V> pipelineEvaluator;
 
+	/* Specifies the components of this MLPlan run. */
 	private Collection<Component> components;
+
 	/*
 	 * Specifies the amount of paths that are randomly completed for the computation
 	 * of the f-value
 	 */
 	private final int randomlyCompletedPaths;
 
+	/* The dataset of this MLPlan run. */
 	private Instances evaluationDataset;
 
+	/*
+	 * X in the paper, these are usually derived using landmarking algorithms on the
+	 * dataset
+	 */
 	private double[] datasetMetaFeatures;
 
 	/*
@@ -99,17 +117,50 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	/* The Random instance used to randomly complete the paths */
 	private final Random random;
 
+	/* The ranker to use for dyad ranking */
 	private PLNetDyadRanker dyadRanker = new PLNetDyadRanker();
 
-	private WEKAPipelineCharacterizer characterizer;
+	/* The characterizer to use to derive meta features for pipelines */
+	private IPipelineCharacterizer characterizer;
 
+	/* Only used if useLandmarkers is set to true */
+	/*
+	 * Defines how many evaluations for each of the landmarkers are performed, to
+	 * reduce variance
+	 */
 	private final int landmarkerSampleSize;
 
+	/* Only used if useLandmarkers is set to true */
+	/* Defines the size of the different landmarkers */
 	private final int[] landmarkers;
 
+	/* Only used if useLandmarkers is set to true */
+	/*
+	 * The concete lanmarker instances, this array has dimension landmakers.size
+	 * \cdot landmarkerSampleSize
+	 */
 	private Instances[][] landmarkerSets;
-	
+
+	/* Only used if useLandmarkers is set to true */
+	/*
+	 * Used to create landmarker values for pipelines where no such landmarker has
+	 * yet been evaluated.
+	 */
 	private ClassifierFactory classifierFactory;
+
+	/*
+	 * Defines if a landmarking based approach is used for defining the meta
+	 * features of the algorithm.
+	 */
+	private boolean useLandmarkers;
+
+	/*
+	 * Used to derive the time until a certain solution has been found, useful for
+	 * evaluations
+	 */
+	private Instant firstEvaluation = null;
+
+	private SolutionEventBus<T> eventBus;
 
 	public void setClassifierFactory(ClassifierFactory classifierFactory) {
 		this.classifierFactory = classifierFactory;
@@ -120,18 +171,22 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	public DyadRankingBasedNodeEvaluator(ComponentLoader loader, DyadRankingBasedNodeEvaluatorConfig config) {
+		this.eventBus = new SolutionEventBus<>();
 		this.components = loader.getComponents();
 		this.random = new Random(config.getSeed());
 		this.evaluatedPaths = config.getNumberOfEvaluations();
 		this.randomlyCompletedPaths = config.getNumberOfRandomSamples();
 
-		System.out.println("Initialized DyadRankingBasedNodeEvaluator with evalNum:" + evaluatedPaths
-				+ " and completionNum:" + randomlyCompletedPaths);
+		logger.debug("Initialized DyadRankingBasedNodeEvaluator with evalNum: {} and completionNum: {}",
+				randomlyCompletedPaths, evaluatedPaths);
 
-		this.characterizer = new WEKAPipelineCharacterizer(loader.getParamConfigs());
-		characterizer.buildFromFile();
+//		this.characterizer = new WEKAPipelineCharacterizer(loader.getParamConfigs());
+//		characterizer.buildFromFile();
+		this.characterizer = new ManualPatternMiner(loader.getComponents());
+		
 		this.landmarkers = config.getLandmarkers();
 		this.landmarkerSampleSize = config.getLandmarkerSampleSize();
+		this.useLandmarkers = config.useLandmarkers();
 
 		// load the dyadranker from the config
 		try {
@@ -143,7 +198,10 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	@Override
-	public V f(Node<T, ?> node) throws Exception {
+	public V f(Node<T, ?> node) {
+		if (firstEvaluation == null) {
+			this.firstEvaluation = Instant.now();
+		}
 		/* Let the random completer handle this use-case. */
 		if (node.isGoal()) {
 			return null;
@@ -155,25 +213,58 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 		if (!randomPathCompleter.knowsNode(node.getPoint())) {
 			synchronized (randomPathCompleter) {
-				randomPathCompleter.appendPathToNode(node.externalPath());
+				try {
+					randomPathCompleter.appendPathToNode(node.externalPath());
+				} catch (InterruptedException e) {
+					logger.error("Interrupted in path completion!");
+					Thread.currentThread().interrupt();
+					return null;
+				}
 			}
 		}
 		// draw N paths at random
-		List<T> randomPaths = getNRandomPaths(node);
+		List<List<T>> randomPaths = null;
+		try {
+			randomPaths = getNRandomPaths(node);
+		} catch (InterruptedException | TimeoutException e) {
+			logger.error("Interrupted in path completion!");
+			Thread.currentThread().interrupt();
+			return null;
+		}
 		// order them according to dyad ranking
 		List<ComponentInstance> allRankedPaths = getDyadRankedPaths(randomPaths);
 		// get the top k paths
 		List<ComponentInstance> topKRankedPaths = allRankedPaths.subList(0,
 				Math.min(evaluatedPaths, allRankedPaths.size()));
 		// evaluate the top k paths
-		List<Pair<ComponentInstance, V>> allEvaluatedPaths = evaluateTopKPaths(topKRankedPaths);
+		List<Pair<ComponentInstance, V>> allEvaluatedPaths = null;
+		try {
+			allEvaluatedPaths = evaluateTopKPaths(topKRankedPaths);
+		} catch (InterruptedException | TimeoutException e) {
+			logger.error("Interrupted while predicitng next best solution");
+			Thread.currentThread().interrupt();
+			return null;
+		} catch (ExecutionException e2) {
+			logger.error("Couldn't evaluate solution candidates- Returning null as FValue!.");
+			return null;
+		}
 		Duration evaluationTime = Duration.between(startOfEvaluation, Instant.now());
 		logger.info("Evaluation of node {} took {}ms", node.getPoint(), evaluationTime.toMillis());
 		return getBestSolution(allEvaluatedPaths);
 	}
 
-	private List<T> getNRandomPaths(Node<T, ?> node) throws InterruptedException, TimeoutException {
-		List<T> completedPaths = new ArrayList<>();
+	/**
+	 * Stolen from {@link RandomCompletionBasedNodeEvaluator}, maybe should refactor
+	 * this into a pattern.
+	 * 
+	 * @param node
+	 *            the starting node
+	 * @return the randomPaths, described by their final node
+	 * @throws InterruptedException
+	 * @throws TimeoutException
+	 */
+	private List<List<T>> getNRandomPaths(Node<T, ?> node) throws InterruptedException, TimeoutException {
+		List<List<T>> completedPaths = new ArrayList<>();
 		for (int currentPath = 0; currentPath < randomlyCompletedPaths; currentPath++) {
 			/*
 			 * complete the current path by the dfs-solution; we assume that this goes in
@@ -207,35 +298,45 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 				pathCompletion.remove(0);
 				completedPath.addAll(pathCompletion);
 			}
-			completedPaths.add(completedPath.get(completedPath.size() - 1));
+			completedPaths.add(completedPath);
 		}
 		return completedPaths;
 	}
 
-	private List<ComponentInstance> getDyadRankedPaths(List<T> randomPaths) {
+	private List<ComponentInstance> getDyadRankedPaths(List<List<T>> randomPaths) {
 		Map<Vector, ComponentInstance> pipelineToCharacterization = new HashMap<>();
 		// extract componentInstances that we can rank
-		for (T randomPath : randomPaths) {
-			TFDNode goalNode = (TFDNode) randomPath;
+		for (List<T> randomPath : randomPaths) {
+			TFDNode goalNode = (TFDNode) randomPath.get(randomPath.size() - 1);
 			ComponentInstance cI = Util.getSolutionCompositionFromState(components, goalNode.getState(), true);
+			pathToPipelines.put(randomPath, cI);
 			// fill the y with landmarkers
-			Vector y_prime = evaluateLandmarkersForAlgorithm(cI);
-			pipelineToCharacterization.put(y_prime, cI);
+			if (useLandmarkers) {
+				Vector y_prime = evaluateLandmarkersForAlgorithm(cI);
+				pipelineToCharacterization.put(y_prime, cI);
+			} else {
+				Vector y = new DenseDoubleVector(characterizer.characterize(cI));
+				pipelineToCharacterization.put(y, cI);
+			}
 		}
 		// invoke dyad ranker
 		return rankRandomPipelines(pipelineToCharacterization);
 	}
 
 	/**
-	 * Calculates the landmarkers for the given Pipeline
+	 * Calculates the landmarkers for the given Pipeline, if the value
+	 * {@link DyadRankingBasedNodeEvaluator#useLandmarkers} is set to
+	 * <code>true</code>.
 	 * 
 	 * @param y
 	 *            the pipeline characterization
 	 * @param cI
-	 * @return
+	 *            the pipeline to characterize
+	 * @return the meta features of the pipeline with appended landmarking features
 	 */
 	private Vector evaluateLandmarkersForAlgorithm(ComponentInstance cI) {
 		double[] y = characterizer.characterize(cI);
+
 		int sizeOfYPrime = characterizer.getLengthOfCharacrization() + landmarkers.length;
 		double[] y_prime = new double[sizeOfYPrime];
 		System.arraycopy(y, 0, y_prime, 0, y.length);
@@ -250,7 +351,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 					logger.error("Couldn't get classifier for {}", cI);
 				}
 			}
-			//average the score
+			// average the score
 			if (score != 0) {
 				score = score / (double) subsets.length;
 			}
@@ -302,7 +403,10 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		for (ComponentInstance node : topKRankedPaths) {
 			try {
 				completionService.submit(() -> {
+					Instant startTime = Instant.now();
 					V score = pipelineEvaluator.evaluate(node);
+					Duration evalTime = Duration.between(startTime, Instant.now());
+					postSolution(node, evalTime.toMillis(), score);
 					return new Pair<>(node, score);
 				});
 			} catch (Exception e) {
@@ -314,6 +418,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.take();
 			try {
 				Pair<ComponentInstance, V> solution = evaluatedPipe.get(5, TimeUnit.SECONDS);
+
 				evaluatedSolutions.add(solution);
 			} catch (Exception e) {
 				evaluatedPipe.cancel(true);
@@ -334,29 +439,46 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		return allEvaluatedPaths.stream().map(Pair::getY).min(V::compareTo).orElseThrow(NoSuchElementException::new);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setGenerator(GraphGenerator<T, String> generator) {
+	public void setGenerator(GraphGenerator<T, ?> generator) {
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
-		GeneralEvaluatedTraversalTree<T, String, Double> completionProblem = new GeneralEvaluatedTraversalTree<>(
-				generator, nodeEvaluator);
+		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
+				(GraphGenerator<T, String>) generator, nodeEvaluator);
 		randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);
+		while (!(randomPathCompleter.next() instanceof AlgorithmInitializedEvent))
+			;
 	}
 
 	public void setDataset(Instances dataset) {
 		// first we split the dataset into train & testdata
-		List<Instances> split = WekaUtil.getStratifiedSplit(dataset, 42l, 0.8d);
-		Instances trainData = split.get(0);
-		evaluationDataset = split.get(1);
-		Map<String, Double> metaFeatures;
-		try {
-			metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
-			datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
-		} catch (Exception e) {
-			logger.error("Failed to characterize the dataset", e);
+		if (useLandmarkers) {
+			List<Instances> split = WekaUtil.getStratifiedSplit(dataset, 42l, 0.8d);
+			Instances trainData = split.get(0);
+			evaluationDataset = split.get(1);
+			Map<String, Double> metaFeatures;
+			try {
+				metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
+				datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
+			} catch (Exception e) {
+				logger.error("Failed to characterize the dataset", e);
+			}
+			setUpLandmarkingDatasets(dataset, trainData);
+		} else {
+			try {
+				Map<String, Double> metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
+				datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
+			} catch (Exception e) {
+				logger.error("Failed to characterize the dataset", e);
+			}
 		}
+	}
 
+	/**
+	 * Sets up the training data for the landmarkers that should be used.
+	 */
+	private void setUpLandmarkingDatasets(Instances dataset, Instances trainData) {
 		landmarkerSets = new Instances[landmarkers.length][landmarkerSampleSize];
-		Random random = new Random();
 		// draw instances used for the landmarkers
 		for (int i = 0; i < landmarkers.length; i++) {
 			int landmarker = landmarkers[i];
@@ -371,7 +493,41 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 	}
 
+	protected void postSolution(final ComponentInstance solution, long time, V score) {
+		try {
+			@SuppressWarnings("unchecked")
+			List<T> pathToSolution = (List<T>) pathToPipelines.getKey(solution);
+			EvaluatedSearchGraphPath<T, ?, V> solutionObject = new EvaluatedSearchGraphPath<>(pathToSolution, null,
+					score);
+			solutionObject.setAnnotation("fTime", time);
+			solutionObject.setAnnotation("timeToSolution", Duration.between(firstEvaluation, Instant.now()).toMillis());
+			solutionObject.setAnnotation("nodesEvaluatedToSolution", this.randomlyCompletedPaths);
+			logger.debug("Posting solution {}", solutionObject);
+			this.eventBus.post(
+					new EvaluatedSearchSolutionCandidateFoundEvent<>("DyadRankingBasedCompletion", solutionObject));
+		} catch (Exception e) {
+			logger.error("Couldn't post solution to event bus.", e);
+		}
+	}
+
 	public void setPipelineEvaluator(IObjectEvaluator<ComponentInstance, V> wrappedSearchBenchmark) {
 		this.pipelineEvaluator = wrappedSearchBenchmark;
 	}
+
+	@Override
+	public boolean requiresGraphGenerator() {
+		return true;
+	}
+
+	@Override
+	public void registerSolutionListener(Object listener) {
+		this.eventBus.register(listener);
+
+	}
+
+	@Override
+	public boolean reportsSolutions() {
+		return true;
+	}
+
 }

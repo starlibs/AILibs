@@ -20,6 +20,8 @@ public interface DyadRankingBasedNodeEvaluatorConfig extends Mutable {
 	public static final String LANDMARKERS_KEY = "landmarkers";
 
 	public static final String LANDMARKERS_SAMPLE_SIZE_KEY = "landmarkerSampleSize";
+	
+	public static final String USE_LANDMARKERS = "useLandmarkers";
 
 	@Key(NUM_EVALUATIONS_KEY)
 	@DefaultValue("10")
@@ -46,4 +48,8 @@ public interface DyadRankingBasedNodeEvaluatorConfig extends Mutable {
 	@DefaultValue("10")
 	public int getLandmarkerSampleSize();
 
+	@Key(USE_LANDMARKERS)
+	@DefaultValue("false")
+	public boolean useLandmarkers();
+	
 }
