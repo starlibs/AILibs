@@ -16,7 +16,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * @author Mirko Jürgens
  *
  */
-public class DyadNormalScaler  extends AbstractDyadScaler {
+public class DyadUnitIntervalScaler  extends AbstractDyadScaler {
 
 	/**
 	 * Transforms only the instances of each dyad according to the mean and standard
