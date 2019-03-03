@@ -1,9 +1,15 @@
+// This stan model fits the given data to a linear combination of curves. 
+// The curves were choosen in such a way that they fulfill our expectations for
+// meaningfull learning curves.
+// This is done in a similar way to the paper: 
+// "Speeding up Automatic Hyperparameter Optimization of Deep Neural Networksby Extrapolation of Learning Curves"
+// by Tobias Domhan, Jost Tobias Springenberg and Frank Hutter
 functions{
 	
 	real log_log_linear(real a, real b, real x){
 		return log(a * log(x) + b);
 	}
-	
+
 	real pow_3(real c, real a, real alpha, real x){
 		return c - a * (x^(-alpha));
 	}
@@ -47,26 +53,28 @@ functions{
 		if(e[22] < 0)
 			return log(0);
 		// additional constraints to get reasonable curves
-		if(e[2] < 0)
+		if(e[2] < 0) // a
 			return log(0);
-		if(e[6] < 0)
+		if(e[6] < 0) // a
 			return log(0);
-		if(e[7] < 0)
+		if(e[7] < 0) // alpha
 			return log(0);
-		if(e[9] > 0)
+		if(e[9] > 0) // a
 			return log(0);
-		if(e[11] < 0)
+		if(e[11] < 0) // c
 			return log(0);
-		if(e[13] < 0)
+		if(e[13] < 0) // a
 			return log(0);
-		if(e[16] < 0)
+		if(e[16] < 0) // alpha
 			return log(0);
-		if(e[20] < 0)
+		if(e[20] < 0) // delta
 			return log(0);
-		if(e[21] < 0)
+		if(e[21] < 0) // kappa
 			return log(0);
+		// performance can never be better than 1
 		if(f_comb(e, 10000) > 1)
 			return log(0);
+		// we only want non-decreasing learning curves
 		for(k in 1:c)
 			if(f_comb(e, k*s) > f_comb(e, s*k+s) )
 				return log(0);
@@ -75,54 +83,29 @@ functions{
 }
 
 data {
+	// number of input points
 	int N;
+	
+	// number of times the non-decreasing property is checked
 	int c;
+	// distance between the checks for non-decreasing property
 	int s;
+	
+	// input points x 
 	vector[N] x;
+	// input points y
 	vector[N] y;
 }
 
 parameters {
-	real e[26];
-
-// 0 	real<lower=0> w_0;
-// 1 	real a_0;
-// 2 	real b_0;
-// 3 	real<lower=0> w_1;
-// 4 	real c_1;
-// 5 	real a_1;
-// 6 	real alpha_1;
-// 7 	real<lower=0> w_2;
-// 8 	real a_2;
-// 9 	real b_2;
-//10	real c_2;
-//11	real<lower=0> w_3;
-//12	real a_3;
-//13	real b_3;
-//14	real c_3;
-//15	real alpha_3;
-//16	real<lower=0> w_4;
-//17	real alpha_4;
-//18	real beta_4;
-//19	real delta_4;
-//20	real kappa_4;
-//21	real<lower=0> w_5;
-//22	real a_5;
-//23	real b_5;
-//24	real c_5;
-//25	real alpha_5;
-	
+	real e[26];	
 	real<lower=0> sigma;
-}
-
-transformed parameters {
 }
 
 model {
 	vector[N] ypred;
 	//prior
-	sigma ~ normal(0, 1);
-	
+	sigma ~ normal(0, 1);	
 	e ~ curveSlopeDist(c, s);
 	
 	// dist
@@ -131,5 +114,3 @@ model {
 		//ypred[n] = log_log_linear(a_0, b_0, x[n]);
 	y ~ normal(ypred, sigma);
 }
-
-
