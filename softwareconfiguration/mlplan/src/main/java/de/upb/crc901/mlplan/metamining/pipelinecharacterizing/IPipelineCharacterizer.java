@@ -11,7 +11,7 @@ import hasco.model.ComponentInstance;
  * data base of pipelines. Subsequently, it can be used to check for these
  * patterns in a new pipeline.
  * 
- * @author Helena Graf
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public interface IPipelineCharacterizer {
@@ -49,4 +49,13 @@ public interface IPipelineCharacterizer {
 	 * @return A matrix representing pattern occurrences in pipelines
 	 */
 	public double[][] getCharacterizationsOfTrainingExamples();
+	
+	
+	/**
+	 * Returns the amount of found pipeline patterns, which is the length of a
+	 * characterization.
+	 * 
+	 * @return the length of any array produced by {@link #characterize(ComponentInstance)}.
+	 */
+	public int getLengthOfCharacrization();
 }

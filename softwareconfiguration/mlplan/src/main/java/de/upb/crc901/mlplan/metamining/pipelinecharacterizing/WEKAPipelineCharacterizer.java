@@ -188,6 +188,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	 * 
 	 * @return the length of any array produced by {@link #characterize(ComponentInstance)}.
 	 */
+	@Override
 	public int getLengthOfCharacrization() {
 		return this.foundPipelinePatterns.size();
 	}
