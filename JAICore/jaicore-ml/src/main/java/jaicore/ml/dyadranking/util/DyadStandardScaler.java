@@ -28,7 +28,8 @@ public class DyadStandardScaler extends AbstractDyadScaler {
 	 * Transforms only the instances of each dyad according to the mean and standard
 	 * of the data the scaler has been fit to.
 	 * 
-	 * @param dataset The dataset of which the instances are to be standardized.
+	 * @param dataset
+	 *            The dataset of which the instances are to be standardized.
 	 */
 	public void transformInstances(DyadRankingDataset dataset) {
 		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
@@ -49,7 +50,8 @@ public class DyadStandardScaler extends AbstractDyadScaler {
 	 * Transforms only the alternatives of each dyad according to the mean and
 	 * standard deviation of the data the scaler has been fit to.
 	 * 
-	 * @param dataset The dataset of which the alternatives are to be standardized.
+	 * @param dataset
+	 *            The dataset of which the alternatives are to be standardized.
 	 */
 	public void transformAlternatives(DyadRankingDataset dataset) {
 		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
