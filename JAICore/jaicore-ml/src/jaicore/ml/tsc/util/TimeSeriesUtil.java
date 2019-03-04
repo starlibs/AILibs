@@ -2,10 +2,12 @@ package jaicore.ml.tsc.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -419,5 +421,99 @@ public class TimeSeriesUtil {
 		
 		return IntStream.of(dataset.getTargets()).boxed().collect(Collectors.toSet()).stream()
 				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Shuffles the given {@link TimeSeriesDataset} object using the given
+	 * <code>seed</code>.
+	 * 
+	 * @param dataset
+	 *            The dataset to be shuffled
+	 * @param seed
+	 *            The seed used within the randomized shuffling
+	 */
+	public static void shuffleTimeSeriesDataset(final TimeSeriesDataset dataset, final int seed) {
+
+		List<Integer> indices = IntStream.range(0, (int) dataset.getNumberOfInstances()).boxed()
+				.collect(Collectors.toList());
+		Collections.shuffle(indices, new Random(seed));
+
+		List<double[][]> valueMatrices = dataset.getValueMatrices();
+		List<double[][]> timestampMatrices = dataset.getTimestampMatrices();
+		int[] targets = dataset.getTargets();
+
+		if (valueMatrices != null) {
+			List<double[][]> targetValueMatrices = new ArrayList<>();
+			for (int i = 0; i < valueMatrices.size(); i++) {
+				targetValueMatrices.add(shuffleMatrix(valueMatrices.get(i), indices));
+			}
+			dataset.setValueMatrices(targetValueMatrices);
+		}
+
+		if (timestampMatrices != null) {
+			List<double[][]> targetTimestampMatrices = new ArrayList<>();
+			for (int i = 0; i < timestampMatrices.size(); i++) {
+				targetTimestampMatrices.add(shuffleMatrix(timestampMatrices.get(i), indices));
+			}
+			dataset.setTimestampMatrices(targetTimestampMatrices);
+		}
+
+		if (targets != null) {
+			dataset.setTargets(shuffleMatrix(targets, indices));
+		}
+	}
+
+	/**
+	 * Shuffles the given <code>srcMatrix</code> using a list of Integer
+	 * <code>indices</code>. It copies the values into a new result array sharing
+	 * the dimensionality of <code>srcMatrix</code>.
+	 * 
+	 * @param srcMatrix
+	 *            The source matrix to be shuffled
+	 * @param indices
+	 *            The Integer indices representing the new shuffled order
+	 * @return Returns the matrix copied from the given source matrix and the
+	 *         indices
+	 */
+	private static double[][] shuffleMatrix(final double[][] srcMatrix, final List<Integer> indices) {
+		if (srcMatrix == null || srcMatrix.length < 1)
+			throw new IllegalArgumentException("Parameter 'srcMatrix' must not be null or empty!");
+
+		if (indices == null || indices.size() != srcMatrix.length)
+			throw new IllegalArgumentException(
+					"Parameter 'indices' must not be null and must have the same length as the number of instances in the source matrix!");
+
+		final double[][] result = new double[srcMatrix.length][srcMatrix[0].length];
+		for (int i = 0; i < indices.size(); i++) {
+			result[i] = srcMatrix[indices.get(i)];
+		}
+		return result;
+	}
+
+	/**
+	 * Shuffles the given <code>srcMatrix</code> using a list of Integer
+	 * <code>indices</code>. It copies the values into a new result array sharing
+	 * the dimensionality of <code>srcMatrix</code>.
+	 * 
+	 * @param srcMatrix
+	 *            The source matrix to be shuffled
+	 * @param indices
+	 *            The Integer indices representing the new shuffled order
+	 * @return Returns the matrix copied from the given source matrix and the
+	 *         indices
+	 */
+	private static int[] shuffleMatrix(final int[] srcMatrix, final List<Integer> indices) {
+		if (srcMatrix == null || srcMatrix.length < 1)
+			throw new IllegalArgumentException("Parameter 'srcMatrix' must not be null or empty!");
+
+		if (indices == null || indices.size() != srcMatrix.length)
+			throw new IllegalArgumentException(
+					"Parameter 'indices' must not be null and must have the same length as the number of instances in the source matrix!");
+
+		final int[] result = new int[srcMatrix.length];
+		for (int i = 0; i < indices.size(); i++) {
+			result[i] = srcMatrix[indices.get(i)];
+		}
+		return result;
 	}
 }
