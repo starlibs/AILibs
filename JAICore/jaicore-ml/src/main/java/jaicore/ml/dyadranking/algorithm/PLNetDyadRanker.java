@@ -276,7 +276,16 @@ public class PLNetDyadRanker extends APLDyadRanker
 			throw new IllegalArgumentException(
 					"Can only make prediction for dyad ranking instances using the Plackett-Luce net dyad ranker!");
 		}
+
 		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+
 		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
@@ -536,7 +545,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		// TODO use top k selection 
+		// TODO use top k selection
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 1;
