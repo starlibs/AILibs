@@ -34,12 +34,12 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.core.predictivemodel.ICertaintyProvider;
 import jaicore.ml.core.predictivemodel.IOnlineLearner;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
-import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
@@ -57,7 +57,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  *
  */
 public class PLNetDyadRanker extends APLDyadRanker
-		implements IOnlineLearner<IDyadRankingInstance>{
+		implements IOnlineLearner<IDyadRankingInstance>, ICertaintyProvider<IDyadRankingInstance> {
 
 	private static final Logger log = LoggerFactory.getLogger(PLNetDyadRanker.class);
 
@@ -462,24 +462,24 @@ public class PLNetDyadRanker extends APLDyadRanker
 		plNet = restored;
 	}
 
-//	@Override
-//	public double getCertainty(IInstance queryInstance) {
-//		if (!(queryInstance instanceof IDyadRankingInstance)) {
-//			throw new IllegalArgumentException("Can only provide certainty for dyad ranking instances!");
-//		}
-//		IDyadRankingInstance drInstance = (IDyadRankingInstance) queryInstance;
-//
-//		if (drInstance.length() != 2) {
-//			throw new IllegalArgumentException("Can only provide certainty for pairs of dyads!");
-//		}
-//		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
-//		for (Dyad dyad : drInstance) {
-//			INDArray plNetInput = dyadToVector(dyad);
-//			double plNetOutput = plNet.output(plNetInput).getDouble(0);
-//			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
-//		}
-//		return Math.abs(dyadUtilityPairs.get(0).getRight() - dyadUtilityPairs.get(1).getRight());
-//	}
+	@Override
+	public double getCertainty(IInstance queryInstance) {
+		if (!(queryInstance instanceof IDyadRankingInstance)) {
+			throw new IllegalArgumentException("Can only provide certainty for dyad ranking instances!");
+		}
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) queryInstance;
+
+		if (drInstance.length() != 2) {
+			throw new IllegalArgumentException("Can only provide certainty for pairs of dyads!");
+		}
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+		return Math.abs(dyadUtilityPairs.get(0).getRight() - dyadUtilityPairs.get(1).getRight());
+	}
 
 	/**
 	 * Returns the pair of {@link Dyad}s for which the model is least certain.
