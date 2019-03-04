@@ -6,11 +6,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
 /**
@@ -382,5 +384,40 @@ public class TimeSeriesUtil {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Counts the number of unique classes occurring in the given
+	 * <code>dataset</code>.
+	 * 
+	 * @param dataset
+	 *            Dataset to be evaluated
+	 * @return Returns the number of unique classes occurring in target matrix of
+	 *         the given <code>dataset</code>
+	 */
+	public static int getNumberOfClasses(final TimeSeriesDataset dataset) {
+		if (dataset == null || dataset.getTargets() == null)
+			throw new IllegalArgumentException(
+					"Given parameter 'dataset' must not be null and must contain a target matrix!");
+		
+		return getClassesInDataset(dataset).size();
+	}
+
+	/**
+	 * Returns a list storing the unique Integer class values in the given
+	 * <code>dataset</code>.
+	 * 
+	 * @param dataset
+	 *            Dataset to be evaluated
+	 * @return Returns a {@link java.util.List} object storing the unique Integer
+	 *         class values of the dataset
+	 */
+	public static List<Integer> getClassesInDataset(final TimeSeriesDataset dataset) {
+		if (dataset == null || dataset.getTargets() == null)
+			throw new IllegalArgumentException(
+					"Given parameter 'dataset' must not be null and must contain a target matrix!");
+		
+		return IntStream.of(dataset.getTargets()).boxed().collect(Collectors.toSet()).stream()
+				.collect(Collectors.toList());
 	}
 }
