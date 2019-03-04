@@ -13,6 +13,7 @@ import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.util.AbstractDyadScaler;
+import jaicore.ml.dyadranking.util.DyadMinMaxScaler;
 import jaicore.ml.dyadranking.util.DyadStandardScaler;
 import jaicore.ml.dyadranking.util.DyadUnitIntervalScaler;
 
@@ -123,7 +124,7 @@ public class DyadScalerTest {
 	public void testMinMaxScaler() {
 		setupDataset();
 		System.out.println("Testing MinMaxScaler...");
-		AbstractDyadScaler stdScaler = new DyadUnitIntervalScaler();
+		AbstractDyadScaler stdScaler = new DyadMinMaxScaler();
 		stdScaler.fit(testingSet);
 		System.out.println("Testing transform instances...");
 		stdScaler.transformInstances(testingSet);
