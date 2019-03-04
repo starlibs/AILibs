@@ -104,21 +104,21 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		checkAndConductTermination();
-		if (getState().equals(AlgorithmState.created)) {
-			this.bestFirst.setTimeout(getTimeout());
-			return activate();
+		this.checkAndConductTermination();
+		if (this.getState().equals(AlgorithmState.created)) {
+			this.bestFirst.setTimeout(this.getTimeout());
+			return this.activate();
 		}
 		AlgorithmEvent e = this.bestFirst.nextWithException();
-		if (e instanceof AlgorithmInitializedEvent)
-			return nextWithException();
-		else if (e instanceof AlgorithmFinishedEvent)
-			return terminate();
-		else if (e instanceof SolutionCandidateFoundEvent) {
+		if (e instanceof AlgorithmInitializedEvent) {
+			return this.nextWithException();
+		} else if (e instanceof AlgorithmFinishedEvent) {
+			return this.terminate();
+		} else if (e instanceof SolutionCandidateFoundEvent) {
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			EvaluatedSearchGraphPath<T, A, NodeOrderList> solution = (EvaluatedSearchGraphPath<T, A, NodeOrderList>) ((SolutionCandidateFoundEvent) e).getSolutionCandidate();
 			EvaluatedSearchGraphPath<T, A, V> modifiedSolution = new EvaluatedSearchGraphPath<>(solution.getNodes(), solution.getEdges(), null);
-			return new ASolutionCandidateFoundEvent<>(getId(), modifiedSolution);
+			return new ASolutionCandidateFoundEvent<>(this.getId(), modifiedSolution);
 		} else {
 			return e;
 		}
