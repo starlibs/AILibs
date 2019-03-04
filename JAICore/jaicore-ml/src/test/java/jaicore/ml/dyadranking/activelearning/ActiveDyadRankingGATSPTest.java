@@ -21,6 +21,8 @@ import org.junit.runners.Parameterized.Parameters;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.dyadranking.activelearning.DyadDatasetPoolProvider;
+import jaicore.ml.dyadranking.activelearning.RandomPoolBasedActiveDyadRanker;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
