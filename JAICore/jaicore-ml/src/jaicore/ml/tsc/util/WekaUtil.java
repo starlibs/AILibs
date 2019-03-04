@@ -146,7 +146,7 @@ public class WekaUtil {
 		try {
 			classifier.buildClassifier(trainingInstances);
 		} catch (Exception e) {
-			throw new TrainingException(String.format("Could not train classifier %d due to a Weka exception.",
+			throw new TrainingException(String.format("Could not train classifier %s due to a Weka exception.",
 					classifier.getClass().getName()), e);
 		}
 	}

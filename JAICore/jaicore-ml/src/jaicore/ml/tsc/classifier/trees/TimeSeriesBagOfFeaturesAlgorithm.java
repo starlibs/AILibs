@@ -88,18 +88,18 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		}
 
 		// TODO Subsequences and feature extraction
-		int T = dataset.getNumberOfVariables(); // Time series length
+		int T = data[0].length; // Time series length
 		double zProp = 0.5d;
 		int lMin = (int) (zProp * T);
 
 		int wMin = 3; // Minimum interval length used for meaningful intervals
 
-		int d = (int) Math.floor(lMin / wMin); // Number of intervals for each subsequence
+		int d = (int) Math.floor((double) lMin / (double) wMin); // Number of intervals for each subsequence
 
-		int r = (int) Math.floor(T / wMin); // Number of possible intervals in a time series
+		int r = (int) Math.floor((double) T / (double) wMin); // Number of possible intervals in a time series
 
 		int numBins = 10; // Number of bins used for the CPEs
-		int numFolds = 10;
+		int numFolds = 10; // Number of folds used for the OOB probability estimation
 
 		// TODO Generate r-d subsequences with each d intervals and calculate features
 		int[][][] subsequences = new int[r - d][d][2];
@@ -110,7 +110,7 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 				int startIndex = random.nextInt(T - lMin);
 				int subSeqLength = random.nextInt(T - lMin - startIndex);
 				subsequences[i][j][0] = startIndex;
-				subsequences[i][j][1] = startIndex + subSeqLength; // exclusive
+				subsequences[i][j][1] = startIndex + subSeqLength + 1; // exclusive
 			}
 		}
 
@@ -136,9 +136,9 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 			for (int j = 0; j < data.length; j++) {
 				double[] intervalFeatures = new double[d*3];
 				for(int k=0; k<d; k++) {
-					intervalFeatures[k * d] = generatedFeatures[j][i][k][0];
-					intervalFeatures[k * d + 1] = generatedFeatures[j][i][k][1]; 
-					intervalFeatures[k * d + 2] = generatedFeatures[j][i][k][2]; 
+					intervalFeatures[k * 3] = generatedFeatures[j][i][k][0];
+					intervalFeatures[k * 3 + 1] = generatedFeatures[j][i][k][1];
+					intervalFeatures[k * 3 + 2] = generatedFeatures[j][i][k][2];
 				}
 				subSeqValueMatrix[i * data.length + j] = intervalFeatures;
 				
@@ -155,26 +155,37 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 			RandomForest rf = new RandomForest();
 
 			double[][] trainingValueMatrix = new double[(numFolds - 1) * numTestInstsPerFold][C];
+			int[] trainingTargetMatrix = new int[(numFolds - 1) * numTestInstsPerFold];
 			if (i == 0) {
 				System.arraycopy(subSeqValueMatrix, numTestInstsPerFold, trainingValueMatrix, 0,
 						(numFolds - 1) * numTestInstsPerFold);
+
+				System.arraycopy(targetMatrix, numTestInstsPerFold, trainingTargetMatrix, 0,
+						(numFolds - 1) * numTestInstsPerFold);
 			} else if (i == numFolds - 1) {
 				System.arraycopy(subSeqValueMatrix, 0, trainingValueMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
+
+				System.arraycopy(targetMatrix, 0, trainingTargetMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
 			} else {
 				System.arraycopy(subSeqValueMatrix, 0, trainingValueMatrix, 0, i * numTestInstsPerFold);
 				System.arraycopy(subSeqValueMatrix, (i + 1) * numTestInstsPerFold, trainingValueMatrix,
+						i * numTestInstsPerFold, (numFolds - i - 1) * numTestInstsPerFold);
+
+				System.arraycopy(targetMatrix, 0, trainingTargetMatrix, 0, i * numTestInstsPerFold);
+				System.arraycopy(targetMatrix, (i + 1) * numTestInstsPerFold, trainingTargetMatrix,
 						i * numTestInstsPerFold, (numFolds - i - 1) * numTestInstsPerFold);
 			}
 
 			ArrayList<double[][]> valueMatrices = new ArrayList<>();
 			valueMatrices.add(trainingValueMatrix);
-			TimeSeriesDataset trainingDS = new TimeSeriesDataset(valueMatrices);
+			TimeSeriesDataset trainingDS = new TimeSeriesDataset(valueMatrices, trainingTargetMatrix);
 
 			try {
 				WekaUtil.buildWekaClassifierFromSimplifiedTS(rf, trainingDS);
 			} catch (TrainingException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				return null;
 			}
 
 			// Store probabilities
