@@ -52,6 +52,10 @@ public class ActiveDyadRankingGATSPTest {
 	private static final String XXL_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
 	private static final String ALTERNATIVES_FEATURE_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
 	private static final String ORDERINGS_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/orderings.csv";
+	
+	private static final int MAX_BATCH_SIZE = 5;
+	private static final int TOP_RANKING_LENGTH = 5;
+	private static final double RATIO_OF_OLD_SAMPLES_IN_MINIBATCH = 0.0d;
 
 	// N = number of training instances
 	private static final int N = 120;
@@ -102,8 +106,8 @@ public class ActiveDyadRankingGATSPTest {
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
 		poolProvider.setRemoveDyadsWhenQueried(true);
 //			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
-//					poolProvider);
-		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
+//					poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH);
+		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, MAX_BATCH_SIZE, seed);
 
 		try {
 

@@ -57,6 +57,7 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				alternatives.add(dyads.get(1).getAlternative());
 				SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
 						alternatives);
+//				System.out.println(queryInstance.toString());
 				IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
 				minibatch.add(trueRanking);
 			}

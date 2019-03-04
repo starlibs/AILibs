@@ -44,7 +44,7 @@ public class ActiveDyadRankingMetaminingTest {
 
 	private static final double TRAIN_RATIO = 0.5d;
 
-	private static boolean REMOVE_DYADS_WHEN_QUERIED = false;
+	private static boolean REMOVE_DYADS_WHEN_QUERIED = true;
 
 	PLNetDyadRanker ranker;
 	DyadRankingDataset dataset;
