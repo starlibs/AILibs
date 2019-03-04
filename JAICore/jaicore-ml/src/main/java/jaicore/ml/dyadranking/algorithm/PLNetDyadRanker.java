@@ -174,7 +174,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 					"Can only update the Plackett-Luce net dyad ranker with a dyad ranking instance!");
 		}
 
-		DyadRankingInstance drInstance = (DyadRankingInstance) instance;
+		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 		// init weight update vector
 		INDArray dyadMatrix;
 		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
@@ -185,7 +185,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 		dyadMatrix = dyadRankingToMatrix(drInstance);
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
-		System.out.println();
 		output = output.transpose();
 		INDArray deltaW = Nd4j.zeros(plNet.params().length());
 		Gradient deltaWk = null;
