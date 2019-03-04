@@ -67,23 +67,28 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 			LOGGER.info(
 					"Only univariate data is used for training (matrix index 0), although multivariate data is available.");
 
+		// Shuffle instances?
+		TimeSeriesUtil.shuffleTimeSeriesDataset(dataset, this.seed);
+
 		double[][] data = dataset.getValuesOrNull(0);
 		int[] targets = dataset.getTargets();
 		
 		if(data == null || data.length == 0 || targets == null || targets.length == 0)
 			throw new IllegalArgumentException(
 					"The given dataset for training must not contain a null or empty data or target matrix.");
-		
-		// TODO: Shuffle instances?
 
-		// TODO: Get num classes
+		// Get number classes
 		int C = TimeSeriesUtil.getNumberOfClasses(dataset);
 
-		// TODO Standardize each time series to zero mean and unit standard deviation (z
+		// Standardize each time series to zero mean and unit standard deviation (z
 		// transformation)
+		// TODO: Use unifying implementation
+		for (int i = 0; i < dataset.getNumberOfInstances(); i++) {
+			data[i] = TimeSeriesUtil.zNormalize(data[i], true);
+		}
 
 		// TODO Subsequences and feature extraction
-		int T = data[0].length; // Time series length
+		int T = dataset.getNumberOfVariables(); // Time series length
 		double zProp = 0.5d;
 		int lMin = (int) (zProp * T);
 

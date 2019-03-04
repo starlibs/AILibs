@@ -1,7 +1,9 @@
 package jaicore.ml.tsc.classifier;
 
+import jaicore.ml.tsc.classifier.trees.TimeSeriesTree;
+
 /**
- * Reference tests for the time series tree classifier.
+ * Reference tests for the {@link TimeSeriesTree}.
  * 
  * @author Julian Lienen
  *

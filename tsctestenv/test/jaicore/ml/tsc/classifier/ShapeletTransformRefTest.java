@@ -25,7 +25,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 
 /**
- * Reference tests of the shapelet transform classifier.
+ * Reference tests of the {@link ShapeletTransformClassifier}.
  * 
  * @author Julian Lienen
  *

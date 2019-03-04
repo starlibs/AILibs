@@ -16,7 +16,7 @@ import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import timeseriesweka.classifiers.LearnShapelets;
 
 /**
- * Reference tests for the LearnShapelets classifier.
+ * Reference tests for the {@link LearnShapeletsClassifier}.
  * 
  * @author Julian Lienen
  *
@@ -52,6 +52,7 @@ public class LearnShapeletsRefTest {
 	public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
 			PredictionException, IOException, TimeSeriesLoadingException, ClassNotFoundException {
 
+		// TODO: Change this?
 		Logger.getLogger("jaicore").setLevel(Level.DEBUG);
 
 		// Initialize classifiers with values selected by reference classifier by
