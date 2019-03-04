@@ -2,22 +2,15 @@ package jaicore.logic;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Collection;
-import java.util.Map;
-
 import org.junit.Test;
 
-import jaicore.basic.algorithm.AAlgorithmFactory;
-import jaicore.basic.algorithm.HomogeneousGeneralAlgorithmTester;
+import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.basic.algorithm.IAlgorithmFactory;
-import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
-import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.util.ForwardChainer;
 import jaicore.logic.fol.util.ForwardChainingProblem;
 
-public class ForwardChainingTest extends HomogeneousGeneralAlgorithmTester<ForwardChainingProblem, Collection<Map<VariableParam, LiteralParam>>>{
+public class ForwardChainingTest extends GeneralAlgorithmTester {
 
 	@Test
 	public void testSingle() throws Exception {
@@ -54,32 +47,6 @@ public class ForwardChainingTest extends HomogeneousGeneralAlgorithmTester<Forwa
 		ForwardChainer fc = new ForwardChainer(new ForwardChainingProblem(factbase, conclusion, true));
 		assertEquals(2, fc.call().size()); // <x,y,z> = <a,b,c>/<b,c,a>
 	}
-
-	@Override
-	public IAlgorithmFactory<ForwardChainingProblem, Collection<Map<VariableParam, LiteralParam>>> getFactory() {
-		return new AAlgorithmFactory<ForwardChainingProblem, Collection<Map<VariableParam, LiteralParam>>>() {
-
-			@Override
-			public IAlgorithm<ForwardChainingProblem, Collection<Map<VariableParam, LiteralParam>>> getAlgorithm() {
-				ForwardChainer fc = new ForwardChainer(getInput());
-				return fc;
-			}
-		};
-	}
-
-	@Override
-	public ForwardChainingProblem getSimpleProblemInputForGeneralTestPurposes() throws Exception {
-
-		Monom factbase = new Monom("P('a', 'b') & P('b', 'c') & Q('b', 'c') & Q('c', 'a')");
-		Monom conclusion = new Monom("P(x, y) & Q(y, z) & P(y, z) & Q(z, x)");
-		
-		return new ForwardChainingProblem(factbase, conclusion, false);
-	}
-
-	@Override
-	public ForwardChainingProblem getDifficultProblemInputForGeneralTestPurposes() throws Exception {
-		return getSimpleProblemInputForGeneralTestPurposes();
-	}
 	
 	@Override
 	public void testInterrupt() throws Exception {
@@ -94,5 +61,10 @@ public class ForwardChainingTest extends HomogeneousGeneralAlgorithmTester<Forwa
 	@Override
 	public void testQuickTimeout() throws Exception {
 		// can't produce difficult enough problems
+	}
+
+	@Override
+	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
+		return new ForwardChainer((ForwardChainingProblem)problem);
 	}
 }
