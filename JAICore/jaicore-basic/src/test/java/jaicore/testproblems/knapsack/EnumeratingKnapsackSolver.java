@@ -1,4 +1,4 @@
-package jaicore.search.testproblems.knapsack;
+package jaicore.testproblems.knapsack;
 
 import java.util.ArrayList;
 import java.util.Collection;

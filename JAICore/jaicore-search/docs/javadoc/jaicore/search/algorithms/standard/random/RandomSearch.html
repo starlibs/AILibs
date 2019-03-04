@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -188,22 +188,26 @@ implements jaicore.basic.ILoggingCustomizable</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html#appendPathToNode-java.util.List-">appendPathToNode</a></span>(java.util.List&lt;<a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">N</a>&gt;&nbsp;nodes)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>jaicore.graph.Graph&lt;<a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">N</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html#getExploredGraph--">getExploredGraph</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html#getLoggerName--">getLoggerName</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html#knowsNode-N-">knowsNode</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">N</a>&nbsp;node)</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code><a href="../../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">A</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html#nextSolutionUnderNode-N-">nextSolutionUnderNode</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">N</a>&nbsp;node)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>jaicore.basic.algorithm.events.AlgorithmEvent</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html#nextWithException--">nextWithException</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html#setLoggerName-java.lang.String-">setLoggerName</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
@@ -394,6 +398,15 @@ implements jaicore.basic.ILoggingCustomizable</pre>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 <dd><code>java.util.concurrent.TimeoutException</code></dd>
 </dl>
+</li>
+</ul>
+<a name="getExploredGraph--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getExploredGraph</h4>
+<pre>public&nbsp;jaicore.graph.Graph&lt;<a href="../../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">N</a>&gt;&nbsp;getExploredGraph()</pre>
 </li>
 </ul>
 <a name="setLoggerName-java.lang.String-">

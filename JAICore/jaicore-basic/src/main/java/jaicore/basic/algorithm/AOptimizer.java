@@ -10,6 +10,7 @@ import jaicore.basic.ScoredItem;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 /**
  * The AOptimizer represents an algorithm that is meant to optimize for a single best solution.
@@ -91,7 +92,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	}
 
 	@Override
-	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}

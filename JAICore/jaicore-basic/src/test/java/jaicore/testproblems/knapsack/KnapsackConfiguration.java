@@ -1,16 +1,16 @@
-package jaicore.search.testproblems.knapsack;
+package jaicore.testproblems.knapsack;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public class KnapsackNode {
+public class KnapsackConfiguration {
 
 	private final List<String> packedObjects;
 	private final Set<String> remainingObjects;
 	private final double usedCapacity;
 
-	public KnapsackNode(List<String> packedObjects, Set<String> remainingObjects, double usedCapacity) {
+	public KnapsackConfiguration(List<String> packedObjects, Set<String> remainingObjects, double usedCapacity) {
 		super();
 		this.packedObjects = packedObjects;
 		this.remainingObjects = remainingObjects;
@@ -49,7 +49,7 @@ public class KnapsackNode {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		KnapsackNode other = (KnapsackNode) obj;
+		KnapsackConfiguration other = (KnapsackConfiguration) obj;
 		if (packedObjects == null) {
 			if (other.packedObjects != null)
 				return false;

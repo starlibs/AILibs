@@ -1,4 +1,4 @@
-package jaicore.search.testproblems.knapsack;
+package jaicore.testproblems.knapsack;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -60,7 +60,7 @@ public class KnapsackProblemSet extends AlgorithmTestProblemSetForSolutionIterat
 //	}
 	
 
-	public double getValueOfKnapsack(KnapsackNode knapsack) {
+	public double getValueOfKnapsack(KnapsackConfiguration knapsack) {
 		if (knapsack == null || knapsack.getPackedObjects() == null || knapsack.getPackedObjects().size() == 0) {
 			return 0.0d;
 		} else {

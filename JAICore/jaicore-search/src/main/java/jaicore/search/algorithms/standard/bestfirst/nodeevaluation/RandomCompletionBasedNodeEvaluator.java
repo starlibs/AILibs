@@ -2,6 +2,7 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,9 +31,9 @@ import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.concurrent.TimeoutTimer;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
@@ -50,9 +51,9 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 @SuppressWarnings("serial")
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
-		implements IPotentiallyGraphDependentNodeEvaluator<T, V>, SerializableNodeEvaluator<T, V>,
-		IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>,
-		ILoggingCustomizable {
+implements IPotentiallyGraphDependentNodeEvaluator<T, V>,
+IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>,
+ILoggingCustomizable {
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
@@ -80,12 +81,14 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 
 	/* sub-tools for conducting and analyzing random completions */
 	private Timer timeoutTimer;
+	private Collection<TimerTask> activeTasks = new ArrayList<>();
+
 	private RandomSearch<T, String> completer;
 	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of
-																			// the completer is asynchronous
+	// the completer is asynchronous
 	protected final ISolutionEvaluator<T, V> solutionEvaluator;
 	protected IUncertaintySource<T, V> uncertaintySource;
-	protected transient SolutionEventBus<T> eventBus = new SolutionEventBus<>();
+	protected SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
 	private boolean visualizeSubSearch;
 
@@ -147,13 +150,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 
 	@SuppressWarnings("unchecked")
 	@Override
-	protected V fTimeouted(final Node<T, ?> n, int timeout) throws InterruptedException, NodeEvaluationException {
+	protected V fTimeouted(final Node<T, ?> n, final int timeout) throws InterruptedException, NodeEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
-		eventBus.post(new NodeAnnotationEvent<>("RandomCompletion", n.getPoint(), "f-computing thread",
+		this.eventBus.post(new NodeAnnotationEvent<>("RandomCompletion", n.getPoint(), "f-computing thread",
 				Thread.currentThread().getName()));
 		this.logger.info(
 				"Received request for f-value of node {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms.",
-				n, this.samples, getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
+				n, this.samples, this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
 		long startOfComputation = System.currentTimeMillis();
 		long deadline = timeout > 0 ? startOfComputation + timeout : -1;
 		if (this.timestampOfFirstEvaluation == 0) {
@@ -182,7 +185,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 				if (path.size() > 1 && !this.solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(path)) {
 					assert this.fValues.containsKey(n
 							.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: "
-									+ path;
+							+ path;
 					V score = this.fValues.get(n.getParent());
 					this.fValues.put(n, score);
 					this.logger.debug(
@@ -213,8 +216,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 				List<List<T>> completedPaths = new ArrayList<>();
 				this.logger.debug("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
 				while (successfulSamples < this.samples) {
-					logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
-					checkInterruption();
+					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
+					this.checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {
 						this.logger.info("Deadline for random completions hit! Finishing node evaluation.");
 						break;
@@ -222,16 +225,16 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 
 					/* determine time that is available to conduct next computation */
 					long remainingTimeForNodeEvaluation = deadline > 0 ? deadline - System.currentTimeMillis() : -1; // this
-																														//value
-																														// is
-																														// positive
-																														// or
-																														// -1
-																														// due
-																														// to
-																														// the
-																														// previous
-																														// check
+					//value
+					// is
+					// positive
+					// or
+					// -1
+					// due
+					// to
+					// the
+					// previous
+					// check
 					long timeoutForJob;
 					if (remainingTimeForNodeEvaluation >= 0 && this.timeoutForSingleCompletionEvaluationInMS >= 0) {
 						timeoutForJob = Math.min(remainingTimeForNodeEvaluation,
@@ -240,8 +243,9 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 						timeoutForJob = remainingTimeForNodeEvaluation;
 					} else if (this.timeoutForSingleCompletionEvaluationInMS >= 0) {
 						timeoutForJob = this.timeoutForSingleCompletionEvaluationInMS;
-					} else
+					} else {
 						timeoutForJob = -1;
+					}
 
 					/*
 					 * complete the current path by the dfs-solution; we assume that this goes
@@ -285,6 +289,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 						abortionTask = new TimerTask() {
 							@Override
 							public void run() {
+								RandomCompletionBasedNodeEvaluator.this.activeTasks.remove(this);
 
 								/* if the executing thread has not been interrupted from outside */
 								if (!executingThread.isInterrupted()) {
@@ -296,12 +301,14 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 							}
 						};
 						if (this.timeoutTimer == null) {
-							this.timeoutTimer = new Timer("RandomCompletion-Timeouter", true);
+							this.timeoutTimer = TimeoutTimer.getInstance();
 						}
 						this.timeoutTimer.schedule(abortionTask, timeoutForJob);
-						logger.debug("Activated timeout of {}ms for evaluation of found solution.", timeoutForJob);
-					} else
-						logger.debug("No timeout active for candidate evaluation.");
+						this.activeTasks.add(abortionTask);
+						this.logger.debug("Activated timeout of {}ms for evaluation of found solution.", timeoutForJob);
+					} else {
+						this.logger.debug("No timeout active for candidate evaluation.");
+					}
 
 					/* evaluate the found solution */
 					drawnSamples++;
@@ -319,8 +326,9 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 						boolean intentionalInterrupt = nodeEvaluationTimedOut.get();
 						this.logger.info("Recognized {} interrupt", intentionalInterrupt ? "intentional" : "external");
 						if (!intentionalInterrupt) {
-							if (abortionTask != null)
+							if (abortionTask != null) {
 								abortionTask.cancel();
+							}
 							throw e;
 						} else {
 							Thread.interrupted(); // set interrupted to false
@@ -343,9 +351,9 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 				 * have failed with exception or were interrupted
 				 */
 				V best = this.bestKnownScoreUnderNodeInCompleterGraph.get(n.externalPath());
-				logger.debug("Finished sampling. {} samples were drawn, {} were successful. Best seen score is {}", drawnSamples, successfulSamples, best);
+				this.logger.debug("Finished sampling. {} samples were drawn, {} were successful. Best seen score is {}", drawnSamples, successfulSamples, best);
 				if (best == null) {
-					checkInterruption();
+					this.checkInterruption();
 					if (countedExceptions > 0) {
 						throw new NoSuchElementException("Among " + drawnSamples
 								+ " evaluated candidates, we could not identify any candidate that did not throw an exception.");
@@ -355,7 +363,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 				}
 
 				/* if we are still interrupted, throw an exception */
-				checkInterruption();
+				this.checkInterruption();
 
 				/* add number of samples to node */
 				n.setAnnotation("fRPSamples", successfulSamples);
@@ -460,13 +468,13 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 				this.logger.error(
 						"Computing the solution quality of {} failed due to an exception. Here is the trace:\n\t{}\n\t{}\n\t{}",
 						path, e.getClass().getName(), e.getMessage(), Arrays.asList(e.getStackTrace()).stream()
-								.map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
+						.map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
 				this.unsuccessfulPaths.add(path);
 				throw new NodeEvaluationException(e, "Error in evaluating node!");
 			}
 			long duration = System.currentTimeMillis() - start;
-			assert duration < timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration
-					+ "ms, but timeout is " + timeoutForSingleCompletionEvaluationInMS;
+			assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration
+			+ "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
 
 			/* at this point, the value should not be NULL */
 			this.logger.info("Result: {}, Size: {}", val, this.scoresOfSolutionPaths.size());
@@ -547,13 +555,15 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
 				this.generator, nodeEvaluator);
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
-		if (this.getTotalDeadline() >= 0)
+		if (this.getTotalDeadline() >= 0) {
 			this.completer.setTimeout(
 					new TimeOut(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
-		if (loggerName != null)
-			completer.setLoggerName(loggerName + ".completer");
+		}
+		if (this.loggerName != null) {
+			this.completer.setLoggerName(this.loggerName + ".completer");
+		}
 		if (this.visualizeSubSearch) {
-//			new VisualizationWindow<>(this.completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(this.bestKnownScoreUnderNodeInCompleterGraph.get(n)));
+			//			new VisualizationWindow<>(this.completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(this.bestKnownScoreUnderNodeInCompleterGraph.get(n)));
 		}
 		while (!(this.completer.next() instanceof AlgorithmInitializedEvent)) {
 			;
@@ -575,8 +585,8 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 	public void cancel() {
 		this.logger.info("Receive cancel signal.");
 		this.completer.cancel();
-		if (this.timeoutTimer != null) {
-			this.timeoutTimer.cancel();
+		if (!this.activeTasks.isEmpty()) {
+			this.activeTasks.forEach(TimerTask::cancel);
 		}
 	}
 
@@ -602,8 +612,9 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 		this.loggerName = name;
 		this.logger.info("Switching logger (name) of object of class {} to {}", this.getClass().getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
-		if (completer != null)
+		if (this.completer != null) {
 			this.completer.setLoggerName(name + ".randomsearch");
+		}
 		this.logger.info("Switched logger (name) of {} to {}", this, name);
 	}
 

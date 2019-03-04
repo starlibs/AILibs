@@ -9,7 +9,7 @@ import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvalua
 public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmProblemTransformer<EnhancedTTSP, GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String>> {
 
 	@Override
-	public GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String> transform(EnhancedTTSP problem) {
+	public GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String> transform(final EnhancedTTSP problem) {
 
 		/* define g */
 		EdgeCostComputer<EnhancedTTSPNode> g = (from, to) -> to.getPoint().getTime() - from.getPoint().getTime();
@@ -30,6 +30,6 @@ public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmProblemTransfo
 			return hVal;
 		};
 
-		return new GraphSearchWithNumberBasedAdditivePathEvaluation<>(problem.getGraphGenerator(), g, h);
+		return new GraphSearchWithNumberBasedAdditivePathEvaluation<>(new EnhancedTTSPGraphGenerator(problem), g, h);
 	}
 }

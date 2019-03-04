@@ -24,12 +24,12 @@ public class NQueenProblemSet extends AlgorithmTestProblemSetForSolutionIterator
 
 	private static final Logger logger = LoggerFactory.getLogger(NQueenProblemSet.class);
 	private static final NQueensToGraphSearchProblemInputReducer reducer = new NQueensToGraphSearchProblemInputReducer();
-	
+
 	@Override
 	public Map<NQueensProblem, Collection<List<Integer>>> getProblemsWithSolutions() {
 		Map<NQueensProblem, Collection<List<Integer>>> problems = new HashMap<>();
 		EnumeratingNQueensSolver solver = new EnumeratingNQueensSolver();
-		for (int i = 0; i < numbersOfSolutions.length; i++) {
+		for (int i = 0; i < this.numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			NQueensProblem problem = new NQueensProblem(n);
 			try {
@@ -48,6 +48,6 @@ public class NQueenProblemSet extends AlgorithmTestProblemSetForSolutionIterator
 
 	@Override
 	public NQueensProblem getDifficultProblemInputForGeneralTestPurposes() throws Exception {
-		return new NQueensProblem(100);
+		return new NQueensProblem(1000000);
 	}
 }

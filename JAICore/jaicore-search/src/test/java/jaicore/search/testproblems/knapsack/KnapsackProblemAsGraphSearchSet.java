@@ -11,8 +11,11 @@ import java.util.stream.Collectors;
 
 import jaicore.basic.algorithm.AlgorithmTestProblemSetForSolutionIterators;
 import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.testproblems.knapsack.KnapsackConfiguration;
+import jaicore.testproblems.knapsack.KnapsackProblem;
+import jaicore.testproblems.knapsack.KnapsackProblemSet;
 
-public class KnapsackProblemAsGraphSearchSet extends AlgorithmTestProblemSetForSolutionIterators<GraphSearchInput<KnapsackNode, String>, List<String>> {
+public class KnapsackProblemAsGraphSearchSet extends AlgorithmTestProblemSetForSolutionIterators<GraphSearchInput<KnapsackConfiguration, String>, List<String>> {
 	private final KnapsackProblemSet problemSet = new KnapsackProblemSet();
 	private final KnapsackToGraphSearchProblemInputReducer reducer = new KnapsackToGraphSearchProblemInputReducer();
 	
@@ -21,10 +24,10 @@ public class KnapsackProblemAsGraphSearchSet extends AlgorithmTestProblemSetForS
 	}
 
 	@Override
-	public Map<GraphSearchInput<KnapsackNode, String>, Collection<List<String>>> getProblemsWithSolutions() {
-		Map<GraphSearchInput<KnapsackNode, String>, Collection<List<String>>> problems = new HashMap<>();
+	public Map<GraphSearchInput<KnapsackConfiguration, String>, Collection<List<String>>> getProblemsWithSolutions() {
+		Map<GraphSearchInput<KnapsackConfiguration, String>, Collection<List<String>>> problems = new HashMap<>();
 		for (Entry<KnapsackProblem, Collection<Set<String>>> problemWithSolutions : problemSet.getProblemsWithSolutions().entrySet()) {
-			GraphSearchInput<KnapsackNode, String> transformedInput = reducer.transform(problemWithSolutions.getKey());
+			GraphSearchInput<KnapsackConfiguration, String> transformedInput = reducer.transform(problemWithSolutions.getKey());
 			Collection<Set<String>> items = problemWithSolutions.getValue();
 			Collection<List<String>> sortedItems = new ArrayList<>();
 			items.forEach(s -> sortedItems.add(s.stream().sorted().collect(Collectors.toList())));
@@ -34,12 +37,12 @@ public class KnapsackProblemAsGraphSearchSet extends AlgorithmTestProblemSetForS
 	}
 
 	@Override
-	public GraphSearchInput<KnapsackNode, String> getSimpleProblemInputForGeneralTestPurposes() throws Exception {
+	public GraphSearchInput<KnapsackConfiguration, String> getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		return reducer.transform(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 	}
 
 	@Override
-	public GraphSearchInput<KnapsackNode, String> getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+	public GraphSearchInput<KnapsackConfiguration, String> getDifficultProblemInputForGeneralTestPurposes() throws Exception {
 		return reducer.transform(problemSet.getDifficultProblemInputForGeneralTestPurposes());
 	}
 }

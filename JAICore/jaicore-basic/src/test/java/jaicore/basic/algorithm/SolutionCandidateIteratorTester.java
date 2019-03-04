@@ -1,9 +1,9 @@
 package jaicore.basic.algorithm;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -11,7 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
 
@@ -31,63 +30,62 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	public AlgorithmTestProblemSetForSolutionIterators<?, ?> getProblemSet() {
 		return (AlgorithmTestProblemSetForSolutionIterators<?,?>) super.getProblemSet();
 	}
-	
+
 	@Test
 	public <I,O> void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		AlgorithmTestProblemSetForSolutionIterators<I,O> problemSet = (AlgorithmTestProblemSetForSolutionIterators<I,O>)getProblemSet();
+		AlgorithmTestProblemSetForSolutionIterators<I,O> problemSet = (AlgorithmTestProblemSetForSolutionIterators<I,O>)this.getProblemSet();
 		Map<I, Collection<O>> problemsWithSolutions = problemSet.getProblemsWithSolutions();
 		for (Entry<I, Collection<O>> problem : problemsWithSolutions.entrySet()) {
-			ISolutionCandidateIterator<I, O> algorithm = (ISolutionCandidateIterator<I,O>)getAlgorithm(problem.getKey());
+			ISolutionCandidateIterator<I, O> algorithm = (ISolutionCandidateIterator<I,O>)this.getAlgorithm(problem.getKey());
 			assertNotNull(algorithm);
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
 			}
-			AtomicInteger seenSolutions = new AtomicInteger(0);
+			Collection<Object> solutions = new HashSet<>();
 			algorithm.registerListener(new Object() {
 				@Subscribe
-				public void receiveSolution(SolutionCandidateFoundEvent<O> solution) {
-					seenSolutions.incrementAndGet();
+				public void receiveSolution(final SolutionCandidateFoundEvent<O> solution) {
+					solutions.add(solution);
 				}
 			});
 			algorithm.call();
-			assertEquals("Failed to solve " + problem.getKey() + ". Only found " + seenSolutions.get() + "/" + problem.getValue() + " solutions.", problem.getValue().size(), seenSolutions.get());
+			assertEquals("Found " + solutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions: " + SetUtil.difference(problem.getValue(), solutions), problem.getValue().size(), solutions.size());
 		}
 	}
 
 	@Test
 	public <I,O> void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		AlgorithmTestProblemSetForSolutionIterators<I,O> problemSet = (AlgorithmTestProblemSetForSolutionIterators<I,O>)getProblemSet();
+		AlgorithmTestProblemSetForSolutionIterators<I,O> problemSet = (AlgorithmTestProblemSetForSolutionIterators<I,O>)this.getProblemSet();
 		Map<I, Collection<O>> problemsWithNumbersOfSolutions = problemSet.getProblemsWithSolutions();
 		for (Entry<I, Collection<O>> problem : problemsWithNumbersOfSolutions.entrySet()) {
-			ISolutionCandidateIterator<I, O> algorithm = (ISolutionCandidateIterator<I,O>)getAlgorithm(problem.getKey());
+			ISolutionCandidateIterator<I, O> algorithm = (ISolutionCandidateIterator<I,O>)this.getAlgorithm(problem.getKey());
 			algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			assertNotNull(algorithm);
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
 			}
-			AtomicInteger seenSolutions = new AtomicInteger(0);
+			Collection<Object> solutions = new HashSet<>();
 			algorithm.registerListener(new Object() {
 				@Subscribe
-				public void receiveSolution(SolutionCandidateFoundEvent<O> solution) {
-					seenSolutions.incrementAndGet();
+				public void receiveSolution(final SolutionCandidateFoundEvent<O> solution) {
+					solutions.add(solution);
 				}
 			});
 			algorithm.call();
-			assertEquals("Failed to solve " + problem.getKey() + ". Only found " + seenSolutions.get() + "/" + problem.getValue() + " solutions.", problem.getValue().size(), seenSolutions.get());
+			assertEquals("Found " + solutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions: " + SetUtil.difference(problem.getValue(), solutions), problem.getValue().size(), solutions.size());
 		}
 	}
 
 	@Test
 	public <I,O> void testThatIteratorReturnsEachPossibleSolution() {
-		AlgorithmTestProblemSetForSolutionIterators<I,O> problemSet = (AlgorithmTestProblemSetForSolutionIterators<I,O>)getProblemSet();
+		AlgorithmTestProblemSetForSolutionIterators<I,O> problemSet = (AlgorithmTestProblemSetForSolutionIterators<I,O>)this.getProblemSet();
 		Map<I, Collection<O>> problemsWithNumbersOfSolutions = problemSet.getProblemsWithSolutions();
 		for (Entry<I, Collection<O>> problem : problemsWithNumbersOfSolutions.entrySet()) {
-			ISolutionCandidateIterator<I, O> algorithm = (ISolutionCandidateIterator<I,O>)getAlgorithm(problem.getKey());
+			ISolutionCandidateIterator<I, O> algorithm = (ISolutionCandidateIterator<I,O>)this.getAlgorithm(problem.getKey());
 			assertNotNull(algorithm);
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
 			}
-			System.out.println(problem.getKey() + ": " + problem.getValue());
 			boolean initialized = false;
 			boolean terminated = false;
 			Collection<Object> solutions = new HashSet<>();
@@ -112,5 +110,5 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 			assertEquals("Found " + solutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions: " + SetUtil.difference(problem.getValue(), solutions), problem.getValue().size(), solutions.size());
 		}
 	}
-	
+
 }
