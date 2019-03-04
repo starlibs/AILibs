@@ -1,8 +1,10 @@
 package de.upb.crc901.mlplan.examples.multiclass.weka;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Time;
 import java.util.HashMap;
@@ -89,6 +91,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		/* initialize ML-Plan with the same config file that has been used to specify the experiments */
 		MLPlanBuilder builder = new MLPlanBuilder();
 		builder.withAutoWEKAConfiguration();
+		builder.withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get("evaluationTimeout")), TimeUnit.SECONDS));
 
@@ -113,6 +116,9 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		results.put("loss", eval.errorRate());
 		results.put("classifier", WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
 		results.put("preprocessor", ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors().toString());
+
+		writeFile("chosenModel." + this.experimentID + ".txt", results.get("preprocessor") + "\n\n\n" + results.get("classifier"));
+		writeFile("result." + this.experimentID + ".txt", "intern: " + mlplan.getInternalValidationErrorOfSelectedClassifier() + "\ntest:" + results.get("loss") + "");
 
 		processor.processResults(results);
 		print("Experiment done.");
@@ -143,18 +149,24 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		}
 	}
 
+	private static void writeFile(final String fileName, final String value) {
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(fileName)))) {
+			bw.write(value);
+		} catch (IOException e) {
+			print("Could not write value to file " + fileName + ": " + value);
+		}
+	}
+
 	private static void print(final String message) {
 		System.out.println(new Time(System.currentTimeMillis()).toString() + ": " + message);
 	}
 
 	public static void main(final String[] args) {
-
 		/* check config */
 		print("Start experiment runner...");
 		ExperimentRunner runner = new ExperimentRunner(new MLPlanWekaExperimenter(configFile));
 		print("Conduct random experiment...");
 		runner.randomlyConductExperiments(1, false);
-		print("Experiment conducted, stop timeout timer.");
-		print("Timer stopped.");
+		print("Experiment conducted");
 	}
 }

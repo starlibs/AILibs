@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multiclass.wekamlplan.scikitlearn;
+package de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn;
 
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;

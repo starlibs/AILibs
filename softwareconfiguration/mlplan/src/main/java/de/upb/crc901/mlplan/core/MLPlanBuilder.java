@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
@@ -83,6 +84,15 @@ public class MLPlanBuilder {
 		this.dbAdapter = dbAdapter;
 	}
 
+	/**
+	 * Set the classifier factory that translates <code>CompositionInstance</code> objects to classifiers that can be evaluated.
+	 *
+	 * @param classifierFactory The classifier factory to be used to translate CompositionInstance objects to classifiers.
+	 */
+	public void withClassifierFactory(final ClassifierFactory classifierFactory) {
+		this.classifierFactory = classifierFactory;
+	}
+
 	public File getSearchSpaceConfigFile() {
 		return this.searchSpaceConfigFile;
 	}
@@ -102,6 +112,30 @@ public class MLPlanBuilder {
 	public MLPlanBuilder withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
 		this.searchSpaceConfigFile = searchSpaceConfig;
 		this.components = new ComponentLoader(searchSpaceConfig).getComponents();
+		return this;
+	}
+
+	/**
+	 * Configures the MLPlanBuilder to deal with the AutoSKLearn search space configuration.
+	 *
+	 * @return Returns the current MLPlanBuilder object with the AutoSKLearn search space configuration.
+	 * @throws IOException Throws an IOException if the search space config file could not be loaded.
+	 */
+	public MLPlanBuilder withAutoSKLearnConfig() throws IOException {
+		if (this.searchSpaceConfigFile == null) {
+			this.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/sklearn/sklearn-mlplan.json"));
+		}
+
+		File fileOfPreferredComponents = this.getAlgorithmConfig().preferredComponents();
+		List<String> ordering;
+		if (!fileOfPreferredComponents.exists()) {
+			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", fileOfPreferredComponents.getAbsolutePath());
+			ordering = new ArrayList<>();
+		} else {
+			ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
+		}
+		this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
+		this.classifierFactory = new SKLearnClassifierFactory();
 		return this;
 	}
 
@@ -160,7 +194,7 @@ public class MLPlanBuilder {
 	public void prepareNodeEvaluatorInFactoryWithData(final Instances data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
-			//			throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
+			// throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
 		}
 		if (this.factoryPreparedWithData) {
 			throw new IllegalStateException("Factory has already been prepared with data. This can only be done once!");
@@ -214,15 +248,12 @@ public class MLPlanBuilder {
 	}
 
 	public void withTimeoutForSingleSolutionEvaluation(final TimeOut timeout) {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,
-				String.valueOf(timeout.milliseconds()));
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, String.valueOf(timeout.milliseconds()));
 	}
 
 	public void withTimeoutForNodeEvaluation(final TimeOut timeout) {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE,
-				String.valueOf(timeout.milliseconds()));
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout.milliseconds()));
 	}
-
 
 	public boolean getUseCache() {
 		return this.useCache;
