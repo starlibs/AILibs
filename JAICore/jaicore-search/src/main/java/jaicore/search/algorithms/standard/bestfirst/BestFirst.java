@@ -200,7 +200,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			synchronized (this.todoList) {
 				this.todoList.remove(this.successorDescription.getTo());
 				if (this.todoList.isEmpty()) {
-					BestFirst.this.post(new NodeExpansionCompletedEvent<>(this.expandedNodeInternal));
+					BestFirst.this.post(new NodeExpansionCompletedEvent<>(BestFirst.this.getId(), this.expandedNodeInternal));
 				}
 			}
 		}
@@ -238,6 +238,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					BestFirst.this.logger.debug("Worker has been interrupted, exiting.");
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, "fError", e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_pruned"));
+					Thread.currentThread().interrupt();
 					return;
 				} catch (TimeoutException e) {
 					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode);
@@ -355,6 +356,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					}
 				}
 			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt(); // interrupt myself. This is for the case that the main thread executes this part
 				BestFirst.this.logger.info("Node builder has been interrupted, finishing execution.");
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -654,13 +656,16 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		final List<NodeExpansionDescription<N, A>> successorDescriptions;
 		List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
 		try {
+			assert !nodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
 			tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
 				this.logger.trace("Invoking getSuccessors");
 				return BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
 			});
+			assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
 			this.logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
 		} catch (Exception e) {
 			this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion); // make sure that we unregister from expand
+			throw new AlgorithmException(e, "Exception occured in successor generation."); // if this was a real exception, throw it.
 		}
 		successorDescriptions = tmpSuccessorDescriptions;
 
