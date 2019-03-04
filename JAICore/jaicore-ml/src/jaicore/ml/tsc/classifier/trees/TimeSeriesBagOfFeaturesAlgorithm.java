@@ -21,8 +21,10 @@ import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.features.TimeSeriesFeature;
 import jaicore.ml.tsc.util.MathUtil;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.trees.RandomForest;
+import weka.core.Instances;
 
 public class TimeSeriesBagOfFeaturesAlgorithm
 		extends ASimplifiedTSCAlgorithm<Integer, TimeSeriesBagOfFeaturesClassifier> {
@@ -68,14 +70,20 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		double[][] data = dataset.getValuesOrNull(0);
 		int[] targets = dataset.getTargets();
 		
+		if(data == null || data.length == 0 || targets == null || targets.length == 0)
+			throw new IllegalArgumentException(
+					"The given dataset for training must not contain a null or empty data or target matrix.");
+		
+		// TODO: Shuffle instances?
+
 		// TODO: Get num classes
-		int C = 0;
+		int C = TimeSeriesUtil.getNumberOfClasses(dataset);
 
 		// TODO Standardize each time series to zero mean and unit standard deviation (z
 		// transformation)
 
 		// TODO Subsequences and feature extraction
-		int T = 0; // Time series length
+		int T = data[0].length; // Time series length
 		double zProp = 0.5d;
 		int lMin = (int) (zProp * T);
 
@@ -86,6 +94,7 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		int r = (int) Math.floor(T / wMin); // Number of possible intervals in a time series
 
 		int numBins = 10; // Number of bins used for the CPEs
+		int numFolds = 10;
 
 		// TODO Generate r-d subsequences with each d intervals and calculate features
 		int[][][] subsequences = new int[r - d][d][2];
@@ -113,7 +122,7 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 
 		// TODO Generate class probability estimate (CPE) for each instance using a
 		// classifier
-		RandomForest rf = new RandomForest();
+
 		double[][] subSeqValueMatrix = new double[(r - d) * data.length][d * 3];
 		int[] targetMatrix = new int[(r - d) * data.length];
 
@@ -131,19 +140,59 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 				targetMatrix[i * data.length + j] = targets[j];
 			}
 		}
-		ArrayList<double[][]> valueMatrices = new ArrayList<>();
-		valueMatrices.add(subSeqValueMatrix);
-		TimeSeriesDataset subSeqDataset = new TimeSeriesDataset(valueMatrices, targetMatrix);
 
-		try {
-			WekaUtil.buildWekaClassifierFromSimplifiedTS(rf, subSeqDataset);
-		} catch (TrainingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		double[][] probs = new double[(r - d) * data.length][C];
+		int numTestInstsPerFold = probs.length / numFolds;
+
 		// rf.measureOutOfBagError()
 		// TODO: Measure OOB probabilities
+		for (int i = 0; i < numFolds; i++) {
+			RandomForest rf = new RandomForest();
+
+			double[][] trainingValueMatrix = new double[(numFolds - 1) * numTestInstsPerFold][C];
+			if (i == 0) {
+				System.arraycopy(subSeqValueMatrix, numTestInstsPerFold, trainingValueMatrix, 0,
+						(numFolds - 1) * numTestInstsPerFold);
+			} else if (i == numFolds - 1) {
+				System.arraycopy(subSeqValueMatrix, 0, trainingValueMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
+			} else {
+				System.arraycopy(subSeqValueMatrix, 0, trainingValueMatrix, 0, i * numTestInstsPerFold);
+				System.arraycopy(subSeqValueMatrix, (i + 1) * numTestInstsPerFold, trainingValueMatrix,
+						i * numTestInstsPerFold, (numFolds - i - 1) * numTestInstsPerFold);
+			}
+
+			ArrayList<double[][]> valueMatrices = new ArrayList<>();
+			valueMatrices.add(trainingValueMatrix);
+			TimeSeriesDataset trainingDS = new TimeSeriesDataset(valueMatrices);
+
+			try {
+				WekaUtil.buildWekaClassifierFromSimplifiedTS(rf, trainingDS);
+			} catch (TrainingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			// Store probabilities
+			double[][] currTestMatrix = new double[numTestInstsPerFold][C];
+			System.arraycopy(subSeqValueMatrix, i * numTestInstsPerFold, currTestMatrix, 0, numTestInstsPerFold);
+			int[] currTestTargetMatrix = new int[numTestInstsPerFold];
+			System.arraycopy(targetMatrix, i * numTestInstsPerFold, currTestTargetMatrix, 0, numTestInstsPerFold);
+			
+			ArrayList<double[][]> testValueMatrices = new ArrayList<>();
+			testValueMatrices.add(currTestMatrix);
+			TimeSeriesDataset testDataset = new TimeSeriesDataset(testValueMatrices, currTestTargetMatrix);
+			Instances testInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(testDataset);
+			double[][] testProbs = null;
+			try {
+				testProbs = rf.distributionsForInstances(testInstances);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for (int j = 0; j < testProbs.length; j++) {
+				probs[i * numTestInstsPerFold + j] = testProbs[j];
+			}
+		}
 
 		// TODO: Discretize probability and form histogram
 		int[][] discretizedProbs = discretizeProbs(numBins, probs);

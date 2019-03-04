@@ -290,8 +290,7 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 
 		// Get occurring classes which can be used for index extraction
 		final int[] targetMatrix = data.getTargets();
-		final List<Integer> occuringClasses = IntStream.of(targetMatrix).boxed().collect(Collectors.toSet()).stream()
-				.collect(Collectors.toList());
+		final List<Integer> occuringClasses = TimeSeriesUtil.getClassesInDataset(data);
 
 		this.I = (int) data.getNumberOfInstances(); // I
 		this.Q = dataMatrix[0].length; // Q
