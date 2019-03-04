@@ -124,110 +124,6 @@
 <li class="blockList">
 <h2 title="Package">Package&nbsp;jaicore.search.algorithms.standard.bestfirst.nodeevaluation</h2>
 <ul class="blockList">
-<li class="blockList"><a name="jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator">
-<!--   -->
-</a>
-<h3>Class <a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/RandomCompletionBasedNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator</a> extends <a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/TimeAwareNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">TimeAwareNodeEvaluator</a>&lt;<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/RandomCompletionBasedNodeEvaluator.html" title="type parameter in RandomCompletionBasedNodeEvaluator">T</a>,<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/RandomCompletionBasedNodeEvaluator.html" title="type parameter in RandomCompletionBasedNodeEvaluator">V</a> extends java.lang.Comparable&lt;<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/RandomCompletionBasedNodeEvaluator.html" title="type parameter in RandomCompletionBasedNodeEvaluator">V</a>&gt;&gt; implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockList">
-<h4>loggerName</h4>
-<pre>java.lang.String loggerName</pre>
-</li>
-<li class="blockList">
-<h4>logger</h4>
-<pre>org.slf4j.Logger logger</pre>
-</li>
-<li class="blockList">
-<h4>timeoutForSingleCompletionEvaluationInMS</h4>
-<pre>int timeoutForSingleCompletionEvaluationInMS</pre>
-</li>
-<li class="blockList">
-<h4>unsuccessfulPaths</h4>
-<pre>java.util.Set&lt;E&gt; unsuccessfulPaths</pre>
-</li>
-<li class="blockList">
-<h4>postedSolutions</h4>
-<pre>java.util.Set&lt;E&gt; postedSolutions</pre>
-</li>
-<li class="blockList">
-<h4>timesToComputeEvaluations</h4>
-<pre>java.util.Map&lt;K,V&gt; timesToComputeEvaluations</pre>
-</li>
-<li class="blockList">
-<h4>scoresOfSolutionPaths</h4>
-<pre>java.util.Map&lt;K,V&gt; scoresOfSolutionPaths</pre>
-</li>
-<li class="blockList">
-<h4>fValues</h4>
-<pre>java.util.Map&lt;K,V&gt; fValues</pre>
-</li>
-<li class="blockList">
-<h4>ppFails</h4>
-<pre>java.util.Map&lt;K,V&gt; ppFails</pre>
-</li>
-<li class="blockList">
-<h4>plFails</h4>
-<pre>java.util.Map&lt;K,V&gt; plFails</pre>
-</li>
-<li class="blockList">
-<h4>plSuccesses</h4>
-<pre>java.util.Map&lt;K,V&gt; plSuccesses</pre>
-</li>
-<li class="blockList">
-<h4>generator</h4>
-<pre><a href="jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="jaicore/search/core/interfaces/GraphGenerator.html" title="type parameter in GraphGenerator">T</a>,<a href="jaicore/search/core/interfaces/GraphGenerator.html" title="type parameter in GraphGenerator">A</a>&gt; generator</pre>
-</li>
-<li class="blockList">
-<h4>timestampOfFirstEvaluation</h4>
-<pre>long timestampOfFirstEvaluation</pre>
-</li>
-<li class="blockList">
-<h4>random</h4>
-<pre>java.util.Random random</pre>
-</li>
-<li class="blockList">
-<h4>samples</h4>
-<pre>int samples</pre>
-</li>
-<li class="blockList">
-<h4>priorityPredicateForRDFS</h4>
-<pre>java.util.function.Predicate&lt;T&gt; priorityPredicateForRDFS</pre>
-</li>
-<li class="blockList">
-<h4>timeoutTimer</h4>
-<pre>java.util.Timer timeoutTimer</pre>
-</li>
-<li class="blockList">
-<h4>completer</h4>
-<pre><a href="jaicore/search/algorithms/standard/random/RandomSearch.html" title="class in jaicore.search.algorithms.standard.random">RandomSearch</a>&lt;<a href="jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">N</a>,<a href="jaicore/search/algorithms/standard/random/RandomSearch.html" title="type parameter in RandomSearch">A</a>&gt; completer</pre>
-</li>
-<li class="blockList">
-<h4>completerInsertionSemaphore</h4>
-<pre>java.util.concurrent.Semaphore completerInsertionSemaphore</pre>
-</li>
-<li class="blockList">
-<h4>solutionEvaluator</h4>
-<pre><a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>,<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">V</a> extends java.lang.Comparable&lt;<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">V</a>&gt;&gt; solutionEvaluator</pre>
-</li>
-<li class="blockList">
-<h4>uncertaintySource</h4>
-<pre><a href="jaicore/search/algorithms/standard/uncertainty/IUncertaintySource.html" title="interface in jaicore.search.algorithms.standard.uncertainty">IUncertaintySource</a>&lt;<a href="jaicore/search/algorithms/standard/uncertainty/IUncertaintySource.html" title="type parameter in IUncertaintySource">T</a>,<a href="jaicore/search/algorithms/standard/uncertainty/IUncertaintySource.html" title="type parameter in IUncertaintySource">V</a> extends java.lang.Comparable&lt;<a href="jaicore/search/algorithms/standard/uncertainty/IUncertaintySource.html" title="type parameter in IUncertaintySource">V</a>&gt;&gt; uncertaintySource</pre>
-</li>
-<li class="blockList">
-<h4>bestKnownScoreUnderNodeInCompleterGraph</h4>
-<pre>java.util.Map&lt;K,V&gt; bestKnownScoreUnderNodeInCompleterGraph</pre>
-</li>
-<li class="blockListLast">
-<h4>visualizeSubSearch</h4>
-<pre>boolean visualizeSubSearch</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
 <li class="blockList"><a name="jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomizedDepthFirstNodeEvaluator">
 <!--   -->
 </a>
@@ -287,15 +183,11 @@
 <li class="blockList"><a name="jaicore.search.algorithms.standard.rstar.GammaNode">
 <!--   -->
 </a>
-<h3>Class <a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">jaicore.search.algorithms.standard.rstar.GammaNode</a> extends <a href="jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="type parameter in GammaNode">T</a>,<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="type parameter in GammaNode">V</a> extends java.lang.Comparable&lt;<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="type parameter in GammaNode">V</a>&gt;&gt; implements Serializable</h3>
+<h3>Class <a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">jaicore.search.algorithms.standard.rstar.GammaNode</a> extends <a href="jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="type parameter in GammaNode">T</a>,<a href="jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt; implements Serializable</h3>
 <ul class="blockList">
 <li class="blockList">
 <h3>Serialized Fields</h3>
 <ul class="blockList">
-<li class="blockList">
-<h4>backpointer</h4>
-<pre><a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="type parameter in GammaNode">T</a>,<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="type parameter in GammaNode">V</a> extends java.lang.Comparable&lt;<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="type parameter in GammaNode">V</a>&gt;&gt; backpointer</pre>
-</li>
 <li class="blockList">
 <h4>g</h4>
 <pre>double g</pre>
@@ -305,27 +197,16 @@
 <pre>boolean avoid</pre>
 </li>
 <li class="blockList">
-<h4>successors</h4>
-<pre>java.util.Collection&lt;E&gt; successors</pre>
-<div class="block">List of generated successor for this node.
- Inititialized with null here and set only once within R* process..</div>
-</li>
-<li class="blockList">
 <h4>predecessors</h4>
 <pre>java.util.Collection&lt;E&gt; predecessors</pre>
 <div class="block">List of all predecessors for this node.
  Initialized here and then filled throughout R* processes.</div>
 </li>
-<li class="blockList">
+<li class="blockListLast">
 <h4>c_low</h4>
 <pre>java.util.HashMap&lt;K,V&gt; c_low</pre>
 <div class="block">Maps from each successor s_ to the lowest cost for path(this, s_).
  This is either a heuristic estimate or the actual known lowest cost.</div>
-</li>
-<li class="blockListLast">
-<h4>path</h4>
-<pre>java.util.HashMap&lt;K,V&gt; path</pre>
-<div class="block">Maps from each successor s_ to a path from this to s_.</div>
 </li>
 </ul>
 </li>

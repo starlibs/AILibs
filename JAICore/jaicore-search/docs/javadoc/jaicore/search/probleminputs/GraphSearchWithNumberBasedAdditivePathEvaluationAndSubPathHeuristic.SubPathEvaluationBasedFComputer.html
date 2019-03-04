@@ -1,0 +1,306 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer (jaicore-search 0.0.1-SNAPSHOT API)</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+<script type="text/javascript" src="../../../script.js"></script>
+</head>
+<body>
+<script type="text/javascript"><!--
+    try {
+        if (location.href.indexOf('is-external=true') == -1) {
+            parent.document.title="GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer (jaicore-search 0.0.1-SNAPSHOT API)";
+        }
+    }
+    catch(err) {
+    }
+//-->
+var methods = {"i0":10,"i1":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar.top">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.top.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-all.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator.html" title="interface in jaicore.search.probleminputs"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" target="_top">Frames</a></li>
+<li><a href="GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">jaicore.search.probleminputs</div>
+<h2 title="Class GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer" class="title">Class GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer&lt;N&gt;</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer.html" title="class in jaicore.search.probleminputs">jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer</a>&lt;N&gt;</li>
+<li>
+<ul class="inheritance">
+<li>jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer&lt;N&gt;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd><a href="../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;N,java.lang.Double&gt;</dd>
+</dl>
+<dl>
+<dt>Enclosing class:</dt>
+<dd><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic">A</a>&gt;</dd>
+</dl>
+<hr>
+<br>
+<pre>public static class <span class="typeNameLabel">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer&lt;N&gt;</span>
+extends <a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer</a>&lt;N&gt;</pre>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html#SubPathEvaluationBasedFComputer-jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator-">SubPathEvaluationBasedFComputer</a></span>(<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>&gt;&nbsp;g,
+                               <a href="../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>,java.lang.Double&gt;&nbsp;h,
+                               <a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>&gt;&nbsp;hPath)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html#gethPath--">gethPath</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>double</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html#h-jaicore.search.model.travesaltree.Node-jaicore.search.model.travesaltree.Node-">h</a></span>(<a href="../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>,?&gt;&nbsp;from,
+ <a href="../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>,?&gt;&nbsp;to)</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;jaicore.search.probleminputs.<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer</a></h3>
+<code><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer.html#f-jaicore.search.model.travesaltree.Node-">f</a>, <a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer.html#getG--">getG</a>, <a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer.html#getH--">getH</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="SubPathEvaluationBasedFComputer-jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>SubPathEvaluationBasedFComputer</h4>
+<pre>public&nbsp;SubPathEvaluationBasedFComputer(<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>&gt;&nbsp;g,
+                                       <a href="../../../jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>,java.lang.Double&gt;&nbsp;h,
+                                       <a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>&gt;&nbsp;hPath)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="h-jaicore.search.model.travesaltree.Node-jaicore.search.model.travesaltree.Node-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>h</h4>
+<pre>public&nbsp;double&nbsp;h(<a href="../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>,?&gt;&nbsp;from,
+                <a href="../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>,?&gt;&nbsp;to)</pre>
+</li>
+</ul>
+<a name="gethPath--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>gethPath</h4>
+<pre>public&nbsp;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="type parameter in GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer">N</a>&gt;&nbsp;gethPath()</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar.bottom">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.bottom.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-all.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator.html" title="interface in jaicore.search.probleminputs"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" target="_top">Frames</a></li>
+<li><a href="GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

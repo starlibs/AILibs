@@ -735,16 +735,16 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <li class="blockList">
 <h4>labelNode</h4>
 <pre>protected&nbsp;void&nbsp;labelNode(<a href="../../../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">V</a>&gt;&nbsp;node)
-                  throws <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a>,
-                         java.util.concurrent.TimeoutException,
+                  throws java.util.concurrent.TimeoutException,
                          jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                         java.lang.InterruptedException</pre>
+                         java.lang.InterruptedException,
+                         jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a></code></dd>
 <dd><code>java.util.concurrent.TimeoutException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 </dl>
 </li>
 </ul>
@@ -755,17 +755,17 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <li class="blockList">
 <h4>initGraph</h4>
 <pre>protected&nbsp;void&nbsp;initGraph()
-                  throws <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a>,
-                         java.util.concurrent.TimeoutException,
+                  throws java.util.concurrent.TimeoutException,
                          jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                         java.lang.InterruptedException</pre>
+                         java.lang.InterruptedException,
+                         jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <div class="block">This method setups the graph by inserting the root nodes.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 <dd><code>java.util.concurrent.TimeoutException</code></dd>
-<dd><code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a></code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 </dl>
 </li>
 </ul>
