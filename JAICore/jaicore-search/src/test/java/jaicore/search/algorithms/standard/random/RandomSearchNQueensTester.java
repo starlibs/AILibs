@@ -12,7 +12,7 @@ import jaicore.search.testproblems.nqueens.QueenNode;
 
 public class RandomSearchNQueensTester extends NQueenTester<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>> {
 
-	
+
 
 	@Override
 	public IGraphSearchFactory<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>, QueenNode, String> getFactory() {
@@ -24,25 +24,30 @@ public class RandomSearchNQueensTester extends NQueenTester<GraphSearchInput<Que
 		return new AlgorithmProblemTransformer<Integer, GraphSearchInput<QueenNode,String>>() {
 
 			@Override
-			public GraphSearchInput<QueenNode, String> transform(Integer problem) {
+			public GraphSearchInput<QueenNode, String> transform(final Integer problem) {
 				return new GraphSearchInput<>(new NQueenGenerator(problem));
 			}
 		};
 	}
 
+	@Override
 	@Test
 	public void testQuickTimeout() throws Exception {
-		
+
+		/* we cannot create sufficiently difficult instances of this problem in general for this algorithm to require at least 5 seconds */
 	}
-	
+
+	@Override
 	@Test
 	public void testCancel() throws Exception {
-		
+
+		/* we cannot create sufficiently difficult instances of this problem in general for this algorithm to require at least 5 seconds */
 	}
-	
+
+	@Override
 	@Test
 	public void testInterrupt() throws Exception {
-		
+
 		/* we cannot create sufficiently difficult instances of this problem in general for this algorithm to require at least 5 seconds */
 	}
 }

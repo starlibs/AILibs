@@ -26,6 +26,7 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.InterruptionTimerTask;
+import jaicore.concurrent.TimeoutTimer;
 
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
@@ -165,7 +166,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	protected Timer getTimerAndCreateIfNotExistent() {
 		if (this.timer == null) {
-			this.timer = new Timer("Timer for algorithm " + this.getId());
+			this.timer = TimeoutTimer.getInstance();
 		}
 		return this.timer;
 	}
@@ -237,10 +238,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			t.interrupt();
 			this.threadsInterruptedByShutdown.add(t);
 		});
-		if (this.timer != null) {
-			this.logger.info("Canceling timer {}", this.timer);
-			this.timer.cancel();
-		}
 		this.logger.info("Shutdown of {} completed.", this.getId());
 	}
 
@@ -378,6 +375,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	protected <T> T computeTimeoutAware(final Callable<T> r) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, TimeoutException {
+		this.logger.debug("Received request to execute {} with awareness of timeout {}.", r, this.getTimeout());
 
 		/* if no timeout is sharp, just execute the task */
 		if (this.getTimeout().milliseconds() < 0) {
