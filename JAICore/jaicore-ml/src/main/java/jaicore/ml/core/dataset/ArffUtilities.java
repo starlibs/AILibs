@@ -27,7 +27,7 @@ public class ArffUtilities {
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = bufferedReader.readLine()) != null) {
-			if (line.trim().charAt(0) == '%') {
+			if (line.trim().equals("") || line.trim().charAt(0) == '%') {
 				continue;
 			}
 			header += line.trim() + "\n";
@@ -55,7 +55,7 @@ public class ArffUtilities {
 		BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = bufferedReader.readLine()) != null) {
-			if (line.trim().charAt(0) == '%') {
+			if (line.trim().equals("") || line.trim().charAt(0) == '%') {
 				continue;
 			}
 			if (startCounting) {
@@ -80,7 +80,7 @@ public class ArffUtilities {
 	public static void skipWithReaderToDatapoints(BufferedReader reader) throws IOException {
 		String line;
 		while ((line = reader.readLine()) != null) {
-			if (line.trim().charAt(0) == '%') {
+			if (line.trim().equals("") || line.trim().charAt(0) == '%') {
 				continue;
 			} else if (line.trim().equals("@data")) {
 				return;
