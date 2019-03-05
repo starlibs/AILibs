@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.zeroshot.inputoptimization;
+package main.java.jaicore.ml.dyadranking.zeroshot.inputoptimization;
 
 import org.deeplearning4j.nn.gradient.Gradient;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
@@ -13,7 +13,7 @@ import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import jaicore.ml.dyadranking.zeroshot.util.InputOptListener;
+import main.java.jaicore.ml.dyadranking.zeroshot.util.InputOptListener;
 
 public class PLNetInputOptimizer {
 	

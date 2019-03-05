@@ -14,8 +14,8 @@ import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.general.DyadRankingInstanceSupplier;
-import jaicore.ml.dyadranking.zeroshot.inputoptimization.NegIdentityInpOptLoss;
-import jaicore.ml.dyadranking.zeroshot.inputoptimization.PLNetInputOptimizer;
+import main.java.jaicore.ml.dyadranking.zeroshot.inputoptimization.NegIdentityInpOptLoss;
+import main.java.jaicore.ml.dyadranking.zeroshot.inputoptimization.PLNetInputOptimizer;
 
 public class InputOptimizerTest {
 

@@ -1,4 +1,4 @@
-package jaicore.ml.dyadranking.zeroshot.inputoptimization;
+package main.java.jaicore.ml.dyadranking.zeroshot.inputoptimization;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
