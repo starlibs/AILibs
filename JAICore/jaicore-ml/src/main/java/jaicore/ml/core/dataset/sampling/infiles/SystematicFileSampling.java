@@ -141,16 +141,5 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
 	}
-
-	public static void main(String[] args) throws Exception {
-		TempFileHandler handler = new TempFileHandler();
-		SystematicFileSampling sampling = new SystematicFileSampling(new Random(123), handler);
-		sampling.setSampleSize(10);
-		File input = new File("/home/lukas/Dev/AILibs/JAICore/jaicore-ml/testsrc/ml/orig/letter.arff");
-		sampling.setInput(input);
-		sampling.setOutputFileName("/home/lukas/testOutput.arff");
-		sampling.call();
-		handler.close();
-	}
 	
 }
