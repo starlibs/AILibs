@@ -60,7 +60,7 @@
 	</logger>
 	
 	<logger name="testedalgorithm">
-    <level value="warn" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -74,7 +74,7 @@
   </logger>
   
   <logger name="testedalgorithm._orgraphsearch._algorithm">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="testednodeevaluator">

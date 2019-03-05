@@ -27,6 +27,7 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.basic.sets.SetUtil;
 
@@ -38,6 +39,10 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 
 	@Before
 	public <I, O> void loadProblemsAndSolutions() throws InterruptedException {
+
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException("Cannot load problems and solutions, because the thread has been interrupted.");
+		}
 
 		/* get problem set */
 		@SuppressWarnings("unchecked")
@@ -132,7 +137,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	}
 
 	@Test
-	public void testThatIteratorReturnsEachPossibleSolution() throws InterruptedException {
+	public void testThatIteratorReturnsEachPossibleSolution() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			assertNotNull(algorithm);
@@ -145,7 +150,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 			Iterator<AlgorithmEvent> iterator = algorithm.iterator();
 			assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 			while (iterator.hasNext()) {
-				AlgorithmEvent e = algorithm.next();
+				AlgorithmEvent e = algorithm.nextWithException();
 				assertNotNull("The search iterator has returned NULL even though hasNext suggested that more event should come.", e);
 				if (!initialized) {
 					assertTrue(e instanceof AlgorithmInitializedEvent);

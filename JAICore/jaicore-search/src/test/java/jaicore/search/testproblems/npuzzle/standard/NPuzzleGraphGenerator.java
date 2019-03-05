@@ -16,13 +16,13 @@ import jaicore.testproblems.npuzzle.NPuzzleState;
  * @author jkoepe
  *
  */
-public class NPuzzleGenerator implements GraphGenerator<NPuzzleState, String>{
+public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, String>{
 
 
 	protected int dimension;
 	private NPuzzleState root;
 
-	public NPuzzleGenerator(final int[][] board) {
+	public NPuzzleGraphGenerator(final int[][] board) {
 		this.dimension = board.length;
 		int emptyX = 0;
 		int emptyY = 0;
