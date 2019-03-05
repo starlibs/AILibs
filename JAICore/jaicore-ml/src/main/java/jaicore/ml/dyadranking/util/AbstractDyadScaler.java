@@ -1,6 +1,7 @@
 package jaicore.ml.dyadranking.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -27,6 +28,14 @@ public abstract class AbstractDyadScaler implements Serializable {
 
 	protected SummaryStatistics[] statsX;
 	protected SummaryStatistics[] statsY;
+	
+	public SummaryStatistics[] getStatsX() {
+		return statsX;
+	}
+
+	public SummaryStatistics[] getStatsY() {
+		return statsY;
+	}
 
 	/**
 	 * Fits the standard scaler to the dataset.
@@ -82,7 +91,9 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * 
 	 * @param dataset The dataset of which the instances are to be standardized.
 	 */
-	public abstract void transformInstances(DyadRankingDataset dataset);
+	public void transformInstances(DyadRankingDataset dataset) {
+		transformInstances(dataset, new ArrayList<>());
+	}
 
 	/**
 	 * Transforms only the alternatives of each dyad according to the mean and
@@ -90,7 +101,28 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * 
 	 * @param dataset The dataset of which the alternatives are to be standardized.
 	 */
-	public abstract void transformAlternatives(DyadRankingDataset dataset);
+	public void transformAlternatives(DyadRankingDataset dataset) {
+		transformAlternatives(dataset, new ArrayList<>());
+	}
+
+	/**
+	 * Transforms only the instances of each dyad according to the mean and
+	 * standard deviation of the data the scaler has been fit to. The attributes
+	 * with indices contained in ignoredIndices are not transformed. {
+	 * 
+	 * @param dataset The dataset of which the alternatives are to be standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by the scaler.
+	 */
+	public abstract void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices);
+
+	/**
+	 * Transforms only the alternatives of each dyad according to the mean and
+	 * standard deviation of the data the scaler has been fit to.
+	 * 
+	 * @param dataset The dataset of which the alternatives are to be standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by the scaler.
+	 */
+	public abstract void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices);
 
 	/**
 	 * Transforms only the instances of each dyad according to the mean and
