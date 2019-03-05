@@ -12,6 +12,9 @@ import jaicore.basic.sets.SetUtil.Pair;
  *
  */
 public class TimeSeriesBagOfFeaturesAlgorithmTest {
+
+	private static final double EPS = 0.00001;
+
 	@Test
 	public void discretizeProbsTest() {
 		int numBins = 10;
@@ -46,6 +49,11 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 
 	@Test
 	public void generateHistogramInstancesTest() {
+		int[][][] histograms = new int[][][] { { { 1, 0, 1 }, { 0, 1, 1 } } };
+		int[][] relativeFreqsOfClasses = new int[][] { { 0, 2 } };
 
+		Assert.assertArrayEquals(new double[] { 1, 0, 1, 0, 1, 1, 0, 2 },
+				TimeSeriesBagOfFeaturesAlgorithm.generateHistogramInstances(histograms, relativeFreqsOfClasses)[0],
+				EPS);
 	}
 }

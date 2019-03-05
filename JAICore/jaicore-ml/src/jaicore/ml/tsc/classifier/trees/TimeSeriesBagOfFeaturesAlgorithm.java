@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,11 +67,17 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 	 */
 	private static final double EPS = 0.00001;
 
-	public TimeSeriesBagOfFeaturesAlgorithm(final int seed, final int numBins, final int numFolds) {
+	private double zProp;
+	private int minIntervalLength;
+
+	public TimeSeriesBagOfFeaturesAlgorithm(final int seed, final int numBins, final int numFolds, final double zProp,
+			final int minIntervalLength) {
 		// TODO Auto-generated constructor stub
 		this.seed = seed;
 		this.numBins = numBins;
 		this.numFolds = numFolds;
+		this.zProp = zProp;
+		this.minIntervalLength = minIntervalLength;
 	}
 
 	@Override
@@ -107,12 +115,12 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 
 		// TODO Subsequences and feature extraction
 		int T = data[0].length; // Time series length
-		double zProp = 0.5d;
-		int lMin = (int) (zProp * T);
+		int lMin = (int) (this.zProp * T);
 
-		int wMin = 3; // Minimum interval length used for meaningful intervals
+		int wMin = this.minIntervalLength; // Minimum interval length used for meaningful intervals
 
-		int d = (int) Math.floor((double) lMin / (double) wMin); // Number of intervals for each subsequence
+		int d = lMin > wMin ? (int) Math.floor((double) lMin / (double) wMin) : 1; // Number of intervals for each
+																					// subsequence
 
 		int r = (int) Math.floor((double) T / (double) wMin); // Number of possible intervals in a time series
 
@@ -212,13 +220,16 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 			ArrayList<double[][]> testValueMatrices = new ArrayList<>();
 			testValueMatrices.add(currTestMatrix);
 			TimeSeriesDataset testDataset = new TimeSeriesDataset(testValueMatrices, currTestTargetMatrix);
-			Instances testInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(testDataset);
+			Instances testInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(testDataset,
+					IntStream.rangeClosed(0, C - 1).boxed().map(v -> String.valueOf(v)).collect(Collectors.toList()));
+
 			double[][] testProbs = null;
 			try {
 				testProbs = rf.distributionsForInstances(testInstances);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
+				return null;
 			}
 			for (int j = 0; j < testProbs.length; j++) {
 				probs[i * numTestInstsPerFold + j] = testProbs[j];
@@ -287,6 +298,8 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 			for (int j = 0; j < relativeFreqsOfClasses[i].length; j++) {
 				instFeatures[featureIdx++] = relativeFreqsOfClasses[i][j];
 			}
+
+			results[i] = instFeatures;
 		}
 
 		return results;

@@ -31,8 +31,9 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 	private int numClasses;
 	private int[][][] subsequences;
 
-	public TimeSeriesBagOfFeaturesClassifier(final int seed, final int numBins) {
-		super(new TimeSeriesBagOfFeaturesAlgorithm(seed, numBins));
+	public TimeSeriesBagOfFeaturesClassifier(final int seed, final int numBins, final int numFolds,
+			final double zProp, final int minIntervalLength) {
+		super(new TimeSeriesBagOfFeaturesAlgorithm(seed, numBins, numFolds, zProp, minIntervalLength));
 		// TODO Auto-generated constructor stub
 	}
 

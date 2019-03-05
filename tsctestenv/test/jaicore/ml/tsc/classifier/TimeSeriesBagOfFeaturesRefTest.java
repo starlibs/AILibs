@@ -60,12 +60,14 @@ public class TimeSeriesBagOfFeaturesRefTest {
 		int seed = 42;
 		int numBins = 10; // As in the reference implementation
 		int numFolds = 10; // As in the reference implementation
+		double zProp = 0.8; // As in the reference implementation
+		int minIntervalLength = 5; // As in the reference implementation
 
-		TimeSeriesBagOfFeaturesClassifier ownClf = new TimeSeriesBagOfFeaturesClassifier(seed, numBins, numFolds);
+		TimeSeriesBagOfFeaturesClassifier ownClf = new TimeSeriesBagOfFeaturesClassifier(seed, numBins, numFolds,
+				zProp, minIntervalLength);
 
 		TSBF refClf = new TSBF();
 		refClf.seedRandom(seed);
-
 
 		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
 				new File(ITALY_POWER_DEMAND_TRAIN), new File(ITALY_POWER_DEMAND_TEST));
