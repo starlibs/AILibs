@@ -29,6 +29,7 @@ import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
@@ -62,7 +63,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 
 	protected final IPathUpdatablePolicy<N, A, V> treePolicy;
 	protected final IPolicy<N, A, V> defaultPolicy;
-	protected final ISolutionEvaluator<N, V> playoutSimulator;
+	protected final ISolutionEvaluator<N, A, V> playoutSimulator;
 
 	private final Map<List<N>, V> scoreCache = new HashMap<>();
 
@@ -368,7 +369,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 						if (!this.scoreCache.containsKey(path)) {
 							this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
 							try {
-								V playoutScore = this.playoutSimulator.evaluateSolution(path);
+								V playoutScore = this.playoutSimulator.evaluateSolution(this.getPathForNodeList(path));
 								boolean isSolutionPlayout = this.nodeGoalTester.isGoal(path.get(path.size() - 1));
 								this.logger.debug("Determined playout score {}. Is goal: {}. Now updating the path.", playoutScore, isSolutionPlayout);
 								this.scoreCache.put(path, playoutScore);
@@ -419,6 +420,15 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			actions.add(this.exploredGraph.getEdgeLabel(path.get(i - 1), path.get(i)));
 		}
 		return actions;
+	}
+
+	private SearchGraphPath<N, A> getPathForNodeList(final List<N> nodeList) {
+		List<A> actions = new ArrayList<>();
+		int n = nodeList.size();
+		for (int i = 1; i < n; i++) {
+			actions.add(this.exploredGraph.getEdgeLabel(nodeList.get(i - 1), nodeList.get(i)));
+		}
+		return new SearchGraphPath<>(nodeList, actions);
 	}
 
 	@Override

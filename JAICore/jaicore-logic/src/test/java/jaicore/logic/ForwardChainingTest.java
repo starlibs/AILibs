@@ -10,8 +10,10 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.basic.algorithm.IAlgorithm;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.util.ForwardChainer;
 import jaicore.logic.fol.util.ForwardChainingProblem;
@@ -36,7 +38,7 @@ public class ForwardChainingTest extends GeneralAlgorithmTester {
 	}
 
 	@Test
-	public void testSingle() throws Exception {
+	public void testSingle() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		Monom factbase = new Monom("P('a', 'b') & P('b', 'c') & Q('b', 'c')");
 		Monom conclusion = new Monom("P(x, y) & Q(y, z)");
 
@@ -45,7 +47,7 @@ public class ForwardChainingTest extends GeneralAlgorithmTester {
 	}
 
 	@Test
-	public void testDouble() throws Exception {
+	public void testDouble() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException  {
 		Monom factbase = new Monom("P('a', 'b') & P('b', 'c') & Q('b', 'c') & Q('c', 'a')");
 		Monom conclusion = new Monom("P(x, y) & Q(y, z)");
 
@@ -54,7 +56,7 @@ public class ForwardChainingTest extends GeneralAlgorithmTester {
 	}
 
 	@Test
-	public void testTriple() throws Exception {
+	public void testTriple() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException  {
 		Monom factbase = new Monom("P('a', 'b') & P('b', 'c') & Q('b', 'c') & Q('c', 'a')");
 		Monom conclusion = new Monom("P(x, y) & Q(y, z) & P(y, z) & Q(z, x)");
 
@@ -63,7 +65,7 @@ public class ForwardChainingTest extends GeneralAlgorithmTester {
 	}
 
 	@Test
-	public void testCWA() throws Exception {
+	public void testCWA() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		Monom factbase = new Monom("P('a', 'b') & P('b', 'c') & Q('b', 'c')");
 		Monom conclusion = new Monom("P(x, y) & !Q(y, z)");
 

@@ -8,7 +8,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
@@ -22,6 +21,7 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
@@ -33,6 +33,7 @@ import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
 import jaicore.logic.fol.theories.EvaluablePredicate;
 import jaicore.planning.classical.problems.ceoc.CEOCOperation;
+import jaicore.planning.core.EvaluatedPlan;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
@@ -50,7 +51,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
  *
  */
 public class HASCOReduction<V extends Comparable<V>> implements
-		AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>> {
+AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
@@ -275,11 +276,11 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	 */
 	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
 			final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
-		return transformer.encodeProblem(this.getPlanningProblem());
+		return transformer.encodeProblem(this.getPlanningProblem()).getGraphGenerator();
 	}
 
 	@Override
-	public CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> transform(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
+	public CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> encodeProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
 
 		/* set object variables that will be important for several methods in the reduction */
 		this.originalProblem = problem;
@@ -293,10 +294,11 @@ public class HASCOReduction<V extends Comparable<V>> implements
 		IObjectEvaluator<Plan, V> planEvaluator = new IObjectEvaluator<Plan, V>() {
 
 			@Override
-			public V evaluate(final Plan plan) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
-				ComponentInstance solution = Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
-				if (solution == null)
+			public V evaluate(final Plan plan) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException  {
+				ComponentInstance solution = HASCOReduction.this.decodeSolution(plan);
+				if (solution == null) {
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
+				}
 				return problem.getCompositionEvaluator().evaluate(solution);
 			}
 
@@ -310,5 +312,14 @@ public class HASCOReduction<V extends Comparable<V>> implements
 		};
 		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>(planningProblem, planEvaluator);
 		return costSensitiveProblem;
+	}
+
+	@Override
+	public ComponentInstance decodeSolution(final EvaluatedPlan<V> solution) {
+		return this.decodeSolution((Plan)solution);
+	}
+
+	public ComponentInstance decodeSolution(final Plan plan) {
+		return Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
 	}
 }

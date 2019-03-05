@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
@@ -13,16 +14,20 @@ import jaicore.planning.hierarchical.problems.stn.STNPlanningDomain;
 import jaicore.planning.hierarchical.problems.stn.STNPlanningProblem;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
-public class STNDockworkerProblemGenerator {
+public class STNDockworkerProblemSet extends AAlgorithmTestProblemSet<STNPlanningProblem> {
+	public STNDockworkerProblemSet() {
+		super("Dockworker Problem");
+	}
+
 	public static STNPlanningProblem getDockworkerProblem() {
 
 		/* retrieve STRIPS operations of the planning problem */
-		StripsPlanningDomain dwrStripsDomain = (StripsPlanningDomain) jaicore.planning.classical.problems.strips.StandardProblemFactory.getDockworkerProblem().getDomain();
+		StripsPlanningDomain dwrStripsDomain = jaicore.planning.classical.problems.strips.StandardProblemFactory.getDockworkerProblem().getDomain();
 
 		/* define non-primitive STN task literals for the domain */
 		Literal taskMoveTopmostContainer = new Literal("move-topmost-container(p1,p2)");
 		Literal taskMoveStack = new Literal("move-stack(p,q)");
-//		Literal taskMoveAllStacks = new Literal("move-all-stacks()");
+		//		Literal taskMoveAllStacks = new Literal("move-all-stacks()");
 
 		/* define STN methods for the domain */
 		List<Method> methods = new ArrayList<>();
@@ -45,5 +50,15 @@ public class STNDockworkerProblemGenerator {
 				);
 		TaskNetwork network = new TaskNetwork("move-stack('p1a', 'p1c') -> move-stack('p1c','p1b') -> move-stack('p2a','p2c') -> move-stack('p2c','p2b') -> move-stack('p3a','p3c') -> move-stack('p3c','p3b')");
 		return new STNPlanningProblem(domain, null, init, network);
+	}
+
+	@Override
+	public STNPlanningProblem getSimpleProblemInputForGeneralTestPurposes() {
+		return getDockworkerProblem();
+	}
+
+	@Override
+	public STNPlanningProblem getDifficultProblemInputForGeneralTestPurposes() {
+		return getDockworkerProblem();
 	}
 }

@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.andor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +27,7 @@ import jaicore.basic.sets.RelationComputationProblem;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import jaicore.search.algorithms.andor.AndORBottomUpFilter.EvaluatedGraph;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -193,7 +195,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 
 			/* compute cartesian product of best subsolutions of children */
 			int k = (int) Math.ceil(Math.pow(this.nodeLimit, 1f / subSolutions.size())); // the number of subsolution to consider for each child
-			List<List<EvaluatedGraph>> subSolutionsPerChild = new ArrayList<>();
+			List<Collection<EvaluatedGraph>> subSolutionsPerChild = new ArrayList<>();
 			for (InnerNodeLabel child : subSolutions.keySet()) {
 				List<EvaluatedGraph> bestSubSolutionsOfThisChild = new ArrayList<>();
 				this.logger.debug("Adding " + Math.min(k, subSolutions.get(child).size()) + "/" + subSolutions.get(child).size() + " subsolutions of child into the cartesian product input.");

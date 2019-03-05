@@ -17,7 +17,7 @@ public class EnhancedTTSPGraphSearchToUncertaintyBasedGraphSearchReducer impleme
 
 	private Random random = new Random(0);
 	private int samples = 3;
-	private ISolutionEvaluator<EnhancedTTSPNode, Double> solutionEvaluator = new AgnosticPathEvaluator<>();
+	private ISolutionEvaluator<EnhancedTTSPNode, String, Double> solutionEvaluator = new AgnosticPathEvaluator<>();
 	private IUncertaintySource<EnhancedTTSPNode, Double> uncertaintySource = (n, simulationPaths, simulationEvaluations) -> 0.5;
 
 

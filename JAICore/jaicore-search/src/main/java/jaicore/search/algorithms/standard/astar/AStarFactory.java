@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.astar;
 
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
@@ -24,13 +23,21 @@ public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 	}
 
 	@Override
-	public IOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluation<T,A>, T, A, Double> getAlgorithm() {
-		AStar<T, A> search = new AStar<T,A>(getInput());
+	public AStar<T, A> getAlgorithm() {
+		return this.getAlgorithm(this.getInput());
+	}
+
+	@Override
+	public AStar<T, A> getAlgorithm(final GraphSearchWithNumberBasedAdditivePathEvaluation<T, A> input) {
+		AStar<T, A> search = new AStar<>(input);
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
-		if (loggerName != null && loggerName.length() > 0)
-			search.setLoggerName(loggerName);
+		if (this.loggerName != null && this.loggerName.length() > 0) {
+			search.setLoggerName(this.loggerName);
+		}
 		return search;
 	}
+
+
 
 	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<T, Double> timeoutEvaluator) {
 		this.timeoutForFInMS = timeoutInMS;
@@ -46,10 +53,10 @@ public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 	}
 
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
-	public void setLoggerName(String loggerName) {
+	public void setLoggerName(final String loggerName) {
 		this.loggerName = loggerName;
 	}
 }

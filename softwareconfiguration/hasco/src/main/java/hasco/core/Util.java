@@ -35,6 +35,7 @@ import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 
 public class Util {
@@ -96,9 +97,9 @@ public class Util {
 			for (Parameter p : object.getComponent().getParameters()) {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName()
-						+ "!";
+				+ "!";
 				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName()
-						+ " is not defined!";
+				+ " is not defined!";
 
 				String assignedValue = parameterValues.get(parameterContainerMap.get(objectName).get(p.getName()));
 				String interpretedValue = "";
@@ -192,9 +193,9 @@ public class Util {
 			for (Parameter p : object.getComponent().getParameters()) {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName()
-						+ "!";
+				+ "!";
 				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName()
-						+ " is not defined!";
+				+ " is not defined!";
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);
@@ -208,12 +209,12 @@ public class Util {
 
 	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
 			final Collection<Component> components, final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
-		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), resolveIntervals);
+		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), resolveIntervals);
 	}
 
 	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
-			final Collection<Component> components, final Monom initState, final Node<N, ?> path, String name, final boolean resolveIntervals) {
-		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), name, resolveIntervals);
+			final Collection<Component> components, final Monom initState, final Node<N, ?> path, final String name, final boolean resolveIntervals) {
+		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), name, resolveIntervals);
 	}
 
 	public static Monom getFinalStateOfPlan(final Monom initState, final Plan plan) {
@@ -228,7 +229,7 @@ public class Util {
 		return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan), resolveIntervals);
 	}
 
-	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan plan, String name,
+	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan plan, final String name,
 			final boolean resolveIntervals) {
 		return getComponentInstanceFromState(components, getFinalStateOfPlan(initState, plan), name, resolveIntervals);
 	}
@@ -237,17 +238,17 @@ public class Util {
 		return getComponentInstanceFromState(components, state, "solution", resolveIntervals);
 	}
 
-	public static ComponentInstance getComponentInstanceFromState(final Collection<Component> components, final Monom state, String name, final boolean resolveIntervals) {
+	public static ComponentInstance getComponentInstanceFromState(final Collection<Component> components, final Monom state, final String name, final boolean resolveIntervals) {
 		return Util.getGroundComponentsFromState(state, components, resolveIntervals).get(name);
 	}
 
 	/**
 	 * Computes a String of component names that appear in the composition which can be used as an identifier for the composition
-	 * 
+	 *
 	 * @param composition
 	 * @return String of all component names in right to left depth-first order
 	 */
-	public static String getComponentNamesOfComposition(ComponentInstance composition) {
+	public static String getComponentNamesOfComposition(final ComponentInstance composition) {
 		StringBuilder builder = new StringBuilder();
 		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
 		componentInstances.push(composition);
@@ -268,11 +269,11 @@ public class Util {
 
 	/**
 	 * Computes a list of all components of the given composition.
-	 * 
+	 *
 	 * @param composition
 	 * @return List of components in right to left depth-first order
 	 */
-	public static List<Component> getComponentsOfComposition(ComponentInstance composition) {
+	public static List<Component> getComponentsOfComposition(final ComponentInstance composition) {
 		List<Component> components = new LinkedList<Component>();
 		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
 		componentInstances.push(composition);
@@ -330,8 +331,8 @@ public class Util {
 		ComponentInstance instance = getComponentInstanceFromState(components, state, objectIdentifierInState, false);
 
 		/* now compute the new domains based on the current values */
-//		Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().filter(containerName -> parameterContainerMap.containsValue(containerName))
-//				.map(containerName -> component.getParameterWithName(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
+		//		Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().filter(containerName -> parameterContainerMap.containsValue(containerName))
+		//				.map(containerName -> component.getParameterWithName(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
 		return getUpdatedDomainsOfComponentParameters(instance);
 		// return null;
 	}
@@ -446,8 +447,9 @@ public class Util {
 					// a rule has failed";
 					// domains.put(param, intersection);
 				}
-			} else
+			} else {
 				logger.debug("Ignoring unsatisfied dependency {}.", dependency);
+			}
 		}
 		return domains;
 	}
@@ -457,8 +459,9 @@ public class Util {
 		for (Collection<Pair<Parameter, ParameterDomain>> condition : dependency.getPremise()) {
 			boolean check = isDependencyConditionSatisfied(condition, values);
 			logger.trace("Result of check for condition {}: {}", condition, check);
-			if (!check)
+			if (!check) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -470,13 +473,14 @@ public class Util {
 			ParameterDomain actualDomain = values.get(param);
 			assert values.containsKey(param) : "Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values;
 			assert values.get(param) != null : "Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is NULL in " + values;
-			if (!requiredDomain.subsumes(actualDomain))
+			if (!requiredDomain.subsumes(actualDomain)) {
 				return false;
+			}
 		}
 		return true;
 	}
 
-	public static List<Interval> getNumericParameterRefinement(final Interval interval, double focus, boolean integer, final ParameterRefinementConfiguration refinementConfig) {
+	public static List<Interval> getNumericParameterRefinement(final Interval interval, final double focus, final boolean integer, final ParameterRefinementConfiguration refinementConfig) {
 
 		double inf = interval.getInf();
 		double sup = interval.getSup();
@@ -510,7 +514,7 @@ public class Util {
 			List<Interval> proposedRefinements = refineOnLinearScale(interval, refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength());
 			for (Interval proposedRefinement : proposedRefinements) {
 				assert proposedRefinement.getInf() >= inf && proposedRefinement.getSup() <= sup : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-						+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
+				+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
 				assert !proposedRefinement.equals(interval) : "No real refinement! Intervals are identical.";
 			}
 			return proposedRefinements;
@@ -625,7 +629,7 @@ public class Util {
 		} while (!openRefinements.isEmpty());
 	}
 
-	public static boolean isDefaultConfiguration(ComponentInstance instance) {
+	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
 		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
 				List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
@@ -634,9 +638,9 @@ public class Util {
 				if (!isCompatibleWithDefaultValue) {
 					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which does not subsume the default value " + defaultValue);
 					return false;
-				}
-				else
+				} else {
 					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which IS COMPATIBLE with the default value " + defaultValue);
+				}
 			} else {
 				if (!instance.getParameterValue(p).equals(p.getDefaultValue().toString())) {
 					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which is not the default " + p.getDefaultValue().toString());
@@ -645,13 +649,14 @@ public class Util {
 			}
 		}
 		for (ComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {
-			if (!isDefaultConfiguration(child))
+			if (!isDefaultConfiguration(child)) {
 				return false;
+			}
 		}
 		return true;
 	}
-	
-	public static int getNumberOfUnparametrizedCompositions(Collection<Component> components, String requiredInterface) {
+
+	public static int getNumberOfUnparametrizedCompositions(final Collection<Component> components, final String requiredInterface) {
 		Collection<Component> candidates = components.stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
 		int numCandidates = 0;
 		for (Component candidate : candidates) {
@@ -662,10 +667,11 @@ public class Util {
 			else {
 				for (String req : candidate.getRequiredInterfaces().keySet()) {
 					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, candidate.getRequiredInterfaces().get(req));
-					if (waysToResolveComponent > 0)
+					if (waysToResolveComponent > 0) {
 						waysToResolveComponent *= subSolutionsForThisInterface;
-					else
+					} else {
 						waysToResolveComponent = subSolutionsForThisInterface;
+					}
 				}
 			}
 			numCandidates += waysToResolveComponent;

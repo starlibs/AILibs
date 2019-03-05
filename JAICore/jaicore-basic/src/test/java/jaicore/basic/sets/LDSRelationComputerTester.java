@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.sets.algorithms.RelationComputerTester;
@@ -17,14 +18,14 @@ import jaicore.basic.sets.algorithms.RelationComputerTester;
 public class LDSRelationComputerTester extends RelationComputerTester {
 
 	@Test
-	public void testOutputSizeForCartesianProducts() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public void testOutputSizeForCartesianProducts() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
 		RelationComputationProblem<Object> problem = this.getCartesianProductProblem();
 		int expected = problem.getSets().get(0).size() * problem.getSets().get(1).size() * problem.getSets().get(2).size();
 		this.testRelation(problem, expected);
 	}
 
 	@Test
-	public void testOutputSizeForNonEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public void testOutputSizeForNonEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
 		RelationComputationProblem<Object> problem = this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes();
 		List<List<Object>> cartesianProduct = new LDSRelationComputer<>(this.getCartesianProductProblem()).call();
 		List<List<?>> groundTruth = cartesianProduct.stream().filter(problem.getPrefixFilter()).collect(Collectors.toList());
@@ -32,12 +33,12 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 	}
 
 	@Test
-	public void testOutputSizeForEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public void testOutputSizeForEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
 		this.testRelation(this.getInfeasibleRelationProblem(), 0);
 	}
 
 	@Test
-	public void testOutputSizeForPrunedRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+	public void testOutputSizeForPrunedRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
 		this.testRelation(this.getInfeasibleCompletelyPrunedRelationProblem(), 0);
 	}
 
@@ -65,15 +66,15 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 		return defficiency;
 	}
 
-	public RelationComputationProblem<Object> getCartesianProductProblem() {
+	public RelationComputationProblem<Object> getCartesianProductProblem() throws AlgorithmTestProblemSetCreationException {
 		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets()); // remove the filter condition
 	}
 
-	public RelationComputationProblem<Object> getInfeasibleRelationProblem() {
+	public RelationComputationProblem<Object> getInfeasibleRelationProblem() throws AlgorithmTestProblemSetCreationException {
 		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> t.size() < 3); // all full tuples are forbidden
 	}
 
-	public RelationComputationProblem<Object> getInfeasibleCompletelyPrunedRelationProblem() {
+	public RelationComputationProblem<Object> getInfeasibleCompletelyPrunedRelationProblem() throws AlgorithmTestProblemSetCreationException {
 		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> false); // all tuples are forbidden
 	}
 

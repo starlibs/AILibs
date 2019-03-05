@@ -146,7 +146,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 						if (this.recycledNodes.isEmpty()) {
 							newNode = new Node();
 							this.numCreatedNodes++;
-							assert (System.currentTimeMillis() - innerTimePoint) < 3000 : "Creating a new node took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + this.computedTuples + " tuples have been computed already.\nRecycling list contains " + this.recycledNodes.size() + "\nOPEN contains " + this.open.size();
+							assert (System.currentTimeMillis() - innerTimePoint) < 5000 : "Creating a new node took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + this.computedTuples + " tuples have been computed already.\nRecycling list contains " + this.recycledNodes.size() + "\nOPEN contains " + this.open.size();
 						}
 						else {
 							newNode = this.recycledNodes.remove(0);

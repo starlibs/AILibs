@@ -66,6 +66,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	@Test
 	public void testStartAndFinishEventEmissionSequentially() throws Exception {
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -79,6 +80,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	@Test
 	public void testStartAndFinishEventEmissionProtocolParallelly() throws Exception {
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -93,6 +95,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	@Test
 	public void testStartAndFinishEventEmissionByIteration() throws Exception {
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -109,6 +112,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* set up algorithm */
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -176,6 +180,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* set up algorithm */
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -255,6 +260,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* set up algorithm */
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}

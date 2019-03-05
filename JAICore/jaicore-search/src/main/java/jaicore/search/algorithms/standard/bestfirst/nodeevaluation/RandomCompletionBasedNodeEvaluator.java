@@ -86,26 +86,26 @@ ILoggingCustomizable {
 	private RandomSearch<T, String> completer;
 	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of
 	// the completer is asynchronous
-	protected final ISolutionEvaluator<T, V> solutionEvaluator;
+	protected final ISolutionEvaluator<T, ?, V> solutionEvaluator;
 	protected IUncertaintySource<T, V> uncertaintySource;
 	protected SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
 	private boolean visualizeSubSearch;
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples,
-			final ISolutionEvaluator<T, V> solutionEvaluator) {
+			final ISolutionEvaluator<T, ?,  V> solutionEvaluator) {
 		this(random, samples, solutionEvaluator, -1, -1);
 	}
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples,
-			final ISolutionEvaluator<T, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
+			final ISolutionEvaluator<T, ?, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
 			final int timeoutForNodeEvaluationInMS) {
 		this(random, samples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS,
 				null);
 	}
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples,
-			final ISolutionEvaluator<T, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
+			final ISolutionEvaluator<T, ?, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
 			final int timeoutForNodeEvaluationInMS, final Predicate<T> priorityPredicateForRDFS) {
 		super(timeoutForNodeEvaluationInMS);
 		if (random == null) {
@@ -140,7 +140,7 @@ ILoggingCustomizable {
 		}
 	}
 
-	public ISolutionEvaluator<T, V> getSolutionEvaluator() {
+	public ISolutionEvaluator<T, ?, V> getSolutionEvaluator() {
 		return this.solutionEvaluator;
 	}
 
@@ -182,7 +182,7 @@ ILoggingCustomizable {
 			if (!n.isGoal()) {
 
 				/* if there was no relevant change in comparison to parent, apply parent's f */
-				if (path.size() > 1 && !this.solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(path)) {
+				if (path.size() > 1 && !this.solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(new SearchGraphPath<>(path))) {
 					assert this.fValues.containsKey(n
 							.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: "
 							+ path;
@@ -460,7 +460,7 @@ ILoggingCustomizable {
 			long start = System.currentTimeMillis();
 			V val = null;
 			try {
-				val = this.solutionEvaluator.evaluateSolution(path);
+				val = this.solutionEvaluator.evaluateSolution(new SearchGraphPath<>(path));
 			} catch (InterruptedException e) {
 				this.logger.info("Received interrupt during computation of f-value of {}.", path);
 				throw e;

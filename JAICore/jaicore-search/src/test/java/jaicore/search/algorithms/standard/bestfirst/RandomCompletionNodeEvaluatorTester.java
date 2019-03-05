@@ -27,6 +27,7 @@ import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationExc
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.testproblems.nqueens.QueenNode;
 
@@ -136,17 +137,17 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 	}
 
 	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getNodeEvaluator(
-			final IObjectEvaluator<List<QueenNode>, Double> oe, final int seed, final int numSamples, final int timeoutForNodeEvaluationInMs) {
-		ISolutionEvaluator<QueenNode, Double> se = new ISolutionEvaluator<QueenNode, Double>() {
+			final IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> oe, final int seed, final int numSamples, final int timeoutForNodeEvaluationInMs) {
+		ISolutionEvaluator<QueenNode, String, Double> se = new ISolutionEvaluator<QueenNode, String, Double>() {
 
 			@Override
-			public Double evaluateSolution(final List<QueenNode> solutionPath) throws InterruptedException, AlgorithmTimeoutedException,
+			public Double evaluateSolution(final SearchGraphPath<QueenNode, String> solutionPath) throws InterruptedException, AlgorithmTimeoutedException,
 			AlgorithmExecutionCanceledException, ObjectEvaluationFailedException {
 				return oe.evaluate(solutionPath);
 			}
 
 			@Override
-			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final List<QueenNode> partialSolutionPath) {
+			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final SearchGraphPath<QueenNode, String> partialSolutionPath) {
 				return true;
 			}
 
