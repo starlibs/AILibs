@@ -28,11 +28,11 @@ import weka.core.Utils;
  */
 public class GlobalCharacterizer extends Characterizer {
 
-	private final String preprocessingPrefix = "-E \"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\" -S \"weka.attributeSelection.BestFirst -D 1 -N 5\" -W ";
-	private final String cp1NN = "weka.classifiers.lazy.IBk";
-	private final String cpNB = "weka.classifiers.bayes.NaiveBayes";
-	private final String cpASC = "weka.classifiers.meta.AttributeSelectedClassifier";
-	private final String cpDS = "weka.classifiers.trees.DecisionStump";
+	protected final String preprocessingPrefix = "-E \"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\" -S \"weka.attributeSelection.BestFirst -D 1 -N 5\" -W ";
+	protected final String cp1NN = "weka.classifiers.lazy.IBk";
+	protected final String cpNB = "weka.classifiers.bayes.NaiveBayes";
+	protected final String cpASC = "weka.classifiers.meta.AttributeSelectedClassifier";
+	protected final String cpDS = "weka.classifiers.trees.DecisionStump";
 
 	/**
 	 * The names of all the meta features that are computed by this characterizer
