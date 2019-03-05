@@ -55,6 +55,7 @@ public class TempFileHandler implements Closeable {
 
 		FileUtil.touch(path);
 		File file = new File(path);
+		file.deleteOnExit();
 		tempFiles.put(uuid, file);
 
 		return uuid;
@@ -141,8 +142,10 @@ public class TempFileHandler implements Closeable {
 			}
 			this.tempFileWriters.remove(uuid);
 		}
-		this.tempFiles.get(uuid).delete();
-		this.tempFiles.remove(uuid);
+		if (this.tempFiles.containsKey(uuid)) {
+			this.tempFiles.get(uuid).delete();
+			this.tempFiles.remove(uuid);
+		}
 	}
 
 	/***
