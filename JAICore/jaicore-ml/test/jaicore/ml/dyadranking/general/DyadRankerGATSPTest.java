@@ -62,6 +62,10 @@ public class DyadRankerGATSPTest {
 	ADyadRanker ranker;
 	DyadRankingDataset dataset;
 
+	public DyadRankerGATSPTest(ADyadRanker ranker) {
+		this.ranker = ranker;
+	}
+
 	@Before
 	public void init() {
 		// load dataset
@@ -88,6 +92,12 @@ public class DyadRankerGATSPTest {
 		// trim dyad ranking instances for train data
 		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
+		// standardize data
+		DyadStandardScaler scaler = new DyadStandardScaler();
+		scaler.fit(trainData);
+		scaler.transformInstances(trainData);
+		scaler.transformInstances(testData);
+		
 		try {
 
 			// train the ranker
