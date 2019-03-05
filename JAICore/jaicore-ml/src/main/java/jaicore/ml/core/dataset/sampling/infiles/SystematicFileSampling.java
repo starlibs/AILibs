@@ -73,6 +73,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				}
 				this.sortedDatasetFile = this.sorter.sort(
 						this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString());
+				this.sortedDatasetFile.deleteOnExit();
 				this.sortedDatasetFileReader = new BufferedReader(new FileReader(this.sortedDatasetFile));
 				ArffUtilities.skipWithReaderToDatapoints(this.sortedDatasetFileReader);
 			} catch (IOException e) {
@@ -143,9 +144,6 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 
 	@Override
 	protected void cleanUp() {
-		if (this.sortedDatasetFile != null) {
-			this.sortedDatasetFile.delete();
-		}
 		this.tempFileHandler.cleanUp();
 	}
 

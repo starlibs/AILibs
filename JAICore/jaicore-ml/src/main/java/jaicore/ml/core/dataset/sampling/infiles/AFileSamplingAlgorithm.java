@@ -102,12 +102,6 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 		cleanUp();
 		return new File(outputFilePath);
 	}
-
-	@Override
-	public void cancel() {
-		super.cancel();
-		this.cleanUp();
-	}
 	
 	/**
 	 * Implement custom clean up behaviour.
