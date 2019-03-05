@@ -77,7 +77,7 @@ public class DatasetFileSorter {
 			String dataPointLine;
 			boolean datastarted = false;
 			while ((dataPointLine = datasetFileReader.readLine()) != null) {
-				if (dataPointLine.trim().charAt(0) == '%') {
+				if (dataPointLine.trim().equals("") || dataPointLine.trim().charAt(0) == '%') {
 					continue;
 				}
 				if (datastarted) {
@@ -142,8 +142,11 @@ public class DatasetFileSorter {
 			// Sort the two halfs
 			String sortedLeftUUID = mergesort(leftUUID);
 			String sortedRightUUID = mergesort(rightUUID);
-			// Merge the sorted halfs back together
-			return merge(sortedLeftUUID, sortedRightUUID);
+			// Merge the sorted halfs back together ande delete the left and right temp files
+			String mergedFileUUID = merge(sortedLeftUUID, sortedRightUUID);
+			this.tempFileHandler.deleteTempFile(leftUUID);
+			this.tempFileHandler.deleteTempFile(rightUUID);
+			return mergedFileUUID;
 		}
 	}
 	
