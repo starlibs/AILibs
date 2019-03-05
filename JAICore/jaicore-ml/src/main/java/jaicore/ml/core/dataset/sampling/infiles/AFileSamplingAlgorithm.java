@@ -81,6 +81,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			try {
 				checkAndConductTermination();
 			} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
+				cleanUp();
 				throw new AlgorithmException(e.getMessage());
 			}
 			if (Instant.now().isAfter(timeoutTime)) {
@@ -95,9 +96,22 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			outputFileWriter.flush();
 			outputFileWriter.close();
 		} catch (IOException e) {
+			cleanUp();
 			throw new AlgorithmException(e, "Could not close File writer for sampling output file");
 		}
+		cleanUp();
 		return new File(outputFilePath);
 	}
 
+	@Override
+	public void cancel() {
+		super.cancel();
+		this.cleanUp();
+	}
+	
+	/**
+	 * Implement custom clean up behaviour.
+	 */
+	protected abstract void cleanUp();
+	
 }

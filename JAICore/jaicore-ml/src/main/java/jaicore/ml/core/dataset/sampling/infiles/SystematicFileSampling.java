@@ -39,30 +39,25 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	/**
 	 * Simple constructor that uses the default datapoint comparator.
 	 * 
-	 * @param random          Random Object for determining the sampling start
-	 *                        point.
-	 * @param tempFileHandler Handler for temporary files, which are needed for
-	 *                        sorting the original file.
+	 * @param random
+	 *            Random Object for determining the sampling start point.
 	 */
-	public SystematicFileSampling(Random random, TempFileHandler tempFileHandler) {
-		this(random, tempFileHandler, null);
-		
+	public SystematicFileSampling(Random random) {
+		this(random, null);
 	}
 
 	/**
 	 * Constructor for a custom datapoint comparator.
 	 * 
-	 * @param random              Random Object for determining the sampling start
-	 *                            point.
-	 * @param tempFileHandler     Handler for temporary files, which are needed for
-	 *                            sorting the original file.
-	 * @param datapointComparator Comparator to sort the dataset.
+	 * @param random
+	 *            Random Object for determining the sampling start point.
+	 * @param datapointComparator
+	 *            Comparator to sort the dataset.
 	 */
-	public SystematicFileSampling(Random random, TempFileHandler tempFileHandler,
-			Comparator<String> datapointComparator) {
+	public SystematicFileSampling(Random random, Comparator<String> datapointComparator) {
 		this.random = random;
-		this.tempFileHandler = tempFileHandler;
 		this.datapointComparator = datapointComparator;
+		this.tempFileHandler = new TempFileHandler();
 	}
 
 	@Override
@@ -76,7 +71,8 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				if (this.datapointComparator != null) {
 					this.sorter.setComparator(this.datapointComparator);
 				}
-				this.sortedDatasetFile = this.sorter.sort(this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString());
+				this.sortedDatasetFile = this.sorter.sort(
+						this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString());
 				this.sortedDatasetFileReader = new BufferedReader(new FileReader(this.sortedDatasetFile));
 				ArffUtilities.skipWithReaderToDatapoints(this.sortedDatasetFileReader);
 			} catch (IOException e) {
@@ -89,7 +85,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				this.addedDatapoints = 0;
 				this.startIndex = this.random.nextInt(this.datapointAmount);
 				this.index = 0;
-				while(this.index < this.startIndex) {
+				while (this.index < this.startIndex) {
 					this.sortedDatasetFileReader.readLine();
 					this.index++;
 				}
@@ -114,7 +110,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 						this.index = 1;
 					}
 					// Skip to the next k-th datapoint.
-					while(this.index < e) {
+					while (this.index < e) {
 						datapoint = this.sortedDatasetFileReader.readLine();
 						this.index++;
 					}
@@ -127,10 +123,12 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				}
 			} else {
 				// Delete sorted dataset file and terminate
-				this.sortedDatasetFile.delete();
+				this.cleanUp();
 				return this.terminate();
 			}
 		case inactive: {
+
+			this.cleanUp();
 			if (this.addedDatapoints < this.sampleSize) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
@@ -138,8 +136,17 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			}
 		}
 		default:
+			this.cleanUp();
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
 	}
-	
+
+	@Override
+	protected void cleanUp() {
+		if (this.sortedDatasetFile != null) {
+			this.sortedDatasetFile.delete();
+		}
+		this.tempFileHandler.cleanUp();
+	}
+
 }
