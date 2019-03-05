@@ -38,4 +38,10 @@ public class RStarTester extends GraphSearchTester {
 
 		/* this test cannot go through, because this is not an enumeration-complete algorithm */
 	}
+
+	@Override
+	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization() {
+
+		/* this test cannot go through, because this is not an enumeration-complete algorithm */
+	}
 }

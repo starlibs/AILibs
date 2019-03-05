@@ -95,7 +95,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	private int numRecycledNodes;
 	private int numCreatedNodes;
 
-	public LDSRelationComputer(final List<? extends Collection<T>> sets) {
+	public LDSRelationComputer(final List<Collection<T>> sets) {
 		this(new RelationComputationProblem<>(sets));
 	}
 

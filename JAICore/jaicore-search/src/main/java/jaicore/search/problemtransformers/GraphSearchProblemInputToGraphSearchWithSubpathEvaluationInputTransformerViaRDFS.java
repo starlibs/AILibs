@@ -49,7 +49,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 	}
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<N, A, V> transform(final GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
+	public GraphSearchWithSubpathEvaluationsInput<N, A, V> encodeProblem(final GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
 		RandomCompletionBasedNodeEvaluator<N, V> rdfsNodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(new Random(this.seed), this.numSamples, problem.getPathEvaluator(), this.timeoutForSingleCompletionEvaluationInMS,
 				this.timeoutForNodeEvaluationInMS, this.prioritizedNodesInRandomCompletion);
 		if (this.preferredNodeEvaluator != null) {
@@ -57,7 +57,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 		} else {
 			this.setNodeEvaluator(rdfsNodeEvaluator);
 		}
-		return super.transform(problem);
+		return super.encodeProblem(problem);
 	}
 
 }
