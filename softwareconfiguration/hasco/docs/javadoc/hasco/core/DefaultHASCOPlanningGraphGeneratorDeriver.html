@@ -111,7 +111,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;N,A&gt;, jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,jaicore.search.core.interfaces.GraphGenerator&lt;N,A&gt;&gt;, jaicore.planning.hierarchical.algorithms.IPathToPlanConverter&lt;N&gt;, jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,N,A&gt;</dd>
+<dd><a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;N,A&gt;, jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,jaicore.planning.core.Plan,jaicore.search.probleminputs.GraphSearchInput&lt;N,A&gt;,jaicore.search.model.other.SearchGraphPath&lt;N,A&gt;&gt;, jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,N,A&gt;</dd>
 </dl>
 <hr>
 <br>
@@ -159,19 +159,19 @@ implements <a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" t
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code>jaicore.planning.core.Plan</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html#getPlan-java.util.List-">getPlan</a></span>(java.util.List&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>&gt;&nbsp;path)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html#decodeSolution-jaicore.search.model.other.SearchGraphPath-">decodeSolution</a></span>(jaicore.search.model.other.SearchGraphPath&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;&nbsp;path)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code>jaicore.search.probleminputs.GraphSearchInput&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html#encodeProblem-jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem-">encodeProblem</a></span>(jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem&nbsp;problem)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html#getWrappedDeriver--">getWrappedDeriver</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html#toString--">toString</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html#transform-jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem-">transform</a></span>(jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem&nbsp;problem)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -212,29 +212,29 @@ implements <a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" t
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="transform-jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem-">
+<a name="encodeProblem-jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>transform</h4>
-<pre>public&nbsp;jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;&nbsp;transform(jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem&nbsp;problem)</pre>
+<h4>encodeProblem</h4>
+<pre>public&nbsp;jaicore.search.probleminputs.GraphSearchInput&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;&nbsp;encodeProblem(jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem&nbsp;problem)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>transform</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;&gt;</code></dd>
+<dd><code>encodeProblem</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,jaicore.planning.core.Plan,jaicore.search.probleminputs.GraphSearchInput&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;,jaicore.search.model.other.SearchGraphPath&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
-<a name="getPlan-java.util.List-">
+<a name="decodeSolution-jaicore.search.model.other.SearchGraphPath-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getPlan</h4>
-<pre>public&nbsp;jaicore.planning.core.Plan&nbsp;getPlan(java.util.List&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>&gt;&nbsp;path)</pre>
+<h4>decodeSolution</h4>
+<pre>public&nbsp;jaicore.planning.core.Plan&nbsp;decodeSolution(jaicore.search.model.other.SearchGraphPath&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;&nbsp;path)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>getPlan</code>&nbsp;in interface&nbsp;<code>jaicore.planning.hierarchical.algorithms.IPathToPlanConverter&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>&gt;</code></dd>
+<dd><code>decodeSolution</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,jaicore.planning.core.Plan,jaicore.search.probleminputs.GraphSearchInput&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;,jaicore.search.model.other.SearchGraphPath&lt;<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">N</a>,<a href="../../hasco/core/DefaultHASCOPlanningGraphGeneratorDeriver.html" title="type parameter in DefaultHASCOPlanningGraphGeneratorDeriver">A</a>&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>

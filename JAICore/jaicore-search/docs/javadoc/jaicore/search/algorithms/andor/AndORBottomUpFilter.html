@@ -291,7 +291,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html
 <li class="blockList">
 <h4>nextWithException</h4>
 <pre>public&nbsp;jaicore.basic.algorithm.events.AlgorithmEvent&nbsp;nextWithException()
-                                                                throws java.util.concurrent.TimeoutException,
+                                                                throws jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                                                                        java.lang.InterruptedException,
                                                                        jaicore.basic.algorithm.exceptions.AlgorithmException,
                                                                        jaicore.basic.algorithm.AlgorithmExecutionCanceledException</pre>
@@ -299,7 +299,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>nextWithException</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithm&lt;<a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;<a href="../../../../jaicore/search/algorithms/andor/AndORBottomUpFilter.html" title="type parameter in AndORBottomUpFilter">N</a>,<a href="../../../../jaicore/search/algorithms/andor/AndORBottomUpFilter.html" title="type parameter in AndORBottomUpFilter">A</a>&gt;,jaicore.graph.Graph&lt;<a href="../../../../jaicore/search/algorithms/andor/AndORBottomUpFilter.html" title="type parameter in AndORBottomUpFilter">N</a>&gt;&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
@@ -313,7 +313,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html
 <li class="blockList">
 <h4>call</h4>
 <pre>public&nbsp;jaicore.graph.Graph&lt;<a href="../../../../jaicore/search/algorithms/andor/AndORBottomUpFilter.html" title="type parameter in AndORBottomUpFilter">N</a>&gt;&nbsp;call()
-                            throws java.util.concurrent.TimeoutException,
+                            throws jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                                    java.lang.InterruptedException,
                                    jaicore.basic.algorithm.exceptions.AlgorithmException,
                                    jaicore.basic.algorithm.AlgorithmExecutionCanceledException</pre>
@@ -323,7 +323,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>call</code>&nbsp;in interface&nbsp;<code>java.util.concurrent.Callable&lt;jaicore.graph.Graph&lt;<a href="../../../../jaicore/search/algorithms/andor/AndORBottomUpFilter.html" title="type parameter in AndORBottomUpFilter">N</a>&gt;&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>

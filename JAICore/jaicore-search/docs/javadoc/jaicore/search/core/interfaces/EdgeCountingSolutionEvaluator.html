@@ -90,14 +90,14 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">jaicore.search.core.interfaces</div>
-<h2 title="Class EdgeCountingSolutionEvaluator" class="title">Class EdgeCountingSolutionEvaluator&lt;N&gt;</h2>
+<h2 title="Class EdgeCountingSolutionEvaluator" class="title">Class EdgeCountingSolutionEvaluator&lt;N,A&gt;</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>jaicore.search.core.interfaces.EdgeCountingSolutionEvaluator&lt;N&gt;</li>
+<li>jaicore.search.core.interfaces.EdgeCountingSolutionEvaluator&lt;N,A&gt;</li>
 </ul>
 </li>
 </ul>
@@ -110,13 +110,13 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,java.lang.Double&gt;</dd>
+<dd><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,A,java.lang.Double&gt;</dd>
 </dl>
 <hr>
 <br>
-<pre>public class <span class="typeNameLabel">EdgeCountingSolutionEvaluator&lt;N&gt;</span>
+<pre>public class <span class="typeNameLabel">EdgeCountingSolutionEvaluator&lt;N,A&gt;</span>
 extends java.lang.Object
-implements <a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,java.lang.Double&gt;</pre>
+implements <a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,A,java.lang.Double&gt;</pre>
 <div class="block">Uses Double to be compliant with algorithms that MUST work with double instead of Integer (such as AStar)</div>
 </li>
 </ul>
@@ -159,11 +159,11 @@ implements <a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluato
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html#doesLastActionAffectScoreOfAnySubsequentSolution-java.util.List-">doesLastActionAffectScoreOfAnySubsequentSolution</a></span>(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>&gt;&nbsp;partialSolutionPath)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html#doesLastActionAffectScoreOfAnySubsequentSolution-jaicore.search.model.other.SearchGraphPath-">doesLastActionAffectScoreOfAnySubsequentSolution</a></span>(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">A</a>&gt;&nbsp;partialSolutionPath)</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code>java.lang.Double</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html#evaluateSolution-java.util.List-">evaluateSolution</a></span>(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>&gt;&nbsp;solutionPath)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html#evaluateSolution-jaicore.search.model.other.SearchGraphPath-">evaluateSolution</a></span>(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">A</a>&gt;&nbsp;solutionPath)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -204,29 +204,29 @@ implements <a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluato
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="evaluateSolution-java.util.List-">
+<a name="evaluateSolution-jaicore.search.model.other.SearchGraphPath-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>evaluateSolution</h4>
-<pre>public&nbsp;java.lang.Double&nbsp;evaluateSolution(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>&gt;&nbsp;solutionPath)</pre>
+<pre>public&nbsp;java.lang.Double&nbsp;evaluateSolution(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">A</a>&gt;&nbsp;solutionPath)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#evaluateSolution-java.util.List-">evaluateSolution</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,java.lang.Double&gt;</code></dd>
+<dd><code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#evaluateSolution-jaicore.search.model.other.SearchGraphPath-">evaluateSolution</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">A</a>,java.lang.Double&gt;</code></dd>
 </dl>
 </li>
 </ul>
-<a name="doesLastActionAffectScoreOfAnySubsequentSolution-java.util.List-">
+<a name="doesLastActionAffectScoreOfAnySubsequentSolution-jaicore.search.model.other.SearchGraphPath-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>doesLastActionAffectScoreOfAnySubsequentSolution</h4>
-<pre>public&nbsp;boolean&nbsp;doesLastActionAffectScoreOfAnySubsequentSolution(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>&gt;&nbsp;partialSolutionPath)</pre>
+<pre>public&nbsp;boolean&nbsp;doesLastActionAffectScoreOfAnySubsequentSolution(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">A</a>&gt;&nbsp;partialSolutionPath)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#doesLastActionAffectScoreOfAnySubsequentSolution-java.util.List-">doesLastActionAffectScoreOfAnySubsequentSolution</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,java.lang.Double&gt;</code></dd>
+<dd><code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#doesLastActionAffectScoreOfAnySubsequentSolution-jaicore.search.model.other.SearchGraphPath-">doesLastActionAffectScoreOfAnySubsequentSolution</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">A</a>,java.lang.Double&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -239,7 +239,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluato
 <pre>public&nbsp;void&nbsp;cancel()</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#cancel--">cancel</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,java.lang.Double&gt;</code></dd>
+<dd><code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#cancel--">cancel</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="type parameter in EdgeCountingSolutionEvaluator">A</a>,java.lang.Double&gt;</code></dd>
 </dl>
 </li>
 </ul>

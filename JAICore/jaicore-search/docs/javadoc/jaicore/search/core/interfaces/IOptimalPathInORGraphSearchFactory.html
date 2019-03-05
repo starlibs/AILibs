@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6};
+var methods = {"i0":6,"i1":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -130,14 +130,11 @@ extends jaicore.basic.algorithm.IAlgorithmFactory&lt;I,<a href="../../../../jaic
 <td class="colFirst"><code><a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html#getAlgorithm--">getAlgorithm</a></span>()</code>&nbsp;</td>
 </tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html#getAlgorithm-I-">getAlgorithm</a></span>(<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a>&nbsp;problem)</code>&nbsp;</td>
+</tr>
 </table>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithmFactory">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithmFactory</h3>
-<code>setProblemInput, setProblemInput</code></li>
-</ul>
 </li>
 </ul>
 </li>
@@ -155,10 +152,25 @@ extends jaicore.basic.algorithm.IAlgorithmFactory&lt;I,<a href="../../../../jaic
 <a name="getAlgorithm--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getAlgorithm</h4>
 <pre><a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a>&gt;&nbsp;getAlgorithm()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getAlgorithm</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a> extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>&gt;,<a href="../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a>&gt;&gt;&gt;</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getAlgorithm-jaicore.search.probleminputs.GraphSearchInput-">
+<!--   -->
+</a><a name="getAlgorithm-I-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getAlgorithm</h4>
+<pre><a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a>&gt;&nbsp;getAlgorithm(<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a>&nbsp;problem)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>getAlgorithm</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">I</a> extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>&gt;,<a href="../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">N</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">A</a>,<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a> extends java.lang.Comparable&lt;<a href="../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="type parameter in IOptimalPathInORGraphSearchFactory">V</a>&gt;&gt;&gt;</code></dd>
