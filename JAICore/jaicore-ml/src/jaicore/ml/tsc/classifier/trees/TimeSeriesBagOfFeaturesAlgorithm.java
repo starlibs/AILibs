@@ -117,7 +117,11 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		int T = data[0].length; // Time series length
 		int lMin = (int) (this.zProp * T);
 
+
 		int wMin = this.minIntervalLength; // Minimum interval length used for meaningful intervals
+
+		if (lMin == T)
+			lMin -= wMin;
 
 		int d = lMin > wMin ? (int) Math.floor((double) lMin / (double) wMin) : 1; // Number of intervals for each
 																					// subsequence
