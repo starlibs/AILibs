@@ -71,40 +71,4 @@ public class DyadStandardScaler extends AbstractDyadScaler {
 			}
 		}
 	}
-
-	@Override
-	public void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
-		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
-				for (int i = 0; i < lengthX; i++) {
-					if (!ignoredIndices.contains(i)) {
-						double value = dyad.getInstance().getValue(i);
-						value -= statsX[i].getMean();
-						value /= statsX[i].getStandardDeviation();
-						dyad.getInstance().setValue(i, value);
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
-		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
-				for (int i = 0; i < lengthY; i++) {
-					if (!ignoredIndices.contains(i)) {
-						double value = dyad.getAlternative().getValue(i);
-						value -= statsY[i].getMean();
-						value /= statsY[i].getStandardDeviation();
-						dyad.getAlternative().setValue(i, value);
-					}
-				}
-			}
-		}
-	}
 }

@@ -1,4 +1,4 @@
-package main.java.jaicore.ml.dyadranking.zeroshot.util;
+package jaicore.ml.dyadranking.zeroshot.util;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,8 @@
-package main.java.jaicore.ml.dyadranking.zeroshot.util;
+package jaicore.ml.dyadranking.zeroshot.util;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
+import jaicore.ml.dyadranking.util.DyadMinMaxScaler;
 
-import jaicore.ml.dyadranking.util.DyadNormalScaler;
 import weka.core.Utils;
 
 public class ZeroShotUtil {
@@ -56,7 +56,7 @@ public class ZeroShotUtil {
 		return options;
 	}
 	
-	public static INDArray unscaleParameters(INDArray parameters, DyadNormalScaler scaler, int numHyperPars) {
+	public static INDArray unscaleParameters(INDArray parameters, DyadMinMaxScaler scaler, int numHyperPars) {
 		int[] hyperParIndices = new int[numHyperPars];
 		for (int i = 0; i < numHyperPars; i++) {
 			hyperParIndices[i] = (int) parameters.length() - numHyperPars + i;

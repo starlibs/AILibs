@@ -125,25 +125,6 @@ public abstract class AbstractDyadScaler implements Serializable {
 	public abstract void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices);
 
 	/**
-	 * Transforms only the instances of each dyad according to the mean and
-	 * standard deviation of the data the scaler has been fit to. The attributes
-	 * with indices contained in ignoredIndices are not transformed. {
-	 * 
-	 * @param dataset The dataset of which the alternatives are to be standardized.
-	 * @param ignoredIndices The {@link List} of indices that are been ignored by the scaler.
-	 */
-	public abstract void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices);
-
-	/**
-	 * Transforms only the alternatives of each dyad according to the mean and
-	 * standard deviation of the data the scaler has been fit to.
-	 * 
-	 * @param dataset The dataset of which the alternatives are to be standardized.
-	 * @param ignoredIndices The {@link List} of indices that are been ignored by the scaler.
-	 */
-	public abstract void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices);
-
-	/**
 	 * Fits the standard scaler to the dataset and transforms the entire dataset
 	 * according to the mean and standard deviation of the dataset.
 	 * 
