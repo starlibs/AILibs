@@ -11,6 +11,7 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.SolutionCandidateIteratorTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPAsGraphSearchSet;
 import jaicore.search.testproblems.knapsack.KnapsackProblemAsGraphSearchSet;
 import jaicore.search.testproblems.nqueens.NQueensProblemAsGraphSearchSet;
 
@@ -31,7 +32,7 @@ public abstract class GraphSearchTester extends SolutionCandidateIteratorTester 
 		/* add N-Queens (as a graph search problem set) */
 		problemSets.add(new NQueensProblemAsGraphSearchSet());
 		problemSets.add(new KnapsackProblemAsGraphSearchSet());
-		// problemSets.add(new EnhancedTTSPAsGraphSearchSet());
+		problemSets.add(new EnhancedTTSPAsGraphSearchSet());
 		List<Collection<Object>> input = new ArrayList<>();
 		input.add(problemSets);
 

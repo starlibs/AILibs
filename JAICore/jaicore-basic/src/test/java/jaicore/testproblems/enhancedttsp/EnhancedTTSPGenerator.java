@@ -1,4 +1,4 @@
-package jaicore.search.testproblems.enhancedttsp;
+package jaicore.testproblems.enhancedttsp;
 
 import java.util.ArrayList;
 import java.util.Arrays;

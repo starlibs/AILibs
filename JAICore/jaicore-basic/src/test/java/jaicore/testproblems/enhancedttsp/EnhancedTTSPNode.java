@@ -1,4 +1,4 @@
-package jaicore.search.testproblems.enhancedttsp;
+package jaicore.testproblems.enhancedttsp;
 
 import it.unimi.dsi.fastutil.shorts.ShortList;
 

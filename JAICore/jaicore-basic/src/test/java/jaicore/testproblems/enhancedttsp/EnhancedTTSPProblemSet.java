@@ -1,13 +1,14 @@
-package jaicore.search.testproblems.enhancedttsp;
+package jaicore.testproblems.enhancedttsp;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import jaicore.basic.algorithm.IAlgorithmTestProblemSetForSolutionIterators;
 
-public class EnhancedTTSPProblemSet extends IAlgorithmTestProblemSetForSolutionIterators<EnhancedTTSP, List<Short>> {
+public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTSP> implements IAlgorithmTestProblemSetForSolutionIterators<EnhancedTTSP, List<Short>> {
 
 	public EnhancedTTSPProblemSet() {
 		super("Enhanced TTSP");
@@ -15,14 +16,14 @@ public class EnhancedTTSPProblemSet extends IAlgorithmTestProblemSetForSolutionI
 
 	private static final int MAX_N = 6;
 	private static final int MAX_DISTANCE = 12;
-//	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
-//	private static final boolean VISUALIZE = false;
+	//	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
+	//	private static final boolean VISUALIZE = false;
 
 	@Override
 	public EnhancedTTSP getSimpleProblemInputForGeneralTestPurposes() {
 		return new EnhancedTTSPGenerator().generate(4, 100);
 	}
-	
+
 	@Override
 	public EnhancedTTSP getDifficultProblemInputForGeneralTestPurposes() {
 		return new EnhancedTTSPGenerator().generate(20, 100);

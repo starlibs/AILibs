@@ -6,12 +6,14 @@ import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IUncertaintyAnnotatingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
-import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.AgnosticPathEvaluator;
+import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
+import jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 
-public class EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer implements AlgorithmicProblemReduction<EnhancedTTSP, GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>> {
+public class EnhancedTTSPGraphSearchToUncertaintyBasedGraphSearchReducer implements AlgorithmicProblemReduction<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>> {
 
 	private Random random = new Random(0);
 	private int samples = 3;
@@ -20,11 +22,16 @@ public class EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer implements Al
 
 
 	@Override
-	public GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double> transform(final EnhancedTTSP problem) {
-		GraphGenerator<EnhancedTTSPNode, String> graphGenerator = new EnhancedTTSPGraphGenerator(problem);
+	public GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double> encodeProblem(final GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> problem) {
 		IUncertaintyAnnotatingNodeEvaluator<EnhancedTTSPNode, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(this.random, this.samples, this.solutionEvaluator);
 		nodeEvaluator.setUncertaintySource(this.uncertaintySource);
-		return new GraphSearchWithUncertaintyBasedSubpathEvaluationInput<>(graphGenerator, nodeEvaluator);
+		return new GraphSearchWithUncertaintyBasedSubpathEvaluationInput<>(problem.getGraphGenerator(), nodeEvaluator);
 
+	}
+
+
+	@Override
+	public EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double> decodeSolution(final EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double> solution) {
+		return solution;
 	}
 }

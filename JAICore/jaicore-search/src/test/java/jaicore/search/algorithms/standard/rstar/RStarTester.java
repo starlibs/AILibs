@@ -22,19 +22,19 @@ public class RStarTester extends GraphSearchTester {
 	}
 
 	@Override
-	public <I,O> void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 
 		/* this test cannot go through, because this is not a enumeration-complete algorithm */
 	}
 
 	@Override
-	public <I,O> void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 
 		/* this test cannot go through, because this is not a enumeration-complete algorithm */
 	}
 
 	@Override
-	public <I,O> void testThatIteratorReturnsEachPossibleSolution() {
+	public void testThatIteratorReturnsEachPossibleSolution() {
 
 		/* this test cannot go through, because this is not an enumeration-complete algorithm */
 	}
