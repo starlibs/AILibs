@@ -101,7 +101,9 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 		}
 			
 		try {
-			return (int) this.finalClf.classifyInstance(finalInstances.firstInstance());
+			double pred = this.finalClf.classifyInstance(finalInstances.firstInstance());
+			// System.out.println(pred);
+			return (int) pred;
 		} catch (Exception e) {
 			throw new PredictionException("Could not predict instance due to a Weka exception.", e);
 		}

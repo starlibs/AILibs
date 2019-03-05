@@ -170,7 +170,7 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		}
 
 		double[][] probs = new double[(r - d) * data.length][C];
-		int numTestInstsPerFold = probs.length / numFolds;
+		int numTestInstsPerFold = (int) ((double) probs.length / (double) numFolds);
 
 		// rf.measureOutOfBagError()
 		// TODO: Measure OOB probabilities
@@ -179,17 +179,19 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 
 			double[][] trainingValueMatrix = new double[(numFolds - 1) * numTestInstsPerFold][C];
 			int[] trainingTargetMatrix = new int[(numFolds - 1) * numTestInstsPerFold];
-			if (i == 0) {
+			if (i == 0) { // First fold
 				System.arraycopy(subSeqValueMatrix, numTestInstsPerFold, trainingValueMatrix, 0,
 						(numFolds - 1) * numTestInstsPerFold);
 
 				System.arraycopy(targetMatrix, numTestInstsPerFold, trainingTargetMatrix, 0,
 						(numFolds - 1) * numTestInstsPerFold);
-			} else if (i == numFolds - 1) {
+
+			} else if (i == (numFolds - 1)) { // Last fold
 				System.arraycopy(subSeqValueMatrix, 0, trainingValueMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
 
 				System.arraycopy(targetMatrix, 0, trainingTargetMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
-			} else {
+
+			} else { // Inner folds
 				System.arraycopy(subSeqValueMatrix, 0, trainingValueMatrix, 0, i * numTestInstsPerFold);
 				System.arraycopy(subSeqValueMatrix, (i + 1) * numTestInstsPerFold, trainingValueMatrix,
 						i * numTestInstsPerFold, (numFolds - i - 1) * numTestInstsPerFold);
@@ -212,10 +214,19 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 			}
 
 			// Store probabilities
-			double[][] currTestMatrix = new double[numTestInstsPerFold][C];
-			System.arraycopy(subSeqValueMatrix, i * numTestInstsPerFold, currTestMatrix, 0, numTestInstsPerFold);
-			int[] currTestTargetMatrix = new int[numTestInstsPerFold];
-			System.arraycopy(targetMatrix, i * numTestInstsPerFold, currTestTargetMatrix, 0, numTestInstsPerFold);
+			double[][] currTestMatrix;
+			int[] currTestTargetMatrix;
+			if (i == (numFolds - 1)) {
+				int remainingLength = probs.length - (numFolds - 1) * numTestInstsPerFold;
+				currTestMatrix = new double[remainingLength][C];
+				currTestTargetMatrix = new int[remainingLength];
+			} else {
+				currTestMatrix = new double[numTestInstsPerFold][C];
+				currTestTargetMatrix = new int[numTestInstsPerFold];
+			}
+
+			System.arraycopy(subSeqValueMatrix, i * numTestInstsPerFold, currTestMatrix, 0, currTestMatrix.length);
+			System.arraycopy(targetMatrix, i * numTestInstsPerFold, currTestTargetMatrix, 0, currTestTargetMatrix.length);
 			
 			ArrayList<double[][]> testValueMatrices = new ArrayList<>();
 			testValueMatrices.add(currTestMatrix);
@@ -314,7 +325,9 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 
 		for (int i = 0; i < discretizedProbs.length; i++) {
 			// Index of the instance
-			int instanceIdx = numInstances == 1 ? 0 : (int) (i / numInstances);
+			// int instanceIdx = numInstances == 1 ? 0 : (int) ((double) i / (double)
+			// numInstances);
+			int instanceIdx = (int) (i / (discretizedProbs.length / numInstances));
 			// int instanceClass = targets[instanceIdx];
 			for (int c = 0; c < numClasses; c++) {
 				int bin = discretizedProbs[i][c];

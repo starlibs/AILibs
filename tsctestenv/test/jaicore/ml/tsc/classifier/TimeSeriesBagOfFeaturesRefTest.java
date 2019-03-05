@@ -60,7 +60,7 @@ public class TimeSeriesBagOfFeaturesRefTest {
 		int seed = 42;
 		int numBins = 10; // As in the reference implementation
 		int numFolds = 10; // As in the reference implementation
-		double zProp = 0.8; // As in the reference implementation
+		double zProp = 0.5; // As in the reference implementation
 		int minIntervalLength = 5; // As in the reference implementation
 
 		TimeSeriesBagOfFeaturesClassifier ownClf = new TimeSeriesBagOfFeaturesClassifier(seed, numBins, numFolds,
