@@ -58,11 +58,14 @@ public class TimeSeriesBagOfFeaturesRefTest {
 		Logger.getLogger("jaicore").setLevel(Level.DEBUG);
 
 		int seed = 42;
+		int numBins = 10; // As in the reference implementation
+		int numFolds = 10; // As in the reference implementation
 
-		TimeSeriesBagOfFeaturesClassifier ownClf = new TimeSeriesBagOfFeaturesClassifier(seed);
+		TimeSeriesBagOfFeaturesClassifier ownClf = new TimeSeriesBagOfFeaturesClassifier(seed, numBins, numFolds);
 
 		TSBF refClf = new TSBF();
 		refClf.seedRandom(seed);
+
 
 		Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, seed, null, null,
 				new File(ITALY_POWER_DEMAND_TRAIN), new File(ITALY_POWER_DEMAND_TEST));

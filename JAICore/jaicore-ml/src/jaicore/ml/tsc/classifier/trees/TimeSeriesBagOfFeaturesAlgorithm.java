@@ -40,6 +40,17 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 	private int seed;
 
 	/**
+	 * Number of bins used for the CPEs.
+	 */
+	private int numBins;
+
+	/**
+	 * Number of folds used for the OOB probability estimation in the training
+	 * phase.
+	 */
+	private int numFolds;
+
+	/**
 	 * See {@link IAlgorithm#getNumCPUs()}.
 	 */
 	private int cpus = 1;
@@ -49,9 +60,16 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 	 */
 	private TimeOut timeout = new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
 
-	public TimeSeriesBagOfFeaturesAlgorithm(final int seed) {
+	/**
+	 * Epsilon delta used for possibly imprecise double operations.
+	 */
+	private static final double EPS = 0.00001;
+
+	public TimeSeriesBagOfFeaturesAlgorithm(final int seed, final int numBins, final int numFolds) {
 		// TODO Auto-generated constructor stub
 		this.seed = seed;
+		this.numBins = numBins;
+		this.numFolds = numFolds;
 	}
 
 	@Override
@@ -98,9 +116,6 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 
 		int r = (int) Math.floor((double) T / (double) wMin); // Number of possible intervals in a time series
 
-		int numBins = 10; // Number of bins used for the CPEs
-		int numFolds = 10; // Number of folds used for the OOB probability estimation
-
 		// TODO Generate r-d subsequences with each d intervals and calculate features
 		int[][][] subsequences = new int[r - d][d][2];
 		Random random = new Random(seed);
@@ -115,7 +130,7 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		}
 
 		// Generate features
-		double[][][][] generatedFeatures = new double[data.length][r - d][d][3];
+		double[][][][] generatedFeatures = new double[data.length][r - d][d][TimeSeriesFeature.NUM_FEATURE_TYPES];
 		for (int i = 0; i < data.length; i++) {
 			for (int j = 0; j < r - d; j++) {
 				for (int k = 0; k < d; k++) {
@@ -209,6 +224,19 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 				probs[i * numTestInstsPerFold + j] = testProbs[j];
 			}
 		}
+		// Train final subseries classifier
+		RandomForest subseriesClf = new RandomForest();
+
+		ArrayList<double[][]> finalValueMatrices = new ArrayList<>();
+		finalValueMatrices.add(subSeqValueMatrix);
+		TimeSeriesDataset finalSubseriesDataset = new TimeSeriesDataset(finalValueMatrices, targetMatrix);
+		try {
+			WekaUtil.buildWekaClassifierFromSimplifiedTS(subseriesClf, finalSubseriesDataset);
+		} catch (TrainingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 
 		// TODO: Discretize probability and form histogram
 		int[][] discretizedProbs = discretizeProbs(numBins, probs);
@@ -225,20 +253,26 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		finalMatrices.add(finalInstances);
 
 		TimeSeriesDataset finalDataset = new TimeSeriesDataset(finalMatrices, targets);
-		RandomForest finalRf = new RandomForest();
+		RandomForest finalClf = new RandomForest();
 		try {
-			WekaUtil.buildWekaClassifierFromSimplifiedTS(finalRf, finalDataset);
+			WekaUtil.buildWekaClassifierFromSimplifiedTS(finalClf, finalDataset);
 		} catch (TrainingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
-		return null;
+		this.model.setSubseriesClf(subseriesClf);
+		this.model.setFinalClf(finalClf);
+		this.model.setNumBins(this.numBins);
+		this.model.setNumClasses(C);
+		this.model.setSubsequences(subsequences);
+
+		return this.model;
 	}
 
 	public static double[][] generateHistogramInstances(final int[][][] histograms,
 			final int[][] relativeFreqsOfClasses) {
-		int featureLength = histograms[0].length * histograms[1].length + relativeFreqsOfClasses[0].length;
+		int featureLength = histograms[0].length * histograms[0][0].length + relativeFreqsOfClasses[0].length;
 		final double[][] results = new double[histograms.length][featureLength];
 
 		for (int i = 0; i < results.length; i++) {
@@ -267,7 +301,7 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 
 		for (int i = 0; i < discretizedProbs.length; i++) {
 			// Index of the instance
-			int instanceIdx = (int) (i / numInstances);
+			int instanceIdx = numInstances == 1 ? 0 : (int) (i / numInstances);
 			// int instanceClass = targets[instanceIdx];
 			for (int c = 0; c < numClasses; c++) {
 				int bin = discretizedProbs[i][c];
@@ -284,12 +318,12 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 	public static int[][] discretizeProbs(final int numBins, final double[][] probs) {
 		int[][] results = new int[probs.length][probs[0].length];
 		
-		final double steps = 1 / numBins;
+		final double steps = 1d / (double) numBins;
 
 		for (int i = 0; i < results.length; i++) {
 			int[] discretizedProbs = new int[probs[i].length];
 			for (int j = 0; j < discretizedProbs.length; j++) {
-				discretizedProbs[j] = (int) (probs[i][j] / steps);
+				discretizedProbs[j] = (int) ((probs[i][j] - EPS) / steps);
 			}
 			results[i] = discretizedProbs;
 		}

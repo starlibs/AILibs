@@ -242,6 +242,28 @@ public class WekaUtil {
 	public static Instances simplifiedTimeSeriesDatasetToWekaInstances(
 			final jaicore.ml.tsc.dataset.TimeSeriesDataset dataSet) {
 
+		final int[] targets = dataSet.getTargets();
+		List<Integer> targetList = Arrays.asList(ArrayUtils.toObject(targets));
+		int min = Collections.min(targetList);
+		int max = Collections.max(targetList);
+		List<String> classValues = IntStream.rangeClosed(min, max).boxed().map(i -> String.valueOf(i))
+				.collect(Collectors.toList());
+		
+		return simplifiedTimeSeriesDatasetToWekaInstances(dataSet, classValues);
+	}
+
+	/**
+	 * Converts a given simplified {@link jaicore.ml.tsc.dataset.TimeSeriesDataset}
+	 * object to a Weka Instances object.
+	 * 
+	 * @param dataSet
+	 *            Data set which is transformed
+	 * @return Transformed Weka Instances object
+	 */
+	// TODO: Include meta information
+	public static Instances simplifiedTimeSeriesDatasetToWekaInstances(
+			final jaicore.ml.tsc.dataset.TimeSeriesDataset dataSet, final List<String> classValues) {
+
 		// TODO: Integrate direct access in TimeSeriesDataset
 		List<double[][]> matrices = new ArrayList<>();
 		for (int i = 0; i < dataSet.getNumberOfVariables(); i++)
@@ -262,11 +284,7 @@ public class WekaUtil {
 
 		// Add class attribute
 		final int[] targets = dataSet.getTargets();
-		List<Integer> targetList = Arrays.asList(ArrayUtils.toObject(targets));
-		int min = Collections.min(targetList);
-		int max = Collections.max(targetList);
-		attributes.add(new Attribute("class",
-				IntStream.rangeClosed(min, max).boxed().map(i -> String.valueOf(i)).collect(Collectors.toList())));
+		attributes.add(new Attribute("class",classValues));
 		final Instances result = new Instances("Instances", attributes, (int) dataSet.getNumberOfInstances());
 		result.setClassIndex(result.numAttributes() - 1);
 
