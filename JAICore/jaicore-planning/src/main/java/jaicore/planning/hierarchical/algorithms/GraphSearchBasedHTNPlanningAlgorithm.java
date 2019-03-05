@@ -57,7 +57,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 		this.problemTransformer = problemTransformer;
 
 		/* set the problem in the search factory */
-		searchProblemBuilder.setGraphGenerator(problemTransformer.transform(problem));
+		searchProblemBuilder.setGraphGenerator(problemTransformer.encodeProblem(problem));
 		searchFactory.setProblemInput(searchProblemBuilder.build());
 		this.search = searchFactory.getAlgorithm();
 	}

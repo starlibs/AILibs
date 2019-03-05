@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import jaicore.basic.algorithm.AlgorithmTestProblemSetForSolutionIterators;
+import jaicore.basic.algorithm.IAlgorithmTestProblemSetForSolutionIterators;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public class EnhancedTTSPAsGraphSearchSet extends AlgorithmTestProblemSetForSolutionIterators<GraphSearchInput<EnhancedTTSPNode, String>, List<Short>> {
+public class EnhancedTTSPAsGraphSearchSet extends IAlgorithmTestProblemSetForSolutionIterators<GraphSearchInput<EnhancedTTSPNode, String>, List<Short>> {
 
 	private final EnhancedTTSPProblemSet problemSet = new EnhancedTTSPProblemSet();
 	private final EnhancedTTSPToGraphSearchProblemInputReducer reducer = new EnhancedTTSPToGraphSearchProblemInputReducer();

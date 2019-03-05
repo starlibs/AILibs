@@ -1,12 +1,12 @@
 package jaicore.search.problemtransformers;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V extends Comparable<V>>
-		implements AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
+		implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>> {
 
 	private INodeEvaluator<N, V> nodeEvaluator;
 	

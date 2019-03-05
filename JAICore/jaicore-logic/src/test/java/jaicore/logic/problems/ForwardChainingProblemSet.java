@@ -1,10 +1,10 @@
 package jaicore.logic.problems;
 
-import jaicore.basic.algorithm.AlgorithmTestProblemSet;
+import jaicore.basic.algorithm.IAlgorithmTestProblemSet;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.util.ForwardChainingProblem;
 
-public class ForwardChainingProblemSet extends AlgorithmTestProblemSet<ForwardChainingProblem, Boolean> {
+public class ForwardChainingProblemSet extends IAlgorithmTestProblemSet<ForwardChainingProblem, Boolean> {
 
 	public ForwardChainingProblemSet() {
 		super("Forward Chaining Problem");

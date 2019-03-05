@@ -26,7 +26,7 @@ import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompl
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;
 import jaicore.basic.TimeOut;
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -204,7 +204,7 @@ public class MLPlanBuilder {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") IOptimalPathInORGraphSearchFactory searchFactory, AlgorithmProblemTransformer transformer) {
+	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") IOptimalPathInORGraphSearchFactory searchFactory, AlgorithmicProblemReduction transformer) {
 		this.hascoFactory.setSearchFactory(searchFactory);
 		this.hascoFactory.setSearchProblemTransformer(transformer);
 		return this;

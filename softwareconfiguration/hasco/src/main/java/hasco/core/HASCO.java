@@ -26,12 +26,12 @@ import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.reduction.HASCOReduction;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.core.Plan;
@@ -63,7 +63,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 
 	/* problem and algorithm setup */
 	private final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
-	private final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, S> searchProblemTransformer;
+	private final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, S> searchProblemTransformer;
 	private final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory;
 
 	/* working constants of the algorithms */
@@ -79,7 +79,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
-			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory, final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, S> searchProblemTransformer) {
+			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory, final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, S> searchProblemTransformer) {
 		super(ConfigFactory.create(HASCOConfig.class), configurationProblem);
 		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
@@ -257,7 +257,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 		return this.planningGraphGeneratorDeriver;
 	}
 
-	public AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, S> getSearchProblemTransformer() {
+	public AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, S> getSearchProblemTransformer() {
 		return this.searchProblemTransformer;
 	}
 

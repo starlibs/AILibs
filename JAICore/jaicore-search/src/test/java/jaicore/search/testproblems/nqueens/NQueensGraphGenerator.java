@@ -12,29 +12,29 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class NQueenGenerator implements SerializableGraphGenerator<QueenNode,String> {
-	
+public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode,String> {
+
 	int dimension;
 	MultipleRootGenerator<QueenNode> root;
-	
-	public NQueenGenerator(int dimension) {
-		this.dimension = dimension;		
+
+	public NQueensGraphGenerator(final int dimension) {
+		this.dimension = dimension;
 	}
 
-//	@Override
-//	public MultipleRootGenerator<QueenNode> getRootGenerator() {
-//		return () ->{
-//			List<QueenNode> l = new ArrayList<>();
-//			for(int i = 0; i < dimension; i++) {
-//				l.add(new QueenNode(0,i, dimension));
-//			}
-//			return l;
-//		};
-//	}
-	
+	//	@Override
+	//	public MultipleRootGenerator<QueenNode> getRootGenerator() {
+	//		return () ->{
+	//			List<QueenNode> l = new ArrayList<>();
+	//			for(int i = 0; i < dimension; i++) {
+	//				l.add(new QueenNode(0,i, dimension));
+	//			}
+	//			return l;
+	//		};
+	//	}
+
 	@Override
 	public SingleRootGenerator<QueenNode> getRootGenerator(){
-		return () ->  new QueenNode(dimension);
+		return () ->  new QueenNode(this.dimension);
 	}
 
 	@Override
@@ -42,9 +42,9 @@ public class NQueenGenerator implements SerializableGraphGenerator<QueenNode,Str
 		return n ->{
 			List<NodeExpansionDescription<QueenNode,String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();
-			for(int i = 0; i < dimension; i++) {
+			for(int i = 0; i < this.dimension; i++) {
 				if(! n.attack(currentRow, i)){
-					l.add(new NodeExpansionDescription<>(n, new QueenNode(n, i), "(" + currentRow + ", " + i + ")", NodeType.OR));
+					l.add(new NodeExpansionDescription<>(n, new QueenNode(n, i), "" + i, NodeType.OR));
 				}
 			}
 			return l;
@@ -54,11 +54,12 @@ public class NQueenGenerator implements SerializableGraphGenerator<QueenNode,Str
 	@Override
 	public NodeGoalTester<QueenNode> getGoalTester() {
 		return n -> {
-			if(n.getNumberOfQueens() == dimension)
+			if(n.getNumberOfQueens() == this.dimension) {
 				return true;
-			else
+			} else {
 				return false;
-			
+			}
+
 		};
 	}
 
@@ -68,11 +69,11 @@ public class NQueenGenerator implements SerializableGraphGenerator<QueenNode,Str
 	}
 
 	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
+	public void setNodeNumbering(final boolean nodenumbering) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
+
+
 
 }

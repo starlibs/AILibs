@@ -2,24 +2,24 @@ package jaicore.search.testproblems.npuzzle.parentDiscarding;
 
 import java.util.Arrays;
 
-import jaicore.search.testproblems.npuzzle.standard.NPuzzleNode;
+import jaicore.testproblems.npuzzle.NPuzzleState;
 
-public class PDPuzzleNode extends NPuzzleNode {
+public class PDPuzzleNode extends NPuzzleState {
 
-	public PDPuzzleNode(int[][] board, int emptyX, int emptyY, int numberOfMoves) {
-		super(board, emptyX, emptyY, numberOfMoves);
+	public PDPuzzleNode(final int[][] board, final int emptyX, final int emptyY) {
+		super(board, emptyX, emptyY);
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see jaicore.search.algorithms.standard.npuzzle.NPuzzleNode#getDistance()
 	 */
 	@Override
 	public double getDistance() {
-	
-		return Math.abs((board.length-1)-emptyX)+Math.abs((board.length-1)-emptyY);
+
+		return Math.abs((this.board.length-1)-this.emptyX)+Math.abs((this.board.length-1)-this.emptyY);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -27,10 +27,10 @@ public class PDPuzzleNode extends NPuzzleNode {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.deepHashCode(board);
-//		result = prime * result + Arrays.hashCode(board);
-		result = prime * result + emptyX;
-		result = prime * result + emptyY;
+		result = prime * result + Arrays.deepHashCode(this.board);
+		//		result = prime * result + Arrays.hashCode(board);
+		result = prime * result + this.emptyX;
+		result = prime * result + this.emptyY;
 		return result;
 	}
 
@@ -38,18 +38,23 @@ public class PDPuzzleNode extends NPuzzleNode {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
-		NPuzzleNode other = (NPuzzleNode) obj;
-		if (emptyX != other.getEmptyX())
+		}
+		NPuzzleState other = (NPuzzleState) obj;
+		if (this.emptyX != other.getEmptyX()) {
 			return false;
-		if (emptyY != other.getEmptyY())
+		}
+		if (this.emptyY != other.getEmptyY()) {
 			return false;
+		}
 		return true;
 	}
 

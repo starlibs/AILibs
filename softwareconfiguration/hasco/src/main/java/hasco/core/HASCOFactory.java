@@ -1,7 +1,7 @@
 package hasco.core;
 
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
@@ -11,11 +11,11 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory;
-	private AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
+	private AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;
 
 	@Override
-	public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, RefinementConfiguredSoftwareConfigurationProblem<V>> reducer) {
-		setProblemInput(reducer.transform(problemInput));
+	public <P> void setProblemInput(P problemInput, AlgorithmicProblemReduction<P, RefinementConfiguredSoftwareConfigurationProblem<V>> reducer) {
+		setProblemInput(reducer.encodeProblem(problemInput));
 	}
 
 	@Override
@@ -52,11 +52,11 @@ public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extend
 		this.searchFactory = searchFactory;
 	}
 
-	public AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> getSearchProblemTransformer() {
+	public AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> getSearchProblemTransformer() {
 		return searchProblemTransformer;
 	}
 
-	public void setSearchProblemTransformer(AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
+	public void setSearchProblemTransformer(AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
 		this.searchProblemTransformer = searchProblemTransformer;
 	}
 }

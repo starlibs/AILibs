@@ -1,4 +1,4 @@
-package jaicore.search.testproblems.nqueens;
+package jaicore.testproblems.nqueens;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,9 +8,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.algorithm.AlgorithmTestProblemSetForSolutionIterators;
+import jaicore.basic.algorithm.AAlgorithmTestProblemSet;
+import jaicore.basic.algorithm.IAlgorithmTestProblemSetForSolutionIterators;
 
-public class NQueenProblemSet extends AlgorithmTestProblemSetForSolutionIterators<NQueensProblem, List<Integer>> {
+public class NQueenProblemSet extends AAlgorithmTestProblemSet<NQueensProblem> implements IAlgorithmTestProblemSetForSolutionIterators<NQueensProblem, List<Integer>> {
 
 	public NQueenProblemSet() {
 		super("N-Queens");
@@ -23,31 +24,26 @@ public class NQueenProblemSet extends AlgorithmTestProblemSetForSolutionIterator
 	int[] numbersOfSolutions = { 2, 10, 4, 40}; // further numbers of solutions are 92, 352, 724
 
 	private static final Logger logger = LoggerFactory.getLogger(NQueenProblemSet.class);
-	private static final NQueensToGraphSearchProblemInputReducer reducer = new NQueensToGraphSearchProblemInputReducer();
 
 	@Override
-	public Map<NQueensProblem, Collection<List<Integer>>> getProblemsWithSolutions() {
+	public Map<NQueensProblem, Collection<List<Integer>>> getProblemsWithSolutions() throws InterruptedException {
 		Map<NQueensProblem, Collection<List<Integer>>> problems = new HashMap<>();
 		EnumeratingNQueensSolver solver = new EnumeratingNQueensSolver();
 		for (int i = 0; i < this.numbersOfSolutions.length; i++) {
 			int n = i + 4;
 			NQueensProblem problem = new NQueensProblem(n);
-			try {
-				problems.put(problem, solver.getSolutions(problem));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			problems.put(problem, solver.getSolutions(problem));
 		}
 		return problems;
 	}
 
 	@Override
-	public NQueensProblem getSimpleProblemInputForGeneralTestPurposes() throws Exception {
+	public NQueensProblem getSimpleProblemInputForGeneralTestPurposes() {
 		return new NQueensProblem(4);
 	}
 
 	@Override
-	public NQueensProblem getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+	public NQueensProblem getDifficultProblemInputForGeneralTestPurposes() {
 		return new NQueensProblem(1000000);
 	}
 }

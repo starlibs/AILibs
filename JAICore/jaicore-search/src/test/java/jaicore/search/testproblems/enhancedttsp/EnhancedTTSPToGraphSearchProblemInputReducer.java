@@ -1,9 +1,9 @@
 package jaicore.search.testproblems.enhancedttsp;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class EnhancedTTSPToGraphSearchProblemInputReducer implements AlgorithmProblemTransformer<EnhancedTTSP, GraphSearchWithPathEvaluationsInput<EnhancedTTSPNode, String,Double>> {
+public class EnhancedTTSPToGraphSearchProblemInputReducer implements AlgorithmicProblemReduction<EnhancedTTSP, GraphSearchWithPathEvaluationsInput<EnhancedTTSPNode, String,Double>> {
 
 	@Override
 	public GraphSearchWithPathEvaluationsInput<EnhancedTTSPNode, String, Double> transform(final EnhancedTTSP problem) {

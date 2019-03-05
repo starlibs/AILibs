@@ -1,7 +1,6 @@
 package jaicore.basic.algorithm;
 
 import java.util.NoSuchElementException;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,14 +64,14 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	}
 
 	@Override
-	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		O candidate = super.nextSolutionCandidate();
 		this.updateBestSeenSolution(candidate);
 		return candidate;
 	}
 
 	@Override
-	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
 			AlgorithmEvent event = this.nextWithException();
 			if (event instanceof SolutionCandidateFoundEvent) {

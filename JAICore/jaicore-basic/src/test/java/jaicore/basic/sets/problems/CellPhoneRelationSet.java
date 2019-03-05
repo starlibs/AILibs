@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import jaicore.basic.algorithm.AlgorithmTestProblemSet;
+import jaicore.basic.algorithm.IAlgorithmTestProblemSet;
 import jaicore.basic.sets.RelationComputationProblem;
 
-public class CellPhoneRelationSet extends AlgorithmTestProblemSet<RelationComputationProblem<?>, Collection<List<?>>> {
+public class CellPhoneRelationSet extends IAlgorithmTestProblemSet<RelationComputationProblem<?>, Collection<List<?>>> {
 
 	public CellPhoneRelationSet() {
 		super("Cell phone relation set");

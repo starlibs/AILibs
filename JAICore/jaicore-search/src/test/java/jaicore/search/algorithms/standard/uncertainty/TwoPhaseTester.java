@@ -10,7 +10,7 @@ import jaicore.search.model.other.AgnosticPathEvaluator;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
-public class TwoPhaseNQueensTester extends GraphSearchTester {
+public class TwoPhaseTester extends GraphSearchTester {
 	
 	@Override
 	public <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem) {

@@ -1,11 +1,10 @@
-package jaicore.search.testproblems.npuzzle.standard;
+package jaicore.testproblems.npuzzle;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jaicore.basic.algorithm.AlgorithmTestProblemSet;
+import jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 
-public class NPuzzleProblemSet extends AlgorithmTestProblemSet<NPuzzleProblem, List<String>> {
+public class NPuzzleProblemSet extends AAlgorithmTestProblemSet<NPuzzleProblem> {
 
 	public NPuzzleProblemSet(final String name) {
 		super("N-Puzzle");
@@ -18,11 +17,11 @@ public class NPuzzleProblemSet extends AlgorithmTestProblemSet<NPuzzleProblem, L
 	private boolean showGraphs = false;
 
 	@Override
-	public NPuzzleProblem getSimpleProblemInputForGeneralTestPurposes() throws Exception {
+	public NPuzzleProblem getSimpleProblemInputForGeneralTestPurposes() {
 		return new NPuzzleProblem(3, 0);
 	}
 	@Override
-	public NPuzzleProblem getDifficultProblemInputForGeneralTestPurposes() throws Exception {
+	public NPuzzleProblem getDifficultProblemInputForGeneralTestPurposes() {
 		return new NPuzzleProblem(1000, 0);
 	}
 

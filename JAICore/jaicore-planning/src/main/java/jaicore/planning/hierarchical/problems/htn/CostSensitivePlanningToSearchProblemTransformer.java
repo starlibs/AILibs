@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class CostSensitivePlanningToSearchProblemTransformer<IPlanning extends IHTNPlanningProblem, V extends Comparable<V>, N, A>
-		implements AlgorithmProblemTransformer<CostSensitiveHTNPlanningProblem<IPlanning, V>, GraphSearchWithPathEvaluationsInput<N, A, V>> {
+		implements AlgorithmicProblemReduction<CostSensitiveHTNPlanningProblem<IPlanning, V>, GraphSearchWithPathEvaluationsInput<N, A, V>> {
 
 	private final IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, N, A> graphGeneratorDeriver;
 
@@ -49,7 +49,7 @@ public class CostSensitivePlanningToSearchProblemTransformer<IPlanning extends I
 			}
 		};
 		/* derive the concrete graph search problem input */
-		return new GraphSearchWithPathEvaluationsInput<>(this.graphGeneratorDeriver.transform(problem.getCorePlanningProblem()), solutionEvaluator);
+		return new GraphSearchWithPathEvaluationsInput<>(this.graphGeneratorDeriver.encodeProblem(problem.getCorePlanningProblem()), solutionEvaluator);
 	}
 
 	public IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, N, A> getGraphGeneratorDeriver() {

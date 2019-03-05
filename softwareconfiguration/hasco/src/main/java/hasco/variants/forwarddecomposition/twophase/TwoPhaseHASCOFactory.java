@@ -4,7 +4,7 @@ import hasco.core.HASCO;
 import hasco.core.HASCOFactory;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.probleminputs.GraphSearchInput;
 
 public class TwoPhaseHASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
@@ -31,8 +31,8 @@ public class TwoPhaseHASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A> 
 	}
 
 	@Override
-	public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, TwoPhaseSoftwareConfigurationProblem> reducer) {
-		setProblemInput(reducer.transform(problemInput));
+	public <P> void setProblemInput(P problemInput, AlgorithmicProblemReduction<P, TwoPhaseSoftwareConfigurationProblem> reducer) {
+		setProblemInput(reducer.encodeProblem(problemInput));
 	}
 
 	@Override

@@ -11,42 +11,46 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode,String> {
-	
+
 	protected int dimension;
 	private PDPuzzleNode root;
-	
 
-	
-	public PDPuzzleGenerator(int[][] board, int emptyX, int emptyY) {
+
+
+	public PDPuzzleGenerator(final int[][] board, final int emptyX, final int emptyY) {
 		this.dimension = board.length;
-		this.root = new PDPuzzleNode(board, emptyX, emptyY, 0);
+		this.root = new PDPuzzleNode(board, emptyX, emptyY);
 	}
-	
-	
+
+
 
 	@Override
 	public SingleRootGenerator<PDPuzzleNode> getRootGenerator() {
-		return () -> root;
+		return () -> this.root;
 	}
 
 	@Override
 	public SuccessorGenerator<PDPuzzleNode, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<PDPuzzleNode, String>> successors = new ArrayList<>();
-			
+
 			//Possible successors
-			if(n.getEmptyX()> 0)//move left
-				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,move(n, "l"), "l", NodeType.OR));
-			
-			if(n.getEmptyX()< dimension-1)//move right
-				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,move(n, "r"), "r", NodeType.OR));
-			
-			if(n.getEmptyY()>0)//move up
-				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,move(n, "u"), "u", NodeType.OR));
-			
-			if(n.getEmptyY()< dimension -1)//move down
-				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,move(n, "d"), "d", NodeType.OR));
-			
+			if(n.getEmptyX()> 0) {
+				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,this.move(n, "l"), "l", NodeType.OR));
+			}
+
+			if(n.getEmptyX()< this.dimension-1) {
+				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,this.move(n, "r"), "r", NodeType.OR));
+			}
+
+			if(n.getEmptyY()>0) {
+				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,this.move(n, "u"), "u", NodeType.OR));
+			}
+
+			if(n.getEmptyY()< this.dimension -1) {
+				successors.add(new NodeExpansionDescription<PDPuzzleNode, String>(n,this.move(n, "d"), "d", NodeType.OR));
+			}
+
 			return successors;
 		};
 	}
@@ -55,19 +59,20 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode,String> {
 	public NodeGoalTester<PDPuzzleNode> getGoalTester() {
 		return n->{
 			int[][] board= n.getBoard();
-			if(board[dimension-1][dimension-1]!= 0)
+			if(board[this.dimension-1][this.dimension-1]!= 0) {
 				return false;
-			else 
+			} else {
 				return true;
+			}
 		};
 	}
 
 	@Override
 	public boolean isSelfContained() {
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Moves the empty tile to another location.
 	 * The possible parameters to move the empty tiles are:
@@ -77,27 +82,27 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode,String> {
 	 * <code>d</down> for moving the empty space downwards.
 	 * @param n
 	 * 		The PDPuzzleNode which contains the boardconfiguration.
-	 * 
+	 *
 	 * @param m
 	 * 		The character which indicates the specific moves. Possible characters are given above.
-	 * 		
+	 *
 	 */
-	public PDPuzzleNode move(PDPuzzleNode n, String move) {
+	public PDPuzzleNode move(final PDPuzzleNode n, final String move) {
 		switch(move) {
-			case "l" : 
-				return move(n, 0,-1);
-			case "r" : 
-				return move(n, 0, 1);
-			case "d" : 
-				return move(n, 1, 0);
-			case "u" : 
-				return move(n, -1, 0);
-			default:
-				System.out.println("No Valid move.");
-				return null;
+		case "l" :
+			return this.move(n, 0,-1);
+		case "r" :
+			return this.move(n, 0, 1);
+		case "d" :
+			return this.move(n, 1, 0);
+		case "u" :
+			return this.move(n, -1, 0);
+		default:
+			System.out.println("No Valid move.");
+			return null;
 		}
 	}
-	
+
 	/**
 	 * The actual move of the empty tile.
 	 * @param n
@@ -109,38 +114,38 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode,String> {
 	 * 		The movement on the y-axis. This value should be -1 if going left, 1 if going right.
 	 * 		Otherwise it should be 0.
 	 */
-	public PDPuzzleNode move(PDPuzzleNode n,int y, int x) {
+	public PDPuzzleNode move(final PDPuzzleNode n,final int y, final int x) {
 		//cloning the board for the new node
-		
+
 		if(x == y || Math.abs(x)>1 || Math.abs(y)>1) {
 			System.out.println("No valid move. No move is executed");
 			return null;
 		}
-		
-		int[][] b = new int[dimension][dimension];
+
+		int[][] b = new int[this.dimension][this.dimension];
 		int[][] board=n.getBoard();
-		for(int i = 0; i< dimension; i++) {
-			for(int j= 0; j < dimension ; j++) {
+		for(int i = 0; i< this.dimension; i++) {
+			for(int j= 0; j < this.dimension ; j++) {
 				b[i][j] = board[i][j];
 			}
 		}
 		int eX = n.getEmptyX();
 		int eY = n.getEmptyY();
-//		int help = b[eY][eX];
+		//		int help = b[eY][eX];
 		b[eY][eX] = b[eY +y][eX+x];
 		b[eY+y][eX+x] = 0;
-		
-		PDPuzzleNode node = new PDPuzzleNode(b, eX+x, eY+y, n.getNumberOfMoves()+1);
-		
-		return node;		
+
+		PDPuzzleNode node = new PDPuzzleNode(b, eX+x, eY+y);
+
+		return node;
 	}
 
 
 
 	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
+	public void setNodeNumbering(final boolean nodenumbering) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

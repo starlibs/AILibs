@@ -33,7 +33,7 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPl
 
 	@Override
 	public GraphGenerator<N, A> transform(final CEOCIPSTNPlanningProblem problem) {
-		return this.wrappedDeriver.transform(problem);
+		return this.wrappedDeriver.encodeProblem(problem);
 	}
 
 	@Override

@@ -1,12 +1,12 @@
 package jaicore.search.testproblems.enhancedttsp;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.graph.LabeledGraph;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer;
 
-public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmProblemTransformer<EnhancedTTSP, GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String>> {
+public class EnhancedTTSPAdditiveGraphReducer implements AlgorithmicProblemReduction<EnhancedTTSP, GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String>> {
 
 	@Override
 	public GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String> transform(final EnhancedTTSP problem) {

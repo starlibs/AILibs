@@ -22,8 +22,8 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.CNFFormula;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -50,7 +50,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
  *
  */
 public class HASCOReduction<V extends Comparable<V>> implements
-		AlgorithmProblemTransformer<RefinementConfiguredSoftwareConfigurationProblem<V>, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>> {
+		AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>> {
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
@@ -275,7 +275,7 @@ public class HASCOReduction<V extends Comparable<V>> implements
 	 */
 	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
 			final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
-		return transformer.transform(this.getPlanningProblem());
+		return transformer.encodeProblem(this.getPlanningProblem());
 	}
 
 	@Override

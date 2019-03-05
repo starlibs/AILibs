@@ -56,11 +56,11 @@
 	</logger>
 	
 	<logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
-	 <level value="trace" />
+	 <level value="info" />
 	</logger>
 	
 	<logger name="testedalgorithm">
-    <level value="info" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -70,11 +70,11 @@
   </logger>
   
   <logger name="jaicore.search.algorithms.standard.bestfirst">
-    <level value="trace" />
+    <level value="warn" />
   </logger>
   
   <logger name="testedalgorithm._orgraphsearch._algorithm">
-    <level value="trace" />
+    <level value="warn" />
   </logger>
   
   <logger name="testednodeevaluator">

@@ -9,13 +9,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jaicore.basic.algorithm.AlgorithmTestProblemSetForSolutionIterators;
+import jaicore.basic.algorithm.IAlgorithmTestProblemSetForSolutionIterators;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.testproblems.knapsack.KnapsackConfiguration;
 import jaicore.testproblems.knapsack.KnapsackProblem;
 import jaicore.testproblems.knapsack.KnapsackProblemSet;
 
-public class KnapsackProblemAsGraphSearchSet extends AlgorithmTestProblemSetForSolutionIterators<GraphSearchInput<KnapsackConfiguration, String>, List<String>> {
+public class KnapsackProblemAsGraphSearchSet extends IAlgorithmTestProblemSetForSolutionIterators<GraphSearchInput<KnapsackConfiguration, String>, List<String>> {
 	private final KnapsackProblemSet problemSet = new KnapsackProblemSet();
 	private final KnapsackToGraphSearchProblemInputReducer reducer = new KnapsackToGraphSearchProblemInputReducer();
 	

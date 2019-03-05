@@ -28,10 +28,10 @@ import hasco.model.ComponentInstance;
 import hasco.serialization.CompositionSerializer;
 import hasco.serialization.UnresolvableRequiredInterfaceException;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
@@ -151,7 +151,7 @@ public abstract class HASCOTester<ISearch extends GraphSearchInput<N, A>, N, A>
 	public abstract HASCOFactory<ISearch, N, A, Double> getFactory();
 
 	@Override
-	public AlgorithmProblemTransformer<RefinementConfiguredSoftwareConfigurationProblem<Double>, RefinementConfiguredSoftwareConfigurationProblem<Double>> getProblemReducer() {
+	public AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<Double>, RefinementConfiguredSoftwareConfigurationProblem<Double>> getProblemReducer() {
 		return p -> p;
 	}
 

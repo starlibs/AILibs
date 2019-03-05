@@ -3,15 +3,15 @@ package jaicore.search.testproblems.knapsack;
 import java.util.List;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import jaicore.testproblems.knapsack.KnapsackConfiguration;
 import jaicore.testproblems.knapsack.KnapsackProblem;
 
-public class KnapsackToGraphSearchProblemInputReducer implements AlgorithmProblemTransformer<KnapsackProblem, GraphSearchWithPathEvaluationsInput<KnapsackConfiguration, String, Double>> {
+public class KnapsackToGraphSearchProblemInputReducer implements AlgorithmicProblemReduction<KnapsackProblem, GraphSearchWithPathEvaluationsInput<KnapsackConfiguration, String, Double>> {
 
 	@Override
 	public GraphSearchWithPathEvaluationsInput<KnapsackConfiguration, String, Double> transform(final KnapsackProblem problem) {

@@ -2,7 +2,7 @@ package jaicore.search.testproblems.enhancedttsp;
 
 import java.util.Random;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IUncertaintyAnnotatingNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
@@ -11,7 +11,7 @@ import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.AgnosticPathEvaluator;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
-public class EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer implements AlgorithmProblemTransformer<EnhancedTTSP, GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>> {
+public class EnhancedTTSPToUncertainlyEvaluatedTravesalTreeReducer implements AlgorithmicProblemReduction<EnhancedTTSP, GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>> {
 
 	private Random random = new Random(0);
 	private int samples = 3;

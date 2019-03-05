@@ -9,19 +9,20 @@ import jaicore.search.model.travesaltree.NodeType;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import jaicore.testproblems.npuzzle.NPuzzleState;
 
 /**
  * A simple generator for the normal NPuzzleProblem.
  * @author jkoepe
  *
  */
-public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
-	
-	
+public class NPuzzleGenerator implements GraphGenerator<NPuzzleState, String>{
+
+
 	protected int dimension;
-	private NPuzzleNode root;
-	
-	public NPuzzleGenerator(int[][] board) {
+	private NPuzzleState root;
+
+	public NPuzzleGenerator(final int[][] board) {
 		this.dimension = board.length;
 		int emptyX = 0;
 		int emptyY = 0;
@@ -34,53 +35,60 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 				}
 			}
 		}
-		this.root = new NPuzzleNode(board, emptyX, emptyY, 0);
-	}
-	
-	@Override
-	public SingleRootGenerator<NPuzzleNode> getRootGenerator() {
-		return () -> root;
+		this.root = new NPuzzleState(board, emptyX, emptyY);
 	}
 
 	@Override
-	public SuccessorGenerator<NPuzzleNode, String> getSuccessorGenerator() {
+	public SingleRootGenerator<NPuzzleState> getRootGenerator() {
+		return () -> this.root;
+	}
+
+	@Override
+	public SuccessorGenerator<NPuzzleState, String> getSuccessorGenerator() {
 		return n -> {
-			List<NodeExpansionDescription<NPuzzleNode, String>> successors = new ArrayList<>();
-			
+			List<NodeExpansionDescription<NPuzzleState, String>> successors = new ArrayList<>();
+
 			//Possible successors
-			if(n.getEmptyX()> 0)//move left
-				successors.add(new NodeExpansionDescription<NPuzzleNode, String>(n,move(n, "l"), "l", NodeType.OR));
-			
-			if(n.getEmptyX()< dimension-1)//move right
-				successors.add(new NodeExpansionDescription<NPuzzleNode, String>(n,move(n, "r"), "r", NodeType.OR));
-			
-			if(n.getEmptyY()>0)//move up
-				successors.add(new NodeExpansionDescription<NPuzzleNode, String>(n,move(n, "u"), "u", NodeType.OR));
-			
-			if(n.getEmptyY()< dimension -1)//move down
-				successors.add(new NodeExpansionDescription<NPuzzleNode, String>(n,move(n, "d"), "d", NodeType.OR));
-			
+			if(n.getEmptyX()> 0) {
+				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n,this.move(n, "l"), "l", NodeType.OR));
+			}
+
+			if(n.getEmptyX()< this.dimension-1) {
+				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n,this.move(n, "r"), "r", NodeType.OR));
+			}
+
+			if(n.getEmptyY()>0) {
+				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n,this.move(n, "u"), "u", NodeType.OR));
+			}
+
+			if(n.getEmptyY()< this.dimension -1) {
+				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n,this.move(n, "d"), "d", NodeType.OR));
+			}
+
 			return successors;
 		};
 	}
 
 	@Override
-	public NodeGoalTester<NPuzzleNode> getGoalTester() {
+	public NodeGoalTester<NPuzzleState> getGoalTester() {
 		return n->{
 			int[][] board= n.getBoard();
-			if(board[dimension-1][dimension-1]!= 0)
+			if(board[this.dimension-1][this.dimension-1]!= 0) {
 				return false;
-			else {
+			} else {
 				int sol =1;
-				for(int i= 0; i < dimension; i++) 
-					for(int j = 0; j < dimension; j++){
-						if(i != dimension -1 & j != dimension -1)
-							if(board[i][j] != sol)
+				for(int i= 0; i < this.dimension; i++) {
+					for(int j = 0; j < this.dimension; j++){
+						if(i != this.dimension -1 & j != this.dimension -1) {
+							if(board[i][j] != sol) {
 								return false;
-						
+							}
+						}
+
 						sol ++;
 					}
-				
+				}
+
 				return true;
 			}
 		};
@@ -88,10 +96,10 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 
 	@Override
 	public boolean isSelfContained() {
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Moves the empty tile to another location.
 	 * The possible parameters to move the empty tiles are:
@@ -101,27 +109,27 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 	 * <code>d</down> for moving the empty space downwards.
 	 * @param n
 	 * 		The NPuzzleNode which contains the boardconfiguration.
-	 * 
+	 *
 	 * @param m
 	 * 		The character which indicates the specific moves. Possible characters are given above.
-	 * 		
+	 *
 	 */
-	public NPuzzleNode move(NPuzzleNode n, String move) {
+	public NPuzzleState move(final NPuzzleState n, final String move) {
 		switch(move) {
-			case "l" : 
-				return move(n, 0,-1);
-			case "r" : 
-				return move(n, 0, 1);
-			case "d" : 
-				return move(n, 1, 0);
-			case "u" : 
-				return move(n, -1, 0);
-			default:
-				System.out.println("No Valid move.");
-				return null;
+		case "l" :
+			return this.move(n, 0,-1);
+		case "r" :
+			return this.move(n, 0, 1);
+		case "d" :
+			return this.move(n, 1, 0);
+		case "u" :
+			return this.move(n, -1, 0);
+		default:
+			System.out.println("No Valid move.");
+			return null;
 		}
 	}
-	
+
 	/**
 	 * The actual move of the empty tile.
 	 * @param n
@@ -133,38 +141,38 @@ public class NPuzzleGenerator implements GraphGenerator<NPuzzleNode, String>{
 	 * 		The movement on the y-axis. This value should be -1 if going left, 1 if going right.
 	 * 		Otherwise it should be 0.
 	 */
-	public NPuzzleNode move(NPuzzleNode n,int y, int x) {
+	public NPuzzleState move(final NPuzzleState n,final int y, final int x) {
 		//cloning the board for the new node
-		
+
 		if(x == y || Math.abs(x)>1 || Math.abs(y)>1) {
 			System.out.println("No valid move. No move is executed");
 			return null;
 		}
-		
-		int[][] b = new int[dimension][dimension];
+
+		int[][] b = new int[this.dimension][this.dimension];
 		int[][] board=n.getBoard();
-		for(int i = 0; i< dimension; i++) {
-			for(int j= 0; j < dimension ; j++) {
+		for(int i = 0; i< this.dimension; i++) {
+			for(int j= 0; j < this.dimension ; j++) {
 				b[i][j] = board[i][j];
 			}
 		}
 		int eX = n.getEmptyX();
 		int eY = n.getEmptyY();
-//		int help = b[eY][eX];
+		//		int help = b[eY][eX];
 		b[eY][eX] = b[eY +y][eX+x];
 		b[eY+y][eX+x] = 0;
-		
-		NPuzzleNode node = new NPuzzleNode(b, eX+x, eY+y, n.getNumberOfMoves()+1);
-		
-		return node;		
+
+		NPuzzleState node = new NPuzzleState(b, eX+x, eY+y);
+
+		return node;
 	}
 
 	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
+	public void setNodeNumbering(final boolean nodenumbering) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
-	
+
+
+
 }

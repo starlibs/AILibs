@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.basic.algorithm.AlgorithmTestProblemSetForSolutionIterators;
+import jaicore.basic.algorithm.IAlgorithmTestProblemSetForSolutionIterators;
 
-public class EnhancedTTSPProblemSet extends AlgorithmTestProblemSetForSolutionIterators<EnhancedTTSP, List<Short>> {
+public class EnhancedTTSPProblemSet extends IAlgorithmTestProblemSetForSolutionIterators<EnhancedTTSP, List<Short>> {
 
 	public EnhancedTTSPProblemSet() {
 		super("Enhanced TTSP");

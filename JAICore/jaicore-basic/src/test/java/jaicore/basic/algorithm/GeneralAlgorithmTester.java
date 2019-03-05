@@ -54,7 +54,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	// fields used together with @Parameter must be public
 	@Parameter(0)
-	public AlgorithmTestProblemSet<?, ?> problemSet;
+	public IAlgorithmTestProblemSet<?> problemSet;
 
 	public abstract IAlgorithm<?, ?> getAlgorithm(Object problem);
 
@@ -389,7 +389,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 
 
-	public AlgorithmTestProblemSet<?, ?> getProblemSet() {
+	public IAlgorithmTestProblemSet<?> getProblemSet() {
 		return this.problemSet;
 	}
 

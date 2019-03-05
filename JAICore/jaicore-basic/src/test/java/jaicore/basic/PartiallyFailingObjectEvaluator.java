@@ -1,15 +1,15 @@
 package jaicore.basic;
 
 import java.util.Collection;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 
 /**
  * This object evaluator simulates failures. It is possible to specify the runs for which a result (null) should be returned.
  * In the other cases, an exception is thrown.
- * 
+ *
  * @author fmohr
  *
  * @param <T>
@@ -20,8 +20,8 @@ public class PartiallyFailingObjectEvaluator<T, V extends Comparable<V>> impleme
 	private final V valueToReturn;
 	private final AtomicInteger numCalls = new AtomicInteger(0);
 	private final Collection<Integer> successfullInvocations;
-	
-	public PartiallyFailingObjectEvaluator(Collection<Integer> successfullInvocations, V valueToReturn) {
+
+	public PartiallyFailingObjectEvaluator(final Collection<Integer> successfullInvocations, final V valueToReturn) {
 		super();
 		this.successfullInvocations = successfullInvocations;
 		this.valueToReturn = valueToReturn;
@@ -29,10 +29,10 @@ public class PartiallyFailingObjectEvaluator<T, V extends Comparable<V>> impleme
 
 
 	@Override
-	public V evaluate(T object) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
-		System.out.println((numCalls.get() + 1) + "/" + successfullInvocations);
-		if (successfullInvocations.contains(numCalls.incrementAndGet()))
-			return valueToReturn;
+	public V evaluate(final T object) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+		if (this.successfullInvocations.contains(this.numCalls.incrementAndGet())) {
+			return this.valueToReturn;
+		}
 		throw new ObjectEvaluationFailedException(null, "Exception for test purposes.");
 	}
 

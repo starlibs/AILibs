@@ -1,4 +1,4 @@
-package jaicore.search.testproblems.nqueens;
+package jaicore.testproblems.nqueens;
 
 public class NQueensProblem {
 	private final int n;
