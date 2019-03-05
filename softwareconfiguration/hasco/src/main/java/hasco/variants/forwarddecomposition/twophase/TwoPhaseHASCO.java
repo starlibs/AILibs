@@ -12,7 +12,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -34,6 +33,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -42,7 +42,7 @@ import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
 
 public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
-		SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
+SoftwareConfigurationAlgorithm<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(TwoPhaseHASCO.class);
@@ -63,39 +63,41 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config) {
 		super(config != null ? config : ConfigFactory.create(TwoPhaseHASCOConfig.class), problem);
-		logger.info("Created TwoPhaseHASCO object.");
+		this.logger.info("Created TwoPhaseHASCO object.");
 	}
 
 	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config,
-			HASCO<ISearch, N, A, Double> hasco) {
+			final HASCO<ISearch, N, A, Double> hasco) {
 		this(problem, config);
 		this.setHasco(hasco);
 	}
 
-	public void setHasco(HASCO<ISearch, N, A, Double> hasco) {
+	public void setHasco(final HASCO<ISearch, N, A, Double> hasco) {
 		this.hasco = hasco;
-		if (this.getLoggerName() != null)
+		if (this.getLoggerName() != null) {
 			this.hasco.setLoggerName(this.getLoggerName() + ".hasco");
+		}
 		this.hasco.setConfig(this.getConfig());
 		this.hasco.registerListener(new Object() {
 
 			@Subscribe
-			public void receiveHASCOEvent(AlgorithmEvent event) {
+			public void receiveHASCOEvent(final AlgorithmEvent event) {
 
 				/*
 				 * forward the HASCO events and register solutions to update best seen solutions
 				 * and fill up the queue
 				 */
-				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
-					post(event);
+				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent)) {
+					TwoPhaseHASCO.this.post(event);
+				}
 				if (event instanceof HASCOSolutionEvent) {
 					@SuppressWarnings("unchecked")
 					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>)event).getSolutionCandidate();
-					updateBestSeenSolution(solution);
-					logger.info("Received new solution {} with score {} and evaluation time {}ms",
+					TwoPhaseHASCO.this.updateBestSeenSolution(solution);
+					TwoPhaseHASCO.this.logger.info("Received new solution {} with score {} and evaluation time {}ms",
 							solution.getComponentInstance(), solution.getScore(),
 							solution.getTimeToEvaluateCandidate());
-					phase1ResultQueue.add(solution);
+					TwoPhaseHASCO.this.phase1ResultQueue.add(solution);
 				}
 
 			}
@@ -103,13 +105,14 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, TimeoutException, AlgorithmException, AlgorithmExecutionCanceledException {
-		logger.info("Stepping 2phase HASCO. Current state: {}", getState());
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
+		this.logger.info("Stepping 2phase HASCO. Current state: {}", this.getState());
 		switch (this.getState()) {
 		case created: {
-			if (hasco == null)
+			if (this.hasco == null) {
 				throw new IllegalStateException(
 						"Cannot start algorithm before HASCO has been set. Please set HASCO either in constructor or via the setter.");
+			}
 			this.timeOfStart = System.currentTimeMillis();
 			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info(
@@ -121,8 +124,8 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 			/* set HASCO objects within the default path prioritizing node evaluator */
 			prioritizingPredicate.setHasco(this.hasco);
-			setHASCOLoggerNameIfPossible();
-			logger.info("Initialized HASCO with start time {}.", timeOfStart);
+			this.setHASCOLoggerNameIfPossible();
+			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 		}
 
@@ -146,7 +149,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 							}
 						}
 					} catch (Exception e) {
-						logger.error(
+						TwoPhaseHASCO.this.logger.error(
 								"Timeouter died away. This must not happen; killing the whole application. The exception responsible for this is:");
 						e.printStackTrace();
 						System.exit(1);
@@ -155,7 +158,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 				}
 			}, "Phase 1 time bound observer");
 			this.timeoutControl.start();
-			logger.info("Entering phase 1. Calling HASCO with timeout {}.", hasco.getTimeout());
+			this.logger.info("Entering phase 1. Calling HASCO with timeout {}.", this.hasco.getTimeout());
 			try {
 				this.hasco.call();
 			} catch (AlgorithmExecutionCanceledException e) {
@@ -170,7 +173,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 			/* phase 2: select model */
 			this.logger.info("Entering phase 2");
-			checkAndConductTermination();
+			this.checkAndConductTermination();
 			this.selectedHASCOSolution = this.selectModel();
 			this.updateBestSeenSolution(this.selectedHASCOSolution);
 			return this.terminate();
@@ -330,7 +333,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 			/* Get a queue of solutions to perform selection evaluation for. */
 			ensembleToSelectFrom = this.getSelectionForPhase2(remainingTime); // should be ordered by scores already (at
-																				// least the first k)
+			// least the first k)
 			int expectedTimeForPhase2 = this.getExpectedRuntimeForPhase2ForAGivenPool(ensembleToSelectFrom);
 			int expectedPostprocessingTime = this.getPostprocessingTimeOfCurrentlyBest();
 			int expectedMaximumRemainingRuntime = expectedTimeForPhase2 + expectedPostprocessingTime;
@@ -395,9 +398,9 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 							"During search, the currently chosen model {} had a total evaluation time of {}ms ({}ms per iteration). "
 									+ "We estimate an evaluation in the selection phase to take {}ms, and the final build to take {}. "
 									+ "This yields a total time of {}ms.",
-							c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime,
-							estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime,
-							estimatedTotalEffortInCaseOfSelection);
+									c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime,
+									estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime,
+									estimatedTotalEffortInCaseOfSelection);
 
 					// /* Old computation as coded by fmohr: we assume a linear growth */
 					// int evaluationTimeOfCurrentlyChosenCandidateInsideSearch =
@@ -537,7 +540,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 	}
 
 	public HASCO<ISearch, N, A, Double> getHasco() {
-		return hasco;
+		return this.hasco;
 	}
 
 	@Override
@@ -597,20 +600,20 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
-		setHASCOLoggerNameIfPossible();
+		this.setHASCOLoggerNameIfPossible();
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
 	}
 
 	private void setHASCOLoggerNameIfPossible() {
-		if (hasco == null) {
-			logger.info("HASCO object is null, so not setting a logger.");
+		if (this.hasco == null) {
+			this.logger.info("HASCO object is null, so not setting a logger.");
 			return;
 		}
-		if (hasco.getLoggerName() != null && hasco.getLoggerName().equals(loggerName + ".hasco")) {
-			logger.info("HASCO logger has already been customized correctly, not customizing again.");
+		if (this.hasco.getLoggerName() != null && this.hasco.getLoggerName().equals(this.loggerName + ".hasco")) {
+			this.logger.info("HASCO logger has already been customized correctly, not customizing again.");
 			return;
 		}
-		logger.info("Setting logger of {} to {}", this.hasco.getId(), getLoggerName() + ".hasco");
-		hasco.setLoggerName(getLoggerName() + ".hasco");
+		this.logger.info("Setting logger of {} to {}", this.hasco.getId(), this.getLoggerName() + ".hasco");
+		this.hasco.setLoggerName(this.getLoggerName() + ".hasco");
 	}
 }

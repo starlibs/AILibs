@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.rstar;
 
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
@@ -51,8 +50,13 @@ public class RStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 	}
 
 	@Override
-	public IOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> getAlgorithm() {
-		RStar<T, A> search = new RStar<>(this.getInput(), this.w, this.k, this.delta);
+	public RStar<T, A> getAlgorithm() {
+		return this.getAlgorithm(this.getInput());
+	}
+
+	@Override
+	public RStar<T, A> getAlgorithm(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> input) {
+		RStar<T, A> search = new RStar<>(input, this.w, this.k, this.delta);
 		if (this.loggerName != null && this.loggerName.length() > 0) {
 			search.setLoggerName(this.loggerName);
 		}

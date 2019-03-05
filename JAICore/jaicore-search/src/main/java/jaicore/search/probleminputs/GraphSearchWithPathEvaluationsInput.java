@@ -21,14 +21,14 @@ import jaicore.search.core.interfaces.ISolutionEvaluator;
  * @param <V>
  */
 public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> {
-	private final ISolutionEvaluator<N, V> pathEvaluator;
+	private final ISolutionEvaluator<N, A, V> pathEvaluator;
 
-	public GraphSearchWithPathEvaluationsInput(final GraphGenerator<N, A> graphGenerator, final ISolutionEvaluator<N, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final GraphGenerator<N, A> graphGenerator, final ISolutionEvaluator<N, A, V> pathEvaluator) {
 		super(graphGenerator);
 		this.pathEvaluator = pathEvaluator;
 	}
 
-	public ISolutionEvaluator<N, V> getPathEvaluator() {
+	public ISolutionEvaluator<N, A, V> getPathEvaluator() {
 		return this.pathEvaluator;
 	}
 

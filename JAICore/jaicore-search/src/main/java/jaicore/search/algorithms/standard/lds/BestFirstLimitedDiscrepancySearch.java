@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -21,6 +20,7 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
@@ -103,7 +103,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.checkAndConductTermination();
 		if (this.getState().equals(AlgorithmState.created)) {
 			this.bestFirst.setTimeout(this.getTimeout());

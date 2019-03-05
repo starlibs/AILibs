@@ -9,7 +9,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -186,7 +185,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.id;
 	}
 
-	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Checking Termination");
 		if (this.isTimeouted()) {
 			this.logger.info("Timeout detected for {}, shutting down the algorithm and stopping execution with TimeoutException", this.getId());
@@ -289,6 +288,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public void cancel() {
+		this.logger.info("Received cancel for algorithm {}.", this.getId());
 		if (this.isCanceled()) {
 			this.logger.debug("Ignoring cancel command since the algorithm has been canceled before.");
 			return;
@@ -374,7 +374,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.loggerName;
 	}
 
-	protected <T> T computeTimeoutAware(final Callable<T> r) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, TimeoutException {
+	protected <T> T computeTimeoutAware(final Callable<T> r) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Received request to execute {} with awareness of timeout {}.", r, this.getTimeout());
 
 		/* if no timeout is sharp, just execute the task */

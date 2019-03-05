@@ -1,7 +1,5 @@
 package de.upb.crc901.mlplan.core;
 
-import java.util.concurrent.TimeoutException;
-
 import org.nd4j.linalg.primitives.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +10,7 @@ import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -33,8 +32,8 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	private final IObjectEvaluator<Classifier, Double> searchBenchmark;
 	private final int timeoutForSolutionEvaluation;
 
-	public SearchPhasePipelineEvaluator(ClassifierFactory classifierFactory, AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, int numMCIterations, Instances dataShownToSearch, double trainFoldSize, int seed,
-			int timeoutForSolutionEvaluation) {
+	public SearchPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch, final double trainFoldSize, final int seed,
+			final int timeoutForSolutionEvaluation) {
 		super();
 		this.classifierFactory = classifierFactory;
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
@@ -48,35 +47,36 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 
 	@Override
 	public String getLoggerName() {
-		return logger.getName();
+		return this.logger.getName();
 	}
 
 	@Override
-	public void setLoggerName(String name) {
-		logger.info("Switching logger name from {} to {}", logger.getName(), name);
-		logger = LoggerFactory.getLogger(name);
-		if (searchBenchmark instanceof ILoggingCustomizable) {
-			logger.info("Setting logger name of actual benchmark {} to {}", searchBenchmark.getClass().getName(), name + ".benchmark");
-			((ILoggingCustomizable) searchBenchmark).setLoggerName(name + ".benchmark");
-		} else
-			logger.info("Benchmark {} does not implement ILoggingCustomizable, not customizing its logger.", searchBenchmark.getClass().getName());
+	public void setLoggerName(final String name) {
+		this.logger.info("Switching logger name from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.searchBenchmark instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger name of actual benchmark {} to {}", this.searchBenchmark.getClass().getName(), name + ".benchmark");
+			((ILoggingCustomizable) this.searchBenchmark).setLoggerName(name + ".benchmark");
+		} else {
+			this.logger.info("Benchmark {} does not implement ILoggingCustomizable, not customizing its logger.", this.searchBenchmark.getClass().getName());
+		}
 	}
 
 	@Override
-	public Double evaluate(ComponentInstance c) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 		final AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		int task = sub.interruptMeAfterMS(timeoutForSolutionEvaluation, () -> {
+		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation, () -> {
 			controlledInterrupt.set(true);
 		});
 		try {
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
 				long seed = this.seed + c.hashCode();
-				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, numMCIterations, this.dataShownToSearch, trainFoldSize, seed);
-				return copiedSearchBenchmark.evaluate(classifierFactory.getComponentInstantiation(c));
+				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSearch, this.trainFoldSize, seed);
+				return copiedSearchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 			}
-			return searchBenchmark.evaluate(classifierFactory.getComponentInstantiation(c));
+			return this.searchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 		} catch (InterruptedException e) {
 			if (controlledInterrupt.get()) {
 				Thread.interrupted(); // reset thread interruption flag, because the thread is not really interrupted but should only stop the evaluation
@@ -87,7 +87,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
 		} finally {
 			sub.cancelTimeout(task);
-			logger.debug("Canceled timeout job {}", task);
+			this.logger.debug("Canceled timeout job {}", task);
 		}
 	}
 

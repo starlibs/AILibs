@@ -2,7 +2,6 @@ package jaicore.planning.hierarchical.algorithms;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import jaicore.basic.algorithm.AOptimizer;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.planning.classical.problems.strips.Operation;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
@@ -30,7 +30,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 
 /**
- * 
+ *
  * @author fmohr
  *
  * @param <PA> class of actions in the planning problem
@@ -41,7 +41,7 @@ import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
  * @param <V> evaluation of solutions
  */
 public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem, ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>>
-		extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
+extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSearchBasedHTNPlanningAlgorithm.class);
 	private String loggerName;
@@ -57,11 +57,10 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 		this.problemTransformer = problemTransformer;
 
 		/* set the problem in the search factory */
-		searchProblemBuilder.setGraphGenerator(problemTransformer.transform(problem));
-		searchFactory.setProblemInput(searchProblemBuilder.build());
-		this.search = searchFactory.getAlgorithm();
+		searchProblemBuilder.setGraphGenerator(problemTransformer.encodeProblem(problem).getGraphGenerator());
+		this.search = searchFactory.getAlgorithm(searchProblemBuilder.build());
 	}
-	
+
 	public List<Action> getPlan(final List<TFDNode> path) {
 		return path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
 	}
@@ -73,7 +72,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, TimeoutException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException {
 
 		this.logger.debug("I'm being asked whether there is a next solution.");
 
@@ -94,16 +93,16 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 				this.logger.debug("The HTN problem is defined as follows:\n\tOperations:{}\n\tMethods:{}", opSB.toString(), methodSB.toString());
 			}
 
-//			if (this.getLoggerName() != null && this.getLoggerName().length() > 0 && this.search instanceof ILoggingCustomizable) {
-//				this.logger.info("Setting logger of search to {}", this.getLoggerName() + ".search");
-//				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
-//			}
-			
+			//			if (this.getLoggerName() != null && this.getLoggerName().length() > 0 && this.search instanceof ILoggingCustomizable) {
+			//				this.logger.info("Setting logger of search to {}", this.getLoggerName() + ".search");
+			//				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
+			//			}
+
 			/* set timeout on search */
-			TimeOut to = getTimeout();
-			logger.debug("Setting timeout of search to {}", to);
+			TimeOut to = this.getTimeout();
+			this.logger.debug("Setting timeout of search to {}", to);
 			this.search.setTimeout(to);
-			return activate();
+			return this.activate();
 		}
 		case active: {
 			if (this.isCanceled()) {
@@ -114,17 +113,16 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 				EvaluatedSearchGraphPath<N, A, V> solution = this.search.nextSolutionCandidate();
 				if (solution == null) {
 					this.logger.info("No more solutions will be found. Terminating algorithm.");
-					return terminate();
+					return this.terminate();
 				}
 				this.logger.info("Next solution found.");
-				List<N> solutionPath = solution.getNodes();
-				Plan plan = this.problemTransformer.getPlan(solutionPath);
-				PlanFoundEvent<?, V> event = new PlanFoundEvent<>(getId(), new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
+				Plan plan = this.problemTransformer.decodeSolution(solution);
+				PlanFoundEvent<?, V> event = new PlanFoundEvent<>(this.getId(), new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
 				this.post(event);
 				return event;
 			}
 			catch (NoSuchElementException e) { // if no more solution exists, terminate
-				return terminate();
+				return this.terminate();
 			}
 		}
 		default:
@@ -148,11 +146,11 @@ public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.problemTransformer instanceof ILoggingCustomizable) {
-			logger.info("Setting logger of problem transformer to {}", name + ".problemtransformer");
+			this.logger.info("Setting logger of problem transformer to {}", name + ".problemtransformer");
 			((ILoggingCustomizable) this.problemTransformer).setLoggerName(name + ".problemtransformer");
 		}
 		if (this.search instanceof ILoggingCustomizable) {
-			logger.info("Setting logger of search to {}", name + ".search");
+			this.logger.info("Setting logger of search to {}", name + ".search");
 			((ILoggingCustomizable) this.search).setLoggerName(name + ".search");
 		}
 		super.setLoggerName(this.loggerName + "._algorithm");

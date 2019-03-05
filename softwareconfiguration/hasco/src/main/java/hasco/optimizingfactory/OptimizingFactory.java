@@ -1,7 +1,5 @@
 package hasco.optimizingfactory;
 
-import java.util.concurrent.TimeoutException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +15,10 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>>
-		extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
+extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
@@ -34,38 +33,39 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 			final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
 		super(problem);
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
-		this.factoryForOptimizationAlgorithm.setProblemInput(this.getInput().getConfigurationProblem());
-		this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm();
+		this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm(this.getInput().getConfigurationProblem());
 		this.optimizer.registerListener(new Object() {
 			@Subscribe
-			public void receiveAlgorithmEvent(AlgorithmEvent event) {
-				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
-					post(event);
+			public void receiveAlgorithmEvent(final AlgorithmEvent event) {
+				if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent)) {
+					OptimizingFactory.this.post(event);
+				}
 			}
 		});
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException()
-			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case created: {
 
 			/* initialize optimizer */
 			if (this.loggerName != null) {
 				if (this.optimizer instanceof ILoggingCustomizable) {
-					logger.info("Setting logger of optimizer {} to {}", optimizer, loggerName + ".optAlgo");
-					((ILoggingCustomizable) this.optimizer).setLoggerName(loggerName + ".optAlgo");
-				} else
-					logger.info(
+					this.logger.info("Setting logger of optimizer {} to {}", this.optimizer, this.loggerName + ".optAlgo");
+					((ILoggingCustomizable) this.optimizer).setLoggerName(this.loggerName + ".optAlgo");
+				} else {
+					this.logger.info(
 							"Optimizer {} does not implement the ILoggingCustomizable interface and, hence, will not receive a customized log identifier.",
 							this.optimizer);
+				}
 			}
 
 			while (!(this.optimizer.next() instanceof AlgorithmInitializedEvent)) {
 				;
 			}
-			return activate();
+			return this.activate();
 		}
 		case active: {
 			C solutionModel = this.optimizer.call();
@@ -73,7 +73,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 				this.constructedObject = this.getInput().getBaseFactory()
 						.getComponentInstantiation(solutionModel.getComponentInstance());
 				this.performanceOfObject = solutionModel.getScore();
-				return terminate();
+				return this.terminate();
 			} catch (ComponentInstantiationFailedException e) {
 				throw new AlgorithmException(e,
 						"Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
@@ -86,7 +86,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 
 	@Override
 	public T call()
-			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}

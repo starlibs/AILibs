@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,7 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
@@ -79,7 +79,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		}
 	}
 
-	private void windowAStar() throws NodeEvaluationException, TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
+	private void windowAStar() throws NodeEvaluationException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException {
 		while (!this.openList.isEmpty()) {
 			this.checkAndConductTermination();
 			if (!this.unreturnedSolutionEvents.isEmpty()) {
@@ -90,7 +90,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			this.openList.remove(n);
 			this.closedList.add(n);
 			if (!n.isGoal()) {
-				this.post(new NodeTypeSwitchEvent<>(getId(), n, "or_closed"));
+				this.post(new NodeTypeSwitchEvent<>(this.getId(), n, "or_closed"));
 			}
 
 			/* check whether this node is outside the window and suspend it */
@@ -99,7 +99,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.closedList.remove(n);
 				this.suspendList.add(n);
 				this.logger.info("Suspending node {} with level {}, which is lower than {}", n, nLevel, this.currentLevel - this.windowSize);
-				this.post(new NodeTypeSwitchEvent<>(getId(), n, "or_suspended"));
+				this.post(new NodeTypeSwitchEvent<>(this.getId(), n, "or_suspended"));
 				continue;
 			}
 
@@ -142,7 +142,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 					if (!nPrime.isGoal()) {
 						this.openList.add(nPrime);
 					}
-					this.post(new NodeAddedEvent<>(getId(), n, nPrime, nPrime.isGoal() ? "or_solution" : "or_open"));
+					this.post(new NodeAddedEvent<>(this.getId(), n, nPrime, nPrime.isGoal() ? "or_solution" : "or_open"));
 				} else if (this.openList.contains(nPrime) || this.suspendList.contains(nPrime)) {
 					V oldScore = nPrime.getInternalLabel();
 					if (oldScore != null && oldScore.compareTo(nPrimeScore) > 0) {
@@ -176,8 +176,8 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, NodeEvaluationException {
-		logger.debug("Next step in {}. State is {}", this.getId(), getState());
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, NodeEvaluationException {
+		this.logger.debug("Next step in {}. State is {}", this.getId(), this.getState());
 		this.checkAndConductTermination();
 		switch (this.getState()) {
 		case created:
@@ -185,9 +185,9 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			Node<T, V> rootNode = new Node<>(null, externalRootNode);
 			this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 			this.openList.add(rootNode);
-			this.post(new GraphInitializedEvent<>(getId(), rootNode));
+			this.post(new GraphInitializedEvent<>(this.getId(), rootNode));
 			rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
-			return activate();
+			return this.activate();
 
 		case active:
 			AlgorithmEvent event;
@@ -201,7 +201,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				if (this.openList.isEmpty()) {
 					if (this.suspendList.isEmpty()) {
 						this.logger.info("The whole graph has been exhausted. No more solutions can be found!");
-						return terminate();
+						return this.terminate();
 					} else {
 						this.logger.info("Search with window size {} is exhausted. Reactivating {} suspended nodes and incrementing window size.", this.windowSize, this.suspendList.size());
 						this.openList.addAll(this.suspendList);

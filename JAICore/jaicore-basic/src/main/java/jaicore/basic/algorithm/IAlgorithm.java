@@ -3,12 +3,12 @@ package jaicore.basic.algorithm;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.Cancelable;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 /**
  * The algorithms should actually also be interruptible, but since this is often not the case,
@@ -60,14 +60,14 @@ public interface IAlgorithm<I, O> extends Iterable<AlgorithmEvent>, Iterator<Alg
 	 * number of threads is limited (e.g. to the number of cores that may be used). <code>setNumCPUs</code>
 	 * does not put such a restriction, because this is unnecessarily limiting in environment where such
 	 * constraints do not exist.
-	 * 
+	 *
 	 * If the value is set to 0, no own threads must be used at all. Note that this may not be possible for
 	 * some algorithms that need observers in the background.
-	 * 
-	 * If the value is set to -1, any restriction on the number of threads is removed.  
-	 * 
+	 *
+	 * If the value is set to -1, any restriction on the number of threads is removed.
+	 *
 	 * Note that different algorithms may have different default behaviors if this number is not set.
-	 * 
+	 *
 	 * @param maxNumberOfThreads
 	 *            The maximum number of threads that may be spawned by the algorithm itself.
 	 */
@@ -100,7 +100,7 @@ public interface IAlgorithm<I, O> extends Iterable<AlgorithmEvent>, Iterator<Alg
 	 * @return The next event occuring during the execution of the algorithm.
 	 * @throws Exception
 	 */
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException;
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException;
 
 	/**
 	 * @return The config interface to store parameters to the algorithm in.
@@ -110,11 +110,12 @@ public interface IAlgorithm<I, O> extends Iterable<AlgorithmEvent>, Iterator<Alg
 	/**
 	 * Overrides the call of Callable to restrict the set of allowed exceptions
 	 */
-	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException;
+	@Override
+	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException;
 
 	/**
 	 * globally unique identifier for the algorithm run
-	 * 
+	 *
 	 * @return
 	 */
 	public String getId();

@@ -5,8 +5,7 @@ dependencies {
 	compile project(":JAICore:jaicore-graphvisualizer")
 	
 	compile group: 'org.knowm.xchart', name: 'xchart', version: '3.5.2'
-	compile group: 'it.unimi.dsi', name: 'fastutil', version: '8.2.1'
-  testCompile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+	  testCompile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
   testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 
 }

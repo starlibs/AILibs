@@ -1,7 +1,5 @@
 package de.upb.crc901.mlplan.core;
 
-import java.util.concurrent.TimeoutException;
-
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.nd4j.linalg.primitives.AtomicBoolean;
 import org.slf4j.Logger;
@@ -13,6 +11,7 @@ import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
@@ -33,8 +32,8 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	private final double trainFoldSize;
 	private final int timeoutForSolutionEvaluation;
 
-	public SelectionPhasePipelineEvaluator(ClassifierFactory classifierFactory, AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, int numMCIterations, Instances dataShownToSearch, double trainFoldSize, int seed,
-			int timeoutForSolutionEvaluation) {
+	public SelectionPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch, final double trainFoldSize, final int seed,
+			final int timeoutForSolutionEvaluation) {
 		super();
 		this.classifierFactory = classifierFactory;
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
@@ -51,43 +50,44 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	}
 
 	@Override
-	public void setLoggerName(String name) {
+	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 	}
 
 	@Override
-	public Double evaluate(ComponentInstance c) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 
 		AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
 		if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 		}
 
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, numMCIterations, dataShownToSelectionPhase, trainFoldSize, seed);
+		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		int task = sub.interruptMeAfterMS(timeoutForSolutionEvaluation - 100, () -> {
+		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, () -> {
 			controlledInterrupt.set(true);
 		});
 		try {
-			mccv.evaluate(classifierFactory.getComponentInstantiation(c), stats);
+			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {
-			if (controlledInterrupt.get())
+			if (controlledInterrupt.get()) {
 				throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed since the timeout was hit.");
+			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
 		} finally {
 			sub.cancelTimeout(task);
-			logger.debug("Canceled timeout job {}", task);
+			this.logger.debug("Canceled timeout job {}", task);
 		}
 
 		/* now retrieve .75-percentile from stats */
 		double mean = stats.getMean();
 		double percentile = stats.getPercentile(75f);
-		logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
+		this.logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
 		return percentile;
 	}
 
