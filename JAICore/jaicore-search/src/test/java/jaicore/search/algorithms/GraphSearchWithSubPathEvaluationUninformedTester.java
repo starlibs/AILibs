@@ -6,10 +6,15 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public abstract class GraphSearchWithSubPathEvaluationUninformedTester extends GraphSearchTester {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public final <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
-		GraphSearchWithSubpathEvaluationsInput<N, A, Double> transformed = new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), n -> 0.0);
-		return this.getSearchAlgorithm(transformed);
+		if (problem instanceof GraphSearchWithSubpathEvaluationsInput) {
+			return this.getSearchAlgorithm((GraphSearchWithSubpathEvaluationsInput<N, A, Double>)problem);
+		}
+		else {
+			return this.getSearchAlgorithm(new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), n -> 0.0));
+		}
 	}
 
 	public abstract <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchWithSubpathEvaluationsInput<N, A, Double> problem);
