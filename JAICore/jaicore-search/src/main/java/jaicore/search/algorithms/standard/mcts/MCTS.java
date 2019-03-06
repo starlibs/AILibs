@@ -120,8 +120,9 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws TimeoutException
 	 * @throws AlgorithmException
+	 * @throws ActionPredictionFailedException
 	 */
-	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, ActionPredictionFailedException {
 		this.logger.debug("Computing a new playout ...");
 		N current = this.root;
 		N next;
@@ -294,7 +295,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		this.logger.trace("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
 		this.unexpandedNodes.remove(node);
 		Collection<NodeExpansionDescription<N, A>> availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node));
-		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(n -> n.getAction()).collect(Collectors.toSet())
+		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toSet())
 				.size() : "The actions under this node don't have unique names";
 				Map<A, N> successorStates = new HashMap<>();
 				for (NodeExpansionDescription<N, A> d : availableActions) {
@@ -314,7 +315,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	}
 
 	@Override
-	public A getAction(final N node, final Map<A, N> actionsWithSuccessors) {
+	public A getAction(final N node, final Map<A, N> actionsWithSuccessors) throws ActionPredictionFailedException {
 
 		try {
 			/* compute next solution */
@@ -323,7 +324,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			/* choose action in root that has best reward */
 			return this.treePolicy.getAction(this.root, actionsWithSuccessors);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new ActionPredictionFailedException(e);
 		}
 	}
 
@@ -336,7 +337,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			current = path.get(i);
 		}
 		assert !path.isEmpty() : "Solution paths cannot be empty!";
-		assert this.isGoal(path.get(path.size() - 1)) : "The head of a solution path must be a goal node, but this is not the case for this path: \n\t" + path.stream().map(n -> n.toString()).collect(Collectors.joining("\n\t"));
+		assert this.isGoal(path.get(path.size() - 1)) : "The head of a solution path must be a goal node, but this is not the case for this path: \n\t" + path.stream().map(N::toString).collect(Collectors.joining("\n\t"));
 	}
 
 	@Override
@@ -403,6 +404,9 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			} catch (NoSuchElementException e) {
 				this.logger.info("No more playouts exist. Terminating.");
 				return this.terminate();
+			}
+			catch (ActionPredictionFailedException e) {
+				throw new AlgorithmException(e, "Step failed due to an exception in predicting an action when computing the playout.");
 			}
 
 			/* the algorithm should never come here */

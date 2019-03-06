@@ -1,6 +1,7 @@
 package jaicore.search.testproblems.nqueens;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,12 +23,12 @@ public class QueenNodeTester {
 	@Test
 	public void testGetPositions() {
 		List<Integer> comp = Arrays.asList(1, 3, 0, 2);
-		assertEquals(this.n1.getPositions(), comp);
+		assertEquals(comp, this.n1.getPositions());
 	}
 
 	@Test
 	public void testGetDimension() {
-		assertEquals(this.n1.getDimension(), 4);
+		assertEquals(4, this.n1.getDimension());
 	}
 
 	@Test
@@ -42,12 +43,12 @@ public class QueenNodeTester {
 		s += "----------------\n";
 		s += "|   |   | Q |   |\n";
 		s += "----------------";
-		assertEquals(this.n1.boardVisualizationAsString(), s);
+		assertEquals(s, this.n1.boardVisualizationAsString());
 	}
 
 	@Test
 	public void testAttack() {
-		assertEquals(this.n1.attack(2, 2), true);
+		assertTrue(this.n1.attack(2, 2));
 	}
 
 	@Test
@@ -62,22 +63,22 @@ public class QueenNodeTester {
 		s += "----------------\n";
 		s += "| O | O | Q | O |\n";
 		s += "----------------";
-		assertEquals(this.n1.toStringAttack(), s);
+		assertEquals(s, this.n1.toStringAttack());
 	}
 
 	@Test
 	public void testGetNumberOfQueens() {
-		assertEquals(this.n1.getNumberOfQueens(), 4);
+		assertEquals(4, this.n1.getNumberOfQueens());
 	}
 
 	@Test
 	public void testGetNumberOfAttackedCells() {
-		assertEquals(this.n1.getNumberOfAttackedCells(), 16);
+		assertEquals(16, this.n1.getNumberOfAttackedCells());
 	}
 
 	@Test
 	public void testGetNumberOfAttackedCellsInNextRow() throws InterruptedException {
-		assertEquals(this.n2.getNumberOfAttackedCellsInNextRow(), 3);
+		assertEquals(3, this.n2.getNumberOfAttackedCellsInNextRow());
 	}
 
 	@Test

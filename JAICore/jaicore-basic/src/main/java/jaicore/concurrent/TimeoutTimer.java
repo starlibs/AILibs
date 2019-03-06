@@ -45,12 +45,12 @@ public class TimeoutTimer extends Timer {
 			}
 		}
 
-		public int interruptMeAfterMS(final long delay) {
+		public int interruptMeAfterMS(final int delay) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay);
 		}
 
-		public int interruptMeAfterMS(final long delay, final Runnable preInterruptionHook) {
+		public int interruptMeAfterMS(final int delay, final Runnable preInterruptionHook) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay, preInterruptionHook);
 		}

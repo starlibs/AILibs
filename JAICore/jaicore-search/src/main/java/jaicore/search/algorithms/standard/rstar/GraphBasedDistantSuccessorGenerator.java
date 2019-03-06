@@ -37,9 +37,11 @@ public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccess
 		if (this.goalTester.isGoal(n)) {
 			return successorsInOriginalGraph;
 		}
-		for (int i = 0; i < MAX_ATTEMPTS; i++) {
+		for (int i = 0; i < MAX_ATTEMPTS && successorsInOriginalGraph.size() < k; i++) {
 			this.logger.debug("Drawing next distant successor for {}. {}/{} have already been drawn. This is the {}-th attempt.", n, successorsInOriginalGraph.size(), k, i + 1);
 			N candidatePoint = n;
+
+			/* detect potential dead end */
 			boolean deadEnd = false;
 			while (!this.goalTester.isGoal(candidatePoint) && metricOverStates.getDistance(n, candidatePoint) <= delta) {
 				if (Thread.currentThread().isInterrupted()) {
@@ -76,9 +78,6 @@ public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccess
 			/* add the node if we don't have it yet */
 			if (!successorsInOriginalGraph.contains(candidatePoint)) {
 				successorsInOriginalGraph.add(candidatePoint);
-				if (successorsInOriginalGraph.size() == k) {
-					break;
-				}
 			}
 		}
 		this.logger.info("Returning {} successors.", successorsInOriginalGraph.size());

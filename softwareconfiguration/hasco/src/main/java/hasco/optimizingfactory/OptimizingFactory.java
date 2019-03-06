@@ -8,7 +8,6 @@ import com.google.common.eventbus.Subscribe;
 import hasco.core.SoftwareConfigurationProblem;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.EvaluatedSoftwareConfigurationSolution;
-import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -17,8 +16,7 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
-public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>>
-extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
+public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
 	/* logging */
 	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
@@ -29,8 +27,7 @@ extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 	private V performanceOfObject;
 	private final SoftwareConfigurationAlgorithm<P, C, V> optimizer;
 
-	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem,
-			final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
+	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
 		super(problem);
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
 		this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm(this.getInput().getConfigurationProblem());
@@ -45,48 +42,36 @@ extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException()
-			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case created: {
+		case created:
 
 			/* initialize optimizer */
 			if (this.loggerName != null) {
-				if (this.optimizer instanceof ILoggingCustomizable) {
-					this.logger.info("Setting logger of optimizer {} to {}", this.optimizer, this.loggerName + ".optAlgo");
-					((ILoggingCustomizable) this.optimizer).setLoggerName(this.loggerName + ".optAlgo");
-				} else {
-					this.logger.info(
-							"Optimizer {} does not implement the ILoggingCustomizable interface and, hence, will not receive a customized log identifier.",
-							this.optimizer);
-				}
+				this.logger.info("Setting logger of optimizer {} to {}.optAlgo", this.optimizer, this.loggerName);
+				this.optimizer.setLoggerName(this.loggerName + ".optAlgo");
 			}
 
-			while (!(this.optimizer.next() instanceof AlgorithmInitializedEvent)) {
-				;
-			}
+			AlgorithmEvent initEvent = this.optimizer.next();
+			assert initEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the optimizer has not been its AlgorithmInitializationEvent";
 			return this.activate();
-		}
-		case active: {
+
+		case active:
 			C solutionModel = this.optimizer.call();
 			try {
-				this.constructedObject = this.getInput().getBaseFactory()
-						.getComponentInstantiation(solutionModel.getComponentInstance());
+				this.constructedObject = this.getInput().getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());
 				this.performanceOfObject = solutionModel.getScore();
 				return this.terminate();
 			} catch (ComponentInstantiationFailedException e) {
-				throw new AlgorithmException(e,
-						"Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
+				throw new AlgorithmException(e, "Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
 			}
-		}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());
 		}
 	}
 
 	@Override
-	public T call()
-			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public T call() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}

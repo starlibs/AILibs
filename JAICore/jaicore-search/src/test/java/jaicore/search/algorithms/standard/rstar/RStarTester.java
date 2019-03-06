@@ -1,5 +1,7 @@
 package jaicore.search.algorithms.standard.rstar;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -9,6 +11,12 @@ import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 
+/**
+ * This test deactivates the solution enumerators, because RStar is not a complete algorithm
+ *
+ * @author fmohr
+ *
+ */
 public class RStarTester extends GraphSearchTester {
 
 	@Override
@@ -23,25 +31,21 @@ public class RStarTester extends GraphSearchTester {
 
 	@Override
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-
-		/* this test cannot go through, because this is not a enumeration-complete algorithm */
+		assertTrue(true);
 	}
 
 	@Override
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-
-		/* this test cannot go through, because this is not a enumeration-complete algorithm */
+		assertTrue(true);
 	}
 
 	@Override
 	public void testThatIteratorReturnsEachPossibleSolution() {
-
-		/* this test cannot go through, because this is not an enumeration-complete algorithm */
+		assertTrue(true);
 	}
 
 	@Override
 	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization() {
-
-		/* this test cannot go through, because this is not an enumeration-complete algorithm */
+		assertTrue(true);
 	}
 }

@@ -55,7 +55,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		this.logger.info("Switching logger name from {} to {}", this.logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.searchBenchmark instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger name of actual benchmark {} to {}", this.searchBenchmark.getClass().getName(), name + ".benchmark");
+			this.logger.info("Setting logger name of actual benchmark {} to {}.benchmark", this.searchBenchmark.getClass().getName(), name);
 			((ILoggingCustomizable) this.searchBenchmark).setLoggerName(name + ".benchmark");
 		} else {
 			this.logger.info("Benchmark {} does not implement ILoggingCustomizable, not customizing its logger.", this.searchBenchmark.getClass().getName());
@@ -66,14 +66,12 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 		final AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation, () -> {
-			controlledInterrupt.set(true);
-		});
+		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation, () -> controlledInterrupt.set(true));
 		try {
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
-				long seed = this.seed + c.hashCode();
-				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSearch, this.trainFoldSize, seed);
+				long subSeed = this.seed + c.hashCode();
+				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSearch, this.trainFoldSize, subSeed);
 				return copiedSearchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 			}
 			return this.searchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));

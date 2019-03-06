@@ -32,8 +32,8 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	private final double trainFoldSize;
 	private final int timeoutForSolutionEvaluation;
 
-	public SelectionPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch, final double trainFoldSize, final int seed,
-			final int timeoutForSolutionEvaluation) {
+	public SelectionPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch,
+			final double trainFoldSize, final int seed, final int timeoutForSolutionEvaluation) {
 		super();
 		this.classifierFactory = classifierFactory;
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
@@ -67,9 +67,7 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, () -> {
-			controlledInterrupt.set(true);
-		});
+		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, () -> controlledInterrupt.set(true));
 		try {
 			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {

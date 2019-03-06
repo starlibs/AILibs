@@ -5,7 +5,7 @@ import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 
-public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluation<T,A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double> {
+public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearchWithNumberBasedAdditivePathEvaluation<T, A>, EvaluatedSearchGraphPath<T, A, Double>, T, A, Double> {
 
 	private int timeoutForFInMS;
 	private INodeEvaluator<T, Double> timeoutEvaluator;
@@ -36,8 +36,6 @@ public class AStarFactory<T, A> extends StandardORGraphSearchFactory<GraphSearch
 		}
 		return search;
 	}
-
-
 
 	public void setTimeoutForFComputation(final int timeoutInMS, final INodeEvaluator<T, Double> timeoutEvaluator) {
 		this.timeoutForFInMS = timeoutInMS;

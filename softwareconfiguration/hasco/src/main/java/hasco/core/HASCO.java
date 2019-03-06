@@ -80,7 +80,8 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
-			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory, final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
+			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory,
+			final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
 		super(ConfigFactory.create(HASCOConfig.class), configurationProblem);
 		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
@@ -129,7 +130,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 
 		/* act depending on state */
 		switch (this.getState()) {
-		case created: {
+		case created:
 			this.logger.info("Starting HASCO run.");
 			AlgorithmInitializedEvent event = this.activate();
 
@@ -190,22 +191,13 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 
 			/* now initialize the search */
 			this.logger.debug("Initializing the search");
-			boolean searchInitializationObserved = false;
-			AlgorithmEvent searchEvent;
-			do {
-				searchEvent = this.search.nextWithException();
-				this.logger.debug("Observing search event {}", searchEvent);
-				searchInitializationObserved = (searchEvent instanceof AlgorithmInitializedEvent);
-			} while (this.search.hasNext() && !searchInitializationObserved);
-			if (!searchInitializationObserved) {
-				throw new IllegalStateException("The search underlying HASCO could not be initialized successully.");
-			}
+			AlgorithmEvent searchInitializationEvent = this.search.nextWithException();
+			assert searchInitializationEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the search was not the initialization event but " + searchInitializationEvent + "!";
 			this.logger.debug("Search has been initialized.");
 			this.logger.info("HASCO initialization completed.");
 			return event;
-		}
 
-		case active: {
+		case active:
 			/* step search */
 			AlgorithmEvent searchEvent = this.search.nextWithException();
 			if (searchEvent instanceof AlgorithmFinishedEvent) {
@@ -223,7 +215,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			} else {
 				return searchEvent;
 			}
-		}
+
 		default:
 			throw new IllegalStateException("HASCO cannot do anything in state " + this.getState());
 		}
