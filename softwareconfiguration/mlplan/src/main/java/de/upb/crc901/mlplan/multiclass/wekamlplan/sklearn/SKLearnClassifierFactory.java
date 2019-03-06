@@ -28,7 +28,7 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList(new String[] { "True", "False" }));
 
-	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactoryTest.class);
+	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
 	private String loggerName;
 
 	@Override
