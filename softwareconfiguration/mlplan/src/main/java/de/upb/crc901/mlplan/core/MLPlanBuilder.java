@@ -40,13 +40,44 @@ import jaicore.search.probleminputs.GraphSearchInput;
 import weka.core.Instances;
 
 public class MLPlanBuilder {
+
+	private static final Logger L = LoggerFactory.getLogger(MLPlanBuilder.class);
+
+	private static final File SPC_AUTO_WEKA = new File("conf/automl/searchmodels/weka/weka-all-autoweka.json");
+	private static final File SPC_SKLEARN = new File("conf/automl/searchmodels/sklearn/sklearn-mlplan.json");
+	private static final File SPC_SKLEARN_UL = new File("conf/automl/searchmodels/sklearn/ml-plan-ul.json");
+
+	private static final File PREFC_AUTO_WEKA = new File("conf/mlplan/weka-precedenceList.txt");
+	private static final File PREFC_SKLEARN = new File("conf/mlplan/sklearn-precedenceList.txt");
+	private static final File PREFC_SKLEARN_UL = new File("conf/mlplan/sklearn-ul-precedenceList.txt");
+
+	private enum DefaultConfig {
+		AUTO_WEKA(SPC_AUTO_WEKA, PREFC_AUTO_WEKA), SKLEARN(SPC_SKLEARN, PREFC_SKLEARN), SKLEARN_UL(SPC_SKLEARN_UL, PREFC_SKLEARN_UL);
+
+		private final File spcFile;
+		private final File preferredComponentsFile;
+
+		private DefaultConfig(final File spcFile, final File preferredComponentsFile) {
+			this.spcFile = spcFile;
+			this.preferredComponentsFile = preferredComponentsFile;
+		}
+
+		public File getSearchSpaceConfigFile() {
+			return this.spcFile;
+		}
+
+		public File getPreferredComponentsFile() {
+			return this.preferredComponentsFile;
+		}
+	}
+
 	static MLPlanClassifierConfig loadOwnerConfig(final File configFile) throws IOException {
 		Properties props = new Properties();
 		if (configFile.exists()) {
 			FileInputStream fis = new FileInputStream(configFile);
 			props.load(fis);
 		} else {
-			System.out.println("Config file " + configFile.getAbsolutePath() + " not found, working with default parameters.");
+			L.warn("Config file {} not found, working with default parameters.", configFile.getAbsolutePath());
 		}
 		return ConfigFactory.create(MLPlanClassifierConfig.class, props);
 	}
@@ -125,28 +156,26 @@ public class MLPlanBuilder {
 	 * @throws IOException Throws an IOException if the search space config file could not be loaded.
 	 */
 	public MLPlanBuilder withAutoSKLearnConfig() throws IOException {
-		if (this.searchSpaceConfigFile == null) {
-			this.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/sklearn/sklearn-mlplan.json"));
-		}
-
-		File fileOfPreferredComponents = this.getAlgorithmConfig().preferredComponents();
-		List<String> ordering;
-		if (!fileOfPreferredComponents.exists()) {
-			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", fileOfPreferredComponents.getAbsolutePath());
-			ordering = new ArrayList<>();
-		} else {
-			ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
-		}
-		this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
 		this.classifierFactory = new SKLearnClassifierFactory();
-		return this;
+		return this.withDefaultConfig(DefaultConfig.SKLEARN);
+	}
+
+	public MLPlanBuilder withTpotConfig() throws IOException {
+		this.classifierFactory = new SKLearnClassifierFactory();
+		return this.withDefaultConfig(DefaultConfig.SKLEARN_UL);
 	}
 
 	public MLPlanBuilder withAutoWEKAConfiguration() throws IOException {
+		this.classifierFactory = new WEKAPipelineFactory();
+		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
+		return this.withDefaultConfig(DefaultConfig.AUTO_WEKA);
+	}
+
+	private MLPlanBuilder withDefaultConfig(final DefaultConfig defConfig) throws IOException {
 		if (this.searchSpaceConfigFile == null) {
-			this.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
+			this.withSearchSpaceConfigFile(defConfig.getSearchSpaceConfigFile());
 		}
-		File fileOfPreferredComponents = this.getAlgorithmConfig().preferredComponents();
+		File fileOfPreferredComponents = defConfig.getPreferredComponentsFile();
 		List<String> ordering;
 		if (!fileOfPreferredComponents.exists()) {
 			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", fileOfPreferredComponents.getAbsolutePath());
@@ -155,8 +184,7 @@ public class MLPlanBuilder {
 			ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
 		}
 		this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
-		this.classifierFactory = new WEKAPipelineFactory();
-		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
+
 		return this;
 	}
 
@@ -197,7 +225,6 @@ public class MLPlanBuilder {
 	public void prepareNodeEvaluatorInFactoryWithData(final Instances data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
-			// throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
 		}
 		if (this.factoryPreparedWithData) {
 			throw new IllegalStateException("Factory has already been prepared with data. This can only be done once!");
@@ -230,22 +257,18 @@ public class MLPlanBuilder {
 	}
 
 	public HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> getHASCOFactory() {
-		//		if (!factoryPreparedWithData) {
-		//			throw new IllegalStateException("Data have not been set on the factory yet.");
-		//		}
 		return this.hascoFactory;
 	}
 
 	@SuppressWarnings("unchecked")
-	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, final AlgorithmicProblemReduction transformer) {
+	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
 		this.hascoFactory.setSearchFactory(searchFactory);
 		this.hascoFactory.setSearchProblemTransformer(transformer);
-		return this; 
+		return this;
 	}
 
 	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
-		this.hascoFactory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.algorithmConfig.randomSeed(),
-				this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(),
+		this.hascoFactory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.algorithmConfig.randomSeed(), this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(),
 				this.algorithmConfig.timeoutForNodeEvaluation());
 		return this;
 	}
