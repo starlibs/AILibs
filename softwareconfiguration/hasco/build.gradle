@@ -1,9 +1,6 @@
 dependencies {
 	compile project(':JAICore:jaicore-basic')
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
-	compile project(':JAICore:jaicore-concurrent')
 	compile project(':JAICore:jaicore-logic')
-	compile project(':JAICore:jaicore-graph')
 	compile project(':JAICore:jaicore-graphvisualizer')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
@@ -12,4 +9,6 @@ dependencies {
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
 	// database connector	
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
+	
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }

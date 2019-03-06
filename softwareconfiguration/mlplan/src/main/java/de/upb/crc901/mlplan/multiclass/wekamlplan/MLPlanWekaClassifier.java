@@ -19,6 +19,7 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import jaicore.ml.evaluation.IInstancesClassifier;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
@@ -43,7 +44,7 @@ import weka.core.OptionHandler;
  * @author wever, fmohr
  *
  */
-public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable {
+public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IInstancesClassifier {
 
 	/* Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
@@ -84,6 +85,20 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		}
 
 		this.classifierFoundByMLPlan = this.mlplan.call();
+	}
+
+	@Override
+	public double[] classifyInstances(final Instances instances) throws Exception {
+		/* If the selected classifier can handle batch classification, use this feature. */
+		if (this.getSelectedClassifier() instanceof IInstancesClassifier) {
+			return ((IInstancesClassifier) this.getSelectedClassifier()).classifyInstances(instances);
+		}
+
+		double[] predictions = new double[instances.size()];
+		for (int i = 0; i < instances.size(); i++) {
+			predictions[i] = this.getSelectedClassifier().classifyInstance(instances.get(i));
+		}
+		return predictions;
 	}
 
 	@Override
@@ -139,8 +154,8 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 
 	@Override
 	public String[] getOptions() {
-		/* As there are no options, simply return null. */
-		return null;
+		/* As there are no options, simply return an empty array. */
+		return new String[] {};
 	}
 
 	public void setTimeout(final TimeOut timeout) {
