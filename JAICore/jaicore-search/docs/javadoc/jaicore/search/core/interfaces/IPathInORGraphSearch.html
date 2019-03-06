@@ -92,7 +92,7 @@
 <li class="blockList">
 <dl>
 <dt>All Superinterfaces:</dt>
-<dd>java.util.concurrent.Callable&lt;O&gt;, jaicore.basic.Cancelable, jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+<dd>java.util.concurrent.Callable&lt;O&gt;, jaicore.basic.Cancelable, jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <dl>
 <dt>All Known Subinterfaces:</dt>
@@ -105,7 +105,7 @@
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">IPathInORGraphSearch&lt;I extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;N,A&gt;,O extends <a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;N,A&gt;,N,A&gt;</span>
-extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;</pre>
+extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;</pre>
 </li>
 </ul>
 </div>
@@ -124,6 +124,13 @@ extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" t
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.search.core.interfaces.<a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a></h3>
 <code><a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html#getGraphGenerator--">getGraphGenerator</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
+<code>nextSolutionCandidate, nextSolutionCandidateEvent</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithm">
@@ -152,13 +159,6 @@ extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" t
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.Cancelable</h3>
 <code>cancel</code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
-<code>nextSolutionCandidate, nextSolutionCandidateEvent</code></li>
 </ul>
 </li>
 </ul>
