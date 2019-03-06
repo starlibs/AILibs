@@ -1,7 +1,6 @@
 package jaicore.ml.tsc.classifier;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -12,6 +11,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.tsc.HistogramBuilder;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 import jaicore.ml.tsc.filter.SFA;
@@ -21,15 +21,14 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 	
 	//TODO mean normalization by dropping first DFT Coefficient
 	private int windowSize;
-	private int wordLength;
 	private int alphabetSize;
 	private double[] alphabet;
+	private ArrayList<ArrayList<HashMap<Integer,Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer,Integer>>> ();
 	private ArrayList<HashMap<Integer,Integer>> histograms = new ArrayList<HashMap<Integer, Integer>>(); 
 	
 	
-	public BOSSAlgorithm(int windowLength,int wordLength,int alphabetSize, double[] alphabet) {
+	public BOSSAlgorithm(int windowLength,int alphabetSize, double[] alphabet) {
 		this.windowSize = windowLength;
-		this.windowSize = wordLength;
 		this.alphabetSize = alphabetSize;
 		this.alphabet = alphabet;
 	}
@@ -87,6 +86,7 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 		
 		
 		SFA sfa = new SFA(alphabet, alphabetSize);
+		HistogramBuilder histoBuilder = new HistogramBuilder();
 		sfa.fit(input);
 		
 		
@@ -95,19 +95,13 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 		
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
 			for(int instance = 0; instance < input.getNumberOfInstances(); instance++) {
-				HashMap<Integer,Integer> histogram = new HashMap<Integer,Integer>();
+				HashMap<Integer,Integer> histogram = null;
 				TimeSeriesDataset tmp = slide.specialFitTransform(input.getValues(matrix)[instance]);
 				try {
 					TimeSeriesDataset tmpTransformed = sfa.transform(tmp);
-					for(double [] d : tmpTransformed.getValues(0)) {
-						if(histogram.containsKey(Arrays.hashCode(d))) {
-							histogram.replace(Arrays.hashCode(d),histogram.get(Arrays.hashCode(d))+1);
-						}
-						else {
-							histogram.put(Arrays.hashCode(d), 1);
-						}
+					histogram = histoBuilder.histogramForInstance(tmpTransformed);
 					}
-				} catch (IllegalArgumentException e) {
+				catch (IllegalArgumentException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (NoneFittedFilterExeception e) {
@@ -116,10 +110,13 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 				}
 				histograms.add(histogram);
 			}
+			multivirateHistograms.add(histograms);
 		}
-		model.setHistograms(histograms);
+		model.setMultivirateHistograms(multivirateHistograms);
 		model.setSfa(sfa);
+		model.setTrainingData(input);
 		return model;
+	
 	}
 
 	@Override
