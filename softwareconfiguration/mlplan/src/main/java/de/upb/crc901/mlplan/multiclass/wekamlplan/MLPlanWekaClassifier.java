@@ -1,6 +1,5 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Objects;
@@ -50,11 +49,10 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
-	private static final boolean visualizationActive = false;
+	private static final boolean VISUALIZATION_ACTIVATED = false;
 
 	/* MLPlan Builder and the instance of mlplan */
 	private final MLPlanBuilder builder;
-	private MLPlan mlplan;
 
 	/* The timeout for the selecting a classifier. */
 	private TimeOut timeout;
@@ -63,7 +61,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private Classifier classifierFoundByMLPlan;
 	private double internalValidationErrorOfSelectedClassifier;
 
-	public MLPlanWekaClassifier(final MLPlanBuilder builder) throws IOException {
+	public MLPlanWekaClassifier(final MLPlanBuilder builder) {
 		this.builder = builder;
 	}
 
@@ -71,20 +69,20 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	public void buildClassifier(final Instances data) throws Exception {
 		Objects.requireNonNull(this.timeout, "Timeout must be set before running ML-Plan.");
 
-		this.mlplan = new MLPlan(this.builder, data);
-		this.mlplan.setTimeout(this.timeout);
+		MLPlan mlplan = new MLPlan(this.builder, data);
+		mlplan.setTimeout(this.timeout);
 		if (this.loggerName != null) {
-			this.mlplan.setLoggerName(this.loggerName + "." + "mlplan");
+			mlplan.setLoggerName(this.loggerName + "." + "mlplan");
 		}
 
-		if (visualizationActive) {
+		if (VISUALIZATION_ACTIVATED) {
 			new JFXPanel();
-			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(this.mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())),
-					new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
 			Platform.runLater(window);
 		}
 
-		this.classifierFoundByMLPlan = this.mlplan.call();
+		this.classifierFoundByMLPlan = mlplan.call();
 	}
 
 	@Override

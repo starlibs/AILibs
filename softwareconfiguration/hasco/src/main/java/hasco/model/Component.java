@@ -1,6 +1,5 @@
 package hasco.model;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,11 +16,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 
-import hasco.serialization.ComponentLoader;
 import jaicore.basic.sets.PartialOrderedSet;
 import jaicore.logging.ToJSONStringUtil;
 
@@ -92,7 +88,7 @@ public class Component {
 	/**
 	 * @return The map of required interfaces.
 	 */
-	public LinkedHashMap<String, String> getRequiredInterfaces() {
+	public Map<String, String> getRequiredInterfaces() {
 		return this.requiredInterfaces;
 	}
 
@@ -156,7 +152,7 @@ public class Component {
 	 * @param param The parameter to be added.
 	 */
 	public void addParameter(final Parameter param) {
-		assert !this.parameters.stream().filter(p -> p.getName().equals(param.getName())).findAny().isPresent() : "Component " + this.name + " already has parameter with name " + param.getName();
+		assert !this.parameters.stream().anyMatch(p -> p.getName().equals(param.getName())) : "Component " + this.name + " already has parameter with name " + param.getName();
 		this.parameters.add(param);
 	}
 
@@ -260,6 +256,5 @@ public class Component {
 		fields.put("parameters", this.parameters);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
-
 
 }

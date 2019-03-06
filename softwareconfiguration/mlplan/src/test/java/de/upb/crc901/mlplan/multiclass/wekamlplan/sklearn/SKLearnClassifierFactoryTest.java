@@ -1,5 +1,7 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,12 +34,6 @@ public class SKLearnClassifierFactoryTest {
 
 	@Test
 	public void testExtractClassifier() throws Exception {
-		// Set<String> imports = new HashSet<>();
-		// String constructionDescription = factory.extractSKLearnConstructInstruction(componentInstance, imports);
-		//
-		// System.out.println(imports);
-		// System.out.println(constructionDescription);
-
 		String imports = "from sklearn.neighbors import KNeighborsClassifier\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import MaxAbsScaler";
 		System.out.println("Imports: " + imports);
 		String composition = "make_pipeline(MaxAbsScaler(),KNeighborsClassifier(p=1,weights=\"distance\",n_neighbors=46))";
@@ -56,9 +52,9 @@ public class SKLearnClassifierFactoryTest {
 		System.out.println("Prediction result: " + Arrays.toString(prediction));
 
 		List<Double> expected = stratSplit.get(1).stream().map(x -> x.classValue()).collect(Collectors.toList());
-
 		System.out.println("Error Rate: " + new ZeroOneLoss().calculateAvgMeasure(Arrays.stream(prediction).mapToObj(x -> Double.valueOf(x)).collect(Collectors.toList()), expected));
 
+		assertEquals(expected.size(), prediction.length);
 	}
 
 }

@@ -26,7 +26,7 @@ import weka.classifiers.Classifier;
  */
 public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCustomizable {
 
-	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList(new String[] { "True", "False" }));
+	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 
 	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactory.class);
 	private String loggerName;
@@ -41,8 +41,6 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 		StringBuilder imports = new StringBuilder();
 		importSet.forEach(imports::append);
 
-		System.out.println("Imports: " + imports.toString());
-
 		try {
 			return new ScikitLearnWrapper(constructInstruction.toString(), imports.toString());
 		} catch (IOException e) {
@@ -54,16 +52,22 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
 
-		System.out.println(groundComponent);
+		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source"), importSet));
+			sb.append(",");
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("base"), importSet));
+			return sb.toString();
+		}
 
 		String[] packagePathSplit = groundComponent.getComponent().getName().split("\\.");
-		String from = packagePathSplit[0];
+		StringBuilder fromSB = new StringBuilder();
+		fromSB.append(packagePathSplit[0]);
 		for (int i = 1; i < packagePathSplit.length - 1; i++) {
-			from += "." + packagePathSplit[i];
+			fromSB.append("." + packagePathSplit[i]);
 		}
 		String className = packagePathSplit[packagePathSplit.length - 1];
 
-		importSet.add("from " + from + " import " + className + "\n");
+		importSet.add("from " + fromSB.toString() + " import " + className + "\n");
 
 		sb.append(className);
 		sb.append("(");
@@ -71,6 +75,10 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor"), importSet));
 			sb.append(",");
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier"), importSet));
+		} else if (groundComponent.getComponent().getName().contains("make_union")) {
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p1"), importSet));
+			sb.append(",");
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("p2"), importSet));
 		} else {
 			boolean first = true;
 			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet()) {
@@ -112,9 +120,6 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 			}
 		}
 		sb.append(")");
-
-		System.out.println(sb.toString());
-
 		return sb.toString();
 	}
 
