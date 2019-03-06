@@ -5,23 +5,50 @@ import java.util.Arrays;
 import jaicore.ml.tsc.util.TimeSeriesUtil;;
 
 /**
- * ShotgunDistance
+ * Implementation of Shotgun Distance measure as published in "Towards Time
+ * Series Classfication without Human Preprocessing" by Patrick Schäfer (2014).
+ * 
+ * To make many of the standard methods to calculate the distance betwenn two
+ * time series applicable, a lot of time and effort has to be spent by a domain
+ * expert to filter the data and extrdact equal-length, equal-scale and alighned
+ * patterns. The Shotgun Distance avoids preprocessing the data for alignment,
+ * scaling or length. This is achieved by breaking the query time series into
+ * disjoint windows (subsequences) of fixed length. These windows are slid along
+ * the sample time series (with stride 1) to find the best matching position in
+ * terms of minimizing a distance metric (e.g. Euclidean distance or DTW
+ * distance).
  */
 public class ShotgunDistance implements ITimeSeriesDistance {
 
     /**
-     * Windw length.
+     * The window length.
      */
     private int windowLength;
 
     /**
-     * Mean normalization. If false, no mean substraction at vertical alignment.
+     * Mean normalization. If false, no mean substraction at vertical alignment of
+     * windows.
      */
     private boolean meanNormalization;
 
+    /**
+     * The euclidean distance used to calculate the distance between different
+     * windows.
+     */
     private EuclideanDistance euclideanDistance = new EuclideanDistance();
 
+    /**
+     * Constructor for the Shotgun Distance.
+     * 
+     * @param windowLength      The window length.
+     * @param meanNormalization Mean normalization. If false, no mean substraction
+     *                          at vertical alignment of windows.
+     */
     public ShotgunDistance(int windowLength, boolean meanNormalization) {
+        // Parameter checks.
+        if (windowLength <= 0)
+            throw new IllegalArgumentException("The window length must not be less or equal to zero.");
+
         this.windowLength = windowLength;
         this.meanNormalization = meanNormalization;
     }
@@ -29,7 +56,7 @@ public class ShotgunDistance implements ITimeSeriesDistance {
     @Override
     public double distance(double[] A, double[] B) {
         // Assure that max(A.length, B.length) <= windowLength, otherwise
-        // IndexOutOfBoundsException will be thrown.
+        // the result is undefined.
 
         double totalDistance = 0;
 
@@ -51,7 +78,7 @@ public class ShotgunDistance implements ITimeSeriesDistance {
             // sliding windows.
             double windowDistance = Double.MAX_VALUE;
 
-            // Slide window length windowLength and stride 1 over the time series B.
+            // Slide window with length windowLength and stride 1 over the time series B.
             int numberOfSlidingWindows = B.length - this.windowLength + 1;
             for (int j = 0; j < numberOfSlidingWindows; j++) {
                 int startOfSlidingWindow = j;

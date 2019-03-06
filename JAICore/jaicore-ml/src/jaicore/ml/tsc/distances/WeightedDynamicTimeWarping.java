@@ -73,7 +73,7 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
      * 
      * @param length Length of the time series, i.e. length of the weight vector.
      */
-    private double[] calculateWeights(int length) {
+    protected double[] calculateWeights(int length) {
         // Use memoization.
         double[] memoized = weightMemoization.get(length);
         if (memoized != null)

@@ -5,14 +5,22 @@ import jaicore.ml.tsc.util.ScalarDistanceUtil;
 import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
 
 /**
- * TimeWarpEditDistance
+ * TimeWarpEditDistance Implementation of Shotgun Distance measure as published
+ * in "Time Warp Edit Distance with Stiffness Adjustment for Time Series
+ * Matching" by Pierre-Francois Marteau (2009).
+ * 
+ * The similarity between two time series is measured as the minimum cost
+ * sequence of edit operations needed to transform one time series into another.
  */
 public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
 
-    /** Stiffness parameter. */
+    /**
+     * Stiffness parameter. Used to parametrize the influence of the time stamp
+     * distance. Must be positive.
+     */
     private double nu;
 
-    /** Additional cost parameter for deletion. */
+    /** Additional cost parameter for deletion. Must be positive. */
     private double lambda;
 
     /**
@@ -24,17 +32,27 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
      * Constructor.
      * 
      * @param lambda Additional cost parameter for deletion.
-     * @param nu     Stiffness parameter.
+     * @param nu     Stiffness parameter. Used to parametrize the influence of the
+     *               time stamp distance.
      * @param d      Distance mesaure used for point distance calculation.
      */
     public TimeWarpEditDistance(double lambda, double nu, IScalarDistance d) {
+        // Parameter checks.
+        if (lambda < 0)
+            throw new IllegalArgumentException("Parameter lambda must be greater or equal to zero.");
+        if (nu < 0)
+            throw new IllegalArgumentException("Parameter nu must be greater or equal to zero.");
+        if (d == null)
+            throw new IllegalArgumentException("Parameter d must not be null.");
+
         this.lambda = lambda;
         this.nu = nu;
         this.d = d;
     }
 
     /**
-     * Creates a TimeWarpEditDistance with squared distance as point distance.
+     * Constructor. Creates a TimeWarpEditDistance with squared distance as point
+     * distance.
      * 
      * @param lambda Additional cost parameter for deletion.
      * @param nu     Stiffness parameter.
@@ -58,12 +76,13 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
     }
 
     /**
+     * The distance caluculation for the Time Warp Edit Distance.
      * 
      * @param A  Time series A[1..n]
      * @param tA Timestamps of time series A, tA[1..n]
      * @param B  Time Series B[1..m]
      * @param tB Timestamps of time series B, tB[1..m]
-     * @return
+     * @return Distance between A and B.
      */
     private double calculateDistance(double[] A, double[] tA, double[] B, double[] tB) {
         int n = A.length;

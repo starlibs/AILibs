@@ -1,53 +1,26 @@
 package jaicore.ml.tsc.distances;
 
 /**
- * Class for the Time Warp Distance Calculation.
+ * Implementation of the Dynamic Time Warping (DTW) measure as published in
+ * "Using DynamicTimeWarpingto FindPatterns in Time Series" Donald J. Berndt and
+ * James Clifford.
  * 
- * <p>
- * Let <code>A = {1, 1, 2, 2, 3, 5}</code> and
- * <code>B = {1, 1, 2, 2, 3, 5}</code> be two time series. Let <code>n=6</code>
- * and <code>m=7</code> be the length of <code>A</code> and <code>B</code>
- * respec. Define the distance between to points <code>x</code> and
- * <code>y</code> as <code>d(x, y) = |x - y|</code> as their absolute
- * difference.
- * </p>
+ * In DTW the time series are "warped" non-linearly in the time dimension to
+ * determine a measure of their similarity independent of certain non-linear
+ * variations in the time dimension.
  * 
- * <p>
- * The distance matrix <code>M</code> will look like this:
- * </p>
- * <p>
- * <code>
- * +------+------+------+------+------+------+------+------+
- * |      |   0  |   1  |   1  |   2  |   2  |   3  |   5  |
- * +------+------+------+------+------+------+------+------+
- * |   0  |   0  |  inf |  inf |  inf |  inf |  inf |  inf |
- * +------+------+------+------+------+------+------+------+
- * |   1  |  inf |   0  |   0  |   1  |   2  |   4  |   8  |
- * +------+------+------+------+------+------+------+------+
- * |   2  |  inf |   1  |   1  |   0  |   0  |   1  |   4  |
- * +------+------+------+------+------+------+------+------+
- * |   3  |  inf |   3  |   3  |   1  |   1  |   0  |   2  |
- * +------+------+------+------+------+------+------+------+
- * |   5  |  inf |   7  |   7  |   4  |   4  |   2  |   0  |
- * +------+------+------+------+------+------+------+------+        
- * |   5  |  inf |  11  |  11  |   7  |   7  |   4  |   0  |        
- * +------+------+------+------+------+------+------+------+            
- * |   5  |  inf |  15  |  15  |  10  |  10  |   6  |   0  |            
- * +------+------+------+------+------+------+------+------+            
- * |   6  |  inf |  20  |  20  |  14  |  14  |   9  |   1  |            
- * +------+------+------+------+------+------+------+------+     
- * </code>
- * </p>
- * 
- * References:
- * <ul>
- * <li>https://riptutorial.com/algorithm/example/24981/introduction-to-dynamic-time-warping</li>
- * </ul>
+ * Given two time series <code>A</code> and <code>B</code> the dynamic
+ * programming formulation is based on the following recurrent definition:
+ * <code>gamma(i,j) = delta(i,j) + min {gamma(i-1, j), gamma(i-1,j-1), gamma(i, j-1)}</code>
+ * where <code>gamma(i,j)</code> is the cummulative distance up to
+ * <code>i,j</code> and
+ * <code>delta(i,j) is the point distance between <code>A_i</code> and
+ * <code>B_i</code>.
  */
 public class DynamicTimeWarping implements ITimeSeriesDistance {
 
     /** Distance measure for scalar points. */
-    IScalarDistance d;
+    IScalarDistance delta;
 
     /**
      * Creates an instance with absolute distance as point distance.
@@ -59,10 +32,14 @@ public class DynamicTimeWarping implements ITimeSeriesDistance {
     /**
      * Creates an instance with a given scalar distance measure.
      * 
-     * @param d Scalar distance measure.
+     * @param delta Scalar distance measure.
      */
-    public DynamicTimeWarping(IScalarDistance d) {
-        this.d = d;
+    public DynamicTimeWarping(IScalarDistance delta) {
+        // Parameter checks.
+        if (delta == null)
+            throw new IllegalArgumentException("Parameter delta must not be null.");
+
+        this.delta = delta;
     }
 
     @Override
@@ -84,7 +61,7 @@ public class DynamicTimeWarping implements ITimeSeriesDistance {
         // Dynamic programming.
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
-                double cost = d.distance(A[i - 1], B[j - 1]); // 1 indexed in algo.
+                double cost = delta.distance(A[i - 1], B[j - 1]); // 1 indexed in algo.
                 double mini = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
                 M[i][j] = cost + mini;
             }
@@ -110,7 +87,7 @@ public class DynamicTimeWarping implements ITimeSeriesDistance {
 
         for (int i = 1; i <= n; i++) {
             for (int j = Math.max(1, i - w); j <= Math.min(m, i + w); j++) {
-                double cost = d.distance(A[i - 1], B[j - 1]);
+                double cost = delta.distance(A[i - 1], B[j - 1]);
                 double mini = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
                 M[i][j] = cost + mini;
             }
