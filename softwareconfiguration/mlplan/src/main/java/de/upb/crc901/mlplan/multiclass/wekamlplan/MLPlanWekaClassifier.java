@@ -11,9 +11,19 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
+import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import hasco.model.Component;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
+import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
+import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
+import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -39,6 +49,8 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
+	private static final boolean visualizationActive = false;
+
 	/* MLPlan Builder and the instance of mlplan */
 	private final MLPlanBuilder builder;
 	private MLPlan mlplan;
@@ -62,6 +74,13 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		this.mlplan.setTimeout(this.timeout);
 		if (this.loggerName != null) {
 			this.mlplan.setLoggerName(this.loggerName + "." + "mlplan");
+		}
+
+		if (visualizationActive) {
+			new JFXPanel();
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(this.mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())),
+					new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+			Platform.runLater(window);
 		}
 
 		this.classifierFoundByMLPlan = this.mlplan.call();

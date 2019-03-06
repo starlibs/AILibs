@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -220,12 +223,13 @@ public class ComponentInstance {
 		return true;
 	}
 
+	@JsonIgnore
 	@Override
 	public String toString() {
 		try {
 			return new ObjectMapper().writeValueAsString(this);
 		} catch (JsonProcessingException e) {
-			L.warn("Could not directly serialize ComponentInstance to JSON");
+			L.warn("Could not directly serialize ComponentInstance to JSON:", e);
 		}
 
 		Map<String, Object> fields = new HashMap<>();
@@ -241,6 +245,7 @@ public class ComponentInstance {
 	 * @return A string representing this object in JSON format.
 	 * @throws IOException An IOException is thrown if the object cannot be serialized to a String.
 	 */
+	@JsonIgnore
 	public String getPrettyPrint() throws IOException {
 		return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(this);
 	}
