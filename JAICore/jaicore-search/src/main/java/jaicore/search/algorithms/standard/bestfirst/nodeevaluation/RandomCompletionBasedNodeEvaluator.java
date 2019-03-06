@@ -51,6 +51,8 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
 implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
+	private static final String ALGORITHM_ID = "RandomCompletion";
+
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
 
@@ -135,7 +137,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	@Override
 	protected V fTimeouted(final Node<T, ?> n, final int timeout) throws InterruptedException, NodeEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
-		this.eventBus.post(new NodeAnnotationEvent<>("RandomCompletion", n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
+		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
 		this.logger.info("Received request for f-value of node {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms.", n, this.samples, this.getTimeoutForNodeEvaluationInMS(),
 				this.timeoutForSingleCompletionEvaluationInMS);
 		long startOfComputation = System.currentTimeMillis();
@@ -199,17 +201,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					}
 
 					/* determine time that is available to conduct next computation */
-					long remainingTimeForNodeEvaluation = deadline > 0 ? deadline - System.currentTimeMillis() : -1; // this
-					// value
-					// is
-					// positive
-					// or
-					// -1
-					// due
-					// to
-					// the
-					// previous
-					// check
+					long remainingTimeForNodeEvaluation = deadline > 0 ? deadline - System.currentTimeMillis() : -1; // this value is positive or -1 due to the previous check
 					long timeoutForJob;
 					if (remainingTimeForNodeEvaluation >= 0 && this.timeoutForSingleCompletionEvaluationInMS >= 0) {
 						timeoutForJob = Math.min(remainingTimeForNodeEvaluation, this.timeoutForSingleCompletionEvaluationInMS);
@@ -288,7 +280,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					try {
 						V val = this.getFValueOfSolutionPath(completedPath);
 						successfulSamples++;
-						this.eventBus.post(new RolloutEvent<>("RandomCompletion", n.path(), val));
+						this.eventBus.post(new RolloutEvent<>(ALGORITHM_ID, n.path(), val));
 						if (val != null) {
 							evaluations.add(val);
 							this.updateMapOfBestScoreFoundSoFar(completedPath, val);
@@ -453,7 +445,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
 			this.logger.debug("Posting solution {}", solutionObject);
-			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>("RandomCompletion", solutionObject));
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(ALGORITHM_ID, solutionObject));
 		} catch (Exception e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (this.logger.isDebugEnabled()) {

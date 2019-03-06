@@ -42,6 +42,11 @@ import jaicore.search.model.travesaltree.Node;
 
 public class Util {
 
+	private static final String LITERAL_RESOLVES = "resolves";
+	private static final String LITERAL_PARAMCONTAINER = "parameterContainer";
+	private static final String LITERAL_VAL = "val";
+	private static final String LITERAL_INTERFACEIDENTIFIER = "interfaceIdentifier";
+
 	private static final Logger logger = LoggerFactory.getLogger(Util.class);
 
 	private Util() {
@@ -50,7 +55,7 @@ public class Util {
 
 	static Map<String, String> getParameterContainerMap(final Monom state, final String objectName) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
-		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals("parameterContainer") && l.getParameters().get(2).getName().equals(objectName)).collect(Collectors.toList());
+		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals(LITERAL_PARAMCONTAINER) && l.getParameters().get(2).getName().equals(objectName)).collect(Collectors.toList());
 		containerLiterals.forEach(l -> parameterContainerMap.put(l.getParameters().get(1).getName(), l.getParameters().get(3).getName()));
 		return parameterContainerMap;
 	}
@@ -71,7 +76,7 @@ public class Util {
 		for (Literal l : state) {
 			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			switch (l.getPropertyName()) {
-			case "resolves": // field 0 and 1 (parent object name and interface name) are ignored here
+			case LITERAL_RESOLVES: // field 0 and 1 (parent object name and interface name) are ignored here
 				String componentName = params[2];
 				String objectName = params[3];
 				Optional<Component> component = components.stream().filter(c -> c.getName().equals(componentName)).findAny();
@@ -79,13 +84,13 @@ public class Util {
 				ComponentInstance object = new ComponentInstance(component.get(), new HashMap<>(), new HashMap<>());
 				objectMap.put(objectName, object);
 				break;
-			case "parameterContainer":
+			case LITERAL_PARAMCONTAINER:
 				if (!parameterContainerMap.containsKey(params[2])) {
 					parameterContainerMap.put(params[2], new HashMap<>());
 				}
 				parameterContainerMap.get(params[2]).put(params[1], params[3]);
 				break;
-			case "val":
+			case LITERAL_VAL:
 				if (overwrittenDataContainers.contains(params[0])) {
 					parameterValues.put(params[0], params[1]);
 				}
@@ -99,7 +104,7 @@ public class Util {
 		}
 
 		/* update the configurations of the objects */
-		for (Entry<String, ComponentInstance> entry: objectMap.entrySet()) {
+		for (Entry<String, ComponentInstance> entry : objectMap.entrySet()) {
 			Map<Parameter, String> paramValuesForThisComponent = new HashMap<>();
 			String objectName = entry.getKey();
 			ComponentInstance object = entry.getValue();
@@ -156,7 +161,7 @@ public class Util {
 		for (Literal l : state) {
 			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			switch (l.getPropertyName()) {
-			case "resolves": // field 0 and 1 (parent object name and interface name) are ignored here
+			case LITERAL_RESOLVES: // field 0 and 1 (parent object name and interface name) are ignored here
 				String componentName = params[2];
 				String objectName = params[3];
 
@@ -165,16 +170,16 @@ public class Util {
 				ComponentInstance object = new ComponentInstance(component.get(), new HashMap<>(), new HashMap<>());
 				objectMap.put(objectName, object);
 				break;
-			case "parameterContainer":
+			case LITERAL_PARAMCONTAINER:
 				if (!parameterContainerMap.containsKey(params[2])) {
 					parameterContainerMap.put(params[2], new HashMap<>());
 				}
 				parameterContainerMap.get(params[2]).put(params[1], params[3]);
 				break;
-			case "val":
+			case LITERAL_VAL:
 				parameterValues.put(params[0], params[1]);
 				break;
-			case "interfaceIdentifier":
+			case LITERAL_INTERFACEIDENTIFIER:
 				interfaceContainerMap.put(params[3], params[1]);
 				break;
 			default:
@@ -184,7 +189,7 @@ public class Util {
 		}
 
 		/* now establish the binding of the required interfaces of the component instances */
-		state.stream().filter(l -> l.getPropertyName().equals("resolves")).forEach(l -> {
+		state.stream().filter(l -> l.getPropertyName().equals(LITERAL_RESOLVES)).forEach(l -> {
 			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			String parentObjectName = params[0];
 			String objectName = params[3];
@@ -307,14 +312,14 @@ public class Util {
 		for (Literal l : state) {
 			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			switch (l.getPropertyName()) {
-			case "parameterContainer":
+			case LITERAL_PARAMCONTAINER:
 				if (!params[2].equals(objectIdentifierInState)) {
 					continue;
 				}
 				parameterContainerMap.put(params[1], params[3]);
 				parameterContainerMapInv.put(params[3], params[1]);
 				break;
-			case "val":
+			case LITERAL_VAL:
 				parameterValues.put(params[0], params[1]);
 				break;
 			default: // ignore other literals

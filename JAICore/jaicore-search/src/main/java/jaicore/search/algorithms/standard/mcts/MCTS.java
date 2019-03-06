@@ -48,6 +48,8 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
  */
 public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V> implements IPolicy<N, A, V> {
 
+	private static final String NODESTATE_ROLLOUT = "or_rollout";
+
 	private Logger logger = LoggerFactory.getLogger(MCTS.class);
 	private String loggerName;
 
@@ -184,7 +186,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 				this.logger.debug("Constructed complete solution with tree policy.");
 				return path;
 			}
-			this.post(new NodeTypeSwitchEvent<N>(this.getId(), next, "or_rollout"));
+			this.post(new NodeTypeSwitchEvent<N>(this.getId(), next, NODESTATE_ROLLOUT));
 			level++;
 		}
 
@@ -223,7 +225,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			current = untriedActionsAndTheirSuccessors.get(chosenAction);
 			assert this.unexpandedNodes.contains(current);
 			this.nodesExplicitlyAdded.add(current);
-			this.post(new NodeTypeSwitchEvent<N>(this.getId(), current, "or_rollout"));
+			this.post(new NodeTypeSwitchEvent<N>(this.getId(), current, NODESTATE_ROLLOUT));
 			path.add(current);
 			this.logger.debug("Selected {} as the untried action with successor state {}. Now completing rest playout from this situation.", chosenAction, current);
 		} else {
@@ -251,7 +253,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			}
 			current = actionsAndTheirSuccessorStates.get(this.defaultPolicy.getAction(current, actionsAndTheirSuccessorStates));
 			if (!this.isGoal(current)) {
-				this.post(new NodeTypeSwitchEvent<>(this.getId(), current, "or_rollout"));
+				this.post(new NodeTypeSwitchEvent<>(this.getId(), current, NODESTATE_ROLLOUT));
 			}
 			this.nodesExplicitlyAdded.add(current);
 			path.add(current);
