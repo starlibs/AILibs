@@ -31,8 +31,7 @@ import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.testproblems.nqueens.QueenNode;
 
-public class RandomCompletionNodeEvaluatorTester
-extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNode, Double>> {
+public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNode, Double>> {
 
 	@Test
 	public void testThatEvaluationDependsOnSeed() throws NodeEvaluationException, InterruptedException {
@@ -44,7 +43,6 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 				Double score = ne.f(node);
 				assertTrue("Score " + score + " has already been seen.", !seenScores.contains(score));
 				seenScores.add(score);
-				System.out.println(score);
 			}
 		}
 	}
@@ -65,13 +63,7 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 		/* this is cheap, test it several times */
 		for (int seed = 0; seed < 5; seed++) {
 			List<List<QueenNode>> seenSolutions = new ArrayList<>();
-			RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne = this.getSeededNodeEvaluator(seed, 20); // draw (up to
-			// 20
-			// examples),
-			// but only
-			// 10
-			// solutions
-			// exist
+			RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne = this.getSeededNodeEvaluator(seed, 20); // draw (up to 20 examples), but only 10 solutions exist
 			ne.setLoggerName("testednodeevaluator");
 			ne.registerSolutionListener(new Object() {
 				@Subscribe
@@ -91,14 +83,12 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 			/* check that all solutions have been enumerated exactly once */
 			Set<List<QueenNode>> solutionSet = new HashSet<>(seenSolutions);
 			assertEquals("The number of found solutions deviates from the sample size!", 10, seenSolutions.size());
-			assertEquals("The items " + SetUtil.intersection(solutionSet, seenSolutions)
-			+ " solutions found by the completer.", solutionSet.size(), seenSolutions.size());
+			assertEquals("The items " + SetUtil.intersection(solutionSet, seenSolutions) + " solutions found by the completer.", solutionSet.size(), seenSolutions.size());
 		}
 	}
 
 	@Test
-	public void testThatAScoreIsReturnedIfExactlyOneSampleSuccess()
-			throws NodeEvaluationException, InterruptedException {
+	public void testThatAScoreIsReturnedIfExactlyOneSampleSuccess() throws NodeEvaluationException, InterruptedException {
 		int numSamples = 1;
 		for (int seed = 0; seed < 1; seed++) {
 			for (int successfulInvocation = 1; successfulInvocation <= numSamples; successfulInvocation++) {
@@ -106,8 +96,7 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 				List<Double> seenScores = new ArrayList<>();
 				List<Integer> successfulInvocations = new ArrayList<>();
 				successfulInvocations.add(successfulInvocation);
-				RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne = this.getNodeEvaluator(
-						new PartiallyFailingObjectEvaluator<>(successfulInvocations, 0.0), seed, numSamples, -1);
+				RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne = this.getNodeEvaluator(new PartiallyFailingObjectEvaluator<>(successfulInvocations, 0.0), seed, numSamples, -1);
 				ne.setLoggerName("testednodeevaluator");
 				ne.registerSolutionListener(new Object() {
 					@Subscribe
@@ -120,8 +109,7 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 					try {
 						Double score = ne.f(node);
 						seenScores.add(score);
-					}
-					catch (NoSuchElementException e) {
+					} catch (NoSuchElementException e) {
 						/* we expect this to happen for some cases */
 					}
 				}
@@ -131,18 +119,11 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 		}
 	}
 
-	@Test
-	public void testUsageOfPartialResultsAfterInterrupt() {
-
-	}
-
-	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getNodeEvaluator(
-			final IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> oe, final int seed, final int numSamples, final int timeoutForNodeEvaluationInMs) {
+	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getNodeEvaluator(final IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> oe, final int seed, final int numSamples, final int timeoutForNodeEvaluationInMs) {
 		ISolutionEvaluator<QueenNode, String, Double> se = new ISolutionEvaluator<QueenNode, String, Double>() {
 
 			@Override
-			public Double evaluateSolution(final SearchGraphPath<QueenNode, String> solutionPath) throws InterruptedException, AlgorithmTimeoutedException,
-			AlgorithmExecutionCanceledException, ObjectEvaluationFailedException {
+			public Double evaluateSolution(final SearchGraphPath<QueenNode, String> solutionPath) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, ObjectEvaluationFailedException {
 				return oe.evaluate(solutionPath);
 			}
 
@@ -153,12 +134,11 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 
 			@Override
 			public void cancel() {
-				// TODO Auto-generated method stub
 
+				/* no cancel required */
 			}
 		};
-		return new RandomCompletionBasedNodeEvaluator<QueenNode, Double>(new Random(seed), numSamples, se, -1,
-				timeoutForNodeEvaluationInMs);
+		return new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, se, -1, timeoutForNodeEvaluationInMs);
 	}
 
 	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getSeededNodeEvaluator(final int seed, final int numSamples) {
@@ -181,20 +161,9 @@ extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNod
 	}
 
 	@Override
-	public Collection<Node<QueenNode, Double>> getNodesToTest(
-			final RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne) {
-		StandardBestFirst<QueenNode, String, Double> bf = this.getBF(new AlternativeNodeEvaluator<>(n -> 0.0, ne)); // the n
-		// ->
-		// 0.0
-		// is
-		// not
-		// really
-		// used
-		// except
-		// for
-		// efficient
-		// initialiazion
-		//		bf.setLoggerName("testedalgorithm");
+	public Collection<Node<QueenNode, Double>> getNodesToTest(final RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne) {
+		StandardBestFirst<QueenNode, String, Double> bf = this.getBF(new AlternativeNodeEvaluator<>(n -> 0.0, ne)); // the n -> 0.0 is not really used except for efficient initialization
+		bf.setLoggerName("testedalgorithm");
 		bf.next();
 		bf.next();
 		Collection<Node<QueenNode, Double>> nodes = new ArrayList<>();

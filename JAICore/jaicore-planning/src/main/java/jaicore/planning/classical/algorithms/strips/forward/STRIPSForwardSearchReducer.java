@@ -1,5 +1,6 @@
 package jaicore.planning.classical.algorithms.strips.forward;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jaicore.planning.classical.problems.strips.StripsAction;
@@ -17,6 +18,6 @@ public class STRIPSForwardSearchReducer implements ISTRIPSPlanningGraphGenerator
 
 	@Override
 	public Plan decodeSolution(final SearchGraphPath<StripsForwardPlanningNode, String> solution) {
-		return new Plan(solution.getNodes().stream().map(n -> (StripsAction)n.getActionToReachState()).filter(a -> a != null).collect(Collectors.toList()));
+		return new Plan(solution.getNodes().stream().map(n -> (StripsAction)n.getActionToReachState()).filter(Objects::nonNull).collect(Collectors.toList()));
 	}
 }

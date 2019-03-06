@@ -10,7 +10,7 @@ public class KnapsackConfiguration {
 	private final Set<String> remainingObjects;
 	private final double usedCapacity;
 
-	public KnapsackConfiguration(List<String> packedObjects, Set<String> remainingObjects, double usedCapacity) {
+	public KnapsackConfiguration(final List<String> packedObjects, final Set<String> remainingObjects, final double usedCapacity) {
 		super();
 		this.packedObjects = packedObjects;
 		this.remainingObjects = remainingObjects;
@@ -26,56 +26,62 @@ public class KnapsackConfiguration {
 	}
 
 	public Set<String> getRemainingObjects() {
-		return remainingObjects;
+		return this.remainingObjects;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((packedObjects == null) ? 0 : packedObjects.hashCode());
-		result = prime * result + ((remainingObjects == null) ? 0 : remainingObjects.hashCode());
+		result = prime * result + ((this.packedObjects == null) ? 0 : this.packedObjects.hashCode());
+		result = prime * result + ((this.remainingObjects == null) ? 0 : this.remainingObjects.hashCode());
 		long temp;
-		temp = Double.doubleToLongBits(usedCapacity);
+		temp = Double.doubleToLongBits(this.usedCapacity);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		KnapsackConfiguration other = (KnapsackConfiguration) obj;
-		if (packedObjects == null) {
-			if (other.packedObjects != null)
+		if (this.packedObjects == null) {
+			if (other.packedObjects != null) {
 				return false;
-		} else if (!packedObjects.equals(other.packedObjects))
+			}
+		} else if (!this.packedObjects.equals(other.packedObjects)) {
 			return false;
-		if (remainingObjects == null) {
-			if (other.remainingObjects != null)
+		}
+		if (this.remainingObjects == null) {
+			if (other.remainingObjects != null) {
 				return false;
-		} else if (!remainingObjects.equals(other.remainingObjects))
+			}
+		} else if (!this.remainingObjects.equals(other.remainingObjects)) {
 			return false;
-		if (Double.doubleToLongBits(usedCapacity) != Double.doubleToLongBits(other.usedCapacity))
-			return false;
-		return true;
+		}
+		return Double.doubleToLongBits(this.usedCapacity) == Double.doubleToLongBits(other.usedCapacity);
 	}
 
 	@Override
 	public String toString() {
-		String s = "[";
-		Iterator<String> it = packedObjects.iterator();
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
+		Iterator<String> it = this.packedObjects.iterator();
 		while (it.hasNext()) {
-			s += it.next();
+			sb.append(it.next());
 			if (it.hasNext()) {
-				s += ", ";
+				sb.append(", ");
 			}
 		}
-		s += "]-<" + usedCapacity + ">";
-		return s;
+		sb.append("]-<" + this.usedCapacity + ">");
+		return sb.toString();
 	}
 }

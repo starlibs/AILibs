@@ -15,7 +15,7 @@ import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvalua
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccessorGenerator<N, A>, ILoggingCustomizable {
+public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccessorGenerator<N>, ILoggingCustomizable {
 
 	private static final int MAX_ATTEMPTS = 10;
 	private final SuccessorGenerator<N, A> succesorGenerator;

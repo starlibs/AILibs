@@ -6,7 +6,6 @@ import java.util.List;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
-import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -14,23 +13,11 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 @SuppressWarnings("serial")
 public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode,String> {
 
-	int dimension;
-	MultipleRootGenerator<QueenNode> root;
+	private final int dimension;
 
 	public NQueensGraphGenerator(final int dimension) {
 		this.dimension = dimension;
 	}
-
-	//	@Override
-	//	public MultipleRootGenerator<QueenNode> getRootGenerator() {
-	//		return () ->{
-	//			List<QueenNode> l = new ArrayList<>();
-	//			for(int i = 0; i < dimension; i++) {
-	//				l.add(new QueenNode(0,i, dimension));
-	//			}
-	//			return l;
-	//		};
-	//	}
 
 	@Override
 	public SingleRootGenerator<QueenNode> getRootGenerator(){
@@ -53,14 +40,7 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 
 	@Override
 	public NodeGoalTester<QueenNode> getGoalTester() {
-		return n -> {
-			if(n.getNumberOfQueens() == this.dimension) {
-				return true;
-			} else {
-				return false;
-			}
-
-		};
+		return n -> n.getNumberOfQueens() == this.dimension;
 	}
 
 	@Override
@@ -70,10 +50,7 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 
 	@Override
 	public void setNodeNumbering(final boolean nodenumbering) {
-		// TODO Auto-generated method stub
 
+		/* not applicable */
 	}
-
-
-
 }

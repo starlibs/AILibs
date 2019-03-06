@@ -33,25 +33,23 @@ import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
  *
  * @author fmohr
  *
- * @param <PA> class of actions in the planning problem
  * @param <P> class of the HTN planning problem
- * @param <ISearch> class of the graph search problem input to which the HTN problem is reduced
+ * @param <S> class of the graph search problem input to which the HTN problem is reduced
  * @param <N> class of the nodes in the search problem
  * @param <A> class of the edges in the search problem
  * @param <V> evaluation of solutions
  */
-public class GraphSearchBasedHTNPlanningAlgorithm<IP extends IHTNPlanningProblem, ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>>
-extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
+public class GraphSearchBasedHTNPlanningAlgorithm<P extends IHTNPlanningProblem, S extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends AOptimizer<P, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(GraphSearchBasedHTNPlanningAlgorithm.class);
 	private String loggerName;
 
 	/* algorithm inputs */
-	private final IHierarchicalPlanningGraphGeneratorDeriver<IP, N, A> problemTransformer;
-	private final IOptimalPathInORGraphSearch<ISearch, N, A, V> search;
+	private final IHierarchicalPlanningGraphGeneratorDeriver<P, N, A> problemTransformer;
+	private final IOptimalPathInORGraphSearch<S, N, A, V> search;
 
-	public GraphSearchBasedHTNPlanningAlgorithm(final IP problem, final IHierarchicalPlanningGraphGeneratorDeriver<IP, N, A> problemTransformer,
-			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory, final SearchProblemInputBuilder<N, A, ISearch> searchProblemBuilder) {
+	public GraphSearchBasedHTNPlanningAlgorithm(final P problem, final IHierarchicalPlanningGraphGeneratorDeriver<P, N, A> problemTransformer, final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory,
+			final SearchProblemInputBuilder<N, A, S> searchProblemBuilder) {
 		super(problem);
 
 		this.problemTransformer = problemTransformer;
@@ -62,7 +60,7 @@ extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 	}
 
 	public List<Action> getPlan(final List<TFDNode> path) {
-		return path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList());
+		return path.stream().filter(n -> n.getAppliedAction() != null).map(TFDNode::getAppliedAction).collect(Collectors.toList());
 	}
 
 	@Override
@@ -77,7 +75,7 @@ extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 		this.logger.debug("I'm being asked whether there is a next solution.");
 
 		switch (this.getState()) {
-		case created: {
+		case created:
 			this.logger.info("Starting HTN planning process.");
 			if (this.logger.isDebugEnabled()) {
 				StringBuilder opSB = new StringBuilder();
@@ -90,21 +88,16 @@ extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 					methodSB.append("\n\t\t");
 					methodSB.append(method);
 				}
-				this.logger.debug("The HTN problem is defined as follows:\n\tOperations:{}\n\tMethods:{}", opSB.toString(), methodSB.toString());
+				this.logger.debug("The HTN problem is defined as follows:\n\tOperations:{}\n\tMethods:{}", opSB, methodSB);
 			}
-
-			//			if (this.getLoggerName() != null && this.getLoggerName().length() > 0 && this.search instanceof ILoggingCustomizable) {
-			//				this.logger.info("Setting logger of search to {}", this.getLoggerName() + ".search");
-			//				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
-			//			}
 
 			/* set timeout on search */
 			TimeOut to = this.getTimeout();
 			this.logger.debug("Setting timeout of search to {}", to);
 			this.search.setTimeout(to);
 			return this.activate();
-		}
-		case active: {
+
+		case active:
 			if (this.isCanceled()) {
 				throw new IllegalStateException("The planner has already been canceled. Cannot compute more plans.");
 			}
@@ -120,17 +113,16 @@ extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 				PlanFoundEvent<?, V> event = new PlanFoundEvent<>(this.getId(), new EvaluatedSearchGraphBasedPlan<>(plan.getActions(), solution.getScore(), solution));
 				this.post(event);
 				return event;
-			}
-			catch (NoSuchElementException e) { // if no more solution exists, terminate
+			} catch (NoSuchElementException e) { // if no more solution exists, terminate
 				return this.terminate();
 			}
-		}
+
 		default:
 			throw new IllegalStateException("Don't know what to do in state " + this.getState());
 		}
 	}
 
-	public IOptimalPathInORGraphSearch<ISearch, N, A, V> getSearch() {
+	public IOptimalPathInORGraphSearch<S, N, A, V> getSearch() {
 		return this.search;
 	}
 
@@ -146,11 +138,11 @@ extends AOptimizer<IP, EvaluatedSearchGraphBasedPlan<V, N>, V> {
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.problemTransformer instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of problem transformer to {}", name + ".problemtransformer");
+			this.logger.info("Setting logger of problem transformer to {}.problemtransformer", name);
 			((ILoggingCustomizable) this.problemTransformer).setLoggerName(name + ".problemtransformer");
 		}
 		if (this.search instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of search to {}", name + ".search");
+			this.logger.info("Setting logger of search to {}.search", name);
 			((ILoggingCustomizable) this.search).setLoggerName(name + ".search");
 		}
 		super.setLoggerName(this.loggerName + "._algorithm");

@@ -6,9 +6,9 @@ import hasco.core.HASCOSolutionCandidate;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public class TwoPhaseHASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
+public class TwoPhaseHASCOFactory<S extends GraphSearchInput<N, A>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
-	private HASCOFactory<ISearch, N, A, Double> hascoFactory;
+	private HASCOFactory<S, N, A, Double> hascoFactory;
 	private TwoPhaseSoftwareConfigurationProblem problem;
 	private TwoPhaseHASCOConfig config;
 
@@ -16,16 +16,16 @@ public class TwoPhaseHASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A> 
 		super();
 	}
 
-	public TwoPhaseHASCOFactory(final HASCOFactory<ISearch, N, A, Double> hascoFactory) {
+	public TwoPhaseHASCOFactory(final HASCOFactory<S, N, A, Double> hascoFactory) {
 		super();
 		this.hascoFactory = hascoFactory;
 	}
 
-	public HASCOFactory<ISearch, N, A, Double> getHascoFactory() {
+	public HASCOFactory<S, N, A, Double> getHascoFactory() {
 		return this.hascoFactory;
 	}
 
-	public void setHascoFactory(final HASCOFactory<ISearch, N, A, Double> hascoFactory) {
+	public void setHascoFactory(final HASCOFactory<S, N, A, Double> hascoFactory) {
 		this.hascoFactory = hascoFactory;
 	}
 
@@ -38,16 +38,15 @@ public class TwoPhaseHASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A> 
 	}
 
 	@Override
-	public TwoPhaseHASCO<ISearch, N, A> getAlgorithm() {
+	public TwoPhaseHASCO<S, N, A> getAlgorithm() {
 		return this.getAlgorithm(this.problem);
 	}
 
 	@Override
-	public TwoPhaseHASCO<ISearch, N, A> getAlgorithm(final TwoPhaseSoftwareConfigurationProblem problem) {
+	public TwoPhaseHASCO<S, N, A> getAlgorithm(final TwoPhaseSoftwareConfigurationProblem problem) {
 		this.hascoFactory.setProblemInput(problem);
-		HASCO<ISearch, N, A, Double> hasco = this.hascoFactory.getAlgorithm();
-		TwoPhaseHASCO<ISearch, N, A> twoPhaseHASCO = new TwoPhaseHASCO<>(problem, this.config, hasco);
-		return twoPhaseHASCO;
+		HASCO<S, N, A, Double> hasco = this.hascoFactory.getAlgorithm();
+		return new TwoPhaseHASCO<>(problem, this.config, hasco);
 	}
 
 }

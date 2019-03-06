@@ -1,4 +1,4 @@
-package jaicore.search.testproblems.npuzzle.parentDiscarding;
+package jaicore.search.testproblems.npuzzle.parentdiscarding;
 
 import java.util.Arrays;
 
@@ -10,14 +10,12 @@ public class PDPuzzleNode extends NPuzzleState {
 		super(board, emptyX, emptyY);
 	}
 
-
 	/* (non-Javadoc)
 	 * @see jaicore.search.algorithms.standard.npuzzle.NPuzzleNode#getDistance()
 	 */
 	@Override
 	public double getDistance() {
-
-		return Math.abs((this.board.length-1)-this.emptyX)+Math.abs((this.board.length-1)-this.emptyY);
+		return (double) Math.abs((this.board.length - 1) - this.emptyX) + Math.abs((this.board.length - 1) - this.emptyY);
 	}
 
 	/* (non-Javadoc)
@@ -28,7 +26,6 @@ public class PDPuzzleNode extends NPuzzleState {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.deepHashCode(this.board);
-		//		result = prime * result + Arrays.hashCode(board);
 		result = prime * result + this.emptyX;
 		result = prime * result + this.emptyY;
 		return result;
@@ -52,10 +49,7 @@ public class PDPuzzleNode extends NPuzzleState {
 		if (this.emptyX != other.getEmptyX()) {
 			return false;
 		}
-		if (this.emptyY != other.getEmptyY()) {
-			return false;
-		}
-		return true;
+		return this.emptyY == other.getEmptyY();
 	}
 
 }

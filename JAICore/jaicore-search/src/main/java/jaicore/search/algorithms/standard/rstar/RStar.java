@@ -380,7 +380,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 		}
 
 		/* set logger name of the distant graph generator */
-		DistantSuccessorGenerator<T, A> distantSuccessorGenerator = this.getInput().getDistantSuccessorGenerator();
+		DistantSuccessorGenerator<T> distantSuccessorGenerator = this.getInput().getDistantSuccessorGenerator();
 		if (distantSuccessorGenerator instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) distantSuccessorGenerator).setLoggerName(name + ".distantsuccessorgenerator");
 		}

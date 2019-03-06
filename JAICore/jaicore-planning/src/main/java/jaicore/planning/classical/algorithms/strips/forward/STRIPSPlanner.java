@@ -77,16 +77,18 @@ public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPla
 		}
 
 		/* logging problem */
-		this.logger.info("Initializing planner for the following problem:\n\tOperations:{}\n\tInitial State: {}\n\tGoal State: {}",
-				problem.getDomain().getOperations().stream()
-				.map(o -> "\n\t - " + o.getName() + "\n\t\tParams: " + o.getParams() + "\n\t\tPre: " + o.getPrecondition() + "\n\t\tAdd: " + ((StripsOperation) o).getAddList() + "\n\t\tDel: " + ((StripsOperation) o).getDeleteList())
-				.collect(Collectors.joining()),
-				problem.getInitState(), problem.getGoalState());
+		if (this.logger.isInfoEnabled()) { // have explicit check here, because we have so many computations in the argument of the info call
+			this.logger.info("Initializing planner for the following problem:\n\tOperations:{}\n\tInitial State: {}\n\tGoal State: {}",
+					problem.getDomain().getOperations().stream()
+					.map(o -> "\n\t - " + o.getName() + "\n\t\tParams: " + o.getParams() + "\n\t\tPre: " + o.getPrecondition() + "\n\t\tAdd: " + ((StripsOperation) o).getAddList() + "\n\t\tDel: " + ((StripsOperation) o).getDeleteList())
+					.collect(Collectors.joining()),
+					problem.getInitState(), problem.getGoalState());
+		}
 
 		/* create search algorithm */
 		this.graphGenerator = this.reducer.encodeProblem(problem);
 		GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V> searchProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.graphGenerator, nodeEvaluator);
-		this.search = new BestFirst<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String, V>(searchProblem);
+		this.search = new BestFirst<>(searchProblem);
 	}
 
 	@Override
@@ -97,10 +99,6 @@ public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPla
 			this.search.setTimeout(this.getTimeout());
 			if (this.visualize) {
 				throw new UnsupportedOperationException("Currently no visualization supported!");
-				// VisualizationWindow<Node<StripsForwardPlanningNode, V>, String> w = new VisualizationWindow<>(
-				// this.search);
-				// TooltipGenerator<StripsForwardPlanningNode> tt = new StripsTooltipGenerator<>();
-				// w.setTooltipGenerator(n -> tt.getTooltip(((Node<StripsForwardPlanningNode, V>) n).getPoint()));
 			}
 			return this.activate();
 		case active:

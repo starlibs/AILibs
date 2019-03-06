@@ -15,9 +15,6 @@ public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTS
 	}
 
 	private static final int MAX_N = 6;
-	private static final int MAX_DISTANCE = 12;
-	//	private static final int TIMEOUT_IN_MS = 5 * 60 * 1000;
-	//	private static final boolean VISUALIZE = false;
 
 	@Override
 	public EnhancedTTSP getSimpleProblemInputForGeneralTestPurposes() {

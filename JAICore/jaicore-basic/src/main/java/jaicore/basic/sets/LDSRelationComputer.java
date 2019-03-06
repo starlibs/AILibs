@@ -35,9 +35,8 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		int indexOfSet;
 		int indexOfValue;
 
-		public Node() {
+		public Node() { }
 
-		}
 		public Node(final Node parent, final int indexOfSet, final int defficiency, final int indexInSet) {
 			long start = System.currentTimeMillis();
 			this.parent = parent;
@@ -60,11 +59,6 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			this.parent.fillTupleArrayWithValuesRec(tupleArray);
 		}
 
-		@Override
-		public String toString() {
-			return "Node [parent=" + this.parent + ", indexOfSet=" + this.indexOfSet + ", defficiency=" + this.defficiency + ", indexInSet=" + this.indexOfValue + "]";
-		}
-
 		T getObject() {
 			return LDSRelationComputer.this.sets.get(this.indexOfSet).get(this.indexOfValue);
 		}
@@ -77,11 +71,6 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			if (this.indexOfSet >= LDSRelationComputer.this.numSets) {
 				LDSRelationComputer.this.recycledNodes.add(this);
 			}
-			//			System.out.println(indexOfValue +"/" + sets.get(parent.nextDecision).size());
-			//			if (parent != null && indexOfValue == sets.get(parent.nextDecision).size()) {
-			//				System.out.println("Recycling");
-			//				parent.recycle();
-			//			}
 		}
 	}
 
@@ -103,7 +92,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		super(problem);
 		this.sets = new ArrayList<>();
 		for (Collection<T> set : problem.getSets()) {
-			this.sets.add(set instanceof List ? (List<T>)set : new ArrayList<>(set));
+			this.sets.add(set instanceof List ? (List<T>) set : new ArrayList<>(set));
 		}
 		this.numSets = this.sets.size();
 		this.prefixFilter = problem.getPrefixFilter();
@@ -146,11 +135,12 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 						if (this.recycledNodes.isEmpty()) {
 							newNode = new Node();
 							this.numCreatedNodes++;
-							assert (System.currentTimeMillis() - innerTimePoint) < 5000 : "Creating a new node took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + this.computedTuples + " tuples have been computed already.\nRecycling list contains " + this.recycledNodes.size() + "\nOPEN contains " + this.open.size();
-						}
-						else {
+							assert (System.currentTimeMillis() - innerTimePoint) < 5000 : "Creating a new node took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + this.computedTuples
+							+ " tuples have been computed already.\nRecycling list contains " + this.recycledNodes.size() + "\nOPEN contains " + this.open.size();
+						} else {
 							newNode = this.recycledNodes.remove(0);
-							assert (System.currentTimeMillis() - innerTimePoint) < 10 : "Retrieving node from recycle list " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + this.computedTuples + " tuples have been computed already.\nRecycling list contains " + this.recycledNodes.size() + "\nOPEN contains " + this.open.size();
+							assert (System.currentTimeMillis() - innerTimePoint) < 10 : "Retrieving node from recycle list " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!\n" + this.computedTuples
+							+ " tuples have been computed already.\nRecycling list contains " + this.recycledNodes.size() + "\nOPEN contains " + this.open.size();
 						}
 						newNode.parent = next;
 						newNode.indexOfSet = next.indexOfSet + 1;

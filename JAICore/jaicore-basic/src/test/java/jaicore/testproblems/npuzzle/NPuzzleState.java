@@ -10,20 +10,22 @@ import java.util.Random;
  * A node for the normal n-Puzzleproblem.
  * Every node contains the current board configuration as an 2D-Array of integer.
  * The empty space is indicated by an Integer with value 0.
+ *
  * @author jkoepe
  */
 public class NPuzzleState {
 
-	//board configuration and empty space
-	protected int [][] board;
+	// board configuration and empty space
+	protected int[][] board;
 	protected int emptyX;
 	protected int emptyY;
 
 	/**
 	 * Constructor for a NPuzzleNode which creates a NPuzzleNode with complete
 	 * randomly distributed numbers.
+	 *
 	 * @param dim
-	 * 		The dimension of the board.
+	 *            The dimension of the board.
 	 */
 	public NPuzzleState(final int dim) {
 		this(dim, 0);
@@ -32,22 +34,23 @@ public class NPuzzleState {
 	/**
 	 * Constructor for a NPuzzleNode which creates a NPuzzleNode.
 	 * The board configuration starts with the targetconfiguration and shuffels the tiles afterwards.
+	 *
 	 * @param dim
-	 * 			The dimension of the board.
+	 *            The dimension of the board.
 	 * @param perm
-	 * 			The number of moves which should be made before starting the search.
-	 * 			This number is hardcoded to at least 1.
+	 *            The number of moves which should be made before starting the search.
+	 *            This number is hardcoded to at least 1.
 	 */
 	public NPuzzleState(final int dim, final int seed) {
 		this.board = new int[dim][dim];
 		List<Integer> numbers = new ArrayList<>();
-		for (int i = 0 ; i < dim * dim; i++) {
+		for (int i = 0; i < dim * dim; i++) {
 			numbers.add(i);
 		}
 		Collections.shuffle(numbers, new Random(seed));
 		int c = 0;
-		for(int i = 0; i < dim; i++) {
-			for(int j = 0; j < dim; j++) {
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
 				this.board[i][j] = numbers.get(c++);
 			}
 		}
@@ -55,22 +58,22 @@ public class NPuzzleState {
 
 	/**
 	 * Constructor for a NPuzzleNode in which the board is already given.
+	 *
 	 * @param board
-	 * 			The board configuration for this node
+	 *            The board configuration for this node
 	 * @param emptyX
-	 * 			The empty space on the x-axis.
+	 *            The empty space on the x-axis.
 	 * @param emptyY
-	 * 			The empty space on the y-axis.
+	 *            The empty space on the y-axis.
 	 *
 	 * @param noMoves
-	 * 			The number of already done moves.
+	 *            The number of already done moves.
 	 */
-	public NPuzzleState(final int [][] board, final int emptyX, final int emptyY) {
+	public NPuzzleState(final int[][] board, final int emptyX, final int emptyY) {
 		this.board = board;
 		this.emptyX = emptyX;
 		this.emptyY = emptyY;
 	}
-
 
 	public int[][] getBoard() {
 		return this.board;
@@ -90,45 +93,44 @@ public class NPuzzleState {
 	 */
 	@Override
 	public String toString() {
-		//		return "NPuzzleNode [board=" + Arrays.toString(board) + ", emptyX=" + emptyX + ", emptyY=" + emptyY + "]";
-		String s = "";
+		StringBuilder sb = new StringBuilder();
 
-		for(int j = 0; j < this.board.length; j++) {
-			s+= "----";
+		for (int j = 0; j < this.board.length; j++) {
+			sb.append("----");
 		}
-		s+= "\n";
+		sb.append("\n");
 
-		for(int i = 0; i< this.board.length; i++) {
-			s += "| ";
-			for(int j = 0; j < this.board.length; j++) {
-				s += this.board[i][j] + " | ";
+		for (int i = 0; i < this.board.length; i++) {
+			sb.append("| ");
+			for (int j = 0; j < this.board.length; j++) {
+				sb.append(this.board[i][j] + " | ");
 			}
-			s += "\n";
-			for(int j = 0; j < this.board.length; j++) {
-				s+= "----";
+			sb.append("\n");
+			for (int j = 0; j < this.board.length; j++) {
+				sb.append("----");
 			}
-			s += "\n";
+			sb.append("\n");
 		}
-		return s;
+		return sb.toString();
 	}
 
 	/**
 	 * Returns the number of wrongly placed tiles
+	 *
 	 * @return
 	 * 		The number of wrongly placed tiles.
 	 */
 	public int getNumberOfWrongTiles() {
 		int wrongTiles = 0;
 		int x = 1;
-		for(int i = 0; i < this.board.length; i++) {
-			for(int j = 0; j < this.board.length; j++) {
-				if(i == this.board.length -1 && j == this.board.length -1) {
+		for (int i = 0; i < this.board.length; i++) {
+			for (int j = 0; j < this.board.length; j++) {
+				if (i == this.board.length - 1 && j == this.board.length - 1) {
 					x = 0;
 				}
 
-
-				if(x != this.board[i][j]) {
-					wrongTiles ++;
+				if (x != this.board[i][j]) {
+					wrongTiles++;
 				}
 
 				x++;
@@ -140,33 +142,32 @@ public class NPuzzleState {
 
 	/**
 	 * Returns the steps which are minimal need to reach a goal state
+	 *
 	 * @return
-	 * 	The number of steps.
+	 * 		The number of steps.
 	 */
 	public double getDistance() {
 		double d = 0.0;
-		for(int i = 0; i < this.board.length; i++) {
-			for(int j = 0;  j < this.board.length; j++) {
+		for (int i = 0; i < this.board.length; i++) {
+			for (int j = 0; j < this.board.length; j++) {
 				int tile = this.board[i][j];
-				double x = (double)tile / this.board.length;
-				double y = tile % this.board.length-1;
-				if(x%1==0) {
+				double x = (double) tile / this.board.length;
+				int y = tile % this.board.length - 1;
+				if (x % 1 == 0) {
 					x--;
 				}
-				x =Math.floor(x);
+				x = Math.floor(x);
 				if (y < 0) {
-					y = this.board.length-1;
+					y = this.board.length - 1;
 				}
 
-				if(tile == 0) {
-					//					x = board.length-1;
-					//					y = board.length-1;
+				if (tile == 0) {
 					continue;
 				}
-				double h1 = Math.abs(i-x);
-				double h2 = Math.abs(j-y);
-				double d1 = h1+h2;
-				d+= d1;
+				double h1 = Math.abs(i - x);
+				double h2 = Math.abs(j - y);
+				double d1 = h1 + h2;
+				d += d1;
 			}
 		}
 		return d;
@@ -180,7 +181,6 @@ public class NPuzzleState {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.deepHashCode(this.board);
-		//		result = prime * result + Arrays.hashCode(board);
 		result = prime * result + this.emptyX;
 		result = prime * result + this.emptyY;
 		return result;
@@ -207,9 +207,6 @@ public class NPuzzleState {
 		if (this.emptyX != other.emptyX) {
 			return false;
 		}
-		if (this.emptyY != other.emptyY) {
-			return false;
-		}
-		return true;
+		return this.emptyY == other.emptyY;
 	}
 }

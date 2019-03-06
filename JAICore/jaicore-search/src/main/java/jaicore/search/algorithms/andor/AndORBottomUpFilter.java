@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.concurrent.TimeoutException;
@@ -27,7 +28,6 @@ import jaicore.basic.sets.RelationComputationProblem;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
-import jaicore.search.algorithms.andor.AndORBottomUpFilter.EvaluatedGraph;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -45,7 +45,6 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 		int val;
 		N node;
 		NodeType type;
-		// List<List<N>> survivedGoalPaths; // ranked list of paths from node to goals
 		boolean evaluated;
 
 		public InnerNodeLabel(final N node, final NodeType type) {
@@ -85,7 +84,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
-		case created: {
+		case created:
+
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
 			InnerNodeLabel root = new InnerNodeLabel(((SingleRootGenerator<N>) this.getInput().getGraphGenerator().getRootGenerator()).getRoot(), NodeType.AND);
@@ -112,13 +112,13 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					}
 					this.logger.debug("Node expansion of {}-node {} completed. Generated {} successors.", n.type, n, generatedChildren);
 				} catch (Exception e) {
-					e.printStackTrace();
+					throw new AlgorithmException(e, "Received exception in algorithm initialization.");
 				}
 			}
 			this.logger.info("Size: {}", this.graph.getItems().size());
 			return this.activate();
-		}
-		case active: {
+
+		case active:
 			this.logger.debug("timeout: {}", this.getTimeout());
 
 			/* now compute best local values bottom up */
@@ -133,7 +133,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			} catch (ObjectEvaluationFailedException e) {
 				throw new AlgorithmException(e, "Could not evaluate solution.");
 			}
-		}
+
 		default:
 			throw new IllegalStateException("No handler defined for state " + this.getState());
 		}
@@ -161,10 +161,10 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 		/* if this is a leaf node, just return itself */
 		if (this.graph.getSuccessors(node).isEmpty()) {
 			EvaluatedGraph evaluatedGraph = new EvaluatedGraph();
-			Graph<N> graph = new Graph<>();
-			graph.addItem(node.node);
-			evaluatedGraph.graph = graph;
-			evaluatedGraph.value = this.evaluator.evaluate(graph);
+			Graph<N> subGraph = new Graph<>();
+			subGraph.addItem(node.node);
+			evaluatedGraph.graph = subGraph;
+			evaluatedGraph.value = this.evaluator.evaluate(subGraph);
 			filteredSolutions.add(evaluatedGraph);
 			this.logger.debug("Returning one single-node solution graph for leaf node {}", node.node);
 			return filteredSolutions;
@@ -183,7 +183,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			if (this.logger.isDebugEnabled()) {
 				StringBuilder sb = new StringBuilder();
 				subSolutions.get(child).forEach(l -> sb.append("\n\tGraph Evaluation: " + l.value + "\n\tGraph representation: \n" + l.graph.getLineBasedStringRepresentation(2).replaceAll("\n", "\n\t\t")));
-				this.logger.debug("Child {} has {} solutions: {}", child, filteredSolutionsUnderChild.size(), sb.toString());
+				this.logger.debug("Child {} has {} solutions: {}", child, filteredSolutionsUnderChild.size(), sb);
 			}
 		}
 
@@ -196,11 +196,13 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			/* compute cartesian product of best subsolutions of children */
 			int k = (int) Math.ceil(Math.pow(this.nodeLimit, 1f / subSolutions.size())); // the number of subsolution to consider for each child
 			List<Collection<EvaluatedGraph>> subSolutionsPerChild = new ArrayList<>();
-			for (InnerNodeLabel child : subSolutions.keySet()) {
+			for (Queue<EvaluatedGraph> child : subSolutions.values()) {
 				List<EvaluatedGraph> bestSubSolutionsOfThisChild = new ArrayList<>();
-				this.logger.debug("Adding " + Math.min(k, subSolutions.get(child).size()) + "/" + subSolutions.get(child).size() + " subsolutions of child into the cartesian product input.");
+				if (this.logger.isDebugEnabled()) { // complex log argument, so explicitly condition its execution
+					this.logger.debug("Adding {}/{} subsolutions of child into the cartesian product input.", Math.min(k, child.size()), child.size());
+				}
 				for (int i = 0; i < k; i++) {
-					EvaluatedGraph subsolution = subSolutions.get(child).poll();
+					EvaluatedGraph subsolution = child.poll();
 					if (subsolution != null) {
 						bestSubSolutionsOfThisChild.add(subsolution);
 					}
@@ -220,13 +222,17 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				}
 				try {
 					extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
-				} catch (TimeoutException | InterruptedException | ObjectEvaluationFailedException e) {
-					e.printStackTrace();
+				} catch (TimeoutException | ObjectEvaluationFailedException e) {
+					this.logger.warn("Received exception {}.", e);
+				}
+				catch (InterruptedException e) {
+					this.logger.info("Thread was interrupted, cannot process this exception here, so reinterrupting the thread.");
+					Thread.currentThread().interrupt();
 				}
 				boolean isDouble = extendedSolutionBase.value instanceof Double;
 				boolean validSolution = isDouble ? !(extendedSolutionBase.value.equals(Double.NaN)) : extendedSolutionBase.value != null;
-				if (!validSolution) {
-					this.logger.debug("\tCutting of sub-solution combination at level " + subSolutionCombination.size() + "/" + subSolutionsPerChild.size() + " as cost function returned " + extendedSolutionBase.value + ". The following combined solution graph was subject of evaluation (one path per line, ommitted nodes are equal to the above line(s)):\n" + extendedSolutionBase.graph.getLineBasedStringRepresentation(2));
+				if (!validSolution && this.logger.isDebugEnabled()) {
+					this.logger.debug("\tCutting of sub-solution combination at level {}/{} as cost function returned {}. The following combined solution graph was subject of evaluation (one path per line, ommitted nodes are equal to the above line(s)):\n{}", subSolutionCombination.size(), subSolutionsPerChild.size(), extendedSolutionBase.value, extendedSolutionBase.graph.getLineBasedStringRepresentation(2));
 				}
 				return validSolution;
 			}));
@@ -241,24 +247,25 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					extendedSolutionBase.graph.addEdge(node.node, subSolution.graph.getRoot());
 				}
 				extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
-				//				System.out.println("\t" + extendedSolutionBase.value);
-				this.logger.trace("Combination {} of subsolutions with performances {} yields an aggregate performance value of {}", i, subSolutionCombination.stream().map(g -> ""+g.value).collect(Collectors.joining(", ")),
-						extendedSolutionBase.value);
+				if (this.logger.isTraceEnabled()) { // costly arguments, only compute if trace is enabled
+					this.logger.trace("Combination {} of subsolutions with performances {} yields an aggregate performance value of {}", i, subSolutionCombination.stream().map(g -> ""+g.value).collect(Collectors.joining(", ")),
+							extendedSolutionBase.value);
+				}
 				filteredSolutions.add(extendedSolutionBase);
 			}
-			this.logger.trace("Determined " + filteredSolutions.size() + " sub-solutions for AND-node with " + subSolutions.size() + " children.");
+			this.logger.trace("Determined {} sub-solutions for AND-node with {} children.", filteredSolutions.size(), subSolutions.size());
 		}
 
 		/* if this is an OR node, choose the best solution paths of the children */
 		else {
 			this.logger.debug("OR-Node: Selecting best child solution out of {}", subSolutions.size());
-			for (InnerNodeLabel child : subSolutions.keySet()) {
-				this.logger.trace("Child {} has {} sub-solutions.", child, subSolutions.size());
-				for (EvaluatedGraph solutionBase : subSolutions.get(child)) {
+			for (Entry<InnerNodeLabel, Queue<EvaluatedGraph>> child : subSolutions.entrySet()) {
+				this.logger.trace("Child {} has {} sub-solutions.", child.getKey(), child.getValue().size());
+				for (EvaluatedGraph solutionBase : child.getValue()) {
 					EvaluatedGraph extendedSolutionBase = new EvaluatedGraph();
 					extendedSolutionBase.graph = new Graph<>(solutionBase.graph);
 					extendedSolutionBase.graph.addItem(node.node);
-					extendedSolutionBase.graph.addEdge(node.node, child.node);
+					extendedSolutionBase.graph.addEdge(node.node, child.getKey().node);
 					extendedSolutionBase.value = solutionBase.value;
 					filteredSolutions.add(extendedSolutionBase);
 				}
@@ -267,14 +274,12 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 
 		/* order solutions by value */
 		filteredSolutions = new LinkedList<>(filteredSolutions.stream().sorted((g1, g2) -> g1.value.compareTo(g2.value)).limit(this.nodeLimit).collect(Collectors.toList()));
-
-		// logger.debug("\treturning " + filteredSolutionsReordered.size() + "
-		// graph(s):");
-
-		this.logger.debug(filteredSolutions.size() + " accepted sub-solutions of " + node.type + "-node " + node.path() + " with " + subSolutions.size() + " children.");
+		if (this.logger.isDebugEnabled()) { // path computation is not cheap, so condition this explicitly
+			this.logger.debug("{} accepted sub-solutions of {}-node {} with {} children.", filteredSolutions.size(), node.type, node.path(), subSolutions.size());
+		}
 		int i = 1;
 		for (EvaluatedGraph g : filteredSolutions) {
-			this.logger.debug("\tValue of sub-solution #" + i + ": " + g.value);
+			this.logger.debug("\tValue of sub-solution #{}: {}", i, g.value);
 			i++;
 		}
 		return filteredSolutions;

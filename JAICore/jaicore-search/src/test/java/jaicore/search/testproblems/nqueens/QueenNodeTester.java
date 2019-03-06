@@ -15,14 +15,13 @@ public class QueenNodeTester {
 
 	@Before
 	public void before() {
-		this.n1 = new QueenNode(Arrays.asList(1,3,0),2, 4);
-		this.n2 = new QueenNode(Arrays.asList(1,3),0,4);
+		this.n1 = new QueenNode(Arrays.asList(1, 3, 0), 2, 4);
+		this.n2 = new QueenNode(Arrays.asList(1, 3), 0, 4);
 	}
-
 
 	@Test
 	public void testGetPositions() {
-		List<Integer> comp = Arrays.asList(1,3,0,2);
+		List<Integer> comp = Arrays.asList(1, 3, 0, 2);
 		assertEquals(this.n1.getPositions(), comp);
 	}
 
@@ -31,50 +30,44 @@ public class QueenNodeTester {
 		assertEquals(this.n1.getDimension(), 4);
 	}
 
-	//	@Test
-	//	public void testToString() {
-	//		String s = "";
-	//		s = "----------------\n";
-	//		s+= "|   | Q |   |   |\n";
-	//		s+= "----------------\n";
-	//		s+= "|   |   |   | Q |\n";
-	//		s+= "----------------\n";
-	//		s+= "| Q |   |   |   |\n";
-	//		s+= "----------------\n";
-	//		s+= "|   |   | Q |   |\n";
-	//		s+= "----------------";
-	//
-	//		System.out.println(s);
-	//		System.out.println(n1.toString());
-	//		assertEquals(n1,s);
-	//	}
+	@Test
+	public void testToString() {
+		String s = "";
+		s = "----------------\n";
+		s += "|   | Q |   |   |\n";
+		s += "----------------\n";
+		s += "|   |   |   | Q |\n";
+		s += "----------------\n";
+		s += "| Q |   |   |   |\n";
+		s += "----------------\n";
+		s += "|   |   | Q |   |\n";
+		s += "----------------";
+		assertEquals(this.n1.boardVisualizationAsString(), s);
+	}
 
 	@Test
 	public void testAttack() {
 		assertEquals(this.n1.attack(2, 2), true);
 	}
 
-	//	@Test
-	//	public void testToStringAttack() {
-	//		String s = "";
-	//		s = "----------------\n";
-	//		s+= "| O | Q | O | O |\n";
-	//		s+= "----------------\n";
-	//		s+= "| O | O | O | Q |\n";
-	//		s+= "----------------\n";
-	//		s+= "| Q | O | O | O |\n";
-	//		s+= "----------------\n";
-	//		s+= "| O | O | Q | O |\n";
-	//		s+= "----------------";
-	//
-	//		System.out.println(s);
-	//		System.out.println(n1.toString());
-	//		assertEquals(n1,s);
-	//	}
+	@Test
+	public void testToStringAttack() {
+		String s = "";
+		s = "----------------\n";
+		s += "| O | Q | O | O |\n";
+		s += "----------------\n";
+		s += "| O | O | O | Q |\n";
+		s += "----------------\n";
+		s += "| Q | O | O | O |\n";
+		s += "----------------\n";
+		s += "| O | O | Q | O |\n";
+		s += "----------------";
+		assertEquals(this.n1.toStringAttack(), s);
+	}
 
 	@Test
 	public void testGetNumberOfQueens() {
-		assertEquals(this.n1.getNumberOfQueens(),4);
+		assertEquals(this.n1.getNumberOfQueens(), 4);
 	}
 
 	@Test
@@ -84,7 +77,7 @@ public class QueenNodeTester {
 
 	@Test
 	public void testGetNumberOfAttackedCellsInNextRow() throws InterruptedException {
-		assertEquals(this.n2.getNumberOfAttackedCellsInNextRow(),3);
+		assertEquals(this.n2.getNumberOfAttackedCellsInNextRow(), 3);
 	}
 
 	@Test
@@ -95,8 +88,8 @@ public class QueenNodeTester {
 
 	@Test
 	public void testHashCode() {
-		QueenNode n = new QueenNode(this.n2,2);
-		assertEquals(this.n1.hashCode(),n.hashCode());
+		QueenNode n = new QueenNode(this.n2, 2);
+		assertEquals(this.n1.hashCode(), n.hashCode());
 	}
 
 }

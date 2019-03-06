@@ -110,7 +110,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	protected final Map<N, Node<N, V>> ext2int = new ConcurrentHashMap<>();
 
 	/* search graph model */
-	protected Queue<Node<N, V>> open = new PriorityQueue<>();
+	protected Queue<Node<N, V>> open = new PriorityQueue<>((n1,n2) -> n1.getInternalLabel().compareTo(n2.getInternalLabel()));
 	private Node<N, V> nodeSelectedForExpansion; // the node that will be expanded next
 	private final Map<N, Thread> expanding = new HashMap<>(); // EXPANDING contains the nodes being expanded and the threads doing this job
 	private final Set<N> closed = new HashSet<>(); // CLOSED contains only node but not paths
@@ -278,7 +278,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						Optional<Node<N, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
 						if (existingIdenticalNodeOnOpen.isPresent()) {
 							Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
-							if (newNode.compareTo(existingNode) < 0) {
+							if (newNode.getInternalLabel().compareTo(existingNode.getInternalLabel()) < 0) {
 								BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
 								BestFirst.this.post(new NodeRemovedEvent<>(BestFirst.this.getId(), existingNode));
 								BestFirst.this.open.remove(existingNode);
@@ -301,7 +301,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 							Optional<N> existingIdenticalNodeOnClosed = BestFirst.this.closed.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
 							if (existingIdenticalNodeOnClosed.isPresent()) {
 								Node<N, V> node = BestFirst.this.ext2int.get(existingIdenticalNodeOnClosed.get());
-								if (newNode.compareTo(node) < 0) {
+								if (newNode.getInternalLabel().compareTo(node.getInternalLabel()) < 0) {
 									node.setParent(newNode.getParent());
 									node.setInternalLabel(newNode.getInternalLabel());
 									BestFirst.this.closed.remove(node.getPoint());

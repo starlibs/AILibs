@@ -50,4 +50,33 @@ public class NPuzzleRedundantNode extends NPuzzleState {
 		return this.moves;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.moves == null) ? 0 : this.moves.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		NPuzzleRedundantNode other = (NPuzzleRedundantNode) obj;
+		if (this.moves == null) {
+			if (other.moves != null) {
+				return false;
+			}
+		} else if (!this.moves.equals(other.moves)) {
+			return false;
+		}
+		return true;
+	}
 }

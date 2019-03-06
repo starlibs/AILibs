@@ -13,7 +13,7 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic
 		public double h(Node<N, ?> from, Node<N, ?> to);
 	}
 
-	public interface DistantSuccessorGenerator<N, A> {
+	public interface DistantSuccessorGenerator<N> {
 		public List<N> getDistantSuccessors(N node, int k, IMetric<N> metricOverStates, double delta) throws InterruptedException;
 	}
 
@@ -37,9 +37,9 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic
 	}
 
 	private final IMetric<N> metricOverStates;
-	private final DistantSuccessorGenerator<N, A> distantSuccessorGenerator;
+	private final DistantSuccessorGenerator<N> distantSuccessorGenerator;
 
-	public GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic(final GraphGenerator<N, A> graphGenerator, final EdgeCostComputer<N> g, final INodeEvaluator<N, Double> h, final PathCostEstimator<N> hPath, final IMetric<N> metricOverStates, final DistantSuccessorGenerator<N, A> distantSuccessorGenerator) {
+	public GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic(final GraphGenerator<N, A> graphGenerator, final EdgeCostComputer<N> g, final INodeEvaluator<N, Double> h, final PathCostEstimator<N> hPath, final IMetric<N> metricOverStates, final DistantSuccessorGenerator<N> distantSuccessorGenerator) {
 		super(graphGenerator, new SubPathEvaluationBasedFComputer<>(g, h, hPath));
 		this.metricOverStates = metricOverStates;
 		this.distantSuccessorGenerator = distantSuccessorGenerator;
@@ -49,7 +49,7 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic
 		return this.metricOverStates;
 	}
 
-	public DistantSuccessorGenerator<N, A> getDistantSuccessorGenerator() {
+	public DistantSuccessorGenerator<N> getDistantSuccessorGenerator() {
 		return this.distantSuccessorGenerator;
 	}
 }
