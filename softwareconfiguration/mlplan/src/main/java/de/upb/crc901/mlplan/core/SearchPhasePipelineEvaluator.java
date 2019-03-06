@@ -70,7 +70,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		try {
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
-				long subSeed = this.seed + c.hashCode();
+				int subSeed = this.seed + c.hashCode();
 				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSearch, this.trainFoldSize, subSeed);
 				return copiedSearchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 			}

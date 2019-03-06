@@ -62,10 +62,14 @@ implements IOptimalPathInORGraphSearchFactory<P, N, A, V> {
 	@Override
 	public BestFirst<P, N, A, V> getAlgorithm(final P problem) {
 		BestFirst<P, N, A, V> search = new BestFirst<>(problem);
-		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
-		if (this.getLoggerName() != null && this.getLoggerName().length() > 0) {
-			search.setLoggerName(this.getLoggerName());
-		}
+		this.setupAlgorithm(search);
 		return search;
+	}
+
+	protected void setupAlgorithm(final BestFirst<P, N, A, V> algorithm) {
+		algorithm.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
+		if (this.getLoggerName() != null && this.getLoggerName().length() > 0) {
+			algorithm.setLoggerName(this.getLoggerName());
+		}
 	}
 }
