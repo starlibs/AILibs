@@ -1,25 +1,29 @@
 package jaicore.ml.scikitwrapper;
 
-public class DefaultProcessListener extends ProcessListener {
-	boolean verbose;
+import java.io.IOException;
 
-	public DefaultProcessListener(boolean verbose) {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class DefaultProcessListener extends AProcessListener {
+	private static final Logger L = LoggerFactory.getLogger(DefaultProcessListener.class);
+
+	protected final boolean verbose;
+
+	public DefaultProcessListener(final boolean verbose) {
 		this.verbose = verbose;
 	}
 
 	@Override
-	public void handleError(String error) {
-		if (error.equals("  import imp") || error.equals(
-				"/usr/lib/python3.7/site-packages/sklearn/externals/joblib/externals/cloudpickle/cloudpickle.py:47: DeprecationWarning: the imp module is deprecated in favour of importlib; see the module's documentation for alternative uses")) {
-			return;
-		}
-		System.err.println(">>> " + error);
+	public void handleError(final String error) {
+		L.error(">>> {}", error);
 	}
 
 	@Override
-	public void handleInput(String input) {
-		if (verbose)
-			System.out.println(">>> " + input);
+	public void handleInput(final String input) throws IOException, InterruptedException {
+		if (this.verbose) {
+			L.info(">>> {}", input);
+		}
 	}
 
 }

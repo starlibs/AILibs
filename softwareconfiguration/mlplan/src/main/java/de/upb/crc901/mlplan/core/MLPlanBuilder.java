@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.aeonbits.owner.ConfigFactory;
@@ -28,6 +30,7 @@ import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -272,5 +275,14 @@ public class MLPlanBuilder {
 
 	public Collection<Component> getComponents() {
 		return this.components;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("algorithmConfig", this.getAlgorithmConfig());
+		fields.put("algorithmConfigFile", this.algorithmConfigFile);
+		fields.put("classifierFactory", this.classifierFactory);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }

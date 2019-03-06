@@ -1,5 +1,6 @@
 package hasco.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,8 +17,11 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
+import hasco.serialization.ComponentLoader;
 import jaicore.basic.sets.PartialOrderedSet;
 import jaicore.logging.ToJSONStringUtil;
 
@@ -73,7 +77,7 @@ public class Component {
 		this(name);
 		this.providedInterfaces = providedInterfaces;
 		this.requiredInterfaces = new LinkedHashMap<>();
-		requiredInterfaces.iterator().next().forEach(this.requiredInterfaces::put);
+		requiredInterfaces.stream().forEach(this.requiredInterfaces::putAll);
 		this.parameters = parameters;
 		this.dependencies = dependencies;
 	}
@@ -130,8 +134,12 @@ public class Component {
 	 * Adds another provided interface to the collection of provided interfaces.
 	 * @param interfaceName The interface to be added to the provided interfaces.
 	 */
-	public void addProvidedInterface(final String interfaceName) {
-		this.providedInterfaces.add(interfaceName);
+	public boolean addProvidedInterface(final String interfaceName) {
+		if (!this.providedInterfaces.contains(interfaceName)) {
+			return this.providedInterfaces.add(interfaceName);
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -242,7 +250,7 @@ public class Component {
 		try {
 			return new ObjectMapper().writeValueAsString(this);
 		} catch (JsonProcessingException e) {
-			L.warn("Could not directly serialize Component to JSON");
+			L.warn("Could not directly serialize Component to JSON: ", e);
 		}
 
 		Map<String, Object> fields = new HashMap<>();
@@ -252,5 +260,6 @@ public class Component {
 		fields.put("parameters", this.parameters);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
+
 
 }

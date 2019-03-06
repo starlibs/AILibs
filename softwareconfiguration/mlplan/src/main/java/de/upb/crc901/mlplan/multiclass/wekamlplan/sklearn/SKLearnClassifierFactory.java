@@ -1,13 +1,19 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
+import hasco.model.CategoricalParameterDomain;
 import hasco.model.ComponentInstance;
+import hasco.model.Parameter;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import weka.classifiers.Classifier;
@@ -20,19 +26,23 @@ import weka.classifiers.Classifier;
  */
 public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCustomizable {
 
+	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList(new String[] { "True", "False" }));
+
 	private Logger logger = LoggerFactory.getLogger(SKLearnClassifierFactoryTest.class);
 	private String loggerName;
 
 	@Override
 	public Classifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 		this.logger.info("Parse ground component instance {} to ScikitLearnWrapper object.", groundComponent);
-		System.err.println("Juhu " + groundComponent);
 
 		StringBuilder constructInstruction = new StringBuilder();
-		constructInstruction.append(this.extractSKLearnConstructInstruction(groundComponent));
+		Set<String> importSet = new HashSet<>();
+		constructInstruction.append(this.extractSKLearnConstructInstruction(groundComponent, importSet));
 		StringBuilder imports = new StringBuilder();
+		importSet.forEach(imports::append);
 
-		System.exit(0);
+		System.out.println("Imports: " + imports.toString());
+
 		try {
 			return new ScikitLearnWrapper(constructInstruction.toString(), imports.toString());
 		} catch (IOException e) {
@@ -41,8 +51,71 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 		}
 	}
 
-	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent) {
-		return null;
+	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
+		StringBuilder sb = new StringBuilder();
+
+		System.out.println(groundComponent);
+
+		String[] packagePathSplit = groundComponent.getComponent().getName().split("\\.");
+		String from = packagePathSplit[0];
+		for (int i = 1; i < packagePathSplit.length - 1; i++) {
+			from += "." + packagePathSplit[i];
+		}
+		String className = packagePathSplit[packagePathSplit.length - 1];
+
+		importSet.add("from " + from + " import " + className + "\n");
+
+		sb.append(className);
+		sb.append("(");
+		if (groundComponent.getComponent().getName().contains("make_pipeline")) {
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor"), importSet));
+			sb.append(",");
+			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier"), importSet));
+		} else {
+			boolean first = true;
+			for (Entry<String, String> parameterValue : groundComponent.getParameterValues().entrySet()) {
+				if (first) {
+					first = false;
+				} else {
+					sb.append(",");
+				}
+
+				Parameter param = groundComponent.getComponent().getParameterWithName(parameterValue.getKey());
+
+				sb.append(parameterValue.getKey() + "=");
+				if (param.isNumeric()) {
+					sb.append(parameterValue.getValue());
+				} else if (param.isCategorical() && BOOL_DOMAIN.subsumes(param.getDefaultDomain())) {
+					sb.append(parameterValue.getValue());
+				} else {
+					try {
+						sb.append(Integer.parseInt(parameterValue.getValue()));
+					} catch (Exception e) {
+						try {
+							sb.append(Double.parseDouble(parameterValue.getValue()));
+						} catch (Exception e1) {
+							sb.append("\"" + parameterValue.getValue() + "\"");
+						}
+					}
+				}
+			}
+
+			for (Entry<String, ComponentInstance> satReqI : groundComponent.getSatisfactionOfRequiredInterfaces().entrySet()) {
+				if (first) {
+					first = false;
+				} else {
+					sb.append(",");
+				}
+
+				sb.append(satReqI.getKey() + "=");
+				sb.append(this.extractSKLearnConstructInstruction(satReqI.getValue(), importSet));
+			}
+		}
+		sb.append(")");
+
+		System.out.println(sb.toString());
+
+		return sb.toString();
 	}
 
 	@Override
