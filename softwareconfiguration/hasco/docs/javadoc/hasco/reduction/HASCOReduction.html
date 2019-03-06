@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -106,13 +106,13 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,V&gt;&gt;</dd>
+<dd>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a>,jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,V&gt;,jaicore.planning.core.EvaluatedPlan&lt;V&gt;&gt;</dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">HASCOReduction&lt;V extends java.lang.Comparable&lt;V&gt;&gt;</span>
 extends java.lang.Object
-implements jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,V&gt;&gt;</pre>
+implements jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a>,jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,V&gt;,jaicore.planning.core.EvaluatedPlan&lt;V&gt;&gt;</pre>
 <div class="block">This is the class that conducts the actual problem reduction of software configuration to HTN Planning</div>
 </li>
 </ul>
@@ -150,36 +150,44 @@ implements jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;<a href="../..
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#decodeSolution-jaicore.planning.core.EvaluatedPlan-">decodeSolution</a></span>(jaicore.planning.core.EvaluatedPlan&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;solution)</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#decodeSolution-jaicore.planning.core.Plan-">decodeSolution</a></span>(jaicore.planning.core.Plan&nbsp;plan)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#encodeProblem-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">encodeProblem</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;problem)</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.util.Collection&lt;java.lang.String&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#getExistingInterfaces--">getExistingInterfaces</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i1" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>&lt;T,A,ISearch extends jaicore.search.probleminputs.GraphSearchInput&lt;T,A&gt;&gt;<br>jaicore.search.core.interfaces.GraphGenerator&lt;T,A&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#getGraphGeneratorUsedByHASCOForSpecificPlanner-jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver-">getGraphGeneratorUsedByHASCOForSpecificPlanner</a></span>(jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,T,A&gt;&nbsp;transformer)</code>
 <div class="block">This method is a utility for everybody who wants to work on the graph obtained from HASCO's reduction but without using the search logic of HASCO</div>
 </td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>jaicore.logic.fol.structure.Monom</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#getInitState--">getInitState</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#getPlanningDomain--">getPlanningDomain</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#getPlanningProblem--">getPlanningProblem</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i5" class="rowColor">
+<tr id="i8" class="altColor">
 <td class="colFirst"><code>jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#getPlanningProblem-jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain-jaicore.logic.fol.structure.CNFFormula-jaicore.logic.fol.structure.Monom-">getPlanningProblem</a></span>(jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain&nbsp;domain,
                   jaicore.logic.fol.structure.CNFFormula&nbsp;knowledge,
                   jaicore.logic.fol.structure.Monom&nbsp;init)</code>&nbsp;</td>
-</tr>
-<tr id="i6" class="altColor">
-<td class="colFirst"><code>jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/reduction/HASCOReduction.html#transform-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">transform</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;problem)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -282,17 +290,39 @@ implements jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;<a href="../..
 </dl>
 </li>
 </ul>
-<a name="transform-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">
+<a name="encodeProblem-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>encodeProblem</h4>
+<pre>public&nbsp;jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;encodeProblem(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;problem)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>encodeProblem</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;,<a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a>,jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;,jaicore.planning.core.EvaluatedPlan&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;&gt;</code></dd>
+</dl>
+</li>
+</ul>
+<a name="decodeSolution-jaicore.planning.core.EvaluatedPlan-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>decodeSolution</h4>
+<pre>public&nbsp;<a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a>&nbsp;decodeSolution(jaicore.planning.core.EvaluatedPlan&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;solution)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>decodeSolution</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;,<a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a>,jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;,jaicore.planning.core.EvaluatedPlan&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;&gt;</code></dd>
+</dl>
+</li>
+</ul>
+<a name="decodeSolution-jaicore.planning.core.Plan-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>transform</h4>
-<pre>public&nbsp;jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;transform(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&nbsp;problem)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>transform</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;,jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/reduction/HASCOReduction.html" title="type parameter in HASCOReduction">V</a>&gt;&gt;&gt;</code></dd>
-</dl>
+<h4>decodeSolution</h4>
+<pre>public&nbsp;<a href="../../hasco/model/ComponentInstance.html" title="class in hasco.model">ComponentInstance</a>&nbsp;decodeSolution(jaicore.planning.core.Plan&nbsp;plan)</pre>
 </li>
 </ul>
 </li>

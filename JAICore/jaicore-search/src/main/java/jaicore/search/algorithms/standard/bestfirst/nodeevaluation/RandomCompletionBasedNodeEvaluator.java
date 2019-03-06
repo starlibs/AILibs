@@ -1,7 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +27,7 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.concurrent.TimeoutTimer;
@@ -49,11 +48,10 @@ import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-@SuppressWarnings("serial")
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
-implements IPotentiallyGraphDependentNodeEvaluator<T, V>,
-IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>,
-ILoggingCustomizable {
+implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
+
+	private static final String ALGORITHM_ID = "RandomCompletion";
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
@@ -70,8 +68,7 @@ ILoggingCustomizable {
 	protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
-	protected GraphGenerator<T, String> generator;
-	// private boolean generatorProvidesPathUnification;
+	protected GraphGenerator<T, ?> generator;
 	protected long timestampOfFirstEvaluation;
 
 	/* algorithm parameters */
@@ -83,30 +80,25 @@ ILoggingCustomizable {
 	private Timer timeoutTimer;
 	private Collection<TimerTask> activeTasks = new ArrayList<>();
 
-	private RandomSearch<T, String> completer;
+	private RandomSearch<T, ?> completer;
 	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of
 	// the completer is asynchronous
-	protected final ISolutionEvaluator<T, V> solutionEvaluator;
+	protected final ISolutionEvaluator<T, ?, V> solutionEvaluator;
 	protected IUncertaintySource<T, V> uncertaintySource;
 	protected SolutionEventBus<T> eventBus = new SolutionEventBus<>();
 	private final Map<List<T>, V> bestKnownScoreUnderNodeInCompleterGraph = new HashMap<>();
 	private boolean visualizeSubSearch;
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples,
-			final ISolutionEvaluator<T, V> solutionEvaluator) {
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, ?, V> solutionEvaluator) {
 		this(random, samples, solutionEvaluator, -1, -1);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples,
-			final ISolutionEvaluator<T, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
-			final int timeoutForNodeEvaluationInMS) {
-		this(random, samples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS,
-				null);
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, ?, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
+		this(random, samples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples,
-			final ISolutionEvaluator<T, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
-			final int timeoutForNodeEvaluationInMS, final Predicate<T> priorityPredicateForRDFS) {
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final ISolutionEvaluator<T, ?, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS,
+			final Predicate<T> priorityPredicateForRDFS) {
 		super(timeoutForNodeEvaluationInMS);
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
@@ -124,39 +116,30 @@ ILoggingCustomizable {
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
 
-		this.logger.info(
-				"Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node",
-				timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
+		this.logger.info("Initialized RandomCompletionEvaluator with timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS);
 
 		/* check whether assertions are on */
-		boolean assertOn = false;
-		assert assertOn = true;
-		if (assertOn) {
-			System.out.println("--------------------------------------------------------");
-			System.out.println("Attention: assertions are activated.");
-			System.out.println("This causes significant performance loss using RandomCompleter.");
-			System.out.println("If you are not in debugging mode, we strongly suggest to deactive assertions.");
-			System.out.println("--------------------------------------------------------");
-		}
+		assert this.logAssertionActivation();
 	}
 
-	public ISolutionEvaluator<T, V> getSolutionEvaluator() {
-		return this.solutionEvaluator;
-	}
-
-	protected double getExpectedUpperBoundForRelativeDistanceToOptimalSolution(final Node<T, ?> n, final List<T> path) {
-		return 0.0;
+	private boolean logAssertionActivation() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("--------------------------------------------------------");
+		sb.append("Attention: assertions are activated.");
+		sb.append("This causes significant performance loss using RandomCompleter.");
+		sb.append("If you are not in debugging mode, we strongly suggest to deactive assertions.");
+		sb.append("--------------------------------------------------------");
+		this.logger.info("{}", sb);
+		return true;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected V fTimeouted(final Node<T, ?> n, final int timeout) throws InterruptedException, NodeEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
-		this.eventBus.post(new NodeAnnotationEvent<>("RandomCompletion", n.getPoint(), "f-computing thread",
-				Thread.currentThread().getName()));
-		this.logger.info(
-				"Received request for f-value of node {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms.",
-				n, this.samples, this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
+		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
+		this.logger.info("Received request for f-value of node {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms.", n, this.samples, this.getTimeoutForNodeEvaluationInMS(),
+				this.timeoutForSingleCompletionEvaluationInMS);
 		long startOfComputation = System.currentTimeMillis();
 		long deadline = timeout > 0 ? startOfComputation + timeout : -1;
 		if (this.timestampOfFirstEvaluation == 0) {
@@ -176,21 +159,15 @@ ILoggingCustomizable {
 			if (this.eventBus == null) { // this is necessary if the node evaluator was stored to the disc
 				this.eventBus = new SolutionEventBus<>();
 			}
-			this.eventBus.post(new NodeAnnotationEvent<>("RandomCompletion", n.getPoint(), "EUBRD2OS",
-					this.getExpectedUpperBoundForRelativeDistanceToOptimalSolution(n, path)));
 			double uncertainty = 0.0;
 			if (!n.isGoal()) {
 
 				/* if there was no relevant change in comparison to parent, apply parent's f */
-				if (path.size() > 1 && !this.solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(path)) {
-					assert this.fValues.containsKey(n
-							.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: "
-							+ path;
+				if (path.size() > 1 && !this.solutionEvaluator.doesLastActionAffectScoreOfAnySubsequentSolution(new SearchGraphPath<>(path))) {
+					assert this.fValues.containsKey(n.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: " + path;
 					V score = this.fValues.get(n.getParent());
 					this.fValues.put(n, score);
-					this.logger.debug(
-							"Score {} of parent can be used since the last action did not affect the performance.",
-							score);
+					this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
 					if (score == null) {
 						this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
 					}
@@ -224,21 +201,10 @@ ILoggingCustomizable {
 					}
 
 					/* determine time that is available to conduct next computation */
-					long remainingTimeForNodeEvaluation = deadline > 0 ? deadline - System.currentTimeMillis() : -1; // this
-					//value
-					// is
-					// positive
-					// or
-					// -1
-					// due
-					// to
-					// the
-					// previous
-					// check
+					long remainingTimeForNodeEvaluation = deadline > 0 ? deadline - System.currentTimeMillis() : -1; // this value is positive or -1 due to the previous check
 					long timeoutForJob;
 					if (remainingTimeForNodeEvaluation >= 0 && this.timeoutForSingleCompletionEvaluationInMS >= 0) {
-						timeoutForJob = Math.min(remainingTimeForNodeEvaluation,
-								this.timeoutForSingleCompletionEvaluationInMS);
+						timeoutForJob = Math.min(remainingTimeForNodeEvaluation, this.timeoutForSingleCompletionEvaluationInMS);
 					} else if (remainingTimeForNodeEvaluation >= 0) {
 						timeoutForJob = remainingTimeForNodeEvaluation;
 					} else if (this.timeoutForSingleCompletionEvaluationInMS >= 0) {
@@ -261,7 +227,7 @@ ILoggingCustomizable {
 						}
 						completedPath = new ArrayList<>(n.externalPath());
 						this.logger.debug("Starting search for next solution ...");
-						SearchGraphPath<T, String> solutionPathFromN = null;
+						SearchGraphPath<T, ?> solutionPathFromN = null;
 						try {
 							solutionPathFromN = this.completer.nextSolutionUnderNode(n.getPoint());
 						} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
@@ -293,8 +259,7 @@ ILoggingCustomizable {
 
 								/* if the executing thread has not been interrupted from outside */
 								if (!executingThread.isInterrupted()) {
-									RandomCompletionBasedNodeEvaluator.this.logger.info(
-											"Sending an controlled interrupt to the evaluating thread to get it back here.");
+									RandomCompletionBasedNodeEvaluator.this.logger.info("Sending an controlled interrupt to the evaluating thread to get it back here.");
 									nodeEvaluationTimedOut.set(true);
 									executingThread.interrupt();
 								}
@@ -315,7 +280,7 @@ ILoggingCustomizable {
 					try {
 						V val = this.getFValueOfSolutionPath(completedPath);
 						successfulSamples++;
-						this.eventBus.post(new RolloutEvent<>("RandomCompletion", n.path(), val));
+						this.eventBus.post(new RolloutEvent<>(ALGORITHM_ID, n.path(), val));
 						if (val != null) {
 							evaluations.add(val);
 							this.updateMapOfBestScoreFoundSoFar(completedPath, val);
@@ -339,11 +304,12 @@ ILoggingCustomizable {
 							throw new NodeEvaluationException(ex, "Error in the evaluation of a node!");
 						} else {
 							countedExceptions++;
-							this.logger.error("Could not evaluate solution candidate ... retry another completion. {}",
-									LoggerUtil.getExceptionInfo(ex));
+							this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 						}
 					}
-					abortionTask.cancel();
+					if (abortionTask != null) {
+						abortionTask.cancel();
+					}
 				}
 
 				/*
@@ -355,8 +321,7 @@ ILoggingCustomizable {
 				if (best == null) {
 					this.checkInterruption();
 					if (countedExceptions > 0) {
-						throw new NoSuchElementException("Among " + drawnSamples
-								+ " evaluated candidates, we could not identify any candidate that did not throw an exception.");
+						throw new NoSuchElementException("Among " + drawnSamples + " evaluated candidates, we could not identify any candidate that did not throw an exception.");
 					} else {
 						return null;
 					}
@@ -368,42 +333,8 @@ ILoggingCustomizable {
 				/* add number of samples to node */
 				n.setAnnotation("fRPSamples", successfulSamples);
 				if (this.uncertaintySource != null) {
-					uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths,
-							evaluations);
+					uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths, evaluations);
 				}
-
-				/*
-				 * cache this result and possible determine whether we already had a solution
-				 * path that goes over this node before
-				 */
-				// if (rememberBestScores) {
-				// if (generatorProvidesPathUnification) {
-				// Optional<List<T>> bestPreviouslyKnownPathOverThisNode = Optional.empty();
-				// AtomicBoolean interruptedInCheck = new AtomicBoolean();
-				// PathUnifyingGraphGenerator<T, ?> castedGenerator =
-				// (PathUnifyingGraphGenerator<T, ?>) generator;
-				// bestPreviouslyKnownPathOverThisNode =
-				// this.completions.keySet().stream().filter(p -> {
-				// try {
-				// if (interruptedInCheck.get())
-				// return false;
-				// return castedGenerator.isPathSemanticallySubsumed(path, p);
-				// } catch (InterruptedException e) {
-				// interruptedInCheck.set(true);
-				// return false;
-				// }
-				// }).min((p1, p2) ->
-				// this.scoresOfSolutionPaths.get(p1).compareTo(this.scoresOfSolutionPaths.get(p2)));
-				// if (interruptedInCheck.get())
-				// throw new InterruptedException("Node evaluation interrupted");
-				// if (bestPreviouslyKnownPathOverThisNode.isPresent() &&
-				// this.scoresOfSolutionPaths.get(bestPreviouslyKnownPathOverThisNode.get()).compareTo(best)
-				// < 0) {
-				// bestCompletion = bestPreviouslyKnownPathOverThisNode.get();
-				// best = this.scoresOfSolutionPaths.get(bestCompletion);
-				// }
-				// }
-				// }
 				this.fValues.put(n, best);
 			}
 
@@ -436,8 +367,7 @@ ILoggingCustomizable {
 		if (bestKnownScore == null || scoreOnOriginalBenchmark.compareTo(bestKnownScore) < 0) {
 			this.bestKnownScoreUnderNodeInCompleterGraph.put(nodeInCompleterGraph, scoreOnOriginalBenchmark);
 			if (nodeInCompleterGraph.size() > 1) {
-				this.updateMapOfBestScoreFoundSoFar(nodeInCompleterGraph.subList(0, nodeInCompleterGraph.size() - 1),
-						scoreOnOriginalBenchmark);
+				this.updateMapOfBestScoreFoundSoFar(nodeInCompleterGraph.subList(0, nodeInCompleterGraph.size() - 1), scoreOnOriginalBenchmark);
 			}
 		}
 	}
@@ -446,35 +376,26 @@ ILoggingCustomizable {
 		boolean knownPath = this.scoresOfSolutionPaths.containsKey(path);
 		if (!knownPath) {
 			if (this.unsuccessfulPaths.contains(path)) {
-				this.logger.warn(
-						"Asking again for the reevaluation of a path that was evaluated unsuccessfully in a previous run; returning NULL: {}",
-						path);
+				this.logger.warn("Asking again for the reevaluation of a path that was evaluated unsuccessfully in a previous run; returning NULL: {}", path);
 				return null;
 			}
-			this.logger.debug(
-					"Associated plan is new. Calling solution evaluator {} to compute f-value for path of length {}. Enable TRACE for exact plan.",
-					this.solutionEvaluator.getClass().getName(), path.size());
+			this.logger.debug("Associated plan is new. Calling solution evaluator {} to compute f-value for path of length {}. Enable TRACE for exact plan.", this.solutionEvaluator.getClass().getName(), path.size());
 			this.logger.trace("The path is {}", path);
 
 			/* compute value of solution */
 			long start = System.currentTimeMillis();
 			V val = null;
 			try {
-				val = this.solutionEvaluator.evaluateSolution(path);
+				val = this.solutionEvaluator.evaluateSolution(new SearchGraphPath<>(path));
 			} catch (InterruptedException e) {
 				this.logger.info("Received interrupt during computation of f-value of {}.", path);
 				throw e;
-			} catch (Throwable e) {
-				this.logger.error(
-						"Computing the solution quality of {} failed due to an exception. Here is the trace:\n\t{}\n\t{}\n\t{}",
-						path, e.getClass().getName(), e.getMessage(), Arrays.asList(e.getStackTrace()).stream()
-						.map(n -> "\n\t" + n.toString()).collect(Collectors.toList()));
+			} catch (Exception e) {
 				this.unsuccessfulPaths.add(path);
 				throw new NodeEvaluationException(e, "Error in evaluating node!");
 			}
 			long duration = System.currentTimeMillis() - start;
-			assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration
-			+ "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
+			assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
 
 			/* at this point, the value should not be NULL */
 			this.logger.info("Result: {}, Size: {}", val, this.scoresOfSolutionPaths.size());
@@ -497,8 +418,7 @@ ILoggingCustomizable {
 				}
 			}
 			if (!this.postedSolutions.contains(path)) {
-				throw new IllegalStateException(
-						"Reading cached score of a plan whose path has not been posted as a solution! Are there several paths to a plan?");
+				throw new IllegalStateException("Reading cached score of a plan whose path has not been posted as a solution! Are there several paths to a plan?");
 			}
 		}
 		V score = this.scoresOfSolutionPaths.get(path);
@@ -520,54 +440,39 @@ ILoggingCustomizable {
 			if (this.eventBus == null) {
 				this.eventBus = new SolutionEventBus<>();
 			}
-			EvaluatedSearchGraphPath<T, ?, V> solutionObject = new EvaluatedSearchGraphPath<>(solution, null,
-					this.scoresOfSolutionPaths.get(solution));
+			EvaluatedSearchGraphPath<T, ?, V> solutionObject = new EvaluatedSearchGraphPath<>(solution, null, this.scoresOfSolutionPaths.get(solution));
 			solutionObject.setAnnotation("fTime", this.timesToComputeEvaluations.get(solution));
-			solutionObject.setAnnotation("timeToSolution",
-					(int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
+			solutionObject.setAnnotation("timeToSolution", (int) (System.currentTimeMillis() - this.timestampOfFirstEvaluation));
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", numberOfComputedFValues);
 			this.logger.debug("Posting solution {}", solutionObject);
-			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>("RandomCompletion", solutionObject));
-		} catch (Throwable e) {
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>(ALGORITHM_ID, solutionObject));
+		} catch (Exception e) {
 			List<Pair<String, Object>> explanations = new ArrayList<>();
 			if (this.logger.isDebugEnabled()) {
 				StringBuilder sb = new StringBuilder();
 				solution.forEach(n -> sb.append(n.toString() + "\n"));
 				explanations.add(new Pair<>("The path that has been tried to convert is as follows:", sb.toString()));
 			}
-			this.logger.error("Cannot post solution, because no valid MLPipeline object could be derived from it:\n{}",
-					LoggerUtil.getExceptionInfo(e, explanations));
+			this.logger.error("Cannot post solution, because no valid MLPipeline object could be derived from it:\n{}", LoggerUtil.getExceptionInfo(e, explanations));
 		}
 	}
 
 	@Override
 	public void setGenerator(final GraphGenerator<T, ?> generator) {
-		this.generator = (GraphGenerator<T, String>)generator;
-		// this.generatorProvidesPathUnification = (this.generator instanceof
-		// PathUnifyingGraphGenerator);
-		// if (!this.generatorProvidesPathUnification)
-		// logger.warn("The graph generator passed to the RandomCompletion algorithm
-		// does not offer path subsumption checks, which may cause inefficiencies in
-		// some domains.");
+		this.generator = generator;
 
 		/* create the completion algorithm and initialize it */
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
-		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
-				this.generator, nodeEvaluator);
+		GraphSearchWithSubpathEvaluationsInput<T, ?, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.generator, nodeEvaluator);
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
 		if (this.getTotalDeadline() >= 0) {
-			this.completer.setTimeout(
-					new TimeOut(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+			this.completer.setTimeout(new TimeOut(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 		}
 		if (this.loggerName != null) {
 			this.completer.setLoggerName(this.loggerName + ".completer");
 		}
-		if (this.visualizeSubSearch) {
-			//			new VisualizationWindow<>(this.completer).setTooltipGenerator(n -> n.toString() + "<br />f: " + String.valueOf(this.bestKnownScoreUnderNodeInCompleterGraph.get(n)));
-		}
-		while (!(this.completer.next() instanceof AlgorithmInitializedEvent)) {
-			;
-		}
+		AlgorithmEvent e = this.completer.next();
+		assert e instanceof AlgorithmInitializedEvent : "First event of completer is not the initialization event!";
 		this.logger.info("Generator has been set, and completer has been initialized");
 	}
 

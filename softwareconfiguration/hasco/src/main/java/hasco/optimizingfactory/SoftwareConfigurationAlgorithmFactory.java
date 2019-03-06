@@ -8,4 +8,7 @@ public interface SoftwareConfigurationAlgorithmFactory<P extends SoftwareConfigu
 
 	@Override
 	public SoftwareConfigurationAlgorithm<P, O, V> getAlgorithm();
+
+	@Override
+	public SoftwareConfigurationAlgorithm<P, O, V> getAlgorithm(P problem);
 }

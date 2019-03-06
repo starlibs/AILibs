@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -174,18 +174,22 @@ extends <a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestF
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstWithRandomCompletionsFactory.html#getAlgorithm--">getAlgorithm</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirst.html" title="class in hasco.variants.forwarddecomposition">HASCOViaFDAndBestFirst</a>&lt;java.lang.Double&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstWithRandomCompletionsFactory.html#getAlgorithm-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">getAlgorithm</a></span>(<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;java.lang.Double&gt;&nbsp;problem)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.Double&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstWithRandomCompletionsFactory.html#getPreferredNodeEvaluator--">getPreferredNodeEvaluator</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>java.util.function.Predicate&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstWithRandomCompletionsFactory.html#getPriorizingPredicate--">getPriorizingPredicate</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstWithRandomCompletionsFactory.html#setPreferredNodeEvaluator-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-">setPreferredNodeEvaluator</a></span>(jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.Double&gt;&nbsp;preferredNodeEvaluator)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstWithRandomCompletionsFactory.html#setPriorizingPredicate-java.util.function.Predicate-">setPriorizingPredicate</a></span>(java.util.function.Predicate&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode&gt;&nbsp;priorizingPredicate)</code>&nbsp;</td>
 </tr>
@@ -202,7 +206,7 @@ extends <a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestF
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;hasco.core.<a href="../../../hasco/core/HASCOFactory.html" title="class in hasco.core">HASCOFactory</a></h3>
-<code><a href="../../../hasco/core/HASCOFactory.html#getPlanningGraphGeneratorDeriver--">getPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#setPlanningGraphGeneratorDeriver-hasco.core.IHASCOPlanningGraphGeneratorDeriver-">setPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setProblemInput</a>, <a href="../../../hasco/core/HASCOFactory.html#setProblemInput-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">setProblemInput</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-">setSearchFactory</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchProblemTransformer-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setSearchProblemTransformer</a></code></li>
+<code><a href="../../../hasco/core/HASCOFactory.html#getPlanningGraphGeneratorDeriver--">getPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#getProblem--">getProblem</a>, <a href="../../../hasco/core/HASCOFactory.html#setPlanningGraphGeneratorDeriver-hasco.core.IHASCOPlanningGraphGeneratorDeriver-">setPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#setProblemInput-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">setProblemInput</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-">setSearchFactory</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchProblemTransformer-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">setSearchProblemTransformer</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -294,7 +298,7 @@ extends <a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestF
 <a name="getAlgorithm--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>getAlgorithm</h4>
 <pre>public&nbsp;<a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirst.html" title="class in hasco.variants.forwarddecomposition">HASCOViaFDAndBestFirst</a>&lt;java.lang.Double&gt;&nbsp;getAlgorithm()</pre>
@@ -305,6 +309,23 @@ extends <a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestF
 <dd><code>getAlgorithm</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;java.lang.Double&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;java.lang.Double&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
 <dd><code><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstFactory.html#getAlgorithm--">getAlgorithm</a></code>&nbsp;in class&nbsp;<code><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirstFactory.html" title="class in hasco.variants.forwarddecomposition">HASCOViaFDAndBestFirstFactory</a>&lt;java.lang.Double&gt;</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getAlgorithm-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getAlgorithm</h4>
+<pre>public&nbsp;<a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestFirst.html" title="class in hasco.variants.forwarddecomposition">HASCOViaFDAndBestFirst</a>&lt;java.lang.Double&gt;&nbsp;getAlgorithm(<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;java.lang.Double&gt;&nbsp;problem)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../hasco/optimizingfactory/SoftwareConfigurationAlgorithmFactory.html#getAlgorithm-P-">getAlgorithm</a></code>&nbsp;in interface&nbsp;<code><a href="../../../hasco/optimizingfactory/SoftwareConfigurationAlgorithmFactory.html" title="interface in hasco.optimizingfactory">SoftwareConfigurationAlgorithmFactory</a>&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;java.lang.Double&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;java.lang.Double&gt;,java.lang.Double&gt;</code></dd>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getAlgorithm</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;java.lang.Double&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;java.lang.Double&gt;&gt;</code></dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../hasco/core/HASCOFactory.html#getAlgorithm-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">getAlgorithm</a></code>&nbsp;in class&nbsp;<code><a href="../../../hasco/core/HASCOFactory.html" title="class in hasco.core">HASCOFactory</a>&lt;jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,java.lang.Double&gt;,jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,java.lang.Double&gt;</code></dd>
 </dl>
 </li>
 </ul>

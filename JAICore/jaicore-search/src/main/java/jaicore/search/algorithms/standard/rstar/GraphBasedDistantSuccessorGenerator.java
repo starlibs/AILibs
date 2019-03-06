@@ -7,6 +7,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IMetric;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -14,7 +15,7 @@ import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvalua
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccessorGenerator<N, A> {
+public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccessorGenerator<N>, ILoggingCustomizable {
 
 	private static final int MAX_ATTEMPTS = 10;
 	private final SuccessorGenerator<N, A> succesorGenerator;
@@ -36,14 +37,29 @@ public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccess
 		if (this.goalTester.isGoal(n)) {
 			return successorsInOriginalGraph;
 		}
-		for (int i = 0; i < MAX_ATTEMPTS; i++) {
-			this.logger.debug("Drawing next distant successor. {}/{} have already been drawn. This is the {}-th attempt.", successorsInOriginalGraph.size(), k, i + 1);
+		for (int i = 0; i < MAX_ATTEMPTS && successorsInOriginalGraph.size() < k; i++) {
+			this.logger.debug("Drawing next distant successor for {}. {}/{} have already been drawn. This is the {}-th attempt.", n, successorsInOriginalGraph.size(), k, i + 1);
 			N candidatePoint = n;
+
+			/* detect potential dead end */
+			boolean deadEnd = false;
 			while (!this.goalTester.isGoal(candidatePoint) && metricOverStates.getDistance(n, candidatePoint) <= delta) {
+				if (Thread.currentThread().isInterrupted()) {
+					throw new InterruptedException("Successor generation has been interrupted.");
+				}
 				assert !this.goalTester.isGoal(candidatePoint) : "Node must not be a goal node!";
 				List<NodeExpansionDescription<N, A>> localSuccessors = this.succesorGenerator.generateSuccessors(candidatePoint);
-				assert !localSuccessors.isEmpty() : "List of local successors must not be empty for node " + candidatePoint + "!";
+				if (localSuccessors.isEmpty()) {
+					this.logger.warn("List of local successors is empty for node {}! This may be due to a dead-end in the search graph.", candidatePoint);
+					deadEnd = true;
+					break;
+				}
 				candidatePoint = localSuccessors.size() > 1 ? localSuccessors.get(this.random.nextInt(localSuccessors.size() - 1)).getTo() : localSuccessors.get(0).getTo();
+				this.logger.trace("Next node on path to distant successor is {}", candidatePoint);
+			}
+			if (deadEnd) {
+				this.logger.debug("Skipping this candidate, because it is a dead-end.");
+				continue;
 			}
 
 			/* check that we really have a node different from the one we expand here */
@@ -62,11 +78,19 @@ public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccess
 			/* add the node if we don't have it yet */
 			if (!successorsInOriginalGraph.contains(candidatePoint)) {
 				successorsInOriginalGraph.add(candidatePoint);
-				if (successorsInOriginalGraph.size() == k) {
-					break;
-				}
 			}
 		}
+		this.logger.info("Returning {} successors.", successorsInOriginalGraph.size());
 		return successorsInOriginalGraph;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

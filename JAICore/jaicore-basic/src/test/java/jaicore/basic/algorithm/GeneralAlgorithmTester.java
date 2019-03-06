@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,15 +34,16 @@ import jaicore.concurrent.ThreadGroupObserver;
 import jaicore.concurrent.TimeoutTimer;
 
 /**
+ * A class to test any type of algorithm.
  *
- * @param <P>
- *            The class of the actual problem to be solved
- * @param <I>
- *            The class of the algorithm input
- * @param <O>
- *            The class of the algorithm output
+ * Note that it is on purpose that this class is not generic in the input/output classes of the tested algorithm.
+ * The reason is that the algorithm is tested for different input instances, and these may also have different types.
+ * Of course, the main type of the different inputs is usually the same, but since the type itself may be generic,
+ * the concrete type may depend on the input itself.
  */
-public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomizable {
+
+@RunWith(Parameterized.class)
+public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(GeneralAlgorithmTester.class);
@@ -48,13 +52,11 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000;
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 10000;
 
-	public abstract AlgorithmProblemTransformer<P, I> getProblemReducer();
+	// fields used together with @Parameter must be public
+	@Parameter(0)
+	public IAlgorithmTestProblemSet<?> problemSet;
 
-	public abstract IAlgorithmFactory<I, O> getFactory();
-
-	public abstract I getSimpleProblemInputForGeneralTestPurposes() throws Exception;
-
-	public abstract I getDifficultProblemInputForGeneralTestPurposes() throws Exception; // runtime at least 10 seconds
+	public abstract IAlgorithm<?, ?> getAlgorithm(Object problem);
 
 	@BeforeClass
 	public static void init() {
@@ -63,9 +65,8 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 
 	@Test
 	public void testStartAndFinishEventEmissionSequentially() throws Exception {
-		IAlgorithmFactory<I, O> factory = this.getFactory();
-		factory.setProblemInput(this.getSimpleProblemInputForGeneralTestPurposes());
-		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -78,9 +79,8 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 
 	@Test
 	public void testStartAndFinishEventEmissionProtocolParallelly() throws Exception {
-		IAlgorithmFactory<I, O> factory = this.getFactory();
-		factory.setProblemInput(this.getSimpleProblemInputForGeneralTestPurposes());
-		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -94,9 +94,8 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 
 	@Test
 	public void testStartAndFinishEventEmissionByIteration() throws Exception {
-		IAlgorithmFactory<I, O> factory = this.getFactory();
-		factory.setProblemInput(this.getSimpleProblemInputForGeneralTestPurposes());
-		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -112,15 +111,14 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 	public void testInterrupt() throws Exception {
 
 		/* set up algorithm */
-		IAlgorithmFactory<I, O> factory = this.getFactory();
-		factory.setProblemInput(this.getDifficultProblemInputForGeneralTestPurposes());
-		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
 		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 		algorithm.setMaxNumThreads(Runtime.getRuntime().availableProcessors());
-		FutureTask<O> task = new FutureTask<>(algorithm);
+		FutureTask<?> task = new FutureTask<>(algorithm);
 
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
 		long start = System.currentTimeMillis();
@@ -149,7 +147,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 
 		/* launch algorithm */
 		try {
-			O output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
+			Object output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
 			assert false : ("Algorithm terminated without exception but with regular output: " + output);
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof InterruptedException) {
@@ -181,16 +179,15 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 	public void testCancel() throws Exception {
 
 		/* set up algorithm */
-		IAlgorithmFactory<I, O> factory = this.getFactory();
-		factory.setProblemInput(this.getDifficultProblemInputForGeneralTestPurposes());
-		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
 		int availableCPUs = Runtime.getRuntime().availableProcessors();
 		algorithm.setNumCPUs(availableCPUs);
 		algorithm.setMaxNumThreads(availableCPUs);
-		FutureTask<O> task = new FutureTask<>(algorithm);
+		FutureTask<?> task = new FutureTask<>(algorithm);
 
 		/* set up timer for interruption */
 		AtomicLong cancelEvent = new AtomicLong();
@@ -219,7 +216,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		/* launch algorithm */
 		algorithmThread.start();
 		try {
-			O output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
+			Object output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
 			assert false : ("Algorithm terminated without exception but with regular output: " + output);
 		} catch (ExecutionException e) {
 
@@ -262,9 +259,8 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 	public void testQuickTimeout() throws Exception {
 
 		/* set up algorithm */
-		IAlgorithmFactory<I, O> factory = this.getFactory();
-		factory.setProblemInput(this.getDifficultProblemInputForGeneralTestPurposes());
-		IAlgorithm<I, O> algorithm = factory.getAlgorithm();
+		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
@@ -272,7 +268,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		algorithm.setNumCPUs(availableCPUs);
 		algorithm.setMaxNumThreads(availableCPUs);
 		assert algorithm.getConfig().threads() == availableCPUs;
-		FutureTask<O> task = new FutureTask<>(algorithm);
+		FutureTask<?> task = new FutureTask<>(algorithm);
 		TimeOut to = new TimeOut(INTERRUPTION_DELAY, TimeUnit.MILLISECONDS);
 		algorithm.setTimeout(to.milliseconds(), TimeUnit.MILLISECONDS);
 		assert algorithm.getTimeout().equals(to) : "Algorithm timeout is " + algorithm.getTimeout() + " but " + to + " has been specified!";
@@ -293,7 +289,7 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 		/* launch algorithm */
 		algorithmThread.start();
 		try {
-			O output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
+			Object output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
 			assert false : ("Algorithm terminated without exception but with regular output: " + output);
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AlgorithmTimeoutedException) {
@@ -395,6 +391,12 @@ public abstract class GeneralAlgorithmTester<P, I, O> implements ILoggingCustomi
 			assertTrue("No finish event was observed", this.observedFinish);
 			assertTrue("More than one finish event was observed", this.observedFinishExactlyOnce);
 		}
+	}
+
+
+
+	public IAlgorithmTestProblemSet<?> getProblemSet() {
+		return this.problemSet;
 	}
 
 	@Override

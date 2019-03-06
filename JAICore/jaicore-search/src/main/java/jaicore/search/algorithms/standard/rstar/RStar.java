@@ -16,13 +16,16 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IMetric;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.search.algorithms.standard.astar.AStar;
@@ -36,6 +39,7 @@ import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
+import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator;
 import jaicore.search.structure.graphgenerator.MultipleRootGenerator;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
@@ -67,8 +71,6 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	private GammaNode<T> bestSeenGoalNode;
 	private final Map<Pair<GammaNode<T>, GammaNode<T>>, SearchGraphPath<T, A>> externalPathsBetweenGammaNodes = new HashMap<>(); // the pairs should always be in a parent-child relation
 
-	private boolean stopAtFirstSolution;
-
 	private List<SolutionCandidateFoundEvent<EvaluatedSearchGraphPath<T, A, Double>>> unreturnedSolutionEvents = new LinkedList<>();
 
 	private Collection<AStar<T, A>> activeAStarSubroutines = new ArrayList<>();
@@ -90,7 +92,6 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 		this.k = k;
 		this.metricOverStates = this.getInput().getMetricOverStates();
 		this.delta = delta;
-		this.stopAtFirstSolution = true;
 	}
 
 	/**
@@ -120,7 +121,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @throws TimeoutException
 	 * @throws AlgorithmExecutionCanceledException
 	 */
-	private void reevaluateState(final GammaNode<T> n) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	private void reevaluateState(final GammaNode<T> n) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 
 		/* Line 7: Try to compute the local path from bp(n) to n. (we use AStar for this) */
 		this.logger.debug("Reevaluating node {}", n);
@@ -129,10 +130,12 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 		}
 		GraphGenerator<T, A> subProblemGraphGenerator = new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getPoint(), n.getPoint());
 		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblemGraphGenerator, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T>) this.getInput().getNodeEvaluator()));
+		astar.setLoggerName(this.getLoggerName() + ".astar");
 		astar.setTimeout(new TimeOut(this.getRemainingTimeToDeadline().milliseconds(), TimeUnit.MILLISECONDS));
 		this.logger.trace("Invoking AStar with root {} and only goal node {}", n.getParent().getPoint(), n.getPoint());
 		this.activeAStarSubroutines.add(astar);
 		EvaluatedSearchGraphPath<T, A, Double> optimalPath = astar.call();
+		this.checkAndConductTermination();
 		this.activeAStarSubroutines.remove(astar);
 		this.externalPathsBetweenGammaNodes.put(new Pair<>(n.getParent(), n), optimalPath);
 		double bestKnownValueFromParentToNode = optimalPath != null ? optimalPath.getScore() : Double.MAX_VALUE;
@@ -155,12 +158,12 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, TimeoutException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Performing next step. Current state is {}", this.getState());
 		this.checkAndConductTermination();
 		switch (this.getState()) {
 		case created:
-
+			this.registerActiveThread();
 			AlgorithmInitializedEvent initializationEvent = this.activate();
 
 			/* Lines 14 to 17 */
@@ -181,6 +184,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				assert false : "Only MultipleRootGenerator or SingleRootGenerators allowed.";
 			}
 			assert !this.open.isEmpty() : "OPEN must not be empty after initialization!";
+			this.unregisterActiveThread();
 			return initializationEvent;
 
 		case active:
@@ -203,6 +207,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				this.logger.info("Terminating RStar.");
 				return this.terminate();
 			}
+			this.registerActiveThread();
 
 			// Lines 20 & 21
 			if (n.getParent() != null && !this.isPathRealizationKnownForAbstractEdgeToNode(n)) {
@@ -220,6 +225,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				this.closed.add(n);
 
 				/* Line 24 to 27: Compute successors */
+				this.logger.debug("Starting generation of successors of {}", n);
 				Collection<GammaNode<T>> successors = this.generateGammaSuccessors(n);
 				this.logger.debug("Generated {} successors.", successors.size());
 				for (GammaNode<T> n_ : successors) { // Line 28
@@ -249,6 +255,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 					}
 				}
 			}
+			this.unregisterActiveThread();
 			return new NodeExpansionCompletedEvent<>(this.getId(), n.getPoint());
 
 		default:
@@ -306,6 +313,9 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	}
 
 	/**
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws AlgorithmException
+	 * @throws AlgorithmTimeoutedException
 	 * Generates this.RStarK Gamma graph successors for a state s within distance this.delta.
 	 * Queries the this.gammaSuccessorGenerator and checks if a generate state has been
 	 * visited i.e. generated in Gamma before. If yes, it takes the old reference from
@@ -317,12 +327,13 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @throws InterruptedException
 	 * @throws
 	 */
-	private Collection<GammaNode<T>> generateGammaSuccessors(final GammaNode<T> n) throws InterruptedException {
+	private Collection<GammaNode<T>> generateGammaSuccessors(final GammaNode<T> n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 
 		/* first create a list of k nodes that are in reach of delta of the current node */
-		List<T> randomDistantSuccessors = this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getPoint(), this.k, this.metricOverStates, this.delta);
+		this.logger.trace("Invoking distant successor generator timeout-aware.");
+		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getPoint(), this.k, this.metricOverStates, this.delta));
 		assert randomDistantSuccessors.size() == new HashSet<>(randomDistantSuccessors).size() : "Distant successor generator has created the same successor ar least twice: \n\t "
-				+ SetUtil.getMultiplyContainedItems(randomDistantSuccessors).stream().map(s -> s.toString()).collect(Collectors.joining("\n\t"));
+				+ SetUtil.getMultiplyContainedItems(randomDistantSuccessors).stream().map(T::toString).collect(Collectors.joining("\n\t"));
 		this.logger.trace("Distant successor generator generated {}/{} successors.", randomDistantSuccessors.size(), this.k);
 
 		/* remove nodes for which a node is already on CLOSED (no reopening in this algorithm) */
@@ -344,11 +355,13 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 			/* if this is a solution, add it as a new solution */
 			if (gammaNodeForThisChild.isGoal()) {
 				this.logger.info("Found new solution. Adding it to the solution set.");
-				if (this.bestSeenGoalNode == null || this.bestSeenGoalNode.g > n.g) {// && this.bestSeenGoalNode.getParent().path.get(this.n_goal).size() != 0) {
+				if (this.bestSeenGoalNode == null || this.bestSeenGoalNode.g > n.g) {
 					this.bestSeenGoalNode = n;
 					this.updateBestSeenSolution(this.getFullExternalPath(n));
 				}
-				this.unreturnedSolutionEvents.add(new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), this.getFullExternalPath(gammaNodeForThisChild)));
+				EvaluatedSearchSolutionCandidateFoundEvent<T, A, Double> solutionEvent = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), this.getFullExternalPath(gammaNodeForThisChild));
+				this.post(solutionEvent);
+				this.unreturnedSolutionEvents.add(solutionEvent);
 			}
 			gammaNodeForThisChild.addPredecessor(n);
 			succWithoutClosed.add(gammaNodeForThisChild);
@@ -359,6 +372,18 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+		super.setLoggerName(name + "._orgraphsearch");
+
+		/* set logger name of the graph generator */
+		if (this.getGraphGenerator() instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.getGraphGenerator()).setLoggerName(name + ".graphgenerator");
+		}
+
+		/* set logger name of the distant graph generator */
+		DistantSuccessorGenerator<T> distantSuccessorGenerator = this.getInput().getDistantSuccessorGenerator();
+		if (distantSuccessorGenerator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) distantSuccessorGenerator).setLoggerName(name + ".distantsuccessorgenerator");
+		}
 	}
 
 	@Override
@@ -368,8 +393,8 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 
 	@Override
 	public void cancel() {
-		this.logger.info("RStar received cancel. Now canceling the AStar subroutines.");
+		this.logger.info("RStar received cancel. Now invoking shutdown routing and cancel the AStar subroutines.");
 		super.cancel();
-		this.activeAStarSubroutines.forEach(a -> a.cancel());
+		this.activeAStarSubroutines.forEach(IAlgorithm::cancel);
 	}
 }

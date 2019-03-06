@@ -1,23 +1,23 @@
 package jaicore.search.core.interfaces;
 
-import java.util.List;
+import jaicore.search.model.other.SearchGraphPath;
 
 /**
  * Uses Double to be compliant with algorithms that MUST work with double instead of Integer (such as AStar)
- * 
+ *
  * @author fmohr
  *
  * @param <N>
  */
-public class EdgeCountingSolutionEvaluator<N> implements ISolutionEvaluator<N, Double> {
+public class EdgeCountingSolutionEvaluator<N, A> implements ISolutionEvaluator<N, A, Double> {
 
 	@Override
-	public Double evaluateSolution(List<N> solutionPath) {
-		return solutionPath.size() * 1.0;
+	public Double evaluateSolution(final SearchGraphPath<N, A> solutionPath) {
+		return solutionPath.getNodes().size() * 1.0;
 	}
 
 	@Override
-	public boolean doesLastActionAffectScoreOfAnySubsequentSolution(List<N> partialSolutionPath) {
+	public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final SearchGraphPath<N, A> partialSolutionPath) {
 		return true;
 	}
 

@@ -2,6 +2,7 @@ package jaicore.search.testproblems.gridworld;
 
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.testproblems.gridworld.GridWorldNode;
 
 public class GridWorldHeuristic implements INodeEvaluator<GridWorldNode, Double> {
 

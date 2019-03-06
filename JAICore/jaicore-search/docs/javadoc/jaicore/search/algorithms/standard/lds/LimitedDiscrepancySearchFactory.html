@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10};
+var methods = {"i0":10,"i1":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -90,7 +90,7 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">jaicore.search.algorithms.standard.lds</div>
-<h2 title="Class LimitedDiscrepancySearchFactory" class="title">Class LimitedDiscrepancySearchFactory&lt;T,A,V extends java.lang.Comparable&lt;V&gt;&gt;</h2>
+<h2 title="Class LimitedDiscrepancySearchFactory" class="title">Class LimitedDiscrepancySearchFactory&lt;N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
@@ -100,10 +100,10 @@ var activeTableTab = "activeTableTab";
 <li>jaicore.basic.algorithm.AAlgorithmFactory&lt;I,O&gt;</li>
 <li>
 <ul class="inheritance">
-<li><a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSearchFactory.html" title="class in jaicore.search.core.interfaces">jaicore.search.core.interfaces.StandardORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,V&gt;,T,A,V&gt;</li>
+<li><a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSearchFactory.html" title="class in jaicore.search.core.interfaces">jaicore.search.core.interfaces.StandardORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;N,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A,V&gt;</li>
 <li>
 <ul class="inheritance">
-<li>jaicore.search.algorithms.standard.lds.LimitedDiscrepancySearchFactory&lt;T,A,V&gt;</li>
+<li>jaicore.search.algorithms.standard.lds.LimitedDiscrepancySearchFactory&lt;N,A,V&gt;</li>
 </ul>
 </li>
 </ul>
@@ -116,12 +116,12 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,V&gt;&gt;, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,V&gt;,T,A&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;N,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;N,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;</dd>
 </dl>
 <hr>
 <br>
-<pre>public class <span class="typeNameLabel">LimitedDiscrepancySearchFactory&lt;T,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
-extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSearchFactory.html" title="class in jaicore.search.core.interfaces">StandardORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,V&gt;,T,A,V&gt;</pre>
+<pre>public class <span class="typeNameLabel">LimitedDiscrepancySearchFactory&lt;N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span>
+extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSearchFactory.html" title="class in jaicore.search.core.interfaces">StandardORGraphSearchFactory</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;N,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A,V&gt;</pre>
 </li>
 </ul>
 </div>
@@ -158,8 +158,12 @@ extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSe
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">V</a>&gt;</code></td>
+<td class="colFirst"><code><a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html#getAlgorithm--">getAlgorithm</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">V</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html#getAlgorithm-jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput-">getAlgorithm</a></span>(<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>&gt;&nbsp;input)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -167,7 +171,7 @@ extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSe
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithmFactory</h3>
-<code>getInput, setProblemInput, setProblemInput</code></li>
+<code>getInput, setProblemInput</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -175,13 +179,6 @@ extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSe
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithmFactory">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithmFactory</h3>
-<code>setProblemInput, setProblemInput</code></li>
 </ul>
 </li>
 </ul>
@@ -217,10 +214,19 @@ extends <a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSe
 <a name="getAlgorithm--">
 <!--   -->
 </a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAlgorithm</h4>
+<pre>public&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">V</a>&gt;&nbsp;getAlgorithm()</pre>
+</li>
+</ul>
+<a name="getAlgorithm-jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput-">
+<!--   -->
+</a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getAlgorithm</h4>
-<pre>public&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">V</a>&gt;&nbsp;getAlgorithm()</pre>
+<pre>public&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">V</a>&gt;&nbsp;getAlgorithm(<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs">GraphSearchWithNodeRecommenderInput</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="type parameter in LimitedDiscrepancySearchFactory">A</a>&gt;&nbsp;input)</pre>
 </li>
 </ul>
 </li>

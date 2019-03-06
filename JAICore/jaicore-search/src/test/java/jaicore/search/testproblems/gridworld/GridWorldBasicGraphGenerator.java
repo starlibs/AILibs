@@ -11,6 +11,8 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import jaicore.testproblems.gridworld.GridWorldNode;
+import jaicore.testproblems.gridworld.GridWorldProblem;
 
 @SuppressWarnings("serial")
 public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<GridWorldNode, String> {

@@ -80,7 +80,7 @@
 <ul>
 <li type="circle">jaicore.basic.algorithm.AAlgorithm&lt;I,O&gt; (implements jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, jaicore.basic.ILoggingCustomizable)
 <ul>
-<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.basic.algorithm.AOptimizer&lt;I,O,V&gt; (implements jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)
 <ul>
@@ -114,18 +114,9 @@
 </ul>
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li type="circle">jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;
+<li type="circle">jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;I1,O1,I2,O2&gt;
 <ul>
-<li type="circle">jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;IPlanning,N,A&gt; (also extends jaicore.planning.hierarchical.algorithms.IPathToPlanConverter&lt;N&gt;)
-<ul>
-<li type="circle">hasco.core.<a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core"><span class="typeNameLink">IHASCOPlanningGraphGeneratorDeriver</span></a>&lt;N,A&gt;</li>
-</ul>
-</li>
-</ul>
-</li>
-<li type="circle">jaicore.planning.hierarchical.algorithms.IPathToPlanConverter&lt;N&gt;
-<ul>
-<li type="circle">jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;IPlanning,N,A&gt; (also extends jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)
+<li type="circle">jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;IPlanning,N,A&gt;
 <ul>
 <li type="circle">hasco.core.<a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core"><span class="typeNameLink">IHASCOPlanningGraphGeneratorDeriver</span></a>&lt;N,A&gt;</li>
 </ul>

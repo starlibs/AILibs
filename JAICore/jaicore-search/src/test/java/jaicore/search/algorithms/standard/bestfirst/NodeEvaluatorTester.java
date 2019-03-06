@@ -14,7 +14,7 @@ import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import jaicore.search.testproblems.nqueens.NQueenGenerator;
+import jaicore.search.testproblems.nqueens.NQueensGraphGenerator;
 import jaicore.search.testproblems.nqueens.QueenNode;
 
 public abstract class NodeEvaluatorTester<N extends INodeEvaluator<QueenNode, Double>> {
@@ -55,7 +55,7 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<QueenNode, Do
 
 	public StandardBestFirst<QueenNode, String, Double> getBF(INodeEvaluator<QueenNode, Double> ne) {
 		GraphSearchWithSubpathEvaluationsInput<QueenNode, String, Double> input = new GraphSearchWithSubpathEvaluationsInput<>(
-				new NQueenGenerator(5), ne); // there will be 10 solutions
+				new NQueensGraphGenerator(5), ne); // there will be 10 solutions
 		StandardBestFirst<QueenNode, String, Double> bf = new StandardBestFirst<>(input);
 		bf.setNumCPUs(1);
 		return bf;

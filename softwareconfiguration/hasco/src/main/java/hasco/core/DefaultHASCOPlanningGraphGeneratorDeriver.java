@@ -1,15 +1,14 @@
 package hasco.core;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
-//github.com/fmohr/AILibs.git
-import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.other.SearchGraphPath;
+import jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  * This class only serves to facilitate the usage of HASCO when passing a IPlanningGraphGeneratorDeriver.
@@ -32,13 +31,13 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPl
 	}
 
 	@Override
-	public GraphGenerator<N, A> transform(final CEOCIPSTNPlanningProblem problem) {
-		return this.wrappedDeriver.transform(problem);
+	public GraphSearchInput<N, A> encodeProblem(final CEOCIPSTNPlanningProblem problem) {
+		return this.wrappedDeriver.encodeProblem(problem);
 	}
 
 	@Override
-	public Plan getPlan(final List<N> path) {
-		return this.wrappedDeriver.getPlan(path);
+	public Plan decodeSolution(final SearchGraphPath<N, A> path) {
+		return this.wrappedDeriver.decodeSolution(path);
 	}
 
 	public IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> getWrappedDeriver() {

@@ -6,39 +6,38 @@ import javafx.application.Platform;
 import javafx.scene.layout.FlowPane;
 
 /**
- * 
+ *
  * @author fmohr
  *
  * @param <N> The node class
  */
 public class SearchRolloutHistogramPluginView<N>
-		extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel<N>, SearchRolloutHistogramPluginController<N>, FlowPane> {
+extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel<N>, SearchRolloutHistogramPluginController<N>, FlowPane> {
 
 	private final Histogram histogram;
 	private final int n = 100;
 
-	public SearchRolloutHistogramPluginView(SearchRolloutHistogramPluginModel<N> model) {
+	public SearchRolloutHistogramPluginView(final SearchRolloutHistogramPluginModel<N> model) {
 		super(model, new FlowPane());
-		histogram = new Histogram(n);
-		histogram.setTitle("Search Rollout Performances");
+		this.histogram = new Histogram(this.n);
+		this.histogram.setTitle("Search Rollout Performances");
 		Platform.runLater(() -> {
-			getNode().getChildren().add(histogram);
+			this.getNode().getChildren().add(this.histogram);
 		});
 	}
 
 	@Override
 	public void update() {
-		if (getModel().getCurrentlySelectedNode() != null && getModel().getObservedPerformancesUnderSelectedNode() != null) {
+		if (this.getModel().getCurrentlySelectedNode() != null && this.getModel().getObservedPerformancesUnderSelectedNode() != null) {
 			Platform.runLater(() -> {
-				histogram.update(getModel().getObservedPerformancesUnderSelectedNode());
+				this.histogram.update(this.getModel().getObservedPerformancesUnderSelectedNode());
 			});
 		}
 	}
-	
+
+	@Override
 	public void clear() {
-		Platform.runLater(() -> {
-			histogram.clear();
-		});
+		Platform.runLater(this.histogram::clear);
 	}
 
 	@Override

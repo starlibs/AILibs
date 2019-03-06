@@ -1,6 +1,5 @@
 package jaicore.search.model.travesaltree;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,8 +7,7 @@ import java.util.Map;
 
 import jaicore.logging.ToJSONStringUtil;
 
-public class Node<T, V extends Comparable<V>> implements Serializable, Comparable<Node<T, V>> {
-	private static final long serialVersionUID = -7608088086719059550L;
+public class Node<T, V extends Comparable<V>> {
 	private final T externalLabel;
 	private boolean goal;
 	protected Node<T, V> parent;
@@ -82,11 +80,6 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 		return path;
 	}
 
-	@Override
-	public int compareTo(final Node<T, V> o) {
-		return this.getInternalLabel().compareTo(o.getInternalLabel());
-	}
-
 	public String getString() {
 		String s = "Node [ref=";
 		s += this.toString();
@@ -103,8 +96,6 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 		s += ", annotations=";
 		s += this.annotations;
 		s += "]";
-
-		// return "Node [ref=" + this.toString() + ", externalLabel=" + externalLabel + ", goal=" + goal + ", parentRef=" + parent.toString() + ", annotations=" + annotations + "]";
 		return s;
 	}
 
@@ -115,6 +106,5 @@ public class Node<T, V extends Comparable<V>> implements Serializable, Comparabl
 		fields.put("goal", this.goal);
 		fields.put("annotations", this.annotations);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
-		// return "Node [externalLabel=" + this.externalLabel + ", goal=" + this.goal + ", annotations=" + this.annotations + "]";
 	}
 }

@@ -533,12 +533,12 @@ implements <a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="int
  number of threads is limited (e.g. to the number of cores that may be used). <code>setNumCPUs</code>
  does not put such a restriction, because this is unnecessarily limiting in environment where such
  constraints do not exist.
- 
+
  If the value is set to 0, no own threads must be used at all. Note that this may not be possible for
  some algorithms that need observers in the background.
- 
- If the value is set to -1, any restriction on the number of threads is removed.  
- 
+
+ If the value is set to -1, any restriction on the number of threads is removed.
+
  Note that different algorithms may have different default behaviors if this number is not set.</div>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
@@ -671,12 +671,12 @@ implements <a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="int
 <pre>protected&nbsp;void&nbsp;checkAndConductTermination()
                                    throws java.lang.InterruptedException,
                                           <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
-                                          java.util.concurrent.TimeoutException</pre>
+                                          <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
 </dl>
 </li>
 </ul>
@@ -896,13 +896,13 @@ implements <a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="int
                              throws java.lang.InterruptedException,
                                     <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a>,
                                     <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
-                                    java.util.concurrent.TimeoutException</pre>
+                                    <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
 </dl>
 </li>
 </ul>
