@@ -3,8 +3,6 @@ package jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
-
 /**
  * DynamicTimeWarpingTest
  */
@@ -20,7 +18,7 @@ public class DynamicTimeWarpingTest {
     double[] timeSeries6 = { 1, 2, 3, 5, 5, 6 };
 
     @Test
-    public void testDistanceCalculation() throws TimeSeriesLengthException {
+    public void testDistanceCalculation() {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
         double distance = dtw.distance(timeSeries1, timeSeries2);
         double expectation = 0;
@@ -28,7 +26,7 @@ public class DynamicTimeWarpingTest {
     }
 
     @Test
-    public void testDistanceCalculation2() throws TimeSeriesLengthException {
+    public void testDistanceCalculation2() {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
         double distance = dtw.distance(timeSeries3, timeSeries4);
         double expectation = 3.29;
@@ -36,7 +34,7 @@ public class DynamicTimeWarpingTest {
     }
 
     @Test
-    public void testDistanceCalculationWithWindow() throws TimeSeriesLengthException {
+    public void testDistanceCalculationWithWindow() {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
         double distance = dtw.distanceWithWindow(timeSeries3, timeSeries4, 10000);
         double expectation = 3.29;
@@ -44,7 +42,7 @@ public class DynamicTimeWarpingTest {
     }
 
     @Test
-    public void testDistanceCalculation3() throws TimeSeriesLengthException {
+    public void testDistanceCalculation3() {
         DynamicTimeWarping dtw = new DynamicTimeWarping();
         double distance = dtw.distance(timeSeries5, timeSeries6);
         double expectation = 1;

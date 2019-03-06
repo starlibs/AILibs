@@ -15,42 +15,28 @@ import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
-import timeseriesweka.elastic_distance_measures.BasicDTW;
+import timeseriesweka.elastic_distance_measures.WeightedDTW;
 
 /**
- * Tests performance and correctness of the {@link DynamicTimeWarping} against
- * the reference implementation.
- * 
- * The reference implementation offers the following classes for Dynamic Time
- * Warping:
- * <p>
- * <ul>
- * <li>DTW.java</li>
- * <li>BasicDTW.java</li>
- * <li>DTW_DistanceBasic.java</li>
- * <li>DTW_DistanceEfficient.java - This implementation is more memory
- * efficient.</li>
- * <li>WeightedDTW.java - Not tested here. See
- * {@link WeightedDynamicTimeWarpingRefTest}.</li>
- * </ul>
- * </p>
+ * Tests performance and correctness of the {@link WeightedDynamicTimeWarping}
+ * against the reference implementation.
  * 
  * <p>
- * Basically all these classes provide a method
+ * This class provide a method
  * <code>double distance(double[] a, double[] b, double cutoff)</code>, where
  * <code>a</code> and <code>b</code> are the time series to measure the distance
- * for and <code>cutoff</code> is the threshold used for early abandon. All
- * these methods us the squared distance <code>d(x,y)=(x-y)*(x-y)</code> as
- * distance between two points <code>x</code> and <code>y</code>.
+ * for and <code>cutoff</code> is the threshold used for early abandon. This
+ * methods use the squared distance <code>d(x,y)=(x-y)*(x-y)</code> as distance
+ * between two points <code>x</code> and <code>y</code>.
  * </p>
  */
-public class DynamicTimeWarpingRefTest {
+public class WeightedDynamicTimeWarpingRefTest {
 
     /** Local path for the datasets arff files. */
     private static final String PATH = "./tsctestenv/data/univariate/";
 
-    /** Path for pen digits dataset. */
-    private static final String CAR = PATH + "Car/Car/Car_TRAIN.arff";
+    /** Path for dataset. */
+    private static final String DATASET_PATH = PATH + "PenDigits/PenDigitsDimension1_TEST.arff";
 
     /** Dataset used for comparison tests. */
     private TimeSeriesDataset dataset;
@@ -63,7 +49,7 @@ public class DynamicTimeWarpingRefTest {
     @Before
     public void setUp() throws TimeSeriesLoadingException {
         // Load dataset.
-        File arffFile = new File(CAR);
+        File arffFile = new File(DATASET_PATH);
         Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader.loadArff(arffFile);
         dataset = trainPair.getX();
     }
@@ -76,18 +62,22 @@ public class DynamicTimeWarpingRefTest {
     @Test
     public void testCorrectness() {
         double cutoff = Double.MAX_VALUE;
+        double g = 1;
+        double Wmax = 1;
 
-        BasicDTW referenceDynamicTimeWarping = new BasicDTW();
-        DynamicTimeWarping dynamicTimeWarping = new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance());
+        WeightedDTW referenceWeightedDynamicTimeWarping = new WeightedDTW(g);
+        WeightedDynamicTimeWarping weightedDynamicTimeWarping = new WeightedDynamicTimeWarping(2, g, Wmax,
+                ScalarDistanceUtil.getSquaredDistance());
 
         double[][] values = dataset.getValues(0);
         for (int i = 0; i < 100; i++) {
             for (int j = i; j < values.length; j++) {
-                double referenceDistance = referenceDynamicTimeWarping.distance(values[i], values[j], cutoff);
-                double distance = dynamicTimeWarping.distance(values[i], values[j]);
+                double referenceDistance = referenceWeightedDynamicTimeWarping.distance(values[i], values[j], cutoff);
+                double distance = weightedDynamicTimeWarping.distance(values[i], values[j]);
                 String message = String.format("Distance between %s and %s.", TimeSeriesUtil.toString(values[i]),
                         TimeSeriesUtil.toString(values[j]));
                 assertEquals(message, referenceDistance, distance, 10e-5);
+                System.out.println("Correct");
             }
         }
     }
@@ -102,23 +92,27 @@ public class DynamicTimeWarpingRefTest {
         double[][] values = dataset.getValues(0);
         int numberOfTestInstances = 100;
 
-        // Measure time for reference implementation.
         double cutoff = Double.MAX_VALUE;
+        double g = 1;
+        double Wmax = 1;
+
+        // Measure time for reference implementation.
         double refStart = System.currentTimeMillis();
-        BasicDTW referenceDynamicTimeWarping = new BasicDTW();
+        WeightedDTW referenceWeightedDynamicTimeWarping = new WeightedDTW(g);
         for (int i = 0; i < numberOfTestInstances; i++) {
             for (int j = i; j < values.length; j++) {
-                referenceDynamicTimeWarping.distance(values[i], values[j], cutoff);
+                referenceWeightedDynamicTimeWarping.distance(values[i], values[j], cutoff);
             }
         }
         double refEnd = System.currentTimeMillis();
 
         // Measure time for own implementation.
         double ownStart = System.currentTimeMillis();
-        DynamicTimeWarping dynamicTimeWarping = new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance());
+        WeightedDynamicTimeWarping weightedDynamicTimeWarping = new WeightedDynamicTimeWarping(2, g, Wmax,
+                ScalarDistanceUtil.getSquaredDistance());
         for (int i = 0; i < numberOfTestInstances; i++) {
             for (int j = i; j < values.length; j++) {
-                dynamicTimeWarping.distance(values[i], values[j]);
+                weightedDynamicTimeWarping.distance(values[i], values[j]);
             }
         }
         double ownEnd = System.currentTimeMillis();
@@ -130,5 +124,4 @@ public class DynamicTimeWarpingRefTest {
                 ownTime);
         assertTrue(message, ownTime <= refTime);
     }
-
 }

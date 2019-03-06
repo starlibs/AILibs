@@ -1,4 +1,4 @@
-package jaicore.ml.tsc.classifier;
+package jaicore.ml.tsc.classifier.neighbors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,16 +13,12 @@ import org.junit.Test;
 import jaicore.ml.core.exception.EvaluationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
-import jaicore.ml.tsc.classifier.NearestNeighborClassifier;
+import jaicore.ml.tsc.classifier.neighbors.NearestNeighborClassifier;
 import jaicore.ml.tsc.classifier.SimplifiedTSClassifierTest;
-import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.distances.DynamicTimeWarping;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
-import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
-import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 import timeseriesweka.elastic_distance_measures.BasicDTW;
-import timeseriesweka.elastic_distance_measures.TWEDistance;
 
 import weka.classifiers.lazy.kNN;
 
@@ -31,13 +27,10 @@ import weka.classifiers.lazy.kNN;
  */
 public class NearestNeighborClassifierRefTest {
 
-    private static final String PATH = "/Users/rtf/Data/TSC/";
+    private static final String PATH = "./tsctestenv/data/univariate/";
 
-    private static final String CAR_TRAIN = PATH + "Car/Car_TRAIN.arff";
-    private static final String CAR_TEST = PATH + "Car/Car_TEST.arff";
-
-    private static final String BIRDCHICKEN_TRAIN = PATH + "BirdChicken/BirdChicken_TRAIN.arff";
-    private static final String BIRDCHICKEN_TEST = PATH + "BirdChicken/BirdChicken_TEST.arff";
+    private static final String CAR_TRAIN = PATH + "Car/Car/Car_TRAIN.arff";
+    private static final String CAR_TEST = PATH + "Car/Car/Car_TEST.arff";
 
     @Test
     public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
@@ -53,7 +46,7 @@ public class NearestNeighborClassifierRefTest {
                 new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance()));
 
         Map<String, Object> result = SimplifiedTSClassifierTest.compareClassifiers(refClf, ownClf, 0, null, null,
-                new File(BIRDCHICKEN_TRAIN), new File(BIRDCHICKEN_TEST));
+                new File(CAR_TRAIN), new File(CAR_TEST));
 
         System.out.println(result.toString());
     }

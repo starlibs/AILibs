@@ -1,9 +1,6 @@
 package jaicore.ml.tsc.distances;
 
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
-
 import jaicore.ml.tsc.complexity.ITimeSeriesComplexity;
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
 /**
  * ComplexityInvariantDistance
@@ -28,10 +25,7 @@ public class ComplexityInvariantDistance implements ITimeSeriesDistance {
     }
 
     @Override
-    public double distance(double[] A, double[] B) throws TimeSeriesLengthException {
-        // Parameter checks.
-        isSameLengthOrException(A, B);
-
+    public double distance(double[] A, double[] B) {
         double complexityA = complexityMeasure.complexity(A);
         double complexityB = complexityMeasure.complexity(B);
         double complexityCorrectionFactor = Math.max(complexityA, complexityB) / Math.min(complexityA, complexityB);

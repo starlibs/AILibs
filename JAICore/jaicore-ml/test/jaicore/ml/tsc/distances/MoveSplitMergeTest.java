@@ -18,7 +18,7 @@ public class MoveSplitMergeTest {
     double[] timeSeries6 = { 7.0, 8.0, 12.0, 13.0, 9.0, 9.0, 5.0 };
 
     @Test
-    public void testDistanceCalculation() throws IllegalArgumentException {
+    public void testDistanceCalculation() {
         MoveSplitMerge msm = new MoveSplitMerge(1.0);
         double distance = msm.distance(timeSeries1, timeSeries2);
         double expectation = 0;
@@ -27,7 +27,7 @@ public class MoveSplitMergeTest {
     }
 
     @Test
-    public void testDistanceCalculation2() throws IllegalArgumentException {
+    public void testDistanceCalculation2() {
         double c = 4.0;
         MoveSplitMerge msm = new MoveSplitMerge(c);
         double distance = msm.distance(timeSeries3, timeSeries4);

@@ -15,42 +15,24 @@ import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
-import timeseriesweka.elastic_distance_measures.BasicDTW;
+import timeseriesweka.elastic_distance_measures.TWEDistance;
 
 /**
- * Tests performance and correctness of the {@link DynamicTimeWarping} against
+ * Tests performance and correctness of the {@link TimeWarpEditDistance} against
  * the reference implementation.
  * 
- * The reference implementation offers the following classes for Dynamic Time
- * Warping:
- * <p>
- * <ul>
- * <li>DTW.java</li>
- * <li>BasicDTW.java</li>
- * <li>DTW_DistanceBasic.java</li>
- * <li>DTW_DistanceEfficient.java - This implementation is more memory
- * efficient.</li>
- * <li>WeightedDTW.java - Not tested here. See
- * {@link WeightedDynamicTimeWarpingRefTest}.</li>
- * </ul>
- * </p>
- * 
- * <p>
- * Basically all these classes provide a method
- * <code>double distance(double[] a, double[] b, double cutoff)</code>, where
- * <code>a</code> and <code>b</code> are the time series to measure the distance
- * for and <code>cutoff</code> is the threshold used for early abandon. All
- * these methods us the squared distance <code>d(x,y)=(x-y)*(x-y)</code> as
- * distance between two points <code>x</code> and <code>y</code>.
- * </p>
+ * The reference implementation uses a squared distance as pointwise distance
+ * metric..
  */
-public class DynamicTimeWarpingRefTest {
+public class TimeWarpEditDistanceRefTest {
 
     /** Local path for the datasets arff files. */
     private static final String PATH = "./tsctestenv/data/univariate/";
 
     /** Path for pen digits dataset. */
-    private static final String CAR = PATH + "Car/Car/Car_TRAIN.arff";
+    // private static final String DATASET_PATH = PATH +
+    // "ItalyPowerDemand/ItalyPowerDemand_TRAIN.arff";
+    private static final String DATASET_PATH = PATH + "PenDigits/PenDigitsDimension1_TEST.arff";
 
     /** Dataset used for comparison tests. */
     private TimeSeriesDataset dataset;
@@ -63,7 +45,7 @@ public class DynamicTimeWarpingRefTest {
     @Before
     public void setUp() throws TimeSeriesLoadingException {
         // Load dataset.
-        File arffFile = new File(CAR);
+        File arffFile = new File(DATASET_PATH);
         Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader.loadArff(arffFile);
         dataset = trainPair.getX();
     }
@@ -76,20 +58,50 @@ public class DynamicTimeWarpingRefTest {
     @Test
     public void testCorrectness() {
         double cutoff = Double.MAX_VALUE;
+        double nu = 1;
+        double lambda = 1;
 
-        BasicDTW referenceDynamicTimeWarping = new BasicDTW();
-        DynamicTimeWarping dynamicTimeWarping = new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance());
+        TWEDistance referenceTimeWarpEditDistance = new TWEDistance(lambda, nu);
+        TimeWarpEditDistance timeWarpEditDistance = new TimeWarpEditDistance(lambda, nu,
+                ScalarDistanceUtil.getSquaredDistance());
 
         double[][] values = dataset.getValues(0);
         for (int i = 0; i < 100; i++) {
             for (int j = i; j < values.length; j++) {
-                double referenceDistance = referenceDynamicTimeWarping.distance(values[i], values[j], cutoff);
-                double distance = dynamicTimeWarping.distance(values[i], values[j]);
+                double referenceDistance = referenceTimeWarpEditDistance.distance(values[i], values[j], cutoff);
+                double distance = timeWarpEditDistance.distance(values[i], values[j]);
                 String message = String.format("Distance between %s and %s.", TimeSeriesUtil.toString(values[i]),
                         TimeSeriesUtil.toString(values[j]));
                 assertEquals(message, referenceDistance, distance, 10e-5);
+                System.out.println("Correct");
             }
         }
+    }
+
+    /**
+     * Test the correctnes of the reference implementation on the test cases used in
+     * the unit tests for the own implementation.
+     */
+    @Test
+    public void testReferenceCorrectness() {
+        double[] timeSeries5 = { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        double[] timeSeries6 = { 1, 2, 3, 4, 5, 6, 7, 8, 12 };
+        double[] timeSeries7 = { 0, 3, 2, 5, 4, 7, 6, 9, 8 };
+
+        double nu = 0.001;
+        double lambda = 1;
+
+        TimeWarpEditDistance timeWarpEditDistance = new TimeWarpEditDistance(lambda, nu,
+                ScalarDistanceUtil.getSquaredDistance());
+
+        TWEDistance referenceTimeWarpEditDistance = new TWEDistance(lambda, nu);
+        double refDistance = referenceTimeWarpEditDistance.distance(timeSeries5, timeSeries6, Double.MAX_VALUE);
+        double ownDistance = timeWarpEditDistance.distance(timeSeries5, timeSeries6);
+        assertEquals(ownDistance, refDistance, 0);
+
+        double refDistance2 = referenceTimeWarpEditDistance.distance(timeSeries5, timeSeries7, Double.MAX_VALUE);
+        double ownDistance2 = timeWarpEditDistance.distance(timeSeries5, timeSeries7);
+        assertEquals(ownDistance2, refDistance2, 0);
     }
 
     /**
@@ -102,23 +114,26 @@ public class DynamicTimeWarpingRefTest {
         double[][] values = dataset.getValues(0);
         int numberOfTestInstances = 100;
 
+        double nu = 0.001;
+        double lambda = 1;
+
         // Measure time for reference implementation.
         double cutoff = Double.MAX_VALUE;
         double refStart = System.currentTimeMillis();
-        BasicDTW referenceDynamicTimeWarping = new BasicDTW();
+        TWEDistance referenceTimeWarpEditDistance = new TWEDistance(lambda, nu);
         for (int i = 0; i < numberOfTestInstances; i++) {
             for (int j = i; j < values.length; j++) {
-                referenceDynamicTimeWarping.distance(values[i], values[j], cutoff);
+                referenceTimeWarpEditDistance.distance(values[i], values[j], cutoff);
             }
         }
         double refEnd = System.currentTimeMillis();
 
         // Measure time for own implementation.
         double ownStart = System.currentTimeMillis();
-        DynamicTimeWarping dynamicTimeWarping = new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance());
+        TimeWarpEditDistance timeWarpEditDistance = new TimeWarpEditDistance(lambda, nu);
         for (int i = 0; i < numberOfTestInstances; i++) {
             for (int j = i; j < values.length; j++) {
-                dynamicTimeWarping.distance(values[i], values[j]);
+                timeWarpEditDistance.distance(values[i], values[j]);
             }
         }
         double ownEnd = System.currentTimeMillis();
@@ -130,5 +145,4 @@ public class DynamicTimeWarpingRefTest {
                 ownTime);
         assertTrue(message, ownTime <= refTime);
     }
-
 }

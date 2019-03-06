@@ -29,7 +29,7 @@ public class ComplexityInvariantDistanceTest {
     }
 
     @Test
-    public void testDistanceCalculation() throws IllegalArgumentException {
+    public void testDistanceCalculation() {
         double distance = cid.distance(timeSeries1, timeSeries2);
         double expectation = ed.distance(timeSeries1, timeSeries2) * (15 / 5);
         String message = "Calculated %f, but %f was expected";

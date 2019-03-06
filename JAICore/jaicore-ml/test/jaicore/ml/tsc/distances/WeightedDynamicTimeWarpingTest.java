@@ -1,10 +1,9 @@
 package jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.Test;
 
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
+import jaicore.ml.tsc.util.ScalarDistanceUtil;
 
 /**
  * WeightedDynamicTimeWarpingTest
@@ -17,18 +16,15 @@ public class WeightedDynamicTimeWarpingTest {
     double[] timeSeries4 = { 0.10, 0.10, 0.10, 0.10, 0.10 };
 
     @Test
-    public void testDistanceCalculation() throws TimeSeriesLengthException {
-        WeightedDynamicTimeWarping wdtw = new WeightedDynamicTimeWarping(1, 1, 1);
+    public void testDistanceCalculation() {
+        int p = 1;
+        double g = 1;
+        double Wmax = 1;
+        IScalarDistance d = ScalarDistanceUtil.getSquaredDistance();
+        WeightedDynamicTimeWarping wdtw = new WeightedDynamicTimeWarping(p, g, Wmax, d);
         double distance = wdtw.distance(timeSeries1, timeSeries2);
         double expectation = 0;
         assertEquals(expectation, distance, 1.0E-5);
     }
 
-    @Test
-    public void testThrowsErrorWhenTimeSeriesHaveDifferentLength() {
-        WeightedDynamicTimeWarping wdtw = new WeightedDynamicTimeWarping(1, 1, 1);
-        assertThrows(TimeSeriesLengthException.class, () -> {
-            wdtw.distance(timeSeries1, timeSeries4);
-        });
-    }
 }
