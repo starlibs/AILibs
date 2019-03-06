@@ -10,14 +10,20 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.TimeOut;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.exception.EvaluationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
+import jaicore.ml.tsc.classifier.trees.TimeSeriesForestClassifier;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
+import jaicore.ml.tsc.quality_measures.FStat;
 import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
+import timeseriesweka.classifiers.LearnShapelets;
+import timeseriesweka.classifiers.ShapeletTransformClassifier;
+import timeseriesweka.classifiers.TSF;
 
 /**
  * Base class for simplified time series classifier comparisons between own
@@ -91,7 +97,8 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 		TimeSeriesDataset test = testPair.getX();
 
 		// TODO: Deal with it and move it to the right place
-		if (testPair.getY() != null && trainPair.getY() != null && !testPair.getY().getClassValues().equals(trainPair.getY().getClassValues())) {
+		if (trainPair.getY() != null && testPair.getY() != null
+				&& !testPair.getY().getClassValues().equals(trainPair.getY().getClassValues())) {
 			LOGGER.warn("The class mapper of the training data differs from the test class mapper.");
 		}
 
@@ -231,7 +238,7 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 			}
 		} else if (predictions.get(0) instanceof String) {
 			for (int i = 0; i < totalPreds; i++) {
-				String prediction = (String) predictions.get(i);
+				// String prediction = (String) predictions.get(i);
 				// TODO: Add mapper
 				throw new UnsupportedOperationException("Not implemented yet.");
 				// if (prediction.equals(test.getTargets()[i]))
@@ -274,5 +281,74 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 			throw new TimeSeriesLoadingException("Could not load training dataset.", e);
 		}
 		return result;
+	}
+
+	/**
+	 * Function creating pairs of own and the corresponding reference classifiers
+	 * using default parameters.
+	 * 
+	 * @param algorithm
+	 *            Name of the algorithm / model
+	 * @param seed
+	 *            Seed used for randomized operations
+	 * @param timeout
+	 *            Timeout used within the training
+	 * @return Returns a pair of created and parameterized classifiers
+	 */
+	public static Pair<ASimplifiedTSClassifier<Integer>, Object> createClassifierPairsWithDefaultParameter(
+			final String algorithm, final int seed, final TimeOut timeout) {
+		ASimplifiedTSClassifier<Integer> ownClassifier = null;
+		Object refClassifier = null;
+
+		switch (algorithm) {
+		case "ShapeletTransform":
+			int k = 205;
+			final int minShapeletLength = 3;
+			final int maxShapeletLength = 23;
+
+			refClassifier = new ShapeletTransformClassifier();
+			((ShapeletTransformClassifier) refClassifier).setSeed(seed);
+			((ShapeletTransformClassifier) refClassifier).setNumberOfShapelets(k);
+
+			ownClassifier = new ShapeletTransformTSClassifier(k, new FStat(), (int) seed, false, minShapeletLength,
+					maxShapeletLength, true, timeout);
+			break;
+
+		case "LearnShapelets":
+			// Initialize classifiers with values selected by reference classifier by
+			// default
+			int K = 8;
+			double learningRate = 0.1;
+			double regularization = 0.01;
+			int scaleR = 3;
+			double minShapeLength = 0.2;
+			int maxIter = 600;
+
+			ownClassifier = new LearnShapeletsClassifier(K, learningRate, regularization, scaleR, minShapeLength,
+					maxIter, (int) seed);
+
+			refClassifier = new LearnShapelets();
+			((LearnShapelets) refClassifier).setSeed(seed);
+			((LearnShapelets) refClassifier).fixParameters();
+			break;
+		case "TimeSeriesForest":
+			int numTrees = 500;
+			// Ref classifier uses no depth limit
+			int maxDepth = 1000;
+			int numCPUs = 1;
+
+			ownClassifier = new TimeSeriesForestClassifier(numTrees, maxDepth, (int) seed, false, numCPUs, timeout);
+
+			refClassifier = new TSF((int) seed);
+			((TSF) refClassifier).setNumTrees(numTrees);
+			break;
+		default:
+			String errorString = String.format("Please specify a valid algorithm. An invalid value was given: %s",
+					algorithm);
+			LOGGER.error(errorString);
+			throw new IllegalArgumentException(errorString);
+		}
+
+		return new Pair<ASimplifiedTSClassifier<Integer>, Object>(ownClassifier, refClassifier);
 	}
 }

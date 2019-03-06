@@ -220,4 +220,51 @@ public class TimeSeriesDataset {
         return !train;
     }
 
+	/**
+	 * Getter for {@link TimeSeriesDataset#valueMatrices}.
+	 * 
+	 * @return the valueMatrices
+	 */
+	public List<double[][]> getValueMatrices() {
+		return valueMatrices;
+	}
+
+	/**
+	 * Getter for {@link TimeSeriesDataset#timestampMatrices}.
+	 * 
+	 * @return the timestampMatrices
+	 */
+	public List<double[][]> getTimestampMatrices() {
+		return timestampMatrices;
+	}
+
+	/**
+	 * Setter for {@link TimeSeriesDataset#valueMatrices}.
+	 * 
+	 * @param valueMatrices
+	 *            the valueMatrices to set
+	 */
+	public void setValueMatrices(List<double[][]> valueMatrices) {
+		this.valueMatrices = valueMatrices;
+	}
+
+	/**
+	 * Setter for {@link TimeSeriesDataset#timestampMatrices}.
+	 * 
+	 * @param timestampMatrices
+	 *            the timestampMatrices to set
+	 */
+	public void setTimestampMatrices(List<double[][]> timestampMatrices) {
+		this.timestampMatrices = timestampMatrices;
+	}
+
+	/**
+	 * Setter for {@link TimeSeriesDataset#targets}.
+	 * 
+	 * @param targets
+	 *            the targets to set
+	 */
+	public void setTargets(int[] targets) {
+		this.targets = targets;
+	}
 }
