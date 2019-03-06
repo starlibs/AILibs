@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.collections.BidiMap;
@@ -180,10 +181,10 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		logger.debug("Initialized DyadRankingBasedNodeEvaluator with evalNum: {} and completionNum: {}",
 				randomlyCompletedPaths, evaluatedPaths);
 
-//		this.characterizer = new WEKAPipelineCharacterizer(loader.getParamConfigs());
-//		characterizer.buildFromFile();
+		// this.characterizer = new WEKAPipelineCharacterizer(loader.getParamConfigs());
+		// characterizer.buildFromFile();
 		this.characterizer = new ManualPatternMiner(loader.getComponents());
-		
+
 		this.landmarkers = config.getLandmarkers();
 		this.landmarkerSampleSize = config.getLandmarkerSampleSize();
 		this.useLandmarkers = config.useLandmarkers();
@@ -192,7 +193,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		try {
 			this.dyadRanker.loadModelFromFile(Paths.get(config.getPlNetPath()).toString());
 		} catch (IOException e) {
-			logger.error("Could load model for plnet");
+			logger.error("Could not load model for plnet in {}", Paths.get(config.getPlNetPath()).toString());
 		}
 
 	}
@@ -233,6 +234,10 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 		// order them according to dyad ranking
 		List<ComponentInstance> allRankedPaths = getDyadRankedPaths(randomPaths);
+
+		// random search failed to find anything here
+		if (allRankedPaths.isEmpty())
+			return(V) new Double(9000.0d);
 		// get the top k paths
 		List<ComponentInstance> topKRankedPaths = allRankedPaths.subList(0,
 				Math.min(evaluatedPaths, allRankedPaths.size()));
@@ -249,8 +254,13 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			return null;
 		}
 		Duration evaluationTime = Duration.between(startOfEvaluation, Instant.now());
-		logger.info("Evaluation of node {} took {}ms", node.getPoint(), evaluationTime.toMillis());
-		return getBestSolution(allEvaluatedPaths);
+		logger.info("Evaluation took {}ms", evaluationTime.toMillis());
+		V bestSoultion = getBestSolution(allEvaluatedPaths);
+		logger.info("Best solution is {}, {}", bestSoultion,
+				allEvaluatedPaths.stream().map(Pair::getY).collect(Collectors.toList()));
+		if (bestSoultion == null)
+			return(V) new Double(9000.0d);
+		return bestSoultion;
 	}
 
 	/**
@@ -280,8 +290,6 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 				}
 				completedPath = new ArrayList<>(node.externalPath());
 
-				logger.info("Starting search for next solution ...");
-
 				SearchGraphPath<T, String> solutionPathFromN = null;
 				try {
 					solutionPathFromN = randomPathCompleter.nextSolutionUnderNode(node.getPoint());
@@ -293,13 +301,14 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 					logger.info("No completion was found for path {}.", node.externalPath());
 					break;
 				}
-				logger.info("Found solution {}", solutionPathFromN);
+
 				pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
 				pathCompletion.remove(0);
 				completedPath.addAll(pathCompletion);
 			}
 			completedPaths.add(completedPath);
 		}
+		logger.info("Returning {} paths", completedPaths.size());
 		return completedPaths;
 	}
 
@@ -401,28 +410,42 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		List<Pair<ComponentInstance, V>> evaluatedSolutions = new ArrayList<>();
 		// schedule the tasks
 		for (ComponentInstance node : topKRankedPaths) {
-			try {
-				completionService.submit(() -> {
+
+			completionService.submit(() -> {
+				try {
 					Instant startTime = Instant.now();
 					V score = pipelineEvaluator.evaluate(node);
 					Duration evalTime = Duration.between(startTime, Instant.now());
 					postSolution(node, evalTime.toMillis(), score);
 					return new Pair<>(node, score);
-				});
-			} catch (Exception e) {
-				logger.error("Couldn't evaluate {}", node);
-			}
+				} catch (Exception e) {
+					logger.error("Couldn't evaluate {}", node);
+					return null;
+				}
+			});
+
 		}
 		// collect the results but not wait longer than 5 seconds for a result to appear
 		for (int i = 0; i < topKRankedPaths.size(); i++) {
-			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.take();
+			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(), i,
+					topKRankedPaths.size());
+			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(10, TimeUnit.SECONDS);
+			if (evaluatedPipe == null) {
+				return evaluatedSolutions;
+			}
+			logger.info("Got a service...");
 			try {
-				Pair<ComponentInstance, V> solution = evaluatedPipe.get(5, TimeUnit.SECONDS);
 
-				evaluatedSolutions.add(solution);
+				Pair<ComponentInstance, V> solution = evaluatedPipe.get(10, TimeUnit.SECONDS);
+				if (solution != null) {
+					evaluatedSolutions.add(solution);
+				}
+
 			} catch (Exception e) {
+				logger.info("Got exception while evaluating {}", e.getMessage());
 				evaluatedPipe.cancel(true);
 			}
+
 		}
 		return evaluatedSolutions;
 	}
@@ -436,7 +459,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 * @return
 	 */
 	private V getBestSolution(List<Pair<ComponentInstance, V>> allEvaluatedPaths) {
-		return allEvaluatedPaths.stream().map(Pair::getY).min(V::compareTo).orElseThrow(NoSuchElementException::new);
+		return allEvaluatedPaths.stream().map(Pair::getY).min(V::compareTo).orElse(null);
 	}
 
 	@SuppressWarnings("unchecked")

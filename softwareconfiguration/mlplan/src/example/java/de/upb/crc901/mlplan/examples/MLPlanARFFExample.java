@@ -8,9 +8,11 @@ import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.dyadranking.DyadRankingBasedNodeEvaluator;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import hasco.serialization.ComponentLoader;
 import jaicore.basic.TimeOut;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
@@ -39,17 +41,21 @@ public class MLPlanARFFExample {
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
 		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration();
-		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withTimeoutForNodeEvaluation(new TimeOut(60, TimeUnit.SECONDS));
+		
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withPreferredNodeEvaluator(new DyadRankingBasedNodeEvaluator<>(
+				new ComponentLoader(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"))));
+
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0.3f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(6);
+		mlplan.setNumCPUs(1);
 
-		new JFXPanel();
-		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
-		Platform.runLater(window);
+	//	new JFXPanel();
+	//	AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+	//	Platform.runLater(window);
 
 		try {
 			long start = System.currentTimeMillis();

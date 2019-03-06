@@ -74,13 +74,21 @@ public class ManualPatternMiner implements IPipelineCharacterizer{
 			int parameterIndex = 0;
 			parameterIndex = parameterIndices.get(parameterName);
 			if (param.isNumeric()) {
+				if (cI.getParameterValue(param) != null) {
 				double value = Double.parseDouble(cI.getParameterValue(param));
 				patterns.setValue(parameterIndex, value);
+				} else {
+					double value = (double) param.getDefaultValue();
+					patterns.setValue(parameterIndex, value);
+				}
 			} else if (param.isCategorical()) {
 				// the parameters are one-hot-encoded, where the parameterIndex specifies the
 				// one hot index for the first categorical parameter, parameterIndex+1 is the
 				// one-hot index for the second parameter etc.
 				String parameterValue = cI.getParameterValue(param);
+				if (parameterValue == null) {
+					parameterValue = (String) param.getDefaultValue();
+				}
 				CategoricalParameterDomain domain = (CategoricalParameterDomain) param.getDefaultDomain();
 				for (int i = 0; i < domain.getValues().length; i++) {
 					if (domain.getValues()[i].equals(parameterValue)) {
