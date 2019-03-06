@@ -16,13 +16,25 @@ import jaicore.ml.learningcurve.extrapolation.client.ExtrapolationServiceClient;
 public class InversePowerLawExtrapolationMethod implements LearningCurveExtrapolationMethod {
 
 	// We assume the service to be running locally
-	private static final String SERVICE_URL = "http://localhost:8081/jaicore/web/api/v1/ipl/modelparams";
+	private static final String ENDPOINT = "/jaicore/web/api/v1/ipl/modelparams";
+
+	private static final String DEFAULT_HOST = "localhost";
+
+	private String serviceUrl;
+
+	public InversePowerLawExtrapolationMethod() {
+		this.serviceUrl = "http://" + DEFAULT_HOST + ENDPOINT;
+	}
+
+	public InversePowerLawExtrapolationMethod(String serviceHost) {
+		this.serviceUrl = "http://" + serviceHost + ENDPOINT;
+	}
 
 	@Override
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
 			throws InvalidAnchorPointsException {
 		// Request model parameters to create learning curve
-		ExtrapolationServiceClient<InversePowerLawConfiguration> client = new ExtrapolationServiceClient<>(SERVICE_URL,
+		ExtrapolationServiceClient<InversePowerLawConfiguration> client = new ExtrapolationServiceClient<>(serviceUrl,
 				InversePowerLawConfiguration.class);
 		InversePowerLawConfiguration configuration = client.getConfigForAnchorPoints(xValues, yValues);
 		configuration.setA(Math.max(0.00000000001, Math.min(configuration.getA(), 0.99999999999)));
