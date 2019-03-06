@@ -240,7 +240,7 @@ public class MLPlanBuilder {
 	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, final AlgorithmicProblemReduction transformer) {
 		this.hascoFactory.setSearchFactory(searchFactory);
 		this.hascoFactory.setSearchProblemTransformer(transformer);
-		return this;
+		return this; 
 	}
 
 	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
