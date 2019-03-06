@@ -17,14 +17,28 @@ import jaicore.ml.learningcurve.extrapolation.client.ExtrapolationServiceClient;
 public class LinearCombinationExtrapolationMethod implements LearningCurveExtrapolationMethod {
 
 	// We assume the service to be running locally
-	private static final String SERVICE_URL = "http://localhost:8080/jaicore/web/api/v1/mcmc/modelparams";
+	private static final String ENDPOINT = "/jaicore/web/api/v1/mcmc/modelparams";
+
+	private static final String DEFAULT_HOST = "localhost";
+
+	private static final String DEFAULT_PORT = "8080";
+
+	private String serviceUrl;
+
+	public LinearCombinationExtrapolationMethod() {
+		this.serviceUrl = "http://" + DEFAULT_HOST + ":" + DEFAULT_PORT + ENDPOINT;
+	}
+
+	public LinearCombinationExtrapolationMethod(String serviceHost, String port) {
+		this.serviceUrl = "http://" + serviceHost + ":" + port + ENDPOINT;
+	}
 
 	@Override
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
 			throws InvalidAnchorPointsException {
 		// Request model parameters to create learning curve
 		ExtrapolationServiceClient<LinearCombinationLearningCurveConfiguration> client = new ExtrapolationServiceClient<>(
-				SERVICE_URL, LinearCombinationLearningCurveConfiguration.class);
+				serviceUrl, LinearCombinationLearningCurveConfiguration.class);
 		LinearCombinationLearningCurveConfiguration configuration = client.getConfigForAnchorPoints(xValues, yValues);
 		return new LinearCombinationLearningCurve(configuration, dataSetSize);
 	}
