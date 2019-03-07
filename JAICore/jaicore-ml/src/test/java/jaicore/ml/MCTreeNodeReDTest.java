@@ -89,7 +89,6 @@ public class MCTreeNodeReDTest {
 				double maxCorrectCls = pctCorrectClassifier.stream().mapToDouble(x -> x).max().getAsDouble();
 
 				System.out.println((maxCorrectCls - maxCorrectDec) + " (Decomp: " + (100 - maxCorrectDec) + "/Classifier: " + (100 - maxCorrectCls) + ")");
-
 			}
 
 		}
