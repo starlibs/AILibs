@@ -27,7 +27,7 @@ public interface IFilter {
 	/** the function computes the needed information for the transform function.
 	 * @param input the dataset that is to transform 
 	 */
-	public void fit(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception;
+	public void fit(TimeSeriesDataset input) throws IllegalArgumentException;
 	
 	
 	/** The function only fits a single instance of the dataset 
@@ -49,7 +49,7 @@ public interface IFilter {
 	 * @param input the to fit and transform instance
 	 * @return the transformed instance
 	 */
-	public double[] fitTransformInstance(double[] input)throws IllegalArgumentException, NoneFittedFilterExeception;
+	public double[] fitTransform(double[] input)throws IllegalArgumentException, NoneFittedFilterExeception;
 	
 	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception;
 }
