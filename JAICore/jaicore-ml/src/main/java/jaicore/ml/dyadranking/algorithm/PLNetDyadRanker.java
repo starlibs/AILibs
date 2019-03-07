@@ -497,6 +497,14 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * @return The pair of {@link Dyad}s for which the model is least certain.
 	 */
 	public DyadRankingInstance getPairWithLeastCertainty(IDyadRankingInstance drInstance) {
+
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+		
 		if (drInstance.length() < 2) {
 			throw new IllegalArgumentException("The query instance must contain at least 2 dyads!");
 		}
@@ -522,6 +530,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty + 1).getLeft());
 		DyadRankingInstance leastCertainPair = new DyadRankingInstance(leastCertainDyads);
+		System.out.println("Pair: " + leastCertainPair);
+		System.out.println("Certainty: " + currentlyLowestCertainty);
+		System.out.println();
 		return leastCertainPair;
 	}
 
@@ -559,6 +570,66 @@ public class PLNetDyadRanker extends APLDyadRanker
 		return currentProbability;
 	}
 
+	public double getLogProbabilityOfTopRanking(IDyadRankingInstance drInstance) {
+
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+		// sort the instance in descending order of utility values
+		// TODO use top k selection
+		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
+		// compute the probability of this ranking according to the Plackett-Luce model
+		double currentProbability = 0;
+		for (int i = 0; i < dyadUtilityPairs.size(); i++) {
+			double sumOfRemainingSkills = 0;
+			for (int j = i; j < dyadUtilityPairs.size(); j++) {
+				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
+			}
+			currentProbability += (dyadUtilityPairs.get(i).getRight() - Math.log(sumOfRemainingSkills));
+		}
+		return currentProbability;
+	}
+
+	public double getLogProbabilityOfTopKRanking(IDyadRankingInstance drInstance, int k) {
+
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+		// sort the instance in descending order of utility values
+		// TODO use top k selection
+		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
+		// compute the probability of this ranking according to the Plackett-Luce model
+		double currentProbability = 0;
+		for (int i = 0; i < Integer.min(k, dyadUtilityPairs.size()); i++) {
+			double sumOfRemainingSkills = 0;
+			for (int j = i; j < Integer.min(k, dyadUtilityPairs.size()); j++) {
+				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
+			}
+			currentProbability += (dyadUtilityPairs.get(i).getRight() - Math.log(sumOfRemainingSkills));
+		}
+		return currentProbability;
+	}
+
 	public double getProbabilityRanking(IDyadRankingInstance drInstance) {
 
 		if (this.plNet == null) {
@@ -583,6 +654,41 @@ public class PLNetDyadRanker extends APLDyadRanker
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
 			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+		}
+		return currentProbability;
+	}
+
+	/**
+	 * Computes the logarithmic probability for a particular ranking according to
+	 * the log Placket-Luce model.
+	 * 
+	 * @param drInstance
+	 * @return Logarithmic probability of the given ranking.
+	 */
+	public double getLogProbabilityRanking(IDyadRankingInstance drInstance) {
+
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray plNetInput = dyadToVector(dyad);
+			double plNetOutput = plNet.output(plNetInput).getDouble(0);
+			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
+		}
+
+		// compute the probability of this ranking according to the Plackett-Luce model
+		double currentProbability = 0;
+		for (int i = 0; i < dyadUtilityPairs.size(); i++) {
+			double sumOfRemainingSkills = 0;
+			for (int j = i; j < dyadUtilityPairs.size(); j++) {
+				sumOfRemainingSkills += dyadUtilityPairs.get(j).getRight();
+			}
+			currentProbability += (dyadUtilityPairs.get(i).getRight() - sumOfRemainingSkills);
 		}
 		return currentProbability;
 	}

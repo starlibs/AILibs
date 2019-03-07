@@ -2,9 +2,9 @@ package jaicore.ml.dyadranking.activelearning;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.nd4j.linalg.primitives.Pair;
@@ -47,13 +47,18 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			Set<IInstance> minibatch = new HashSet<IInstance>();
 			List<Pair<Vector, Double>> dStarWithProbability = new ArrayList<Pair<Vector, Double>>(maxBatchSize);
 			for (Vector instanceFeatures : poolProvider.getInstanceFeatures()) {
-				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instanceFeatures));
-				IDyadRankingInstance queryRanking = new DyadRankingInstance(dyads);
-				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, lengthOfTopRankingToConsider);
-				dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, prob));
+//				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instanceFeatures));
+//				IDyadRankingInstance queryRanking = new DyadRankingInstance(dyads);
+////				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, lengthOfTopRankingToConsider);
+//				double prob = ranker.getLogProbabilityOfTopRanking(queryRanking);
+////				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, 5);
+//				dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, prob));
+				dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, 54d));
 			}
-
-			Collections.sort(dStarWithProbability, Comparator.comparing(p -> -p.getRight()));
+			
+			
+			Collections.shuffle(dStarWithProbability);
+//			Collections.sort(dStarWithProbability, Comparator.comparing(p -> (-p.getRight())));
 
 			int numberOfOldInstances = Integer.min((int) (ratioOfOldInstancesForMinibatch * maxBatchSize),
 					seenInstances.size());
@@ -61,6 +66,8 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 			for (int batchIndex = 0; batchIndex < numberOfNewInstances; batchIndex++) {
 				Vector curDStar = dStarWithProbability.get(batchIndex).getFirst();
+				System.out.println("Choose " + batchIndex + ": " + dStarWithProbability.get(batchIndex).getLeft());
+				System.out.println("with log probability: " + dStarWithProbability.get(batchIndex).getRight());
 				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(curDStar));
 				if (dyads.size() < 2)
 					break;
@@ -73,9 +80,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 				// get the alternatives pair for which the PLNet is most uncertain
 				DyadRankingInstance queryPair = ranker.getPairWithLeastCertainty(queryRanking);
-
-//			System.out.println("Query pair: " + queryPair.getDyadAtPosition(0).getAlternative() + " "
-//					+ queryPair.getDyadAtPosition(1).getAlternative());
 
 				// convert to SparseDyadRankingInstance
 				List<Vector> alternativePair = new ArrayList<Vector>(queryPair.length());
