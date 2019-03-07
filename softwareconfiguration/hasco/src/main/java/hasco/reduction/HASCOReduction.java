@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,8 +49,10 @@ import jaicore.search.probleminputs.GraphSearchInput;
  * @author fmohr
  *
  */
-public class HASCOReduction<V extends Comparable<V>> implements
-AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
+public class HASCOReduction<V extends Comparable<V>>
+		implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
+
+	private static final boolean CONFIGURE_PARAMS = true; // this could be determined automatically later
 
 	// component selection
 	private static final String RESOLVE_COMPONENT_IFACE_PREFIX = "1_tResolve";
@@ -61,7 +62,6 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 	private static final String REFINE_PARAMETERS_PREFIX = "2_tRefineParamsOf";
 	private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
 	private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
-	// private static final String REDEF_CLOSED_PREFIX = "2_satisfy";
 	private static final String REDEF_VALUE_PREFIX = "2_redefValue";
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> originalProblem;
@@ -69,7 +69,6 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 	/* working variables */
 	private Collection<Component> components;
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
-	private final boolean configureParams = true; // this could be determined automatically later
 
 	public Monom getInitState() {
 		if (this.originalProblem == null) {
@@ -175,39 +174,39 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 				VariableParam inputParam = new VariableParam("c1");
 				params.add(inputParam);
 				params.add(new VariableParam("c2"));
-				LinkedHashMap<String, String> requiredInterfaces = c.getRequiredInterfaces();
+				Map<String, String> requiredInterfaces = c.getRequiredInterfaces();
 				List<Literal> network = new ArrayList<>();
 
-				String refinementArguments = "";
+				StringBuilder refinementArgumentsSB = new StringBuilder();
 				int j = 0;
-				if (this.configureParams) {
+				if (CONFIGURE_PARAMS) {
 					for (j = 1; j <= c.getParameters().size(); j++) {
 						String paramIdentifier = "p" + j;
-						refinementArguments += ", " + paramIdentifier;
+						refinementArgumentsSB.append(", " + paramIdentifier);
 					}
 				}
 
 				for (int k = 1; k <= requiredInterfaces.entrySet().size(); k++) {
-					refinementArguments += ",sc" + k;
+					refinementArgumentsSB.append(",sc" + k);
 				}
 
 				int sc = 0;
-				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(c1,c2" + refinementArguments + ")"));
+				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"));
 				for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
 					String paramName = "sc" + (++sc);
 					params.add(new VariableParam(paramName));
 					network.add(new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + requiredInterface.getValue() + "(c2," + paramName + ")"));
 				}
 
-				refinementArguments = "";
-				if (this.configureParams) {
+				refinementArgumentsSB = new StringBuilder();
+				if (CONFIGURE_PARAMS) {
 					for (j = 1; j <= c.getParameters().size(); j++) {
 						String paramIdentifier = "p" + j;
 						params.add(new VariableParam(paramIdentifier));
-						refinementArguments += ", " + paramIdentifier;
+						refinementArgumentsSB.append(", " + paramIdentifier);
 					}
 				}
-				network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
+				network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"));
 				List<VariableParam> outputs = new ArrayList<>(params);
 				outputs.remove(inputParam);
 				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom("component(c1)"), new TaskNetwork(network), false, outputs, new Monom()));
@@ -217,20 +216,19 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 			List<VariableParam> params = new ArrayList<>();
 			params.add(new VariableParam("c1"));
 			List<Literal> initNetwork = new ArrayList<>();
-			String refinementArguments = "";
+			StringBuilder refinementArgumentsSB = new StringBuilder();
 			int j = 0;
 
 			/*
 			 * go, in an ordering that is consistent with the pre-order on the params
 			 * imposed by the dependencies, over the set of params
 			 */
-			if (this.configureParams) {
+			if (CONFIGURE_PARAMS) {
 				for (Parameter p : c.getParameters()) {
 					String paramName = "p" + (++j);
-					refinementArguments += ", " + paramName;
+					refinementArgumentsSB.append(", " + paramName);
 					params.add(new VariableParam(paramName));
 					initNetwork.add(new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(c2, " + paramName + ")"));
-					// if (p instanceof NumericParameter) {
 					methods.add(new OCIPMethod("ignoreParamRefinementFor" + p.getName() + "Of" + c.getName(), "object, container, curval", new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
 							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval) & overwritten(container)"), new TaskNetwork(DECLARE_CLOSED_PREFIX + "(container)"), false,
 							"", new Monom("notRefinable('" + c.getName() + "', object, '" + p.getName() + "', container, curval)")));
@@ -238,19 +236,14 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 					methods.add(new OCIPMethod("refineParam" + p.getName() + "Of" + c.getName(), "object, container, curval, newval", new Literal(REFINE_PARAMETER_PREFIX + p.getName() + "Of" + c.getName() + "(object,container)"),
 							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"), new TaskNetwork(REDEF_VALUE_PREFIX + "(container,curval,newval)"), false, "",
 							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
-					// else
-					// throw new IllegalArgumentException(
-					// "Parameter " + p.getName() + " of type \"" + p.getClass() + "\" in component
-					// \"" + c.getName() +
-					// "\" is currently not supported.");
 				}
-				initNetwork.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"));
+				initNetwork.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"));
 				params = new ArrayList<>(params);
 				params.add(1, new VariableParam("c2"));
-				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"), new Monom("component(c1)"), new TaskNetwork(initNetwork), false,
-						new ArrayList<>(), new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
-				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArguments + ")"), new Monom("component(c1)"), new TaskNetwork(), false,
-						new ArrayList<>(), new Monom("refinementCompleted('" + c.getName() + "', c2)")));
+				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"), new Monom("component(c1)"),
+						new TaskNetwork(initNetwork), false, new ArrayList<>(), new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
+				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"), new Monom("component(c1)"),
+						new TaskNetwork(), false, new ArrayList<>(), new Monom("refinementCompleted('" + c.getName() + "', c2)")));
 			}
 		}
 		return new CEOCIPSTNPlanningDomain(operations, methods);
@@ -274,8 +267,7 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 	 * @param plannerFactory
 	 * @return
 	 */
-	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(
-			final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
+	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
 		return transformer.encodeProblem(this.getPlanningProblem()).getGraphGenerator();
 	}
 
@@ -294,7 +286,7 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 		IObjectEvaluator<Plan, V> planEvaluator = new IObjectEvaluator<Plan, V>() {
 
 			@Override
-			public V evaluate(final Plan plan) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException  {
+			public V evaluate(final Plan plan) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 				ComponentInstance solution = HASCOReduction.this.decodeSolution(plan);
 				if (solution == null) {
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
@@ -310,13 +302,12 @@ AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>,
 			}
 
 		};
-		CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> costSensitiveProblem = new CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>(planningProblem, planEvaluator);
-		return costSensitiveProblem;
+		return new CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>(planningProblem, planEvaluator);
 	}
 
 	@Override
 	public ComponentInstance decodeSolution(final EvaluatedPlan<V> solution) {
-		return this.decodeSolution((Plan)solution);
+		return this.decodeSolution((Plan) solution);
 	}
 
 	public ComponentInstance decodeSolution(final Plan plan) {

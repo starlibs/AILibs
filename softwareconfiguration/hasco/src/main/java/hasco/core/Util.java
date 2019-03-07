@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -267,7 +266,7 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			builder.append(curInstance.getComponent().getName());
-			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
 			// This set should be ordered
 			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
@@ -292,7 +291,7 @@ public class Util {
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance.getComponent());
-			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
 			// This set should be ordered
 			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
@@ -499,7 +498,7 @@ public class Util {
 		for (Interval proposedRefinement : proposedRefinements) {
 			double epsilon = 1E-7;
 			assert proposedRefinement.getInf() + epsilon >= inf && proposedRefinement.getSup() <= sup + epsilon : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-			+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
+					+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
 			if (proposedRefinement.equals(interval)) {
 				throw new IllegalStateException("No real refinement! Intervals are identical.");
 			}
