@@ -133,8 +133,8 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 				}
 
 				// case 4:
-				boolean neitherIOrJAreInPredictedTopK = !justIIsInPredictedTopK && !justJIsInPredictedTopK;
-				boolean neitherIOrJAreInActualTopK = !justIIsInActualTopK && !justJIsInActualTopK;
+				boolean neitherIOrJAreInPredictedTopK = predictedI >= k && predictedJ >= k;
+				boolean neitherIOrJAreInActualTopK = actualI >= k && actualJ >= k;
 
 				if (iAndJAreBothInActualTopK && neitherIOrJAreInPredictedTopK) {
 					penalty = p;

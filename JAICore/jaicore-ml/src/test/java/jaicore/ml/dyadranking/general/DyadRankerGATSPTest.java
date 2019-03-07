@@ -33,6 +33,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
+import jaicore.ml.dyadranking.loss.KendallsTauOfTopK;
 import jaicore.ml.dyadranking.util.DyadStandardScaler;
 
 /**
@@ -93,18 +94,26 @@ public class DyadRankerGATSPTest {
 		scaler.fit(trainData);
 		scaler.transformInstances(trainData);
 		scaler.transformInstances(testData);
-		
-		try {
 
-			// train the ranker
-			ranker.train(trainData);
-			double avgKendallTau = 0.0d;
-			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
-			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-			assertTrue(avgKendallTau > 0.5d);
-		} catch (TrainingException | PredictionException e) {
-			e.printStackTrace();
-		}
+		KendallsTauOfTopK ktotk = new KendallsTauOfTopK(15, 0.75);
+		System.out.println(ktotk.loss(trainData.get(0), trainData.get(0)));
+		
+//		try {
+//
+//			// train the ranker
+//			ranker.train(trainData);
+//			double avgKendallTau = 0.0d;
+//			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
+//			List<IDyadRankingInstance> predictions = ranker.predict(testData);
+//			KendallsTauOfTopK ktotk = new KendallsTauOfTopK(15, Math.PI);
+//			for(int i = 0; i < testData.size(); i++) {
+//				System.out.println(ktotk.loss(testData.get(i), testData.get(i)));
+//			}
+//			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
+//			assertTrue(avgKendallTau > 0.5d);
+//		} catch (TrainingException | PredictionException e) {
+//			e.printStackTrace();
+//		}
 
 	}
 
