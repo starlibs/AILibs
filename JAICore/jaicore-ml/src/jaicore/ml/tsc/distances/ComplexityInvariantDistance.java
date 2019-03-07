@@ -1,14 +1,20 @@
 package jaicore.ml.tsc.distances;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
-
 import jaicore.ml.tsc.complexity.ITimeSeriesComplexity;
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
 /**
- * ComplexityInvariantDistance
+ * Implementation of the Complexity Invariant Distance (CID) measure as
+ * published in "A Complexity-Invariant Distance Measure for Time Series" by
+ * Gustavo E.A.P.A. Batista, Xiaoyue Wang and Eamonn J. Keogh.
+ * 
+ * The authors address the <i>complexity</i> invariant of time series distance
+ * measures. That is, that time series with higher complexity tend to be further
+ * apart under current distance measures than pairs of simple objects.
+ * 
+ * Given a complexity measure <code>c</code> and a distance measure
+ * <code>d</code>, the Complexity Invariant Distance for the two time series
+ * <code>A</code> and <code>B</code> is:
+ * <code>d(A, B) * (max(c(A), c(B)) / min(c(A), c(B)))</code>.
  */
 public class ComplexityInvariantDistance implements ITimeSeriesDistance {
 
@@ -25,16 +31,18 @@ public class ComplexityInvariantDistance implements ITimeSeriesDistance {
      * @param complexity The complexity measure.
      */
     ComplexityInvariantDistance(ITimeSeriesDistance distanceMeasure, ITimeSeriesComplexity complexityMeasure) {
+        // Parameter checks.
+        if (distanceMeasure == null)
+            throw new IllegalArgumentException("The distance measure must not be null.");
+        if (complexityMeasure == null)
+            throw new IllegalArgumentException("The complexity measure must not be null.");
+
         this.distanceMeasure = distanceMeasure;
         this.complexityMeasure = complexityMeasure;
     }
 
     @Override
-    public double distance(INDArray A, INDArray B) throws TimeSeriesLengthException {
-        // Parameter checks.
-        isTimeSeriesOrException(A, B);
-        isSameLengthOrException(A, B);
-
+    public double distance(double[] A, double[] B) {
         double complexityA = complexityMeasure.complexity(A);
         double complexityB = complexityMeasure.complexity(B);
         double complexityCorrectionFactor = Math.max(complexityA, complexityB) / Math.min(complexityA, complexityB);

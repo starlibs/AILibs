@@ -1,8 +1,5 @@
 package jaicore.ml.tsc.distances;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
-
 /**
  * Interface that describes a distance measure of two time series that takes the
  * timestamps into account.
@@ -18,5 +15,5 @@ public interface ITimeSeriesDistanceWithTimestamps extends ITimeSeriesDistance {
      * @param tB Timestamps for the second times series.
      * @return Distance between the first and second time series.
      */
-    public double distance(INDArray A, INDArray tA, INDArray B, INDArray tB) throws TimeSeriesLengthException;
+    public double distance(double[] A, double[] tA, double[] B, double[] tB);
 }

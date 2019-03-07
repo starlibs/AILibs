@@ -210,4 +210,221 @@ public class TimeSeriesUtil {
 		return timestamps;
 	}
 
+	/**
+	 * Enables printing of time series.
+	 * 
+	 * @param timeSeries Time series to print.
+	 * @return Readable string of the time series, i.e.
+	 *         <code>"{1.0, 2.0, 3.0, 4.0}"</code>
+	 */
+	public static String toString(double[] timeSeries) {
+		if (timeSeries.length == 0)
+			return "{}";
+
+		int stringLength = 2 + timeSeries.length * 3 - 1;
+		StringBuilder sb = new StringBuilder(stringLength);
+		sb.append("{" + timeSeries[0]);
+		for (int i = 1; i < timeSeries.length; i++) {
+			sb.append(", " + timeSeries[i]);
+		}
+		sb.append("}");
+		return sb.toString();
+	}
+
+	/**
+	 * Calculates the derivative of a timeseries as described first by Keogh and
+	 * Pazzani (2001).
+	 * <code>f'(n) = \frac{ f(n) - f(n-1) + /frac{f(i+1) - f(i-1)}{2} }{2}</code>
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public static double[] keoghDerivate(double[] T) {
+		double[] derivate = new double[T.length - 2];
+
+		for (int i = 1; i < T.length - 1; i++) {
+			derivate[i - 1] = ((T[i] - T[i - 1]) + (T[i + 1] - T[i - 1]) / 2) / 2;
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * Calculates the derivateive of a timeseries as described first by Keogh and
+	 * Pazzani (2001).
+	 * <code>f'(n) = \frac{ f(n) - f(n-1) + /frac{f(i+1) - f(i-1)}{2} }{2}</code>
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public static double[] keoghDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 1; i < T.length - 1; i++) {
+			derivate[i] = ((T[i] - T[i - 1]) + (T[i + 1] - T[i - 1]) / 2) / 2;
+		}
+
+		derivate[0] = derivate[1];
+		derivate[T.length - 1] = derivate[T.length - 2];
+
+		return derivate;
+	}
+
+	/**
+	 * Calclualtes f'(n) = f(n-1) - f(n)
+	 * 
+	 * @param T Time series.
+	 * @return
+	 */
+	public static double[] backwardDifferenceDerivate(double[] T) {
+		double[] derivate = new double[T.length - 1];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i - 1] = T[i] - T[i - 1];
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * Calclualtes f'(n) = f(n-1) - f(n)
+	 * 
+	 * @param T Time series.
+	 * @return
+	 */
+	public static double[] backwardDifferenceDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i] = T[i] - T[i - 1];
+		}
+
+		derivate[0] = derivate[1];
+		return derivate;
+	}
+
+	/**
+	 * f'(n) = f(n+1) - f(n)
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public static double[] forwardDifferenceDerivate(double[] T) {
+		double[] derivate = new double[T.length - 1];
+
+		for (int i = 0; i < T.length - 1; i++) {
+			derivate[i] = T[i + 1] - T[i];
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * f'(n) = f(n+1) - f(n)
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public static double[] forwardDifferenceDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 0; i < T.length - 1; i++) {
+			derivate[i] = T[i + 1] - T[i];
+		}
+
+		derivate[T.length - 1] = derivate[T.length - 2];
+		return derivate;
+	}
+
+	/**
+	 * Calculates the derivative of a timeseries as described first by Gullo et. al
+	 * (2009).
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public static double[] gulloDerivate(double[] T) {
+		double[] derivate = new double[T.length - 1];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i - 1] = T[i + 1] - T[i - 1] / 2;
+		}
+
+		return derivate;
+	}
+
+	/**
+	 * f'(n) = \frac{f(i+1)-f(i-1)}{2}
+	 * 
+	 * @param T
+	 * @return
+	 */
+	public static double[] gulloDerivateWithBoundaries(double[] T) {
+		double[] derivate = new double[T.length];
+
+		for (int i = 1; i < T.length; i++) {
+			derivate[i] = T[i + 1] - T[i - 1] / 2;
+		}
+
+		derivate[0] = derivate[1];
+		return derivate;
+	}
+
+	public static double sum(double[] T) {
+		double sum = 0;
+		for (int i = 0; i < T.length; i++)
+			sum += T[i];
+		return sum;
+	}
+
+	public static double mean(double[] T) {
+		return sum(T) / T.length;
+	}
+
+	/**
+	 * Calculates the (population) variance of the values of a times series.
+	 */
+	public static double variance(double T[]) {
+		double mean = mean(T);
+		double squaredDeviations = 0;
+		for (int i = 0; i < T.length; i++) {
+			squaredDeviations += (T[i] - mean) * (T[i] - mean);
+		}
+		return squaredDeviations / T.length;
+	}
+
+	/**
+	 * Calculates the (population) standard deviation of the values of a times
+	 * series.
+	 */
+	public static double standardDeviation(double[] T) {
+		return Math.sqrt(variance(T));
+	}
+
+	public static double[] zTransform(double[] T) {
+		double mean = mean(T);
+		double standardDeviation = standardDeviation(T);
+		if (standardDeviation == 0) { // TODO: How to handle zero standard deviation properly.
+			return new double[T.length]; // All zeros.
+		}
+		double[] zTransformedT = new double[T.length];
+		for (int i = 0; i < T.length; i++) {
+			zTransformedT[i] = (T[i] - mean) / standardDeviation;
+		}
+		return zTransformedT;
+	}
+
+	public static double[] normalizeByStandardDeviation(double[] T) {
+		double standardDeviation = standardDeviation(T);
+		if (standardDeviation == 0) {
+			return new double[T.length];
+		}
+		double[] normalizedT = new double[T.length];
+		for (int i = 0; i < T.length; i++) {
+			normalizedT[i] = T[i] / standardDeviation;
+		}
+		return normalizedT;
+
+	}
+
 }

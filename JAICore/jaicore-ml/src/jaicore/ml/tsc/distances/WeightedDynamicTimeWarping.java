@@ -1,80 +1,112 @@
 package jaicore.ml.tsc.distances;
 
-import org.nd4j.linalg.api.ndarray.INDArray;
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Class for the Weighted Dynamic Time Warp Distance Calculation.
+ * Implementation of the Dynamic Time Warping (DTW) measure as published in
+ * "Weighted dynamic time warping for time series classification" by Young-Seon
+ * Jeong, Myong K. Jeong and Olufemi A. Omitaomu.
+ * 
+ * DTW does not account for the relative importance regarding the phase
+ * difference between a reference point and a testing point. This may lead to
+ * misclassification especially in applications where the shape similarity
+ * between two sequences is a major consideration for an accurate recognition.
+ * Therefore, [the authors] propose a novel distance measure, called a weighted
+ * DTW (WDTW), which is a penalty-based DTW. [Their] approach penalizes points
+ * with higher phase difference between a reference point and a testing point in
+ * order to prevent minimum distance distortion caused by outliers.
  */
 public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
 
-    int p;
     /**
      * Controls the level of penalization for the points with larger phase
-     * difference
+     * difference.
      */
-    double g;
-    double Wmax;
+    private double g;
 
-    private double[] weights;
+    /**
+     * The desired upper bound for the weight parameter that is used to penalize
+     * points with higher phase difference.
+     */
+    private double maximumWeight;
+
+    /** Distance measure for scalar points. */
+    private IScalarDistance d;
+
+    /** Memorizes the calculated weight vectors for a specific length. */
+    private Map<Integer, double[]> weightMemoization = new HashMap<>();
 
     /**
      * Constructor.
      * 
-     * @param p    Defines the p-norm.
-     * @param g    Controls the penelization in weights for points with larger phase
-     *             difference.
-     * @param Wmax The desired upper bound for the weight parameter.
+     * @param g             Controls the penelization in weights for points with
+     *                      larger phase difference.
+     * @param maximumWeight The desired upper bound for the weight parameter that is
+     *                      used to penalize points with higher phase difference.
      */
-    public WeightedDynamicTimeWarping(int p, double g, double Wmax) {
-        this.p = p;
+    public WeightedDynamicTimeWarping(double g, double maximumWeight, IScalarDistance d) {
         this.g = g;
-        this.Wmax = Wmax;
+        this.maximumWeight = maximumWeight;
+        this.d = d;
     }
 
     @Override
-    public double distance(INDArray A, INDArray B) throws IllegalArgumentException {
-        // Parameter checks.
-        isTimeSeriesOrException(A, B);
-        isSameLengthOrException(A, B);
+    public double distance(double[] A, double[] B) {
+        int n = A.length;
+        int m = B.length;
+        double[][] M = new double[n + 1][m + 1];
 
-        int n = (int) A.length();
-        double[][] M = new double[n + 1][n + 1];
-
-        initWeights(n);
+        double[] weights = calculateWeights(Math.max(n, m));
 
         // Dynamic Programming initialization.
         for (int i = 1; i <= n; i++)
             M[i][0] = Double.MAX_VALUE;
-        for (int i = 1; i <= n; i++)
-            M[0][i] = Double.MAX_VALUE;
+        for (int j = 1; j <= m; j++)
+            M[0][j] = Double.MAX_VALUE;
         M[0][0] = 0d;
 
         // Dynamic programming.
         for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= n; j++) {
+            for (int j = 1; j <= m; j++) {
                 // Paper: | w[i-j] (a_i - b_j) |^p
-                double cost = Math.pow(Math.abs(weights[i - j] * (A.getDouble(i - 1) - B.getDouble(j - 1))), p);
-                double mini = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
-                M[i][j] = cost + mini;
+                // double cost = Math.pow(Math.abs(weights[Math.abs(i - j)] * (A[i - 1] - B[j -
+                // 1])), p);
+                double cost = weights[Math.abs(i - j)] * this.d.distance(A[i - 1], B[j - 1]);
+                double minimum = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
+                M[i][j] = cost + minimum;
             }
         }
-
-        return Math.pow(M[n][n], 1 / (double) p);
+        return M[n][m];
     }
 
     /**
-     * Initialize weights, as explained in 4.2 Modified logistic weight function.
+     * Calculates the weight vector via the Modified logistic weight function (see
+     * paper 4.2). Uses memoization to avoid multiple calculations for the same
+     * length.
      * 
-     * @param m Length of the time series, i.e. length of the weight vector.
+     * @param length Length of the time series, i.e. length of the weight vector. Is
+     *               guaranteed to be greater 0 within this class.
+     * @return Resulting weight vector.
      */
-    private void initWeights(int m) {
-        weights = new double[m];
-        double mc = (double) m / 2; // center of time series.
+    protected double[] calculateWeights(int length) {
+        // Use memoization.
+        double[] memoized = this.weightMemoization.get(length);
+        if (memoized != null)
+            return memoized;
 
-        for (int i = 0; i < m; i++) {
-            weights[i] = Wmax / (1 + Math.exp(-g * (i - mc)));
+        // Calculate weights when not memoized.
+        double[] weights = new double[length];
+        double halfLength = (double) length / 2; // center of time series.
+
+        for (int i = 0; i < length; i++) {
+            weights[i] = maximumWeight / (1 + Math.exp(-this.g * (i - halfLength)));
         }
+
+        // Add to memoization-
+        this.weightMemoization.put(length, weights);
+
+        return weights;
     }
 
 }

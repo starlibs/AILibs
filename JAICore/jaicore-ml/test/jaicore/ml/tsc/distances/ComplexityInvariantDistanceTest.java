@@ -5,50 +5,65 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.tsc.complexity.StretchingComplexity;
 
 /**
- * ComplexityInvariantDistanceTest
+ * Test suite for the
+ * {@link jaicore.ml.tsc.distances.ComplexityInvariantDistance} implementation.
  */
 public class ComplexityInvariantDistanceTest {
 
-    /** The distance to test. */
-    ComplexityInvariantDistance cid;
+    /** The distance measure used throughout the tests. */
+    EuclideanDistance euclideanDistance;
 
-    /** Time series to test with. */
-    INDArray timeSeries1; // complexity 5
-    INDArray timeSeries2; // complexity 15
-    INDArray noTimeSeries;
+    /** The complexity measure used throughout the tests. */
+    StretchingComplexity stretchingComplexity;
 
     @Before
     public void setUp() {
-        int[] shape = { 6 };
-        float[] data = { 1, 1, 1, 1, 1, 1 };
-        timeSeries1 = Nd4j.create(data, shape);
-        timeSeries2 = Nd4j.create(new double[] { .0, Math.sqrt(8), .0, Math.sqrt(8), .0, Math.sqrt(8) }, shape);
-
-        noTimeSeries = Nd4j.rand(2, 2);
-
-        EuclideanDistance e = new EuclideanDistance();
-        StretchingComplexity sc = new StretchingComplexity();
-        cid = new ComplexityInvariantDistance(e, sc);
+        euclideanDistance = new EuclideanDistance();
+        stretchingComplexity = new StretchingComplexity();
     }
 
+    /**
+     * Correctness test. Tests the distance calculation based on an defined input
+     * and expected output.
+     */
     @Test
-    public void testDistanceCalculation() throws IllegalArgumentException {
+    public void testCorrectnessForDistanceCalculation() {
+        // Input.
+        double[] timeSeries1 = { 1, 1, 1, 1, 1, 1 }; // complexity 5
+        double[] timeSeries2 = { .0, Math.sqrt(8), .0, Math.sqrt(8), .0, Math.sqrt(8) }; // complexity 15
+        // Expectation.
+        double expectation = euclideanDistance.distance(timeSeries1, timeSeries2) * (15 / 5);
+
+        ComplexityInvariantDistance cid = new ComplexityInvariantDistance(euclideanDistance, stretchingComplexity);
         double distance = cid.distance(timeSeries1, timeSeries2);
-        double expectation = timeSeries1.distance2(timeSeries2) * (15 / 5);
-        String message = "Calculated %f, but %f was expected";
-        assertEquals(String.format(message, distance, expectation), expectation, distance, 0.001);
+
+        assertEquals(expectation, distance, 0.001);
     }
 
+    /**
+     * Robustness test: When initializing with <code>null</code> for the distance
+     * measure, the constructor is supposed to throw an IllegalArgumentExpection.
+     */
     @Test
-    public void testThrowsErrorWhenTimeSeriesIsNoTimeSeries() {
+    public void testRobustnessForNullDistanceMeasure() {
         assertThrows(IllegalArgumentException.class, () -> {
-            cid.distance(noTimeSeries, timeSeries1);
+            new ComplexityInvariantDistance(null, stretchingComplexity);
         });
     }
+
+    /**
+     * Robustness test: When initializing with <code>null</code> for the complexity
+     * measure, the constructor is supposed to throw an IllegalArgumentExpection.
+     */
+    @Test
+    public void testRobustnessForNullComplexityMeasure() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new ComplexityInvariantDistance(euclideanDistance, null);
+        });
+    }
+
 }
