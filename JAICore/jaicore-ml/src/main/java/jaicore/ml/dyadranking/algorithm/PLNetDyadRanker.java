@@ -433,5 +433,9 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 	public MultiLayerNetwork getPlNet() {
 		return plNet;
 	}
+	
+	public int getEpoch() {
+		return epoch;
+	}
 
 }
