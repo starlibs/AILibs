@@ -8,10 +8,10 @@ import org.junit.Test;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
 
 /**
- * Test suite for the {@link jaicore.ml.tsc.distances.DerivateTransformDistance}
+ * Test suite for the {@link jaicore.ml.tsc.distances.DerivateDistance}
  * implementation.
  */
-public class DerivateTransformDistanceTest {
+public class DerivateDistanceTest {
 
     /**
      * Correctness test. Tests the distance calculation based on an defined input
@@ -25,7 +25,7 @@ public class DerivateTransformDistanceTest {
         // Expectation.
         double expectation = 0;
 
-        DerivateTransformDistance dtd = new DerivateTransformDistance(0.5, new DynamicTimeWarping());
+        DerivateDistance dtd = new DerivateDistance(0.5, new DynamicTimeWarping());
         double distance = dtd.distance(timeSeries1, timeSeries2);
 
         assertEquals(expectation, distance, 0);
@@ -45,7 +45,7 @@ public class DerivateTransformDistanceTest {
         // Expectation.
         double expectation = Math.cos(alpha) * 1 + Math.sin(alpha) * 3;
 
-        DerivateTransformDistance dtd = new DerivateTransformDistance(alpha, timeSeriesDistance);
+        DerivateDistance dtd = new DerivateDistance(alpha, timeSeriesDistance);
         double distance = dtd.distance(timeSeries1, timeSeries2);
 
         assertEquals(expectation, distance, 1.0E-5);
@@ -58,7 +58,7 @@ public class DerivateTransformDistanceTest {
     @Test
     public void testRobustnessForNullDistanceMeasure() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new DerivateTransformDistance(0.5, null);
+            new DerivateDistance(0.5, null);
         });
     }
 
@@ -70,7 +70,7 @@ public class DerivateTransformDistanceTest {
     public void testRobustnessForAlphaGreaterPiHalf() {
         assertThrows(IllegalArgumentException.class, () -> {
             double alpha = (Math.PI / 2) + 1e4;
-            new DerivateTransformDistance(alpha, new EuclideanDistance());
+            new DerivateDistance(alpha, new EuclideanDistance());
         });
     }
 
@@ -82,7 +82,7 @@ public class DerivateTransformDistanceTest {
     public void testRobustnessForAlphaLessThanZero() {
         assertThrows(IllegalArgumentException.class, () -> {
             double alpha = 0 - Double.MIN_VALUE;
-            new DerivateTransformDistance(alpha, new EuclideanDistance());
+            new DerivateDistance(alpha, new EuclideanDistance());
         });
     }
 
@@ -93,7 +93,7 @@ public class DerivateTransformDistanceTest {
     @Test
     public void testBoundaryForAlphaEqualToZero() {
         double alpha = 0;
-        new DerivateTransformDistance(alpha, new EuclideanDistance());
+        new DerivateDistance(alpha, new EuclideanDistance());
     }
 
     /**
@@ -103,7 +103,7 @@ public class DerivateTransformDistanceTest {
     @Test
     public void testBoundaryForAlphaEqualToPiHalf() {
         double alpha = Math.PI / 2;
-        new DerivateTransformDistance(alpha, new EuclideanDistance());
+        new DerivateDistance(alpha, new EuclideanDistance());
     }
 
 }
