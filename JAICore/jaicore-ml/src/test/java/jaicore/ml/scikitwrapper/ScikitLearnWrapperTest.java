@@ -1,6 +1,8 @@
 package jaicore.ml.scikitwrapper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -74,6 +76,8 @@ public class ScikitLearnWrapperTest {
 		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction, ScikitLearnWrapper.getImportString(imports));
 		Instances dataset = this.loadARFF(CLASSIFICATION_ARFF);
 		slw.buildClassifier(dataset);
+		assertNotEquals(slw.getModelPath(), null);
+		assertTrue(slw.getModelPath().exists());
 	}
 
 	@Test
@@ -143,30 +147,6 @@ public class ScikitLearnWrapperTest {
 	@Test
 	public void invalidConstructorEmptyConstructionCall() throws IOException {
 		new ScikitLearnWrapper("", "");
-	}
-
-	@Test
-	public void changeOutputFolder() throws Exception {
-		File newOutputFolder = new File(BASE_TESTRSC_PATH + "newOutputFolder");
-		if (newOutputFolder.exists()) {
-			for (File f : newOutputFolder.listFiles()) {
-				f.delete();
-			}
-		} else {
-			newOutputFolder.mkdirs();
-		}
-		try {
-			ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor()", "from sklearn.neural_network import MLPRegressor");
-			Instances dataset = this.loadARFF(OWN_CLASSIFIER_DUMP);
-			slw.setProblemType(ProblemType.REGRESSION);
-			slw.buildClassifier(dataset);
-		} finally {
-			if (newOutputFolder.exists()) {
-				for (File f : newOutputFolder.listFiles()) {
-					f.delete();
-				}
-			}
-		}
 	}
 
 	private Instances loadARFF(final String arffPath) throws IOException {

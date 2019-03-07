@@ -110,7 +110,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	protected final Map<N, Node<N, V>> ext2int = new ConcurrentHashMap<>();
 
 	/* search graph model */
-	protected Queue<Node<N, V>> open = new PriorityQueue<>((n1,n2) -> n1.getInternalLabel().compareTo(n2.getInternalLabel()));
+	protected Queue<Node<N, V>> open = new PriorityQueue<>((n1, n2) -> n1.getInternalLabel().compareTo(n2.getInternalLabel()));
 	private Node<N, V> nodeSelectedForExpansion; // the node that will be expanded next
 	private final Map<N, Thread> expanding = new HashMap<>(); // EXPANDING contains the nodes being expanded and the threads doing this job
 	private final Set<N> closed = new HashSet<>(); // CLOSED contains only node but not paths
@@ -144,6 +144,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getNodeEvaluator();
+
 		if (this.nodeEvaluator == null) {
 			throw new IllegalArgumentException("Cannot work with node evaulator that is null");
 		} else if (this.nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
@@ -412,7 +413,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* currently, we only support tree search */
 		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t) + "\n\tSecond Path:"
-		+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + "\n\t\t" + t);
+				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + "\n\t\t" + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
@@ -461,8 +462,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			if (BestFirst.this.timeoutForComputationOfF > 0 && fTime > BestFirst.this.timeoutForComputationOfF + 1000) {
 				BestFirst.this.logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", node, fTime, BestFirst.this.timeoutForComputationOfF);
 			}
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			this.logger.info("Thread {} received interrupt in node evaluation. Timeout flag is {}", Thread.currentThread(), timedout.get());
 			if (timedout.get()) {
 				BestFirst.this.logger.debug("Received interrupt during computation of f.");
@@ -473,7 +473,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				try {
 					label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.f(node) : null;
 				} catch (Throwable e2) {
-					e2.printStackTrace();
+					this.logger.warn("Was not able to label node", e2);
 				}
 			} else {
 				this.logger.info("Received external interrupt. Forwarding this interrupt.");
@@ -568,7 +568,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				assert this.nodeSelectedForExpansion == null : "Node selected for expansion must be NULL when setting it!";
 				this.nodeSelectedForExpansion = node;
 				assert this.open.contains(node) : "OPEN must contain the node to be expanded.\n\tOPEN size: " + this.open.size() + "\n\tNode to be expanded: " + node + ".\n\tOPEN: "
-				+ this.open.stream().map(n -> "\n\t\t" + n).collect(Collectors.joining());
+						+ this.open.stream().map(n -> "\n\t\t" + n).collect(Collectors.joining());
 				this.open.remove(this.nodeSelectedForExpansion);
 				int openSizeAfter = this.open.size();
 				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getPoint()) : "A node chosen for expansion has no entry in the ext2int map!";
@@ -596,7 +596,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 * Preliminarily check that the active jobs are less than the additional threads
 		 */
 		assert this.additionalThreadsForNodeAttachment == 0 || this.activeJobs.get() < this.additionalThreadsForNodeAttachment : "Cannot expand nodes if number of active jobs (" + this.activeJobs.get()
-		+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
+				+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
 
 		/*
 		 * Step 1: determine node that will be expanded next. Either it already has been
@@ -614,7 +614,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					try {
 						this.logger.debug("No next node has been selected. Choosing the first from OPEN.");
 						while (this.open.isEmpty() && this.activeJobs.get() > 0) {
-							this.logger.trace("Await condition as open queue is empty and active jobs is {} ...",  this.activeJobs.get());
+							this.logger.trace("Await condition as open queue is empty and active jobs is {} ...", this.activeJobs.get());
 							this.numberOfActiveJobsHasChanged.await();
 							this.logger.trace("Got signaled");
 							this.checkAndConductTermination();
@@ -708,8 +708,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
 			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", nodeSelectedForExpansion, this.open.size(), this.activeJobs.get());
 			expansionEvent = new NodeExpansionJobSubmittedEvent<>(this.getId(), nodeSelectedForExpansion, successorDescriptions);
-		}
-		else {
+		} else {
 			expansionEvent = new RemovedGoalNodeFromOpenEvent<>(this.getId(), nodeSelectedForExpansion);
 		}
 
@@ -1011,8 +1010,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 									haveLock = false;
 									Thread.currentThread().interrupt();
 									this.checkAndConductTermination();
-								}
-								else {
+								} else {
 									throw e; // if the algorithm has already been shut down, just throw the exception
 								}
 							}
@@ -1199,7 +1197,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of node evaluator {} to {}", this.nodeEvaluator, name + ".nodeevaluator");
+			this.logger.info("Setting logger of node evaluator {} to {}", this.nodeEvaluator.getClass().getName(), name + ".nodeevaluator");
 			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");
 		} else {
 			this.logger.info("Node evaluator {} does not implement ILoggingCustomizable, so its logger won't be customized.", this.nodeEvaluator);

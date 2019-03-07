@@ -65,6 +65,7 @@ public class TimeoutTimer extends Timer {
 				public void run() {
 					final TimerTask thisTask = this;
 					int taskId = TimeoutTimer.this.tasks.keySet().stream().filter(id -> TimeoutTimer.this.tasks.get(id) == thisTask).findFirst().get();
+					System.err.println("Job " + taskId + " for interruption of " + thread + " after delay of " + delay + "ms triggered.");
 					logger.info("Job {} for interruption of {} after delay of {}ms triggered.", taskId, thread, delay);
 					if (preInterruptionHook != null) {
 						logger.debug("Job {} now invokes pre-interruption.", taskId);

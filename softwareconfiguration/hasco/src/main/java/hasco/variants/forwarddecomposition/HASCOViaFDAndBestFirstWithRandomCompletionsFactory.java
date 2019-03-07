@@ -21,8 +21,7 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOVia
 		this(seed, numSamples, -1, -1);
 	}
 
-	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(final int seed, final int numSamples,
-			final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
+	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(final int seed, final int numSamples, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
 		super();
 		this.seed = seed;
 		this.numSamples = numSamples;
@@ -53,9 +52,8 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOVia
 
 	@Override
 	public HASCOViaFDAndBestFirst<Double> getAlgorithm(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
-		this.setSearchProblemTransformer(
-				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(
-						this.preferredNodeEvaluator, this.priorizingPredicate, this.seed, this.numSamples, this.timeoutForSingleCompletionEvaluationInMS, this.timeoutForNodeEvaluationInMS));
+		this.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(this.preferredNodeEvaluator, this.priorizingPredicate, this.seed, this.numSamples,
+				this.timeoutForSingleCompletionEvaluationInMS, this.timeoutForNodeEvaluationInMS));
 		this.setSearchFactory(new StandardBestFirstFactory<>());
 		return new HASCOViaFDAndBestFirst<>(super.getAlgorithm(problem));
 	}

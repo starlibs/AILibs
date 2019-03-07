@@ -1,5 +1,8 @@
 package hasco.optimizingfactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +18,7 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.logging.ToJSONStringUtil;
 
 public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AAlgorithm<OptimizingFactoryProblem<P, T, V>, T> {
 
@@ -48,7 +52,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 
 			/* initialize optimizer */
 			if (this.loggerName != null) {
-				this.logger.info("Setting logger of optimizer {} to {}.optAlgo", this.optimizer, this.loggerName);
+				this.logger.info("Setting logger of optimizer {} to {}.optAlgo", this.optimizer.getClass().getName(), this.loggerName);
 				this.optimizer.setLoggerName(this.loggerName + ".optAlgo");
 			}
 
@@ -112,5 +116,15 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._algorithm");
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("factoryForOptimizationAlgorithm", this.factoryForOptimizationAlgorithm);
+		fields.put("constructedObject", this.constructedObject);
+		fields.put("performanceOfObject", this.performanceOfObject);
+		fields.put("optimizer", this.optimizer);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }

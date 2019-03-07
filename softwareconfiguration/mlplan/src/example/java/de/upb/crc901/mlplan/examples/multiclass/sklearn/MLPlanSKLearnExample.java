@@ -26,7 +26,7 @@ public class MLPlanSKLearnExample {
 	private static final File DATASET = new File("testrsc/car.arff");
 	private static final ZeroOneLoss LOSS_MEASURE = new ZeroOneLoss();
 
-	private static final TimeOut TIMEOUT = new TimeOut(60, TimeUnit.SECONDS);
+	private static final TimeOut TIMEOUT = new TimeOut(600, TimeUnit.SECONDS);
 
 	public static void main(final String[] args) throws Exception {
 		Instances data = new Instances(new FileReader(DATASET));
@@ -37,14 +37,15 @@ public class MLPlanSKLearnExample {
 
 		MLPlanBuilder builder = new MLPlanBuilder();
 		builder.withAlgorithmConfig(mlplanConfig);
-		builder.withRandomCompletionBasedBestFirstSearch();
 		builder.withAutoSKLearnConfig();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(15, TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(15, TimeUnit.SECONDS));
 
 		SKLearnMLPlanWekaClassifier mlplan = new SKLearnMLPlanWekaClassifier(builder);
+
 		mlplan.setTimeout(TIMEOUT);
 		mlplan.setLoggerName("sklmlplanc");
+		mlplan.setVisualizationEnabled(true);
 		mlplan.buildClassifier(testSplit.get(0));
 
 		List<Double> actual = Arrays.stream(mlplan.classifyInstances(testSplit.get(1))).mapToObj(x -> x).collect(Collectors.toList());

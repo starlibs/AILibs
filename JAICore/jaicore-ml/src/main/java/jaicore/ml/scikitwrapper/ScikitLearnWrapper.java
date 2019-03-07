@@ -199,6 +199,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 		this.runProcess(testCommand, new DefaultProcessListener(VERBOSE));
 
+		if (Thread.currentThread().isInterrupted()) {
+			throw new InterruptedException("ScikitLearnWrapper was interrupted during classifyInstances");
+		}
+
 		String fileContent = "";
 		try {
 			/* Parse the result */
@@ -309,6 +313,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 	public void setModelPath(final File modelFile) {
 		this.modelFile = modelFile;
+	}
+
+	public File getModelPath() {
+		return this.modelFile;
 	}
 
 	/**
