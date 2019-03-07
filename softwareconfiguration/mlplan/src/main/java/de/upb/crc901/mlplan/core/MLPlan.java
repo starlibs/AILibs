@@ -202,7 +202,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.logger.info("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated ML-Plan logger {}. Now setting logger of twoPhaseHASCO to {}.2phasehasco", name, name);
-		this.logger.info("Setting logger of {} to {}", this.optimizingFactory.getClass().getName(), this.loggerName + ".optimizingfactory");
+		this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
 		this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
 
 		this.logger.info("Switched ML-Plan logger to {}", name);

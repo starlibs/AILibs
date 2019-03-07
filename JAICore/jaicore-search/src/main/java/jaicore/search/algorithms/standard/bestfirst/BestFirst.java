@@ -1197,7 +1197,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of node evaluator {} to {}", this.nodeEvaluator.getClass().getName(), name + ".nodeevaluator");
+			this.logger.info("Setting logger of node evaluator {} to {}.nodeevaluator", this.nodeEvaluator.getClass().getName(), name);
 			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");
 		} else {
 			this.logger.info("Node evaluator {} does not implement ILoggingCustomizable, so its logger won't be customized.", this.nodeEvaluator);

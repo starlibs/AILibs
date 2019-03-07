@@ -1,14 +1,9 @@
 package jaicore.ml.core.dataset.weka;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.InstanceSchema;
@@ -128,7 +123,8 @@ public class WekaInstancesUtil {
 		return wekaInstances;
 	}
 
-	public static IAttributeType<?> transformWEKAAttributeToAttributeType(final Attribute att) {
+	@SuppressWarnings("rawtypes")
+	public static IAttributeType transformWEKAAttributeToAttributeType(final Attribute att) {
 		if (att.isNumeric()) {
 			return new NumericAttributeType();
 		} else if (att.isNominal()) {
@@ -141,17 +137,4 @@ public class WekaInstancesUtil {
 		throw new IllegalArgumentException("Can only transform numeric or categorical attributes");
 	}
 
-	public static void main(final String[] args) throws FileNotFoundException, IOException, ContainsNonNumericAttributesException, UnsupportedAttributeTypeException {
-		Instances data = new Instances(new FileReader(new File("../../../datasets/classification/multi-class/car.arff")));
-		data.setClassIndex(data.numAttributes() - 1);
-		System.out.println("Read in weka instances.");
-		long timestampStart = System.currentTimeMillis();
-		SimpleDataset simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(data);
-		long timestampStop = System.currentTimeMillis();
-		System.out.println("Transformation took " + (timestampStop - timestampStart) + "ms");
-
-		Instances backToInstances = datasetToWekaInstances(simpleDataset);
-		System.out.println(backToInstances);
-
-	}
 }

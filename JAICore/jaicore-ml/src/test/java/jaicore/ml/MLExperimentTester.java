@@ -1,5 +1,7 @@
 package jaicore.ml;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -28,6 +30,7 @@ import weka.core.Instances;
 public class MLExperimentTester implements IExperimentSetEvaluator {
 
 	private final ISpecificMLExperimentConfig config = ConfigCache.getOrCreate(ISpecificMLExperimentConfig.class);
+	private boolean conductedExperiment = false;
 
 	@Override
 	public IExperimentSetConfig getConfig() {
@@ -53,13 +56,14 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 
 		results.put("loss", loss);
 		processor.processResults(results);
-
+		this.conductedExperiment = true;
 	}
 
 	@Test
 	public void testExperimentRunnerForMLExperiment() {
 		ExperimentRunner runner = new ExperimentRunner(new MLExperimentTester());
 		runner.randomlyConductExperiments(true);
+		assertTrue(this.conductedExperiment);
 	}
 
 }

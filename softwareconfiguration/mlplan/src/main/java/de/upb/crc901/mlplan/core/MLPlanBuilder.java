@@ -229,7 +229,6 @@ public class MLPlanBuilder {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void prepareNodeEvaluatorInFactoryWithData(final Instances data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
@@ -243,8 +242,6 @@ public class MLPlanBuilder {
 		if (this.pipelineValidityCheckingNodeEvaluator == null && this.preferredNodeEvaluator == null) {
 			return;
 		}
-
-		HASCOViaFDAndBestFirstFactory<Double> factory = (HASCOViaFDAndBestFirstFactory<Double>) this.hascoFactory;
 
 		/* now determine the real node evaluator to be used. A semantic node evaluator has highest priority */
 		INodeEvaluator<TFDNode, Double> actualNodeEvaluator;
@@ -266,7 +263,8 @@ public class MLPlanBuilder {
 
 	}
 
-	public HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> getHASCOFactory() {
+	@SuppressWarnings("rawtypes")
+	public HASCOFactory getHASCOFactory() {
 		return this.hascoFactory;
 	}
 
@@ -277,12 +275,14 @@ public class MLPlanBuilder {
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
 		this.hascoFactory.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
 		this.updateSearchProblemTransformer();
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	private void updateSearchProblemTransformer() {
 		this.hascoFactory.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<TFDNode, String, Double>(this.preferredNodeEvaluator, this.priorizingPredicate,
 				this.algorithmConfig.randomSeed(), this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));

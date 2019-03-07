@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Test;
-
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -27,7 +25,6 @@ public class MCTreeNodeReDTest {
 	private static final String CLASSIFIER_NAME = RandomForest.class.getName();
 	private static final File DATASET = new File("testrsc/orig/vowel.arff");
 
-	@Test
 	public static void main(final String[] args) throws Exception {
 		System.out.println(CLASSIFIER_NAME);
 
