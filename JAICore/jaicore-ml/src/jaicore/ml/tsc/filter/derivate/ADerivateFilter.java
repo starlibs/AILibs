@@ -69,7 +69,7 @@ public abstract class ADerivateFilter implements IFilter {
     }
 
     @Override
-    public double[] fitTransformInstance(double[] input) {
+    public double[] fitTransform(double[] input) {
         return transform(input);
     }
 
