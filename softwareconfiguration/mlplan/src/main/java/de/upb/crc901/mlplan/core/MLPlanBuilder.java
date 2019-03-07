@@ -5,8 +5,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.function.Predicate;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
@@ -22,27 +26,60 @@ import hasco.core.HASCOFactory;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import weka.core.Instances;
 
 public class MLPlanBuilder {
+
+	private static final Logger L = LoggerFactory.getLogger(MLPlanBuilder.class);
+
+	private static final File SPC_AUTO_WEKA = new File("resources/automl/searchmodels/weka/weka-all-autoweka.json");
+	private static final File SPC_SKLEARN = new File("resources/automl/searchmodels/sklearn/sklearn-mlplan.json");
+	private static final File SPC_SKLEARN_UL = new File("resources/automl/searchmodels/sklearn/ml-plan-ul.json");
+
+	private static final File PREFC_AUTO_WEKA = new File("resources/mlplan/weka-precedenceList.txt");
+	private static final File PREFC_SKLEARN = new File("resources/mlplan/sklearn-precedenceList.txt");
+	private static final File PREFC_SKLEARN_UL = new File("resources/mlplan/sklearn-ul-precedenceList.txt");
+
+	private enum DefaultConfig {
+		AUTO_WEKA(SPC_AUTO_WEKA, PREFC_AUTO_WEKA), SKLEARN(SPC_SKLEARN, PREFC_SKLEARN), SKLEARN_UL(SPC_SKLEARN_UL, PREFC_SKLEARN_UL);
+
+		private final File spcFile;
+		private final File preferredComponentsFile;
+
+		private DefaultConfig(final File spcFile, final File preferredComponentsFile) {
+			this.spcFile = spcFile;
+			this.preferredComponentsFile = preferredComponentsFile;
+		}
+
+		public File getSearchSpaceConfigFile() {
+			return this.spcFile;
+		}
+
+		public File getPreferredComponentsFile() {
+			return this.preferredComponentsFile;
+		}
+	}
+
 	static MLPlanClassifierConfig loadOwnerConfig(final File configFile) throws IOException {
 		Properties props = new Properties();
 		if (configFile.exists()) {
 			FileInputStream fis = new FileInputStream(configFile);
 			props.load(fis);
 		} else {
-			System.out.println("Config file " + configFile.getAbsolutePath() + " not found, working with default parameters.");
+			L.warn("Config file {} not found, working with default parameters.", configFile.getAbsolutePath());
 		}
 		return ConfigFactory.create(MLPlanClassifierConfig.class, props);
 	}
@@ -60,7 +97,10 @@ public class MLPlanBuilder {
 
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
-	private HASCOViaFDFactory<? extends GraphSearchInput<TFDNode, String>, Double> hascoFactory = new HASCOViaFDFactory<>();
+
+	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double>();
+
+	private Predicate<TFDNode> priorizingPredicate = null;
 
 	public MLPlanBuilder() {
 		super();
@@ -74,13 +114,19 @@ public class MLPlanBuilder {
 		this.useCache = false;
 	}
 
-	public MLPlanBuilder(final File searchSpaceConfigFile, final File alhorithmConfigFile, final MultiClassPerformanceMeasure performanceMeasure, final PerformanceDBAdapter dbAdapter) {
-		this();
-		this.searchSpaceConfigFile = searchSpaceConfigFile;
-		this.algorithmConfigFile = alhorithmConfigFile;
-		this.performanceMeasure = performanceMeasure;
+	public MLPlanBuilder(final File searchSpaceConfigFile, final File algorithmConfigFile, final MultiClassPerformanceMeasure performanceMeasure, final PerformanceDBAdapter dbAdapter) {
+		this(searchSpaceConfigFile, algorithmConfigFile, performanceMeasure);
 		this.useCache = true;
 		this.dbAdapter = dbAdapter;
+	}
+
+	/**
+	 * Set the classifier factory that translates <code>CompositionInstance</code> objects to classifiers that can be evaluated.
+	 *
+	 * @param classifierFactory The classifier factory to be used to translate CompositionInstance objects to classifiers.
+	 */
+	public void withClassifierFactory(final ClassifierFactory classifierFactory) {
+		this.classifierFactory = classifierFactory;
 	}
 
 	public File getSearchSpaceConfigFile() {
@@ -105,11 +151,33 @@ public class MLPlanBuilder {
 		return this;
 	}
 
+	/**
+	 * Configures the MLPlanBuilder to deal with the AutoSKLearn search space configuration.
+	 *
+	 * @return Returns the current MLPlanBuilder object with the AutoSKLearn search space configuration.
+	 * @throws IOException Throws an IOException if the search space config file could not be loaded.
+	 */
+	public MLPlanBuilder withAutoSKLearnConfig() throws IOException {
+		this.classifierFactory = new SKLearnClassifierFactory();
+		return this.withDefaultConfig(DefaultConfig.SKLEARN);
+	}
+
+	public MLPlanBuilder withTpotConfig() throws IOException {
+		this.classifierFactory = new SKLearnClassifierFactory();
+		return this.withDefaultConfig(DefaultConfig.SKLEARN_UL);
+	}
+
 	public MLPlanBuilder withAutoWEKAConfiguration() throws IOException {
+		this.classifierFactory = new WEKAPipelineFactory();
+		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
+		return this.withDefaultConfig(DefaultConfig.AUTO_WEKA);
+	}
+
+	private MLPlanBuilder withDefaultConfig(final DefaultConfig defConfig) throws IOException {
 		if (this.searchSpaceConfigFile == null) {
-			this.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
+			this.withSearchSpaceConfigFile(defConfig.getSearchSpaceConfigFile());
 		}
-		File fileOfPreferredComponents = this.getAlgorithmConfig().preferredComponents();
+		File fileOfPreferredComponents = defConfig.getPreferredComponentsFile();
 		List<String> ordering;
 		if (!fileOfPreferredComponents.exists()) {
 			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", fileOfPreferredComponents.getAbsolutePath());
@@ -118,8 +186,8 @@ public class MLPlanBuilder {
 			ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
 		}
 		this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
-		this.classifierFactory = new WEKAPipelineFactory();
-		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
+		this.withRandomCompletionBasedBestFirstSearch();
+
 		return this;
 	}
 
@@ -129,6 +197,7 @@ public class MLPlanBuilder {
 
 	public MLPlanBuilder withAlgorithmConfig(final MLPlanClassifierConfig config) {
 		this.algorithmConfig = config;
+		this.updateSearchProblemTransformer();
 		return this;
 	}
 
@@ -146,6 +215,9 @@ public class MLPlanBuilder {
 	 * @return
 	 */
 	public MLPlanBuilder withPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
+		if (this.factoryPreparedWithData) {
+			throw new IllegalStateException("The method prepareNodeEvaluatorInFactoryWithData has already been called. No changes to the preferred node evaluator possible anymore");
+		}
 
 		/* first update the preferred node evaluator */
 		if (this.preferredNodeEvaluator == null) {
@@ -153,14 +225,13 @@ public class MLPlanBuilder {
 		} else {
 			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, this.preferredNodeEvaluator);
 		}
+		this.updateSearchProblemTransformer();
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	public void prepareNodeEvaluatorInFactoryWithData(final Instances data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
-			//			throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
 		}
 		if (this.factoryPreparedWithData) {
 			throw new IllegalStateException("Factory has already been prepared with data. This can only be done once!");
@@ -171,8 +242,6 @@ public class MLPlanBuilder {
 		if (this.pipelineValidityCheckingNodeEvaluator == null && this.preferredNodeEvaluator == null) {
 			return;
 		}
-
-		HASCOViaFDAndBestFirstFactory<Double> factory = (HASCOViaFDAndBestFirstFactory<Double>) this.hascoFactory;
 
 		/* now determine the real node evaluator to be used. A semantic node evaluator has highest priority */
 		INodeEvaluator<TFDNode, Double> actualNodeEvaluator;
@@ -188,41 +257,45 @@ public class MLPlanBuilder {
 			actualNodeEvaluator = this.preferredNodeEvaluator;
 		}
 
-		/* set the node evaluator as the preferred node evaluator in the search factory */
-		factory.getSearchFactory().setPreferredNodeEvaluator(actualNodeEvaluator);
+		/* update the preferred node evaluator in the HascoFactory */
+		this.preferredNodeEvaluator = actualNodeEvaluator;
+		this.updateSearchProblemTransformer();
+
 	}
 
-	public HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> getHASCOFactory() {
-		//		if (!factoryPreparedWithData) {
-		//			throw new IllegalStateException("Data have not been set on the factory yet.");
-		//		}
+	@SuppressWarnings("rawtypes")
+	public HASCOFactory getHASCOFactory() {
 		return this.hascoFactory;
 	}
 
 	@SuppressWarnings("unchecked")
-	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, final AlgorithmicProblemReduction transformer) {
+	public MLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
 		this.hascoFactory.setSearchFactory(searchFactory);
 		this.hascoFactory.setSearchProblemTransformer(transformer);
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
 	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
-		this.hascoFactory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.algorithmConfig.randomSeed(),
-				this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(),
-				this.algorithmConfig.timeoutForNodeEvaluation());
+		this.hascoFactory.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
+		this.updateSearchProblemTransformer();
 		return this;
 	}
 
+	@SuppressWarnings("unchecked")
+	private void updateSearchProblemTransformer() {
+		this.hascoFactory.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<TFDNode, String, Double>(this.preferredNodeEvaluator, this.priorizingPredicate,
+				this.algorithmConfig.randomSeed(), this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));
+
+	}
+
 	public void withTimeoutForSingleSolutionEvaluation(final TimeOut timeout) {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,
-				String.valueOf(timeout.milliseconds()));
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, String.valueOf(timeout.milliseconds()));
 	}
 
 	public void withTimeoutForNodeEvaluation(final TimeOut timeout) {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE,
-				String.valueOf(timeout.milliseconds()));
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout.milliseconds()));
 	}
-
 
 	public boolean getUseCache() {
 		return this.useCache;
@@ -238,5 +311,14 @@ public class MLPlanBuilder {
 
 	public Collection<Component> getComponents() {
 		return this.components;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("algorithmConfig", this.getAlgorithmConfig());
+		fields.put("algorithmConfigFile", this.algorithmConfigFile);
+		fields.put("classifierFactory", this.classifierFactory);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }

@@ -73,12 +73,27 @@
   </logger>
   
   <logger name="hasco">
+    <level value="info" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="sklmlplanc">
     <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
+  </logger>
+  <logger name="sklmlplanc.mlplan.optimizingfactory">
+    <level value="warn" />
+  </logger>
+  <logger name="sklmlplanc.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
+    <level value="debug" />
   </logger>
   
   <logger name="mlplan">
@@ -95,15 +110,15 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
@@ -111,7 +126,7 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
@@ -128,6 +143,10 @@
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
     <level value="warn" />
+  </logger>
+  
+  <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
+  	<level value="warn" />
   </logger>
   
   <logger name="testedalgorithm">
