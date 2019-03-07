@@ -427,23 +427,26 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 		// collect the results but not wait longer than 5 seconds for a result to appear
 		for (int i = 0; i < topKRankedPaths.size(); i++) {
-			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(), i,
+			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(), i+1,
 					topKRankedPaths.size());
-			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(10, TimeUnit.SECONDS);
+			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(1, TimeUnit.SECONDS);
 			if (evaluatedPipe == null) {
-				return evaluatedSolutions;
+				logger.info("Didn't receive any futures (expected {} futures)", topKRankedPaths.size());
+				continue;
 			}
-			logger.info("Got a service...");
 			try {
-
-				Pair<ComponentInstance, V> solution = evaluatedPipe.get(10, TimeUnit.SECONDS);
+				Pair<ComponentInstance, V> solution = evaluatedPipe.get(5, TimeUnit.SECONDS);
 				if (solution != null) {
+					logger.info("Evaluation was successful. Adding {} to solutions", solution.getY());
 					evaluatedSolutions.add(solution);
+				} else {
+					logger.info("No solution was found while waiting up to 20s.");
+					evaluatedPipe.cancel(true);
 				}
 
 			} catch (Exception e) {
 				logger.info("Got exception while evaluating {}", e.getMessage());
-				evaluatedPipe.cancel(true);
+			//	evaluatedPipe.cancel(true);
 			}
 
 		}
