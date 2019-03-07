@@ -1,5 +1,6 @@
 package jaicore.ml.core.dataset.sampling.infile;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
@@ -68,7 +69,8 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 		samplingAlgorithm.setOutputFileName(OUTPUT_FILE_NAME);
 		samplingAlgorithm.call();
 		int outputSize = ArffUtilities.countDatasetEntries(new File(OUTPUT_FILE_NAME), true);
-		assertEquals(sampleSize, outputSize);
+		// Allow sample size to be one off, in case of rounding errors
+		assertTrue(sampleSize >= outputSize -1 && sampleSize <= outputSize + 1);
 	}
 
 	/**
