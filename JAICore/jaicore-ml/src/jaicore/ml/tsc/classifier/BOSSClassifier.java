@@ -40,6 +40,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		this.alphabet = alphabet;
 	}
 
+	
 	@Override
 	public Integer predict(double[] univInstance) throws PredictionException {
 		//TODO Exceptions 
@@ -68,16 +69,29 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 
 	@Override
 	public Integer predict(List<double[]> multivInstance) throws PredictionException {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("The BOSS classifier is a univariat classifer");
 	}
 
 	@Override
 	public List<Integer> predict(TimeSeriesDataset dataset) throws PredictionException {
-		// TODO Auto-generated method stub
-		return null;
+		ArrayList<Integer> predictions = new ArrayList<Integer>();
+		for(double[][] matrix: dataset.getValueMatrices()) {
+			for(double[] instance : matrix) {
+				predictions.add(predict(instance));
+			}
+		}
+		return predictions;
 	}
 
+	/**
+	 * @param a The distance starting point histogram.
+	 * @param b	The distance destination histogram.
+	 * @return The distance between Histogram a and b.
+	 * 
+	 * The distance itself is calculated as 0 if the word does not appear in b but not in a and 
+	 * if the word exists in a but not in it is the wordcount of a squared. For the "normal" case 
+	 * where the word exists in a and b the distance is wordcount of a minus b squared.
+	 */
 	private double BossDistance(HashMap<Integer,Integer> a, HashMap<Integer,Integer> b) {
 		double result = 0;
 		for(Integer key : a.keySet()) {

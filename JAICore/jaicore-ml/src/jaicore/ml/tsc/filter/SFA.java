@@ -116,7 +116,7 @@ public class SFA implements IFilter {
 		
 		
 		for(int matrix = 0; matrix < DFTDataset.getNumberOfVariables(); matrix++) {
-			//for each part of every coefficient claculate the bins for the alphabet (number of bins == number of letters)
+			//for each part of every coefficient calculate the bins for the alphabet (number of bins == number of letters)
 			double[][] lookUpTable = new double [numberOfDesieredDFTCoefficients*2][alphabet.length-1];
 			
 			for(int coeficient = 0; coeficient < numberOfDesieredDFTCoefficients*2; coeficient++) {
@@ -158,23 +158,44 @@ public class SFA implements IFilter {
 
 
 	@Override
-	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[] transform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		
 		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
 	}
 
 
 	@Override
-	public void fitInstance(double[] input) throws IllegalArgumentException {
+	public void fit(double[] input) throws IllegalArgumentException {
 		
 		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
 	}
 
 
 	@Override
-	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[] fitTransform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		
 		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+	}
+
+
+	@Override
+	public double[][] transform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
+	@Override
+	public void fit(double[][] input) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		fit(input);
+		return transform(input);
 	}
 
 }

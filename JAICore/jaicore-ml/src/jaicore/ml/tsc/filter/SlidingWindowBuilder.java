@@ -86,8 +86,8 @@ public class SlidingWindowBuilder implements IFilter{
 	 * This operation is unsuported because it would result in one stream of new instances in one array.
 	 */
 	@Override
-	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		throw new UnsupportedOperationException();
+	public double[] transform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		throw new UnsupportedOperationException("This is done by the special fit and transform because this mehtod must return a new dataset not a double array.");
 	}
 	
 	/*
@@ -95,9 +95,9 @@ public class SlidingWindowBuilder implements IFilter{
 	 * not usefull
 	 */
 	@Override
-	public void fitInstance(double[] input) throws IllegalArgumentException {
+	public void fit(double[] input) throws IllegalArgumentException {
 		
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("This is done by using the special fit and transform.");
 		/*
 		 * if(defaultWindowSize > input.length) { //TODO Or should than the instance be
 		 * returned throw new
@@ -112,9 +112,29 @@ public class SlidingWindowBuilder implements IFilter{
 	}
 
 	@Override
-	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		fitInstance(input);
-		return transformInstance(input);
+	public double[] fitTransform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		throw new UnsupportedOperationException("This is done by using the special fit and transform.");
+		/*
+		 * fitInstance(input); return transformInstance(input);
+		 */
+	}
+
+	@Override
+	public double[][] transform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void fit(double[][] input) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

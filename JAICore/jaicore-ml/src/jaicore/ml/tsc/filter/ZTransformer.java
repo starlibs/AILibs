@@ -21,6 +21,7 @@ public class ZTransformer implements IFilter {
 	private double mean;
 	private double deviation;
 	private ArrayList <double[][]> ztransformedDataset = new ArrayList<double[][]>();
+	private double[][] ztransformedMatrix;
 	
 	//To get a unbiased estimate for the variance the intermediated results are 
 	//divided by n-1 instead of n(Number of samples of Population)
@@ -28,6 +29,7 @@ public class ZTransformer implements IFilter {
 	
 	private boolean fitted = false;
 	private boolean fittedInstance = false;
+	private boolean fittedMatrix = false;
 
 	
 	public void setBasselCorrected(boolean basselCorrected) {
@@ -48,13 +50,11 @@ public class ZTransformer implements IFilter {
 		if(!fitted) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
 		}
-		double[][] ztransformedMatrix = new double[input.getNumberOfInstances()][input.getValues(0)[0].length];
+		
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++){			
-			for(int instance = 0; instance <input.getNumberOfInstances(); instance++) {
-				ztransformedMatrix[instance] = fitTransformInstance(input.getValues(matrix)[instance]);
-				fittedInstance = false;
-			}
+			fitTransform(input.getValues(matrix));
 			ztransformedDataset.add(ztransformedMatrix);
+			fittedMatrix = false;
 		}
 
 		return new TimeSeriesDataset(ztransformedDataset);
@@ -86,7 +86,7 @@ public class ZTransformer implements IFilter {
 	}
 	
 	@Override
-	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[] transform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		if(!fitted) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transfom method is called");
 		}
@@ -102,7 +102,7 @@ public class ZTransformer implements IFilter {
 	}
 	
 	@Override
-	public void fitInstance(double[] input) throws IllegalArgumentException {
+	public void fit(double[] input) throws IllegalArgumentException {
 		double SumSq = 0;
 		double SumMean = 0;
 		double NumberEntrys = input.length;
@@ -126,9 +126,33 @@ public class ZTransformer implements IFilter {
 		fittedInstance = true;
 	}
 	@Override
-	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		fitInstance(input);
-		return transformInstance(input);
+	public double[] fitTransform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		fit(input);
+		return transform(input);
+	}
+
+	@Override
+	public double[][] transform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		if(!fittedMatrix) {
+			throw new NoneFittedFilterExeception("The fit method must be called first.");
+		}
+		ztransformedMatrix = new double[input.length][input[0].length];
+		for(int instance = 0; instance <input.length; instance++) {
+			ztransformedMatrix[instance] = fitTransform(input[instance]);
+			fittedInstance = false;
+		}
+		return ztransformedMatrix;
+	}
+
+	@Override
+	public void fit(double[][] input) throws IllegalArgumentException {
+		fittedMatrix = true;
+	}
+
+	@Override
+	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		fit(input);
+		return transform(input);
 	}
 
 }

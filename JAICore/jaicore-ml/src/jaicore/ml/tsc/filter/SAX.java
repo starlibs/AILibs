@@ -139,7 +139,25 @@ public class SAX implements IFilter {
 	}
 
 	@Override
-	public double[] fitTransformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[] fitTransform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double[][] transform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void fit(double[][] input) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		// TODO Auto-generated method stub
 		return null;
 	}

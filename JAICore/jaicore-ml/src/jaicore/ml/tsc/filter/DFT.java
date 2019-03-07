@@ -23,7 +23,8 @@ public class DFT implements IFilter {
 	 * matrix in the original dataset.
 	 */
 	private ArrayList<double[][]> DFTCoefficients = new ArrayList<double[][]>();
-	//TODO sinvollen wert finden 
+	
+	private double[][] DFTCoefficientsMatrix;
 	
 	private double[] DFTCoefficientsInstance;
 	/**
@@ -40,6 +41,7 @@ public class DFT implements IFilter {
 	 * tracks weather the fit method was called
 	 */
 	private boolean fittedInstance = false;
+	private boolean fittedMatrix = false;
 	private boolean fitted = false;
 	
 	/**
@@ -88,14 +90,10 @@ public class DFT implements IFilter {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
 		
-		double[][] DFTCoefficientsMatrix = new double[input.getNumberOfInstances()][numberOfDisieredCoefficients*2];
 		
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
-			for(int instance = 0; instance<input.getNumberOfInstances(); instance++) {
-				double[] DFTCoefficientsOFInstance = fitTransformInstance(input.getValues(matrix)[instance]);
-				fittedInstance = false;
-				DFTCoefficientsMatrix[instance] = DFTCoefficientsOFInstance;
-			}
+			fitTransform(input.getValues(matrix));
+			fittedMatrix = false;
 			DFTCoefficients.add(DFTCoefficientsMatrix);
 		}
 		
@@ -110,7 +108,7 @@ public class DFT implements IFilter {
 
 	
 	@Override
-	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[] transform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		if(!fitted) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
 		}
@@ -118,7 +116,7 @@ public class DFT implements IFilter {
 	}
 
 	@Override
-	public void fitInstance(double[] input) throws IllegalArgumentException{
+	public void fit(double[] input) throws IllegalArgumentException{
 		
 		if(numberOfDisieredCoefficients > input.length) {
 			throw new IllegalArgumentException("There cannot be more DFT coefficents calcualated than there entrys in the basis instance.");
@@ -167,9 +165,38 @@ public class DFT implements IFilter {
 	}
 
 	@Override
-	public double[] fitTransformInstance(double[] input)  throws IllegalArgumentException, NoneFittedFilterExeception {
-		fitInstance(input);
-		return transformInstance(input) ;
+	public double[] fitTransform(double[] input)  throws IllegalArgumentException, NoneFittedFilterExeception {
+		fit(input);
+		return transform(input) ;
+	}
+
+	@Override
+	public double[][] transform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void fit(double[][] input) throws IllegalArgumentException {
+		DFTCoefficientsMatrix = new double[input.length][numberOfDisieredCoefficients*2];
+		double[] DFTCoefficientsOFInstance = null;
+		for(int instance = 0; instance<input.length; instance++) {
+			try {
+				DFTCoefficientsOFInstance = fitTransform(input[instance]);
+			} catch (NoneFittedFilterExeception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			fittedInstance = false;
+			DFTCoefficientsMatrix[instance] = DFTCoefficientsOFInstance;
+		}
+		
+	}
+
+	@Override
+	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+		fit(input);
+		return transform(input);
 	}
 
 }
