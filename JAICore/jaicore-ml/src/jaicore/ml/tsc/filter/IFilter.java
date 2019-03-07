@@ -49,7 +49,7 @@ public interface IFilter {
 	 * @param input the to fit and transform instance
 	 * @return the transformed instance
 	 */
-	public double[] fitTransformInstance(double[] input)throws IllegalArgumentException, NoneFittedFilterExeception;
+	public double[] fitTransform(double[] input)throws IllegalArgumentException, NoneFittedFilterExeception;
 	
 	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception;
 }
