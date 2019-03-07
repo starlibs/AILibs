@@ -1,9 +1,17 @@
 package jaicore.ml.tsc.filter.derivate;
 
 /**
- * BackwardDifferenceDerivate f'(n) = f(n-1) - f(n)
+ * BackwardDifferenceDerivate f'(n) = f(n) - f(n-1)
  */
 public class BackwardDifferenceDerivate extends ADerivateFilter {
+
+    public BackwardDifferenceDerivate() {
+        super();
+    }
+
+    public BackwardDifferenceDerivate(boolean withBoundaries) {
+        super(withBoundaries);
+    }
 
     @Override
     protected double[] derivate(double[] T) {

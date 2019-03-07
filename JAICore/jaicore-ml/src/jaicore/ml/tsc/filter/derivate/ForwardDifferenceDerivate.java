@@ -5,6 +5,14 @@ package jaicore.ml.tsc.filter.derivate;
  */
 public class ForwardDifferenceDerivate extends ADerivateFilter {
 
+    public ForwardDifferenceDerivate() {
+        super();
+    }
+
+    public ForwardDifferenceDerivate(boolean withBoundaries) {
+        super(withBoundaries);
+    }
+
     @Override
     protected double[] derivate(double[] T) {
         double[] derivate = new double[T.length - 1];

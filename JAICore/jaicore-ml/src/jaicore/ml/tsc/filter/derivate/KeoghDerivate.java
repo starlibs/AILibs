@@ -7,6 +7,14 @@ package jaicore.ml.tsc.filter.derivate;
  */
 public class KeoghDerivate extends ADerivateFilter {
 
+    public KeoghDerivate() {
+        super();
+    }
+
+    public KeoghDerivate(boolean withBoundaries) {
+        super(withBoundaries);
+    }
+
     @Override
     protected double[] derivate(double[] T) {
         double[] derivate = new double[T.length - 2];
