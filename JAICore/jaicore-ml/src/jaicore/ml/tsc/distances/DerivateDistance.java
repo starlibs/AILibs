@@ -25,7 +25,7 @@ import jaicore.ml.tsc.util.TimeSeriesUtil;
  * Euclidean distance as underlying distance measure is commonly denoted as
  * DD_ED.
  */
-public class DerivateTransformDistance implements ITimeSeriesDistance {
+public class DerivateDistance implements ITimeSeriesDistance {
 
     /**
      * Alpha value that adjusts the parameters {@link a} and {@link b}, that is
@@ -68,7 +68,7 @@ public class DerivateTransformDistance implements ITimeSeriesDistance {
      * @param derivateDistance   The distance measure to use to calculate the
      *                           distance of the derivate values.
      */
-    public DerivateTransformDistance(double alpha, ITimeSeriesDistance timeSeriesDistance,
+    public DerivateDistance(double alpha, ITimeSeriesDistance timeSeriesDistance,
             ITimeSeriesDistance derivateDistance) {
         // Parameter checks.
         if (alpha > Math.PI / 2 || alpha < 0)
@@ -90,7 +90,7 @@ public class DerivateTransformDistance implements ITimeSeriesDistance {
      * @param distance The distance measure to use to calculate the distance of the
      *                 function and derivate values.
      */
-    public DerivateTransformDistance(double alpha, ITimeSeriesDistance distance) {
+    public DerivateDistance(double alpha, ITimeSeriesDistance distance) {
         this(alpha, distance, distance);
     }
 
