@@ -66,7 +66,7 @@ public class WeightedDynamicTimeWarpingRefTest {
         double Wmax = 1;
 
         WeightedDTW referenceWeightedDynamicTimeWarping = new WeightedDTW(g);
-        WeightedDynamicTimeWarping weightedDynamicTimeWarping = new WeightedDynamicTimeWarping(2, g, Wmax,
+        WeightedDynamicTimeWarping weightedDynamicTimeWarping = new WeightedDynamicTimeWarping(g, Wmax,
                 ScalarDistanceUtil.getSquaredDistance());
 
         double[][] values = dataset.getValues(0);
@@ -108,7 +108,7 @@ public class WeightedDynamicTimeWarpingRefTest {
 
         // Measure time for own implementation.
         double ownStart = System.currentTimeMillis();
-        WeightedDynamicTimeWarping weightedDynamicTimeWarping = new WeightedDynamicTimeWarping(2, g, Wmax,
+        WeightedDynamicTimeWarping weightedDynamicTimeWarping = new WeightedDynamicTimeWarping(g, Wmax,
                 ScalarDistanceUtil.getSquaredDistance());
         for (int i = 0; i < numberOfTestInstances; i++) {
             for (int j = i; j < values.length; j++) {
