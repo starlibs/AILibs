@@ -63,6 +63,17 @@ public class DerivateDistanceTest {
     }
 
     /**
+     * Robustness test: When initializing with <code>null</code> for the derivation
+     * the constructor is supposed to throw an IllegalArgumentExpection.
+     */
+    @Test
+    public void testRobustnessForNullDerivationMeasure() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            new DerivateDistance(0.5, null, new EuclideanDistance(), new EuclideanDistance());
+        });
+    }
+
+    /**
      * Robustness test: When initializing with <code>alpha > pi/2</code> the
      * constuctor is supposed to thrown an IllegalArgumentException.
      */

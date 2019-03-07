@@ -1,6 +1,7 @@
 package jaicore.ml.tsc.distances;
 
-import jaicore.ml.tsc.util.TimeSeriesUtil;
+import jaicore.ml.tsc.filter.derivate.ADerivateFilter;
+import jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
 
 /**
  * Implementation of the Derivate Distance (DD) measure as published in "Using
@@ -46,6 +47,9 @@ public class DerivateDistance implements ITimeSeriesDistance {
      */
     private double b;
 
+    /** The derivate calculation to use. */
+    private ADerivateFilter derivate;
+
     /**
      * The distance measure to use to calculate the distance of the function values.
      */
@@ -63,6 +67,38 @@ public class DerivateDistance implements ITimeSeriesDistance {
      * @param alpha              The distance measure to use to calculate the
      *                           distance of the function values.
      *                           <code>0 <= alpha <= pi/2</code>.
+     * @param derivate           The derivate calculation to use.
+     * @param timeSeriesDistance The distance measure to use to calculate the
+     *                           distance of the derivate values.
+     * @param derivateDistance   The distance measure to use to calculate the
+     *                           distance of the derivate values.
+     */
+    public DerivateDistance(double alpha, ADerivateFilter derivate, ITimeSeriesDistance timeSeriesDistance,
+            ITimeSeriesDistance derivateDistance) {
+        // Parameter checks.
+        if (alpha > Math.PI / 2 || alpha < 0) {
+            throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
+        }
+        if (derivate == null) {
+            throw new IllegalArgumentException("Parameter derivate must not be null.");
+        }
+        if (timeSeriesDistance == null) {
+            throw new IllegalArgumentException("Parameter timeSeriesDistance must not be null.");
+        }
+
+        setAlpha(alpha);
+        this.derivate = derivate;
+        this.timeSeriesDistance = timeSeriesDistance;
+        this.derivateDistance = derivateDistance;
+    }
+
+    /**
+     * Constructor with individual distance measures for the function and derivate
+     * values that uses the {@link BackwardDifferenceDerivate} as derivation.
+     * 
+     * @param alpha              The distance measure to use to calculate the
+     *                           distance of the function values.
+     *                           <code>0 <= alpha <= pi/2</code>.
      * @param timeSeriesDistance The distance measure to use to calculate the
      *                           distance of the derivate values.
      * @param derivateDistance   The distance measure to use to calculate the
@@ -70,15 +106,7 @@ public class DerivateDistance implements ITimeSeriesDistance {
      */
     public DerivateDistance(double alpha, ITimeSeriesDistance timeSeriesDistance,
             ITimeSeriesDistance derivateDistance) {
-        // Parameter checks.
-        if (alpha > Math.PI / 2 || alpha < 0)
-            throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
-        if (timeSeriesDistance == null)
-            throw new IllegalArgumentException("Parameter timeSeriesDistance must not be null");
-
-        setAlpha(alpha);
-        this.timeSeriesDistance = timeSeriesDistance;
-        this.derivateDistance = derivateDistance;
+        this(alpha, new BackwardDifferenceDerivate(), timeSeriesDistance, derivateDistance);
     }
 
     /**
@@ -87,17 +115,33 @@ public class DerivateDistance implements ITimeSeriesDistance {
      * 
      * @param alpha    The distance measure to use to calculate the distance of the
      *                 function values. <code>0 <= alpha <= pi/2</code>.
+     * @param derivate The derivate calculation to use.
+     * @param distance The distance measure to use to calculate the distance of the
+     *                 function and derivate values.
+     */
+    public DerivateDistance(double alpha, ADerivateFilter derivate, ITimeSeriesDistance distance) {
+        this(alpha, derivate, distance, distance);
+    }
+
+    /**
+     * Constructor that uses the same distance measures for the function and
+     * derivate values that uses the {@link BackwardDifferenceDerivate} as
+     * derivation.
+     * 
+     * @param alpha    The distance measure to use to calculate the distance of the
+     *                 function values. <code>0 <= alpha <= pi/2</code>.
+     * @param derivate The derivate calculation to use.
      * @param distance The distance measure to use to calculate the distance of the
      *                 function and derivate values.
      */
     public DerivateDistance(double alpha, ITimeSeriesDistance distance) {
-        this(alpha, distance, distance);
+        this(alpha, new BackwardDifferenceDerivate(), distance, distance);
     }
 
     @Override
     public double distance(double[] A, double[] B) {
-        double[] derivateA = TimeSeriesUtil.backwardDifferenceDerivate(A);
-        double[] derivateB = TimeSeriesUtil.backwardDifferenceDerivate(B);
+        double[] derivateA = this.derivate.transform(A);
+        double[] derivateB = this.derivate.transform(B);
 
         return a * timeSeriesDistance.distance(A, B) + b * derivateDistance.distance(derivateA, derivateB);
     }
