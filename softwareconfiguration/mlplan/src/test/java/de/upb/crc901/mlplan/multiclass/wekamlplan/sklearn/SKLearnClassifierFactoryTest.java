@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import hasco.model.ComponentInstance;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.scikitwrapper.ScikitLearnWrapper;
@@ -20,16 +19,8 @@ import weka.core.Instances;
 
 public class SKLearnClassifierFactoryTest {
 
-	private static final File TEST_PIPE = new File("testrsc/sklearn/sklearn_classifier_factory.pipe_description.json");
-	private static ComponentInstance componentInstance;
-	private static SKLearnClassifierFactory factory;
-
 	@BeforeClass
 	public static void setup() throws IOException {
-		// ObjectMapper om = new ObjectMapper();
-		// componentInstance = ComponentInstance.fromJson(new ObjectMapper().readTree(FileUtil.readFileAsString(TEST_PIPE)));
-		// System.out.println(componentInstance);
-		// factory = new SKLearnClassifierFactory();
 	}
 
 	@Test
