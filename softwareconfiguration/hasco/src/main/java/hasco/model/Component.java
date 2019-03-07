@@ -152,7 +152,9 @@ public class Component {
 	 * @param param The parameter to be added.
 	 */
 	public void addParameter(final Parameter param) {
-		assert !this.parameters.stream().anyMatch(p -> p.getName().equals(param.getName())) : "Component " + this.name + " already has parameter with name " + param.getName();
+		if (this.parameters.stream().anyMatch(p -> p.getName().equals(param.getName()))) {
+			throw new IllegalArgumentException("Component " + this.name + " already has a parameter with name " + param.getName());
+		}
 		this.parameters.add(param);
 	}
 

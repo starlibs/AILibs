@@ -41,7 +41,6 @@ import jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProble
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  * This is the class that conducts the actual problem reduction of software configuration to HTN Planning
@@ -63,6 +62,8 @@ public class HASCOReduction<V extends Comparable<V>>
 	private static final String REFINE_PARAMETER_PREFIX = "2_tRefineParam";
 	private static final String DECLARE_CLOSED_PREFIX = "2_declareClosed";
 	private static final String REDEF_VALUE_PREFIX = "2_redefValue";
+
+	private static final String COMPONENT_OF_C1 = "component(c1)";
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> originalProblem;
 
@@ -103,7 +104,7 @@ public class HASCOReduction<V extends Comparable<V>>
 				params.add(new VariableParam("c2"));
 				int j = 0;
 				Map<CNFFormula, Monom> addList = new HashMap<>();
-				Monom standardKnowledgeAboutNewComponent = new Monom("component(c2) & resolves(c1, '" + i + "', '" + c.getName() + "', c2)");
+				Monom standardKnowledgeAboutNewComponent = new Monom("component(c2) & resolves(c1, '" + i + "', '" + c.getName() + "'," + " c2" + ")");
 				for (Parameter p : c.getParameters()) {
 					String paramIdentifier = "p" + (++j);
 					params.add(new VariableParam(paramIdentifier));
@@ -144,23 +145,21 @@ public class HASCOReduction<V extends Comparable<V>>
 				}
 
 				addList.put(new CNFFormula(), standardKnowledgeAboutNewComponent);
-				CEOCOperation newOp = new CEOCOperation(SATISFY_PREFIX + i + "With" + c.getName(), params, new Monom("component(c1)"), addList, new HashMap<>(), new ArrayList<>());
+				CEOCOperation newOp = new CEOCOperation(SATISFY_PREFIX + i + "With" + c.getName(), params, new Monom(COMPONENT_OF_C1), addList, new HashMap<>(), new ArrayList<>());
 				operations.add(newOp);
 			}
 		}
 
 		/* create operations for parameter initialization */
-		{
-			Map<CNFFormula, Monom> addList = new HashMap<>();
-			addList.put(new CNFFormula(), new Monom("val(container,newValue) & overwritten(container)"));
-			Map<CNFFormula, Monom> deleteList = new HashMap<>();
-			deleteList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
-			operations.add(new CEOCOperation(REDEF_VALUE_PREFIX, "container,previousValue,newValue", new Monom("val(container,previousValue)"), addList, deleteList, ""));
-			addList = new HashMap<>();
-			addList.put(new CNFFormula(), new Monom("closed(container)"));
-			deleteList = new HashMap<>();
-			operations.add(new CEOCOperation(DECLARE_CLOSED_PREFIX, "container", new Monom(), addList, deleteList, ""));
-		}
+		Map<CNFFormula, Monom> addList = new HashMap<>();
+		addList.put(new CNFFormula(), new Monom("val(container,newValue) & overwritten(container)"));
+		Map<CNFFormula, Monom> deleteList = new HashMap<>();
+		deleteList.put(new CNFFormula(), new Monom("val(container,previousValue)"));
+		operations.add(new CEOCOperation(REDEF_VALUE_PREFIX, "container,previousValue,newValue", new Monom("val(container,previousValue)"), addList, deleteList, ""));
+		addList = new HashMap<>();
+		addList.put(new CNFFormula(), new Monom("closed(container)"));
+		deleteList = new HashMap<>();
+		operations.add(new CEOCOperation(DECLARE_CLOSED_PREFIX, "container", new Monom(), addList, deleteList, ""));
 
 		/* create methods */
 		Collection<OCIPMethod> methods = new ArrayList<>();
@@ -191,7 +190,7 @@ public class HASCOReduction<V extends Comparable<V>>
 				}
 
 				int sc = 0;
-				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"));
+				network.add(new Literal(SATISFY_PREFIX + i + "With" + c.getName() + "(" + "c1" + "," + "c2" + refinementArgumentsSB.toString() + ")"));
 				for (Entry<String, String> requiredInterface : requiredInterfaces.entrySet()) {
 					String paramName = "sc" + (++sc);
 					params.add(new VariableParam(paramName));
@@ -206,10 +205,10 @@ public class HASCOReduction<V extends Comparable<V>>
 						refinementArgumentsSB.append(", " + paramIdentifier);
 					}
 				}
-				network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"));
+				network.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(" + "c1" + "," + "c2" + refinementArgumentsSB.toString() + ")"));
 				List<VariableParam> outputs = new ArrayList<>(params);
 				outputs.remove(inputParam);
-				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom("component(c1)"), new TaskNetwork(network), false, outputs, new Monom()));
+				methods.add(new OCIPMethod("resolve" + i + "With" + c.getName(), params, new Literal(RESOLVE_COMPONENT_IFACE_PREFIX + i + "(c1,c2)"), new Monom(COMPONENT_OF_C1), new TaskNetwork(network), false, outputs, new Monom()));
 			}
 
 			/* create methods for choosing/refining parameters */
@@ -237,12 +236,12 @@ public class HASCOReduction<V extends Comparable<V>>
 							new Monom("parameterContainer('" + c.getName() + "', '" + p.getName() + "', object, container) & val(container,curval)"), new TaskNetwork(REDEF_VALUE_PREFIX + "(container,curval,newval)"), false, "",
 							new Monom("isValidParameterRangeRefinement('" + c.getName() + "', object, '" + p.getName() + "', container, curval, newval)")));
 				}
-				initNetwork.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"));
+				initNetwork.add(new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(" + "c1" + "," + "c2" + refinementArgumentsSB.toString() + ")"));
 				params = new ArrayList<>(params);
 				params.add(1, new VariableParam("c2"));
-				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"), new Monom("component(c1)"),
+				methods.add(new OCIPMethod("refineParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"), new Monom(COMPONENT_OF_C1),
 						new TaskNetwork(initNetwork), false, new ArrayList<>(), new Monom("!refinementCompleted('" + c.getName() + "', c2)")));
-				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"), new Monom("component(c1)"),
+				methods.add(new OCIPMethod("closeRefinementOfParamsOf" + c.getName(), params, new Literal(REFINE_PARAMETERS_PREFIX + c.getName() + "(c1,c2" + refinementArgumentsSB.toString() + ")"), new Monom(COMPONENT_OF_C1),
 						new TaskNetwork(), false, new ArrayList<>(), new Monom("refinementCompleted('" + c.getName() + "', c2)")));
 			}
 		}
@@ -267,7 +266,7 @@ public class HASCOReduction<V extends Comparable<V>>
 	 * @param plannerFactory
 	 * @return
 	 */
-	public <T, A, ISearch extends GraphSearchInput<T, A>> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
+	public <T, A> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
 		return transformer.encodeProblem(this.getPlanningProblem()).getGraphGenerator();
 	}
 
@@ -302,7 +301,7 @@ public class HASCOReduction<V extends Comparable<V>>
 			}
 
 		};
-		return new CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>(planningProblem, planEvaluator);
+		return new CostSensitiveHTNPlanningProblem<>(planningProblem, planEvaluator);
 	}
 
 	@Override
