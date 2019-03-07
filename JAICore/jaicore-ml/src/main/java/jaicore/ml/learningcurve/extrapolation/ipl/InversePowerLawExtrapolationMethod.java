@@ -20,14 +20,16 @@ public class InversePowerLawExtrapolationMethod implements LearningCurveExtrapol
 
 	private static final String DEFAULT_HOST = "localhost";
 
+	private static final String DEFAULT_PORT = "8080";
+
 	private String serviceUrl;
 
 	public InversePowerLawExtrapolationMethod() {
-		this.serviceUrl = "http://" + DEFAULT_HOST + ENDPOINT;
+		this.serviceUrl = "http://" + DEFAULT_HOST + ":" + DEFAULT_PORT + ENDPOINT;
 	}
 
-	public InversePowerLawExtrapolationMethod(String serviceHost) {
-		this.serviceUrl = "http://" + serviceHost + ENDPOINT;
+	public InversePowerLawExtrapolationMethod(String serviceHost, String port) {
+		this.serviceUrl = "http://" + serviceHost + ":" + port + ENDPOINT;
 	}
 
 	@Override
