@@ -98,7 +98,7 @@ public class MLPlanBuilder {
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
 
-	private HASCOViaFDFactory<? extends GraphSearchInput<TFDNode, String>, Double> hascoFactory = new HASCOViaFDFactory<>();
+	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double>();
 
 	private Predicate<TFDNode> priorizingPredicate = null;
 
