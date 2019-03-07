@@ -47,7 +47,7 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					break;
 				Vector instance = instanceFeatures.get(0);
 
-				// get two random pair of dyads
+				// get random pair of dyads
 				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instance));
 				Collections.shuffle(dyads, random);
 

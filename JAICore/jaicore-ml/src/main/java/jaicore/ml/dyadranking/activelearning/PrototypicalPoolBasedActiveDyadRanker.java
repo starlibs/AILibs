@@ -3,6 +3,7 @@ package jaicore.ml.dyadranking.activelearning;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -24,22 +25,68 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	private int maxBatchSize;
 	private double ratioOfOldInstancesForMinibatch;
 	private int lengthOfTopRankingToConsider;
+	private int numberRandomQueriesAtStart;
+	private int iteration;
+	private int seed;
 
-	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider) {
-		super(ranker, poolProvider);
-		seenInstances = new ArrayList<IInstance>(poolProvider.getPool().size());
-	}
+//	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider) {
+//		super(ranker, poolProvider);
+//		seenInstances = new ArrayList<IInstance>(poolProvider.getPool().size());
+//	}
 
 	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider,
-			int maxBatchSize, int lengthOfTopRankingToConsider, double ratioOfOldInstancesForMinibatch) {
+			int maxBatchSize, int lengthOfTopRankingToConsider, double ratioOfOldInstancesForMinibatch, int numberRandomQueriesAtStart, int seed) {
 		super(ranker, poolProvider);
 		seenInstances = new ArrayList<IInstance>(poolProvider.getPool().size());
 		this.maxBatchSize = maxBatchSize;
 		this.ratioOfOldInstancesForMinibatch = ratioOfOldInstancesForMinibatch;
 		this.lengthOfTopRankingToConsider = lengthOfTopRankingToConsider;
+		this.numberRandomQueriesAtStart = numberRandomQueriesAtStart;
+		this.iteration = 0;
+		this.seed = seed;
 	}
 
 	public void activelyTrain(int numberOfQueries) {
+		
+		if(iteration < numberRandomQueriesAtStart) {
+
+			Random random = new Random(seed);
+			for (int i = 0; i < numberOfQueries; i++) {
+				Set<IInstance> minibatch = new HashSet<IInstance>();
+				for (int batchIndex = 0; batchIndex < maxBatchSize; batchIndex++) {
+					// get random instance
+					List<Vector> instanceFeatures = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
+					Collections.shuffle(instanceFeatures, random);
+					if (instanceFeatures.isEmpty())
+						break;
+					Vector instance = instanceFeatures.get(0);
+
+					// get random pair of dyads
+					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instance));
+					Collections.shuffle(dyads, random);
+
+					// query them
+					LinkedList<Vector> alternatives = new LinkedList<Vector>();
+					alternatives.add(dyads.get(0).getAlternative());
+					alternatives.add(dyads.get(1).getAlternative());
+					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
+							alternatives);
+//					System.out.println(queryInstance.toString());
+					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
+					minibatch.add(trueRanking);
+				}
+				// feed it to the ranker
+				try {
+					ranker.update(minibatch);
+				} catch (TrainingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		else {
+		
 		for (int i = 0; i < numberOfQueries; i++) {
 
 			// get the instance feature vector for which the top ranking has the lowest
@@ -107,7 +154,8 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-//			ranker.updateIteratively(groundTruthPair);
+		}
+		iteration++;
 		}
 	}
 
