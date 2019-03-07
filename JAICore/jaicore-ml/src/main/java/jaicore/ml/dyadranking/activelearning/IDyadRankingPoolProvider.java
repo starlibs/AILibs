@@ -6,6 +6,7 @@ import java.util.Set;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.activelearning.IActiveLearningPoolProvider;
 import jaicore.ml.dyadranking.Dyad;
+import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 
 /**
  * Interface for an active learning pool provider in the context of dyad
@@ -49,4 +50,6 @@ public interface IDyadRankingPoolProvider extends IActiveLearningPoolProvider {
 	public void setRemoveDyadsWhenQueried(boolean flag);
 	
 	public int getPoolSize();
+	
+	public DyadRankingDataset getQueriedRankings();
 }

@@ -36,6 +36,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	private HashMap<Vector, IDyadRankingInstance> dyadRankingsByAlternatives;
 	private List<IInstance> pool;
 	private boolean removeDyadsWhenQueried;
+	private HashSet<IDyadRankingInstance> queriedRankings;
 
 	public DyadDatasetPoolProvider(DyadRankingDataset dataset) {
 		removeDyadsWhenQueried = false;
@@ -48,6 +49,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			this.addDyadRankingInstance(drInstance);
 		}
+		this.queriedRankings = new HashSet<IDyadRankingInstance>();
 	}
 
 	@Override
@@ -77,6 +79,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 			for (Dyad dyad : dyadList)
 				this.removeDyadFromPool(dyad);
 		}
+		queriedRankings.add(trueRanking);
 		return trueRanking;
 	}
 
@@ -174,5 +177,11 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 			size+=set.size();
 		return size;
 	}
+
+	@Override
+	public DyadRankingDataset getQueriedRankings() {
+		return new DyadRankingDataset(new ArrayList<IDyadRankingInstance>(queriedRankings));
+	}
+	
 
 }
