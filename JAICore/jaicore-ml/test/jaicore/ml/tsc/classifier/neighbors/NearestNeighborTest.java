@@ -16,7 +16,9 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.distances.EuclideanDistance;
 
 /**
- * NearestNeighborTest
+ * Test suite for the
+ * {@link jaicore.ml.tsc.classifier.neighbors.NearestNeighborClassifer}
+ * implementation.
  */
 public class NearestNeighborTest {
 
@@ -54,6 +56,7 @@ public class NearestNeighborTest {
         ArrayList<double[][]> values = new ArrayList<>(1);
         values.add(data);
         dataset = new TimeSeriesDataset(values, targets);
+
         // Set up priority queue.
         nearestNeighbors = new PriorityQueue<>(NearestNeighborClassifier.nearestNeighborComparator);
         nearestNeighbors.add(new Pair<Integer, Double>(1, 0.1));
