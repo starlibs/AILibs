@@ -76,15 +76,14 @@ public class DerivateDistance implements ITimeSeriesDistance {
     public DerivateDistance(double alpha, ADerivateFilter derivate, ITimeSeriesDistance timeSeriesDistance,
             ITimeSeriesDistance derivateDistance) {
         // Parameter checks.
-        if (alpha > Math.PI / 2 || alpha < 0) {
+        if (alpha > Math.PI / 2 || alpha < 0)
             throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
-        }
-        if (derivate == null) {
+        if (derivate == null)
             throw new IllegalArgumentException("Parameter derivate must not be null.");
-        }
-        if (timeSeriesDistance == null) {
+        if (timeSeriesDistance == null)
             throw new IllegalArgumentException("Parameter timeSeriesDistance must not be null.");
-        }
+        if (derivateDistance == null)
+            throw new IllegalArgumentException("Parameter derivateDistance must not be null.");
 
         setAlpha(alpha);
         this.derivate = derivate;
