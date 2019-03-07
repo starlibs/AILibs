@@ -23,6 +23,10 @@ import weka.core.UnsupportedAttributeTypeException;
 
 public class WekaInstancesUtil {
 
+	private WekaInstancesUtil() {
+		/* Intentionally blank, hiding standard constructor for this util class. */
+	}
+
 	public static SimpleDataset wekaInstancesToDataset(final Instances data) {
 		List<IAttributeType<?>> attributeTypeList = new LinkedList<>();
 		for (int i = 0; i < data.numAttributes(); i++) {

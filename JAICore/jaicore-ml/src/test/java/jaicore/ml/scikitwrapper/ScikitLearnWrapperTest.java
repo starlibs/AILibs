@@ -80,7 +80,7 @@ public class ScikitLearnWrapperTest {
 		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction, ScikitLearnWrapper.getImportString(imports));
 		Instances dataset = this.loadARFF(CLASSIFICATION_ARFF);
 		slw.buildClassifier(dataset);
-		assertNotEquals(slw.getModelPath(), null);
+		assertNotEquals(null, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
 
