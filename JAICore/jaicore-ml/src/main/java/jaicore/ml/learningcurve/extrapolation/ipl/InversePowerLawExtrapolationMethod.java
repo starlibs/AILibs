@@ -20,7 +20,7 @@ public class InversePowerLawExtrapolationMethod implements LearningCurveExtrapol
 
 	private static final String DEFAULT_HOST = "localhost";
 
-	private static final String DEFAULT_PORT = "8080";
+	private static final String DEFAULT_PORT = "8081";
 
 	private String serviceUrl;
 
