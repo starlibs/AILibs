@@ -82,14 +82,22 @@ public class SlidingWindowBuilder implements IFilter{
 		return transform(input);
 	}
 
+	/*
+	 * This operation is unsuported because it would result in one stream of new instances in one array.
+	 */
 	@Override
 	public double[] transformInstance(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
-
+	
+	/*
+	 * This method is unsupported because the corresponding transform operation is
+	 * not usefull
+	 */
 	@Override
 	public void fitInstance(double[] input) throws IllegalArgumentException {
+		
+		throw new UnsupportedOperationException();
 		/*
 		 * if(defaultWindowSize > input.length) { //TODO Or should than the instance be
 		 * returned throw new

@@ -22,6 +22,8 @@ public interface IFilter {
 	 */
 	public double[] transformInstance(double [] input) throws IllegalArgumentException, NoneFittedFilterExeception;
 	
+	//public double[][] transformMatrix(double [][] input) throws IllegalArgumentException, NoneFittedFilterExeception;
+	
 	/** the function computes the needed information for the transform function.
 	 * @param input the dataset that is to transform 
 	 */
@@ -32,6 +34,8 @@ public interface IFilter {
 	 * @param input The to fit instance
 	 */
 	public void fitInstance(double [] input) throws IllegalArgumentException;
+	
+	//public void fitMatrix(double[][] input) throws IllegalArgumentException;
 	
 	/**	a utility function to avoid the added effort of calling the fit and transform function separate
 	 * @param input the dataset that is to be transfromed 
