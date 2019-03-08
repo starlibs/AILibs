@@ -97,7 +97,6 @@ public class KendallsTauOfTopKTest {
 
 		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), trueOrdering, predictedOrdering);
 
-		// 3 > 2 holds
 		Assert.assertEquals(5.0d, distance);
 		
 	}
