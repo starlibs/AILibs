@@ -453,7 +453,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* currently, we only support tree search */
-		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
+		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n + "").reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
 				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* register node in map and create annotation object */
@@ -858,7 +858,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			} catch (InterruptedException e) {
 				this.logger.warn("Got interrupted during shutdown!", e);
 			}
-			assert this.pool.isTerminated() : "The worker pool has not been shutdown correctly!";
+			if (this.pool != null) {
+				assert this.pool.isTerminated() : "The worker pool has not been shutdown correctly!";
+			}
 			if (!this.pool.isTerminated()) {
 				this.logger.error("Worker pool has not been shutdown correctly!");
 			} else {
