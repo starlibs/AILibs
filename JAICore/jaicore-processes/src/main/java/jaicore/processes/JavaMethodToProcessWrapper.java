@@ -53,12 +53,11 @@ public class JavaMethodToProcessWrapper {
 		wrappers.add(this);
 	}
 
-	static public String getAbsoluteClasspath() {
+	public static String getAbsoluteClasspath() {
 		try {
-			return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar
-					+ URLDecoder.decode(JavaMethodToProcessWrapper.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
+			return System.getProperty("java.class.path") + java.io.File.pathSeparatorChar + URLDecoder.decode(JavaMethodToProcessWrapper.class.getProtectionDomain().getCodeSource().getLocation().getPath(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+			logger.error("The encoding of the URL is unsupported", e);
 		}
 		return null;
 	}
@@ -80,8 +79,7 @@ public class JavaMethodToProcessWrapper {
 	 * @throws InterruptedException
 	 *             This is only thrown if the executing thread is interrupted from *outside* but not when it is canceled due to the timeout
 	 */
-	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final int timeout, final Object... inputs)
-			throws IOException, InvocationTargetException, InterruptedException {
+	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final int timeout, final Object... inputs) throws IOException, InvocationTargetException, InterruptedException {
 		TimeoutSubmitter submitter = TimeoutTimer.getInstance().getSubmitter();
 		TimerTask timerTask = submitter.interruptMeAfterMS(timeout);
 		Object c;
@@ -152,26 +150,17 @@ public class JavaMethodToProcessWrapper {
 
 		/* this hook kills the java process we just created. This is done on the system level, because process.destroy() is not reliable
 		 * The hook is invoked either on an interrupt of the executing thread or if the whole application is terminated (not abrubtly) */
-		Thread killerHook = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				logger.info("Destroying subprocess {}", JavaMethodToProcessWrapper.this.pidOfSubProcess);
-				if (process.isAlive()) {
-					try {
-						process.destroy();
-						ProcessUtil.killProcess(JavaMethodToProcessWrapper.this.pidOfSubProcess);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+		Thread killerHook = new Thread(() -> {
+			logger.info("Destroying subprocess {}", JavaMethodToProcessWrapper.this.pidOfSubProcess);
+			if (process.isAlive()) {
+				try {
+					process.destroy();
+					ProcessUtil.killProcess(JavaMethodToProcessWrapper.this.pidOfSubProcess);
+				} catch (IOException e) {
+					logger.error("An unexpected exception occurred while killing the process with id {}", JavaMethodToProcessWrapper.this.pidOfSubProcess, e);
 				}
-				logger.info("Subprocess {} destroyed.", JavaMethodToProcessWrapper.this.pidOfSubProcess);
-				//				try {
-				//					System.out.println("Running java processes: ");
-				//					ProcessUtil.getRunningJavaProcesses().stream().forEach(p -> System.out.println("\t" + p));
-				//				} catch (IOException e) {
-				//					e.printStackTrace();
-				//				}
 			}
+			logger.info("Subprocess {} destroyed.", JavaMethodToProcessWrapper.this.pidOfSubProcess);
 		});
 		Runtime.getRuntime().addShutdownHook(killerHook);
 
@@ -206,7 +195,7 @@ public class JavaMethodToProcessWrapper {
 				FileUtil.deleteFolderRecursively(dir);
 				return out;
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				logger.error("The class of the deserialized object could not be found", e);
 			}
 		}
 		if (nullResult.exists()) {
@@ -218,12 +207,12 @@ public class JavaMethodToProcessWrapper {
 			try {
 				exception = (Exception) FileUtil.unserializeObject(exceptionResult.getAbsolutePath());
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+				logger.error("The class of the deserialized object could not be found", e);
 			}
 			FileUtil.deleteFolderRecursively(dir);
 			throw new InvocationTargetException(exception);
 		}
-		logger.warn("Subprocess execution terminated but no result was observed for " + id + "!");
+		logger.warn("Subprocess execution terminated but no result was observed for {}!", id);
 		return null;
 	}
 
@@ -243,38 +232,37 @@ public class JavaMethodToProcessWrapper {
 				String descriptor = argsArray.poll();
 				boolean isNull = descriptor.equals("");
 				objcts[counter] = isNull ? null : FileUtil.unserializeObject(folder.getAbsolutePath() + File.separator + descriptor);
-				params[counter] = isNull ? null : Class.forName(descriptor.substring(0, descriptor.lastIndexOf(".")));
+				params[counter] = isNull ? null : Class.forName(descriptor.substring(0, descriptor.lastIndexOf('.')));
 				counter++;
 			}
 
 			/* retrieve method and call it */
 			Method method = MethodUtils.getMatchingAccessibleMethod(Class.forName(clazz), method_name, params);
 			return method.invoke(targetObject, objcts);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new CommandExecutionException(e);
 		}
 	}
 
 	public static void main(final String[] args) {
-		LinkedList<String> argsArray = new LinkedList<String>(Arrays.asList(args));
+		LinkedList<String> argsArray = new LinkedList<>(Arrays.asList(args));
 		File folder = new File(argsArray.poll());
 		if (!folder.exists()) {
 			throw new IllegalArgumentException("The invocation call folder " + folder + " does not exist!");
 		}
 		String clazz = argsArray.poll();
-		String method_name = argsArray.poll();
+		String methodName = argsArray.poll();
 		String target = argsArray.poll();
 		Object result;
 		try {
-			result = executeCommand(folder, clazz, method_name, target, argsArray);
+			result = executeCommand(folder, clazz, methodName, target, argsArray);
 			FileUtil.serializeObject(result, folder.getAbsolutePath() + File.separator + "result." + (result != null ? "ser" : "null"));
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("An exception occurred while serializing the object", e);
 			try {
 				FileUtil.serializeObject(e, folder.getAbsolutePath() + File.separator + "result.exception");
 			} catch (IOException e1) {
-				e1.printStackTrace();
+				logger.error("An exception occurred while serializing the error message of the occurred exception.", e1);
 			}
 		}
 		logger.info("Finishing subprocess");
