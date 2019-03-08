@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.concurrent.TimeoutTimer;
+import jaicore.interrupt.Interrupter;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
@@ -249,7 +251,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 					/* setup timeout timer to interrupt evaluation */
 					TimerTask abortionTask = null;
-					AtomicBoolean nodeEvaluationTimedOut = new AtomicBoolean(false);
+					String interruptReason = "RCNE-timeout-" + System.currentTimeMillis();
 					if (timeoutForJob >= 0) {
 						Thread executingThread = Thread.currentThread();
 						abortionTask = new TimerTask() {
@@ -260,8 +262,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 								/* if the executing thread has not been interrupted from outside */
 								if (!executingThread.isInterrupted()) {
 									RandomCompletionBasedNodeEvaluator.this.logger.info("Sending an controlled interrupt to the evaluating thread to get it back here.");
-									nodeEvaluationTimedOut.set(true);
-									executingThread.interrupt();
+									Interrupter.get().interruptThread(executingThread, interruptReason);
 								}
 							}
 						};
@@ -288,7 +289,8 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							this.logger.warn("Got NULL result as score for path {}", completedPath);
 						}
 					} catch (InterruptedException e) {
-						boolean intentionalInterrupt = nodeEvaluationTimedOut.get();
+						assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t" + Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
+						boolean intentionalInterrupt = Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(interruptReason);
 						this.logger.info("Recognized {} interrupt", intentionalInterrupt ? "intentional" : "external");
 						if (!intentionalInterrupt) {
 							if (abortionTask != null) {
@@ -296,6 +298,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							}
 							throw e;
 						} else {
+							Interrupter.get().markInterruptOnCurrentThreadAsResolved(interruptReason);
 							Thread.interrupted(); // set interrupted to false
 						}
 					} catch (Exception ex) {

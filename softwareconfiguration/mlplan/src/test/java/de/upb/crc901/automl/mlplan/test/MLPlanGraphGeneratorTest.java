@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.test;
+package de.upb.crc901.automl.mlplan.test;
 
 import java.io.FileReader;
 import java.io.IOException;

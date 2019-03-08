@@ -12,6 +12,10 @@ import java.util.Random;
  */
 public class ComponentUtil {
 
+	private ComponentUtil() {
+		/* Intentionally left blank to prevent instantiation of this class. */
+	}
+
 	/**
 	 * This procedure returns a ComponentInstance of the given Component with default parameterization.
 	 * Note that required interfaces are not resolved.

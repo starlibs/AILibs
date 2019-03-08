@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.examples;
+package de.upb.crc901.automl.mlplan.examples;
 
 import java.io.File;
 import java.io.FileReader;
@@ -28,6 +28,8 @@ import weka.core.Instances;
 
 public class MLPlanARFFExample {
 
+	private static final boolean ACTIVATE_VISUALIZATION = false;
+
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
@@ -43,13 +45,15 @@ public class MLPlanARFFExample {
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(300, TimeUnit.SECONDS);
+		mlplan.setTimeout(60, TimeUnit.SECONDS);
 		mlplan.setNumCPUs(1);
 
-		new JFXPanel();
-		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-				new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
-		Platform.runLater(window);
+		if (ACTIVATE_VISUALIZATION) {
+			new JFXPanel();
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+			Platform.runLater(window);
+		}
 
 		try {
 			long start = System.currentTimeMillis();

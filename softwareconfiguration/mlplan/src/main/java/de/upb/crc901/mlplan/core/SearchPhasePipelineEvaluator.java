@@ -1,6 +1,9 @@
 package de.upb.crc901.mlplan.core;
 
-import org.nd4j.linalg.primitives.AtomicBoolean;
+import java.util.Arrays;
+import java.util.TimerTask;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +17,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import weka.classifiers.Classifier;
@@ -64,9 +68,8 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
-		final AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation, () -> controlledInterrupt.set(true));
+		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation);
 		try {
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
@@ -76,17 +79,22 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			}
 			return this.searchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 		} catch (InterruptedException e) {
-			if (controlledInterrupt.get()) {
+			this.logger.info("Received InterruptedException!");
+			assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t" + Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
+			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
+				this.logger.debug("This is a controlled interrupt of ourselves for task {}.", task);
 				Thread.interrupted(); // reset thread interruption flag, because the thread is not really interrupted but should only stop the evaluation
+				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
+				assert !Interrupter.get().hasCurrentThreadOpenInterrupts() : "There are still open interrupts!";
 				throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.");
 			}
+			this.logger.info("Recognized uncontrolled interrupt. Forwarding this exception.");
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
 		} finally {
-			sub.cancelTimeout(task);
+			task.cancel();
 			this.logger.debug("Canceled timeout job {}", task);
 		}
 	}
-
 }

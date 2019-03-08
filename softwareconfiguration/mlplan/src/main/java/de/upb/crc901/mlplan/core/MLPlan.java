@@ -238,4 +238,14 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	public double getInternalValidationErrorOfSelectedClassifier() {
 		return this.internalValidationErrorOfSelectedClassifier;
 	}
+
+	@Override
+	public void cancel() {
+		this.logger.info("Received cancel. First canceling optimizer, then invoking general shutdown.");
+		this.optimizingFactory.cancel();
+		this.logger.debug("Now canceling main ML-Plan routine");
+		super.cancel();
+		assert this.isCanceled() : "Canceled-flag is not positive at the end of the cancel routine!";
+		this.logger.info("Completed cancellation of ML-Plan. Cancel status is {}", this.isCanceled());
+	}
 }

@@ -835,10 +835,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		/* interrupt the expanding threads */
 		this.logger.debug("Interrupting {} active expansion threads.", this.expanding.size());
 		synchronized (this.expanding) {
-			this.expanding.values().forEach(t -> {
-				this.logger.trace("Interrupting active expansion thread {}", t);
-				t.interrupt();
-			});
+			for (Thread t : this.expanding.values()) {
+				this.interruptThreadAsPartOfShutdown(t);
+			}
 		}
 
 		/* cancel ongoing work */
@@ -860,11 +859,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			}
 			if (this.pool != null) {
 				assert this.pool.isTerminated() : "The worker pool has not been shutdown correctly!";
-			}
-			if (!this.pool.isTerminated()) {
-				this.logger.error("Worker pool has not been shutdown correctly!");
-			} else {
-				this.logger.info("Worker pool has been shut down.");
+				if (!this.pool.isTerminated()) {
+					this.logger.error("Worker pool has not been shutdown correctly!");
+				} else {
+					this.logger.info("Worker pool has been shut down.");
+				}
 			}
 			this.logger.info("Setting number of active jobs to 0.");
 			this.activeJobsCounterLock.lock();

@@ -22,7 +22,7 @@ public class ThreadGroupObserver extends Thread {
 
 	public void cancel() {
 		this.active = false;
-		this.interrupt();
+		this.interrupt(); // no controlled interrupt in run method
 	}
 
 	@Override
@@ -30,11 +30,9 @@ public class ThreadGroupObserver extends Thread {
 		while (this.active && !Thread.currentThread().isInterrupted()) {
 			this.maxObservedThreads = Math.max(this.maxObservedThreads, this.group.activeCount());
 			if (this.isThreadConstraintViolated()) {
-
 				/* store all currently active threads */
 				this.threadsAtPointOfViolation = new Thread[this.group.activeCount()];
 				this.group.enumerate(this.threadsAtPointOfViolation, true);
-
 				L.info("Running violation hook!");
 				this.hookOnConstraintViolation.run();
 				return;
@@ -42,7 +40,8 @@ public class ThreadGroupObserver extends Thread {
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
+				Thread.currentThread().interrupt(); // no controlled interrupt needed, because execution will cease after this anyway
+				return;
 			}
 		}
 	}

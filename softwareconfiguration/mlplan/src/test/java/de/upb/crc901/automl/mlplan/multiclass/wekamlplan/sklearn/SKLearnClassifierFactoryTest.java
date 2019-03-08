@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn;
+package de.upb.crc901.automl.mlplan.multiclass.wekamlplan.sklearn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,6 +15,7 @@ import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.ComponentUtil;

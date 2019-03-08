@@ -11,7 +11,7 @@ public class ThreadObserver extends Thread {
 	private final List<Thread> threadsThatHaveBeenActiveAtLastObservation = new ArrayList<>();
 	private final PrintStream stream;
 
-	public ThreadObserver(PrintStream stream) {
+	public ThreadObserver(final PrintStream stream) {
 		super("ThreadObserver");
 		this.stream = stream;
 	}
@@ -25,22 +25,24 @@ public class ThreadObserver extends Thread {
 				List<Thread> newThreads = SetUtil.difference(currentlyActiveThreads, this.threadsThatHaveBeenActiveAtLastObservation);
 				List<Thread> goneThreads = SetUtil.difference(this.threadsThatHaveBeenActiveAtLastObservation, currentlyActiveThreads);
 				if (!newThreads.isEmpty()) {
-					stream.println("" + System.currentTimeMillis());
-					stream.println("New Threads:");
-					for (Thread t : newThreads)
-						stream.println("\t" + t.getName() + ": " + t.getThreadGroup());
+					this.stream.println("" + System.currentTimeMillis());
+					this.stream.println("New Threads:");
+					for (Thread t : newThreads) {
+						this.stream.println("\t" + t.getName() + ": " + t.getThreadGroup());
+					}
 				}
 				if (!goneThreads.isEmpty()) {
-					stream.println("Gone Threads:");
-					for (Thread t : goneThreads)
-						stream.println("\t" + t.getName() + ": " + t.getThreadGroup());
+					this.stream.println("Gone Threads:");
+					for (Thread t : goneThreads) {
+						this.stream.println("\t" + t.getName() + ": " + t.getThreadGroup());
+					}
 				}
 				this.threadsThatHaveBeenActiveAtLastObservation.clear();
 				this.threadsThatHaveBeenActiveAtLastObservation.addAll(currentlyActiveThreads);
 				Thread.sleep(1000);
 			}
 		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
+			Thread.currentThread().interrupt(); // no controlled interrupt necessary, because the execution will cease immediately after this anyway
 		}
 	}
 }

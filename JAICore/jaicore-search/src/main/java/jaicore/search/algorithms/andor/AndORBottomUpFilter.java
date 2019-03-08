@@ -226,8 +226,9 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					this.logger.warn("Received exception {}.", e);
 				}
 				catch (InterruptedException e) {
+					assert !Thread.currentThread().isInterrupted() : "The interrupted-flag should not be true when an InterruptedException is thrown!";
 					this.logger.info("Thread was interrupted, cannot process this exception here, so reinterrupting the thread.");
-					Thread.currentThread().interrupt();
+					Thread.currentThread().interrupt(); // no controlled interrupt necessary, because this is only a re-interruption
 				}
 				boolean isDouble = extendedSolutionBase.value instanceof Double;
 				boolean validSolution = isDouble ? !(extendedSolutionBase.value.equals(Double.NaN)) : extendedSolutionBase.value != null;
