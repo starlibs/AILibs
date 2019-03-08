@@ -27,7 +27,7 @@ public class TimeoutableEvaluator implements IClassifierEvaluator {
 	}
 
 	@Override
-	public Double evaluate(final Classifier object) throws ObjectEvaluationFailedException  {
+	public Double evaluate(final Classifier object) throws ObjectEvaluationFailedException {
 		int timeoutTaskID = TimeoutTimer.getInstance().getSubmitter().interruptMeAfterMS(this.timeoutInMS);
 		Double returnValue = 30000.0;
 		try {
@@ -35,7 +35,6 @@ public class TimeoutableEvaluator implements IClassifierEvaluator {
 		} catch (InterruptedException e) {
 			// hide the interrupt exception as we simply want to return the default return value.
 		} catch (Throwable e) {
-			//
 			if (!e.getMessage().contains("Killed WEKA") && !e.getMessage().contains("Bag size needs")) {
 				throw new ObjectEvaluationFailedException(e, "Error");
 			}

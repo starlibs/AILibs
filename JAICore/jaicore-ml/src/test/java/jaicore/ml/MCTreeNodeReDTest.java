@@ -1,5 +1,6 @@
 package jaicore.ml;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,14 +15,20 @@ import weka.classifiers.rules.ZeroR;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 
+/**
+ * In this class it is checked whether the MCTreeNodeReD, i.e. the reduction stump classifier is working properly.
+ *
+ * @author fmohr, mwever
+ */
 public class MCTreeNodeReDTest {
 
 	private static final String CLASSIFIER_NAME = RandomForest.class.getName();
+	private static final File DATASET = new File("testrsc/orig/vowel.arff");
 
 	public static void main(final String[] args) throws Exception {
 		System.out.println(CLASSIFIER_NAME);
 
-		Instances data = new Instances(new FileReader("testrsc/autowekasets/dataset_189_baseball.arff"));
+		Instances data = new Instances(new FileReader(DATASET));
 		data.setClassIndex(data.numAttributes() - 1);
 
 		for (int s = 0; s < 10; s++) {
@@ -79,7 +86,6 @@ public class MCTreeNodeReDTest {
 				double maxCorrectCls = pctCorrectClassifier.stream().mapToDouble(x -> x).max().getAsDouble();
 
 				System.out.println((maxCorrectCls - maxCorrectDec) + " (Decomp: " + (100 - maxCorrectDec) + "/Classifier: " + (100 - maxCorrectCls) + ")");
-
 			}
 
 		}

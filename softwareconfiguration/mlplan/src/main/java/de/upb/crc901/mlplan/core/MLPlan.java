@@ -111,7 +111,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.twoPhaseHASCOFactory.setConfig(this.getConfig());
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
 		this.optimizingFactory.registerListener(new Object() {
-
 			@Subscribe
 			public void receiveEventFromFactory(final AlgorithmEvent event) {
 				if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent) {
@@ -153,12 +152,14 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			// this.twoPhaseHASCOFactory.setTimeout(this.getTimeout());
 
 			/* communicate the parameters with which ML-Plan will run */
-			this.logger.info(
-					"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tMCCV for search: {} iterations with {}% for training\n\tMCCV for select: {} iterations with {}% for training\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-					this.getInput().relationName(), MultiClassPerformanceMeasure.ERRORRATE, this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
-					this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), this.getConfig().numberOfMCIterationsDuringSearch(),
-					(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSearch()), this.getConfig().numberOfMCIterationsDuringSelection(), (int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSelection()),
-					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info(
+						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tMCCV for search: {} iterations with {}% for training\n\tMCCV for select: {} iterations with {}% for training\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
+						this.getInput().relationName(), MultiClassPerformanceMeasure.ERRORRATE, this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
+						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2),
+						this.getConfig().numberOfMCIterationsDuringSearch(), (int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSearch()), this.getConfig().numberOfMCIterationsDuringSelection(),
+						(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSelection()), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+			}
 			this.logger.info("Initializing the optimization factory.");
 			this.optimizingFactory.init();
 			this.logger.info("Started and activated ML-Plan.");
@@ -201,7 +202,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.logger.info("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated ML-Plan logger {}. Now setting logger of twoPhaseHASCO to {}.2phasehasco", name, name);
-		this.logger.info("Setting logger of {} to {}", this.optimizingFactory, this.loggerName + ".optimizingfactory");
+		this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
 		this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
 
 		this.logger.info("Switched ML-Plan logger to {}", name);

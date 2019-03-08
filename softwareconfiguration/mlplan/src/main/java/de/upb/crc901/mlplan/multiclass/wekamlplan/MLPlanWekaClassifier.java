@@ -49,7 +49,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
-	private static final boolean VISUALIZATION_ACTIVATED = false;
+	private boolean visualizationEnabled = false;
 
 	/* MLPlan Builder and the instance of mlplan */
 	private final MLPlanBuilder builder;
@@ -75,7 +75,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 			mlplan.setLoggerName(this.loggerName + "." + "mlplan");
 		}
 
-		if (VISUALIZATION_ACTIVATED) {
+		if (this.visualizationEnabled) {
 			new JFXPanel();
 			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
 					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
@@ -169,6 +169,16 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	}
 
 	/**
+	 * Enables the GUI of the MLPlanWekaClassifier if set to true. By default the visualization is deactivated.
+	 * The flag needs to be set before buildClassifier is called.
+	 *
+	 * @param visualizationEnabled Flag whether the visualization is enabled or not.
+	 */
+	public void setVisualizationEnabled(final boolean visualizationEnabled) {
+		this.visualizationEnabled = visualizationEnabled;
+	}
+
+	/**
 	 * @return An object of the classifier ML-Plan has selected during the build.
 	 */
 	public Classifier getSelectedClassifier() {
@@ -194,4 +204,5 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	public String getLoggerName() {
 		return this.loggerName;
 	}
+
 }

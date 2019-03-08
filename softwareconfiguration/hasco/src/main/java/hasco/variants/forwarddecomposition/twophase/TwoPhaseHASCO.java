@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Queue;
@@ -40,6 +42,7 @@ import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.logging.LoggerUtil;
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
 
@@ -61,6 +64,17 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 	private int secondsSpentInPhase1;
 
 	private Thread timeoutControl = null;
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("hasco", this.hasco);
+		fields.put("phase1ResultQueue", this.phase1ResultQueue);
+		fields.put("selectedHASCOSolution", this.selectedHASCOSolution);
+		fields.put("timeOfStart", this.timeOfStart);
+		fields.put("secondsSpentInPhase1", this.secondsSpentInPhase1);
+		return ToJSONStringUtil.toJSONString(fields);
+	}
 
 	public TwoPhaseHASCO(final TwoPhaseSoftwareConfigurationProblem problem, final TwoPhaseHASCOConfig config) {
 		super(config != null ? config : ConfigFactory.create(TwoPhaseHASCOConfig.class), problem);
@@ -124,7 +138,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
-			/* active is only one step in this model; this could be refined */
+		/* active is only one step in this model; this could be refined */
 		case active:
 
 			/* phase 1: gather solutions */
@@ -141,7 +155,8 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 						}
 					}
 				} catch (Exception e) {
-					TwoPhaseHASCO.this.logger.error("Timeouter died away. This must NEVER happen. The exception responsible for this is: \n\t{}", Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t")));
+					TwoPhaseHASCO.this.logger.error("Timeouter died away. This must NEVER happen. The exception responsible for this is: \n\t{}",
+							Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t")));
 				}
 			}, "Phase 1 time bound observer");
 			this.timeoutControl.start();
@@ -354,7 +369,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 				TwoPhaseHASCO.this.logger.info(
 						"During search, the currently chosen model {} had a total evaluation time of {}ms ({}ms per iteration). " + "We estimate an evaluation in the selection phase to take {}ms, and the final build to take {}. "
 								+ "This yields a total time of {}ms.",
-								c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection);
+						c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection);
 
 				/* Schedule a timeout for this evaluation, which is 10% over the estimated time */
 				int timeoutForEvaluation = (int) (estimatedInSelectionSingleIterationEvaluationTime * (1 + TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance()));

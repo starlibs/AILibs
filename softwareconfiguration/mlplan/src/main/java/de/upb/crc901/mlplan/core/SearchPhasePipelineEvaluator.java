@@ -32,8 +32,8 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	private final IObjectEvaluator<Classifier, Double> searchBenchmark;
 	private final int timeoutForSolutionEvaluation;
 
-	public SearchPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch, final double trainFoldSize, final int seed,
-			final int timeoutForSolutionEvaluation) {
+	public SearchPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch,
+			final double trainFoldSize, final int seed, final int timeoutForSolutionEvaluation) {
 		super();
 		this.classifierFactory = classifierFactory;
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
