@@ -19,19 +19,27 @@ import jaicore.ml.tsc.filter.SlidingWindowBuilder;
 
 public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifier> {
 	
-	//TODO mean normalization by dropping first DFT Coefficient
+	
 	private int windowSize;
 	private int alphabetSize;
 	private double[] alphabet;
+	private int wordlength;
+	private boolean meanCorrected;
 	private ArrayList<ArrayList<HashMap<Integer,Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer,Integer>>> ();
-	private ArrayList<HashMap<Integer,Integer>> histograms = new ArrayList<HashMap<Integer, Integer>>(); 
+	private ArrayList<HashMap<Integer,Integer>> histograms = new ArrayList<HashMap<Integer, Integer>>();
+	 
 	
-	
-	public BOSSAlgorithm(int windowLength,int alphabetSize, double[] alphabet) {
+	//This class assumes that the optimal proportion of word length to window size is determined elsewhere and the corresponding
+	//drop of SFA words.
+	public BOSSAlgorithm(int windowLength,int alphabetSize, double[] alphabet, int wordlength,boolean meanCorrected) {
 		this.windowSize = windowLength;
 		this.alphabetSize = alphabetSize;
 		this.alphabet = alphabet;
+		this.wordlength = wordlength;
+		this.meanCorrected = meanCorrected;
 	}
+	
+	
 	@Override
 	public void registerListener(Object listener) {
 		// TODO Auto-generated method stub
@@ -85,7 +93,7 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		
 		
-		SFA sfa = new SFA(alphabet, alphabetSize);
+		SFA sfa = new SFA(alphabet, alphabetSize,meanCorrected);
 		HistogramBuilder histoBuilder = new HistogramBuilder();
 		sfa.fit(input);
 		
@@ -102,12 +110,11 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 					histogram = histoBuilder.histogramForInstance(tmpTransformed);
 					}
 				catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (NoneFittedFilterExeception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
 				histograms.add(histogram);
 			}
 			multivirateHistograms.add(histograms);

@@ -38,11 +38,14 @@ public class DFT implements IFilter {
 	private boolean variableSet = false;
 	
 	/**
-	 * tracks weather the fit method was called
+	 * tracks whether the fit method was called
 	 */
 	private boolean fittedInstance = false;
 	private boolean fittedMatrix = false;
 	private boolean fitted = false;
+	
+	private boolean meanCorrected = false;
+	private int startingpoint = 0;
 	
 	/**
 	 *  The variable is set to 1/sqrt(n) in paper "Efficient Retrieval of Similar Time Sequences Using DFT" by Davood Rafieidrafiei and Alberto Mendelzon
@@ -58,6 +61,11 @@ public class DFT implements IFilter {
 
 	public void setNumberOfDisieredCoefficients(int numberOfDisieredCoefficients) {
 		this.numberOfDisieredCoefficients = numberOfDisieredCoefficients;
+	}
+	
+	
+	public void setMeanCorrected(boolean meanCorrected) {
+		this.meanCorrected = meanCorrected;
 	}
 
 	/* (non-Javadoc)
@@ -130,16 +138,19 @@ public class DFT implements IFilter {
 			throw new IllegalArgumentException("The to transform instance can not be of length zero.");
 		}
 		//The buffer for the calculated DFT coefficeients
-		DFTCoefficientsInstance = new double[numberOfDisieredCoefficients*2];
+		DFTCoefficientsInstance = new double[numberOfDisieredCoefficients*2-(startingpoint*2)];
 		
 		//Variable used to make steps of size two in a loop that makes setps of size one
 		int loopcounter = 0;
+		if(meanCorrected) {
+			startingpoint = 1;
+		}
 		for(int entry = 0; entry < input.length; entry++) {
 			
 			Complex result = new Complex(0,0);
 			Complex tmp = null;
 			
-			for(int coefficient = 0; coefficient<numberOfDisieredCoefficients; coefficient++) {
+			for(int coefficient = startingpoint; coefficient<numberOfDisieredCoefficients; coefficient++) {
 				double currentEntry = input[entry];
 				
 				//calculates the real and imaginary part of the entry according to the desired coefficient

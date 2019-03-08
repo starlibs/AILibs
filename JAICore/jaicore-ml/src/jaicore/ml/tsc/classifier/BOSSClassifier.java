@@ -32,11 +32,25 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		this.multivirateHistograms = multivirateHistograms;
 	}
 
-	public BOSSClassifier(ASimplifiedTSCAlgorithm<Integer, ? extends ASimplifiedTSClassifier<Integer>> algorithm,int windowLength,int wordLength,int alphabetSize, double[] alphabet) {
-		super(new BOSSAlgorithm(windowLength, alphabetSize,alphabet));
+	public BOSSClassifier(ASimplifiedTSCAlgorithm<Integer, ? extends ASimplifiedTSClassifier<Integer>> algorithm,int windowLength,int wordLength,int alphabetSize, double[] alphabet, boolean meanCorrected) {
+		super(new BOSSAlgorithm(windowLength, alphabetSize,alphabet,wordLength, meanCorrected));
 		this.windowSize = windowLength;
 		this.wordLength = wordLength;
 		this.alphabetSize = alphabetSize;
+		this.alphabet = alphabet;
+	}
+	
+	/*
+	 * In the empirical observations as described in paper: 
+	 * "The BOSS is concerned with time series classification in the presence of noise Patrick Schäfer" p.1519,
+	 * showed that most of
+	 * the time a alphabet size of 4 works best.
+	 */ 
+	public BOSSClassifier(ASimplifiedTSCAlgorithm<Integer, ? extends ASimplifiedTSClassifier<Integer>> algorithm,int windowLength,int wordLength, double[] alphabet, boolean meanCorrected) {
+		super(new BOSSAlgorithm(windowLength, 4,alphabet,wordLength, meanCorrected));
+		this.windowSize = windowLength;
+		this.wordLength = wordLength;
+		this.alphabetSize = 4;
 		this.alphabet = alphabet;
 	}
 
