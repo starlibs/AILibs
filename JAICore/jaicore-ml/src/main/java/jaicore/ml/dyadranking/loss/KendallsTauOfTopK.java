@@ -33,17 +33,17 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 		for (int predictedI = 0; predictedI < k - 1; predictedI++) {
 			Dyad predDyad = predicted.getDyadAtPosition(predictedI);
 			int actualI = -1;
-			for (int i = 0; i < k; i++) {
+			for (int i = 0; i < actual.length(); i++) {
 				if (actual.getDyadAtPosition(i).equals(predDyad)) {
 					actualI = i;
 					break;
 				}
 			}
 
-			for (int predictedJ = predictedI + 1; predictedJ < k; predictedJ++) {
+			for (int predictedJ = 0; predictedJ < predicted.length(); predictedJ++) {
 				Dyad predPairedDyad = predicted.getDyadAtPosition(predictedJ);
 				int actualJ = -1;
-				for (int j = actualI + 1; j < k; j++) {
+				for (int j = 0; j < actual.length(); j++) {
 					if (actual.getDyadAtPosition(j).equals(predPairedDyad)) {
 						actualJ = j;
 						break;
@@ -146,8 +146,8 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 				kendallsDistance += penalty;
 			}
 		}
-		double kendallTau = 2.0 * (kendallsDistance) / (k * (k - 1));
+		double kendallDistance = 2.0 * (kendallsDistance) / (k * (k - 1));
 
-		return kendallTau;
+		return kendallDistance;
 	}
 }
