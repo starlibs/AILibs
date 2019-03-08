@@ -227,28 +227,33 @@ public class JavaMethodToProcessWrapper {
 		return null;
 	}
 
-	private static Object executeCommand(final File folder, final String clazz, final String method_name, final String target, final LinkedList<String> argsArray) throws Exception {
+	private static Object executeCommand(final File folder, final String clazz, final String method_name, final String target, final LinkedList<String> argsArray) throws CommandExecutionException {
 
-		logger.info("Invoking in folder {} method {} on class {}", folder, clazz, method_name);
-		Object targetObject = null;
-		if (!target.equals("null")) {
-			targetObject = FileUtil.unserializeObject(folder.getAbsolutePath() + File.separator + target);
+		try {
+			logger.info("Invoking in folder {} method {} on class {}", folder, clazz, method_name);
+			Object targetObject = null;
+			if (!target.equals("null")) {
+				targetObject = FileUtil.unserializeObject(folder.getAbsolutePath() + File.separator + target);
+			}
+
+			Class<?>[] params = new Class[argsArray.size()];
+			Object[] objcts = new Object[argsArray.size()];
+			int counter = 0;
+			while (!argsArray.isEmpty()) {
+				String descriptor = argsArray.poll();
+				boolean isNull = descriptor.equals("");
+				objcts[counter] = isNull ? null : FileUtil.unserializeObject(folder.getAbsolutePath() + File.separator + descriptor);
+				params[counter] = isNull ? null : Class.forName(descriptor.substring(0, descriptor.lastIndexOf(".")));
+				counter++;
+			}
+
+			/* retrieve method and call it */
+			Method method = MethodUtils.getMatchingAccessibleMethod(Class.forName(clazz), method_name, params);
+			return method.invoke(targetObject, objcts);
 		}
-
-		Class<?>[] params = new Class[argsArray.size()];
-		Object[] objcts = new Object[argsArray.size()];
-		int counter = 0;
-		while (!argsArray.isEmpty()) {
-			String descriptor = argsArray.poll();
-			boolean isNull = descriptor.equals("");
-			objcts[counter] = isNull ? null : FileUtil.unserializeObject(folder.getAbsolutePath() + File.separator + descriptor);
-			params[counter] = isNull ? null : Class.forName(descriptor.substring(0, descriptor.lastIndexOf(".")));
-			counter++;
+		catch (Exception e) {
+			throw new CommandExecutionException(e);
 		}
-
-		/* retrieve method and call it */
-		Method method = MethodUtils.getMatchingAccessibleMethod(Class.forName(clazz), method_name, params);
-		return method.invoke(targetObject, objcts);
 	}
 
 	public static void main(final String[] args) {

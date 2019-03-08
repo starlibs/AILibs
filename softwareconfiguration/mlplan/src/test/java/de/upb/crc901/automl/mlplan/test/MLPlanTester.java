@@ -23,7 +23,7 @@ public class MLPlanTester extends AutoMLAlgorithmTester {
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(0f);
 			mlplan.setLoggerName("mlplan");
-			mlplan.setTimeout(10, TimeUnit.SECONDS);
+			mlplan.setTimeout(60, TimeUnit.SECONDS);
 			mlplan.setNumCPUs(1);
 			return mlplan;
 		} catch (IOException e) {

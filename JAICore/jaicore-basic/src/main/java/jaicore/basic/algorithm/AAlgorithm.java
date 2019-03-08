@@ -53,6 +53,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private int timeoutPrecautionOffset = 2000; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
 	private static final int MIN_RUNTIME_FOR_OBSERVED_TASK = 50;
 
+	private static final String INTERRUPT_NAME_SUFFIX = "-shutdown";
+
 	/**
 	 * C'tor providing the input for the algorithm already.
 	 *
@@ -228,20 +230,22 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.shutdownInitialized = System.currentTimeMillis();
 		}
 		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting {} active threads.", this.getId(), this.getState(), this.activeThreads.size());
-		this.activeThreads.forEach(t -> this.interruptThreadAsPartOfShutdown(t));
+		for (Thread t : this.activeThreads) {
+			this.interruptThreadAsPartOfShutdown(t);
+		}
 		this.logger.info("Shutdown of {} completed.", this.getId());
 	}
 
 	protected void interruptThreadAsPartOfShutdown(final Thread t) {
-		Interrupter.get().interruptThread(t, this.getId() + "-shutdown");
+		Interrupter.get().interruptThread(t, this.getId() + INTERRUPT_NAME_SUFFIX);
 	}
 
 	public boolean hasThreadBeenInterruptedDuringShutdown(final Thread t) {
-		return Interrupter.get().hasThreadBeenInterruptedWithReason(t, this.getId() + "-shutdown");
+		return Interrupter.get().hasThreadBeenInterruptedWithReason(t, this.getId() + INTERRUPT_NAME_SUFFIX);
 	}
 
 	protected void resolveShutdownInterruptOnCurrentThread() throws InterruptedException {
-		Interrupter.get().markInterruptOnCurrentThreadAsResolved(this.getId() + "-shutdown");
+		Interrupter.get().markInterruptOnCurrentThreadAsResolved(this.getId() + INTERRUPT_NAME_SUFFIX);
 	}
 
 	public boolean isShutdownInitialized() {
