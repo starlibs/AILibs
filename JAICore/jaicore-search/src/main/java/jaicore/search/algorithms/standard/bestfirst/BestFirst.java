@@ -797,10 +797,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		/* interrupt the expanding threads */
 		this.logger.debug("Interrupting {} active expansion threads.", this.expanding.size());
 		synchronized (this.expanding) {
-			this.expanding.values().forEach(t -> {
-				this.logger.trace("Interrupting active expansion thread {}", t);
-				t.interrupt();
-			});
+			this.expanding.values().forEach(t -> interruptThreadAsPartOfShutdown(t));
 		}
 
 		/* cancel ongoing work */

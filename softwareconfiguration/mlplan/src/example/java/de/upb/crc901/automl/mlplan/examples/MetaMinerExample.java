@@ -1,3 +1,4 @@
+package de.upb.crc901.automl.mlplan.examples;
 //package de.upb.crc901.mlplan.examples;
 //
 //import java.io.BufferedReader;

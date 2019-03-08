@@ -232,12 +232,14 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.shutdownInitialized = System.currentTimeMillis();
 		}
 		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting {} active threads.", this.getId(), this.getState(), this.activeThreads.size());
-		this.activeThreads.forEach(t -> {
-			this.logger.info("Interrupting {} on behalf of shutdown of {}", t, this.getId());
-			t.interrupt();
-			this.threadsInterruptedByShutdown.add(t);
-		});
+		this.activeThreads.forEach(t -> interruptThreadAsPartOfShutdown(t));
 		this.logger.info("Shutdown of {} completed.", this.getId());
+	}
+	
+	protected void interruptThreadAsPartOfShutdown(Thread t) {
+		this.logger.info("Interrupting {} on behalf of shutdown of {}", t, this.getId());
+		t.interrupt();
+		this.threadsInterruptedByShutdown.add(t);
 	}
 
 	public boolean hasThreadBeenInterruptedDuringShutdown(final Thread t) {

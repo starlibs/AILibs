@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn;
+package de.upb.crc901.automl.mlplan.multiclass.wekamlplan.sklearn;
 
 import static org.junit.Assert.assertEquals;
 

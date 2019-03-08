@@ -37,7 +37,6 @@ import jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import weka.core.Instances;
 
@@ -45,6 +44,7 @@ public class MLPlanBuilder {
 
 	private static final Logger L = LoggerFactory.getLogger(MLPlanBuilder.class);
 
+	private static final File SPC_TINYTEST = new File("resources/automl/searchmodels/weka/tinytest.json");
 	private static final File SPC_AUTO_WEKA = new File("resources/automl/searchmodels/weka/weka-all-autoweka.json");
 	private static final File SPC_SKLEARN = new File("resources/automl/searchmodels/sklearn/sklearn-mlplan.json");
 	private static final File SPC_SKLEARN_UL = new File("resources/automl/searchmodels/sklearn/ml-plan-ul.json");
@@ -54,7 +54,7 @@ public class MLPlanBuilder {
 	private static final File PREFC_SKLEARN_UL = new File("resources/mlplan/sklearn-ul-precedenceList.txt");
 
 	private enum DefaultConfig {
-		AUTO_WEKA(SPC_AUTO_WEKA, PREFC_AUTO_WEKA), SKLEARN(SPC_SKLEARN, PREFC_SKLEARN), SKLEARN_UL(SPC_SKLEARN_UL, PREFC_SKLEARN_UL);
+		TINYTEST(SPC_TINYTEST, PREFC_AUTO_WEKA), AUTO_WEKA(SPC_AUTO_WEKA, PREFC_AUTO_WEKA), SKLEARN(SPC_SKLEARN, PREFC_SKLEARN), SKLEARN_UL(SPC_SKLEARN_UL, PREFC_SKLEARN_UL);
 
 		private final File spcFile;
 		private final File preferredComponentsFile;
@@ -98,7 +98,7 @@ public class MLPlanBuilder {
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
 
-	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double>();
+	private HASCOViaFDFactory<?, Double> hascoFactory = new HASCOViaFDFactory<>();
 
 	private Predicate<TFDNode> priorizingPredicate = null;
 
@@ -171,6 +171,12 @@ public class MLPlanBuilder {
 		this.classifierFactory = new WEKAPipelineFactory();
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
 		return this.withDefaultConfig(DefaultConfig.AUTO_WEKA);
+	}
+	
+	public MLPlanBuilder withTinyTestConfiguration() throws IOException {
+		this.classifierFactory = new WEKAPipelineFactory();
+		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
+		return this.withDefaultConfig(DefaultConfig.TINYTEST);
 	}
 
 	private MLPlanBuilder withDefaultConfig(final DefaultConfig defConfig) throws IOException {
@@ -275,14 +281,12 @@ public class MLPlanBuilder {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
 		this.hascoFactory.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
 		this.updateSearchProblemTransformer();
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void updateSearchProblemTransformer() {
 		this.hascoFactory.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<TFDNode, String, Double>(this.preferredNodeEvaluator, this.priorizingPredicate,
 				this.algorithmConfig.randomSeed(), this.algorithmConfig.numberOfRandomCompletions(), this.algorithmConfig.timeoutForCandidateEvaluation(), this.algorithmConfig.timeoutForNodeEvaluation()));
