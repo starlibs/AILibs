@@ -1,5 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
+import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jaicore.concurrent.TimeoutTimer;
@@ -56,10 +57,10 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 		/* execute evaluation */
 		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
-		int taskId = ts.interruptMeAfterMS(interruptionTime, () -> controlledInterrupt.set(true));
+		TimerTask timerTask= ts.interruptMeAfterMS(interruptionTime, () -> controlledInterrupt.set(true));
 		try {
 			V result = this.fTimeouted(node, grantedTime);
-			ts.cancelTimeout(taskId);
+			timerTask.cancel();
 			ts.close();
 			return result;
 		} catch (InterruptedException e) {

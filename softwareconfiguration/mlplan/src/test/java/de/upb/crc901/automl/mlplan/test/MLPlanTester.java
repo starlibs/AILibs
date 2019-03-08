@@ -14,7 +14,7 @@ import weka.core.Instances;
 public class MLPlanTester extends AutoMLAlgorithmTester {
 
 	@Override
-	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(Instances data) {
+	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(final Instances data) {
 		try {
 			MLPlanBuilder builder = new MLPlanBuilder().withTinyTestConfiguration().withRandomCompletionBasedBestFirstSearch();
 			builder.withTimeoutForNodeEvaluation(new TimeOut(10, TimeUnit.SECONDS));

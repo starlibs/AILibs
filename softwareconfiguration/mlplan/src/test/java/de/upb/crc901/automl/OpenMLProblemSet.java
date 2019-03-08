@@ -4,27 +4,31 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;
 
 public class OpenMLProblemSet extends MLProblemSet {
 
-	private final static Integer[] ids = {3};
-	private final static String apiKey = "4350e421cdc16404033ef1812ea38c01";
-	private final static List<Instances> INSTANCES = new ArrayList<>();
-	
+	private static final Integer[] ids = {3};
+	private static final String API_KEY = "4350e421cdc16404033ef1812ea38c01";
+	private static final List<Instances> INSTANCES = new ArrayList<>();
+	private static final Logger logger = LoggerFactory.getLogger(OpenMLProblemSet.class);
+
 	static {
-		OpenMLHelper.setApiKey(apiKey);
-		try {
-			for (int id : ids) {
+		OpenMLHelper.setApiKey(API_KEY);
+		for (int id : ids) {
+			try {
 				INSTANCES.add(OpenMLHelper.getInstancesById(id));
+			} catch (IOException e) {
+				logger.error("Received exception {}", org.apache.commons.lang.exception.ExceptionUtils.getStackTrace(e));
 			}
-		} catch (NumberFormatException | IOException e) {
-			e.printStackTrace();
 		}
 	}
-	
+
 	public OpenMLProblemSet() {
 		super("openml.org");
 	}

@@ -1,7 +1,8 @@
 package de.upb.crc901.mlplan.core;
 
+import java.util.TimerTask;
+
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.nd4j.linalg.primitives.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import weka.core.Instances;
@@ -65,20 +67,19 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		int task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, () -> controlledInterrupt.set(true));
+		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100);
 		try {
 			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {
-			if (controlledInterrupt.get()) {
+			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
 				throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed since the timeout was hit.");
 			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
 		} finally {
-			sub.cancelTimeout(task);
+			task.cancel();
 			this.logger.debug("Canceled timeout job {}", task);
 		}
 

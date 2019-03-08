@@ -1,11 +1,11 @@
 package jaicore.concurrent;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ public class TimeoutTimer extends Timer {
 	private static final Logger logger = LoggerFactory.getLogger(TimeoutTimer.class);
 	private static final TimeoutTimer instance = new TimeoutTimer();
 	private final List<TimeoutSubmitter> emittedSubmitters = new ArrayList<>();
-	private final ConcurrentHashMap<Integer, TimerTask> tasks = new ConcurrentHashMap<>();
+	private final Set<TimerTask> tasks = new HashSet<>();
 
 	private TimeoutTimer() {
 		super("Global TimeoutTimer", true);
@@ -45,73 +45,31 @@ public class TimeoutTimer extends Timer {
 			}
 		}
 
-		public int interruptMeAfterMS(final int delay) {
+		public synchronized TimerTask interruptMeAfterMS(final int delay) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay);
 		}
 
-		public int interruptMeAfterMS(final int delay, final Runnable preInterruptionHook) {
+		public synchronized TimerTask interruptMeAfterMS(final int delay, final Runnable preInterruptionHook) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay, preInterruptionHook);
 		}
 
-		public int interruptThreadAfterMS(final Thread thread, final long delay) {
+		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay) {
 			return this.interruptThreadAfterMS(thread, delay, null);
 		}
 
-		public int interruptThreadAfterMS(final Thread thread, final long delay, final Runnable preInterruptionHook) {
-			return this.scheduleTask(new TimerTask() {
-				@Override
-				public void run() {
-					final TimerTask thisTask = this;
-					int taskId = TimeoutTimer.this.tasks.keySet().stream().filter(id -> TimeoutTimer.this.tasks.get(id) == thisTask).findFirst().get();
-					logger.info("Job {} for interruption of {} after delay of {}ms triggered.", taskId, thread, delay);
-					if (preInterruptionHook != null) {
-						logger.debug("Job {} now invokes pre-interruption.", taskId);
-						preInterruptionHook.run();
-					}
-					logger.debug("Job {} now interrupts thread {}", taskId, thread);
-					thread.interrupt();
-				}
-			}, delay);
-		}
-
-		public int interruptJobAfterMS(final Future<?> job, final long delay) {
-			return this.scheduleTask(new TimerTask() {
-
-				@Override
-				public void run() {
-					logger.info("canceling job {} after delay {}", job, delay);
-					job.cancel(true);
-				}
-			}, delay);
-		}
-
-		public void cancelTimeout(final int taskId) {
-			if (!TimeoutTimer.this.tasks.containsKey(taskId)) {
-				throw new IllegalArgumentException("Task with id " + taskId + " was not found.");
+		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, final Runnable preInterruptionHook) {
+			TimerTask task = new InterruptionTimerTask("timeout task for thread " + thread.getId(), thread, preInterruptionHook);
+			if (!TimeoutTimer.this.emittedSubmitters.contains(this)) {
+				throw new IllegalStateException("Cannot submit interrupt job to submitter " + this + " since it has already been closed!");
 			}
-			TimeoutTimer.this.tasks.get(taskId).cancel();
-			TimeoutTimer.this.tasks.remove(taskId);
-			logger.info("Timeout for {} has been canceled.", taskId);
-		}
+			TimeoutTimer.this.schedule(task, delay);
 
-		private synchronized int scheduleTask(final TimerTask task, final long delay) {
-			synchronized (instance) {
-				if (!TimeoutTimer.this.emittedSubmitters.contains(this)) {
-					throw new IllegalStateException("Cannot submit interrupt job to submitter " + this + " since it has already been closed!");
-				}
-				TimeoutTimer.this.schedule(task, delay);
-
-				/* create id for job and return it */
-				int id;
-				do {
-					id = (int) (Math.random() * 1000000);
-				} while (TimeoutTimer.this.tasks.containsKey(id));
-				TimeoutTimer.this.tasks.put(id, task);
-				logger.info("Job {} scheduled for in {}ms.", id, delay);
-				return id;
-			}
+			/* create id for job and return it */
+			TimeoutTimer.this.tasks.add(task);
+			logger.info("Job {} scheduled for in {}ms.", task, delay);
+			return task;
 		}
 
 		public void close() {

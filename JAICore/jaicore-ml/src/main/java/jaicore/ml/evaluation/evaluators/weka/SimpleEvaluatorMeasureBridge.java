@@ -12,21 +12,27 @@ import weka.core.Instances;
 
 /**
  * Basic implementation of the {@link AbstractEvaluatorMeasureBridge}. Uses the given loss function to compute loss on the given data. No extra steps are performed.
- * 
+ *
  * @author jnowack
  *
  */
 public class SimpleEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double>{
 
-	public SimpleEvaluatorMeasureBridge(IMeasure<Double, Double> basicEvaluator) {
+	public SimpleEvaluatorMeasureBridge(final IMeasure<Double, Double> basicEvaluator) {
 		super(basicEvaluator);
 	}
 
 	@Override
-	public Double evaluateSplit(Classifier classifier, Instances trainingData, Instances validationData) throws Exception {
+	public Double evaluateSplit(final Classifier classifier, final Instances trainingData, final Instances validationData) throws Exception {
 		List<Double> actual = WekaUtil.getClassesAsList(validationData);
 		List<Double> predicted = new ArrayList<>();
-		classifier.buildClassifier(trainingData);
+		try {
+			classifier.buildClassifier(trainingData);
+		}
+		catch (InterruptedException e) {
+			Thread.interrupted(); // clear the interrupted field. This is, even though a Java convention, often not done by WEKA classifiers.
+			throw e;
+		}
 		if (classifier instanceof IInstancesClassifier) {
 			for (double prediction : ((IInstancesClassifier) classifier).classifyInstances(validationData)) {
 				predicted.add(prediction);

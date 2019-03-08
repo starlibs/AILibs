@@ -98,7 +98,7 @@ public class MLPlanBuilder {
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
 
-	private HASCOViaFDFactory<?, Double> hascoFactory = new HASCOViaFDFactory<>();
+	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<>();
 
 	private Predicate<TFDNode> priorizingPredicate = null;
 
@@ -172,7 +172,7 @@ public class MLPlanBuilder {
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
 		return this.withDefaultConfig(DefaultConfig.AUTO_WEKA);
 	}
-	
+
 	public MLPlanBuilder withTinyTestConfiguration() throws IOException {
 		this.classifierFactory = new WEKAPipelineFactory();
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
