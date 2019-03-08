@@ -147,8 +147,7 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 			}
 		}
 		System.out.println("KD "+ kendallsDistance);
-		double kendallDistance = ( 2 * kendallsDistance) / (k * (k - 1));
 
-		return kendallDistance;
+		return kendallsDistance;
 	}
 }
