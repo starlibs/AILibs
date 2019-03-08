@@ -54,7 +54,7 @@ public class ComponentUtil {
 			}
 
 			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
-		} while (ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
 		return ci;
 	}
 
