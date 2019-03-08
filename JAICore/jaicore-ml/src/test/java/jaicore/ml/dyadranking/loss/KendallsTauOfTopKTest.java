@@ -13,6 +13,8 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import junit.framework.Assert;
 
 public class KendallsTauOfTopKTest {
+	
+	private static final double P = 0.5d;
 
 	@Test
 	public void test() {
@@ -39,7 +41,7 @@ public class KendallsTauOfTopKTest {
 		List<IDyadRankingInstance> instance2 = Arrays.asList(new DyadRankingInstance(dyadList2));
 		DyadRankingDataset predictedOrdering = new DyadRankingDataset(instance2);
 
-		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering,
+		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), trueOrdering,
 				predictedOrdering);
 
 		// distance should be 1 as the last two do not influence the ranking
@@ -49,7 +51,7 @@ public class KendallsTauOfTopKTest {
 		instance2 = Arrays.asList(new DyadRankingInstance(dyadList2));
 		predictedOrdering = new DyadRankingDataset(instance2);
 
-		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering, predictedOrdering);
+		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), trueOrdering, predictedOrdering);
 
 		//the ranking is wrong
 		Assert.assertEquals(1.0d, distance);
@@ -60,7 +62,7 @@ public class KendallsTauOfTopKTest {
 		instance2 = Arrays.asList(new DyadRankingInstance(dyadList2));
 		predictedOrdering = new DyadRankingDataset(instance2);
 
-		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering, predictedOrdering);
+		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), trueOrdering, predictedOrdering);
 		// for the pair 1,2 we should gain no loss (as 1 < 2 holds for the second pair aswell)
 		// but 3 > 2 holds which is wrong!
 		Assert.assertEquals(1.0d, distance);
@@ -69,7 +71,7 @@ public class KendallsTauOfTopKTest {
 		instance2 = Arrays.asList(new DyadRankingInstance(dyadList2));
 		predictedOrdering = new DyadRankingDataset(instance2);
 
-		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering, predictedOrdering);
+		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), trueOrdering, predictedOrdering);
 
 		//only 2 appears the in the predicted ranking, thus, we know that 2 > 1 which is wrong
 		// 1 > 3 and 2 > 1 hold which are bot wrong -> 2 pens
@@ -80,13 +82,23 @@ public class KendallsTauOfTopKTest {
 		instance2 = Arrays.asList(new DyadRankingInstance(dyadList2));
 		predictedOrdering = new DyadRankingDataset(instance2);
 
-		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering, predictedOrdering);
+		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), trueOrdering, predictedOrdering);
 
 		// 3 > 2 holds
 		Assert.assertEquals(1.0d, distance);
 
 		// Case 4
+		// the top k lists are disjoint. For k = 2 we have 6 unordered pairs in total, 4 pairs for which both elements are in 
+		// opposing top k lists (case 3) and 2 pairs for which both elements are in one top k list and none in the other (case 4).
+		// With a penalty parameter of p = 0.5 we expect the overall distance to be 5.
+		dyadList2 = Arrays.asList(dyad4, dyad3, dyad1, dyad2);
+		instance2 = Arrays.asList(new DyadRankingInstance(dyadList2));
+		predictedOrdering = new DyadRankingDataset(instance2);
 
+		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), trueOrdering, predictedOrdering);
+
+		// 3 > 2 holds
+		Assert.assertEquals(5.0d, distance);
 		
 	}
 
