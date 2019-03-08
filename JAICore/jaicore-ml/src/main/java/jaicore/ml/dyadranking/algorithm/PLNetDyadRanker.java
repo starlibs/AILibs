@@ -530,9 +530,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty + 1).getLeft());
 		DyadRankingInstance leastCertainPair = new DyadRankingInstance(leastCertainDyads);
-		System.out.println("Pair: " + leastCertainPair);
-		System.out.println("Certainty: " + currentlyLowestCertainty);
-		System.out.println();
+//		System.out.println("Pair: " + leastCertainPair);
+//		System.out.println("Certainty: " + currentlyLowestCertainty);
+//		System.out.println();
 		return leastCertainPair;
 	}
 
@@ -692,4 +692,13 @@ public class PLNetDyadRanker extends APLDyadRanker
 		}
 		return currentProbability;
 	}
+	
+	public double getSkillForDyad(Dyad dyad) {
+		if(plNet == null)
+			return Double.NaN;
+		INDArray plNetInput = dyadToVector(dyad);
+		double plNetOutput = plNet.output(plNetInput).getDouble(0);
+		return plNetOutput;
+	}
+	
 }

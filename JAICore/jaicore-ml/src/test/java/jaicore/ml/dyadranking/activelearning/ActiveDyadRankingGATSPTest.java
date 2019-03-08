@@ -1,11 +1,8 @@
 package jaicore.ml.dyadranking.activelearning;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,8 +19,7 @@ import org.junit.runners.Parameterized.Parameters;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.dyadranking.activelearning.DyadDatasetPoolProvider;
-import jaicore.ml.dyadranking.activelearning.RandomPoolBasedActiveDyadRanker;
+import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -115,8 +111,46 @@ public class ActiveDyadRankingGATSPTest {
 		
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
 		poolProvider.setRemoveDyadsWhenQueried(false);
-			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
-					poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH);
+		
+// 		List<Vector> instFeat = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
+//		List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instFeat.get(0)));
+//		List<Vector> alts1 = new ArrayList<Vector>();
+//		List<Vector> alts2 = new ArrayList<Vector>();
+//		alts1.add(dyads.get(1).getAlternative());
+//		alts1.add(dyads.get(3).getAlternative());
+//		alts2.add(dyads.get(5).getAlternative());
+//		alts2.add(dyads.get(7).getAlternative());
+//		
+//		SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(instFeat.get(0), alts1);
+//		poolProvider.query(queryInstance);
+//		SparseDyadRankingInstance queryInstance2 = new SparseDyadRankingInstance(instFeat.get(0), alts2);
+//		SparseDyadRankingInstance queryInstance3 = new SparseDyadRankingInstance(instFeat.get(4), alts2);
+//		
+//		double[] instVals = instFeat.get(0).asArray();
+//		double[] alt1Vals = alts2.get(0).asArray();
+//		double[] alt2Vals = alts2.get(1).asArray();
+//		List<Vector> newAlts = new ArrayList<Vector>();
+//		newAlts.add(new DenseDoubleVector(alt1Vals));
+//		newAlts.add(new DenseDoubleVector(alt2Vals));
+//		
+//		SparseDyadRankingInstance queryInstance4 = new SparseDyadRankingInstance(new DenseDoubleVector(instVals), newAlts);
+//		
+//		poolProvider.query(queryInstance);
+//		poolProvider.query(queryInstance2);
+//		poolProvider.query(queryInstance3);
+//		poolProvider.query(queryInstance4);
+//
+//		System.out.println(queryInstance2.getDyadAtPosition(0) == queryInstance4.getDyadAtPosition(0));
+//		System.out.println(queryInstance2.getDyadAtPosition(0).equals(queryInstance4.getDyadAtPosition(0)));
+//		
+//		for(Object obj : poolProvider.getQueriedRankings()) {
+//			System.out.println(obj);
+//		}
+		
+		
+		UCBPoolBasedActiveDyadRanker activeRanker = new UCBPoolBasedActiveDyadRanker(ranker, poolProvider, seed, 5, MAX_BATCH_SIZE);
+//			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
+//					poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH, 5, 5);
 //		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, MAX_BATCH_SIZE, seed);
 
 		try {
@@ -127,10 +161,12 @@ public class ActiveDyadRankingGATSPTest {
 			for(int i = 0; i < 100; i++) {
 			activeRanker.activelyTrain(1);
 			double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
+			double avgKendallTauIS = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), new DyadRankingDataset(poolProvider.getQueriedRankings()), ranker);
 //			System.out.print(avgKendallTau + ",");
 			System.out.println("Current Kendalls Tau: " + avgKendallTau);
-			System.out.println();
-			stats[i].addValue(avgKendallTau);
+			System.out.println("Current Kendalls Tau IS: " + avgKendallTauIS);
+			System.out.println(poolProvider.getQueriedRankings());
+//			stats[i].addValue(avgKendallTau);
 			}
 			
 //			double avgKendallTau = 0.0d;

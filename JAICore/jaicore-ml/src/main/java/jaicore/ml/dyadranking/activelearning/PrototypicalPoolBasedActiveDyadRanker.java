@@ -114,8 +114,8 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 				for (int batchIndex = 0; batchIndex < numberOfNewInstances; batchIndex++) {
 					Vector curDStar = dStarWithProbability.get(batchIndex).getFirst();
-					System.out.println("Choose " + batchIndex + ": " + dStarWithProbability.get(batchIndex).getLeft());
-					System.out.println("with log probability: " + dStarWithProbability.get(batchIndex).getRight());
+//					System.out.println("Choose " + batchIndex + ": " + dStarWithProbability.get(batchIndex).getLeft());
+//					System.out.println("with log probability: " + dStarWithProbability.get(batchIndex).getRight());
 					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(curDStar));
 					if (dyads.size() < 2)
 						break;
