@@ -35,6 +35,7 @@ dependencies {
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
 	}
 
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
 	
 }

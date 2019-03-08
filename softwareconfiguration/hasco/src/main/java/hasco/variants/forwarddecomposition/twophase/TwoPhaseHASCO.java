@@ -7,10 +7,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -138,7 +138,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
-		/* active is only one step in this model; this could be refined */
+			/* active is only one step in this model; this could be refined */
 		case active:
 
 			/* phase 1: gather solutions */
@@ -168,9 +168,10 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			}
 			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
 
+			/* if there is no candidate, and the remaining time is very small, throw an AlgorithmTimeoutedException */
 			this.logger.info("HASCO has finished. {} solutions were found.", this.phase1ResultQueue.size());
-			if (this.phase1ResultQueue.isEmpty()) {
-				throw new NoSuchElementException("No classifier could be built within the given timeout.");
+			if (this.phase1ResultQueue.isEmpty() && this.getRemainingTimeToDeadline().seconds() < 10) {
+				throw new AlgorithmTimeoutedException(this.getRemainingTimeToDeadline().milliseconds() * -1);
 			}
 
 			/* phase 2: select model */
@@ -369,11 +370,11 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 				TwoPhaseHASCO.this.logger.info(
 						"During search, the currently chosen model {} had a total evaluation time of {}ms ({}ms per iteration). " + "We estimate an evaluation in the selection phase to take {}ms, and the final build to take {}. "
 								+ "This yields a total time of {}ms.",
-						c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection);
+								c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection);
 
 				/* Schedule a timeout for this evaluation, which is 10% over the estimated time */
 				int timeoutForEvaluation = (int) (estimatedInSelectionSingleIterationEvaluationTime * (1 + TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance()));
-				int taskId = ts.interruptMeAfterMS(timeoutForEvaluation);
+				TimerTask timerTask = ts.interruptMeAfterMS(timeoutForEvaluation);
 
 				/* If we have a global timeout, check whether considering this model is feasible. */
 				if (TwoPhaseHASCO.this.getTimeout().seconds() > 0) {
@@ -392,15 +393,16 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 					TwoPhaseHASCO.this.logger.info("Evaluated candidate {} with score {} (score assigned by HASCO was {}). Time to evaluate was {}ms", c.getComponentInstance(), selectionScore, c.getScore(), trueEvaluationTime);
 					stats.set(run, selectionScore);
 				} catch (InterruptedException e) {
+					assert !Thread.currentThread().isInterrupted() : "The interrupted-flag should not be true when an InterruptedException is thrown!";
 					TwoPhaseHASCO.this.logger.info("Selection eval of {} got interrupted after {}ms. Defined timeout was: {}ms", c.getComponentInstance(), (System.currentTimeMillis() - timestampStart), timeoutForEvaluation);
-					Thread.currentThread().interrupt();
+					Thread.currentThread().interrupt(); // no controlled interrupt needed here, because this is only a re-interrupt, and the execution will cease after this anyway
 				} catch (Exception e) {
 					TwoPhaseHASCO.this.logger.error("Observed an exeption when trying to evaluate a candidate in the selection phase.\n{}", LoggerUtil.getExceptionInfo(e));
 				} finally {
 					sem.release();
 					TwoPhaseHASCO.this.logger.debug("Released. Sem state: {}", sem.availablePermits());
-					if (taskId >= 0) {
-						ts.cancelTimeout(taskId);
+					if (timerTask != null) {
+						timerTask.cancel();
 					}
 				}
 			});
@@ -426,11 +428,14 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.logger.warn("No solution contained in ensemble.");
 		} else {
 			int selectedModelIndex = this.getCandidateThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats);
-			if (selectedModelIndex < 0) {
-				throw new NoSuchElementException("Could not identify any solution.");
+			if (selectedModelIndex >= 0) {
+				selectedModel = ensembleToSelectFrom.get(selectedModelIndex);
+				this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", selectedModel.getComponentInstance(), selectedModel.getScore(), stats.get(selectedModelIndex));
 			}
-			selectedModel = ensembleToSelectFrom.get(selectedModelIndex);
-			this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", selectedModel.getComponentInstance(), selectedModel.getScore(), stats.get(selectedModelIndex));
+			else {
+				this.logger.warn("Could not select any real solution in selection phase, just returning the best we have seen in HASCO.");
+				return bestSolution;
+			}
 		}
 		return selectedModel;
 	}
@@ -454,8 +459,14 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 	@Override
 	public void cancel() {
+		this.logger.info("Received cancel signal.");
 		super.cancel();
-		this.timeoutControl.interrupt();
+		this.logger.debug("Cancelling HASCO");
+		if (this.hasco != null) {
+			this.hasco.cancel();
+		}
+		this.timeoutControl.interrupt(); // no controlled interrupt necessary, because there is no controlled interruption handling in the body of the timeoutControl
+		assert this.isCanceled() : "Cancel-flag is not true at the end of the cancel procedure!";
 	}
 
 	/**

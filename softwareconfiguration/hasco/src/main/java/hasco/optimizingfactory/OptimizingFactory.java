@@ -127,4 +127,13 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 		fields.put("optimizer", this.optimizer);
 		return ToJSONStringUtil.toJSONString(fields);
 	}
+
+	@Override
+	public void cancel() {
+		this.logger.info("Received cancel. First canceling the optimizer {}, then my own routine!", this.optimizer.getId());
+		this.optimizer.cancel();
+		this.logger.debug("Now canceling the OptimizingFactory itself.");
+		super.cancel();
+		assert this.isCanceled() : "Cancel-flag must be true at end of cancel routine!";
+	}
 }

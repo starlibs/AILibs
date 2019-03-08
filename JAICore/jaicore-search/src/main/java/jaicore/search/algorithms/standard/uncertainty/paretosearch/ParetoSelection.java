@@ -46,15 +46,16 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 * @param q
 	 * @return true if p dominates q. False, otherwise.
 	 */
+	@SuppressWarnings("unchecked")
 	private boolean dominates(final Node<T, V> p, final Node<T, V> q) {
 		// Get f and u values of nodes
-		V p_f = (V) p.getAnnotation("f");
-		double p_u = (double) p.getAnnotation("uncertainty");
-		V q_f = (V) q.getAnnotation("f");
-		double q_u = (double) q.getAnnotation("uncertainty");
+		V pF = (V) p.getAnnotation("f");
+		double pU = (double) p.getAnnotation("uncertainty");
+		V qF = (V) q.getAnnotation("f");
+		double qU = (double) q.getAnnotation("uncertainty");
 
 		// p dominates q <=> (q.f < p.f AND q.u <= p.u) OR (q.f <= p.f AND q.u < p.u)
-		return (((p_f.compareTo(q_f) < 0) && (p_u <= q_u)) || ((p_f.compareTo(q_f) <= 0) && (p_u < q_u)));
+		return (((pF.compareTo(qF) < 0) && (pU <= qU)) || ((pF.compareTo(qF) <= 0) && (pU < qU)));
 	}
 
 	/**
@@ -125,7 +126,7 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 		if (!(o instanceof Node)) {
 			return false;
 		}
-		return this.open.stream().filter(pn -> pn.node == o).findFirst().isPresent();
+		return this.open.stream().anyMatch(pn -> pn.node == o);
 	}
 
 	@Override
@@ -141,7 +142,6 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	@Override
 	public Iterator<Node<T, V>> iterator() {
 		// Convert ParetoNode-iterator from this.pareto to a Node<T,V>-iterator.
-		// TODO: improve
 		ArrayList<Node<T, V>> a = new ArrayList<>();
 		for (ParetoNode<T, V> p : this.pareto) {
 			a.add(p.node);
@@ -214,7 +214,7 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 			}
 		}
 		for (ParetoNode<T, V> q : p.dominatedBy) {
-			q.dominates.remove(p); // TODO: Is this even necessary?
+			q.dominates.remove(p);
 		}
 		this.pareto.remove(p);
 		return this.open.remove(p);
@@ -222,16 +222,17 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 
 	@Override
 	public String toString() {
-		String s = "OPEN LIST: \n";
+		StringBuilder sb = new StringBuilder();
+		sb.append("OPEN LIST: \n");
 		for (ParetoNode<T, V> p : this.open) {
-			s += p.toString() + "\n";
+			sb.append(p.toString() + "\n");
 		}
-		s += "PARETO = [";
+		sb.append("PARETO = [");
 		for (ParetoNode<T, V> p : this.pareto) {
-			s += p.node.getPoint() + ", ";
+			sb.append(p.node.getPoint() + ", ");
 		}
-		s += "]";
-		return s;
+		sb.append("]");
+		return sb.toString();
 	}
 
 	@Override

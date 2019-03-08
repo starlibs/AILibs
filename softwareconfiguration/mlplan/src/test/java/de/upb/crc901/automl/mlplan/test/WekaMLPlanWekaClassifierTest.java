@@ -1,4 +1,4 @@
-package de.upb.crc901.mlplan.test;
+package de.upb.crc901.automl.mlplan.test;
 
 import static org.junit.Assert.assertTrue;
 

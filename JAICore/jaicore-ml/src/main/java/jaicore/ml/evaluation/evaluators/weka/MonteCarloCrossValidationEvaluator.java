@@ -74,6 +74,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 			}
 		}
 		if (Thread.currentThread().isInterrupted()) {
+			Thread.interrupted(); // clear the interrupted field. This is Java a general convention when an InterruptedException is thrown (see Java documentation for details)
 			throw new InterruptedException("MCCV has been interrupted");
 		}
 		Double score = stats.getMean();

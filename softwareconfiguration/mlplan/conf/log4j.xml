@@ -8,7 +8,7 @@
     <layout class="org.apache.log4j.PatternLayout">
       <!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
         - %m%n" /> -->
-      <param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="%-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -70,6 +70,10 @@
   
   <logger name="jaicore.graphvisualizer">
     <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.interrupt">
+    <level value="info" />
   </logger>
   
   <logger name="hasco">
