@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -157,7 +158,7 @@ public class SetUtil {
 	public static <T> Collection<Collection<T>> getCartesianProductOfSetsOfSameClass(final Collection<Collection<T>> items) {
 
 		/* recursion abortion */
-		if (items.size() == 0) {
+		if (items.isEmpty()) {
 			return new ArrayList<Collection<T>>();
 		}
 		if (items.size() == 1) {
@@ -690,8 +691,7 @@ public class SetUtil {
 			for (Collection<K> reducedDomain : powerset(domain)) {
 				mappings.addAll(allMappings(reducedDomain, range, true, injectivesOnly, surjectivesOnly));
 			}
-			if (!surjectivesOnly)
-			{
+			if (!surjectivesOnly) {
 				mappings.add(new HashMap<>()); // add the empty mapping
 			}
 		}
@@ -905,11 +905,11 @@ public class SetUtil {
 		Map<K, V> submap1 = new Hashtable<K, V>(), submap2 = new Hashtable<K, V>();
 		int mid = (int) Math.ceil(map.size() / 2.0);
 		int i = 0;
-		for (K key : map.keySet()) {
+		for (Entry<K, V> entry : map.entrySet()) {
 			if (i++ < mid) {
-				submap1.put(key, map.get(key));
+				submap1.put(entry.getKey(), entry.getValue());
 			} else {
-				submap2.put(key, map.get(key));
+				submap2.put(entry.getKey(), entry.getValue());
 			}
 		}
 

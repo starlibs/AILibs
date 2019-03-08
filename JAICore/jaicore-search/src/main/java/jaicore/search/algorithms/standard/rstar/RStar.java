@@ -48,6 +48,8 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 /**
  * Implementation of the R* algorithm.
  *
+ * @author fischor, fmohr, mwever
+ *
  * @param <T> a nodes external label i.e. a state of a problem
  * @param <A> action (action space of problem)
  */
@@ -103,10 +105,10 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @throws NodeEvaluationException
 	 */
 	private void updateState(final GammaNode<T> n) throws NodeEvaluationException, InterruptedException {
-		if ((n.g > this.w * this.h.f(n)) || ((n.getParent() == null || !this.isPathRealizationKnownForAbstractEdgeToNode(n)) && n.avoid)) {
-			n.setInternalLabel(new RStarK(true, n.g + this.w * this.h.f(n)));
+		if ((n.getG() > this.w * this.h.f(n)) || ((n.getParent() == null || !this.isPathRealizationKnownForAbstractEdgeToNode(n)) && n.getAvoid())) {
+			n.setInternalLabel(new RStarK(true, n.getG() + this.w * this.h.f(n)));
 		} else {
-			n.setInternalLabel(new RStarK(false, n.g + this.w * this.h.f(n)));
+			n.setInternalLabel(new RStarK(false, n.getG() + this.w * this.h.f(n)));
 		}
 		this.open.add(n);
 	}
@@ -139,7 +141,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 		this.activeAStarSubroutines.remove(astar);
 		this.externalPathsBetweenGammaNodes.put(new Pair<>(n.getParent(), n), optimalPath);
 		double bestKnownValueFromParentToNode = optimalPath != null ? optimalPath.getScore() : Double.MAX_VALUE;
-		n.getParent().c_low.put(n, bestKnownValueFromParentToNode);
+		n.getParent().cLow.put(n, bestKnownValueFromParentToNode);
 
 		/**
 		 * If no path bp(n)->n could be computed or
@@ -147,11 +149,11 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 		 * the state n should be avoided.
 		 */
 		// Line 8
-		if (!n.isGoal() && (optimalPath == null || (n.getParent().g + bestKnownValueFromParentToNode > this.w * this.hPath.h(n.getParent(), n)))) {
+		if (!n.isGoal() && (optimalPath == null || (n.getParent().getG() + bestKnownValueFromParentToNode > this.w * this.hPath.h(n.getParent(), n)))) {
 			n.setParent(this.argminCostToStateOverPredecessors(n));
-			n.avoid = true;
+			n.setAvoid(true);
 		}
-		n.g = n.getParent().g + n.getParent().c_low.get(n);
+		n.setG(n.getParent().getG() + n.getParent().cLow.get(n));
 		if (!n.isGoal()) {
 			this.updateState(n);
 		}
@@ -172,13 +174,13 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				for (T root : ((MultipleRootGenerator<T>) rootGenerator).getRoots()) {
 					GammaNode<T> internalRoot = new GammaNode<>(root);
 					internalRoot.setInternalLabel(new RStarK(false, this.w * this.h.f(internalRoot)));
-					internalRoot.g = 0;
+					internalRoot.setG(0);
 					this.open.add(internalRoot);
 				}
 			} else if (rootGenerator instanceof SingleRootGenerator) {
 				GammaNode<T> internalRoot = new GammaNode<>(((SingleRootGenerator<T>) rootGenerator).getRoot());
 				internalRoot.setInternalLabel(new RStarK(false, this.w * this.h.f(internalRoot)));
-				internalRoot.g = 0;
+				internalRoot.setG(0);
 				this.open.add(internalRoot);
 			} else {
 				assert false : "Only MultipleRootGenerator or SingleRootGenerators allowed.";
@@ -231,7 +233,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				for (GammaNode<T> n_ : successors) { // Line 28
 
 					/* Line 29: Initialize successors by setting the path from s to s_ to null, and by estimating the lowest cost from s to s_ with the heuristic h(s, s_). */
-					n.c_low.put(n_, this.hPath.h(n, n_));
+					n.cLow.put(n_, this.hPath.h(n, n_));
 
 					/* Lines 30 and 31 of the algorithm can be omitted here. They contain further initialization of
 						   the successors, but This is done implicitly in the generation process of the Gamma successors. */
@@ -244,8 +246,8 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 					 */
 					// Line 32
 					boolean isNewNode = n_.getParent() == null;
-					if (isNewNode || (n.g + n.c_low.get(n_) < n_.g)) {
-						n_.g = n.g + n.c_low.get(n_);
+					if (isNewNode || (n.getG() + n.cLow.get(n_) < n_.getG())) {
+						n_.setG(n.getG() + n.cLow.get(n_));
 						n_.setParent(n);
 						this.updateState(n_); // updates priority of n_ in open list.
 						if (isNewNode) {
@@ -294,7 +296,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 			edges.addAll(0, concreteEdges);
 			current = current.getParent();
 		}
-		return new EvaluatedSearchGraphPath<>(nodes, edges, n.g);
+		return new EvaluatedSearchGraphPath<>(nodes, edges, n.getG());
 	}
 
 	/**
@@ -305,7 +307,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	private GammaNode<T> argminCostToStateOverPredecessors(final GammaNode<T> n) {
 		GammaNode<T> argmin = null;
 		for (GammaNode<T> p : n.getPredecessors()) {
-			if ((argmin == null) || (p.g + p.c_low.get(n) < argmin.g + argmin.c_low.get(n))) {
+			if ((argmin == null) || (p.getG() + p.cLow.get(n) < argmin.getG() + argmin.cLow.get(n))) {
 				argmin = p;
 			}
 		}
@@ -355,7 +357,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 			/* if this is a solution, add it as a new solution */
 			if (gammaNodeForThisChild.isGoal()) {
 				this.logger.info("Found new solution. Adding it to the solution set.");
-				if (this.bestSeenGoalNode == null || this.bestSeenGoalNode.g > n.g) {
+				if (this.bestSeenGoalNode == null || this.bestSeenGoalNode.getG() > n.getG()) {
 					this.bestSeenGoalNode = n;
 					this.updateBestSeenSolution(this.getFullExternalPath(n));
 				}

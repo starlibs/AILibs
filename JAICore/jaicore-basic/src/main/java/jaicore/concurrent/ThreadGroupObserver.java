@@ -1,6 +1,11 @@
 package jaicore.concurrent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ThreadGroupObserver extends Thread {
+	private static final Logger L = LoggerFactory.getLogger(ThreadGroupObserver.class);
+
 	private final ThreadGroup group;
 	private int maxObservedThreads = 0;
 	private boolean active = true;
@@ -29,6 +34,7 @@ public class ThreadGroupObserver extends Thread {
 				/* store all currently active threads */
 				this.threadsAtPointOfViolation = new Thread[this.group.activeCount()];
 				this.group.enumerate(this.threadsAtPointOfViolation, true);
+				L.info("Running violation hook!");
 				this.hookOnConstraintViolation.run();
 				return;
 			}

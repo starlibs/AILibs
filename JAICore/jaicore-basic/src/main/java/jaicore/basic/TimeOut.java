@@ -55,19 +55,13 @@ public class TimeOut {
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
-			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
+		if (obj == null || this.getClass() != obj.getClass()) {
 			return false;
 		}
 		TimeOut other = (TimeOut) obj;
 		if (this.duration != other.duration) {
 			return false;
 		}
-		if (this.unit != other.unit) {
-			return false;
-		}
-		return true;
+		return this.unit == other.unit;
 	}
 }

@@ -111,7 +111,8 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 				}
 			}
 			long end = System.currentTimeMillis();
-			this.logger.debug("Selected literal {} with still unbound params {} that can be ground in {} ways in {}ms.", this.chosenLiteral, this.chosenLiteral.getVariableParams(), this.possibleChoicesForLocalLiteral.size(), end - timeToPrepareCWAVersion);
+			this.logger.debug("Selected literal {} with still unbound params {} that can be ground in {} ways in {}ms.", this.chosenLiteral, this.chosenLiteral.getVariableParams(), this.possibleChoicesForLocalLiteral.size(),
+					end - timeToPrepareCWAVersion);
 			this.logger.info("Initialized FC algorithm within {}ms.", end - start);
 			return this.activate();
 		}
@@ -303,8 +304,8 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 		for (Literal l : conclusion) {
 			Literal lg = new Literal(l, grounding);
 			if (factbase.contains(lg) != l.isPositive()) {
-				System.err.println("Literal " + l + " in conclusion ground to " + lg + " does not follow from state: ");
-				factbase.stream().sorted((l1, l2) -> l1.toString().compareTo(l2.toString())).forEach(lit -> System.out.println("\t" + lit));
+				this.logger.error("Literal {} in conclusion ground to {} does not follow from state: ", l, lg);
+				factbase.stream().sorted((l1, l2) -> l1.toString().compareTo(l2.toString())).forEach(lit -> this.logger.info("\t{}", lit));
 				return false;
 			}
 		}
