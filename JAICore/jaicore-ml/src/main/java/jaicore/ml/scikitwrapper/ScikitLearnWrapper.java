@@ -311,6 +311,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		this.modelFile = modelFile;
 	}
 
+	public File getModelPath() {
+		return this.modelFile;
+	}
+
 	/**
 	 * Returns a hash for the given Instances based on the Weka implementation of hashCode(). Additionally the sign is replaces by an additional 0/1.
 	 *
@@ -463,4 +467,5 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 			return processParameters.toArray(new String[] {});
 		}
 	}
+
 }
