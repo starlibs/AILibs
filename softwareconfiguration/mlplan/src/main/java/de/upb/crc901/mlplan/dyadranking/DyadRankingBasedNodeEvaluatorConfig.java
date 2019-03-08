@@ -20,8 +20,14 @@ public interface DyadRankingBasedNodeEvaluatorConfig extends Mutable {
 	public static final String LANDMARKERS_KEY = "landmarkers";
 
 	public static final String LANDMARKERS_SAMPLE_SIZE_KEY = "landmarkerSampleSize";
-	
+
 	public static final String USE_LANDMARKERS = "useLandmarkers";
+
+	/*
+	 * Seocifies if the dad ranker should evaluate the top k pipelines, or, just
+	 * return the score which is predicted by the PLNet
+	 */
+	public static final String USE_EVALUATIONS = "useEvaluations";
 
 	@Key(NUM_EVALUATIONS_KEY)
 	@DefaultValue("10")
@@ -51,5 +57,8 @@ public interface DyadRankingBasedNodeEvaluatorConfig extends Mutable {
 	@Key(USE_LANDMARKERS)
 	@DefaultValue("false")
 	public boolean useLandmarkers();
-	
+
+	@Key(USE_EVALUATIONS)
+	@DefaultValue("true")
+	public boolean useEvaluations();
 }
