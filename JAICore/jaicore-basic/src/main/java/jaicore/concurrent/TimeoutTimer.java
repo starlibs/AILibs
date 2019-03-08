@@ -2,6 +2,7 @@ package jaicore.concurrent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -106,7 +107,7 @@ public class TimeoutTimer extends Timer {
 				/* create id for job and return it */
 				int id;
 				do {
-					id = (int) (Math.random() * 1000000);
+					id = new Random().nextInt(1000000);
 				} while (TimeoutTimer.this.tasks.containsKey(id));
 				TimeoutTimer.this.tasks.put(id, task);
 				logger.info("Job {} scheduled for in {}ms.", id, delay);

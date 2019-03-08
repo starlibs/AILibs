@@ -383,12 +383,12 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				return r.call();
 			} catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
 				boolean interruptedDueToShutdown = this.threadsInterruptedByShutdown.contains(Thread.currentThread());
-				this.logger.info("Received intterrupt. Cancel flag is {}. Thread contained in interrupted by shutdown: {}", this.isCanceled(), interruptedDueToShutdown);
+				this.logger.info("Received interrupt. Cancel flag is {}. Thread contained in interrupted by shutdown: {}", this.isCanceled(), interruptedDueToShutdown);
 				if (!interruptedDueToShutdown) {
 					throw e;
 				}
 				this.checkAndConductTermination();
-				throw new IllegalStateException("termination routine should have thrown an exception!");
+				throw new IllegalStateException("Received an interrupt and checked termination, thus, termination routine should have thrown an exception which it apparently did not!");
 			} catch (Exception e) {
 				throw new AlgorithmException(e, "The algorithm has failed due to an exception of a Callable.");
 			}
@@ -397,10 +397,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		/* if the remaining time is not sufficient to conduct further calculation, cancel at this point */
 		long remainingTime = this.getRemainingTimeToDeadline().milliseconds();
 		if (remainingTime < this.timeoutPrecautionOffset + MIN_RUNTIME_FOR_OBSERVED_TASK) {
-			this.logger.debug("Only {}ms left, which is not enough to reliably compute more successors. Terminating search at this point", remainingTime);
-			Thread.sleep(remainingTime);
-			this.checkAndConductTermination();
-			throw new IllegalStateException("termination routine should have thrown an exception!");
+			this.logger.debug("Only {}ms left, which is not enough to reliably continue computation. Terminating algorithm at this point, throwing an AlgorithmTimeoutedException.", remainingTime);
+			throw new AlgorithmTimeoutedException(remainingTime * (-1));
 		}
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
@@ -436,7 +434,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			/* otherwise, if the thread has been interrupted directly and not as a consequence of a shutdown, forward the interrupt */
 			else {
 				boolean interruptedDueToShutdown = this.threadsInterruptedByShutdown.contains(Thread.currentThread());
-				this.logger.info("Received intterrupt. Cancel flag is {}. Thread contained in interrupted by shutdown: {}", this.isCanceled(), interruptedDueToShutdown);
+				this.logger.info("Received interrupt. Cancel flag is {}. Thread contained in interrupted by shutdown: {}", this.isCanceled(), interruptedDueToShutdown);
 				if (!interruptedDueToShutdown) {
 					throw e;
 				}

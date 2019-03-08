@@ -72,10 +72,21 @@ import jaicore.search.structure.graphgenerator.RootGenerator;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
+/**
+ *
+ * @author fmohr, wever
+ *
+ * @param <I>
+ * @param <N>
+ * @param <A>
+ * @param <V>
+ */
 public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
 	private String loggerName;
+
+	private static final String SPACER = "\n\t\t";
 
 	public enum ParentDiscarding {
 		NONE, OPEN, ALL
@@ -110,7 +121,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	protected final Map<N, Node<N, V>> ext2int = new ConcurrentHashMap<>();
 
 	/* search graph model */
-	protected Queue<Node<N, V>> open = new PriorityQueue<>((n1,n2) -> n1.getInternalLabel().compareTo(n2.getInternalLabel()));
+	protected Queue<Node<N, V>> open = new PriorityQueue<>((n1, n2) -> n1.getInternalLabel().compareTo(n2.getInternalLabel()));
 	private Node<N, V> nodeSelectedForExpansion; // the node that will be expanded next
 	private final Map<N, Thread> expanding = new HashMap<>(); // EXPANDING contains the nodes being expanded and the threads doing this job
 	private final Set<N> closed = new HashSet<>(); // CLOSED contains only node but not paths
@@ -185,6 +196,37 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 	/** BLOCK A: Internal behavior of the algorithm **/
 
+	private enum ENodeType {
+
+		OR_PRUNED("or_pruned"), OR_TIMEDOUT("or_timedout"), OR_OPEN("or_open"), OR_SOLUTION("or_solution"), OR_CREATED("or_created"), OR_CLOSED("or_closed");
+
+		private String name;
+
+		private ENodeType(final String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return this.name;
+		}
+	}
+
+	private enum ENodeAnnotation {
+		F_ERROR("fError"), F_MESSAGE("fMessage"), F_TIME("fTime");
+
+		private String name;
+
+		private ENodeAnnotation(final String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return this.name;
+		}
+	}
+
 	private class NodeBuilder implements Runnable {
 
 		private final Collection<N> todoList;
@@ -226,7 +268,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				try {
 					BestFirst.this.labelNode(newNode);
 					if (newNode.getInternalLabel() == null) {
-						BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_pruned"));
+						BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
 						return;
 					}
 					if (BestFirst.this.isStopCriterionSatisfied()) {
@@ -238,29 +280,29 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						BestFirst.this.logger.warn("Leaving node building routine due to interrupt. This leaves the search inconsistent; the node should be attached again!");
 					}
 					BestFirst.this.logger.debug("Worker has been interrupted, exiting.");
-					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, "fError", e));
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_pruned"));
+					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
 					Thread.currentThread().interrupt();
 					return;
 				} catch (TimeoutException e) {
 					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode);
-					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, "fError", e));
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_timedout"));
+					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
+					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_TIMEDOUT.toString()));
 					return;
 				} catch (ControlledNodeEvaluationException e) {
 					BestFirst.this.logger.debug("Node evaluation failed with a controlled exception.");
-					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, "fError", e));
-					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, "fMessage", "hello, yes it is pruned!"));
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_pruned"));
+					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
+					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
+					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_MESSAGE.toString(), "hello, yes it is pruned!"));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
 
 					return;
 				} catch (Exception e) {
 					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
-					newNode.setAnnotation("fError", e);
-					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, "fError", e));
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_pruned"));
+					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
+					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
 					return;
 				}
 
@@ -279,7 +321,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						if (existingIdenticalNodeOnOpen.isPresent()) {
 							Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
 							if (newNode.getInternalLabel().compareTo(existingNode.getInternalLabel()) < 0) {
-								BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+								BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_OPEN.toString())));
 								BestFirst.this.post(new NodeRemovedEvent<>(BestFirst.this.getId(), existingNode));
 								BestFirst.this.open.remove(existingNode);
 								if (newNode.getInternalLabel() == null) {
@@ -341,7 +383,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 							}
 						}
 					}
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, "or_" + (newNode.isGoal() ? "solution" : "open")));
+					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_OPEN.toString())));
 					BestFirst.this.createdCounter++;
 				}
 
@@ -361,7 +403,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				Thread.currentThread().interrupt(); // interrupt myself. This is for the case that the main thread executes this part
 				BestFirst.this.logger.info("Node builder has been interrupted, finishing execution.");
 			} catch (Exception e) {
-				e.printStackTrace();
+				BestFirst.this.logger.error("An unexpected exception occurred while building nodes", e);
 			} finally {
 
 				/*
@@ -408,11 +450,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* check loop */
 		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: "
-				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + "\n\t\t" + t);
+				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* currently, we only support tree search */
-		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + "\n\t\t" + t) + "\n\tSecond Path:"
-		+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + "\n\t\t" + t);
+		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n.toString()).reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
+				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
@@ -426,7 +468,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (parent == null) {
 			this.post(new GraphInitializedEvent<Node<N, V>>(this.getId(), newNode));
 		} else {
-			this.post(new NodeAddedEvent<Node<N, V>>(this.getId(), parent, newNode, "or_" + (newNode.isGoal() ? "solution" : "created")));
+			this.post(new NodeAddedEvent<Node<N, V>>(this.getId(), parent, newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_CREATED.toString())));
 			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
 		}
 		return newNode;
@@ -461,19 +503,18 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			if (BestFirst.this.timeoutForComputationOfF > 0 && fTime > BestFirst.this.timeoutForComputationOfF + 1000) {
 				BestFirst.this.logger.warn("Computation of f for node {} took {}ms, which is more than the allowed {}ms", node, fTime, BestFirst.this.timeoutForComputationOfF);
 			}
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			this.logger.info("Thread {} received interrupt in node evaluation. Timeout flag is {}", Thread.currentThread(), timedout.get());
 			if (timedout.get()) {
 				BestFirst.this.logger.debug("Received interrupt during computation of f.");
-				this.post(new NodeTypeSwitchEvent<>(this.getId(), node, "or_timedout"));
-				node.setAnnotation("fError", "Timeout");
+				this.post(new NodeTypeSwitchEvent<>(this.getId(), node, ENodeType.OR_TIMEDOUT.toString()));
+				node.setAnnotation(ENodeAnnotation.F_ERROR.toString(), "Timeout");
 				computationTimedout = true;
 				Thread.interrupted(); // set interrupt state of thread to FALSE, because interrupt
 				try {
 					label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.f(node) : null;
-				} catch (Throwable e2) {
-					e2.printStackTrace();
+				} catch (Exception e2) {
+					this.logger.error("An unexpected exception occurred while labeling node {}", node, e2);
 				}
 			} else {
 				this.logger.info("Received external interrupt. Forwarding this interrupt.");
@@ -486,7 +527,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* register time required to compute this node label */
 		long fTime = System.currentTimeMillis() - startComputation;
-		node.setAnnotation("fTime", fTime);
+		node.setAnnotation(ENodeAnnotation.F_TIME.toString(), fTime);
 		this.logger.debug("Computed label {} for {} in {}ms", label, node, fTime);
 
 		/* if no label was computed, prune the node and cancel the computation */
@@ -496,8 +537,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			} else {
 				BestFirst.this.logger.debug("Not inserting node {} because computation of f-value timed out.", node);
 			}
-			if (!node.getAnnotations().containsKey("fError")) {
-				node.setAnnotation("fError", "f-computer returned NULL");
+			if (!node.getAnnotations().containsKey(ENodeAnnotation.F_ERROR.toString())) {
+				node.setAnnotation(ENodeAnnotation.F_ERROR.toString(), "f-computer returned NULL");
 			}
 			return;
 		}
@@ -526,7 +567,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					this.openLock.lockInterruptibly();
 					try {
 						if (root == null) {
-							throw new IllegalArgumentException("Cannot add NULL as a node to OPEN");
+							throw new IllegalArgumentException("Root for MultipleRootGenerator is null. Cannot add NULL as a node to OPEN");
 						}
 						this.open.add(root);
 					} finally {
@@ -537,7 +578,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			} else {
 				Node<N, V> root = this.newNode(null, ((SingleRootGenerator<N>) this.rootGenerator).getRoot());
 				if (root == null) {
-					throw new IllegalArgumentException("Cannot add NULL as a node to OPEN");
+					throw new IllegalArgumentException("Root for SingleRootGenerator is null. Cannot add NULL as a node to OPEN");
 				}
 				this.labelNode(root);
 				this.checkAndConductTermination();
@@ -563,12 +604,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.openLock.lockInterruptibly();
 			try {
 				assert !this.open.contains(null) : "OPEN contains NULL";
-				assert !this.open.stream().filter(n -> n.getInternalLabel() == null).findAny().isPresent() : "OPEN contains an element with value NULL";
+				assert this.open.stream().noneMatch(n -> n.getInternalLabel() == null) : "OPEN contains an element with value NULL";
 				int openSizeBefore = this.open.size();
 				assert this.nodeSelectedForExpansion == null : "Node selected for expansion must be NULL when setting it!";
 				this.nodeSelectedForExpansion = node;
 				assert this.open.contains(node) : "OPEN must contain the node to be expanded.\n\tOPEN size: " + this.open.size() + "\n\tNode to be expanded: " + node + ".\n\tOPEN: "
-				+ this.open.stream().map(n -> "\n\t\t" + n).collect(Collectors.joining());
+						+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
 				this.open.remove(this.nodeSelectedForExpansion);
 				int openSizeAfter = this.open.size();
 				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getPoint()) : "A node chosen for expansion has no entry in the ext2int map!";
@@ -596,14 +637,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 * Preliminarily check that the active jobs are less than the additional threads
 		 */
 		assert this.additionalThreadsForNodeAttachment == 0 || this.activeJobs.get() < this.additionalThreadsForNodeAttachment : "Cannot expand nodes if number of active jobs (" + this.activeJobs.get()
-		+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
+				+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
 
 		/*
 		 * Step 1: determine node that will be expanded next. Either it already has been
 		 * set or it will be the first of OPEN. If necessary, we wait for potential
 		 * incoming nodes
 		 */
-		final Node<N, V> nodeSelectedForExpansion;
+		final Node<N, V> actualNodeSelectedForExpansion;
 		{
 			Node<N, V> tmpNodeSelectedForExpansion = null; // necessary workaround as setting final variables in a try-block is not reasonably possible
 			this.nodeSelectionLock.lockInterruptibly();
@@ -614,7 +655,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					try {
 						this.logger.debug("No next node has been selected. Choosing the first from OPEN.");
 						while (this.open.isEmpty() && this.activeJobs.get() > 0) {
-							this.logger.trace("Await condition as open queue is empty and active jobs is {} ...",  this.activeJobs.get());
+							this.logger.trace("Await condition as open queue is empty and active jobs is {} ...", this.activeJobs.get());
 							this.numberOfActiveJobsHasChanged.await();
 							this.logger.trace("Got signaled");
 							this.checkAndConductTermination();
@@ -640,44 +681,44 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				this.nodeSelectionLock.unlock();
 			}
 			assert this.nodeSelectedForExpansion == null : "The object variable for the next selected node must be NULL at the end of the select step.";
-			nodeSelectedForExpansion = tmpNodeSelectedForExpansion;
+			actualNodeSelectedForExpansion = tmpNodeSelectedForExpansion;
 			synchronized (this.expanding) {
-				this.expanding.put(nodeSelectedForExpansion.getPoint(), Thread.currentThread());
+				this.expanding.put(actualNodeSelectedForExpansion.getPoint(), Thread.currentThread());
 				assert this.expanding.keySet().contains(tmpNodeSelectedForExpansion.getPoint()) : "The node selected for expansion should be in the EXPANDING map by now.";
 			}
-			assert !this.open.contains(nodeSelectedForExpansion) : "Node selected for expansion is still on OPEN";
-			assert nodeSelectedForExpansion != null : "We have not selected any node for expansion, but this must be the case at this point.";
-			this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
+			assert !this.open.contains(actualNodeSelectedForExpansion) : "Node selected for expansion is still on OPEN";
+			assert actualNodeSelectedForExpansion != null : "We have not selected any node for expansion, but this must be the case at this point.";
+			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 		}
 
 		/* steps 2 and 3 only for non-goal nodes */
 		AlgorithmEvent expansionEvent;
-		if (!nodeSelectedForExpansion.isGoal()) {
+		if (!actualNodeSelectedForExpansion.isGoal()) {
 
 			/* Step 2: compute the successors in the underlying graph */
-			this.beforeExpansion(nodeSelectedForExpansion);
-			this.post(new NodeTypeSwitchEvent<Node<N, V>>(this.getId(), nodeSelectedForExpansion, "or_expanding"));
-			this.logger.debug("Expanding node {} with f-value {}", nodeSelectedForExpansion, nodeSelectedForExpansion.getInternalLabel());
+			this.beforeExpansion(actualNodeSelectedForExpansion);
+			this.post(new NodeTypeSwitchEvent<Node<N, V>>(this.getId(), actualNodeSelectedForExpansion, "or_expanding"));
+			this.logger.debug("Expanding node {} with f-value {}", actualNodeSelectedForExpansion, actualNodeSelectedForExpansion.getInternalLabel());
 			this.logger.debug("Start computation of successors");
 			final List<NodeExpansionDescription<N, A>> successorDescriptions;
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
 			try {
-				assert !nodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
+				assert !actualNodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
 				tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
 					this.logger.trace("Invoking getSuccessors");
-					return BestFirst.this.successorGenerator.generateSuccessors(nodeSelectedForExpansion.getPoint());
+					return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
 				});
 				assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
 				this.logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
 			} catch (Exception e) {
-				this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion); // make sure that we unregister from expand
+				this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion); // make sure that we unregister from expand
 				throw new AlgorithmException(e, "Exception occured in successor generation."); // if this was a real exception, throw it.
 			}
 			successorDescriptions = tmpSuccessorDescriptions;
 
-			this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
-			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), nodeSelectedForExpansion);
-			this.post(new SuccessorComputationCompletedEvent<>(this.getId(), nodeSelectedForExpansion, successorDescriptions));
+			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
+			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion);
+			this.post(new SuccessorComputationCompletedEvent<>(this.getId(), actualNodeSelectedForExpansion, successorDescriptions));
 
 			/*
 			 * step 3: trigger node builders that compute node details and decide whether
@@ -685,12 +726,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			 */
 			List<N> todoList = successorDescriptions.stream().map(d -> d.getTo()).collect(Collectors.toList());
 			for (NodeExpansionDescription<N, A> successorDescription : successorDescriptions) {
-				NodeBuilder nb = new NodeBuilder(todoList, nodeSelectedForExpansion, successorDescription);
+				NodeBuilder nb = new NodeBuilder(todoList, actualNodeSelectedForExpansion, successorDescription);
 				this.logger.trace("Number of additional threads for node attachment is {}", this.additionalThreadsForNodeAttachment);
 				if (this.additionalThreadsForNodeAttachment < 1) {
 					nb.run();
 				} else {
-					this.lockConditionSafeleyWhileExpandingNode(this.activeJobsCounterLock, nodeSelectedForExpansion); // acquires the lock and shuts down properly when being interrupted
+					this.lockConditionSafeleyWhileExpandingNode(this.activeJobsCounterLock, actualNodeSelectedForExpansion); // acquires the lock and shuts down properly when being interrupted
 					this.logger.trace("Acquired activeJobsCounterLock for increment");
 					try {
 						this.activeJobs.incrementAndGet();
@@ -705,12 +746,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					this.pool.submit(nb);
 				}
 			}
-			this.checkTerminationAndUnregisterFromExpand(nodeSelectedForExpansion);
-			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", nodeSelectedForExpansion, this.open.size(), this.activeJobs.get());
-			expansionEvent = new NodeExpansionJobSubmittedEvent<>(this.getId(), nodeSelectedForExpansion, successorDescriptions);
-		}
-		else {
-			expansionEvent = new RemovedGoalNodeFromOpenEvent<>(this.getId(), nodeSelectedForExpansion);
+			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
+			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, this.open.size(), this.activeJobs.get());
+			expansionEvent = new NodeExpansionJobSubmittedEvent<>(this.getId(), actualNodeSelectedForExpansion, successorDescriptions);
+		} else {
+			expansionEvent = new RemovedGoalNodeFromOpenEvent<>(this.getId(), actualNodeSelectedForExpansion);
 		}
 
 		/*
@@ -719,13 +759,13 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 */
 		this.expandedCounter++;
 		synchronized (this.expanding) {
-			this.expanding.remove(nodeSelectedForExpansion.getPoint());
-			assert !this.expanding.containsKey(nodeSelectedForExpansion.getPoint()) : "Expanded node " + nodeSelectedForExpansion + " was not removed from EXPANDING!";
+			this.expanding.remove(actualNodeSelectedForExpansion.getPoint());
+			assert !this.expanding.containsKey(actualNodeSelectedForExpansion.getPoint()) : actualNodeSelectedForExpansion + " was expanded and it was not removed from EXPANDING!";
 		}
-		this.closed.add(nodeSelectedForExpansion.getPoint());
-		assert this.closed.contains(nodeSelectedForExpansion.getPoint()) : "Expanded node " + nodeSelectedForExpansion + " was not inserted into CLOSED!";
-		this.post(new NodeTypeSwitchEvent<Node<N, V>>(this.getId(), nodeSelectedForExpansion, "or_closed"));
-		this.afterExpansion(nodeSelectedForExpansion);
+		this.closed.add(actualNodeSelectedForExpansion.getPoint());
+		assert this.closed.contains(actualNodeSelectedForExpansion.getPoint()) : "Expanded node " + actualNodeSelectedForExpansion + " was not inserted into CLOSED!";
+		this.post(new NodeTypeSwitchEvent<Node<N, V>>(this.getId(), actualNodeSelectedForExpansion, ENodeType.OR_CLOSED.toString()));
+		this.afterExpansion(actualNodeSelectedForExpansion);
 		this.checkAndConductTermination();
 		this.openLock.lockInterruptibly();
 		try {
@@ -751,12 +791,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		try {
 			l.lockInterruptibly();
 		} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
-			this.logger.debug("Received an interrupt while waiting for " + l + " to become available.");
-			// if (!isShutdownInitialized()) { // if the algorithm has not been shutdown yet, we do this now by interrupting ourselves explicitly and invoking the check
+			this.logger.debug("Received an interrupt while waiting for {} to become available.", l);
 			Thread.currentThread().interrupt();
 			this.checkTerminationAndUnregisterFromExpand(node);
-			// } else if ()
-			// throw e; // if the algorithm has already been shut down, just throw the exception
 		}
 	}
 
@@ -813,9 +850,13 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			}
 			try {
 				this.logger.debug("Waiting 3 seconds for pool shutdown.");
-				this.pool.awaitTermination(3, TimeUnit.DAYS);
+				if (this.pool != null) {
+					this.pool.awaitTermination(3, TimeUnit.DAYS);
+				} else {
+					this.logger.error("Apparently, the pool was unexpectedly not set and thus null.");
+				}
 			} catch (InterruptedException e) {
-				this.logger.warn("Got interrupted during shutdown!");
+				this.logger.warn("Got interrupted during shutdown!", e);
 			}
 			assert this.pool.isTerminated() : "The worker pool has not been shutdown correctly!";
 			if (!this.pool.isTerminated()) {
@@ -851,8 +892,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		try {
 			this.logger.info("Received solution with f-value {} and annotations {}", solutionEvent.getSolutionCandidate().getScore(), solutionEvent.getSolutionCandidate().getAnnotations());
 			this.registerSolution(solutionEvent.getSolutionCandidate()); // unpack this solution and plug it into the registration process
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			this.logger.error("An unexpected exception occurred while receiving EvaluatedSearchSolutionCandidateFoundEvent.", e);
 		}
 	}
 
@@ -861,8 +902,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		try {
 			this.logger.debug("Received rollout event: {}", event);
 			this.post(event);
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			this.logger.error("An unexpected exception occurred while receiving RolloutEvent", e);
 		}
 	}
 
@@ -871,8 +912,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		try {
 			this.logger.debug("Received solution annotation: {}", event);
 			this.post(event);
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			this.logger.error("An unexpected exception occurred receiveSolutionCandidateAnnotationEvent.", e);
 		}
 	}
 
@@ -886,8 +927,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			}
 			Node<N, V> nodeInt = this.ext2int.get(nodeExt);
 			nodeInt.setAnnotation(event.getAnnotationName(), event.getAnnotationValue());
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			this.logger.error("An unexpected exception occurred while receiving node annotation event ", e);
 		}
 	}
 
@@ -936,8 +977,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		/* now initialize the graph */
 		try {
 			this.initGraph();
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			this.logger.error("An unexpected exception occurred while the graph should be initialized.", e);
 			return;
 		}
 
@@ -1008,11 +1049,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 								this.logger.debug("Received an interrupt while waiting for number of active jobs to change.");
 								if (!this.isShutdownInitialized()) { // if the algorithm has not been shutdown yet, we do this now by interrupting ourselves explicitly and invoking the check
 									this.activeJobsCounterLock.unlock(); // we can (and MUST) unlock now to avoid deadlocks
-									haveLock = false;
 									Thread.currentThread().interrupt();
 									this.checkAndConductTermination();
-								}
-								else {
+								} else {
 									throw e; // if the algorithm has already been shut down, just throw the exception
 								}
 							}
@@ -1099,6 +1138,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	/** BLOCK C: Hooks **/
 
 	protected void afterInitialization() {
+		/* intentionally left blank */
 	}
 
 	protected boolean beforeSelection() {
@@ -1106,12 +1146,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	}
 
 	protected void afterSelection(final Node<N, V> node) {
+		/* intentionally left blank */
 	}
 
 	protected void beforeExpansion(final Node<N, V> node) {
+		/* intentionally left blank */
 	}
 
 	protected void afterExpansion(final Node<N, V> node) {
+		/* intentionally left blank */
 	}
 
 	/** BLOCK D: Getters and Setters **/
@@ -1199,7 +1242,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of node evaluator {} to {}", this.nodeEvaluator, name + ".nodeevaluator");
+			this.logger.info("Setting logger of node evaluator {} to {}.nodeevaluator", this.nodeEvaluator, name);
 			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeevaluator");
 		} else {
 			this.logger.info("Node evaluator {} does not implement ILoggingCustomizable, so its logger won't be customized.", this.nodeEvaluator);
