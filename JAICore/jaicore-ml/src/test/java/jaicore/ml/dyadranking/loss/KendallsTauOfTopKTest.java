@@ -62,7 +62,8 @@ public class KendallsTauOfTopKTest {
 
 		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering, predictedOrdering);
 		// for the pair 1,2 we should gain no loss (as 1 < 2 holds for the second pair aswell)
-		Assert.assertEquals(0.0d, distance);
+		// but 3 > 2 holds which is wrong!
+		Assert.assertEquals(1.0d, distance);
 	
 		dyadList2 = Arrays.asList(dyad2, dyad3, dyad1, dyad4);
 		instance2 = Arrays.asList(new DyadRankingInstance(dyadList2));
@@ -71,7 +72,8 @@ public class KendallsTauOfTopKTest {
 		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering, predictedOrdering);
 
 		//only 2 appears the in the predicted ranking, thus, we know that 2 > 1 which is wrong
-		Assert.assertEquals(1.0d, distance);
+		// 1 > 3 and 2 > 1 hold which are bot wrong -> 2 pens
+		Assert.assertEquals(2.0d, distance);
 		
 		// Case 3
 		dyadList2 = Arrays.asList(dyad1, dyad3, dyad2, dyad4);
@@ -80,6 +82,7 @@ public class KendallsTauOfTopKTest {
 
 		distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, .5), trueOrdering, predictedOrdering);
 
+		// 3 > 2 holds
 		Assert.assertEquals(1.0d, distance);
 
 		// Case 4

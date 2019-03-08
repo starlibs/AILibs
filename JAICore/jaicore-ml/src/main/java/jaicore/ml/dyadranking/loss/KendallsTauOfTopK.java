@@ -28,27 +28,27 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 		if (k <= 1) {
 			throw new IllegalArgumentException("Dyad rankings must have length greater than 1.");
 		}
-		int nConc = 0;
-		int nDisc = 0;
-		for (int predictedI = 0; predictedI < k - 1; predictedI++) {
-			Dyad predDyad = predicted.getDyadAtPosition(predictedI);
-			int actualI = -1;
-			for (int i = 0; i < actual.length(); i++) {
-				if (actual.getDyadAtPosition(i).equals(predDyad)) {
-					actualI = i;
+		
+		for (int actualI = 0; actualI < actual.length() - 1; actualI++) {
+			Dyad actualDyad = actual.getDyadAtPosition(actualI);
+			int predictedI = -1;
+			for (int i = 0; i < predicted.length(); i++) {
+				if (predicted.getDyadAtPosition(i).equals(actualDyad)) {
+					predictedI = i;
 					break;
 				}
 			}
 
-			for (int predictedJ = 0; predictedJ < predicted.length(); predictedJ++) {
-				Dyad predPairedDyad = predicted.getDyadAtPosition(predictedJ);
-				int actualJ = -1;
-				for (int j = 0; j < actual.length(); j++) {
-					if (actual.getDyadAtPosition(j).equals(predPairedDyad)) {
-						actualJ = j;
+			for (int actualJ = actualI + 1; actualJ < actual.length(); actualJ++) {
+				Dyad actPairedDyad = actual.getDyadAtPosition(actualJ);
+				int predictedJ = -1;
+				for (int j = 0; j < predicted.length(); j++) {
+					if (predicted.getDyadAtPosition(j).equals(actPairedDyad)) {
+						predictedJ = j;
 						break;
 					}
 				}
+				
 
 				double penalty = 0;
 
@@ -146,7 +146,8 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 				kendallsDistance += penalty;
 			}
 		}
-		double kendallDistance = 2.0 * (kendallsDistance) / (k * (k - 1));
+		System.out.println("KD "+ kendallsDistance);
+		double kendallDistance = ( 2 * kendallsDistance) / (k * (k - 1));
 
 		return kendallDistance;
 	}
