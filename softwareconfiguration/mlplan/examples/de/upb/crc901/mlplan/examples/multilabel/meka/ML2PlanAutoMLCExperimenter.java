@@ -15,8 +15,6 @@ import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.ml.evaluation.multilabel.ClassifierMetricGetter;
 import jaicore.ml.evaluation.multilabel.MultilabelDatasetSplitter;
-import jaicore.ml.evaluation.multilabel.databaseconnection.ClassifierDBConnection;
-import jaicore.ml.evaluation.multilabel.databaseconnection.EvaluationMode;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
@@ -64,34 +62,19 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 		// Get train / test splits
 		String splitDescription_traintest = experimentDescription.get("test_split_tech");
 		String testFold = experimentDescription.get("test_fold");
-		String testSeed = experimentDescription.get("test_seed");
-		String valSeed = experimentDescription.get("val_seed");
+		String testSeed = experimentDescription.get("seed");
 		Instances train = MultilabelDatasetSplitter.getTrainSplit(data, splitDescription_traintest, testFold, testSeed);
 		Instances test = MultilabelDatasetSplitter.getTestSplit(data, splitDescription_traintest, testFold, testSeed);
 
-		// Get validation splits
-		String splitDescription_validation = experimentDescription.get("val_split_tech");
-		String validation_fold = experimentDescription.get("val_fold");
-		Instances validation_fold_0 = MultilabelDatasetSplitter.getTrainSplit(train, splitDescription_validation,
-				validation_fold, valSeed);
-		Instances validation_fold_1 = MultilabelDatasetSplitter.getTestSplit(train, splitDescription_validation,
-				validation_fold, valSeed);
-
 		// Prepare connection
-		ClassifierDBConnection connection = new ClassifierDBConnection(adapter, experimentDescription.get("dataset"),
-				splitDescription_traintest, testFold, splitDescription_validation, validation_fold, testSeed, valSeed);
-
-		System.out.println("Now validate...");
-
-		// Evaluation: validation
-		connection.setMode(EvaluationMode.Validation);
-		this.evaluateMLClassifier(validation_fold_0, validation_fold_1, connection);
+		ResultsDBConnection connection = new ResultsDBConnection("intermediate_measurements", "final_measurements",
+				"ordered_metric", experimentEntry.getId(), "ML2Plan", adapter);
 
 		System.out.println("Now test...");
 
 		// Evaluation: test
-		connection.setMode(EvaluationMode.Test);
-		this.evaluateMLClassifier(validation_fold_0, test, connection);
+		int metricIdToOptimize = Integer.parseInt(experimentDescription.get("metric_id"));
+		this.evaluateMLClassifier(train, test, connection, metricIdToOptimize);
 
 		System.out.println("Done with evaluation. Send job result.");
 
@@ -103,13 +86,16 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 	}
 
 	private void evaluateMLClassifier(final Instances train_fold, final Instances test_fold,
-			final ClassifierDBConnection connection) throws Exception {
+			final ResultsDBConnection connection, int metricIdToOptimize) throws Exception {
 		Map<Integer, String> multilabelmetricsWithIds = new HashMap<>();
 		for (String metric : ClassifierMetricGetter.multiLabelMetrics) {
 			multilabelmetricsWithIds.put(connection.getLatestIdForMetric(metric), metric);
 		}
 
 		// TODO Init classifier here
+		// Don't forget to set the metric to optimize according to the given metricId!
+		// Don't forget to register a solution uploader to ml2plan for intermediate
+		// solutions!
 		// MultiLabelClassifier classifier = new MekaML2PlanMekaClassifier(new
 		// ML2PlanMekaBuider());
 		MultiLabelClassifier classifier = null;
@@ -118,9 +104,12 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 		Result result = Evaluation.evaluateModel(classifier, train_fold, test_fold);
 		System.out.println("Done evaluating Classifier.");
 		System.out.println("Store results in DB...");
-		// TODO here the classifier is m2lplan, but for automlc it will be automlc
-		connection.addMeasurementsForMultilabelClassifierIfNotExists(connection.getOrCreateIdForClassifier("ml2plan"),
-				result, multilabelmetricsWithIds);
+		HashMap<String, Double> metrics = new HashMap<>();
+		ClassifierMetricGetter.multiLabelMetrics.forEach(metric -> {
+			metrics.put(metric, ClassifierMetricGetter.getValueOfMultilabelClassifier(result, metric));
+
+		});
+		connection.addFinalMeasurements(metrics);
 		System.out.println("Stored results in DB.");
 	}
 
