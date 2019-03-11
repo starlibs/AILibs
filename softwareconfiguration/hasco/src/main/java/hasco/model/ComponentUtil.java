@@ -12,9 +12,8 @@ import java.util.Random;
  */
 public class ComponentUtil {
 
-	private ComponentUtil () {
-
-		/* intentionally left blank. Just necessary to avoid explicit instantiation */
+	private ComponentUtil() {
+		/* Intentionally left blank to prevent instantiation of this class. */
 	}
 
 	/**
@@ -59,7 +58,7 @@ public class ComponentUtil {
 			}
 
 			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
-		} while (ComponentInstanceUtil.isValidComponentInstantiation(ci));
+		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
 		return ci;
 	}
 

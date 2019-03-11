@@ -30,7 +30,6 @@ public class ThreadGroupObserver extends Thread {
 		while (this.active && !Thread.currentThread().isInterrupted()) {
 			this.maxObservedThreads = Math.max(this.maxObservedThreads, this.group.activeCount());
 			if (this.isThreadConstraintViolated()) {
-
 				/* store all currently active threads */
 				this.threadsAtPointOfViolation = new Thread[this.group.activeCount()];
 				this.group.enumerate(this.threadsAtPointOfViolation, true);

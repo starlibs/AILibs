@@ -47,7 +47,7 @@ public class ComponentUtilTest {
 					double actual = Double.parseDouble(ci.getParameterValue(param.getName()));
 					assertEquals("Parameter " + param.getName() + " does not have default value " + expected + " but instead has value " + actual, expected, actual, 1.0E-9);
 				} else {
-					String expected = (String) param.getDefaultValue();
+					String expected = param.getDefaultValue() + "";
 					String actual = ci.getParameterValue(param.getName());
 					assertEquals("Parameter " + param.getName() + " does not have default value " + expected + " but instead has value " + actual, expected, actual);
 				}
