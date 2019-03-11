@@ -148,10 +148,10 @@ public class ActiveDyadRankingGATSPTest {
 //		}
 		
 		
-		UCBPoolBasedActiveDyadRanker activeRanker = new UCBPoolBasedActiveDyadRanker(ranker, poolProvider, seed, 5, MAX_BATCH_SIZE);
+//		UCBPoolBasedActiveDyadRanker activeRanker = new UCBPoolBasedActiveDyadRanker(ranker, poolProvider, seed, 5, MAX_BATCH_SIZE);
 //			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
 //					poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH, 5, 5);
-//		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, MAX_BATCH_SIZE, seed);
+		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, MAX_BATCH_SIZE, seed);
 
 		try {
 

@@ -2,6 +2,8 @@ package jaicore.ml.dyadranking.activelearning;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -23,9 +25,6 @@ import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.activelearning.ActiveDyadRanker;
-import jaicore.ml.dyadranking.activelearning.DyadScorePoolProvider;
-import jaicore.ml.dyadranking.activelearning.PrototypicalPoolBasedActiveDyadRanker;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -40,11 +39,15 @@ import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 @RunWith(Parameterized.class)
 public class ActiveDyadRankingMetaminingTest {
 
-	private static final String DYADS_SCORES_FILE = "testsrc/ml/dyadranking/meta-mining-dyads.txt";
+	private static final String DYADS_SCORES_FILE = "testsrc/ml/dyadranking/dyad_pool_newest.txt";
 
-	private static final double TRAIN_RATIO = 0.5d;
+	private static final double TRAIN_RATIO = 0.7d;
 
-	private static boolean REMOVE_DYADS_WHEN_QUERIED = true;
+	private static boolean REMOVE_DYADS_WHEN_QUERIED = false;
+	
+	private static final int MAX_BATCH_SIZE = 5;
+	private static final int TOP_RANKING_LENGTH = 5;
+	private static final double RATIO_OF_OLD_SAMPLES_IN_MINIBATCH = 0.0d;
 
 	PLNetDyadRanker ranker;
 	DyadRankingDataset dataset;
@@ -79,7 +82,7 @@ public class ActiveDyadRankingMetaminingTest {
 //		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
 
 		List<Pair<Dyad, Double>> dyadScorePairs = loadDyadsAndScore(DYADS_SCORES_FILE);
-		long seed = 23;
+		int seed = 443;
 		SummaryStatistics[] results = new SummaryStatistics[100];
 		for (int i = 0; i < results.length; i++) {
 			results[i] = new SummaryStatistics();
@@ -87,10 +90,18 @@ public class ActiveDyadRankingMetaminingTest {
 
 		ranker = new PLNetDyadRanker();
 		DyadScorePoolProvider poolProvider = new DyadScorePoolProvider(dyadScorePairs);
+		poolProvider.printCounts();
 		poolProvider.setRemoveDyadsWhenQueried(REMOVE_DYADS_WHEN_QUERIED);
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (Vector vector : poolProvider.getInstanceFeatures()) {
 			dataset.add(poolProvider.getDyadRankingInstanceForInstanceFeatures(vector));
+		}
+		
+		try {
+			dataset.serialize(new FileOutputStream(new File("testsrc/ml/dyadranking/dyad_pool_newest.txt")));
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 
 		Collections.shuffle(dataset, new Random(seed));
@@ -126,31 +137,24 @@ public class ActiveDyadRankingMetaminingTest {
 
 		System.out.println("size after: " + poolProvider.getInstanceFeatures().size());
 
-		ActiveDyadRanker activeDyadRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker, poolProvider);
-
+//		ActiveDyadRanker activeDyadRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker, poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH, 5, seed);
+		ActiveDyadRanker activeDyadRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
+		
 		System.out.println("tau of query: "
 				+ DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, queryAnswers));
-
-//		ActiveDyadRanker activeDyadRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
 
 		try {
 
 			// train the ranker
 //			for (IInstance inst : trainData)
 //				System.out.println(((IDyadRankingInstance) inst).getDyadAtPosition(0).getInstance());
-//			for (int i = 0; i < 100; i++) {
-//				activeDyadRanker.activelyTrain(1);
-//				double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
-//						testData, ranker);
-//				results[i].addValue(avgKendallTau);
-//				System.out.print(avgKendallTau + ",");
-//			}
-				ranker.train(trainData);
-				double avgTauOutOfSample = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
+			for (int i = 0; i < 100; i++) {
+				activeDyadRanker.activelyTrain(1);
+				double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
 						testData, ranker);
-				double avgTauInSample = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
-						trainData, ranker);
-				System.out.println("out of sample: " + avgTauOutOfSample + "\t in sample:" + avgTauInSample);
+				results[i].addValue(avgKendallTau);
+				System.out.print(avgKendallTau + ",");
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

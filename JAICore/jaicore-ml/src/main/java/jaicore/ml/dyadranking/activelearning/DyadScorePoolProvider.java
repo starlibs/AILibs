@@ -17,6 +17,7 @@ import org.nd4j.linalg.primitives.Pair;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
+import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
@@ -35,6 +36,8 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 	private HashMap<Dyad, SummaryStatistics> dyadScores;
 	private List<IInstance> pool;
 	private boolean removeDyadsWhenQueried;
+	private HashSet<IDyadRankingInstance> queriedRankings;
+
 
 	public DyadScorePoolProvider(List<Pair<Dyad, Double>> dyadScorePairs) {
 		removeDyadsWhenQueried = false;
@@ -45,6 +48,7 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 		for (Pair<Dyad, Double> pair : dyadScorePairs) {
 			addDyad(pair.getFirst(), pair.getSecond());
 		}
+		this.queriedRankings = new HashSet<IDyadRankingInstance>();
 	}
 
 	@Override
@@ -62,7 +66,6 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 				throw new IllegalStateException("Dyad not contained yet!");
 			}
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, dyadScores.get(dyad).getMean()));
-			System.out.println("Current score: " + dyadScores.get(dyad).getMean());
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
@@ -77,7 +80,6 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 			}
 		}
 		return new DyadRankingInstance(ranking);
-
 	}
 
 	@Override
@@ -173,5 +175,11 @@ public class DyadScorePoolProvider implements IDyadRankingPoolProvider {
 		for(Set<Dyad> set : dyadsByInstances.values())
 			size+=set.size();
 		return size;
+	}
+
+	@Override
+	public DyadRankingDataset getQueriedRankings() {
+		
+		return null;
 	}
 }

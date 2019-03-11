@@ -28,6 +28,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	private int numberRandomQueriesAtStart;
 	private int iteration;
 	private int seed;
+	private Random random;
 
 //	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider) {
 //		super(ranker, poolProvider);
@@ -45,13 +46,13 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 		this.numberRandomQueriesAtStart = numberRandomQueriesAtStart;
 		this.iteration = 0;
 		this.seed = seed;
+		this.random = new Random(seed);
 	}
 
 	public void activelyTrain(int numberOfQueries) {
 
 		if (iteration < numberRandomQueriesAtStart) {
 
-			Random random = new Random(seed);
 			for (int i = 0; i < numberOfQueries; i++) {
 				Set<IInstance> minibatch = new HashSet<IInstance>();
 				for (int batchIndex = 0; batchIndex < maxBatchSize; batchIndex++) {
