@@ -2,8 +2,6 @@ package jaicore.ml.dyadranking.util;
 
 import java.util.List;
 
-import org.nd4j.nativeblas.Nd4jCpu.IGenerator;
-
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -15,7 +13,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  * datasets, i.e. transform the data to have a mean of 0 and a standard
  * deviation of 1 according to the data it was fit to.
  * 
- * @author Michael Braun, Jonas Hanselle
+ * @author Michael Braun, Jonas Hanselle, Mirko Jürgens
  *
  */
 public class DyadStandardScaler extends AbstractDyadScaler {
