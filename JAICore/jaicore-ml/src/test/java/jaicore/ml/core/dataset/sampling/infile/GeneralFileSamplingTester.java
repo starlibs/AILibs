@@ -1,5 +1,6 @@
 package jaicore.ml.core.dataset.sampling.infile;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
@@ -11,6 +12,8 @@ import java.util.UUID;
 
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
@@ -27,6 +30,7 @@ import jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
  */
 public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<Object, File, File> {
 
+	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 	protected static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator
 			+ UUID.randomUUID().toString() + ".arff";
@@ -65,7 +69,8 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 		samplingAlgorithm.setOutputFileName(OUTPUT_FILE_NAME);
 		samplingAlgorithm.call();
 		int outputSize = ArffUtilities.countDatasetEntries(new File(OUTPUT_FILE_NAME), true);
-		assertEquals(sampleSize, outputSize);
+		// Allow sample size to be one off, in case of rounding errors
+		assertTrue(sampleSize >= outputSize -1 && sampleSize <= outputSize + 1);
 	}
 
 	/**
@@ -111,6 +116,9 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 			if (line.trim().equals("") || line.trim().charAt(0) == '%') {
 				continue;
 			} else {
+				if (set.contains(line.trim())) {
+					System.out.println("Duplicate line: " + line.trim());
+				}
 				set.add(line.trim());
 			}
 		}
@@ -144,12 +152,18 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 
 	@Override
 	public File getSimpleProblemInputForGeneralTestPurposes() throws Exception {
-		return new File("testsrc/ml/orig/vowel.arff");
+		OpenmlConnector client = new OpenmlConnector();
+		DataSetDescription description = client.dataGet(188);
+		File file = description.getDataset(OPENML_API_KEY);
+		return file;
 	}
 
 	@Override
 	public File getDifficultProblemInputForGeneralTestPurposes() throws Exception {
-		return new File("testsrc/ml/orig/letter.arff");
+		OpenmlConnector client = new OpenmlConnector();
+		DataSetDescription description = client.dataGet(182);
+		File file = description.getDataset(OPENML_API_KEY);
+		return file;
 	}
 
 	@AfterClass

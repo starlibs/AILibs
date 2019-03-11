@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -25,8 +27,6 @@ import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 public class SystematicFileSampling extends AFileSamplingAlgorithm {
 
 	private Random random;
-	private int k;
-	private int startIndex;
 	private int index;
 	private int addedDatapoints;
 	private int datapointAmount;
@@ -35,12 +35,12 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	private Comparator<String> datapointComparator;
 	private File sortedDatasetFile;
 	private BufferedReader sortedDatasetFileReader;
+	private List<Integer> indicesForSelection;
 
 	/**
 	 * Simple constructor that uses the default datapoint comparator.
 	 * 
-	 * @param random
-	 *            Random Object for determining the sampling start point.
+	 * @param random Random Object for determining the sampling start point.
 	 */
 	public SystematicFileSampling(Random random) {
 		this(random, null);
@@ -49,10 +49,9 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	/**
 	 * Constructor for a custom datapoint comparator.
 	 * 
-	 * @param random
-	 *            Random Object for determining the sampling start point.
-	 * @param datapointComparator
-	 *            Comparator to sort the dataset.
+	 * @param random              Random Object for determining the sampling start
+	 *                            point.
+	 * @param datapointComparator Comparator to sort the dataset.
 	 */
 	public SystematicFileSampling(Random random, Comparator<String> datapointComparator) {
 		this.random = random;
@@ -81,15 +80,18 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			}
 			// Count datapoints in the sorted dataset and initialize variables.
 			try {
-				this.datapointAmount = ArffUtilities.countDatasetEntries(this.sortedDatasetFile, true);
-				this.k = (int) Math.floor(this.datapointAmount / this.sampleSize);
 				this.addedDatapoints = 0;
-				this.startIndex = this.random.nextInt(this.datapointAmount);
 				this.index = 0;
-				while (this.index < this.startIndex) {
-					this.sortedDatasetFileReader.readLine();
-					this.index++;
+				this.datapointAmount = ArffUtilities.countDatasetEntries(this.sortedDatasetFile, true);
+				this.indicesForSelection = new LinkedList<>();
+				int k = (int) Math.floor(this.datapointAmount / this.sampleSize);
+				int startIndex = this.random.nextInt(this.datapointAmount);
+				int i = 0;
+				while (this.indicesForSelection.size() < this.sampleSize) {
+					int e = (startIndex + k * (i++)) % this.datapointAmount;
+					this.indicesForSelection.add(e);
 				}
+				this.indicesForSelection.sort(Integer::compare);
 				return this.activate();
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Was not able to count the datapoints.");
@@ -99,23 +101,16 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			// systematic sampling method.
 			if (this.addedDatapoints < this.sampleSize) {
 				try {
-					// Determine the next k-th element.
-					int e = (this.startIndex + (this.addedDatapoints) * this.k) % this.datapointAmount;
+					// Determine and find the next k-th element.
+					int e = this.indicesForSelection.get(this.addedDatapoints);
 					String datapoint = this.sortedDatasetFileReader.readLine();
-					// Last datapoint of the file reached -> Start from the file beginning again.
-					if (this.index > e) {
-						this.sortedDatasetFileReader.close();
-						this.sortedDatasetFileReader = new BufferedReader(new FileReader(this.sortedDatasetFile));
-						ArffUtilities.skipWithReaderToDatapoints(this.sortedDatasetFileReader);
-						datapoint = this.sortedDatasetFileReader.readLine();
-						this.index = 1;
-					}
-					// Skip to the next k-th datapoint.
+					this.index++;
 					while (this.index < e) {
 						datapoint = this.sortedDatasetFileReader.readLine();
 						this.index++;
 					}
 					// Add this datapoint to the output file.
+					assert datapoint != null;
 					this.outputFileWriter.write(datapoint + "\n");
 					this.addedDatapoints++;
 					return new SampleElementAddedEvent(getId());

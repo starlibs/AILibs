@@ -35,24 +35,25 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
+	private int fullDatasetSize = -1;
 
 	/**
 	 * Create a classifier evaluator with learning curve extrapolation.
 	 * 
-	 * @param anchorpoints                         Anchorpoints for the learning
-	 *                                             curve extrapolation.
-	 * @param subsamplingMethod                    Subsampling method to create
-	 *                                             samples at the given
-	 *                                             anchorpoints.
-	 * @param dataset                              Dataset to evaluate the
-	 *                                             classifier with.
-	 * @param trainSplitForAnchorpointsMeasurement Ratio to split the subsamples at
-	 *                                             the anchorpoints into train and
-	 *                                             test.
-	 * @param extrapolationMethod                  Method to extrapolate a learning
-	 *                                             curve from the accuracy
-	 *                                             measurements at the anchorpoints.
-	 * @param seed                                 Random seed.
+	 * @param anchorpoints
+	 *            Anchorpoints for the learning curve extrapolation.
+	 * @param subsamplingMethod
+	 *            Subsampling method to create samples at the given anchorpoints.
+	 * @param dataset
+	 *            Dataset to evaluate the classifier with.
+	 * @param trainSplitForAnchorpointsMeasurement
+	 *            Ratio to split the subsamples at the anchorpoints into train and
+	 *            test.
+	 * @param extrapolationMethod
+	 *            Method to extrapolate a learning curve from the accuracy
+	 *            measurements at the anchorpoints.
+	 * @param seed
+	 *            Random seed.
 	 */
 	public LearningCurveExtrapolationEvaluator(int[] anchorpoints, SubsamplingMethod subsamplingMethod,
 			IDataset<IInstance> dataset, double trainSplitForAnchorpointsMeasurement,
@@ -64,6 +65,10 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 		this.trainSplitForAnchorpointsMeasurement = trainSplitForAnchorpointsMeasurement;
 		this.extrapolationMethod = extrapolationMethod;
 		this.seed = seed;
+	}
+
+	public void setFullDatasetSize(int fullDatasetSize) {
+		this.fullDatasetSize = fullDatasetSize;
 	}
 
 	@Override
@@ -78,7 +83,15 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 			// Create the extrapolator and calculate the accuracy the classifier would have
 			// if it was trained on the complete dataset.
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve(this.anchorpoints);
-			return learningCurve.getCurveValue(dataset.size()) * 100.0d;
+
+			int evaluationPoint = dataset.size();
+			// Overwrite evaluation point if a value was provided, otherwise evaluate on the
+			// size of the given dataset
+			if (this.fullDatasetSize != -1) {
+				evaluationPoint = this.fullDatasetSize;
+			}
+
+			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
 		} catch (Exception e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
 					e.getClass().getName(), e.getMessage());
