@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,8 +30,9 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import jaicore.ml.dyadranking.loss.KendallsTauOfTopK;
+import jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import jaicore.ml.dyadranking.util.DyadStandardScaler;
+import jaicore.ml.dyadranking.util.DyadUnitIntervalScaler;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -60,7 +60,7 @@ public class DyadRankerGATSPTest {
 	// N = number of training instances
 	private static final int N = 120;
 	// seed for shuffling the dataset
-	private static final long seed = 1337;
+	private static final long seed = 15;
 
 	PLNetDyadRanker ranker;
 	DyadRankingDataset dataset;
@@ -73,58 +73,55 @@ public class DyadRankerGATSPTest {
 	public void init() {
 		// load dataset
 		dataset = loadDatasetFromXXLAndCSV();
-		try {
-			dataset.serialize(new FileOutputStream(new File("GATSP-Data.txt")));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+////			dataset.serialize(new FileOutputStream(new File("GATSP-Data.txt")));
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	@Test
 	public void test() {
+		dataset = randomlyTrimSparseDyadRankingInstances(dataset, M);
 
-		
-//		dataset = randomlyTrimSparseDyadRankingInstances(dataset, 15);
-//
-//		Collections.shuffle(dataset, new Random(seed));
-//
-//		// split data
-//		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
-//		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
-//
-//		// trim dyad ranking instances for train data
-//
-//		// standardize data
-//		DyadStandardScaler scaler = new DyadStandardScaler();
-//
-//		scaler.fit(trainData);
-//		scaler.transformInstances(trainData);
-//		scaler.transformInstances(testData);
-//
-//		try {
-//
-//			// train the ranker
-////			ranker.train(trainData);
-//			double avgKendallTau = 0.0d;
+		Collections.shuffle(dataset, new Random(seed));
+
+		// split data
+		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
+		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
+
+		// trim dyad ranking instances for train data
+
+		// standardize data
+		AbstractDyadScaler scaler = new DyadStandardScaler();
+
+		scaler.fit(trainData);
+		scaler.transformInstances(trainData);
+		scaler.transformInstances(testData);
+
+		try {
+
+			// train the ranker
 //			ranker.train(trainData);
-////			ranker.update(trainData.get(0));
-////			for(IInstance instance : trainData)
-////				ranker.update(instance);
-////			List<IDyadRankingInstance> predictions = ranker.predict(testData);
+			double avgKendallTau = 0.0d;
+			ranker.train(trainData);
+//			ranker.update(trainData.get(0));
+//			for(IInstance instance : trainData)
+//				ranker.update(instance);
+//			List<IDyadRankingInstance> predictions = ranker.predict(testData);
 //			for(int i = 0; i < trainData.size(); i++) {
 //				System.out.println("Train prob: " + ranker.getLogProbabilityOfTopRanking(trainData.get(i)));
 //			}
 //			for(int i = 0; i < testData.size(); i++) {
-//				System.out.println("Test prob: " + ranker.getLogProbabilityOfTopRanking(testData.get(i)));
+////				System.out.println("Test prob: " + ranker.getLogProbabilityOfTopRanking(testData.get(i)));
 //			}
-////			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
-////			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
-////			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-////			assertTrue(avgKendallTau > 0.5d);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
+			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
+			assertTrue(avgKendallTau > 0.5d);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -280,14 +277,17 @@ public class DyadRankerGATSPTest {
 	public static List<APLDyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
 		// Use a simple config such that the test finishes quickly
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "100");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_SEED, Long.toString(seed));
+//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "0.8");
+		
 		return Arrays.asList(plNetRanker);
 	}
 }
