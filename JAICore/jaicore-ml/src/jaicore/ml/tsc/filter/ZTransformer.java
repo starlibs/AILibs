@@ -70,8 +70,7 @@ public class ZTransformer implements IFilter {
 		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
-		//TODO should be something done here? Because ztransform can be calculated over all in the transform step
-		//through the fit transform of the single instance
+		
 		fitted = true;
 	}
 
@@ -110,7 +109,7 @@ public class ZTransformer implements IFilter {
 		if(NumberEntrys == 0) {
 			throw new IllegalArgumentException("The to transform instance can not be empty.");
 		}
-		//TODO can be numarical inaccurate if the data is large
+		//TODO can be numerical inaccurate if the data is large
 		for(int entry = 0; entry<input.length;entry++) {
 			SumSq =+ Math.pow(entry,2);
 			SumMean =+ entry;

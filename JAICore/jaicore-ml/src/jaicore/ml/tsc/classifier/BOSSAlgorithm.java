@@ -16,16 +16,48 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 import jaicore.ml.tsc.filter.SFA;
 import jaicore.ml.tsc.filter.SlidingWindowBuilder;
+import jaicore.ml.tsc.filter.ZTransformer;
 
 public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifier> {
 	
 	
+	/**
+	 *  The size of the sliding window that is used over each instance and splits it into multiple
+	 *  smaller instances.
+	 */
 	private int windowSize;
+	
+	/**
+	 * The alphabet size determines the number of Bins for the SFA Histograms. Four was determined empirical
+	 *  as an optimal value for the alphabet size.
+	 *  cf.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+	 * 
+	 */
 	private int alphabetSize;
+	
+	/**
+	 *  The alphabet consists of doubles representing letters and defines each word. 
+	 */
 	private double[] alphabet;
+	/**
+	 *  The word length determines the number of used DFT-coefficients. Where the DFT-coefficients are
+	 *  half the word length.
+	 */
 	private int wordlength;
+	/**
+	 *  If mean corrected is set to true than the first DFT coefficient is dropped to normalize the mean.
+	 *  c.f.p. 1519 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+	 */
 	private boolean meanCorrected;
+	
+	/**
+	 *  The list contains the list of Histograms in which every matrix of the multivariate dataset results in.
+	 */
 	private ArrayList<ArrayList<HashMap<Integer,Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer,Integer>>> ();
+	/**
+	 *  Constians the histograms of one matrix for each instance one. Where the keys are the words which are double value
+	 *  sequences converted to an integer hash code and the values are the corresponding word counts.   
+	 */
 	private ArrayList<HashMap<Integer,Integer>> histograms = new ArrayList<HashMap<Integer, Integer>>();
 	 
 	
@@ -88,6 +120,7 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 		return null;
 	}
 
+	
 	@Override
 	public BOSSClassifier call()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
@@ -95,6 +128,8 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 		
 		SFA sfa = new SFA(alphabet, alphabetSize,meanCorrected);
 		HistogramBuilder histoBuilder = new HistogramBuilder();
+		
+		//calculates the lookup table for the alphabet for the whole input dataset.
 		sfa.fit(input);
 		
 		
@@ -102,24 +137,47 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 		slide.setDefaultWindowSize(windowSize);
 		
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
+			histograms.clear();
 			for(int instance = 0; instance < input.getNumberOfInstances(); instance++) {
+				/*
+				 * Every instance results in an own histogram there for has its own HashMap of
+				 * the the from key: word value: count of word.
+				 */
 				HashMap<Integer,Integer> histogram = null;
+				
+				/*
+				 * By the special fit transform an instance is transformed to a dataset. This
+				 * is done because every instance creates a list of new smaller instances when
+				 * split into sliding windows.
+				 */
 				TimeSeriesDataset tmp = slide.specialFitTransform(input.getValues(matrix)[instance]);
 				try {
+					/* The from one instance resulting dataset is z-normalized. */ 
+					ZTransformer znorm = new ZTransformer();
+					znorm.fitTransform(tmp);
+					
+					// The SFA words for that dataset are computed using the precomputed MCB quantisation intervals 
 					TimeSeriesDataset tmpTransformed = sfa.transform(tmp);
+					// The occurring SFA words of the instance are getting counted with a parallel numerosity reduction.
 					histogram = histoBuilder.histogramForInstance(tmpTransformed);
 					}
+				
 				catch (IllegalArgumentException e) {
 					e.printStackTrace();
 				} catch (NoneFittedFilterExeception e) {
 					e.printStackTrace();
 				}
-				
+				// Each instance in the dataset has its own histogram so the original dataset results in a list of histograms.
 				histograms.add(histogram);
 			}
+			// In the case of a multivariate dataset each matrix would have a list of histograms which than results
+			// in a list of lists of histograms. 
+			// The Boss classifier however can not handle multivariate datasets. 
 			multivirateHistograms.add(histograms);
 		}
+		// In the end all calculated and needed algortihms are set for the classifier.
 		model.setMultivirateHistograms(multivirateHistograms);
+		model.setHistogramUnivirate(histograms);
 		model.setSfa(sfa);
 		model.setTrainingData(input);
 		return model;

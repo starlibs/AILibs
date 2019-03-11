@@ -90,7 +90,7 @@ public class DFT implements IFilter {
 		return output;
 	}
 
-	//calculates the number of desired DFT coefficients for each instance 
+	//calculates the number of desired DFT coefficients for each matrix and therefore for each instance 
 	@Override
 	public void fit(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception{
 		
@@ -120,6 +120,9 @@ public class DFT implements IFilter {
 		if(!fitted) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
 		}
+		if(input.length == 0) {
+			throw new IllegalArgumentException("The input can not be empty.");
+		}
 		return DFTCoefficientsInstance;
 	}
 
@@ -130,13 +133,14 @@ public class DFT implements IFilter {
 			throw new IllegalArgumentException("There cannot be more DFT coefficents calcualated than there entrys in the basis instance.");
 		}
 		
+		if(input.length == 0) {
+			throw new IllegalArgumentException("The to transform instance can not be of length zero.");
+		}
+		
 		if(!variableSet) {
 			paperSpecificVariable = (double) 1.0/((double)input.length);
 		}
 		
-		if(input.length == 0) {
-			throw new IllegalArgumentException("The to transform instance can not be of length zero.");
-		}
 		//The buffer for the calculated DFT coefficeients
 		DFTCoefficientsInstance = new double[numberOfDisieredCoefficients*2-(startingpoint*2)];
 		
@@ -145,6 +149,7 @@ public class DFT implements IFilter {
 		if(meanCorrected) {
 			startingpoint = 1;
 		}
+		
 		for(int entry = 0; entry < input.length; entry++) {
 			
 			Complex result = new Complex(0,0);
@@ -154,7 +159,7 @@ public class DFT implements IFilter {
 				double currentEntry = input[entry];
 				
 				//calculates the real and imaginary part of the entry according to the desired coefficient
-				
+				//c.f. p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
 				double realpart = Math.cos(-(1.0/(double)input.length)*2.0*Math.PI*(double)entry*(double)coefficient);
 				double imaginarypart =  Math.sin(-(1.0/(double)input.length)*2.0*Math.PI*(double)entry*(double)coefficient);
 				
@@ -183,8 +188,13 @@ public class DFT implements IFilter {
 
 	@Override
 	public double[][] transform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		// TODO Auto-generated method stub
-		return null;
+		if(!fittedMatrix) {
+			throw new NoneFittedFilterExeception("The fit method must be called before transforming");
+		}
+		if(input.length == 0) {
+			throw new IllegalArgumentException("The input can not be empty");
+		}
+		return DFTCoefficientsMatrix;
 	}
 
 	@Override
@@ -195,13 +205,12 @@ public class DFT implements IFilter {
 			try {
 				DFTCoefficientsOFInstance = fitTransform(input[instance]);
 			} catch (NoneFittedFilterExeception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			fittedInstance = false;
 			DFTCoefficientsMatrix[instance] = DFTCoefficientsOFInstance;
 		}
-		
+		fittedMatrix = true;
 	}
 
 	@Override

@@ -35,7 +35,7 @@ public class SFATest {
 
 	@Test
 	public void test() {
-		SFA testSFA = new SFA(new double[]{1,2},4);
+		SFA testSFA = new SFA(new double[]{1,2},4, false);
 		try {
 			TimeSeriesDataset output = testSFA.fitTransform(dataset);
 			assertEquals(2,output.getValues(0)[0][0],1.0E-5);

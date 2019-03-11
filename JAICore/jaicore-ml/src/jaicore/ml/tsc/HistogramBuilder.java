@@ -7,7 +7,8 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /**
  * @author Helen Beierling
- * This class is used to compute Histograms for the found words.
+ * This class is used to compute Histograms for the found sfa words.
+ * This includes a numerosity reduction.
  * (in form of double sequences which are used as key by using the Arrays class HashCode which are Integer).
  */
 public class HistogramBuilder {
@@ -15,11 +16,12 @@ public class HistogramBuilder {
 	
 	public HashMap<Integer,Integer> histogramForInstance(TimeSeriesDataset blownUpSingleInstance){
 		double [] lastWord = null;
+		//The blown up instance contains only one matrix.
 		for(double [] d : blownUpSingleInstance.getValues(0)) {
 				if(histogram.containsKey(Arrays.hashCode(d))) {
 				/*
-				 * To the histogramm suczessiv duplicates are not added because of numeority
-				 * reduction. c.f.p.1514
+				 * To the histogramm suczessiv duplicates are not added because of numerosity reduction.
+				 * c.f.p.1514
 				 * "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
 				 */
 					if(!Arrays.equals(d, lastWord)) {
