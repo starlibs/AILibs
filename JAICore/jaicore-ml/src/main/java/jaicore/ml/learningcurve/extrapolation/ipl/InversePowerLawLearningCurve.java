@@ -84,4 +84,16 @@ public class InversePowerLawLearningCurve implements AnalyticalLearningCurve {
 		return this.getCurveValue(convergencePoint);
 	}
 
+	public double getA() {
+		return this.a;
+	}
+
+	public double getB() {
+		return this.b;
+	}
+
+	public double getC() {
+		return this.c;
+	}
+
 }
