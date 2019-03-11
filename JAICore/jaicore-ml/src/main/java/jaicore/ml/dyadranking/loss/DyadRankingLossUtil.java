@@ -2,6 +2,7 @@ package jaicore.ml.dyadranking.loss;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import com.google.common.collect.Lists;
 
@@ -54,13 +55,14 @@ public class DyadRankingLossUtil {
 	public static double computeAverageLoss(DyadRankingLossFunction lossFunction, DyadRankingDataset trueOrderings,
 			ADyadRanker ranker) throws PredictionException {
 		double avgLoss = 0.0d;
+		Random rng = new Random(0);
 		for (int i = 0; i < trueOrderings.size(); i++) {
 			IDyadRankingInstance actual = trueOrderings.get(i);
 
 			// shuffle the instance such that a ranker that doesn't do anything can't come
 			// up with a perfect result
 			List<Dyad> shuffleContainer = Lists.newArrayList(actual.iterator());
-			Collections.shuffle(shuffleContainer);
+			Collections.shuffle(shuffleContainer, rng);
 			IDyadRankingInstance shuffledActual = new DyadRankingInstance(shuffleContainer);
 			IDyadRankingInstance predicted = ranker.predict(shuffledActual);
 			avgLoss += lossFunction.loss(actual, predicted);

@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -166,5 +168,45 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	public <T> IAttributeType<T> getTargetType(Class<T> clazz) {
 		throw new UnsupportedOperationException("Dyad rankings have no target type.");
 	}
+	
+	public List<INDArray> toND4j() {
+		List<INDArray> ndList = new ArrayList<INDArray>();
+		for (IInstance instance : this) {
+			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+			ndList.add(dyadRankingToMatrix(drInstance));
+		}
+		return ndList;	
+	}
+	
+	/**
+	 * Converts a dyad to a {@link INDArray} row vector consisting of a
+	 * concatenation of the instance and alternative features.
+	 * 
+	 * @param dyad The dyad to convert.
+	 * @return The dyad in {@link INDArray} row vector form.
+	 */
+	private INDArray dyadToVector(Dyad dyad) {
+		INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
+		INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
+		INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
+		return dyadVector;
+	}
 
+	/**
+	 * Converts a dyad ranking to a {@link INDArray} matrix where each row
+	 * corresponds to a dyad.
+	 * 
+	 * @param drInstance The dyad ranking to convert to a matrix.
+	 * @return The dyad ranking in {@link INDArray} matrix form.
+	 */
+	private INDArray dyadRankingToMatrix(IDyadRankingInstance drInstance) {
+		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
+		for (Dyad dyad : drInstance) {
+			INDArray dyadVector = dyadToVector(dyad);
+			dyadList.add(dyadVector);
+		}
+		INDArray dyadMatrix;
+		dyadMatrix = Nd4j.vstack(dyadList);
+		return dyadMatrix;
+	}
 }
