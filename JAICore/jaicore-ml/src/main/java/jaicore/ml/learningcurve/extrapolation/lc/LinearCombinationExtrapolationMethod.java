@@ -35,7 +35,7 @@ public class LinearCombinationExtrapolationMethod implements LearningCurveExtrap
 
 	@Override
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
-			throws InvalidAnchorPointsException {
+			throws InvalidAnchorPointsException, InterruptedException {
 		// Request model parameters to create learning curve
 		ExtrapolationServiceClient<LinearCombinationLearningCurveConfiguration> client = new ExtrapolationServiceClient<>(
 				serviceUrl, LinearCombinationLearningCurveConfiguration.class);

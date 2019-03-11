@@ -21,7 +21,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class AnchorpointsCreationTest {
 
 	@Test
-	public void anchorpointsAreCreatedAndHaveTheValues () throws IOException, InvalidAnchorPointsException, AlgorithmException {
+	public void anchorpointsAreCreatedAndHaveTheValues () throws IOException, InvalidAnchorPointsException, AlgorithmException, InterruptedException {
 		int[] xValues = new int[] {2, 4, 8, 16, 32, 64};
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();

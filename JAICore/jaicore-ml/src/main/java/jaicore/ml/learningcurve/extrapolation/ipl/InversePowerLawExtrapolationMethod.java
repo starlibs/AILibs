@@ -34,7 +34,7 @@ public class InversePowerLawExtrapolationMethod implements LearningCurveExtrapol
 
 	@Override
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
-			throws InvalidAnchorPointsException {
+			throws InvalidAnchorPointsException, InterruptedException {
 		// Request model parameters to create learning curve
 		ExtrapolationServiceClient<InversePowerLawConfiguration> client = new ExtrapolationServiceClient<>(serviceUrl,
 				InversePowerLawConfiguration.class);

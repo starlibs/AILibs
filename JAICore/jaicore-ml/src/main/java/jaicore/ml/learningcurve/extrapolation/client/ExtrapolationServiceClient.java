@@ -3,6 +3,8 @@ package jaicore.ml.learningcurve.extrapolation.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -34,7 +36,7 @@ public class ExtrapolationServiceClient<C> {
 		this.configClass = configClass;
 	}
 
-	public C getConfigForAnchorPoints(int[] xValuesArr, double[] yValuesArr) throws InvalidAnchorPointsException {
+	public C getConfigForAnchorPoints(int[] xValuesArr, double[] yValuesArr) throws InvalidAnchorPointsException, InterruptedException {
 		// Create request
 		ExtrapolationRequest request = new ExtrapolationRequest();
 		List<Integer> xValues = new ArrayList<>();
@@ -53,18 +55,25 @@ public class ExtrapolationServiceClient<C> {
 		WebTarget target = null;
 		try {
 			target = client.target(new URI(this.serviceUrl));
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		// Send request and wait for response
-		Response response = target.request(MediaType.APPLICATION_JSON)
+		Future<Response> future = target.request(MediaType.APPLICATION_JSON).async()
 				.post(Entity.entity(request, MediaType.APPLICATION_JSON));
+
+		Response response;
+		try {
+			response = future.get();
+		} catch (ExecutionException e) {
+			throw new RuntimeException("Exception while waiting for server response", e);
+		}
 
 		if (response.getStatus() == 500 && response.readEntity(String.class).equals("Invalid anchorpoints")) {
 			throw new InvalidAnchorPointsException();
 		}
-		
+
 		// Create configuration object from response
 		C configuration = response.readEntity(this.configClass);
 

@@ -12,7 +12,7 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.interfaces.LearningCurve;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -105,9 +105,10 @@ public class LearningCurveExtrapolator {
 	 * @throws AlgorithmException
 	 *             An error occured during the creation of the specified
 	 *             anchorpoints.
+	 * @throws InterruptedException 
 	 */
 	public LearningCurve extrapolateLearningCurve(int[] anchorPoints)
-			throws InvalidAnchorPointsException, AlgorithmException {
+			throws InvalidAnchorPointsException, AlgorithmException, InterruptedException {
 		double[] yValues = new double[anchorPoints.length];
 		try {
 			Instances testInstances = WekaInstancesUtil.datasetToWekaInstances(this.test);

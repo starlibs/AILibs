@@ -5,11 +5,13 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
 import jaicore.ml.interfaces.LearningCurve;
+import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolator;
 import weka.classifiers.Classifier;
@@ -92,7 +94,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 			}
 
 			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
-		} catch (Exception e) {
+		} catch (AlgorithmException | InvalidAnchorPointsException e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
 					e.getClass().getName(), e.getMessage());
 			return null;

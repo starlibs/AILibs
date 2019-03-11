@@ -11,6 +11,6 @@ import jaicore.ml.interfaces.LearningCurve;
 public interface LearningCurveExtrapolationMethod {
 
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
-			throws InvalidAnchorPointsException;
+			throws InvalidAnchorPointsException, InterruptedException;
 
 }

@@ -5,17 +5,21 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.interfaces.AnalyticalLearningCurve;
+import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolator;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
+import weka.core.UnsupportedAttributeTypeException;
 
 /**
  * For the classifier a learning curve will be extrapolated with a given set of
@@ -47,26 +51,25 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 	 * Create a classifier evaluator with an accuracy measurement at the
 	 * extrapolated learning curves saturation point.
 	 * 
-	 * @param anchorpoints                         Anchorpoints for the learning
-	 *                                             curve extrapolation.
-	 * @param subsamplingMethod                    Subsampling method to create
-	 *                                             samples at the given
-	 *                                             anchorpoints.
-	 * @param train                                Dataset predict the learning
-	 *                                             curve with and where the
-	 *                                             subsample for the measurement is
-	 *                                             drawn from.
-	 * @param trainSplitForAnchorpointsMeasurement Ratio to split the subsamples at
-	 *                                             the anchorpoints into train and
-	 *                                             test.
-	 * @param extrapolationMethod                  Method to extrapolate a learning
-	 *                                             curve from the accuracy
-	 *                                             measurements at the anchorpoints.
-	 * @param seed                                 Random seed.
-	 * @param epsilon                              Tolerance value for calculating
-	 *                                             the saturation point.
-	 * @param test                                 Test dataset to measure the
-	 *                                             accuracy.
+	 * @param anchorpoints
+	 *            Anchorpoints for the learning curve extrapolation.
+	 * @param subsamplingMethod
+	 *            Subsampling method to create samples at the given anchorpoints.
+	 * @param train
+	 *            Dataset predict the learning curve with and where the subsample
+	 *            for the measurement is drawn from.
+	 * @param trainSplitForAnchorpointsMeasurement
+	 *            Ratio to split the subsamples at the anchorpoints into train and
+	 *            test.
+	 * @param extrapolationMethod
+	 *            Method to extrapolate a learning curve from the accuracy
+	 *            measurements at the anchorpoints.
+	 * @param seed
+	 *            Random seed.
+	 * @param epsilon
+	 *            Tolerance value for calculating the saturation point.
+	 * @param test
+	 *            Test dataset to measure the accuracy.
 	 */
 	public ExtrapolatedSaturationPointEvaluator(int[] anchorpoints, SubsamplingMethod subsamplingMethod,
 			IDataset<IInstance> train, double trainSplitForAnchorpointsMeasurement,
@@ -108,7 +111,8 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointInstances,
 					testInstances);
 			return evaluator.evaluate(classifier);
-		} catch (Exception e) {
+		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException
+				| UnsupportedAttributeTypeException e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
 					e.getClass().getName(), e.getMessage());
 			return null;
