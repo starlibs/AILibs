@@ -32,11 +32,11 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 		super(ranker, poolProvider);
 		this.maxBatchSize = maxBatchSize;
 		this.seed = seed;
+		this.random = new Random(seed);
 	}
 
 	@Override
 	public void activelyTrain(int numberOfQueries) {
-		random = new Random(seed);
 		for (int i = 0; i < numberOfQueries; i++) {
 			Set<IInstance> minibatch = new HashSet<IInstance>();
 			for (int batchIndex = 0; batchIndex < maxBatchSize; batchIndex++) {
@@ -63,6 +63,7 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			}
 			// feed it to the ranker
 			try {
+				System.out.println(minibatch);
 				ranker.update(minibatch);
 			} catch (TrainingException e) {
 				// TODO Auto-generated catch block
