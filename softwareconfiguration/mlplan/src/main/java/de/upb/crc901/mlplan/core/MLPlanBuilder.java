@@ -194,9 +194,10 @@ public class MLPlanBuilder {
 		return hascoFactory;
 	}
 
-	public void setHascoFactory(
+	public MLPlanBuilder setHascoFactory(
 			HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory) {
 		this.hascoFactory = hascoFactory;
+		return this;
 	}
 	
 

@@ -1,14 +1,17 @@
-package de.upb.crc901.mlplan.examples;
+package de.upb.crc901.mlplan.examples.dyadranking;
 
 import java.io.File;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
+import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory;
+import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
@@ -30,15 +33,16 @@ public class WekaDyadRankingExample {
 
 //		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
 //				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),
-//				MultiClassPerformanceMeasure.ERRORRATE, pAdapter);
-		MLPlanWekaBuilder builder = new MLPlanWekaBuilder(
+//				MultiClassPerformanceMeasure.ERRORRATE, pAdapter); 
+		
+		MLPlanBuilder builder = new MLPlanBuilder(
 				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),
-				MultiClassPerformanceMeasure.ERRORRATE).usingBFwithDyadRankedNodeQueue(new WEKADyadRankedNodeQueueConfig());
+				MultiClassPerformanceMeasure.ERRORRATE).setHascoFactory(new HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(new WEKADyadRankedNodeQueueConfig()));
+		
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
+		mlplan.setTimeout(new TimeOut(60, TimeUnit.SECONDS));
 
-		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(60);
 		//System.out.println(mlplan.getHascoFactory());
 		//BestFirst bestFirst = (BestFirst) mlplan.getHascoFactory().getAlgorithm().getHasco().getSearch();
 		//System.out.println(bestFirst);
