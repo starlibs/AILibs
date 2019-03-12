@@ -6,6 +6,10 @@ import java.util.Arrays;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
+/**
+ * @author Helen Beierling
+ *	This class combines the 
+ */
 public class SFA implements IFilter {
 
 	private double[] alphabet;
