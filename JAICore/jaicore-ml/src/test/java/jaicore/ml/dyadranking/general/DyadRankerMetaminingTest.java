@@ -30,7 +30,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 import jaicore.ml.dyadranking.util.AbstractDyadScaler;
-import jaicore.ml.dyadranking.util.DyadMinMaxScaler;
+import jaicore.ml.dyadranking.util.DyadUnitIntervalScaler;
 
 /**
  * This is a test based on a dataset containing 400 dyad rankings of dataset and
@@ -76,7 +76,7 @@ public class DyadRankerMetaminingTest {
 	@Test
 	public void test() {
 
-		AbstractDyadScaler scaler = new DyadMinMaxScaler();
+		AbstractDyadScaler scaler = new DyadUnitIntervalScaler();
 		Collections.shuffle(dataset, new Random(seed));
 
 		// split data
@@ -84,9 +84,9 @@ public class DyadRankerMetaminingTest {
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList((int) (0.7 * dataset.size()), dataset.size()));
 
 		// standardize data
-		scaler.fit(trainData);
-		scaler.transformAlternatives(trainData);
-		scaler.transformAlternatives(testData);
+//		scaler.fit(trainData);
+//		scaler.transformAlternatives(trainData);
+//		scaler.transformAlternatives(testData);
 
 //		trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
 //		testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
