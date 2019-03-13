@@ -91,12 +91,7 @@ public class PLNetDyadRanker extends APLDyadRanker implements IOnlineLearner<IDy
 					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
 		}
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
-		train(drDataset.toND4j(), configuration.plNetMaxEpochs(), configuration.plNetEarlyStoppingTrainRatio());
-		if (configuration.plNetEarlyStoppingRetrain()) {
-			int maxEpochs = epoch;
-			this.plNet = null;
-			train(drDataset.toND4j(), maxEpochs, 1.0);
-		}
+		train(drDataset.toND4j());
 	}
 	
 	public void train(List<INDArray> dataset) throws TrainingException {
