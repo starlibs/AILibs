@@ -7,7 +7,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,22 +18,19 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import com.google.common.collect.Collections2;
-
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import jaicore.ml.dyadranking.util.DyadStandardScaler;
+import jaicore.ml.dyadranking.util.AbstractDyadScaler;
+import jaicore.ml.dyadranking.util.DyadMinMaxScaler;
 
 /**
  * This is a test based on a dataset containing 400 dyad rankings of dataset and
@@ -51,7 +47,7 @@ import jaicore.ml.dyadranking.util.DyadStandardScaler;
 @RunWith(Parameterized.class)
 public class DyadRankerMetaminingTest {
 
-	private static final String DATASET_FILE = "testsrc/ml/dyadranking/metamining-dataset.txt";
+	private static final String DATASET_FILE = "testsrc/ml/dyadranking/MLPlan-Data.txt";
 
 	// N = number of training instances
 	private static final int N = 300;
@@ -80,35 +76,33 @@ public class DyadRankerMetaminingTest {
 	@Test
 	public void test() {
 
-		DyadStandardScaler scaler = new DyadStandardScaler();
+		AbstractDyadScaler scaler = new DyadMinMaxScaler();
 		Collections.shuffle(dataset, new Random(seed));
 
 		// split data
-		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
-		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
+		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, (int) (0.7 * dataset.size())));
+		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList((int) (0.7 * dataset.size()), dataset.size()));
 
 		// standardize data
 		scaler.fit(trainData);
-		scaler.transformInstances(trainData);
-		scaler.transformInstances(testData);
+		scaler.transformAlternatives(trainData);
+		scaler.transformAlternatives(testData);
 
-		trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
+//		trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
 //		testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
 		try {
 
 			// train the ranker
-//			ranker.train(trainData);
-			for(int i = 0; i < 1; i++)
-				ranker.update(trainData.get(i));
+			ranker.train(trainData);
 			double avgKendallTau = 0.0d;
 			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
 			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
 			assertTrue(avgKendallTau > 0.5d);
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) testData.get(0);
 			List<Dyad> dyads = new LinkedList<Dyad>();
-			for(int i = 0; i < drInstance.length(); i++) {
-				dyads.add(drInstance.getDyadAtPosition(i));
-			}
+//			for(int i = 0; i < drInstance.length(); i++) {
+//				dyads.add(drInstance.getDyadAtPosition(i));
+//			}
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
