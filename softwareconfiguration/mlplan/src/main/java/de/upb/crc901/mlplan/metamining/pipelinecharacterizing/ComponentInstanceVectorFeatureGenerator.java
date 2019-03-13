@@ -15,9 +15,16 @@ import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 
-public class ManualPatternMiner implements IPipelineCharacterizer {
+/**
+ * Characterizes a pipelines by the components that ocurr in it and the
+ * parameters that are set for it.
+ * 
+ * @author Mirko Jürgens, Helena Graf
+ *
+ */
+public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharacterizer {
 
-	private static final Logger logger = LoggerFactory.getLogger(ManualPatternMiner.class);
+	private static final Logger logger = LoggerFactory.getLogger(ComponentInstanceVectorFeatureGenerator.class);
 
 	/*
 	 * Maps the name of a component to a map that maps the name of the hyper
@@ -29,7 +36,7 @@ public class ManualPatternMiner implements IPipelineCharacterizer {
 
 	private int patternCount;
 
-	public ManualPatternMiner(Collection<Component> collection) {
+	public ComponentInstanceVectorFeatureGenerator(Collection<Component> collection) {
 		int counter = 0;
 		logger.debug("Got {} components as input.", collection.size());
 		for (Component component : collection) {
@@ -59,7 +66,6 @@ public class ManualPatternMiner implements IPipelineCharacterizer {
 	 * @return
 	 */
 	public double[] characterize(ComponentInstance cI, Vector patterns) {
-		// Vector patterns = new DenseDoubleVector(patternCount);
 		// first: get the encapsulated component
 		Component c = cI.getComponent();
 		String componentName = c.getName();
@@ -75,8 +81,8 @@ public class ManualPatternMiner implements IPipelineCharacterizer {
 			parameterIndex = parameterIndices.get(parameterName);
 			if (param.isNumeric()) {
 				if (cI.getParameterValue(param) != null) {
-				double value = Double.parseDouble(cI.getParameterValue(param));
-				patterns.setValue(parameterIndex, value);
+					double value = Double.parseDouble(cI.getParameterValue(param));
+					patterns.setValue(parameterIndex, value);
 				} else {
 					double value = (double) param.getDefaultValue();
 					patterns.setValue(parameterIndex, value);
@@ -110,12 +116,11 @@ public class ManualPatternMiner implements IPipelineCharacterizer {
 	@Override
 	public void build(List<ComponentInstance> pipelines) throws InterruptedException {
 		throw new UnsupportedOperationException("This characterizer is not trained!");
-		
 	}
 
 	@Override
 	public double[] characterize(ComponentInstance pipeline) {
-		return characterize (pipeline, new DenseDoubleVector(patternCount, 0.0d));
+		return characterize(pipeline, new DenseDoubleVector(patternCount, 0.0d));
 	}
 
 	@Override
@@ -124,8 +129,8 @@ public class ManualPatternMiner implements IPipelineCharacterizer {
 	}
 
 	@Override
-	public int getLengthOfCharacrization() {
+	public int getLengthOfCharacterization() {
 		return patternCount;
 	}
-	
+
 }

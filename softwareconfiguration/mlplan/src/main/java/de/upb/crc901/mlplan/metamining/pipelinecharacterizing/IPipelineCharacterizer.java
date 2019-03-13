@@ -58,5 +58,5 @@ public interface IPipelineCharacterizer {
 	 * @return the length of any array produced by
 	 *         {@link #characterize(ComponentInstance)}.
 	 */
-	public int getLengthOfCharacrization();
+	public int getLengthOfCharacterization();
 }
