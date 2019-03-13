@@ -2,12 +2,16 @@ package de.upb.crc901.mlplan.metamining.dyadranking;
 
 import java.util.Collection;
 
-import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
+import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
+import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import hasco.core.Util;
 import hasco.model.Component;
+import hasco.model.ComponentInstance;
+import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.search.ADyadRankedNodeQueue;
+import jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.model.travesaltree.Node;
 
@@ -25,9 +29,9 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	private Collection<Component> components;
 
 	/**
-	 * the characterizer for characterizing pipelines
+	 * the characterizer for characterizing (partial) pipelines
 	 */
-	private WEKAPipelineCharacterizer characterizer;
+	private IPipelineCharacterizer characterizer;
 
 	/**
 	 * Construct a new WEKA dyad ranked node queue that ranks WEKA pipelines
@@ -38,15 +42,22 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	 * @param components
 	 *            the components
 	 */
-	public WEKADyadRankedNodeQueue(Vector contextCharacterization, Collection<Component> components) {
-		super(contextCharacterization);
+	public WEKADyadRankedNodeQueue(Vector contextCharacterization, Collection<Component> components, ADyadRanker ranker,
+			AbstractDyadScaler scaler) {
+		super(contextCharacterization, ranker, scaler);
 		this.components = components;
-		// TODO init pipeline characterizer
+		this.characterizer = new ComponentInstanceVectorFeatureGenerator(components);
 	}
 
 	@Override
 	protected Vector characterize(Node<TFDNode, Double> node) {
-		return new DenseDoubleVector(characterizer.characterize(
-				Util.getComponentInstanceFromState(components, node.getPoint().getState(), "solution", true)));
+		ComponentInstance cI = Util.getComponentInstanceFromState(components, node.getPoint().getState(), "solution",
+				true);
+		if (cI != null) {
+			return new DenseDoubleVector(characterizer.characterize(cI));
+		} else {
+			return new DenseDoubleVector(characterizer.getLengthOfCharacterization(), 0);
+		}
+		
 	}
 }

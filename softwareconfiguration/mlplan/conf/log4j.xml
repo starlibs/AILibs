@@ -123,6 +123,18 @@
     <level value="warn" />
   </logger>
   
+    <logger name="jaicore.ml.dyadranking">
+    <level value="trace" />
+    </logger>
+    
+      <logger name="jaicore.ml.metafeatures">
+    <level value="trace" />
+    </logger>
+    
+    <logger name="de.upb.crc901.mlplan">
+    <level value="trace" />
+  	</logger> 	
+  
   <logger name="testedalgorithm">
     <level value="trace" />
     

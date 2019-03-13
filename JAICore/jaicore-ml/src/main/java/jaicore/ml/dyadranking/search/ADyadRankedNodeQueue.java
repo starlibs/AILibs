@@ -1,19 +1,26 @@
 package jaicore.ml.dyadranking.search;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.exception.PredictionException;
+import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.ADyadRanker;
-import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
+import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
+import jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import jaicore.search.model.travesaltree.Node;
 
 /**
@@ -28,25 +35,26 @@ import jaicore.search.model.travesaltree.Node;
  */
 public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implements Queue<Node<N, V>> {
 
+	private Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+
 	/** the dyad ranker used to rank the nodes */
-	//TODO: load a pre-trained PLNet 
-	private ADyadRanker dyadRanker = new PLNetDyadRanker();
+	private ADyadRanker dyadRanker;
+
+	/** for scaling the dyads */
+	protected AbstractDyadScaler scaler;
 
 	/** the actual queue of nodes */
-	private List<Node<N, V>> queue;
+	private List<Node<N, V>> queue = new ArrayList<>();
 
 	/** characterizations of the nodes (not ordered the same way as the nodes!) */
-	private List<Vector> nodeCharacterizations;
+	private List<Vector> nodeCharacterizations = new ArrayList<>();
+
+	private Vector originalContextCharacterization;
 
 	/** characterization of the context the nodes are ranked in */
 	private Vector contextCharacterization;
 
-	/**
-	 * the instance which is used repeatedly to query the dyadranker, which infers
-	 * an ordering of the nodes
-	 */
-	private SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(contextCharacterization,
-			nodeCharacterizations);
+	private List<Dyad> queryDyads = new ArrayList<>();
 
 	/** connects nodes to their respective characterizations */
 	private BiMap<Node<N, V>, Vector> nodesAndCharacterizationsMap = HashBiMap.create();
@@ -59,21 +67,28 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	 *            the characterization of the context the nodes are ranked in
 	 */
 	public ADyadRankedNodeQueue(Vector contextCharacterization) {
-		this.contextCharacterization = contextCharacterization;
+		this.contextCharacterization = contextCharacterization.addConstantToCopy(0);
+		this.originalContextCharacterization = contextCharacterization;
+		LOGGER.trace("Construct ADyadNodeQueue with contexcharacterization {}", contextCharacterization);
 	}
 
 	/**
 	 * Constructs a new DyadRankedNodeQueue that ranks the nodes in the queue
-	 * according to the given context characterization and given dyad ranker.
+	 * according to the given context characterization and given dyad ranker. Given
+	 * dyad ranker must be pre-trained.
 	 * 
 	 * @param contextCharacterization
 	 *            the characterization of the context the nodes are ranked in
 	 * @param dyadRanker
 	 *            the dyad ranker to be used for the ranking of the nodes
 	 */
-	public ADyadRankedNodeQueue(Vector contextCharacterization, ADyadRanker dyadRanker) {
+	public ADyadRankedNodeQueue(Vector contextCharacterization, ADyadRanker dyadRanker, AbstractDyadScaler scaler) {
 		this(contextCharacterization);
 		this.dyadRanker = dyadRanker;
+		this.scaler = scaler;
+
+		// transform dataset
+		transformContextCharacterization();
 	}
 
 	/**
@@ -188,9 +203,17 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				// characterize new node
 				Vector characterization = characterize(e);
 				nodeCharacterizations.add(characterization);
+				LOGGER.debug("Characterize node, length of vector: {}", characterization.length());
+
+				// scale node
+				Dyad newDyad = new Dyad(contextCharacterization, characterization);
+				queryDyads.add(newDyad);
+				DyadRankingDataset dataset = new DyadRankingDataset();
+				dataset.add(new DyadRankingInstance(Arrays.asList(newDyad)));
+				scaler.transformAlternatives(dataset);
 
 				// predict new ranking and reorder queue accordingly
-				IDyadRankingInstance prediction = dyadRanker.predict(queryInstance);
+				IDyadRankingInstance prediction = dyadRanker.predict(new DyadRankingInstance(queryDyads));
 				queue.clear();
 				for (int i = 0; i < prediction.length(); i++) {
 					queue.add(nodesAndCharacterizationsMap.inverse()
@@ -270,7 +293,30 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	 *            the dyad ranker
 	 */
 	public void setDyadRanker(ADyadRanker dyadRanker) {
+		LOGGER.trace("Update dyad ranker. Was {} now is {}", this.dyadRanker.getClass(), dyadRanker.getClass());
 		this.dyadRanker = dyadRanker;
+	}
+
+	public AbstractDyadScaler getScaler() {
+		return scaler;
+	}
+
+	public void setScaler(AbstractDyadScaler scaler) {
+		LOGGER.trace("Update scaler. Was {} now is {}", this.scaler.getClass(), scaler.getClass());
+		this.scaler = scaler;
+
+		// transform dataset
+		contextCharacterization = originalContextCharacterization.addConstantToCopy(0);
+		transformContextCharacterization();
+	}
+
+	private void transformContextCharacterization() {
+		LOGGER.trace("Transform context characterization with scaler {}", this.scaler.getClass());
+		Dyad dyad = new Dyad(contextCharacterization, contextCharacterization);
+		DyadRankingInstance instance = new DyadRankingInstance(Arrays.asList(dyad));
+		DyadRankingDataset dataset = new DyadRankingDataset();
+		dataset.add(instance);
+		scaler.transformInstances(dataset);
 	}
 
 }

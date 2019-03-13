@@ -16,7 +16,7 @@ import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 
 /**
- * Characterizes a pipelines by the components that ocurr in it and the
+ * Characterizes a pipelines by the components that occur in it and the
  * parameters that are set for it.
  * 
  * @author Mirko Jürgens, Helena Graf
@@ -36,8 +36,16 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 
 	private int patternCount;
 
+	/**
+	 * Construct a ComponentInstanceVectorFeatureGenerator that is able to
+	 * characterize pipelines consisting of the given components and parameters.
+	 * 
+	 * @param collection
+	 *            the components to use
+	 */
 	public ComponentInstanceVectorFeatureGenerator(Collection<Component> collection) {
 		int counter = 0;
+		logger.debug("HELO {}", collection);
 		logger.debug("Got {} components as input.", collection.size());
 		for (Component component : collection) {
 			logger.debug("Inserting {} at position {}", component.getName(), counter);
@@ -62,23 +70,27 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 	 * Recursively resolves the components.
 	 * 
 	 * @param cI
-	 * @param input
-	 * @return
+	 *            the component instance to resolve
+	 * @param patterns
+	 *            the patterns found so far
+	 * @return the characterization
 	 */
 	public double[] characterize(ComponentInstance cI, Vector patterns) {
 		// first: get the encapsulated component
 		Component c = cI.getComponent();
 		String componentName = c.getName();
+
 		// set the used algorithm to '1'
 		int index = componentNameToDyadIndex.get(componentName);
 		patterns.setValue(index, 1.0d);
+
 		// now resolve the parameters
 		Map<String, Integer> parameterIndices = componentNameToParameterDyadIndex.get(componentName);
+
 		// assumption: the values is always set in the parameters vector
 		for (Parameter param : c.getParameters()) {
 			String parameterName = param.getName();
-			int parameterIndex = 0;
-			parameterIndex = parameterIndices.get(parameterName);
+			int parameterIndex = parameterIndices.get(parameterName);
 			if (param.isNumeric()) {
 				if (cI.getParameterValue(param) != null) {
 					double value = Double.parseDouble(cI.getParameterValue(param));
@@ -106,10 +118,12 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 
 			}
 		}
+
 		// recursively resolve the patterns for the requiredInterfaces
 		for (ComponentInstance requiredInterface : cI.getSatisfactionOfRequiredInterfaces().values()) {
 			characterize(requiredInterface, patterns);
 		}
+
 		return patterns.asArray();
 	}
 

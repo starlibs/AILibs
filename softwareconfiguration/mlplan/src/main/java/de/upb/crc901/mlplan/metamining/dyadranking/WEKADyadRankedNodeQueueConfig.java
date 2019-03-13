@@ -4,11 +4,13 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.openml.webapplication.fantail.dc.Characterizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import hasco.model.Component;
 import jaicore.ml.dyadranking.search.ADyadRankedNodeQueueConfig;
-import jaicore.ml.metafeatures.GlobalCharacterizer;
+import jaicore.ml.metafeatures.LandmarkerCharacterizer;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import weka.core.Instances;
@@ -22,7 +24,9 @@ import weka.core.Instances;
  *
  */
 public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TFDNode> {
-
+	
+	private Logger logger = LoggerFactory.getLogger(WEKADyadRankedNodeQueueConfig.class);
+	
 	/**
 	 * the characterizer used to characterize new datasets, must produce dataset
 	 * meta data of the same format the dyad ranker is trained with
@@ -47,7 +51,7 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 */
 	public WEKADyadRankedNodeQueueConfig() throws Exception {
 		super();
-		this.characterizer = new GlobalCharacterizer();
+		this.characterizer = new LandmarkerCharacterizer();
 	}
 
 	/**
@@ -73,8 +77,10 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 		this.components = components;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void configureBestFirst(BestFirst bestFirst) {
-		bestFirst.setOpen(new WEKADyadRankedNodeQueue(new DenseDoubleVector(contextCharacterization), components));
+		logger.trace("Configuring OPEN list of BF");
+		bestFirst.setOpen(new WEKADyadRankedNodeQueue(new DenseDoubleVector(contextCharacterization), components, ranker, scaler));
 	}
 }

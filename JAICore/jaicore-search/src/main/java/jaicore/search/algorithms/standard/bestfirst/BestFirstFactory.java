@@ -15,15 +15,9 @@ public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N
 	private int timeoutForFInMS;
 	private INodeEvaluator<N, V> timeoutEvaluator;
 	private Logger logger = LoggerFactory.getLogger(BestFirstFactory.class);
-	private IBestFirstQueueConfiguration<P, N, A, V> config;
 
 	public BestFirstFactory() {
 		super();
-	}
-
-	public BestFirstFactory(IBestFirstQueueConfiguration<P, N, A, V> config) {
-		this();
-		this.config = config;
 	}
 
 	public BestFirstFactory(final int timeoutForFInMS) {
@@ -43,10 +37,6 @@ public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
 		if (getLoggerName() != null && getLoggerName().length() > 0)
 			search.setLoggerName(getLoggerName());
-
-		if (config != null) {
-			config.configureBestFirst(search);
-		}
 
 		return search;
 	}
