@@ -237,5 +237,10 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	public List<String> getFoundPipelinePatterns() {
 		return foundPipelinePatterns;
 	}
+	
+	@Override
+	public int getLengthOfCharacrization() {
+		return this.foundPipelinePatterns.size();
+	}
 
 }

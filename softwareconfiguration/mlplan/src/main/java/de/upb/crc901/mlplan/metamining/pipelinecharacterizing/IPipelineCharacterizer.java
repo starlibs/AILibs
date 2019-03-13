@@ -11,7 +11,7 @@ import hasco.model.ComponentInstance;
  * data base of pipelines. Subsequently, it can be used to check for these
  * patterns in a new pipeline.
  * 
- * @author Helena Graf
+ * @author Helena Graf, Mirko Jürgens
  *
  */
 public interface IPipelineCharacterizer {
@@ -21,7 +21,7 @@ public interface IPipelineCharacterizer {
 	 * 
 	 * @param pipelines
 	 *            The pipelines to go through for patterns
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public void build(List<ComponentInstance> pipelines) throws InterruptedException;
 
@@ -40,8 +40,9 @@ public interface IPipelineCharacterizer {
 
 	/**
 	 * For each {@link MLPipeline} that was used in the training (given by its
-	 * ComponentInstance), return which found pattern (found during the training phase in
-	 * {@link IPipelineCharacterizer#build(List)}) occurs in which pipeline.
+	 * ComponentInstance), return which found pattern (found during the training
+	 * phase in {@link IPipelineCharacterizer#build(List)}) occurs in which
+	 * pipeline.
 	 * 
 	 * If in the returned matrix m, m[i][j]=1, pattern j occurs in training pipeline
 	 * i. Otherwise m[i][j]=0 and pattern j doesn't occur in training pipeline i.
@@ -49,4 +50,13 @@ public interface IPipelineCharacterizer {
 	 * @return A matrix representing pattern occurrences in pipelines
 	 */
 	public double[][] getCharacterizationsOfTrainingExamples();
+
+	/**
+	 * Returns the amount of found pipeline patterns, which is the length of a
+	 * characterization.
+	 * 
+	 * @return the length of any array produced by
+	 *         {@link #characterize(ComponentInstance)}.
+	 */
+	public int getLengthOfCharacrization();
 }
