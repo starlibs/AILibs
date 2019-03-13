@@ -6,10 +6,13 @@ import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
+import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
+import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
+import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * A scaler that can be fit to a certain dataset and then be used to standardize
@@ -28,7 +31,7 @@ public abstract class AbstractDyadScaler implements Serializable {
 
 	protected SummaryStatistics[] statsX;
 	protected SummaryStatistics[] statsY;
-	
+
 	public SummaryStatistics[] getStatsX() {
 		return statsX;
 	}
@@ -106,23 +109,126 @@ public abstract class AbstractDyadScaler implements Serializable {
 	}
 
 	/**
-	 * Transforms only the instances of each dyad according to the mean and
-	 * standard deviation of the data the scaler has been fit to. The attributes
-	 * with indices contained in ignoredIndices are not transformed. {
+	 * Transforms only the instances of each dyad according to the mean and standard
+	 * deviation of the data the scaler has been fit to. The attributes with indices
+	 * contained in ignoredIndices are not transformed. {
 	 * 
-	 * @param dataset The dataset of which the alternatives are to be standardized.
-	 * @param ignoredIndices The {@link List} of indices that are been ignored by the scaler.
+	 * @param dataset        The dataset of which the alternatives are to be
+	 *                       standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by
+	 *                       the scaler.
 	 */
-	public abstract void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices);
+	public abstract void transformInstances(Dyad dyad, List<Integer> ignoredIndices);
 
 	/**
 	 * Transforms only the alternatives of each dyad according to the mean and
 	 * standard deviation of the data the scaler has been fit to.
 	 * 
-	 * @param dataset The dataset of which the alternatives are to be standardized.
-	 * @param ignoredIndices The {@link List} of indices that are been ignored by the scaler.
+	 * @param dataset        The dataset of which the alternatives are to be
+	 *                       standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by
+	 *                       the scaler.
 	 */
-	public abstract void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices);
+	public abstract void transformAlternatives(Dyad dyad, List<Integer> ignoredIndices);
+
+	/**
+	 * Transforms an instance feature vector.
+	 * 
+	 * @param Instance       vector to be transformed
+	 * @param ignoredIndices
+	 */
+	public abstract void transformInstaceVector(Vector vector, List<Integer> ignoredIndices);
+
+	/**
+	 * Transforms only the instances of each dyad in a
+	 * {@link SparseDyadRankingInstance} according to the mean and standard
+	 * deviation of the data the scaler has been fit to. The attributes with indices
+	 * contained in ignoredIndices are not transformed. {
+	 * 
+	 * @param dataset        The dataset of which the alternatives are to be
+	 *                       standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by
+	 *                       the scaler.
+	 */
+	public void transformInstances(SparseDyadRankingInstance drInstance, List<Integer> ignoredIndices) {
+		transformInstaceVector(drInstance.getDyadAtPosition(0).getInstance(), ignoredIndices);
+	}
+
+	/**
+	 * Transforms only the instances of each dyad in a
+	 * {@link DyadRankingInstance} according to the mean and standard
+	 * deviation of the data the scaler has been fit to. The attributes with indices
+	 * contained in ignoredIndices are not transformed. {
+	 * 
+	 * @param dataset        The dataset of which the alternatives are to be
+	 *                       standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by
+	 *                       the scaler.
+	 */
+	public void transformInstances(DyadRankingInstance drInstance, List<Integer> ignoredIndices) {
+		for (Dyad dyad : drInstance)
+			transformInstances(dyad, ignoredIndices);
+	}
+
+	/**
+	 * Transforms only the alternatives of each dyad in an
+	 * {@link IDyadRankingInstance} according to the mean and standard
+	 * deviation of the data the scaler has been fit to. The attributes with indices
+	 * contained in ignoredIndices are not transformed. {
+	 * 
+	 * @param dataset        The dataset of which the alternatives are to be
+	 *                       standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by
+	 *                       the scaler.
+	 */
+	public void transformAlternatives(IDyadRankingInstance drInstance, List<Integer> ignoredIndices) {
+		for (Dyad dyad : drInstance)
+			transformAlternatives(dyad, ignoredIndices);
+	}
+
+	/**
+	 * Transforms only the instances of each dyad in a
+	 * {@link DyadRankingDataset} according to the mean and standard
+	 * deviation of the data the scaler has been fit to. The attributes with indices
+	 * contained in ignoredIndices are not transformed. {
+	 * 
+	 * @param dataset        The dataset of which the alternatives are to be
+	 *                       standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by
+	 *                       the scaler.
+	 */
+	public void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
+		for (IInstance instance : dataset) {
+			if (instance instanceof SparseDyadRankingInstance) {
+				SparseDyadRankingInstance drSparseInstance = (SparseDyadRankingInstance) instance;
+				this.transformInstances(drSparseInstance, ignoredIndices);
+			} else if (instance instanceof DyadRankingInstance) {
+				DyadRankingInstance drDenseInstance = (DyadRankingInstance) instance;
+				this.transformInstances(drDenseInstance, ignoredIndices);
+			} else {
+				throw new IllegalArgumentException(
+						"The scalers only support SparseDyadRankingInstance and DyadRankingInstance!");
+			}
+		}
+	}
+
+	/**
+	 * Transforms only the alternatives of each dyad in a
+	 * {@link DyadRankingDataset} according to the mean and standard
+	 * deviation of the data the scaler has been fit to. The attributes with indices
+	 * contained in ignoredIndices are not transformed. {
+	 * 
+	 * @param dataset        The dataset of which the alternatives are to be
+	 *                       standardized.
+	 * @param ignoredIndices The {@link List} of indices that are been ignored by
+	 *                       the scaler.
+	 */
+	public void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
+		for (IInstance instance : dataset) {
+			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+			this.transformAlternatives(drInstance, ignoredIndices);
+		}
+	}
 
 	/**
 	 * Fits the standard scaler to the dataset and transforms the entire dataset
