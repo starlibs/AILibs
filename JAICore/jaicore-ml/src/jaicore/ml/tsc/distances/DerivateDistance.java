@@ -6,7 +6,7 @@ import jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
 /**
  * Implementation of the Derivate Distance (DD) measure as published in "Using
  * derivatives in time series classification" by Tomasz Gorecki and Maciej
- * Luczak.
+ * Luczak (2013).
  * 
  * The authors wanted to create a distance measure which considers both, the
  * function values of times series (point to point comparison) and the values of
@@ -15,9 +15,10 @@ import jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
  * Given a distance measure <code>d</code>, the Derivate Distance for the two
  * time series <code>A</code> and <code>B</code> is:
  * <code>a * d(A, B) + b * d(A', B')</code>, where <code>A'</code> and
- * <code>B'</code> are the derivates of <code>A</code> and <code>B</code>
- * respec. and <code>0 <= a <= 1, 0 <= b <= 1></code> are parameters of the
- * measure. The parameters <code>a</code> and <code>b</code> are set via an
+ * <code>B'</code> are the derivates (@see jaicore.ml.tsc.filter.derivate) of
+ * <code>A</code> and <code>B</code> respec. and
+ * <code>0 <= a <= 1, 0 <= b <= 1></code> are parameters of the measure. The
+ * parameters <code>a</code> and <code>b</code> are set via an
  * <code>alpha</code> value, that is <code>a=cos(alpha)</code> and
  * <code>b=sin(alpha)</code>.
  * 
@@ -25,6 +26,10 @@ import jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
  * measure is commonly denoted as DD_DTW. The Derivate Distance that uses the
  * Euclidean distance as underlying distance measure is commonly denoted as
  * DD_ED.
+ * <p>
+ * It is also possible to use a distinct distance measure to calculate the
+ * distance between the time series and its derivates.
+ * </p>
  */
 public class DerivateDistance implements ITimeSeriesDistance {
 
@@ -129,7 +134,6 @@ public class DerivateDistance implements ITimeSeriesDistance {
      * 
      * @param alpha    The distance measure to use to calculate the distance of the
      *                 function values. <code>0 <= alpha <= pi/2</code>.
-     * @param derivate The derivate calculation to use.
      * @param distance The distance measure to use to calculate the distance of the
      *                 function and derivate values.
      */
