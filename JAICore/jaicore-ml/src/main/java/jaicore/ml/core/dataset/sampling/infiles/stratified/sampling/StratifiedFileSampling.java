@@ -149,7 +149,6 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 		for (String uuid : strati.keySet()) {
 			sampleSizeForStrati[i] = Math
 					.round((float) (this.sampleSize * ((double) strati.get(uuid) / (double) this.datapointAmount)));
-			System.out.println("Sample out of Strati: " + sampleSizeForStrati[i] + "/" + strati.get(uuid));
 			i++;
 		}
 
