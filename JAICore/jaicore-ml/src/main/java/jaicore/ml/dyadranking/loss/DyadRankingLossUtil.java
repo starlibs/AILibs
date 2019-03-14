@@ -15,6 +15,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * Class that contains utility methods for handling dyad ranking losses.
+ * 
  * @author Jonas Hanselle
  *
  */
@@ -22,9 +23,15 @@ public class DyadRankingLossUtil {
 
 	/**
 	 * Computes the average loss over several dyad orderings.
-	 * @param lossFunction The loss function to be used for the individual {@link IDyadRankingInstance}s
-	 * @param trueOrderings The true orderings represented by {@link IDyadRankingInstance}s
-	 * @param predictedOrderings The predicted orderings represented by {@link IDyadRankingInstance}s
+	 * 
+	 * @param lossFunction
+	 *            The loss function to be used for the individual
+	 *            {@link IDyadRankingInstance}s
+	 * @param trueOrderings
+	 *            The true orderings represented by {@link IDyadRankingInstance}s
+	 * @param predictedOrderings
+	 *            The predicted orderings represented by
+	 *            {@link IDyadRankingInstance}s
 	 * @return Average loss over all {@link IDyadRankingInstance}s
 	 */
 	public static double computeAverageLoss(DyadRankingLossFunction lossFunction, DyadRankingDataset trueOrderings,
@@ -46,23 +53,28 @@ public class DyadRankingLossUtil {
 	}
 
 	/**
-	 * Computes the average loss over several dyad orderings. Predictions are obtained by the given {@link ADyadRanker}.
-	 * @param lossFunction The loss function to be used for the individual {@link IDyadRankingInstance}s
-	 * @param trueOrderings The true orderings represented by {@link IDyadRankingInstance}s
-	 * @param ranker The {@link ADyadRanker} used to make predictions
+	 * Computes the average loss over several dyad orderings. Predictions are
+	 * obtained by the given {@link ADyadRanker}.
+	 * 
+	 * @param lossFunction
+	 *            The loss function to be used for the individual
+	 *            {@link IDyadRankingInstance}s
+	 * @param trueOrderings
+	 *            The true orderings represented by {@link IDyadRankingInstance}s
+	 * @param ranker
+	 *            The {@link ADyadRanker} used to make predictions
 	 * @return Average loss over all {@link IDyadRankingInstance}s
 	 */
 	public static double computeAverageLoss(DyadRankingLossFunction lossFunction, DyadRankingDataset trueOrderings,
-			ADyadRanker ranker) throws PredictionException {
+			ADyadRanker ranker, Random random) throws PredictionException {
 		double avgLoss = 0.0d;
-		Random rng = new Random(0);
 		for (int i = 0; i < trueOrderings.size(); i++) {
 			IDyadRankingInstance actual = trueOrderings.get(i);
 
 			// shuffle the instance such that a ranker that doesn't do anything can't come
 			// up with a perfect result
 			List<Dyad> shuffleContainer = Lists.newArrayList(actual.iterator());
-			Collections.shuffle(shuffleContainer, rng);
+			Collections.shuffle(shuffleContainer, random);
 			IDyadRankingInstance shuffledActual = new DyadRankingInstance(shuffleContainer);
 			IDyadRankingInstance predicted = ranker.predict(shuffledActual);
 			avgLoss += lossFunction.loss(actual, predicted);
@@ -73,4 +85,8 @@ public class DyadRankingLossUtil {
 		return avgLoss;
 	}
 
+	public static double computeAverageLoss(DyadRankingLossFunction lossFunction, DyadRankingDataset trueOrderings,
+			ADyadRanker ranker) throws PredictionException {
+		return computeAverageLoss(lossFunction, trueOrderings, ranker, new Random(0));
+	}
 }

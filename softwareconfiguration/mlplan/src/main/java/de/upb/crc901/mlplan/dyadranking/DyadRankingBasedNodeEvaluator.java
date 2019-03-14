@@ -1,10 +1,13 @@
 package de.upb.crc901.mlplan.dyadranking;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -44,12 +47,15 @@ import jaicore.ml.WekaUtil;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
+import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
+import jaicore.ml.dyadranking.util.DyadMinMaxScaler;
 import jaicore.ml.evaluation.evaluators.weka.FixedSplitClassifierEvaluator;
 import jaicore.ml.metafeatures.LandmarkerCharacterizer;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
@@ -163,6 +169,10 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 	private SolutionEventBus<T> eventBus;
 
+	private GraphGenerator<T, ?> graphGenerator;
+
+	private DyadMinMaxScaler scaler = null;
+
 	public void setClassifierFactory(ClassifierFactory classifierFactory) {
 		this.classifierFactory = classifierFactory;
 	}
@@ -189,11 +199,17 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		this.landmarkerSampleSize = config.getLandmarkerSampleSize();
 		this.useLandmarkers = config.useLandmarkers();
 
+		String scalerPath = config.scalerPath();
+
 		// load the dyadranker from the config
-		try {
+		try (ObjectInputStream oin = new ObjectInputStream(new FileInputStream(Paths.get(scalerPath).toFile()));) {
 			this.dyadRanker.loadModelFromFile(Paths.get(config.getPlNetPath()).toString());
+
+			this.scaler = (DyadMinMaxScaler) oin.readObject();
 		} catch (IOException e) {
 			logger.error("Could not load model for plnet in {}", Paths.get(config.getPlNetPath()).toString());
+		} catch (ClassNotFoundException e) {
+			logger.error("Could not read scaler.", e);
 		}
 
 	}
@@ -207,6 +223,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		if (node.isGoal()) {
 			return null;
 		}
+		/* Reinitializing random search... */
+	//	initializeRandomSearch(this.graphGenerator);
 		/* Time measuring */
 		Instant startOfEvaluation = Instant.now();
 
@@ -237,7 +255,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 		// random search failed to find anything here
 		if (allRankedPaths.isEmpty())
-			return(V) new Double(9000.0d);
+			return (V) new Double(9000.0d);
 		// get the top k paths
 		List<ComponentInstance> topKRankedPaths = allRankedPaths.subList(0,
 				Math.min(evaluatedPaths, allRankedPaths.size()));
@@ -259,7 +277,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		logger.info("Best solution is {}, {}", bestSoultion,
 				allEvaluatedPaths.stream().map(Pair::getY).collect(Collectors.toList()));
 		if (bestSoultion == null)
-			return(V) new Double(9000.0d);
+			return (V) new Double(9000.0d);
+		eventBus.post(new FValueEvent<V>(bestSoultion, evaluationTime.toMillis()));
 		return bestSoultion;
 	}
 
@@ -325,6 +344,11 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 				pipelineToCharacterization.put(y_prime, cI);
 			} else {
 				Vector y = new DenseDoubleVector(characterizer.characterize(cI));
+				if (scaler != null) {
+					List<IDyadRankingInstance> asList = Arrays.asList(new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures), Arrays.asList(y)));
+					DyadRankingDataset dataset = new DyadRankingDataset(asList);
+					scaler.transformAlternatives(dataset);
+				}
 				pipelineToCharacterization.put(y, cI);
 			}
 		}
@@ -427,9 +451,9 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 		// collect the results but not wait longer than 5 seconds for a result to appear
 		for (int i = 0; i < topKRankedPaths.size(); i++) {
-			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(), i+1,
-					topKRankedPaths.size());
-			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(1, TimeUnit.SECONDS);
+			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(),
+					i + 1, topKRankedPaths.size());
+			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(5, TimeUnit.SECONDS);
 			if (evaluatedPipe == null) {
 				logger.info("Didn't receive any futures (expected {} futures)", topKRankedPaths.size());
 				continue;
@@ -446,7 +470,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 			} catch (Exception e) {
 				logger.info("Got exception while evaluating {}", e.getMessage());
-			//	evaluatedPipe.cancel(true);
+				// evaluatedPipe.cancel(true);
 			}
 
 		}
@@ -468,6 +492,11 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setGenerator(GraphGenerator<T, ?> generator) {
+		this.graphGenerator = generator;
+		initializeRandomSearch(generator);
+	}
+
+	private void initializeRandomSearch(GraphGenerator<T, ?> generator) {
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
 				(GraphGenerator<T, String>) generator, nodeEvaluator);
@@ -477,6 +506,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	public void setDataset(Instances dataset) {
+
 		// first we split the dataset into train & testdata
 		if (useLandmarkers) {
 			List<Instances> split = WekaUtil.getStratifiedSplit(dataset, 42l, 0.8d);

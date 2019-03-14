@@ -46,6 +46,7 @@ import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
@@ -1245,6 +1246,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	public Object getNodeAnnotation(final N node, final String annotation) {
 		Node<N, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotation(annotation);
+	}
+	
+	@Subscribe
+	public void onFValueReceivedEvent(FValueEvent<V> event) {
+		this.post(event);
 	}
 
 	@Override

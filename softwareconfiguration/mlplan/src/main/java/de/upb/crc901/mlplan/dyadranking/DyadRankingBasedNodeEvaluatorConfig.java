@@ -16,6 +16,8 @@ public interface DyadRankingBasedNodeEvaluatorConfig extends Mutable {
 	public static final String SEED_KEY = "seed";
 
 	public static final String PLNET_ZIP_KEY = "plnetPath";
+	
+	public static final String SCALER_SER_KEY= "scalerPath";
 
 	public static final String LANDMARKERS_KEY = "landmarkers";
 
@@ -42,7 +44,7 @@ public interface DyadRankingBasedNodeEvaluatorConfig extends Mutable {
 	public int getSeed();
 
 	@Key(PLNET_ZIP_KEY)
-	@DefaultValue("resources/draco/plnet/pretrained_plnet_deep.zip")
+	@DefaultValue("resources/draco/plnet/final_plnet_minmax.zip")
 	public String getPlNetPath();
 
 	@Key(LANDMARKERS_KEY)
@@ -61,4 +63,8 @@ public interface DyadRankingBasedNodeEvaluatorConfig extends Mutable {
 	@Key(USE_EVALUATIONS)
 	@DefaultValue("true")
 	public boolean useEvaluations();
+
+	@Key(SCALER_SER_KEY)
+	@DefaultValue("resources/draco/plnet/minmaxscaler.ser")
+	public String scalerPath();
 }
