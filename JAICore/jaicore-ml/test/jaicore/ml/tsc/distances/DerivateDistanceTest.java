@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.Test;
 
-import jaicore.ml.tsc.util.ScalarDistanceUtil;
-
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.DerivateDistance}
  * implementation.
@@ -38,14 +36,16 @@ public class DerivateDistanceTest {
     @Test
     public void testCorrectnessForDistanceCalculation2() {
         // Input.
-        double[] timeSeries1 = { 1, 1, 2, 2, 3, 5 }; // distance with d(x,y) = |x-y| is 1
-        double[] timeSeries2 = { 1, 2, 3, 5, 5, 6 }; // backward distance derivates have distance 3
+        double[] timeSeries1 = { 1, 1, 2, 2, 3, 5 };
+        double[] timeSeries2 = { 1, 2, 3, 5, 5, 6 };
         double alpha = 0.5;
-        ITimeSeriesDistance timeSeriesDistance = new DynamicTimeWarping(ScalarDistanceUtil.getAbsoluteDistance());
-        // Expectation.
-        double expectation = Math.cos(alpha) * 1 + Math.sin(alpha) * 3;
+        ITimeSeriesDistance timeSeriesDistance = new DynamicTimeWarping();
+        ITimeSeriesDistance derivateDistance = new EuclideanDistance();
 
-        DerivateDistance dtd = new DerivateDistance(alpha, timeSeriesDistance);
+        // Expectation.
+        double expectation = Math.cos(alpha) * 1 + Math.sin(alpha) * Math.sqrt(7);
+
+        DerivateDistance dtd = new DerivateDistance(alpha, timeSeriesDistance, derivateDistance);
         double distance = dtd.distance(timeSeries1, timeSeries2);
 
         assertEquals(expectation, distance, 1.0E-5);
