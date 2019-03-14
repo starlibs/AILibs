@@ -22,4 +22,17 @@ public class HilbertTransformTest {
         assertArrayEquals(expectation, transformed, 0.0001);
     }
 
+    @Test
+    public void testCorrectnessForTransformation2() {
+        // Input.
+        double[] timeSeries = { 2, 2, 2, 2, 2 };
+        // Expectation.
+        double[] expectation = { -4.166667, -1.666667, 0, 1.666667, 4.166667 };
+
+        HilbertTransform hilbertTransform = new HilbertTransform();
+        double[] transformed = hilbertTransform.transform(timeSeries);
+
+        assertArrayEquals(expectation, transformed, 0.0001);
+    }
+
 }
