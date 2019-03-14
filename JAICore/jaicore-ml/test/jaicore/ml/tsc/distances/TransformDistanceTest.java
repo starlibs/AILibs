@@ -26,8 +26,8 @@ public class TransformDistanceTest {
         // Expectation.
         double expectation = 0;
 
-        TransformDistance dtd = new TransformDistance(0.5, new DynamicTimeWarping());
-        double distance = dtd.distance(timeSeries1, timeSeries2);
+        TransformDistance td = new TransformDistance(0.5, new DynamicTimeWarping());
+        double distance = td.distance(timeSeries1, timeSeries2);
 
         assertEquals(expectation, distance, 0);
     }
@@ -43,14 +43,13 @@ public class TransformDistanceTest {
         double[] timeSeries2 = { 2, 2, 2, 2, 2 }; // transform { -4.166667, -1.666667, 0, 1.666667, 4.166667 }
         double alpha = 0.5;
         ATransformFilter transform = new HilbertTransform();
-        ITimeSeriesDistance timeSeriesDistance = new EuclideanDistance();
-        ITimeSeriesDistance transformDistance = new EuclideanDistance();
+        ITimeSeriesDistance euclideanDistance = new EuclideanDistance();
 
         // Expectation.
         double expectation = Math.cos(alpha) * Math.sqrt(15) + Math.sin(alpha) * 6.79562;
 
-        TransformDistance dtd = new TransformDistance(alpha, transform, timeSeriesDistance, transformDistance);
-        double distance = dtd.distance(timeSeries1, timeSeries2);
+        TransformDistance td = new TransformDistance(alpha, transform, euclideanDistance);
+        double distance = td.distance(timeSeries1, timeSeries2);
 
         assertEquals(expectation, distance, 1.0E-5);
     }
@@ -67,7 +66,7 @@ public class TransformDistanceTest {
     }
 
     /**
-     * Robustness test: When initializing with <code>null</code> for the derivation
+     * Robustness test: When initializing with <code>null</code> for the transform
      * the constructor is supposed to throw an IllegalArgumentExpection.
      */
     @Test
