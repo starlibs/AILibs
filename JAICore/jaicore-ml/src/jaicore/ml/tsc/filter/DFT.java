@@ -1,6 +1,7 @@
 package jaicore.ml.tsc.filter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.math.complex.Complex;
 
@@ -212,11 +213,87 @@ public class DFT implements IFilter {
 		}
 		fittedMatrix = true;
 	}
-
+	
 	@Override
 	public double[][] fitTransform(double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
 		return transform(input);
 	}
+	
+	// It is required that the input is inform of the already sliced windows. 
+	// cf. p. 1516 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+	public double[][] rekursivDFT(double[][] input) {
+		if(input.length == 0) {
+			throw new IllegalArgumentException("The input can not be empty");
+		}
+		
+		if(input[0].length < numberOfDisieredCoefficients) {
+			throw new IllegalArgumentException("Can not compute more dft coefficents than the length of the input.");
+		}
+		
+		if(numberOfDisieredCoefficients < 0) {
+			throw new IllegalArgumentException("The number of desiered DFT coefficients can not be negativ.");
+		}
+		
+		Complex[][] outputComplex = new Complex[input.length][numberOfDisieredCoefficients];
+		Complex[][] vMatrix = new Complex[numberOfDisieredCoefficients][numberOfDisieredCoefficients];
+		for(int i = 0; i < numberOfDisieredCoefficients; i++) {
+			vMatrix[i][i] = vFormular(i, input[0].length);
+		}
+		
+		for(int i = 0; i < input.length; i++) {
+			if(i == 0) {
+				try {
+					double[] tmp = fitTransform(input[i]);
+					Complex[] firstEntry = new Complex[numberOfDisieredCoefficients];
+					for(int entry = 0; entry < tmp.length-1; entry++) {
+						firstEntry[entry] = new Complex(tmp[entry], tmp[entry+1]);
+					}
+					outputComplex[0] = firstEntry;
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoneFittedFilterExeception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			else {
+				Complex [] coefficientsForInstance = new Complex[numberOfDisieredCoefficients];
+				for(int j = 0; j < numberOfDisieredCoefficients; j++) {
+					coefficientsForInstance[j] = vMatrix[j][j].multiply((outputComplex[i-1][j].subtract(new Complex(input[i-1][0],0).add(new Complex(input[i][input[i].length-1],0)))));
+				}
+				outputComplex[i] = coefficientsForInstance;
+			}
+		}
+		
+		double[][] output = conversion(outputComplex);
+		return output;
+		
+	}
+	
+	private double[][] conversion(Complex[][] input) {
+		double[][] output = new double[input.length][input.length*2];
+		for(int i = 0; i< input.length; i++) {
+			int loopcounter = 0;
+			for(int j = 0; j <input[i].length*2; j+=2) {
+				output[i][j] = input[i][loopcounter].getReal();
+				output[i][j+1] = input[i][loopcounter].getImaginary();
+				loopcounter++;
+			}
+		}
+		return output;
+	}
 
+	private Complex vFormular(int coefficient, int legthOfinstance) {
+		Complex result = new Complex(Math.cos(2*Math.PI*coefficient/legthOfinstance),Math.sin(2*Math.PI*coefficient/legthOfinstance));
+		return result;
+	}
+	public TimeSeriesDataset rekursivDFT(TimeSeriesDataset input) {
+		TimeSeriesDataset output = new TimeSeriesDataset(new ArrayList(),null,null);
+		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
+			output.getValueMatrices().add(rekursivDFT(input.getValues(matrix)));
+		}
+		return output;
+	}
 }
