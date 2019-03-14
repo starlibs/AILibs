@@ -18,6 +18,11 @@ import jaicore.ml.tsc.filter.SFA;
 import jaicore.ml.tsc.filter.SlidingWindowBuilder;
 import jaicore.ml.tsc.filter.ZTransformer;
 
+/**
+ * @author Helen Beierling
+ * This class calculates all needed informations for the BOSS classifier. A fitted SFA and all
+ * histograms for the training samples.
+ */
 public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifier> {
 	
 	

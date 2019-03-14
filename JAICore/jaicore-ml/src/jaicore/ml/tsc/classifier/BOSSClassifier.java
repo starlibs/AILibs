@@ -12,6 +12,12 @@ import jaicore.ml.tsc.filter.SFA;
 import jaicore.ml.tsc.filter.SlidingWindowBuilder;
 import jaicore.ml.tsc.filter.ZTransformer;
 
+/**
+ * @author Helen Beierling 
+ *	This class predicts labels for instances by cutting the instance into pieces and calculate for every piece the DFT values and 
+ *  assigns them to the corresponding letter to form the SFA words of that piece and afterwards creating a histogram for which the
+ *  distance is calculated to all histograms of the training data and the label of the nearest one is returned as prediction.
+ */
 public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	
 	private TimeSeriesDataset trainingData;

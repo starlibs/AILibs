@@ -3,6 +3,7 @@ package jaicore.ml.tsc.filter;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,9 +45,28 @@ public class zTransformTest {
 	@Test
 	public void test() {
 		ZTransformer test = new ZTransformer();
-		
+		test.setBasselCorrected(false);
 		try {
-			test.fitTransform(dataset);
+			for(double[][] matrix: dataset.getValueMatrices()) {
+				for(double[] istance: matrix) {
+					System.out.println(Arrays.toString(istance));
+				}
+				System.out.println("--------------------------------------------------");
+			}
+			TimeSeriesDataset tmp = test.fitTransform(dataset);
+			for(double[][] matrix: tmp.getValueMatrices()) {
+				for(double[] istance: matrix) {
+					System.out.println(Arrays.toString(istance));
+				}
+				System.out.println("--------------------------------------------------");
+			}
+			
+			for(double[][] matrix: tmp.getValueMatrices()) {
+				for(double[] istance: matrix) {
+					System.out.println(Arrays.stream(istance).average());
+				}
+				System.out.println("--------------------------------------------------");
+			}
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

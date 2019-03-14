@@ -6,6 +6,11 @@ import java.util.Arrays;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
+/**
+ * @author Helen Beierling
+ * This class cuts an instance or a set of instances into a number of smaller instances which are
+ * typically saved in an matrix per instance and the matrices in a list. 
+ */
 public class SlidingWindowBuilder implements IFilter{
 	
 	private boolean fitted = false;
@@ -76,9 +81,9 @@ public class SlidingWindowBuilder implements IFilter{
 			throw new IllegalArgumentException("The input instance can not be smaller than the windowsize");
 		}
 		
-		double [][] newMatrix = new double[instance.length-defaultWindowSize][defaultWindowSize];
+		double [][] newMatrix = new double[instance.length-defaultWindowSize+1][defaultWindowSize];
 		
-		for(int entry = 0; entry < instance.length-(defaultWindowSize); entry++) {
+		for(int entry = 0; entry <= instance.length-(defaultWindowSize); entry++) {
 			newMatrix[entry] = Arrays.copyOfRange(instance, entry, entry+defaultWindowSize);
 		}
 		ArrayList<double[][]> newDataset= new ArrayList<double[][]>();

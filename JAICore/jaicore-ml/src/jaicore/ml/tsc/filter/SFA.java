@@ -8,7 +8,8 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 /**
  * @author Helen Beierling
- *	This class combines the 
+ *	This class combines the MCB of finding the bins for a given set of DFT coefficients and SFA
+ *	which selects the right letter for a DFT coefficient.
  */
 public class SFA implements IFilter {
 

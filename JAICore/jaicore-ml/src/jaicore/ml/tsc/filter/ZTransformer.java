@@ -12,7 +12,7 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 /**
  * @author Helen Beierling
- *
+ *	This class normalizes the mean of an instance to be zero and the deviation to be one. 
  */
 public class ZTransformer implements IFilter {
 	
@@ -52,17 +52,14 @@ public class ZTransformer implements IFilter {
 		}
 		
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++){			
-			fitTransform(input.getValues(matrix));
-			ztransformedDataset.add(ztransformedMatrix);
+			
+			ztransformedDataset.add(fitTransform(input.getValues(matrix)));
 			fittedMatrix = false;
 		}
 
 		return new TimeSeriesDataset(ztransformedDataset);
 	}
 
-	/* (non-Javadoc)
-	 * @see jaicore.ml.tsc.filter.IFilter#fit(jaicore.ml.core.dataset.IDataset)
-	 */
 	
 	@Override
 	public void fit(TimeSeriesDataset input) throws IllegalArgumentException{
@@ -75,9 +72,6 @@ public class ZTransformer implements IFilter {
 	}
 
 
-	/* (non-Javadoc)
-	 * @see jaicore.ml.tsc.filter.IFilter#fitTransform(jaicore.ml.core.dataset.IDataset)
-	 */
 	@Override
 	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
 		fit(input);
@@ -95,15 +89,17 @@ public class ZTransformer implements IFilter {
 		
 		double[] ztransform = new double[input.length];
 		for(int entry = 0; entry < input.length; entry++) {
-			ztransform[entry] = (entry-mean)/deviation;
+			if(deviation != 0) {
+				ztransform[entry] = (entry-mean)/deviation;
+			}
 		}
 		return ztransform;
 	}
 	
 	@Override
 	public void fit(double[] input) throws IllegalArgumentException {
-		double SumSq = 0;
-		double SumMean = 0;
+		double SumSq = 0.0;
+		double SumMean = 0.0;
 		double NumberEntrys = input.length;
 		
 		if(NumberEntrys == 0) {
@@ -111,16 +107,19 @@ public class ZTransformer implements IFilter {
 		}
 		//TODO can be numerical inaccurate if the data is large
 		for(int entry = 0; entry<input.length;entry++) {
-			SumSq =+ Math.pow(entry,2);
-			SumMean =+ entry;
+			SumSq = SumSq + Math.pow(input[entry],2);
+			SumMean = SumMean + input[entry];
 		}
 		mean = SumMean/NumberEntrys;
+		double variance = (1/NumberEntrys)*(SumSq)-Math.pow(mean, 2);
 		if(BasselCorrected) {
-			deviation = Math.sqrt((SumSq/NumberEntrys - Math.pow((SumMean/NumberEntrys),2))* NumberEntrys/(NumberEntrys-1));
+			double tmp = (NumberEntrys/(NumberEntrys-1));
+			deviation = Math.sqrt(tmp*variance);
 		}
 		else {
-			deviation = Math.sqrt((SumSq - (Math.pow(SumMean,2)/NumberEntrys))/NumberEntrys);
-		}
+			
+			deviation =  Math.sqrt(variance);
+			}
 		
 		fittedInstance = true;
 	}

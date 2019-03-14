@@ -9,6 +9,8 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 /**
  * @author Helen Beierling
+ * 	This class calculates the DFT coefficients for a given double vector or a set of them.
+ * 	The calculations are done iteratively or recursively.
  * 
  *	Rafiei, D., and Mendelzon, A. Efficient retrieval of similar time sequences using DFT.
  *	(1998), pp. 249–257. (1)
