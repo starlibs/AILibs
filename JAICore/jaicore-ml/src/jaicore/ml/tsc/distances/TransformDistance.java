@@ -4,18 +4,79 @@ import jaicore.ml.tsc.filter.transform.ATransformFilter;
 import jaicore.ml.tsc.filter.transform.CosineTransform;
 
 /**
- * TransformDistance
+ * Implementation of the Transform Distance (TD) measure as published in
+ * "Non-isometric transforms in time series classification using DTW" by Tomasz
+ * Gorecki and Maciej Luczak (2014).
+ * 
+ * Building up on their work of the Derivate Distance, the authors were looking
+ * for functions other than the derivative which can be used in a similar
+ * manner, what leads them to use transform instead of derivates.
+ * 
+ * Given a distance measure <code>d</code>, the Transform Distance for the two
+ * time series <code>A</code> and <code>B</code> is:
+ * <code>a * d(A, B) + b * d(t(A), t(B))</code>, where <code>t(A)</code> and
+ * <code>t(B)</code> are transforms (@see jaicore.ml.tsc.filter.transform) of
+ * <code>A</code> and <code>B</code> respec. and
+ * <code>0 <= a <= 1, 0 <= b <= 1></code> are parameters of the measure. The
+ * parameters <code>a</code> and <code>b</code> are set via an
+ * <code>alpha</code> value, that is <code>a=cos(alpha)</code> and
+ * <code>b=sin(alpha)</code>.
+ * 
+ * The Transform Distance that uses Dynamic Time Warping as underlying distance
+ * measure is commonly denoted as TD_DTW. The Transform Distance that uses the
+ * Euclidean distance as underlying distance measure is commonly denoted as
+ * TD_ED.
+ * <p>
+ * It is also possible to use a distinct distance measure to calculate the
+ * distance between the time series and its transforms.
+ * </p>
  */
 public class TransformDistance implements ITimeSeriesDistance {
 
+    /**
+     * Alpha value that adjusts the parameters {@link a} and {@link b}, that is
+     * <code>a=cos(alpha)</code> and <code>b=sin(alpha)</code>. It holds, that
+     * <code>0 <= alpha <= pi/2</code>.
+     */
     private double alpha;
+
+    /**
+     * Determines the influence of distance of the function values to the overall
+     * distance measure.
+     */
     private double a;
+
+    /**
+     * Determines the influence of distance of the transform values to the overall
+     * distance measure.
+     */
     private double b;
 
+    /** The transform calculation to use. */
     private ATransformFilter transform;
+
+    /**
+     * The distance measure to use to calculate the distance of the function values.
+     */
     private ITimeSeriesDistance timeSeriesDistance;
+
+    /**
+     * The distance measure to use to calculate the distance of the transform
+     * values.
+     */
     private ITimeSeriesDistance transformDistance;
 
+    /**
+     * Constructor with individual distance measures for the function and transform
+     * values.
+     * 
+     * @param alpha              @see #alpha ,<code>0 <= alpha <= pi/2</code>.
+     * @param transform          The transform calculation to use.
+     * @param timeSeriesDistance The distance measure to use to calculate the
+     *                           distance of the transform values.
+     * @param transformDistance  The distance measure to use to calculate the
+     *                           distance of the transform values.
+     */
     public TransformDistance(double alpha, ATransformFilter transform, ITimeSeriesDistance timeSeriesDistance,
             ITimeSeriesDistance transformDistance) {
         // Parameter checks.
@@ -34,15 +95,46 @@ public class TransformDistance implements ITimeSeriesDistance {
         this.transformDistance = transformDistance;
     }
 
-    public TransformDistance(double alpha, ATransformFilter transform, ITimeSeriesDistance distance) {
-        this(alpha, transform, distance, distance);
-    }
-
+    /**
+     * Constructor with individual distance measures for the function and transform
+     * values that uses the {@link CosineTransform} as transformation.
+     * 
+     * @param alpha              The distance measure to use to calculate the
+     *                           distance of the function values.
+     *                           <code>0 <= alpha <= pi/2</code>.
+     * @param timeSeriesDistance The distance measure to use to calculate the
+     *                           distance of the transform values.
+     * @param transformDistance  The distance measure to use to calculate the
+     *                           distance of the transform values.
+     */
     public TransformDistance(double alpha, ITimeSeriesDistance timeSeriesDistance,
             ITimeSeriesDistance transformDistance) {
         this(alpha, new CosineTransform(), timeSeriesDistance, transformDistance);
     }
 
+    /**
+     * Constructor that uses the same distance measures for the function and
+     * transform values.
+     * 
+     * @param alpha     The distance measure to use to calculate the distance of the
+     *                  function values. <code>0 <= alpha <= pi/2</code>.
+     * @param transform The transform calculation to use.
+     * @param distance  The distance measure to use to calculate the distance of the
+     *                  function and transform values.
+     */
+    public TransformDistance(double alpha, ATransformFilter transform, ITimeSeriesDistance distance) {
+        this(alpha, transform, distance, distance);
+    }
+
+    /**
+     * Constructor that uses the same distance measures for the function and
+     * transform values that uses the {@link CosineTransform} as transformation.
+     * 
+     * @param alpha    The distance measure to use to calculate the distance of the
+     *                 function values. <code>0 <= alpha <= pi/2</code>.
+     * @param distance The distance measure to use to calculate the distance of the
+     *                 function and transform values.
+     */
     public TransformDistance(double alpha, ITimeSeriesDistance distance) {
         this(alpha, new CosineTransform(), distance);
     }
