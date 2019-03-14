@@ -1,6 +1,6 @@
 {
 	"repository" : "WEKA - Auto-WEKA Searchspace",
-	"include": ["./weka-classifiers-dyadranking-reduced.json", "./weka-preprocessors-autoweka.json"],
+	"include": ["./weka-classifiers-approach-5.json", "./weka-preprocessors-autoweka.json"],
 	"components" : [ {
 	  	    "name" : "pipeline",
 	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],

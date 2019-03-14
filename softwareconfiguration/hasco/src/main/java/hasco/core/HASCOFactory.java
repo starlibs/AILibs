@@ -8,7 +8,7 @@ import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class HASCOFactory<ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
-	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
+	protected RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory;
 	private AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer;

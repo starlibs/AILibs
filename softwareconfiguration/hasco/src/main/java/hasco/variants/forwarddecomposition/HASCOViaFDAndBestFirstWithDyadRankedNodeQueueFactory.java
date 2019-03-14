@@ -8,13 +8,25 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
 
 public class HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory extends HASCOViaFDAndBestFirstFactory<Double> {
-	public HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(IBestFirstQueueConfiguration<GraphSearchWithSubpathEvaluationsInput<TFDNode,String,Double>, TFDNode, String, Double> OPENConfig) {
+
+	public HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(
+			IBestFirstQueueConfiguration<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> OPENConfig) {
+		super();
+		this.setNodeEvaluator(n->0.0);
 		this.setSearchFactory(new DyadRankedBestFirstFactory<>(OPENConfig));
-		this.setNodeEvaluator(null);
 	}
-	
+
 	@Override
 	public void setNodeEvaluator(INodeEvaluator<TFDNode, Double> nodeEvaluator) {
-		setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> 0.0));
+		System.err.println("Set node eval correctly");
+		setSearchProblemTransformer(
+				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> {
+					if (n.isGoal()) {
+						System.err.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA Evaluate node");
+						return nodeEvaluator.f(n);
+					} else {
+						return 0.0;
+					}
+				}));
 	}
 }

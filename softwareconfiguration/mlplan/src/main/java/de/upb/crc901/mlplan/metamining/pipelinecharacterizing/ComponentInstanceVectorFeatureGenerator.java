@@ -105,7 +105,11 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 				// one-hot index for the second parameter etc.
 				String parameterValue = cI.getParameterValue(param);
 				if (parameterValue == null) {
+					if (param.getDefaultValue() instanceof String) {
 					parameterValue = (String) param.getDefaultValue();
+					} else {
+						parameterValue = String.valueOf(param.getDefaultValue());
+					}
 				}
 				CategoricalParameterDomain domain = (CategoricalParameterDomain) param.getDefaultDomain();
 				for (int i = 0; i < domain.getValues().length; i++) {

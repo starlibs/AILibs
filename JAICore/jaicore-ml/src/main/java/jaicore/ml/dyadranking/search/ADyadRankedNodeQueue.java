@@ -158,6 +158,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 
 	@Override
 	public boolean addAll(Collection<? extends Node<N, V>> c) {
+		LOGGER.trace("Add {} nodes", c.size());
 		boolean changed = false;
 
 		for (Node<N, V> elem : c) {
@@ -200,10 +201,10 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 			return true;
 		} else if (e != null) {
 			try {
+				LOGGER.debug("Add node to OPEN, is Goal: {}", e.isGoal());
 				// characterize new node
 				Vector characterization = characterize(e);
 				nodeCharacterizations.add(characterization);
-				LOGGER.debug("Characterize node, length of vector: {}", characterization.length());
 
 				// scale node
 				Dyad newDyad = new Dyad(contextCharacterization, characterization);
@@ -211,17 +212,23 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				DyadRankingDataset dataset = new DyadRankingDataset();
 				dataset.add(new DyadRankingInstance(Arrays.asList(newDyad)));
 				scaler.transformAlternatives(dataset);
+				replaceNaNByZeroes(characterization);
+				
+				// add new pairing of node and characterization
+				nodesAndCharacterizationsMap.put(e, characterization);
 
 				// predict new ranking and reorder queue accordingly
 				IDyadRankingInstance prediction = dyadRanker.predict(new DyadRankingInstance(queryDyads));
 				queue.clear();
 				for (int i = 0; i < prediction.length(); i++) {
-					queue.add(nodesAndCharacterizationsMap.inverse()
-							.get(prediction.getDyadAtPosition(i).getAlternative()));
+					Node<N,V> toAdd = nodesAndCharacterizationsMap.inverse()
+							.get(prediction.getDyadAtPosition(i).getAlternative());
+					if (toAdd != null) {
+						queue.add(toAdd);
+					} else {
+						LOGGER.warn("Got a node in a prediction that doesnt exist");
+					}
 				}
-
-				// add new pairing of node and characterization
-				nodesAndCharacterizationsMap.put(e, characterization);
 
 				return true;
 			} catch (PredictionException e1) {
@@ -232,6 +239,14 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 			}
 		} else {
 			return false;
+		}
+	}
+	
+	private void replaceNaNByZeroes(Vector vector) {
+		for (int i = 0; i < vector.length(); i++) {
+			if (Double.isNaN(vector.getValue(i))) {
+				vector.setValue(i, 0);
+			}
 		}
 	}
 
@@ -247,8 +262,22 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 
 	public Node<N, V> removeNodeAtPosition(int i) {
 		Node<N, V> removedNode = queue.remove(i);
+		LOGGER.trace("Retrieve node from OPEN. Is goal: {}, Index: {}", removedNode.isGoal(), i);
 		nodeCharacterizations.remove(nodesAndCharacterizationsMap.get(removedNode));
-		nodesAndCharacterizationsMap.remove(removedNode);
+		Vector removedAlternative = nodesAndCharacterizationsMap.remove(removedNode);
+		
+		int index = -1;
+		for (int j = 0; j < queryDyads.size(); j++) {
+			if (queryDyads.get(j).getAlternative().equals(removedAlternative)) {
+				index = j;
+				break;
+			}
+		}
+		
+		if (index >= -1) {
+			queryDyads.remove(index);
+		}
+		
 		return removedNode;
 	}
 
@@ -269,6 +298,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	@Override
 	public Node<N, V> peek() {
 		if (!queue.isEmpty()) {
+			LOGGER.trace("Peek from OPEN. Is goal: {}", this.element().isGoal());
 			return this.element();
 		} else {
 			return null;

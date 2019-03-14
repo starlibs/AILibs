@@ -44,7 +44,7 @@ public class WekaDyadRankingExample {
 
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
 		MLPlanBuilder builder = new MLPlanBuilder()
-				.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-dyadranking-reduced.json"))
+				.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
 				.withAlgorithmConfigFile(new File("conf/mlplan.properties"))
 				.withPerformanceMeasure(MultiClassPerformanceMeasure.ERRORRATE)
 				.setHascoFactory(new HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(openConfig));
@@ -54,9 +54,9 @@ public class WekaDyadRankingExample {
 		System.out.println(mlplan.getComponents());
 		openConfig.setComponents(mlplan.getComponents());
 		openConfig.setData(data);
-		mlplan.setTimeout(new TimeOut(300, TimeUnit.SECONDS));
+		mlplan.setTimeout(new TimeOut(60, TimeUnit.SECONDS));
 
-		// mlplan.activateVisualization();
+		mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));
