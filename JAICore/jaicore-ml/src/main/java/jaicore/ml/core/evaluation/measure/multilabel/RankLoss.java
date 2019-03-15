@@ -40,6 +40,11 @@ public class RankLoss extends ADecomposableDoubleMeasure<double[]> {
 				mistakes++;
 			}
 		}
+
+		if (differentPairs == 0) {
+			return Double.NaN;
+		}
+
 		return (double) mistakes / differentPairs;
 	}
 }

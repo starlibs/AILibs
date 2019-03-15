@@ -2,6 +2,7 @@ package jaicore.ml.core.evaluation.measure;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import meka.core.Metrics;
 import meka.core.Result;
@@ -10,16 +11,20 @@ import weka.classifiers.Evaluation;
 /**
 * Class for getting metrics by their name for single- and multilabel
 * classifiers.
-* 
-* @author Helena Graf
+*
+* @author helegraf, mwever
 *
 */
 public class ClassifierMetricGetter {
 
+	private ClassifierMetricGetter() {
+		/* Left blank to prevent instantiation. */
+	}
+
 	/**
 	 * Available metric for singlelabelclassifiers
 	 */
-	public static final List<String> singleLabelMetrics = Arrays.asList("correct", "incorrect", "kappa", "totalCost", "avgCost", "KBRelativeInformation", "KBMeanInformation", "KBInformation", "correlationCoefficient",
+	protected static final List<String> SINGLE_LABEL_METRICS = Arrays.asList("correct", "incorrect", "kappa", "totalCost", "avgCost", "KBRelativeInformation", "KBMeanInformation", "KBInformation", "correlationCoefficient",
 			"rootMeanSquaredError", "rootMeanPriorSquaredError", "coverageOfTestCasesByPredictedRegions", "sizeOfPredictedRegions", "rootRelativeSquaredError", "truePositiveRate", "numTruePositives", "weightedTruePositiveRate",
 			"trueNegativeRate", "numTrueNegatives", "weightedTrueNegativeRate", "falsePositiveRate", "numFalsePositives", "weightedFalsePositiveRate", "falseNegativeRate", "numFalseNegatives", "weightedFalseNegativeRate", "precision",
 			"weightedPrecision", "recall", "weightedRecall", "fMeasure", "weightedFMeasure", "unweightedMacroFmeasure", "unweightedMicroFmeasure", "matthewsCorrelationCoefficient", "weightedMatthewsCorrelation", "areaUnderROC",
@@ -29,9 +34,17 @@ public class ClassifierMetricGetter {
 	/**
 	 * Available metrics for multilabelclassifiers
 	 */
-	public static final List<String> multiLabelMetrics = Arrays.asList("L_Hamming", "L_LevenshteinDistance", "L_LogLoss", "L_LogLossD", "L_LogLossL", "L_OneError", "L_JaccardDist", "L_RankLoss", "L_ZeroOne", "P_Accuracy",
+	protected static final List<String> MULTI_LABEL_METRICS = Arrays.asList("L_Hamming", "L_LevenshteinDistance", "L_LogLoss", "L_LogLossD", "L_LogLossL", "L_OneError", "L_JaccardDist", "L_RankLoss", "L_ZeroOne", "P_Accuracy",
 			"P_AveragePrecision", "P_ExactMatch", "P_FmacroAvgD", "P_FmacroAvgL", "P_FmicroAvg", "P_Hamming", "P_Harmonic", "P_JaccardIndex", "P_macroAUPRC", "P_marcoAUROC", "P_RecallMicro", "P_RecallMacro", "P_PrecisionMicro",
 			"P_PrecisionMacro", "P_Fitness");
+
+	public static List<String> getSingleLabelMetrics() {
+		return SINGLE_LABEL_METRICS;
+	}
+
+	public static List<String> getMultiLabelMetrics() {
+		return MULTI_LABEL_METRICS;
+	}
 
 	/**
 	 * Extracts the metric with the given name from the Evaluation object that is
@@ -148,9 +161,10 @@ public class ClassifierMetricGetter {
 			return eval.pctUnclassified();
 		case "priorEntropy":
 			return eval.priorEntropy();
+		default:
+			throw new NoSuchElementException(metricName + " not a supported metric!");
 		}
 
-		throw new IllegalArgumentException(metricName + " not a supported metric!");
 	}
 
 	/**
@@ -217,8 +231,8 @@ public class ClassifierMetricGetter {
 		case "P_Fitness":
 			return (Metrics.P_ExactMatch(result.allTrueValues(), result.allPredictions(0.5)) + (1 - Metrics.L_Hamming(result.allTrueValues(), result.allPredictions(0.5)))
 					+ Metrics.P_FmacroAvgL(result.allTrueValues(), result.allPredictions(0.5)) + (1 - Metrics.L_RankLoss(result.allTrueValues(), result.allPredictions()))) / 4.0;
+		default:
+			throw new NoSuchElementException(metricName + " not a supported metric!");
 		}
-
-		throw new IllegalArgumentException(metricName + " not a supported metric!");
 	}
 }

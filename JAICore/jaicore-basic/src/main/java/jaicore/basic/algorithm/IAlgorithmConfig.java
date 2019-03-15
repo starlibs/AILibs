@@ -11,6 +11,7 @@ import java.util.List;
 import org.aeonbits.owner.Mutable;
 
 import jaicore.basic.FileUtil;
+import jaicore.basic.PropertiesLoadFailedException;
 
 public interface IAlgorithmConfig extends Mutable {
 
@@ -59,7 +60,7 @@ public interface IAlgorithmConfig extends Mutable {
 		try {
 			return loadPropertiesFromList(FileUtil.readFileAsList(file));
 		} catch (IOException e) {
-			throw new RuntimeException("Could not load properties from the given file.");
+			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
 		}
 	}
 

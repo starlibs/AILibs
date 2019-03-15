@@ -139,7 +139,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			this.logger.info("Done evaluating Classifier.");
 			this.logger.info("Store results in DB...");
 			HashMap<String, Double> metrics = new HashMap<>();
-			ClassifierMetricGetter.multiLabelMetrics.forEach(metric -> {
+			ClassifierMetricGetter.getMultiLabelMetrics().forEach(metric -> {
 				try {
 					metrics.put(metric, ClassifierMetricGetter.getValueOfMultilabelClassifier(result, metric));
 				} catch (Exception e) {

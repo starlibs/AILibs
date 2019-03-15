@@ -189,7 +189,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 		String algo = classifiers[algoId];
 		String algoMode = setups.get(algo)[setupId];
 		int timeoutInSeconds = timeoutsInSeconds[timeoutId];
-		if (performanceMeasure != EMulticlassMeasure.errorRate) {
+		if (performanceMeasure != EMulticlassMeasure.ERROR_RATE) {
 			throw new IllegalArgumentException("Currently the only supported performance measure is errorRate");
 		}
 		MLExperiment exp = new MLExperiment(new File(datasetFolder + File.separator + availableDatasets.get(datasetId)).getAbsolutePath(), algo, algoMode, seedId, timeoutInSeconds, numberOfCPUs, memoryInMB, performanceMeasure.toString());

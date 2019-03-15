@@ -4,6 +4,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.basic.SQLAdapter;
 import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 
@@ -15,10 +18,12 @@ import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 */
 public class MetricTableLoader {
 
+	private static final Logger logger = LoggerFactory.getLogger(MetricTableLoader.class);
+
 	public static void main(final String[] args) {
 		SQLAdapter adapter = new SQLAdapter(args[0], args[1], args[2], args[3], Boolean.parseBoolean(args[4]));
 
-		for (String multiLabelMetric : ClassifierMetricGetter.multiLabelMetrics) {
+		for (String multiLabelMetric : ClassifierMetricGetter.getMultiLabelMetrics()) {
 			Map<String, String> metricDescription = new HashMap<>();
 			metricDescription.put("metric_name", multiLabelMetric);
 			metricDescription.put("version", "1");
@@ -26,11 +31,11 @@ public class MetricTableLoader {
 			try {
 				adapter.insert("metric", metricDescription);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				logger.error("Could not insert metric into metric table.", e);
 			}
 		}
 
-		for (String multiLabelMetric : ClassifierMetricGetter.singleLabelMetrics) {
+		for (String multiLabelMetric : ClassifierMetricGetter.getSingleLabelMetrics()) {
 			Map<String, String> metricDescription = new HashMap<>();
 			metricDescription.put("metric_name", multiLabelMetric);
 			metricDescription.put("version", "1");
@@ -38,7 +43,7 @@ public class MetricTableLoader {
 			try {
 				adapter.insert("metric", metricDescription);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				logger.error("Could not insert metric into metric table.", e);
 			}
 		}
 
