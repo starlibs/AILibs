@@ -1179,12 +1179,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (threadsForExpansion < 1) {
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
 		}
+
+		int threadsForAlgorithm = (this.getConfig().threads() >= 0) ? this.getConfig().threads() : this.getConfig().cpus();
+
 		this.additionalThreadsForNodeAttachment = threadsForExpansion;
-		if (this.additionalThreadsForNodeAttachment > this.getConfig().threads() - 2) { // timer and main thread must not add up here
-			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, this.getConfig().threads() - 2);
+		if (this.additionalThreadsForNodeAttachment > threadsForAlgorithm - 2) { // timer and main thread must not add up here
+			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, threadsForAlgorithm - 2);
 		}
 		if (this.additionalThreadsForNodeAttachment < 1) {
-			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", this.getConfig().threads());
+			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", threadsForAlgorithm);
 			this.additionalThreadsForNodeAttachment = 0;
 			return;
 		}
