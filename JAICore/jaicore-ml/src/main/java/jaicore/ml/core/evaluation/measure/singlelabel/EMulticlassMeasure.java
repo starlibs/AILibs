@@ -1,6 +1,6 @@
 package jaicore.ml.core.evaluation.measure.singlelabel;
 
-public enum MulticlassMetric {
+public enum EMulticlassMeasure {
     areaAboveROC,
     areaUnderROC,
     avgCost,

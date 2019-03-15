@@ -11,13 +11,12 @@ import com.google.common.collect.Range;
 import jaicore.basic.sets.SetUtil;
 import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 
-public class RankMultilabelEvaluator extends ADecomposableDoubleMeasure<double[]> {
+public class RankLoss extends ADecomposableDoubleMeasure<double[]> {
 
 	@Override
-	public Double calculateMeasure(double[] actual, double[] expected) {
+	public Double calculateMeasure(final double[] actual, final double[] expected) {
 		int numLabels = actual.length;
-		List<Set<Integer>> labelPairs = SetUtil.getAllPossibleSubsetsWithSize(
-				ContiguousSet.create(Range.closed(0, numLabels - 1), DiscreteDomain.integers()).asList(), 2);
+		List<Set<Integer>> labelPairs = SetUtil.getAllPossibleSubsetsWithSize(ContiguousSet.create(Range.closed(0, numLabels - 1), DiscreteDomain.integers()).asList(), 2);
 
 		int mistakes = 0;
 		int differentPairs = 0;
@@ -29,16 +28,18 @@ public class RankMultilabelEvaluator extends ADecomposableDoubleMeasure<double[]
 			double yProb = expected[y];
 			double xTrue = actual[x];
 			double yTrue = actual[y];
-			if (xTrue == yTrue)
+			if (xTrue == yTrue) {
 				continue;
+			}
 			differentPairs++;
-			if (xProb == yProb)
+			if (xProb == yProb) {
 				mistakes += 0.5;
-			else if (xTrue == 1 && xProb < yProb)
+			} else if (xTrue == 1 && xProb < yProb) {
 				mistakes++;
-			else if (yTrue == 1 && yProb < xProb)
+			} else if (yTrue == 1 && yProb < xProb) {
 				mistakes++;
+			}
 		}
-		return mistakes * 1.0 / differentPairs;
+		return (double) mistakes / differentPairs;
 	}
 }

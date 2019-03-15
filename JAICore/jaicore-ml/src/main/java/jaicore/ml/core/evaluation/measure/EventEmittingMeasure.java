@@ -9,39 +9,55 @@ import jaicore.ml.evaluation.MeasureAggregatedComputationEvent;
 import jaicore.ml.evaluation.MeasureListComputationEvent;
 import jaicore.ml.evaluation.MeasureSingleComputationEvent;
 
-public class EventEmittingMeasure<INPUT, OUTPUT> implements IMeasure<INPUT, OUTPUT> {
+/**
+ * A wrapper for emitting an event once the measure is computed for a specific input.
+ *
+ * @author mwever
+ *
+ * @param <I> The type of the inputs.
+ * @param <O> The type of the measured values.
+ */
+public class EventEmittingMeasure<I, O> implements IMeasure<I, O> {
 
-	private final IMeasure<INPUT, OUTPUT> baseMeasure;
+	/* Wrapped measure */
+	private final IMeasure<I, O> baseMeasure;
+
+	/* Event Bus to register listeners on and to which events of measurement results are posted. */
 	private final EventBus measurementEventBus = new EventBus();
 
-	public EventEmittingMeasure(final IMeasure<INPUT, OUTPUT> baseMeasure) {
+	/**
+	 * Constructor wrapping a given measure into an EventEmittingMeasure.
+	 *
+	 * @param baseMeasure The measure to be wrapped.
+	 */
+	public EventEmittingMeasure(final IMeasure<I, O> baseMeasure) {
 		super();
 		this.baseMeasure = baseMeasure;
 	}
 
 	@Override
-	public OUTPUT calculateMeasure(final INPUT actual, final INPUT expected) {
-		OUTPUT o = this.baseMeasure.calculateMeasure(actual, expected);
+	public O calculateMeasure(final I actual, final I expected) {
+		O o = this.baseMeasure.calculateMeasure(actual, expected);
 		this.measurementEventBus.post(new MeasureSingleComputationEvent<>(actual, expected, o));
 		return o;
 	}
 
 	@Override
-	public List<OUTPUT> calculateMeasure(final List<INPUT> actual, final List<INPUT> expected) {
-		List<OUTPUT> o = this.baseMeasure.calculateMeasure(actual, expected);
+	public List<O> calculateMeasure(final List<I> actual, final List<I> expected) {
+		List<O> o = this.baseMeasure.calculateMeasure(actual, expected);
 		this.measurementEventBus.post(new MeasureListComputationEvent<>(actual, expected, o));
 		return o;
 	}
 
 	@Override
-	public OUTPUT calculateMeasure(final List<INPUT> actual, final List<INPUT> expected, final IAggregateFunction<OUTPUT> aggregateFunction) {
-		OUTPUT o = this.baseMeasure.calculateMeasure(actual, expected, aggregateFunction);
+	public O calculateMeasure(final List<I> actual, final List<I> expected, final IAggregateFunction<O> aggregateFunction) {
+		O o = this.baseMeasure.calculateMeasure(actual, expected, aggregateFunction);
 		this.measurementEventBus.post(new MeasureAggregatedComputationEvent<>(actual, expected, aggregateFunction, o));
 		return o;
 	}
 
 	@Override
-	public OUTPUT calculateAvgMeasure(final List<INPUT> actual, final List<INPUT> expected) {
+	public O calculateAvgMeasure(final List<I> actual, final List<I> expected) {
 		throw new UnsupportedOperationException("This method is not implemented for this measure.");
 	}
 }
