@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -28,7 +29,7 @@ public abstract class FileUtil {
 	public static List<String> readFileAsList(final File file) throws IOException {
 		return readFileAsList(file.getAbsolutePath());
 	}
-	
+
 	public static List<String> readFileAsList(final String filename) throws IOException {
 		try (BufferedReader r = Files.newBufferedReader(Paths.get(filename), StandardCharsets.UTF_8)) {
 			String line;
@@ -39,11 +40,11 @@ public abstract class FileUtil {
 			return lines;
 		}
 	}
-	
+
 	public static String readFileAsString(final File file) throws IOException {
 		return readFileAsString(file.getAbsolutePath());
 	}
-	
+
 	public static String readFileAsString(final String filename) throws IOException {
 		final StringBuffer sb = new StringBuffer();
 		try (BufferedReader r = Files.newBufferedReader(Paths.get(filename), StandardCharsets.UTF_8)) {
@@ -111,55 +112,67 @@ public abstract class FileUtil {
 		fos.close();
 	}
 
-	public static synchronized void serializeObject(Object object, String pathname) throws IOException {
+	public static synchronized void serializeObject(final Object object, final String pathname) throws IOException {
 		File file = new File(pathname);
-		if (file.getParentFile() != null && !file.getParentFile().exists())
+		if (file.getParentFile() != null && !file.getParentFile().exists()) {
 			file.getParentFile().mkdirs();
+		}
 		try (ObjectOutputStream os2 = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath())))) {
 			os2.writeObject(object);
-		}
-		catch (NotSerializableException e) {
+		} catch (NotSerializableException e) {
 			file.delete();
 			throw e;
 		}
 	}
-	
-	public static Object unserializeObject(String pathname) throws IOException, ClassNotFoundException {
+
+	public static Object unserializeObject(final String pathname) throws IOException, ClassNotFoundException {
 		try (ObjectInputStream is = new ObjectInputStream(new BufferedInputStream(new FileInputStream(pathname)))) {
 			return is.readObject();
 		}
 	}
-	
-	public static void touch(String filename) {
+
+	public static void touch(final String filename) {
 		try (FileWriter fw = new FileWriter(filename)) {
 			fw.write("");
 		} catch (IOException e) {
-			//  Auto-generated catch block
+			// Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	public static void move(File from, File to) {
+
+	public static void move(final File from, final File to) {
 		from.renameTo(to);
 	}
-	
-	public static void move(String from, String to) {
+
+	public static void move(final String from, final String to) {
 		move(new File(from), new File(to));
 	}
-	
-	public static List<File> getFilesOfFolder(File folder) {
-	    List<File> files = new ArrayList<>();
+
+	public static List<File> getFilesOfFolder(final File folder) {
+		List<File> files = new ArrayList<>();
 		for (File file : folder.listFiles()) {
-	        if (!file.isDirectory()) {
-	            files.add(file);
-	        }
-	    }
+			if (!file.isDirectory()) {
+				files.add(file);
+			}
+		}
 		return files;
 	}
 
-	public static Properties readPropertiesFile(File propertiesFile) throws FileNotFoundException, IOException {
+	public static Properties readPropertiesFile(final File propertiesFile) throws FileNotFoundException, IOException {
 		Properties props = new Properties();
 		props.load(new FileInputStream(propertiesFile));
 		return props;
+	}
+
+	public static void requireFileExists(final File file) throws FileIsDirectoryException, FileNotFoundException {
+		Objects.requireNonNull(file);
+
+		if (!file.exists()) {
+			throw new FileNotFoundException("File " + file.getAbsolutePath() + " does not exist");
+		}
+
+		if (!file.isFile()) {
+			throw new FileIsDirectoryException("The file " + file.getAbsolutePath() + " is not a file but a directory.");
+		}
 	}
 }

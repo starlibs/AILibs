@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.evaluators.weka;
+package jaicore.ml.evaluation.evaluators.weka.measurebridge;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +16,9 @@ import weka.core.Instances;
  * @author jnowack
  *
  */
-public class SimpleEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double>{
+public class SimpleSLCEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double> {
 
-	public SimpleEvaluatorMeasureBridge(final IMeasure<Double, Double> basicEvaluator) {
+	public SimpleSLCEvaluatorMeasureBridge(final IMeasure<Double, Double> basicEvaluator) {
 		super(basicEvaluator);
 	}
 
@@ -28,8 +28,7 @@ public class SimpleEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge
 		List<Double> predicted = new ArrayList<>();
 		try {
 			classifier.buildClassifier(trainingData);
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			Thread.interrupted(); // clear the interrupted field. This is, even though a Java convention, often not done by WEKA classifiers.
 			throw e;
 		}
@@ -42,7 +41,7 @@ public class SimpleEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge
 				predicted.add(classifier.classifyInstance(inst));
 			}
 		}
-		return this.basicEvaluator.calculateAvgMeasure(actual, predicted);
+		return this.getBasicEvaluator().calculateAvgMeasure(actual, predicted);
 	}
 
 }

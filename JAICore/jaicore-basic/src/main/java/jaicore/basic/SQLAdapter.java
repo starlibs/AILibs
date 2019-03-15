@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
  * used.
@@ -23,18 +26,31 @@ import java.util.Properties;
  */
 @SuppressWarnings("serial")
 public class SQLAdapter implements Serializable, AutoCloseable {
-	private final String driver, host, user, password, database;
+
+	private Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
+
+	private static final String DB_DRIVER = "mysql";
+
+	/* Credentials and properties for the connection establishment. */
+	private final String driver;
+	private final String host;
+	private final String user;
+	private final String password;
+	private final String database;
 	private final boolean ssl;
-	private Connection connect;
-	private long timestampOfLastAction = Long.MIN_VALUE;
 	private final Properties connectionProperties;
 
+	/* Connection object */
+	private Connection connect;
+
+	private long timestampOfLastAction = Long.MIN_VALUE;
+
 	public SQLAdapter(final String host, final String user, final String password, final String database, final boolean ssl) {
-		this("mysql", host, user, password, database, new Properties(), ssl);
+		this(DB_DRIVER, host, user, password, database, new Properties(), ssl);
 	}
 
 	public SQLAdapter(final String host, final String user, final String password, final String database) {
-		this("mysql", host, user, password, database, new Properties());
+		this(DB_DRIVER, host, user, password, database, new Properties());
 	}
 
 	public SQLAdapter(final String driver, final String host, final String user, final String password, final String database, final Properties connectionProperties) {
@@ -52,7 +68,6 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this.connectionProperties = connectionProperties;
 
 		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				SQLAdapter.this.close();
@@ -61,7 +76,6 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	}
 
 	private void connect() throws SQLException {
-
 		int tries = 0;
 		do {
 			try {
@@ -73,16 +87,17 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				return;
 			} catch (SQLException e) {
 				tries++;
-				System.err.println("Connection to server " + this.host + " failed with JDBC driver " + this.driver + " (attempt " + tries + " of 3), waiting 3 seconds and trying again.");
-				e.printStackTrace();
+				this.logger.error("Connection to server {} failed with JDBC driver {} (attempt {} of 3), waiting 3 seconds before trying again.", this.host, this.driver, tries, e);
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e1) {
-					e1.printStackTrace();
+					Thread.interrupted();
+					this.logger.error("SQLAdapter was interrupted while waiting to try again establishing a database connection", e1);
+					throw new RuntimeException("SQLAdapter was interrupted while trying to establish a database connection", e1);
 				}
 			}
 		} while (tries < 3);
-		System.err.println("Quitting execution");
+		this.logger.error("Quitting execution as no database connection could be established");
 		System.exit(1);
 	}
 
@@ -172,6 +187,36 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
 		return this.insert(statement, values);
+	}
+
+	public void insertNoNewValues(final String sql, final List<? extends Object> values) throws SQLException {
+		this.checkConnection();
+		PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+		for (int i = 1; i <= values.size(); i++) {
+			this.setValue(stmt, i, values.get(i - 1));
+		}
+		stmt.executeUpdate();
+	}
+
+	public void insertNoNewValues(final String table, final Map<String, ? extends Object> map) throws SQLException {
+		StringBuilder sb1 = new StringBuilder();
+		StringBuilder sb2 = new StringBuilder();
+		List<Object> values = new ArrayList<>();
+		for (String key : map.keySet()) {
+			if (map.get(key) == null) {
+				continue;
+			}
+			if (sb1.length() != 0) {
+				sb1.append(", ");
+				sb2.append(", ");
+			}
+			sb1.append(key);
+			sb2.append("?");
+			values.add(map.get(key));
+		}
+
+		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
+		this.insertNoNewValues(statement, values);
 	}
 
 	public void update(final String sql) throws SQLException {
@@ -279,7 +324,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				this.connect.close();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			this.logger.error("An exception occurred while closing the database connection.", e);
 		}
 	}
 

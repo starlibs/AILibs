@@ -9,7 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.ComponentInstance;
@@ -24,7 +24,7 @@ import weka.classifiers.Classifier;
  *
  * @author wever
  */
-public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCustomizable {
+public class SKLearnClassifierFactory implements IClassifierFactory, ILoggingCustomizable {
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 

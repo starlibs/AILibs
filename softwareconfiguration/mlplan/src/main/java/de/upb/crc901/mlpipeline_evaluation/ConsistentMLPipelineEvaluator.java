@@ -10,7 +10,7 @@ import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleSLCEvaluatorMeasureBridge;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -97,7 +97,7 @@ public class ConsistentMLPipelineEvaluator {
 
 		switch (techniqueAndDescription[0]) {
 		case "3MCCV":
-			return new MonteCarloCrossValidationEvaluator(new SimpleEvaluatorMeasureBridge(new ZeroOneLoss()), 3, data,
+			return new MonteCarloCrossValidationEvaluator(new SimpleSLCEvaluatorMeasureBridge(new ZeroOneLoss()), 3, data,
 					Float.parseFloat(techniqueAndDescription[1]), seed);
 		}
 

@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
@@ -17,27 +17,29 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
-import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
+import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import weka.core.Instances;
 
 public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SelectionPhasePipelineEvaluator.class);
 
-	private final ClassifierFactory classifierFactory;
-	private final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
-
+	private final IClassifierFactory classifierFactory;
+	private final IDatasetSplitter datasetSplitter;
+	private final IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge;
 	private final int seed;
 	private final int numMCIterations;
 	private final Instances dataShownToSelectionPhase;
 	private final double trainFoldSize;
 	private final int timeoutForSolutionEvaluation;
 
-	public SelectionPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch,
-			final double trainFoldSize, final int seed, final int timeoutForSolutionEvaluation) {
+	public SelectionPhasePipelineEvaluator(final IClassifierFactory classifierFactory, final IDatasetSplitter datasetSplitter, final IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge, final int numMCIterations,
+			final Instances dataShownToSearch, final double trainFoldSize, final int seed, final int timeoutForSolutionEvaluation) {
 		super();
 		this.classifierFactory = classifierFactory;
+		this.datasetSplitter = datasetSplitter;
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
 		this.seed = seed;
 		this.numMCIterations = numMCIterations;
@@ -58,13 +60,12 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
-
-		AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
+		IEvaluatorMeasureBridge<Double> bridge = this.evaluationMeasurementBridge;
 		if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 		}
 
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
+		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.datasetSplitter, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();

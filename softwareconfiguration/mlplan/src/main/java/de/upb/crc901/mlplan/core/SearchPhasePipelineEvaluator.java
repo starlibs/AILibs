@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
@@ -18,8 +18,9 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
-import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
+import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -27,8 +28,9 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 
 	private Logger logger = LoggerFactory.getLogger(SearchPhasePipelineEvaluator.class);
 
-	private final ClassifierFactory classifierFactory;
-	private final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
+	private final IClassifierFactory classifierFactory;
+	private final IDatasetSplitter datasetSplitter;
+	private final IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge;
 	private final int seed;
 	private final int numMCIterations;
 	private final Instances dataShownToSearch;
@@ -36,16 +38,17 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	private final IObjectEvaluator<Classifier, Double> searchBenchmark;
 	private final int timeoutForSolutionEvaluation;
 
-	public SearchPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch,
-			final double trainFoldSize, final int seed, final int timeoutForSolutionEvaluation) {
+	public SearchPhasePipelineEvaluator(final IClassifierFactory classifierFactory, final IDatasetSplitter datasetSplitter, final IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge, final int numMCIterations,
+			final Instances dataShownToSearch, final double trainFoldSize, final int seed, final int timeoutForSolutionEvaluation) {
 		super();
 		this.classifierFactory = classifierFactory;
+		this.datasetSplitter = datasetSplitter;
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
 		this.seed = seed;
 		this.dataShownToSearch = dataShownToSearch;
 		this.numMCIterations = numMCIterations;
 		this.trainFoldSize = trainFoldSize;
-		this.searchBenchmark = new MonteCarloCrossValidationEvaluator(this.evaluationMeasurementBridge, numMCIterations, dataShownToSearch, trainFoldSize, seed);
+		this.searchBenchmark = new MonteCarloCrossValidationEvaluator(this.evaluationMeasurementBridge, this.datasetSplitter, numMCIterations, dataShownToSearch, trainFoldSize, seed);
 		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
 	}
 
@@ -74,13 +77,14 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
 				int subSeed = this.seed + c.hashCode();
-				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSearch, this.trainFoldSize, subSeed);
+				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.datasetSplitter, this.numMCIterations, this.dataShownToSearch, this.trainFoldSize, subSeed);
 				return copiedSearchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 			}
 			return this.searchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 		} catch (InterruptedException e) {
 			this.logger.info("Received InterruptedException!");
-			assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t" + Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
+			assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t"
+					+ Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
 			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
 				this.logger.debug("This is a controlled interrupt of ourselves for task {}.", task);
 				Thread.interrupted(); // reset thread interruption flag, because the thread is not really interrupted but should only stop the evaluation

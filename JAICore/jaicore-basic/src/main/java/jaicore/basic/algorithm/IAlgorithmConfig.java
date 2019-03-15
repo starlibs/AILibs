@@ -27,7 +27,7 @@ public interface IAlgorithmConfig extends Mutable {
 	public int cpus();
 
 	/**
-	 * @return Number of threads that may be spawned by the algorithm.
+	 * @return Number of threads that may be spawned by the algorithm. If set to -1, the number of CPUs is used as the number of threads. If set to 0, parallelization is deactivated.
 	 */
 	@Key(K_THREADS)
 	@DefaultValue("-1")
@@ -52,11 +52,15 @@ public interface IAlgorithmConfig extends Mutable {
 	 * @param file The file to read in as properties.
 	 * @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given file.
 	 */
-	default void loadPropertiesFromFile(final File file) throws IOException {
+	default IAlgorithmConfig loadPropertiesFromFile(final File file) {
 		if (!file.exists() || !file.isFile()) {
 			throw new IllegalArgumentException("File to load properties from does not exist or is not a file.");
 		}
-		loadPropertiesFromList(FileUtil.readFileAsList(file));
+		try {
+			return loadPropertiesFromList(FileUtil.readFileAsList(file));
+		} catch (IOException e) {
+			throw new RuntimeException("Could not load properties from the given file.");
+		}
 	}
 
 	/**
@@ -64,7 +68,7 @@ public interface IAlgorithmConfig extends Mutable {
 	 * @param resourcePath The path to the resource.
 	 * @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given resource.
 	 */
-	default void loadPropertiesFromResource(final String resourcePath) throws IOException {
+	default IAlgorithmConfig loadPropertiesFromResource(final String resourcePath) throws IOException {
 		// Get file from resources folder
 		ClassLoader classLoader = FileUtil.class.getClassLoader();
 		String content = null;
@@ -79,8 +83,9 @@ public interface IAlgorithmConfig extends Mutable {
 		}
 
 		if (content != null) {
-			loadPropertiesFromList(Arrays.asList(content.split("\n")));
+			return loadPropertiesFromList(Arrays.asList(content.split("\n")));
 		}
+		return this;
 	}
 
 	/**
@@ -88,7 +93,7 @@ public interface IAlgorithmConfig extends Mutable {
 	 *
 	 * @param propertiesList The list of property assignments.
 	 */
-	default void loadPropertiesFromList(final List<String> propertiesList) {
+	default IAlgorithmConfig loadPropertiesFromList(final List<String> propertiesList) {
 		for (String line : propertiesList) {
 			if (!line.contains("=") || line.startsWith("#")) {
 				continue;
@@ -96,5 +101,6 @@ public interface IAlgorithmConfig extends Mutable {
 			String[] split = line.split("=");
 			this.setProperty(split[0].trim(), split[1].trim());
 		}
+		return this;
 	}
 }

@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
@@ -14,7 +14,7 @@ import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 
-public class WEKAPipelineFactory implements ClassifierFactory {
+public class WEKAPipelineFactory implements IClassifierFactory {
 
 	@Override
 	public MLPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException  {
