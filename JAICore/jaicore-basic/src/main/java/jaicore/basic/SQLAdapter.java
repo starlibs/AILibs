@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -27,9 +28,10 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("serial")
 public class SQLAdapter implements Serializable, AutoCloseable {
 
-	private Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
+	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
 	private static final String DB_DRIVER = "mysql";
+	private static final String KEY_EQUALS_VALUE_TO_BE_SET = " = (?)";
 
 	/* Credentials and properties for the connection establishment. */
 	private final String driver;
@@ -41,7 +43,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	private final Properties connectionProperties;
 
 	/* Connection object */
-	private Connection connect;
+	private transient Connection connect;
 
 	private long timestampOfLastAction = Long.MIN_VALUE;
 
@@ -67,11 +69,8 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this.database = database;
 		this.connectionProperties = connectionProperties;
 
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-			@Override
-			public void run() {
-				SQLAdapter.this.close();
-			}
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			SQLAdapter.this.close();
 		}));
 	}
 
@@ -122,14 +121,14 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	public ResultSet getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
 		StringBuilder conditionSB = new StringBuilder();
 		List<String> values = new ArrayList<>();
-		for (String key : conditions.keySet()) {
+		for (Entry<String, String> entry : conditions.entrySet()) {
 			if (conditionSB.length() > 0) {
 				conditionSB.append(" AND ");
 			} else {
 				conditionSB.append(" WHERE ");
 			}
-			conditionSB.append(key + " = (?)");
-			values.add(conditions.get(key));
+			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+			values.add(entry.getValue());
 		}
 		return this.getResultsOfQuery("SELECT * FROM `" + table + "`" + conditionSB.toString(), values);
 	}

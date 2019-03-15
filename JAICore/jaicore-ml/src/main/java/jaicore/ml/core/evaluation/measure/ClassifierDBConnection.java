@@ -1,4 +1,4 @@
-package jaicore.ml.core.evaluation.measure.multilabel;
+package jaicore.ml.core.evaluation.measure;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

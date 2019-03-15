@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import jaicore.basic.SQLAdapter;
+import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 
 /**
 * This is a helper class to setup the metric table.
