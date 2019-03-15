@@ -1,5 +1,9 @@
 package hasco.core;
 
+import java.io.File;
+
+import org.aeonbits.owner.ConfigFactory;
+
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
@@ -13,6 +17,7 @@ public class HASCOFactory<S extends GraphSearchInput<N, A>, N, A, V extends Comp
 	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
 	private IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory;
 	private AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer;
+	private HASCOConfig hascoConfig;
 
 	public void setProblemInput(final RefinementConfiguredSoftwareConfigurationProblem<V> problemInput) {
 		this.problem = problemInput;
@@ -37,7 +42,7 @@ public class HASCOFactory<S extends GraphSearchInput<N, A>, N, A, V extends Comp
 		if (this.searchProblemTransformer == null) {
 			throw new IllegalStateException("Cannot create HASCO, because no searchProblemTransformer has been specified.");
 		}
-		return new HASCO<>(problem, this.planningGraphGeneratorDeriver, this.searchFactory, this.searchProblemTransformer);
+		return new HASCO<>(this.hascoConfig, problem, this.planningGraphGeneratorDeriver, this.searchFactory, this.searchProblemTransformer);
 	}
 
 	public IHASCOPlanningGraphGeneratorDeriver<N, A> getPlanningGraphGeneratorDeriver() {
@@ -62,6 +67,14 @@ public class HASCOFactory<S extends GraphSearchInput<N, A>, N, A, V extends Comp
 
 	public void setSearchProblemTransformer(final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
 		this.searchProblemTransformer = searchProblemTransformer;
+	}
+
+	public void withAlgorithmConfig(final HASCOConfig hascoConfig) {
+		this.hascoConfig = hascoConfig;
+	}
+
+	public void withAlgorithmConfigFile(final File hascoConfigFile) {
+		this.hascoConfig = (HASCOConfig) ConfigFactory.create(HASCOConfig.class).loadPropertiesFromFile(hascoConfigFile);
 	}
 
 	public RefinementConfiguredSoftwareConfigurationProblem<V> getProblem() {
