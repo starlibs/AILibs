@@ -5,26 +5,6 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 public interface IFilter {
 
-	public static void fit(TimeSeriesDataset dataset, IFilter filter, int valueMatrixIndex) {
-		// Get values and fit filter.
-		double[][] matrix = dataset.getValues(valueMatrixIndex);
-		filter.fit(matrix);
-	}
-
-	public static void transform(TimeSeriesDataset dataset, IFilter filter, int valueMatrixIndex, boolean append)
-			throws NoneFittedFilterExeception {
-		// Get the values and timestamps.
-		double[][] valueMatrix = dataset.getValues(valueMatrixIndex);
-		double[][] timestampMatrix = dataset.getTimestampsOrNull(valueMatrixIndex);
-		// Transform the values.
-		double[][] valueMatrixTransformed = filter.transform(valueMatrix);
-		// Append (at the end) or replace.
-		if (append)
-			dataset.add(valueMatrix, timestampMatrix);
-		else
-			dataset.replace(valueMatrixIndex, valueMatrixTransformed, timestampMatrix);
-	}
-
 	/**
 	 * represents a function working on a dataset by transforming the dataset
 	 * itself.
