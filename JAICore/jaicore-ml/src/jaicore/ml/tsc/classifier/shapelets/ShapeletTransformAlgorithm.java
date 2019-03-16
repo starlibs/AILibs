@@ -224,6 +224,8 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 		final int[] targetMatrix = data.getTargets();
 
 		try {
+			final int timeSeriesLength = dataMatrix[0].length;
+
 			// Estimate min and max
 			if (this.estimateShapeletLengthBorders) {
 				LOGGER.debug("Starting min max estimation.");
@@ -234,7 +236,13 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 						this.maxShapeletLength);
 			} else {
 				if (this.maxShapeletLength == -1)
-					this.maxShapeletLength = dataMatrix[0].length - 1;
+					this.maxShapeletLength = timeSeriesLength - 1;
+			}
+
+			if (this.maxShapeletLength >= timeSeriesLength) {
+				LOGGER.debug(
+						"The maximum shapelet length was larger than the total time series length. Therefore, it will be set to time series length - 1.");
+				this.maxShapeletLength = timeSeriesLength - 1;
 			}
 
 			// Determine shapelets
