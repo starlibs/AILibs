@@ -68,7 +68,7 @@ public class TSClassifierExperimenter implements IExperimentSetEvaluator {
 		ASimplifiedTSClassifier<Integer> ownClassifier = classifierPair.getX();
 		Object refClassifier = classifierPair.getY();
 
-		String datasetPathPrefix = this.config.getDatasetFolder().getAbsolutePath() + "\\" + dataset + "\\" + dataset;
+		String datasetPathPrefix = this.config.getDatasetFolder().getAbsolutePath() + "/" + dataset + "/" + dataset;
 
 		try {
 			Map<String, Object> results = SimplifiedTSClassifierTest.compareClassifiers(refClassifier, ownClassifier,
@@ -79,11 +79,12 @@ public class TSClassifierExperimenter implements IExperimentSetEvaluator {
 			LOGGER.info("Evaluation of experiment with id {} finished.", experimentEntry.getId());
 		} catch (TimeSeriesLoadingException e) {
 			LOGGER.error("Could not finish experiment due to {}.", e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
 	public static void main(final String[] args) {
-		String algorithm = "ls";
+		String algorithm = "tsbf";
 		int numRuns = 5;
 		
 		if(args.length == 2) {

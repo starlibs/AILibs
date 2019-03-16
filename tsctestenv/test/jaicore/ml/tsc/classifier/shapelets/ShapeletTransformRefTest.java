@@ -18,7 +18,6 @@ import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.classifier.SimplifiedTSClassifierTest;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.quality_measures.FStat;
-import jaicore.ml.tsc.shapelets.search.EarlyAbandonMinimumDistanceSearchStrategy;
 import timeseriesweka.classifiers.ShapeletTransformClassifier;
 import timeseriesweka.filters.shapelet_transforms.Shapelet;
 import timeseriesweka.filters.shapelet_transforms.distance_functions.OnlineSubSeqDistance;
@@ -55,8 +54,9 @@ public class ShapeletTransformRefTest {
 		final int minShapeletLength = 3;
 		final int maxShapeletLength = -1;
 		ShapeletTransformTSClassifier ownClf = new ShapeletTransformTSClassifier(k, new FStat(), seed, false,
-				minShapeletLength, maxShapeletLength, true, new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS), 5);
-		ownClf.setMinDistanceSearchStrategy(new EarlyAbandonMinimumDistanceSearchStrategy(false));
+				minShapeletLength, maxShapeletLength, true, new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS), 10);
+		// ownClf.setMinDistanceSearchStrategy(new
+		// EarlyAbandonMinimumDistanceSearchStrategy(false));
 
 		ShapeletTransformClassifier refClf = new ShapeletTransformClassifier();
 		refClf.setNumberOfShapelets(k);
