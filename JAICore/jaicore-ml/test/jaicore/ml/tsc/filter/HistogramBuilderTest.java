@@ -11,14 +11,17 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.junit.Before;
 
+import jaicore.ml.tsc.HistogramBuilder;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
+
 @RunWith(JUnit4.class)
-public class SFATest {
+public class HistogramBuilderTest {
 	
 	double[] timeseries1;
 	double[] timeseries2;
@@ -26,11 +29,11 @@ public class SFATest {
 	
 	@Before
 	public void setup() throws Exception {
-		//timeseries1 = new double [] {1,1,1,1,1,1,1,1};
+		timeseries1 = new double [] {1,1,1,1,1,1,1,1};
 		timeseries2 = new double[] {1,2,4,3,5,2,4,3};
-		double[][] matrix = new double[1][8];
-		//matrix[0] = timeseries1;
-		matrix[0] = timeseries2;
+		double[][] matrix = new double[3][8];
+		matrix[0] = timeseries1;
+		matrix[1] = timeseries2;
 		
 		ArrayList<double[][]> futureDataSet = new ArrayList<double[][]>();
 		futureDataSet.add(matrix);
@@ -46,11 +49,9 @@ public class SFATest {
 			for(double [][] matrix : dataset.getValueMatrices()) {
 				for(double[] instance : matrix) {
 					TimeSeriesDataset tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
-					for(double[][] m : tmp.getValueMatrices()) {
-						for(double[] i : m) {
-							System.out.println(Arrays.toString(i));
-						}
-					}
+					HistogramBuilder histoBuilder = new HistogramBuilder();
+					HashMap<Integer,Integer> histo = histoBuilder.histogramForInstance(tmp);
+					System.out.println(histo.toString());
 					System.out.println("--------------------------------------------");
 				}
 			}
@@ -66,5 +67,6 @@ public class SFATest {
 			e.printStackTrace();
 		}
 	}
-
 }
+
+

@@ -34,12 +34,22 @@ public class SFA implements IFilter {
 	
 	private ArrayList<double[][]> sfaDataset = new ArrayList<double[][]>();
 	private double[][] sfaMatrix = null;
+
+	private boolean rekursiv;
 	
 	public void setNumberOfDesieredDFTCoefficients(int numberOfDesieredDFTCoefficients) {
 		this.numberOfDesieredDFTCoefficients = numberOfDesieredDFTCoefficients;
 	}
 
+	public void disableRekursiv() {
+		this.rekursiv = false;
+	}
 	
+	public void enableRekursiv() {
+		this.rekursiv = true;
+	}
+
+
 	public SFA(double [] alphabet, int wordLength,boolean meanCorrected) {
 		this.alphabet  = alphabet;
 		
@@ -56,7 +66,7 @@ public class SFA implements IFilter {
 		if(!fitted) {
 			throw new NoneFittedFilterExeception("The filter must be fitted before it can transform.");
 		}
-		//TODO Sliding window is still missing 
+		
 		
 		sfaDataset = new ArrayList<double[][]>();
 		//calculate SFA words for every instance and its DFT coefficients 
@@ -72,24 +82,26 @@ public class SFA implements IFilter {
 					// or it lays on the border give it first, last or second ,penultimate  
 					if(elem < lookup[0]) {
 						sfaWords[instance][entry] = alphabet[0];
-					}
+					}else 
 					if(elem == lookup[0]){
 						sfaWords[instance][entry] = alphabet[1];
-					}
+					}else
 					if(elem > lookup[alphabet.length-2]) {
 						sfaWords[instance][entry] = alphabet[alphabet.length-1];
-					}
+					}else
 					if(elem == lookup[alphabet.length-2]) {
 						sfaWords[instance][entry] = alphabet[alphabet.length-1];
 					}
 					//get alphabet letter for every non extrem coefficient
 					else {
-						for(int i = 1; i < lookup.length-2; i++) {
-							if(elem > lookup[i]) {
+						for(int i = 1; i < lookup.length; i++) {
+							if(elem < lookup[i]) {
 								sfaWords[instance][entry] = alphabet[i];
+								break;
 							}
 							if(elem == lookup[i]){
 								sfaWords[instance][entry] = alphabet[i+1];
+								break;
 							}
 						} 
 					}
@@ -113,13 +125,22 @@ public class SFA implements IFilter {
 			throw new IllegalArgumentException("The alphabet size can not be zero.");
 		}
 		
+		lookupTable.clear();
+		
 		dftFilter = new DFT();
 		dftFilter.setMeanCorrected(meanCorrected);
 		
 		try {
 			//calculates the number of DFT coefficents with wordlength as number of desired DFT coefficients
 			dftFilter.setNumberOfDisieredCoefficients(numberOfDesieredDFTCoefficients);
-			dFTDataset = (TimeSeriesDataset) dftFilter.fitTransform(input);
+			
+			if(!rekursiv) {
+				dFTDataset = (TimeSeriesDataset) dftFilter.fitTransform(input);
+			}
+			else {
+				// Only works for sliding windows. However it is normally used for SFA. 
+				dFTDataset = (TimeSeriesDataset) dftFilter.rekursivDFT(input);
+			}
 			
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
@@ -154,8 +175,8 @@ public class SFA implements IFilter {
 				//  in the way that all coefficients are spread equally over the bins
 				else {
 					int splitValue=(int) Math.round(toBin.length/alphabet.length);
-					for(int alphabetLetter = 0; alphabetLetter < alphabet.length-1; alphabetLetter++) {
-						lookUpTable[coeficient][alphabetLetter] = toBin[alphabetLetter+splitValue];
+					for(int alphabetLetter = 1; alphabetLetter < alphabet.length; alphabetLetter++) {
+						lookUpTable[coeficient][alphabetLetter-1] = toBin[alphabetLetter*splitValue];
 					}
 				}
 				
@@ -168,8 +189,8 @@ public class SFA implements IFilter {
 
 	@Override
 	public TimeSeriesDataset fitTransform(TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		
-		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+		fit(input);
+		return transform(input);
 	}
 
 
@@ -261,7 +282,12 @@ public class SFA implements IFilter {
 		try {
 			//calculates the number of DFT coefficents with wordlength as number of desired DFT coefficients
 			dftFilterMatrix.setNumberOfDisieredCoefficients(numberOfDesieredDFTCoefficients);
+			if(!rekursiv) {
 			dftMatrix =  dftFilterMatrix.fitTransform(input);
+			}
+			else {
+				dftMatrix = dftFilterMatrix.rekursivDFT(input);
+			}
 			
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block

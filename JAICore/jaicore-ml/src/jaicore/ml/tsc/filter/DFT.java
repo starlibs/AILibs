@@ -3,7 +3,7 @@ package jaicore.ml.tsc.filter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.apache.commons.math.complex.Complex;
+import org.apache.commons.math3.complex.Complex;
 
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
@@ -50,12 +50,15 @@ public class DFT implements IFilter {
 	private boolean meanCorrected = false;
 	private int startingpoint = 0;
 	
+	
 	/**
 	 *  The variable is set to 1/sqrt(n) in paper "Efficient Retrieval of Similar Time Sequences Using DFT" by Davood Rafieidrafiei and Alberto Mendelzon
 	 *  but in the original "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
 	 *  it is set to 1/n. By default it is set to 1/n. 
 	 */ 
-	private double paperSpecificVariable;   
+	private double paperSpecificVariable;
+
+	private boolean rekursivFirstInstance;   
 	
 	public void setPaperSpecificVariable(double paperSpecificVariable) {
 		this.paperSpecificVariable = paperSpecificVariable;
@@ -69,6 +72,16 @@ public class DFT implements IFilter {
 	
 	public void setMeanCorrected(boolean meanCorrected) {
 		this.meanCorrected = meanCorrected;
+		
+		if(this.meanCorrected) {
+			startingpoint = 1;
+			if(numberOfDisieredCoefficients == 1) {
+				throw new IllegalArgumentException("The number of desiered dft coefficients would be zero.");
+			}
+		}
+		else {
+			startingpoint = 0; 
+		}
 	}
 
 	/* (non-Javadoc)
@@ -100,7 +113,7 @@ public class DFT implements IFilter {
 		if(input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
-		
+		DFTCoefficients.clear();
 		
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
 			fitTransform(input.getValues(matrix));
@@ -120,7 +133,7 @@ public class DFT implements IFilter {
 	
 	@Override
 	public double[] transform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		if(!fitted) {
+		if(!fittedInstance) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
 		}
 		if(input.length == 0) {
@@ -144,41 +157,43 @@ public class DFT implements IFilter {
 			paperSpecificVariable = (double) 1.0/((double)input.length);
 		}
 		
+		if(rekursivFirstInstance) {
+			startingpoint = 0;
+		}
 		//The buffer for the calculated DFT coefficeients
 		DFTCoefficientsInstance = new double[numberOfDisieredCoefficients*2-(startingpoint*2)];
 		
 		//Variable used to make steps of size two in a loop that makes setps of size one
 		int loopcounter = 0;
-		if(meanCorrected) {
-			startingpoint = 1;
-		}
 		
-		for(int entry = 0; entry < input.length; entry++) {
+		for(int coefficient = startingpoint; coefficient<numberOfDisieredCoefficients; coefficient++) {
 			
-			Complex result = new Complex(0,0);
-			Complex tmp = null;
-			
-			for(int coefficient = startingpoint; coefficient<numberOfDisieredCoefficients; coefficient++) {
-				double currentEntry = input[entry];
+			Complex result = new Complex(0.0,0.0);
+
+			for(int entry = 0; entry < input.length; entry++) {
 				
 				//calculates the real and imaginary part of the entry according to the desired coefficient
 				//c.f. p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
 				double realpart = Math.cos(-(1.0/(double)input.length)*2.0*Math.PI*(double)entry*(double)coefficient);
 				double imaginarypart =  Math.sin(-(1.0/(double)input.length)*2.0*Math.PI*(double)entry*(double)coefficient);
 				
-				tmp = new Complex(realpart,imaginarypart);
-				tmp = tmp.multiply(currentEntry);
+				Complex tmp = new Complex(realpart,imaginarypart);
+				tmp = tmp.multiply(input[entry]);
 				
 				result = result.add(tmp);
 			}
 			
-			result = result.multiply(paperSpecificVariable);
+			//result = result.multiply(paperSpecificVariable);
 			
 			//saves the calculated coefficient in the buffer with first the real part and than the imaginary
 			DFTCoefficientsInstance[loopcounter]= result.getReal();
 			DFTCoefficientsInstance[loopcounter+1] = result.getImaginary();
-			
 			loopcounter+=2;
+		}
+		if(rekursivFirstInstance) {
+			if(meanCorrected) {
+				startingpoint = 1;
+			}
 		}
 		fittedInstance = true;
 	}
@@ -202,7 +217,8 @@ public class DFT implements IFilter {
 
 	@Override
 	public void fit(double[][] input) throws IllegalArgumentException {
-		DFTCoefficientsMatrix = new double[input.length][numberOfDisieredCoefficients*2];
+		
+		DFTCoefficientsMatrix = new double[input.length][numberOfDisieredCoefficients*2-(startingpoint*2)];
 		double[] DFTCoefficientsOFInstance = null;
 		for(int instance = 0; instance<input.length; instance++) {
 			try {
@@ -224,6 +240,8 @@ public class DFT implements IFilter {
 	
 	// It is required that the input is inform of the already sliced windows. 
 	// cf. p. 1516 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+	// Best explanation of the algorithm can be found here : "https://www.dsprelated.com/showarticle/776.php"
+	
 	public double[][] rekursivDFT(double[][] input) {
 		if(input.length == 0) {
 			throw new IllegalArgumentException("The input can not be empty");
@@ -238,18 +256,22 @@ public class DFT implements IFilter {
 		}
 		
 		Complex[][] outputComplex = new Complex[input.length][numberOfDisieredCoefficients];
-		Complex[][] vMatrix = new Complex[numberOfDisieredCoefficients][numberOfDisieredCoefficients];
-		for(int i = 0; i < numberOfDisieredCoefficients; i++) {
-			vMatrix[i][i] = vFormular(i, input[0].length);
-		}
+		/*
+		 * Complex[][] vMatrix = new
+		 * Complex[numberOfDisieredCoefficients][numberOfDisieredCoefficients]; for(int
+		 * i = 0; i < numberOfDisieredCoefficients; i++) { vMatrix[i][i] = vFormular(-i,
+		 * input[0].length); }
+		 */
 		
 		for(int i = 0; i < input.length; i++) {
 			if(i == 0) {
 				try {
+					rekursivFirstInstance = true;
 					double[] tmp = fitTransform(input[i]);
+					rekursivFirstInstance = false;
 					Complex[] firstEntry = new Complex[numberOfDisieredCoefficients];
-					for(int entry = 0; entry < tmp.length-1; entry++) {
-						firstEntry[entry] = new Complex(tmp[entry], tmp[entry+1]);
+					for(int entry = 0; entry < tmp.length-1; entry+=2) {
+						firstEntry[entry/2] = new Complex(tmp[entry], tmp[entry+1]);
 					}
 					outputComplex[0] = firstEntry;
 				} catch (IllegalArgumentException e) {
@@ -263,7 +285,7 @@ public class DFT implements IFilter {
 			else {
 				Complex [] coefficientsForInstance = new Complex[numberOfDisieredCoefficients];
 				for(int j = 0; j < numberOfDisieredCoefficients; j++) {
-					coefficientsForInstance[j] = vMatrix[j][j].multiply((outputComplex[i-1][j].subtract(new Complex(input[i-1][0],0).add(new Complex(input[i][input[i].length-1],0)))));
+					coefficientsForInstance[j] = vFormular(j, input[i].length).multiply((outputComplex[i-1][j].subtract(new Complex(input[i-1][0],0).subtract(new Complex(input[i][input[i].length-1],0)))));
 				}
 				outputComplex[i] = coefficientsForInstance;
 			}
@@ -275,10 +297,14 @@ public class DFT implements IFilter {
 	}
 	
 	private double[][] conversion(Complex[][] input) {
-		double[][] output = new double[input.length][input.length*2];
+		if(input.length == 0) {
+			throw new IllegalArgumentException("The input can not be empty");
+		}
+		
+		double[][] output = new double[input.length][input[0].length*2-(startingpoint*2)];
 		for(int i = 0; i< input.length; i++) {
-			int loopcounter = 0;
-			for(int j = 0; j <input[i].length*2; j+=2) {
+			int loopcounter = startingpoint;
+			for(int j = 0 ; j <output[i].length; j+=2) {
 				output[i][j] = input[i][loopcounter].getReal();
 				output[i][j+1] = input[i][loopcounter].getImaginary();
 				loopcounter++;
@@ -291,11 +317,12 @@ public class DFT implements IFilter {
 		Complex result = new Complex(Math.cos(2*Math.PI*coefficient/legthOfinstance),Math.sin(2*Math.PI*coefficient/legthOfinstance));
 		return result;
 	}
+	
 	public TimeSeriesDataset rekursivDFT(TimeSeriesDataset input) {
-		TimeSeriesDataset output = new TimeSeriesDataset(new ArrayList(),null,null);
+		ArrayList<double[][]> tmp = new ArrayList<double[][]>();
 		for(int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
-			output.getValueMatrices().add(rekursivDFT(input.getValues(matrix)));
+			tmp.add(rekursivDFT(input.getValues(matrix)));
 		}
-		return output;
+		return new TimeSeriesDataset(tmp,null,null);
 	}
 }
