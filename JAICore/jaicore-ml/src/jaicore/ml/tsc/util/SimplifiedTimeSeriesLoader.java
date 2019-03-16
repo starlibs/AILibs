@@ -283,8 +283,26 @@ public class SimplifiedTimeSeriesLoader {
 		return result;
 	}
 
-	// end is exclusive
+	/**
+	 * Function returning a submatrix of the given <code>matrix</code>. The
+	 * submatrix is specified by the indices <code>begin</code> and
+	 * </code>end</code> (exclusive). Only the rows within this interval are copied
+	 * into the result matrix.
+	 * 
+	 * @param matrix
+	 *            The matrix from which the submatrix is extracted
+	 * @param begin
+	 *            Begin index of the rows to be extracted
+	 * @param end
+	 *            Exclusive end index of the rows to be extracted
+	 * @return Returns the specified submatrix
+	 */
 	private static double[][] getInterval(final double[][] matrix, final int begin, final int end) {
+		if (begin < 0 || begin > matrix.length - 1)
+			throw new IllegalArgumentException("The begin index must be valid!");
+		if (end < 1 || end > matrix.length)
+			throw new IllegalArgumentException("The end index must be valid!");
+
 		final double[][] result = new double[end - begin][];
 		for (int i = 0; i < end - begin; i++) {
 			result[i] = matrix[i + begin];
@@ -292,9 +310,25 @@ public class SimplifiedTimeSeriesLoader {
 		return result;
 	}
 
-	// TODO: Make this generic?
-	// end is exclusive
+	/**
+	 * Function returning an interval as subarray of the given <code>array</code>.
+	 * The interval is specified by the indices <code>begin</code> and
+	 * </code>end</code> (exclusive).
+	 * 
+	 * @param array
+	 *            The array from which the interval is extracted
+	 * @param begin
+	 *            Begin index of the interval
+	 * @param end
+	 *            Exclusive end index of the interval
+	 * @return Returns the specified interval as a subarray
+	 */
 	private static int[] getInterval(final int[] array, final int begin, final int end) {
+		if (begin < 0 || begin > array.length - 1)
+			throw new IllegalArgumentException("The begin index must be valid!");
+		if (end < 1 || end > array.length)
+			throw new IllegalArgumentException("The end index must be valid!");
+
 		final int[] result = new int[end - begin];
 		for (int i = 0; i < end - begin; i++) {
 			result[i] = array[i + begin];
@@ -336,7 +370,6 @@ public class SimplifiedTimeSeriesLoader {
 
 			// count remaining characters
 			while (readChars != -1) {
-				System.out.println(readChars);
 				for (int i = 0; i < readChars; ++i) {
 					if (c[i] == '\n') {
 						++count;

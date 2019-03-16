@@ -29,6 +29,11 @@ public abstract class ASimplifiedTSClassifier<TARGETDOMAIN> {
 	protected ClassMapper classMapper;
 
 	/**
+	 * Variable indicating whether the classifier has been trained.
+	 */
+	protected boolean trained;
+
+	/**
 	 * Constructor for a simplified time series classifier.
 	 * 
 	 * @param algorithm The algorithm object used for the training of the classifier
@@ -135,6 +140,21 @@ public abstract class ASimplifiedTSClassifier<TARGETDOMAIN> {
 	 */
 	public void setClassMapper(ClassMapper classMapper) {
 		this.classMapper = classMapper;
+	}
+
+	/**
+	 * @return the trained
+	 */
+	public boolean isTrained() {
+		return trained;
+	}
+
+	/**
+	 * @param trained
+	 *            the trained to set
+	 */
+	public void setTrained(boolean trained) {
+		this.trained = trained;
 	}
 
 }
