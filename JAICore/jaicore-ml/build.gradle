@@ -24,7 +24,7 @@ dependencies {
 
 	// end dependencies for meka
 	
-	compile ('de.upb.isys:interruptable-weka:0.0.8') {
+	compile ('de.upb.isys:interruptable-weka:0.0.9') {
 	  	exclude group: 'log4j'
     	exclude group: 'org.slf4j'
 	}

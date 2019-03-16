@@ -17,48 +17,39 @@ import weka.classifiers.Classifier;
 public class WEKAPipelineFactory implements IClassifierFactory {
 
 	@Override
-	public MLPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException  {
+	public MLPipeline getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 
 		ComponentInstance preprocessorCI = null;
 		String ppName = "";
 		ComponentInstance classifierCI = null;
-		
-		switch (groundComponent.getComponent().getName()) {
-		case "pipeline": {
+
+		if (groundComponent.getComponent().getName().equals("pipeline")) {
 			/* Retrieve component instances of pipeline */
 			preprocessorCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("preprocessor");
 			ppName = preprocessorCI.getComponent().getName();
 
 			classifierCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("classifier");
-			break;
-		}
-		default: {
+		} else {
 			classifierCI = groundComponent;
-			break;
 		}
-		}
-		
+
 		try {
-		ASEvaluation eval = null;
-		ASSearch search = null;
-		if (ppName.startsWith("weka")) {
-			ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
-			ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
+			ASEvaluation eval = null;
+			ASSearch search = null;
+			if (preprocessorCI != null && ppName.startsWith("weka")) {
+				ComponentInstance evaluatorCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval");
+				ComponentInstance searcherCI = preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search");
 
-			eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[] {}));
-			search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[] {}));
-		}
+				eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[] {}));
+				search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[] {}));
+			}
 
-		classifierCI.getParameterValues();
-		List<String> parameters = this.getParameterList(classifierCI);
-		Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(), parameters.toArray(new String[] {}));
-		// "
-		// + ((eval != null) ? eval.getClass().getName() : "") + " " +
-		// c.getClass().getName());
-		return new MLPipeline(search, eval, c);
-		}
-		catch (Exception e) {
-			throw new ComponentInstantiationFailedException(e, "Could not instantiate component."); 
+			classifierCI.getParameterValues();
+			List<String> parameters = this.getParameterList(classifierCI);
+			Classifier c = AbstractClassifier.forName(classifierCI.getComponent().getName(), parameters.toArray(new String[] {}));
+			return new MLPipeline(search, eval, c);
+		} catch (Exception e) {
+			throw new ComponentInstantiationFailedException(e, "Could not instantiate component.");
 		}
 	}
 
@@ -84,7 +75,7 @@ public class WEKAPipelineFactory implements IClassifierFactory {
 			parameters.add("-" + paramName);
 			parameters.add(paramValue);
 		}
-		
+
 		return parameters;
 	}
 
