@@ -55,7 +55,7 @@ public class DynamicTimeWarpingTest {
     public void testCorrectnessForDistanceCalculation3() {
         // Input.
         double[] timeSeries5 = { 1, 1, 2, 2, 3, 5 }; // distance with d(x,y) = |x-y| is 1
-        double[] timeSeries6 = { 1, 2, 3, 5, 5, 6 };
+        double[] timeSeries6 = { 1, 2, 3, 5, 5, 5, 6 };
         // Expectation.
         double expectation = 1;
 
