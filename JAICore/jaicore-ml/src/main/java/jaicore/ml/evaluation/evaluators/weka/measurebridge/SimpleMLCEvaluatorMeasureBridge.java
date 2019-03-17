@@ -17,20 +17,30 @@ public class SimpleMLCEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBri
 	}
 
 	@Override
-	public Double evaluateSplit(final Classifier pl, final Instances trainingData, final Instances validationData) throws Exception {
+	public Double evaluateSplit(final Classifier pl, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
 		try {
 			pl.buildClassifier(trainingData);
 		} catch (OutOfMemoryError e) {
-			throw new ObjectEvaluationFailedException(e, "Ran out of memory while building classifier " + ((MultiLabelClassifier) pl).getModel());
+			throw new ObjectEvaluationFailedException("Ran out of memory while building classifier " + ((MultiLabelClassifier) pl).getModel(), e);
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ObjectEvaluationFailedException("Could not train classifier");
 		}
 		int numLabels = trainingData.classIndex();
 
 		List<double[]> actual = new LinkedList<>();
 		List<double[]> expected = new LinkedList<>();
 
-		for (int i = 0; i < validationData.size(); i++) {
-			actual.add(pl.distributionForInstance(validationData.get(i)));
-			expected.add(MLUtils.toDoubleArray(validationData.get(i), numLabels));
+		try {
+			for (int i = 0; i < validationData.size(); i++) {
+				actual.add(pl.distributionForInstance(validationData.get(i)));
+				expected.add(MLUtils.toDoubleArray(validationData.get(i), numLabels));
+			}
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ObjectEvaluationFailedException("Could not validate trained classifier", e);
 		}
 
 		Double error = this.getBasicEvaluator().calculateAvgMeasure(actual, expected);
@@ -39,7 +49,6 @@ public class SimpleMLCEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBri
 			throw new ObjectEvaluationFailedException("Classifier " + pl.getClass().getName() + " could not be evalauted. Please refer to the previous logs for more detailed information.");
 		}
 
-		System.err.println("Error " + error);
 		return this.getBasicEvaluator().calculateAvgMeasure(actual, expected);
 	}
 

@@ -72,6 +72,7 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 			String currentValueOfParam = groundComponent.getParameterValue(param);
 			boolean variableHasBeenSet = state.contains(new Literal("overwritten('" + containerOfParam + "')"));
 			boolean variableHasBeenClosed = state.contains(new Literal("closed('" + containerOfParam + "')"));
+
 			assert variableHasBeenSet == groundComponent.getParametersThatHaveBeenSetExplicitly().contains(param);
 			assert !variableHasBeenClosed || variableHasBeenSet : "Parameter " + param.getName() + " of component " + component.getName() + " with default domain " + param.getDefaultDomain() + " has been closed but no value has been set.";
 

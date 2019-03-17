@@ -6,12 +6,16 @@ import weka.core.Instances;
 * This class provides methods to obtain train and test splits for a given data
 * set and split technique.
 *
-* @author helegraf
+* @author helegraf, mwever
 *
 */
 public class MultilabelDatasetSplitter {
 
-	private static final String splitTechniqueAndDetailsSeparator = ":";
+	private static final String SPLIT_TECHNIQUE_AND_DETAILS_SEPARATOR = ":";
+
+	private MultilabelDatasetSplitter() {
+		/* Private C'tor to prevent instantiation of this class.  */
+	}
 
 	/**
 	 * Split the Instances object according to the given splitDescription. The
@@ -41,15 +45,15 @@ public class MultilabelDatasetSplitter {
 
 		// Split according to technique
 		switch (splitTechniqueAndDetails[0]) {
-		case "mccv":
-			return new RandomMultilabelCrossValidation().getTestSplit(data, Integer.parseInt(seed), Integer.parseInt(testFold), splitTechniqueAndDetails[1]);
 		case "2cv":
 			return new RandomMultilabelCrossValidation().getTestSplit(data, Integer.parseInt(seed), Integer.parseInt(testFold), new RandomMultilabelCrossValidation().generateSplittingInfo(0.5, 0.5));
 		case "PseudoRandom":
 			return new RandomMultilabelCrossValidation().getTestSplit(data, Integer.parseInt(seed), Integer.parseInt(testFold), splitTechniqueAndDetails[1]);
+		case "mccv":
+			return new RandomMultilabelCrossValidation().getTestSplit(data, Integer.parseInt(seed), Integer.parseInt(testFold), splitTechniqueAndDetails[1]);
+		default:
+			throw new IllegalArgumentException("Split technique " + splitTechniqueAndDetails[0] + " not supported.");
 		}
-
-		throw new IllegalArgumentException("Split technique " + splitTechniqueAndDetails[0] + " not supported.");
 	}
 
 	/**
@@ -86,9 +90,10 @@ public class MultilabelDatasetSplitter {
 			return new RandomMultilabelCrossValidation().getTrainSplit(data, Integer.parseInt(seed), Integer.parseInt(testFold), new RandomMultilabelCrossValidation().generateSplittingInfo(0.5, 0.5));
 		case "PseudoRandom":
 			return new RandomMultilabelCrossValidation().getTrainSplit(data, Integer.parseInt(seed), Integer.parseInt(testFold), splitTechniqueAndDetails[1]);
+		default:
+			throw new IllegalArgumentException("Split technique " + splitTechniqueAndDetails[0] + " not supported.");
 		}
 
-		throw new IllegalArgumentException("Split technique " + splitTechniqueAndDetails[0] + " not supported.");
 	}
 
 	/**
@@ -98,6 +103,6 @@ public class MultilabelDatasetSplitter {
 	 * @return The separator token
 	 */
 	public static String getSplitTechniqueAndDetailsSeparator() {
-		return splitTechniqueAndDetailsSeparator;
+		return SPLIT_TECHNIQUE_AND_DETAILS_SEPARATOR;
 	}
 }

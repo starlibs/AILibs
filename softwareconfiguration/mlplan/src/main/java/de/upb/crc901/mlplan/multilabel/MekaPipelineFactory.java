@@ -51,15 +51,9 @@ public class MekaPipelineFactory implements IClassifierFactory {
 			List<String> params = new LinkedList<>();
 			for (Parameter p : component.getParameters()) {
 				if (paramValues.containsKey(p.getName())) {
-
-					/* ignore activator params, which are only used to control the search */
-					if (p.getName().toLowerCase().contains("activator")) {
-						continue;
-					}
-
-					/* if this is a boolean flag and the value is false, omit it */
 					String value = paramValues.get(p.getName());
-					if (value.equals("false")) {
+					/* ignore activator params, which are only used to control the search and if this is a boolean flag and the value is false, omit it */
+					if (p.getName().toLowerCase().contains("activator") || value.equals("false")) {
 						continue;
 					}
 
@@ -87,7 +81,7 @@ public class MekaPipelineFactory implements IClassifierFactory {
 				try {
 					((OptionHandler) c).setOptions(paramsAsArray);
 				} catch (Exception e) {
-					logger.error("Invalid option array for classifier {}: {}. Exception: {}. Error message: {}", className, params, e.getClass().getName(), e.getMessage());
+					logger.error("Invalid option array for classifier {}: {}.", className, params, e);
 					throw new ComponentInstantiationFailedException(e, "Invalid option array for classifier " + className + ": " + params);
 				}
 			}

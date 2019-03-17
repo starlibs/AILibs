@@ -1,5 +1,6 @@
 package jaicore.ml.evaluation.evaluators.weka.measurebridge;
 
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -20,6 +21,6 @@ public interface IEvaluatorMeasureBridge<O> {
 	 * @return Returns the result of the measured value.
 	 * @throws Exception Throws an Exception if there are issues training or validating the classifier.
 	 */
-	public abstract O evaluateSplit(final Classifier h, Instances trainingData, Instances validationData) throws Exception;
+	public abstract O evaluateSplit(final Classifier h, Instances trainingData, Instances validationData) throws ObjectEvaluationFailedException, InterruptedException;
 
 }

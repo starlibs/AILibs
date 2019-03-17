@@ -74,11 +74,11 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {
 			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
-				throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed since the timeout was hit.");
+				throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.", e);
 			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
-			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
+			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
 		} finally {
 			task.cancel();
 			this.logger.debug("Canceled timeout job {}", task);

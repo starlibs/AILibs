@@ -11,7 +11,7 @@ import weka.core.Instances;
 /**
 * Class executing pseudo-random splits to enable multilabelcrossvalidation.
 *
-* @author Helena Graf
+* @author helegraf, mwever
 *
 */
 public class RandomMultilabelCrossValidation implements IMultilabelCrossValidation {
@@ -19,17 +19,16 @@ public class RandomMultilabelCrossValidation implements IMultilabelCrossValidati
 	/**
 	 * The name of this class (identifier for db)
 	 */
-	private static final String name = "PseudoRandom";
+	private static final String NAME = "PseudoRandom";
 
 	/**
 	 * The separator used by this class to separate split portions (from db split representation as string)
 	 */
-	private static final String splitSeparator = "/";
+	private static final String SPLIT_SEPARATOR = "/";
 
 	@Override
 	public Instances getTestSplit(final Instances data, final int seed, final int fold, final String splitInfo) {
-		Instances test = this.getFolds(data, seed, splitInfo).get(fold);
-		return test;
+		return this.getFolds(data, seed, splitInfo).get(fold);
 	}
 
 	@Override
@@ -63,17 +62,16 @@ public class RandomMultilabelCrossValidation implements IMultilabelCrossValidati
 	 */
 	private List<Instances> getFolds(final Instances data, final int seed, final String splitInfo) {
 		Collection<Integer>[] instancesInFolds = WekaUtil.getArbitrarySplit(data, new Random(seed), Arrays.stream(splitInfo.split(this.getSplitSeparator())).mapToDouble(Double::parseDouble).toArray());
-		List<Instances> folds = WekaUtil.realizeSplit(data, instancesInFolds);
-		return folds;
+		return WekaUtil.realizeSplit(data, instancesInFolds);
 	}
 
 	@Override
 	public String getName() {
-		return name;
+		return NAME;
 	}
 
 	@Override
 	public String getSplitSeparator() {
-		return splitSeparator;
+		return SPLIT_SEPARATOR;
 	}
 }

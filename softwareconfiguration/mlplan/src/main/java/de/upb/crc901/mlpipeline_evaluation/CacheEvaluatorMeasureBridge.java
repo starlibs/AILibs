@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import hasco.model.ComponentInstance;
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.AbstractEvaluatorMeasureBridge;
@@ -41,7 +42,7 @@ public class CacheEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<
 	}
 
 	@Override
-	public Double evaluateSplit(final Classifier pl, final Instances trainingData, final Instances validationData) throws Exception {
+	public Double evaluateSplit(final Classifier pl, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
 		if (trainingData instanceof ReproducibleInstances) {
 
 			if (((ReproducibleInstances) trainingData).isCacheLookup()) {

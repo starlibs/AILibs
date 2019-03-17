@@ -3,6 +3,7 @@ package jaicore.ml.evaluation.evaluators.weka.measurebridge;
 import java.util.ArrayList;
 import java.util.List;
 
+import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.evaluation.IInstancesClassifier;
@@ -23,24 +24,34 @@ public class SimpleSLCEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBri
 	}
 
 	@Override
-	public Double evaluateSplit(final Classifier classifier, final Instances trainingData, final Instances validationData) throws Exception {
+	public Double evaluateSplit(final Classifier classifier, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
 		List<Double> actual = WekaUtil.getClassesAsList(validationData);
 		List<Double> predicted = new ArrayList<>();
+
 		try {
 			classifier.buildClassifier(trainingData);
 		} catch (InterruptedException e) {
-			Thread.interrupted(); // clear the interrupted field. This is, even though a Java convention, often not done by WEKA classifiers.
 			throw e;
+		} catch (Exception e) {
+			throw new ObjectEvaluationFailedException("Could not build model.", e);
 		}
-		if (classifier instanceof IInstancesClassifier) {
-			for (double prediction : ((IInstancesClassifier) classifier).classifyInstances(validationData)) {
-				predicted.add(prediction);
+
+		try {
+			if (classifier instanceof IInstancesClassifier) {
+				for (double prediction : ((IInstancesClassifier) classifier).classifyInstances(validationData)) {
+					predicted.add(prediction);
+				}
+			} else {
+				for (Instance inst : validationData) {
+					predicted.add(classifier.classifyInstance(inst));
+				}
 			}
-		} else {
-			for (Instance inst : validationData) {
-				predicted.add(classifier.classifyInstance(inst));
-			}
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new ObjectEvaluationFailedException("Could not validate classifier.", e);
 		}
+
 		return this.getBasicEvaluator().calculateAvgMeasure(actual, predicted);
 	}
 

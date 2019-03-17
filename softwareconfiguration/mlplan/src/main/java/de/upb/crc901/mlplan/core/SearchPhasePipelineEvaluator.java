@@ -95,7 +95,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			this.logger.info("Recognized uncontrolled interrupt. Forwarding this exception.");
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
-			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
+			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
 		} finally {
 			task.cancel();
 			this.logger.debug("Canceled timeout job {}", task);

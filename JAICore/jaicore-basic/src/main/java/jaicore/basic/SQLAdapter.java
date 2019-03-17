@@ -18,6 +18,8 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.sets.SetUtil.Pair;
+
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
  * used.
@@ -191,24 +193,8 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	}
 
 	public int insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
-		StringBuilder sb1 = new StringBuilder();
-		StringBuilder sb2 = new StringBuilder();
-		List<Object> values = new ArrayList<>();
-		for (Entry<String, ? extends Object> entry : map.entrySet()) {
-			if (entry.getValue() == null) {
-				continue;
-			}
-			if (sb1.length() != 0) {
-				sb1.append(", ");
-				sb2.append(", ");
-			}
-			sb1.append(entry.getKey());
-			sb2.append("?");
-			values.add(entry.getValue());
-		}
-
-		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
-		return this.insert(statement, values);
+		Pair<String, List<Object>> insertStatement = this.buildInsertStatement(table, map);
+		return this.insert(insertStatement.getX(), insertStatement.getY());
 	}
 
 	public void insertNoNewValues(final String sql, final List<? extends Object> values) throws SQLException {
@@ -221,7 +207,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		}
 	}
 
-	public void insertNoNewValues(final String table, final Map<String, ? extends Object> map) throws SQLException {
+	private Pair<String, List<Object>> buildInsertStatement(final String table, final Map<String, ? extends Object> map) {
 		StringBuilder sb1 = new StringBuilder();
 		StringBuilder sb2 = new StringBuilder();
 		List<Object> values = new ArrayList<>();
@@ -239,7 +225,14 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		}
 
 		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
-		this.insertNoNewValues(statement, values);
+
+		return new Pair<>(statement, values);
+
+	}
+
+	public void insertNoNewValues(final String table, final Map<String, ? extends Object> map) throws SQLException {
+		Pair<String, List<Object>> insertStatement = this.buildInsertStatement(table, map);
+		this.insertNoNewValues(insertStatement.getX(), insertStatement.getY());
 	}
 
 	public void update(final String sql) throws SQLException {
