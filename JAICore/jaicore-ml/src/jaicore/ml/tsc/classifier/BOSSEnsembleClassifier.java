@@ -21,7 +21,7 @@ public class BOSSEnsembleClassifier extends ASimplifiedTSClassifier<Integer> {
 	public BOSSEnsembleClassifier(HashMap<Integer,Integer> windowLengthsandWordLength,int alphabetSize, double[] alphabet, boolean meanCorrected) {
 		super(null);
 		for(Integer windowLength : windowLengthsandWordLength.keySet()) {
-			ensemble.add(new BOSSClassifier(new BOSSAlgorithm(windowLength, alphabetSize, alphabet,windowLengthsandWordLength.get(windowLength), meanCorrected), windowLength,windowLengthsandWordLength.get(windowLength) ,alphabetSize, alphabet, meanCorrected));
+			ensemble.add(new BOSSClassifier(windowLength,windowLengthsandWordLength.get(windowLength) ,alphabetSize, alphabet, meanCorrected));
 		}
 		
 	}
@@ -35,7 +35,7 @@ public class BOSSEnsembleClassifier extends ASimplifiedTSClassifier<Integer> {
 	public BOSSEnsembleClassifier(HashMap<Integer,Integer> windowLengthsandWordLength, double[] alphabet, boolean meanCorrected) {
 		super(null);
 		for(Integer windowLength : windowLengthsandWordLength.keySet()) {
-			ensemble.add(new BOSSClassifier(new BOSSAlgorithm(windowLength, 4, alphabet,windowLengthsandWordLength.get(windowLength),meanCorrected), windowLength,windowLengthsandWordLength.get(windowLength) ,4, alphabet, meanCorrected));
+			ensemble.add(new BOSSClassifier(windowLength,windowLengthsandWordLength.get(windowLength) ,4, alphabet, meanCorrected));
 		}
 		
 	}
