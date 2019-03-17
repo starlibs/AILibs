@@ -130,12 +130,13 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 	public BOSSClassifier call()
 			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		
+		multivirateHistograms.clear();
 		
-		SFA sfa = new SFA(alphabet, alphabetSize,meanCorrected);
 		HistogramBuilder histoBuilder = new HistogramBuilder();
+		SFA sfa = new SFA(alphabet, alphabetSize,meanCorrected);
 		
 		//calculates the lookup table for the alphabet for the whole input dataset.
-		sfa.fit(input);
+		
 		
 		
 		SlidingWindowBuilder slide = new SlidingWindowBuilder();
@@ -159,10 +160,11 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 				try {
 					/* The from one instance resulting dataset is z-normalized. */ 
 					ZTransformer znorm = new ZTransformer();
-					znorm.fitTransform(tmp);
+					TimeSeriesDataset normed = znorm.fitTransform(tmp);
+					
 					
 					// The SFA words for that dataset are computed using the precomputed MCB quantisation intervals 
-					TimeSeriesDataset tmpTransformed = sfa.transform(tmp);
+					TimeSeriesDataset tmpTransformed = sfa.fitTransform(normed);
 					// The occurring SFA words of the instance are getting counted with a parallel numerosity reduction.
 					histogram = histoBuilder.histogramForInstance(tmpTransformed);
 					}
@@ -182,8 +184,8 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 		}
 		// In the end all calculated and needed algortihms are set for the classifier.
 		model.setMultivirateHistograms(multivirateHistograms);
-		model.setHistogramUnivirate(histograms);
-		model.setSfa(sfa);
+		model.setHistogramUnivirate(multivirateHistograms.get(0));
+		//model.setSfa(sfa);
 		model.setTrainingData(input);
 		return model;
 	

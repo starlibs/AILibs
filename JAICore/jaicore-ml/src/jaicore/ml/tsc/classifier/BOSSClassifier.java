@@ -27,8 +27,10 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	private int wordLength;
 	private int alphabetSize;
 	private double[] alphabet; 
+	
+	private boolean meanCorrected;
 	private ArrayList<ArrayList<HashMap<Integer,Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer,Integer>>> ();
-	private SFA sfa;
+	
 	private ArrayList<HashMap<Integer, Integer>> univirateHistograms;
 	//---------------------------------------------------------------
 	// All needed for every predict. 
@@ -40,9 +42,6 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		this.trainingData = trainingData;
 	}
 
-	public void setSfa(SFA sfa) {
-		this.sfa = sfa;
-	}
 	
 	public void setMultivirateHistograms(ArrayList<ArrayList<HashMap<Integer, Integer>>> multivirateHistograms) {
 		this.multivirateHistograms = multivirateHistograms;
@@ -52,12 +51,13 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		this.univirateHistograms = histograms;
 	}
 
-	public BOSSClassifier(ASimplifiedTSCAlgorithm<Integer, ? extends ASimplifiedTSClassifier<Integer>> algorithm,int windowLength,int wordLength,int alphabetSize, double[] alphabet, boolean meanCorrected) {
+	public BOSSClassifier(int windowLength,int wordLength,int alphabetSize, double[] alphabet, boolean meanCorrected) {
 		super(new BOSSAlgorithm(windowLength, alphabetSize,alphabet,wordLength, meanCorrected));
 		this.windowLength = windowLength;
 		this.wordLength = wordLength;
 		this.alphabetSize = alphabetSize;
 		this.alphabet = alphabet;
+		this.meanCorrected = meanCorrected;
 		
 		//This is the same window size as used for the training samples
 		slide.setDefaultWindowSize(windowLength);
@@ -69,7 +69,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	 * showed that most of
 	 * the time a alphabet size of 4 works best.
 	 */ 
-	public BOSSClassifier(ASimplifiedTSCAlgorithm<Integer, ? extends ASimplifiedTSClassifier<Integer>> algorithm,int windowLength,int wordLength, double[] alphabet, boolean meanCorrected) {
+	public BOSSClassifier(int windowLength,int wordLength, double[] alphabet, boolean meanCorrected) {
 		super(new BOSSAlgorithm(windowLength, 4,alphabet,wordLength, meanCorrected));
 		this.windowLength = windowLength;
 		this.wordLength = wordLength;
@@ -84,7 +84,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	@Override
 	public Integer predict(double[] univInstance) throws PredictionException {
 		//TODO Exceptions 
-		
+		SFA sfa = new SFA(alphabet, alphabetSize, meanCorrected);
 		TimeSeriesDataset tmpznormedsfaTransformed = null;
 		
 		//create windows for test instance an there for a small dataset with 
@@ -98,7 +98,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 				tmpznormed.getValues(0)[instance] = znorm.fitTransform(tmp.getValues(0)[instance]);
 			}
 			
-			 tmpznormedsfaTransformed= sfa.transform(tmpznormed);
+			 tmpznormedsfaTransformed= sfa.fitTransform(tmpznormed);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
