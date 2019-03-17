@@ -86,11 +86,18 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge = builder.getEvaluationMeasurementBridge();
 
 		/* create 2-phase software configuration problem */
-		IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(builder.getClassifierFactory(), builder.getSearchPhaseDatasetSplitter(), evaluationMeasurementBridge,
-				this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch, this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed(), this.getConfig().timeoutForCandidateEvaluation());
+		PipelineEvaluatorBuilder searchEvaluatorBuilder = new PipelineEvaluatorBuilder();
+		searchEvaluatorBuilder.withClassifierFactory(builder.getClassifierFactory()).withDatasetSplitter(builder.getSearchPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge)
+				.withData(this.dataShownToSearch).withSeed(this.getConfig().randomSeed()).withTimeoutForSolutionEvaluation(this.getConfig().timeoutForCandidateEvaluation())
+				.withNumMCIterations(this.getConfig().numberOfMCIterationsDuringSearch()).withTrainFoldSize(this.getConfig().getMCCVTrainFoldSizeDuringSearch());
+		IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(searchEvaluatorBuilder);
 
-		IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(builder.getClassifierFactory(), builder.getSelectionPhaseDatasetSplitter(), evaluationMeasurementBridge,
-				this.getConfig().numberOfMCIterationsDuringSelection(), MLPlan.this.getInput(), this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed(), this.getConfig().timeoutForCandidateEvaluation());
+		PipelineEvaluatorBuilder selectionEvaluatorBuilder = new PipelineEvaluatorBuilder();
+		selectionEvaluatorBuilder.withClassifierFactory(builder.getClassifierFactory()).withDatasetSplitter(builder.getSelectionPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge)
+				.withData(MLPlan.this.getInput()).withSeed(this.getConfig().randomSeed()).withTimeoutForSolutionEvaluation(this.getConfig().timeoutForCandidateEvaluation())
+				.withNumMCIterations(this.getConfig().numberOfMCIterationsDuringSelection()).withTrainFoldSize(this.getConfig().getMCCVTrainFoldSizeDuringSelection());
+		IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(selectionEvaluatorBuilder);
+
 		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(builder.getSearchSpaceConfigFile(), builder.getRequestedInterface(), searchBenchmark, selectionBenchmark);
 
 		/* create 2-phase HASCO */

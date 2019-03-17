@@ -13,9 +13,7 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.model.ComponentInstance;
 import hasco.serialization.CompositionSerializer;
-import jaicore.basic.SQLAdapter;
 import jaicore.ml.openml.OpenMLHelper;
-import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 /**
@@ -34,18 +32,9 @@ public class PipelineEvaluationCache {
 	private static final String INTERMEDIATE_RESULTS_TABLENAME = "pgotfml_hgraf.intermediate_results";
 
 	// Evaluation configuration
-	private String datasetId;
-	private DatasetOrigin datasetOrigin;
-	private String testEvaluationTechnique;
-	private String testSplitTechnique;
-	private int testSeed = 0;
-	private String valSplitTechnique;
-	private String valEvaluationTechnique;
-	private int valSeed = 0;
-
-	private Instances data;
-	private SQLAdapter adapter;
 	private boolean useCache = true;
+
+	private final PipelineEvaluationCacheConfigBuilder config;
 
 	/**
 	 * Construct a new cache for evaluations. The valid split and evaluation
@@ -59,24 +48,16 @@ public class PipelineEvaluationCache {
 	 */
 	public PipelineEvaluationCache(final PipelineEvaluationCacheConfigBuilder configBuilder) throws Exception {
 		super();
-		this.datasetId = configBuilder.getDatasetId();
-		this.datasetOrigin = configBuilder.getDatasetOrigin();
-		this.testEvaluationTechnique = configBuilder.getTestEvaluationTechnique();
-		this.testSplitTechnique = configBuilder.getTestSplitTechnique();
-		this.testSeed = configBuilder.getTestSeed();
-		this.valEvaluationTechnique = configBuilder.getValEvaluationTechnique();
-		this.valSplitTechnique = configBuilder.getValSplitTechnique();
-		this.valSeed = configBuilder.getValSeed();
-		this.adapter = configBuilder.getAdapter();
+		this.config = configBuilder;
 
-		switch (this.datasetOrigin) {
+		switch (this.config.getDatasetOrigin()) {
 		case LOCAL:
 		case CLUSTER_LOCATION_NEW:
-			this.data = new DataSource(this.datasetId).getDataSet();
+			this.config.withDataset(new DataSource(this.config.getDatasetId()).getDataSet());
 			break;
 		case OPENML_DATASET_ID:
 			OpenMLHelper.setApiKey("4350e421cdc16404033ef1812ea38c01");
-			this.data = OpenMLHelper.getInstancesById(Integer.parseInt(this.datasetId));
+			this.config.withDataset(OpenMLHelper.getInstancesById(Integer.parseInt(this.config.getDatasetId())));
 			break;
 		default:
 			throw new InvalidDatasetOriginException("Invalid dataset origin.");
@@ -96,7 +77,7 @@ public class PipelineEvaluationCache {
 	public double getResultOrExecuteEvaluation(final ComponentInstance cI) throws Exception {
 		// Lookup
 		String serializedCI = null;
-		if (this.useCache && this.datasetOrigin != DatasetOrigin.LOCAL) {
+		if (this.useCache && this.config.getDatasetOrigin() != DatasetOrigin.LOCAL) {
 			this.logger.debug("DB Lookup");
 			serializedCI = CompositionSerializer.serializeComponentInstance(cI).toString();
 			this.logger.debug("Pipeline: {}", serializedCI);
@@ -113,7 +94,7 @@ public class PipelineEvaluationCache {
 		this.logger.debug("Score: {}", result);
 
 		// Write back
-		if (this.useCache && this.datasetOrigin != DatasetOrigin.LOCAL) {
+		if (this.useCache && this.config.getDatasetOrigin() != DatasetOrigin.LOCAL) {
 			this.logger.debug("Write new evaluation back into DB");
 			this.uploadResultToDB(serializedCI, result);
 		}
@@ -128,16 +109,17 @@ public class PipelineEvaluationCache {
 		if (this.doNotValidate()) {
 			query = "SELECT error_rate FROM " + INTERMEDIATE_RESULTS_TABLENAME
 					+ " WHERE pipeline=? AND dataset_id=? AND dataset_origin=? AND test_evaluation_technique=? AND test_split_technique=? AND test_seed=? AND val_evaluation_technique IS NULL AND val_split_technique IS NULL AND val_seed IS NULL";
-			values = Arrays.asList(serializedCI, this.datasetId, DatasetOrigin.mapOriginToColumnIdentifier(this.datasetOrigin), this.testEvaluationTechnique, this.testSplitTechnique, String.valueOf(this.testSeed));
+			values = Arrays.asList(serializedCI, this.config.getDatasetId(), DatasetOrigin.mapOriginToColumnIdentifier(this.config.getDatasetOrigin()), this.config.getTestEvaluationTechnique(), this.config.getTestSplitTechnique(),
+					String.valueOf(this.config.getTestSeed()));
 		} else {
 			query = "SELECT error_rate FROM " + INTERMEDIATE_RESULTS_TABLENAME
 					+ " WHERE pipeline=? AND dataset_id=? AND dataset_origin=? AND test_evaluation_technique=? AND test_split_technique=? AND test_seed=? AND val_evaluation_technique=? AND val_split_technique=? AND val_seed=?";
-			values = Arrays.asList(serializedCI, this.datasetId, DatasetOrigin.mapOriginToColumnIdentifier(this.datasetOrigin), this.testEvaluationTechnique, this.testSplitTechnique, String.valueOf(this.testSeed),
-					this.valEvaluationTechnique, this.valSplitTechnique, String.valueOf(this.valSeed));
+			values = Arrays.asList(serializedCI, this.config.getDatasetId(), DatasetOrigin.mapOriginToColumnIdentifier(this.config.getDatasetOrigin()), this.config.getTestEvaluationTechnique(), this.config.getTestSplitTechnique(),
+					String.valueOf(this.config.getTestSeed()), this.config.getValEvaluationTechnique(), this.config.getValSplitTechnique(), String.valueOf(this.config.getValSeed()));
 		}
 
 		try {
-			ResultSet resultSet = this.adapter.getResultsOfQuery(query, values);
+			ResultSet resultSet = this.config.getAdapter().getResultsOfQuery(query, values);
 			if (resultSet.next()) {
 				return resultSet.getDouble("error_rate");
 			} else {
@@ -154,29 +136,30 @@ public class PipelineEvaluationCache {
 		// Get dataset
 		MLPipeline classifier = new WEKAPipelineFactory().getComponentInstantiation(cI);
 		if (this.doNotValidate()) {
-			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.testSplitTechnique, this.testEvaluationTechnique, this.testSeed, this.data, classifier);
+			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.config.getTestSplitTechnique(), this.config.getTestEvaluationTechnique(), this.config.getTestSeed(), this.config.getData(), classifier);
 		} else {
-			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.testSplitTechnique, this.testEvaluationTechnique, this.testSeed, this.valSplitTechnique, this.valEvaluationTechnique, this.valSeed, this.data, classifier);
+			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.config.getTestSplitTechnique(), this.config.getTestEvaluationTechnique(), this.config.getTestSeed(), this.config.getValSplitTechnique(),
+					this.config.getValEvaluationTechnique(), this.config.getValSeed(), this.config.getData(), classifier);
 		}
 	}
 
 	private void uploadResultToDB(final String serializedCI, final double result) {
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("pipeline", serializedCI);
-		map.put("dataset_id", this.datasetId);
-		map.put("dataset_origin", DatasetOrigin.mapOriginToColumnIdentifier(this.datasetOrigin));
-		map.put("test_evaluation_technique", this.testEvaluationTechnique);
-		map.put("test_split_technique", this.testSplitTechnique);
-		map.put("test_seed", this.testSeed);
+		map.put("dataset_id", this.config.getDatasetId());
+		map.put("dataset_origin", DatasetOrigin.mapOriginToColumnIdentifier(this.config.getDatasetOrigin()));
+		map.put("test_evaluation_technique", this.config.getTestEvaluationTechnique());
+		map.put("test_split_technique", this.config.getTestSplitTechnique());
+		map.put("test_seed", this.config.getTestSeed());
 		map.put("error_rate", result);
 		if (!this.doNotValidate()) {
-			map.put("val_split_technique", this.valSplitTechnique);
-			map.put("val_evaluation_technique", this.valEvaluationTechnique);
-			map.put("val_seed", this.valSeed);
+			map.put("val_split_technique", this.config.getValSplitTechnique());
+			map.put("val_evaluation_technique", this.config.getValEvaluationTechnique());
+			map.put("val_seed", this.config.getValSeed());
 		}
 
 		try {
-			this.adapter.insert(INTERMEDIATE_RESULTS_TABLENAME, map);
+			this.config.getAdapter().insert(INTERMEDIATE_RESULTS_TABLENAME, map);
 		} catch (SQLException e) {
 			this.logger.warn(LOG_CANT_CONNECT_TO_CACHE, e);
 			this.useCache = false;
@@ -184,13 +167,13 @@ public class PipelineEvaluationCache {
 	}
 
 	private boolean doNotValidate() {
-		return this.valSplitTechnique == null || this.valSplitTechnique.trim().equals("");
+		return this.config.getValSplitTechnique() == null || this.config.getValSplitTechnique().trim().equals("");
 	}
 
 	public void configureValidation(final String valSplitTechnique, final String valEvaluationTechnique, final int valSeed) {
-		this.valEvaluationTechnique = valEvaluationTechnique;
-		this.valSplitTechnique = valSplitTechnique;
-		this.valSeed = valSeed;
+		this.config.withValEvaluationTechnique(valEvaluationTechnique);
+		this.config.withValSplitTechnique(valSplitTechnique);
+		this.config.withValSeed(valSeed);
 	}
 
 	public boolean usesCache() {
