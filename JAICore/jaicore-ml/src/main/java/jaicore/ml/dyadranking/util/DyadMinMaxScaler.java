@@ -1,5 +1,6 @@
 package jaicore.ml.dyadranking.util;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
@@ -56,6 +57,21 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	}
 
 	/**
+	 * Undoes the transformation of the instances of each dyad.
+	 * 
+	 * @param dataset
+	 * @param decimals number of decimal places for rounding
+	 */
+	public void untransformInstances(DyadRankingDataset dataset, int decimals) {
+		for (IInstance instance : dataset) {
+			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+			for (Dyad dyad : drInstance) {
+				untransformInstance(dyad, decimals);
+			}
+		}
+	}
+
+	/**
 	 * Undoes the transformation of the instance of a single dyad.
 	 * 
 	 * @param dyad
@@ -73,6 +89,30 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 			dyad.getInstance().setValue(i, value);
 		}
 	}
+	
+	/**
+	 * Undoes the transformation of the instance of a single dyad.
+	 * 
+	 * @param dyad
+	 * @param decimals number of decimal places for rounding
+	 */
+	public void untransformInstance(Dyad dyad, int decimals) {
+		String pattern = "#.";
+		for(int i = 0; i < decimals; i++)
+			pattern += "#";
+		DecimalFormat df = new DecimalFormat(pattern);
+		int lengthX = dyad.getInstance().length();
+		if (lengthX != statsX.length) {
+			throw new IllegalArgumentException("The scaler was fit to instances of length " + statsX.length
+					+ " but received an instance of length " + lengthX + ".");
+		}
+		for (int i = 0; i < lengthX; i++) {
+			double value = dyad.getInstance().getValue(i);
+			value *= statsX[i].getMax() - statsX[i].getMin();
+			value += statsX[i].getMin();
+			dyad.getInstance().setValue(i, Double.valueOf(df.format(value)));
+		}
+	}
 
 	/**
 	 * Undoes the transformation of the alternatives of each dyad.
@@ -84,6 +124,21 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			for (Dyad dyad : drInstance) {
 				untransformAlternative(dyad);
+			}
+		}
+	}
+
+	/**
+	 * Undoes the transformation of the alternatives of each dyad.
+	 * 
+	 * @param dataset
+	 * @param decimals number of de
+	 */
+	public void untransformAlternatives(DyadRankingDataset dataset, int decimals) {
+		for (IInstance instance : dataset) {
+			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+			for (Dyad dyad : drInstance) {
+				untransformAlternative(dyad, decimals);
 			}
 		}
 	}
@@ -104,6 +159,30 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 			value *= statsY[i].getMax() - statsY[i].getMin();
 			value += statsY[i].getMin();
 			dyad.getAlternative().setValue(i, value);
+		}
+	}
+	
+	/**
+	 * Undoes the transformation on the alternative of a single dyad.
+	 * 
+	 * @param dyad
+	 */
+	public void untransformAlternative(Dyad dyad, int decimals) {
+		String pattern = "#.";
+		for(int i = 0; i < decimals; i++)
+			pattern += "#";
+		DecimalFormat df = new DecimalFormat(pattern);
+		int lengthY = dyad.getAlternative().length();
+		if (lengthY != statsY.length) {
+			throw new IllegalArgumentException("The scaler was fit to alternatives of length " + statsY.length
+					+ " but received an alternative of length " + lengthY + ".");
+		}
+		for (int i = 0; i < lengthY; i++) {
+			double value = dyad.getAlternative().getValue(i);
+			value *= statsY[i].getMax() - statsY[i].getMin();
+			value += statsY[i].getMin();
+			dyad.getAlternative().setValue(i, Double.valueOf(df.format(value)));
+			
 		}
 	}
 
