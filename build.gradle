@@ -29,6 +29,7 @@ allprojects {
 	//Other
 	apply plugin: "maven"
 	apply plugin: "jacoco"
+	apply plugin: "signing"
 
 	//Nebula
 	apply plugin: 'nebula.project'
@@ -40,8 +41,8 @@ allprojects {
 	targetCompatibility = 1.8
 
 	//Project properties
-	project.group = 'de.upb.isys'
-	project.version = '0.0.1-SNAPSHOT'
+	project.group = 'ai.libs'
+	project.version = '0.0.8'
 	
 	sourceSets {
 		main {
@@ -154,8 +155,7 @@ allprojects {
 	//      testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	artifacts {
 		testArtifacts testClassesJar
-		archives sourcesJar
-		archives javadocJar
+		archives sourcesJar, javadocJar
 	}
 	
 	// generate JavaDoc for each project
@@ -165,8 +165,13 @@ allprojects {
         	destinationDir = file("docs/javadoc")
 //		failOnError = true
     	}
-
+	
 }
+
+signing {
+	sign configurations.archives
+}
+
 
 dependencies{
 	compile project(":hasco")
