@@ -45,7 +45,7 @@ public class MLPlanARFFExample {
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(60, TimeUnit.SECONDS);
+		mlplan.setTimeout(300, TimeUnit.SECONDS);
 		mlplan.setNumCPUs(1);
 
 		if (ACTIVATE_VISUALIZATION) {

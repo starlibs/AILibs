@@ -1,5 +1,7 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,7 +26,8 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 	private final int timeoutForNodeEvaluationInMS;
 	private long totalDeadline = -1; // this deadline can be set to guarantee that there will be no activity after this timestamp
 	private final INodeEvaluator<T, V> fallbackNodeEvaluator;
-
+	private final Collection<TimerTask> activeTimerTasks = new ArrayList<>();
+	
 	public TimeAwareNodeEvaluator(final int pTimeoutInMS) {
 		this(pTimeoutInMS, n -> null);
 	}
@@ -57,13 +60,17 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 		/* execute evaluation */
 		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask timerTask= ts.interruptMeAfterMS(interruptionTime, () -> controlledInterrupt.set(true));
+		TimerTask timerTask = ts.interruptMeAfterMS(interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + ")", () -> controlledInterrupt.set(true));
+		activeTimerTasks.add(timerTask);
 		try {
 			V result = this.fTimeouted(node, grantedTime);
 			timerTask.cancel();
+			activeTimerTasks.remove(timerTask);
 			ts.close();
 			return result;
 		} catch (InterruptedException e) {
+			timerTask.cancel();
+			activeTimerTasks.remove(timerTask);
 			Thread.interrupted(); // clear interrupted field
 			if (controlledInterrupt.get()) {
 				return this.fallbackNodeEvaluator.f(node);
@@ -71,6 +78,10 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 				throw e;
 			}
 		}
+	}
+	
+	public void cancel() {
+		activeTimerTasks.forEach(tt -> tt.cancel());
 	}
 
 	public int getTimeoutForNodeEvaluationInMS() {

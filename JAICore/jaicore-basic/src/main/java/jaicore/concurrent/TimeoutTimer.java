@@ -45,22 +45,22 @@ public class TimeoutTimer extends Timer {
 			}
 		}
 
-		public synchronized TimerTask interruptMeAfterMS(final int delay) {
+		public synchronized TimerTask interruptMeAfterMS(final int delay, String reason) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
-			return this.interruptThreadAfterMS(Thread.currentThread(), delay);
+			return this.interruptThreadAfterMS(Thread.currentThread(), delay, reason);
 		}
 
-		public synchronized TimerTask interruptMeAfterMS(final int delay, final Runnable preInterruptionHook) {
+		public synchronized TimerTask interruptMeAfterMS(final int delay, String reason, final Runnable preInterruptionHook) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
-			return this.interruptThreadAfterMS(Thread.currentThread(), delay, preInterruptionHook);
+			return this.interruptThreadAfterMS(Thread.currentThread(), delay, reason, preInterruptionHook);
 		}
 
-		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay) {
-			return this.interruptThreadAfterMS(thread, delay, null);
+		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, String reason) {
+			return this.interruptThreadAfterMS(thread, delay, reason, null);
 		}
 
-		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, final Runnable preInterruptionHook) {
-			TimerTask task = new InterruptionTimerTask("timeout task for thread " + thread.getId(), thread, preInterruptionHook);
+		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, String reason, final Runnable preInterruptionHook) {
+			TimerTask task = new InterruptionTimerTask(reason, thread, preInterruptionHook);
 			if (!TimeoutTimer.this.emittedSubmitters.contains(this)) {
 				throw new IllegalStateException("Cannot submit interrupt job to submitter " + this + " since it has already been closed!");
 			}

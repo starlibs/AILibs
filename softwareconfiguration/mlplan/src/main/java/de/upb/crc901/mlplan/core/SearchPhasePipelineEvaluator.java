@@ -69,7 +69,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation);
+		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation, "Timeout for pipeline in search phase for candidate " + c + ".");
 		try {
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);

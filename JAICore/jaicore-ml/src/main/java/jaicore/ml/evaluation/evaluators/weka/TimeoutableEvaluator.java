@@ -31,7 +31,7 @@ public class TimeoutableEvaluator implements IClassifierEvaluator {
 
 	@Override
 	public Double evaluate(final Classifier object) throws ObjectEvaluationFailedException, InterruptedException {
-		TimerTask timeoutTask = TimeoutTimer.getInstance().getSubmitter().interruptMeAfterMS(this.timeoutInMS);
+		TimerTask timeoutTask = TimeoutTimer.getInstance().getSubmitter().interruptMeAfterMS(this.timeoutInMS, "Evaluation of classifier " + object + " has timeouted (" + TimeoutableEvaluator.class.getName() + ")");
 		Double returnValue = 30000.0;
 		try {
 			returnValue = this.ce.evaluate(object);

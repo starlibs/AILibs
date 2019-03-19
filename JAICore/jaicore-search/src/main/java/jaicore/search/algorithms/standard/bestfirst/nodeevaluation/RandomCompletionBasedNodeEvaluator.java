@@ -54,10 +54,11 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
 	private static final String ALGORITHM_ID = "RandomCompletion";
+	private static final boolean LOG_FAILURES_AS_ERRORS = false;
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
-
+	
 	private final int timeoutForSingleCompletionEvaluationInMS;
 
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
@@ -307,7 +308,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							throw new NodeEvaluationException(ex, "Error in the evaluation of a node!");
 						} else {
 							countedExceptions++;
-							this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+							if (LOG_FAILURES_AS_ERRORS)
+								this.logger.error("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
+							else
+								this.logger.debug("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 						}
 					}
 					if (abortionTask != null) {
@@ -491,7 +495,8 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	@Override
 	public void cancel() {
-		this.logger.info("Receive cancel signal.");
+		this.logger.info("Receive cancel signal. Canceling myself (aborting all timers) and canceling the completer.");
+		super.cancel();
 		this.completer.cancel();
 		if (!this.activeTasks.isEmpty()) {
 			this.activeTasks.forEach(TimerTask::cancel);

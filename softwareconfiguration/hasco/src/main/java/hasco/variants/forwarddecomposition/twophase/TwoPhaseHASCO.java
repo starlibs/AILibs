@@ -163,7 +163,10 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.logger.info("Entering phase 1. Calling HASCO with timeout {}.", this.hasco.getTimeout());
 			try {
 				this.hasco.call();
-			} catch (AlgorithmExecutionCanceledException e) {
+			} catch (InterruptedException e) {
+				this.logger.info("HASCO has terminated due to an interrupt.");
+			}
+			catch (AlgorithmExecutionCanceledException e) {
 				this.logger.info("HASCO has terminated due to a cancel.");
 			}
 			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
@@ -374,7 +377,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 				/* Schedule a timeout for this evaluation, which is 10% over the estimated time */
 				int timeoutForEvaluation = (int) (estimatedInSelectionSingleIterationEvaluationTime * (1 + TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance()));
-				TimerTask timerTask = ts.interruptMeAfterMS(timeoutForEvaluation);
+				TimerTask timerTask = ts.interruptMeAfterMS(timeoutForEvaluation, "Timeout for evaluation of ensemble candidate " + c.getComponentInstance());
 
 				/* If we have a global timeout, check whether considering this model is feasible. */
 				if (TwoPhaseHASCO.this.getTimeout().seconds() > 0) {

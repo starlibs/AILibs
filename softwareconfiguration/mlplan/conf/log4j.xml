@@ -77,7 +77,7 @@
   </logger>
   
   <logger name="hasco">
-    <level value="info" />
+    <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
@@ -118,7 +118,7 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
@@ -134,11 +134,11 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
