@@ -198,9 +198,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 				while (successfulSamples < this.samples) {
 					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
 					if (activeTasks.containsKey(n)) {
-						IllegalStateException e = new IllegalStateException("There must be no active timer job for the considered node at the beginning of a sampling loop.");
-						e.printStackTrace();
-						throw e;
+						throw new IllegalStateException("There must be no active timer job for the considered node at the beginning of a sampling loop.");
 					}
 					this.checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {

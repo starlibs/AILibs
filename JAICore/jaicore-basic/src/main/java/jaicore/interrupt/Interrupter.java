@@ -38,7 +38,7 @@ public class Interrupter {
 	public static Interrupter get() {
 		return instance;
 	}
-
+	
 	private final List<Interrupt> openInterrupts = new LinkedList<>();
 
 	public synchronized void interruptThread(final Thread t, final Object reason) {
@@ -61,7 +61,7 @@ public class Interrupter {
 
 	public boolean hasThreadBeenInterruptedWithReason(final Thread thread, final Object reason) {
 		boolean matches = this.openInterrupts.stream().anyMatch(i -> i.getInterruptedThread() == thread && i.getReasonForInterruption().equals(reason));
-		logger.debug("Reasons for why thread {} has currently been interrupted: {}. Checked reason {} matched? {}", thread, openInterrupts.stream().filter(t -> t.getInterruptedThread() == thread).map(i -> i.getReasonForInterruption()).collect(Collectors.toList()), reason, matches);
+		logger.debug("Reasons for why thread {} has currently been interrupted: {}. Checked reason {} matched? {}", thread, openInterrupts.stream().filter(t -> t.getInterruptedThread() == thread).map(Interrupt::getReasonForInterruption).collect(Collectors.toList()), reason, matches);
 		return matches;
 	}
 
