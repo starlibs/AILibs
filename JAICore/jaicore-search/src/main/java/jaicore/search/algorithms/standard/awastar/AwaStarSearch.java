@@ -242,7 +242,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		/* cancel node evaluator */
 		if (this.nodeEvaluator instanceof ICancelableNodeEvaluator) {
 			this.logger.info("Canceling node evaluator.");
-			((ICancelableNodeEvaluator) this.nodeEvaluator).cancel();
+			((ICancelableNodeEvaluator) this.nodeEvaluator).cancelActiveTasks();
 		}
 
 	}

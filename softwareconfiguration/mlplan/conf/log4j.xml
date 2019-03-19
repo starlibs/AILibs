@@ -130,15 +130,15 @@
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="info" />
+    <level value="warn" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">

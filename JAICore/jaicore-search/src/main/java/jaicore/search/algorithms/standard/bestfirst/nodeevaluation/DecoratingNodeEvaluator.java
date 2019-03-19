@@ -82,16 +82,16 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 	}
 
 	@Override
-	public void cancel() {
+	public void cancelActiveTasks() {
 		if (this.canceled) {
 			return;
 		}
 		this.canceled = true;
 		if (this.isDecoratedEvaluatorCancelable()) {
-			((ICancelableNodeEvaluator) this.decoratedEvaluator).cancel();
+			((ICancelableNodeEvaluator) this.decoratedEvaluator).cancelActiveTasks();
 		}
 		if (this instanceof ICancelableNodeEvaluator) {
-			((ICancelableNodeEvaluator) this).cancel();
+			((ICancelableNodeEvaluator) this).cancelActiveTasks();
 		}
 	}
 	

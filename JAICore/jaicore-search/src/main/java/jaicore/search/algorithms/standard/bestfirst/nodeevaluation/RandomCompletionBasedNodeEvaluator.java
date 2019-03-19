@@ -2,12 +2,12 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
@@ -51,14 +51,14 @@ import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
-implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
+		implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
 	private static final String ALGORITHM_ID = "RandomCompletion";
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomCompletionBasedNodeEvaluator.class);
-	
+
 	private final int timeoutForSingleCompletionEvaluationInMS;
 
 	protected Set<List<T>> unsuccessfulPaths = Collections.synchronizedSet(new HashSet<>());
@@ -81,7 +81,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	/* sub-tools for conducting and analyzing random completions */
 	private Timer timeoutTimer;
-	private Collection<TimerTask> activeTasks = new ArrayList<>();
+	private Map<Node<T, ?>, TimerTask> activeTasks = new ConcurrentHashMap<>();
 
 	private RandomSearch<T, ?> completer;
 	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of
@@ -141,8 +141,8 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	protected V fTimeouted(final Node<T, ?> n, final int timeout) throws InterruptedException, NodeEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
-		this.logger.info("Received request for f-value of node {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms.", n, this.samples, this.getTimeoutForNodeEvaluationInMS(),
-				this.timeoutForSingleCompletionEvaluationInMS);
+		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Node details: {}", n.hashCode(), this.samples,
+				this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS, n);
 		long startOfComputation = System.currentTimeMillis();
 		long deadline = timeout > 0 ? startOfComputation + timeout : -1;
 		if (this.timestampOfFirstEvaluation == 0) {
@@ -197,6 +197,11 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				this.logger.debug("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
 				while (successfulSamples < this.samples) {
 					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
+					if (activeTasks.containsKey(n)) {
+						IllegalStateException e = new IllegalStateException("There must be no active timer job for the considered node at the beginning of a sampling loop.");
+						e.printStackTrace();
+						throw e;
+					}
 					this.checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {
 						this.logger.info("Deadline for random completions hit! Finishing node evaluation.");
@@ -252,17 +257,19 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 					/* setup timeout timer to interrupt evaluation */
 					TimerTask abortionTask = null;
-					String interruptReason = "RCNE-timeout-" + System.currentTimeMillis();
+					String interruptReason = "RCNE-timeout";
 					if (timeoutForJob >= 0) {
 						Thread executingThread = Thread.currentThread();
 						abortionTask = new TimerTask() {
 							@Override
 							public void run() {
-								RandomCompletionBasedNodeEvaluator.this.activeTasks.remove(this);
+								RandomCompletionBasedNodeEvaluator.this.activeTasks.remove(n);
 
 								/* if the executing thread has not been interrupted from outside */
 								if (!executingThread.isInterrupted()) {
-									RandomCompletionBasedNodeEvaluator.this.logger.info("Sending an controlled interrupt to the evaluating thread to get it back here.");
+									RandomCompletionBasedNodeEvaluator.this.logger.info(
+											"Sending a controlled interrupt with interrupt reason {} to the evaluating thread {}. The node whose evaluation triggered the creation of this timeout job has hash code {}. More detailed node representation: {}",
+											interruptReason, executingThread, n.hashCode(), n);
 									Interrupter.get().interruptThread(executingThread, interruptReason);
 								}
 							}
@@ -271,7 +278,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							this.timeoutTimer = TimeoutTimer.getInstance();
 						}
 						this.timeoutTimer.schedule(abortionTask, timeoutForJob);
-						this.activeTasks.add(abortionTask);
+						this.activeTasks.put(n, abortionTask);
 						this.logger.debug("Activated timeout of {}ms for evaluation of found solution.", timeoutForJob);
 					} else {
 						this.logger.debug("No timeout active for candidate evaluation.");
@@ -281,6 +288,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					drawnSamples++;
 					try {
 						V val = this.getFValueOfSolutionPath(completedPath);
+						logger.debug("Completed path evaluation. Score is {}", val);
 						successfulSamples++;
 						this.eventBus.post(new RolloutEvent<>(ALGORITHM_ID, n.path(), val));
 						if (val != null) {
@@ -290,12 +298,14 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							this.logger.warn("Got NULL result as score for path {}", completedPath);
 						}
 					} catch (InterruptedException e) {
-						assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t" + Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
+						assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t"
+								+ Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
 						boolean intentionalInterrupt = Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(interruptReason);
 						this.logger.info("Recognized {} interrupt", intentionalInterrupt ? "intentional" : "external");
 						if (!intentionalInterrupt) {
 							if (abortionTask != null) {
 								abortionTask.cancel();
+								super.cancelActiveTasks();
 							}
 							throw e;
 						} else {
@@ -313,9 +323,13 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							else
 								this.logger.debug("Could not evaluate solution candidate ... retry another completion. {}", LoggerUtil.getExceptionInfo(ex));
 						}
-					}
-					if (abortionTask != null) {
-						abortionTask.cancel();
+					} finally { // make sure that the abortion task is definitely killed
+						logger.debug("Finished process for sample {}. Canceling its abortion task.", drawnSamples);
+						if (abortionTask != null) {
+							abortionTask.cancel();
+							activeTasks.remove(n);
+							super.cancelActiveTasks();
+						}
 					}
 				}
 
@@ -335,6 +349,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				}
 
 				/* if we are still interrupted, throw an exception */
+				logger.debug("Checking interruption.");
 				this.checkInterruption();
 
 				/* add number of samples to node */
@@ -395,7 +410,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 			try {
 				val = this.solutionEvaluator.evaluateSolution(new SearchGraphPath<>(path));
 			} catch (InterruptedException e) {
-				this.logger.info("Received interrupt during computation of f-value of {}.", path);
+				this.logger.info("Received interrupt during computation of f-value.");
 				throw e;
 			} catch (Exception e) {
 				this.unsuccessfulPaths.add(path);
@@ -494,12 +509,15 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	}
 
 	@Override
-	public void cancel() {
+	public void cancelActiveTasks() {
 		this.logger.info("Receive cancel signal. Canceling myself (aborting all timers) and canceling the completer.");
-		super.cancel();
+		super.cancelActiveTasks();
 		this.completer.cancel();
 		if (!this.activeTasks.isEmpty()) {
-			this.activeTasks.forEach(TimerTask::cancel);
+			for (Entry<Node<T, ?>, TimerTask> entry : new HashSet<>(this.activeTasks.entrySet())) {
+				entry.getValue().cancel();
+				this.activeTasks.remove(entry.getKey());
+			}
 		}
 	}
 

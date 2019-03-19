@@ -883,7 +883,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		/* cancel node evaluator */
 		if (this.cancelableNodeEvaluator) {
 			this.logger.info("Canceling node evaluator.");
-			((ICancelableNodeEvaluator) this.nodeEvaluator).cancel();
+			((ICancelableNodeEvaluator) this.nodeEvaluator).cancelActiveTasks();
 		}
 		this.logger.info("Shutdown completed");
 	}
@@ -1180,8 +1180,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
 		}
 		this.additionalThreadsForNodeAttachment = threadsForExpansion;
-		if (this.additionalThreadsForNodeAttachment > this.getConfig().threads() - 2) { // timer and main thread must not add up here
-			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, this.getConfig().threads() - 2);
+		int maxThreads = this.getConfig().threads() > 0 ? this.getConfig().threads() : -1;
+		if (maxThreads > 0 && this.additionalThreadsForNodeAttachment > maxThreads - 2) { // timer and main thread must not add up here
+			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, maxThreads - 2);
 		}
 		if (this.additionalThreadsForNodeAttachment < 1) {
 			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", this.getConfig().threads());

@@ -155,7 +155,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 						}
 					}
 				} catch (Exception e) {
-					TwoPhaseHASCO.this.logger.error("Timeouter died away. This must NEVER happen. The exception responsible for this is: \n\t{}",
+					TwoPhaseHASCO.this.logger.error("Timeouter died away. This must NEVER happen. The exception responsible for this is: {} ({}). Stack trace: \n\t{}", e.getClass().getName(), e.getMessage(),
 							Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t")));
 				}
 			}, "Phase 1 time bound observer");
@@ -351,6 +351,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 		ensembleToSelectFrom.forEach(c -> stats.add(Double.MAX_VALUE));
 
 		int n = ensembleToSelectFrom.size();
+		AtomicInteger evaluatedModels = new AtomicInteger();
 		for (int i = 0; i < n; i++) {
 			HASCOSolutionCandidate<Double> c = ensembleToSelectFrom.get(i);
 
@@ -392,6 +393,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 				}
 				try {
 					double selectionScore = evaluator.evaluate(c.getComponentInstance());
+					evaluatedModels.incrementAndGet();
 					long trueEvaluationTime = (System.currentTimeMillis() - timestampStart);
 					TwoPhaseHASCO.this.logger.info("Evaluated candidate {} with score {} (score assigned by HASCO was {}). Time to evaluate was {}ms", c.getComponentInstance(), selectionScore, c.getScore(), trueEvaluationTime);
 					stats.set(run, selectionScore);
@@ -412,10 +414,10 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 		}
 
 		/* now wait for results */
-		this.logger.info("Waiting for termination of {} threads that compute the selection scores.", n);
+		this.logger.info("Waiting for termination of {} computations running on {} threads.", n, this.getConfig().cpus());
 		sem.acquire(n);
 		long endOfPhase2 = System.currentTimeMillis();
-		this.logger.info("Finished phase 2 within {}ms net. Total runtime was {}ms. ", endOfPhase2 - startOfPhase2, endOfPhase2 - this.timeOfStart);
+		this.logger.info("Finished phase 2 within {}ms net. Total runtime was {}ms. Evaluated solutions {}/{}", endOfPhase2 - startOfPhase2, endOfPhase2 - this.timeOfStart, evaluatedModels.get(), n);
 		this.logger.debug("Shutting down thread pool");
 		pool.shutdownNow();
 		pool.awaitTermination(5, TimeUnit.SECONDS);
@@ -423,7 +425,6 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 		if (!pool.isShutdown()) {
 			this.logger.warn("Thread pool is not shut down yet!");
 		}
-
 		ts.close();
 
 		/* set chosen model */

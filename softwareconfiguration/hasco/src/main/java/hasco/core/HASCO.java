@@ -147,7 +147,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			} else {
 				this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName, (this.search instanceof ILoggingCustomizable));
 			}
-
+			
 			/* register a listener on the search that will forward all events to HASCO's event bus */
 			this.search.registerListener(new Object() {
 
