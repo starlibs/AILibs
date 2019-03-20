@@ -1,5 +1,7 @@
 package jaicore.ml.core.dataset.sampling.inmemory;
 
+import java.util.Random;
+
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
@@ -32,13 +34,11 @@ public class SystematicSamplingTester<I extends IInstance> extends GeneralSampli
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
 				SystematicSamplingFactory<I> factory = new SystematicSamplingFactory<>();
-				factory.setRandom(RANDOM_SEED);
 				if (this.input != null) {
-					factory.setInputDataset(input);
 					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
-					factory.setSampleSize(sampleSize);
+					return factory.getAlgorithm(sampleSize, input, new Random(RANDOM_SEED));
 				}
-				return factory.getAlgorithm();
+				return null;
 			}
 		};
 	}

@@ -15,22 +15,18 @@ import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
  */
 public interface ISamplingAlgorithmFactory<I extends IInstance> {
 
-	public void setSampleSize(int sampleSize);
-
-	public void setInputDataset(IDataset<I> inputDataset);
-
-	public void setRandom(long seed);
-
-	public void setRandom(Random random);
-
 	/**
 	 * After the neccessary config is done, this method returns a fully configured
 	 * instance of a sampling algorithm.
 	 * 
+	 * @param sampleSize
+	 *            Desired size of the sample that will be created.
+	 * @param inputDataset
+	 *            Dataset where the sample will be drawn from.
+	 * @param random
+	 *            Random object to make samples reproducible.
 	 * @return Configured sampling algorithm object.
-	 * @throws IllegalStateException
-	 *             Method was called before all mandatory configuration was done.
 	 */
-	public ASamplingAlgorithm<I> getAlgorithm() throws IllegalStateException;
+	public ASamplingAlgorithm<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random);
 
 }
