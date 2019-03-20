@@ -1,14 +1,11 @@
 package jaicore.ml.core.dataset.sampling.inmemory;
 
-import java.util.Random;
-
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.SimpleRandomSampling;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 
 public class SimpleRandomSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
@@ -34,14 +31,14 @@ public class SimpleRandomSamplingTester<I extends IInstance> extends GeneralSamp
 
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
-				Random r = new Random(RANDOM_SEED);
-				ASamplingAlgorithm<I> algorithm = new SimpleRandomSampling<I>(r);
+				SimpleRandomSamplingFactory<I> factory = new SimpleRandomSamplingFactory<>();
+				factory.setRandom(RANDOM_SEED);
 				if (this.input != null) {
-					algorithm.setInput(input);
+					factory.setInputDataset(input);
 					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
-					algorithm.setSampleSize(sampleSize);
+					factory.setSampleSize(sampleSize);
 				}
-				return algorithm;
+				return factory.getAlgorithm();
 			}
 		};
 	}

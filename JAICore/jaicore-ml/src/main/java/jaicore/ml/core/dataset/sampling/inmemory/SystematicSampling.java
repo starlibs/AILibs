@@ -18,15 +18,15 @@ import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private Random random;
-	private IDataset<I> sortedDataset;
+	private IDataset<I> sortedDataset = null;
 	private int k;
 	private int startIndex;
 	private int index;
 
 	// Default Comparator to sort datapoints by their vector representation.
-	private Comparator<IInstance> datapointComparator = new Comparator<IInstance>() {
+	private Comparator<I> datapointComparator = new Comparator<I>() {
 		@Override
-		public int compare(IInstance o1, IInstance o2) {
+		public int compare(I o1, I o2) {
 			double[] v1 = o1.getPoint();
 			double[] v2 = o2.getPoint();
 			for (int i = 0; i < Math.min(v1.length, v2.length); i++) {
@@ -58,7 +58,7 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	 * @param datapointComparator
 	 *            Comparator to sort the dataset.
 	 */
-	public SystematicSampling(Random random, Comparator<IInstance> datapointComparator) {
+	public SystematicSampling(Random random, Comparator<I> datapointComparator) {
 		this.random = random;
 		this.datapointComparator = datapointComparator;
 	}
@@ -69,9 +69,11 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 		case created:
 			// Initialize variables and sort dataset.
 			this.sample = this.getInput().createEmpty();
-			this.sortedDataset = this.getInput().createEmpty();
-			this.sortedDataset.addAll(this.getInput());
-			this.sortedDataset.sort(this.datapointComparator);
+			if (this.sortedDataset == null) {
+				this.sortedDataset = this.getInput().createEmpty();
+				this.sortedDataset.addAll(this.getInput());
+				this.sortedDataset.sort(this.datapointComparator);
+			}
 			this.startIndex = this.random.nextInt(this.sortedDataset.size());
 			this.k = (int) Math.floor(this.sortedDataset.size() / this.sampleSize);
 			this.index = 0;
@@ -96,6 +98,14 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
+	}
+
+	public IDataset<I> getSortedDataset() {
+		return sortedDataset;
+	}
+
+	public void setSortedDataset(IDataset<I> sortedDataset) {
+		this.sortedDataset = sortedDataset;
 	}
 
 }
