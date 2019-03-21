@@ -6,6 +6,7 @@ import java.util.Random;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.SystematicSampling;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
 public class SystematicSamplingFactory<I extends IInstance>
 		implements IRerunnableSamplingAlgorithmFactory<I, SystematicSampling<I>> {

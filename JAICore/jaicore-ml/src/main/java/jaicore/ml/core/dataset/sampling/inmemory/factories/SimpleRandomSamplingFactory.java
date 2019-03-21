@@ -5,6 +5,7 @@ import java.util.Random;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.SimpleRandomSampling;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
 public class SimpleRandomSamplingFactory<I extends IInstance>
 		implements ISamplingAlgorithmFactory<I, SimpleRandomSampling<I>> {

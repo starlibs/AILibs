@@ -4,6 +4,7 @@ import java.util.Random;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.IStratiAmountSelector;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.IStratiAssigner;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;

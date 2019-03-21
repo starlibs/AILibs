@@ -5,6 +5,7 @@ import java.util.Random;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.casecontrol.CaseControlSampling;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
 public class CaseControlSamplingFactory<I extends IInstance> implements IRerunnableSamplingAlgorithmFactory<I, CaseControlSampling<I>> {
 

@@ -9,7 +9,7 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.factories.ISamplingAlgorithmFactory;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.ConfigurationLearningCurveExtrapolator;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;

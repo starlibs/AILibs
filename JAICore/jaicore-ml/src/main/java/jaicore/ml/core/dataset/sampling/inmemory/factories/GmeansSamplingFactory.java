@@ -8,6 +8,7 @@ import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.GmeansSampling;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
 public class GmeansSamplingFactory<I extends IInstance>
 		implements IRerunnableSamplingAlgorithmFactory<I, GmeansSampling<I>> {

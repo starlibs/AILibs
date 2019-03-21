@@ -1,4 +1,4 @@
-package jaicore.ml.core.dataset.sampling.inmemory.factories;
+package jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces;
 
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;

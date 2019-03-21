@@ -3,7 +3,7 @@ package jaicore.ml.learningcurve.extrapolation;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.factories.ISamplingAlgorithmFactory;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.learningcurve.extrapolation.lcnet.LCNetExtrapolationMethod;
 import weka.classifiers.Classifier;
 
