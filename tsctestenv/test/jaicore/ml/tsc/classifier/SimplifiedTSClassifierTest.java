@@ -18,6 +18,7 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.tsc.classifier.shapelets.LearnShapeletsClassifier;
 import jaicore.ml.tsc.classifier.shapelets.ShapeletTransformTSClassifier;
+import jaicore.ml.tsc.classifier.trees.LearnPatternSimilarityClassifier;
 import jaicore.ml.tsc.classifier.trees.TimeSeriesBagOfFeaturesClassifier;
 import jaicore.ml.tsc.classifier.trees.TimeSeriesForestClassifier;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
@@ -25,6 +26,7 @@ import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 import jaicore.ml.tsc.quality_measures.FStat;
 import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
+import timeseriesweka.classifiers.LPS;
 import timeseriesweka.classifiers.LearnShapelets;
 import timeseriesweka.classifiers.ShapeletTransformClassifier;
 import timeseriesweka.classifiers.TSBF;
@@ -504,6 +506,29 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 			refClf.searchParameters(false);
 
 			refClassifier = refClf;
+
+			break;
+		case "LearnPatternSimilarity":
+
+			int numLPSTrees = Integer.parseInt(parameters.get("lps_numTree"));
+			int maxLPSDepth = Integer.parseInt(parameters.get("lps_maxTreeDepth"));
+			int numSegments = Integer.parseInt(parameters.get("lps_numSegment"));
+
+			ownClassifier = new LearnPatternSimilarityClassifier((int) seed, numLPSTrees, maxLPSDepth, numSegments);
+
+			LPS refLPSClf = new LPS();
+			refLPSClf.setParamSearch(false);
+			try {
+				FieldUtils.writeField(refLPSClf, "nosTrees", numLPSTrees, true);
+				FieldUtils.writeField(refLPSClf, "treeDepth", maxLPSDepth, true);
+				FieldUtils.writeField(refLPSClf, "nosSegments", numSegments, true);
+				FieldUtils.writeField(refLPSClf, "ratioLevel", 0.01d, true);
+
+			} catch (IllegalAccessException e) {
+				throw new IllegalStateException("Cannot test TSBF reference classifier due to parameter set problems.");
+			}
+
+			refClassifier = refLPSClf;
 
 			break;
 		default:

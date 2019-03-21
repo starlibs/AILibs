@@ -106,6 +106,9 @@ public class TSClassifierExperimenter implements IExperimentSetEvaluator {
 		case "tsbf":
 			config = ConfigCache.getOrCreate(TimeSeriesBagOfFeaturesExperimentConfig.class);
 			break;
+		case "lps":
+			config = ConfigCache.getOrCreate(LearnPatternSimilarityExperimentConfig.class);
+			break;
 		default:
 			config = ConfigCache.getOrCreate(LearnShapeletsExperimentConfig.class);
 		}

@@ -25,7 +25,8 @@ public class ResultCollector {
 	 * Enumeration of available classifier which can be evaluated.
 	 */
 	public enum AvailableClassifier {
-		LEARN_SHAPELETS("ls"), SHAPELET_TRANSFORM("st"), TIME_SERIES_FOREST("tsf"), TIME_SERIES_BAG_OF_FEATURES("tsbf");
+		LEARN_SHAPELETS("ls"), SHAPELET_TRANSFORM("st"), TIME_SERIES_FOREST("tsf"), TIME_SERIES_BAG_OF_FEATURES(
+				"tsbf"), LEARN_PATTERN_SIMILARITY("lps");
 
 		/**
 		 * Technical string used to select the correct database table
@@ -174,7 +175,7 @@ public class ResultCollector {
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		generateLateXTableForClassifier(AvailableClassifier.TIME_SERIES_BAG_OF_FEATURES);
+		generateLateXTableForClassifier(AvailableClassifier.LEARN_PATTERN_SIMILARITY);
 	}
 
 }
