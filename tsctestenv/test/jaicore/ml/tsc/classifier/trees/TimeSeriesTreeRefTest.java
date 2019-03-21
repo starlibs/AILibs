@@ -1,4 +1,4 @@
-package jaicore.ml.tsc.classifier;
+package jaicore.ml.tsc.classifier.trees;
 
 import jaicore.ml.tsc.classifier.trees.TimeSeriesTree;
 
