@@ -34,9 +34,10 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 			
 			// Count number of classes
 			int numberOfClasses = classOccurrences.keySet().size();
-			
-			// Calculate Boundaries that define which Instances is choose for which random number
-			probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
+			if (probabilityBoundaries == null) {
+				// Calculate Boundaries that define which Instances is choose for which random number
+				probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
+			}
 			return this.activate();
 		case active:
 			if(this.sample.size() < this.sampleSize) {
