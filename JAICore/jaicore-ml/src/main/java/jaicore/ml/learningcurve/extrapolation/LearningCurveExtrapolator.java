@@ -11,8 +11,9 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.IRerunnableSamplingAlgorithmFactory;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.ISamplingAlgorithmFactory;
 import jaicore.ml.interfaces.LearningCurve;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -32,61 +33,35 @@ public class LearningCurveExtrapolator {
 
 	protected Classifier learner;
 	protected IDataset<IInstance> dataset, train, test;
-	protected ASamplingAlgorithm<IInstance> subsamplingAlgorithm;
+	protected ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
+	protected ASamplingAlgorithm<IInstance> samplingAlgorithm;
+	protected Random random;
 	protected LearningCurveExtrapolationMethod extrapolationMethod;
 
 	/**
-	 * Create a learning curve extrapolator with a custom configured subsampling
-	 * method.
+	 * Create a learning curve extrapolator with a subsampling factory.
 	 * 
-	 * @param extrapolationMethod
-	 *            Method for extrapolating a learning curve from anchorpoints.
-	 * @param learner
-	 *            Learning model to predict the learning curve of.
-	 * @param dataset
-	 *            Dataset to measure evaluate the learner on.
-	 * @param trainsplit
-	 *            Portion of the dataset, which shall be used to sample from for
-	 *            training.
-	 * @param subsamplingMethod
-	 *            Subsampling method to retrieve a default configured subsampler
-	 *            for.
-	 * @param seed
-	 *            Random seed.
+	 * @param extrapolationMethod      Method for extrapolating a learning curve
+	 *                                 from anchorpoints.
+	 * @param learner                  Learning model to predict the learning curve
+	 *                                 of.
+	 * @param dataset                  Dataset to measure evaluate the learner on.
+	 * @param trainsplit               Portion of the dataset, which shall be used
+	 *                                 to sample from for training.
+	 * @param samplingAlgorithmFactory Subsampling algorithm factory to create a
+	 *                                 configured subsampler with.
+	 * @param seed                     Random seed.
 	 */
 	public LearningCurveExtrapolator(LearningCurveExtrapolationMethod extrapolationMethod, Classifier learner,
-			IDataset<IInstance> dataset, double trainsplit, SubsamplingMethod subsamplingMethod, long seed) {
-		this.extrapolationMethod = extrapolationMethod;
-		this.learner = learner;
-		this.dataset = dataset;
-		this.subsamplingAlgorithm = subsamplingMethod.getSubsampler(seed);
-		this.createSplit(trainsplit, seed);
-	}
-
-	/**
-	 * Create a learning curve extrapolator with a given subsampler.
-	 * 
-	 * @param extrapolationMethod
-	 *            Method for extrapolating a learning curve from anchorpoints.
-	 * @param learner
-	 *            Learning model to predict the learning curve of.
-	 * @param dataset
-	 *            Dataset to measure evaluate the learner on.
-	 * @param trainsplit
-	 *            Portion of the dataset, which shall be used to sample from for
-	 *            training.
-	 * @param subsamplingAlgorithm
-	 *            Subsampler to create the samples at the anchorpoints.
-	 * @param seed
-	 *            Random seed.
-	 */
-	public LearningCurveExtrapolator(LearningCurveExtrapolationMethod extrapolationMethod, Classifier learner,
-			IDataset<IInstance> dataset, double trainsplit, ASamplingAlgorithm<IInstance> subsamplingAlgorithm,
+			IDataset<IInstance> dataset, double trainsplit,
+			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
 			long seed) {
 		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;
-		this.subsamplingAlgorithm = subsamplingAlgorithm;
+		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
+		this.samplingAlgorithm = null;
+		this.random = new Random(seed);
 		this.createSplit(trainsplit, seed);
 	}
 
@@ -94,18 +69,16 @@ public class LearningCurveExtrapolator {
 	 * Measure the learner accuracy at the given anchorpoints and extrapolate a
 	 * learning curve based the results.
 	 * 
-	 * @param anchorPoints
-	 *            Sample sizes as anchorpoints, where the accuracy shall be
-	 *            measured.
+	 * @param anchorPoints Sample sizes as anchorpoints, where the accuracy shall be
+	 *                     measured.
 	 * @return The extrapolated learning curve.
 	 * 
-	 * @throws InvalidAnchorPointsException
-	 *             The anchorpoints (amount, values, ...) are not suitable for the
-	 *             given learning curve extrapolation method.
-	 * @throws AlgorithmException
-	 *             An error occured during the creation of the specified
-	 *             anchorpoints.
-	 * @throws InterruptedException 
+	 * @throws InvalidAnchorPointsException The anchorpoints (amount, values, ...)
+	 *                                      are not suitable for the given learning
+	 *                                      curve extrapolation method.
+	 * @throws AlgorithmException           An error occured during the creation of
+	 *                                      the specified anchorpoints.
+	 * @throws InterruptedException
 	 */
 	public LearningCurve extrapolateLearningCurve(int[] anchorPoints)
 			throws InvalidAnchorPointsException, AlgorithmException, InterruptedException {
@@ -113,17 +86,22 @@ public class LearningCurveExtrapolator {
 		try {
 			Instances testInstances = WekaInstancesUtil.datasetToWekaInstances(this.test);
 
-			// Create subsamples at the anchorpoints and measure the accuracy there
+			// Create subsamples at the anchorpoints and measure the accuracy there.
 			for (int i = 0; i < anchorPoints.length; i++) {
+				// If it is a rerunnable factory, set the previous run.
+				if (this.samplingAlgorithmFactory instanceof IRerunnableSamplingAlgorithmFactory
+						&& this.samplingAlgorithm != null) {
+					((IRerunnableSamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>>) this.samplingAlgorithmFactory)
+							.setPreviousRun(this.samplingAlgorithm);
+				}
+				this.samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(anchorPoints[i], this.train,
+						this.random);
+				IDataset<IInstance> subsampledDataset = this.samplingAlgorithm.call();
 
-				this.subsamplingAlgorithm.setSampleSize(anchorPoints[i]);
-				this.subsamplingAlgorithm.setInput(this.train);
-				IDataset<IInstance> subsampledDataset = this.subsamplingAlgorithm.call();
-
-				// Train classifier on subsample
+				// Train classifier on subsample.
 				this.learner.buildClassifier(WekaInstancesUtil.datasetToWekaInstances(subsampledDataset));
 
-				// Measure accuracy of the trained learner on test split
+				// Measure accuracy of the trained learner on test split.
 				double correctCounter = 0d;
 				for (Instance instance : testInstances) {
 					if (this.learner.classifyInstance(instance) == instance.classValue()) {

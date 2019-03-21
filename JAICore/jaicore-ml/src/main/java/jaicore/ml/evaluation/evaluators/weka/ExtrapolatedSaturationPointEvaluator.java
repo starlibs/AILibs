@@ -1,5 +1,6 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
+import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
@@ -11,8 +12,8 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.ISamplingAlgorithmFactory;
 import jaicore.ml.interfaces.AnalyticalLearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
@@ -37,7 +38,7 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private SubsamplingMethod subsamplingMethod;
+	private ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
 	private IDataset<IInstance> train;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
@@ -51,32 +52,34 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 	 * Create a classifier evaluator with an accuracy measurement at the
 	 * extrapolated learning curves saturation point.
 	 * 
-	 * @param anchorpoints
-	 *            Anchorpoints for the learning curve extrapolation.
-	 * @param subsamplingMethod
-	 *            Subsampling method to create samples at the given anchorpoints.
-	 * @param train
-	 *            Dataset predict the learning curve with and where the subsample
-	 *            for the measurement is drawn from.
-	 * @param trainSplitForAnchorpointsMeasurement
-	 *            Ratio to split the subsamples at the anchorpoints into train and
-	 *            test.
-	 * @param extrapolationMethod
-	 *            Method to extrapolate a learning curve from the accuracy
-	 *            measurements at the anchorpoints.
-	 * @param seed
-	 *            Random seed.
-	 * @param epsilon
-	 *            Tolerance value for calculating the saturation point.
-	 * @param test
-	 *            Test dataset to measure the accuracy.
+	 * @param anchorpoints                         Anchorpoints for the learning
+	 *                                             curve extrapolation.
+	 * @param samplingAlgorithmFactory             Subsampling factory for a
+	 *                                             subsampler to create samples at
+	 *                                             the given anchorpoints.
+	 * @param train                                Dataset predict the learning
+	 *                                             curve with and where the
+	 *                                             subsample for the measurement is
+	 *                                             drawn from.
+	 * @param trainSplitForAnchorpointsMeasurement Ratio to split the subsamples at
+	 *                                             the anchorpoints into train and
+	 *                                             test.
+	 * @param extrapolationMethod                  Method to extrapolate a learning
+	 *                                             curve from the accuracy
+	 *                                             measurements at the anchorpoints.
+	 * @param seed                                 Random seed.
+	 * @param epsilon                              Tolerance value for calculating
+	 *                                             the saturation point.
+	 * @param test                                 Test dataset to measure the
+	 *                                             accuracy.
 	 */
-	public ExtrapolatedSaturationPointEvaluator(int[] anchorpoints, SubsamplingMethod subsamplingMethod,
+	public ExtrapolatedSaturationPointEvaluator(int[] anchorpoints,
+			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
 			IDataset<IInstance> train, double trainSplitForAnchorpointsMeasurement,
 			LearningCurveExtrapolationMethod extrapolationMethod, long seed, double epsilon, IDataset<IInstance> test) {
 		super();
 		this.anchorpoints = anchorpoints;
-		this.subsamplingMethod = subsamplingMethod;
+		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
 		this.train = train;
 		this.trainSplitForAnchorpointsMeasurement = trainSplitForAnchorpointsMeasurement;
 		this.extrapolationMethod = extrapolationMethod;
@@ -90,8 +93,7 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 			throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier,
-				train, this.trainSplitForAnchorpointsMeasurement, this.subsamplingMethod.getSubsampler(this.seed),
-				this.seed);
+				train, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed);
 		try {
 			// Create the extrapolator and calculate sample size of the saturation point
 			// with the given epsilon
@@ -100,9 +102,8 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
-			ASamplingAlgorithm<IInstance> samplingAlgorithm = this.subsamplingMethod.getSubsampler(this.seed);
-			samplingAlgorithm.setInput(this.train);
-			samplingAlgorithm.setSampleSize(optimalSampleSize);
+			ASamplingAlgorithm<IInstance> samplingAlgorithm = this.samplingAlgorithmFactory
+					.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
 			IDataset<IInstance> saturationPointTrainSet = samplingAlgorithm.call();
 			Instances saturationPointInstances = WekaInstancesUtil.datasetToWekaInstances(saturationPointTrainSet);
 
