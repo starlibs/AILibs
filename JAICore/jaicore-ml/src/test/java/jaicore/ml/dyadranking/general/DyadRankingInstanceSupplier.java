@@ -98,5 +98,46 @@ public class DyadRankingInstanceSupplier {
 		}
 		return dataset;
 	}
+	
+	public static double inputOptimizerTestScore(Dyad dyad) {
+		Vector inst = dyad.getInstance();
+		Vector alt = dyad.getAlternative();
+		double score = Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1))
+					/* + Math.abs(inst.getValue(0)) + Math.abs(inst.getValue(1)) + Math.abs(alt.getValue(0)) + Math.abs(alt.getValue(1)) */;
+		return score;
+	}
+	
+	public static Comparator<Dyad> inputOptimizerTestRanker() {
+		Comparator<Dyad> comparator = new Comparator<Dyad>() {
 
+			@Override
+			public int compare(Dyad d1, Dyad d2) {
+				double score1 = inputOptimizerTestScore(d1);
+				double score2 = inputOptimizerTestScore(d2);
+				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
+			}	
+		};
+		return comparator;
+	}
+	
+	public static DyadRankingInstance getInputOptDyadRankingInstance(int maxLength, int seed) {
+		List<Dyad> dyads = new ArrayList<Dyad>();
+		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
+
+		for (int i = 0; i < actualLength; i++) {
+			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
+			dyads.add(dyad);
+		}
+		Comparator<Dyad> comparator = inputOptimizerTestRanker();
+		Collections.sort(dyads, comparator);
+		return new DyadRankingInstance(dyads);
+	}
+	
+	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size, int seed) {
+		DyadRankingDataset dataset = new DyadRankingDataset();
+		for (int i = 0; i < size; i++) {
+			dataset.add(DyadRankingInstanceSupplier.getInputOptDyadRankingInstance(maxLengthDyadRankingInstance, seed));
+		}
+		return dataset;
+	}
 }
