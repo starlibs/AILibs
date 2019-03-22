@@ -75,7 +75,11 @@ public class PLNetInputOptimizer {
 			if (listener != null) {
 				listener.reportOptimizationStep(inp, output);
 			}
-			if (output > incumbentOutput) {
+			
+			INDArray incCheck = inp.dup().muli(inputMask);
+			if (output > incumbentOutput 
+				&& BooleanIndexing.and(incCheck, Conditions.greaterThanOrEqual(0.0d))
+				&& BooleanIndexing.and(incCheck, Conditions.lessThanOrEqual(1.0d))) {
 				incumbent = inp.dup();
 				incumbentOutput = output;
 				//System.out.println("Found new incumbent.");
