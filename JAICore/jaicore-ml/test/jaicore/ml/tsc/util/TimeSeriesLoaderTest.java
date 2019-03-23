@@ -23,11 +23,12 @@ public class TimeSeriesLoaderTest {
 	/**
 	 * Path prefix for the time series classification datasets.
 	 */
-	private static final String TSC_DATASET_PATH_PREFIX = "D:\\Data\\TSC\\";
+	private static final String TSC_DATASET_PATH_PREFIX = "data" + File.separator;
 
 	@Test
 	public void testUnivariateArffFileLoading() throws TimeSeriesLoadingException {
-		final File datasetFile = new File(TSC_DATASET_PATH_PREFIX + "UnivariateTSCProblems\\Car\\Car_TRAIN.arff");
+		final File datasetFile = new File(
+				TSC_DATASET_PATH_PREFIX + "univariate" + File.separator + "Car" + File.separator + "Car_TRAIN.arff");
 
 		final TimeSeriesDataset result = TimeSeriesLoader.loadArff(datasetFile);
 
@@ -45,9 +46,11 @@ public class TimeSeriesLoaderTest {
 	@Test
 	public void testMultivariateArffFileLoading() throws TimeSeriesLoadingException {
 		File datasetFile0 = new File(
-				TSC_DATASET_PATH_PREFIX + "MultivariateTSCProblems\\Libras\\LibrasDimension1_TRAIN.arff");
+				TSC_DATASET_PATH_PREFIX + "multivariate" + File.separator + "Libras" + File.separator
+						+ "LibrasDimension1_TRAIN.arff");
 		File datasetFile1 = new File(
-				TSC_DATASET_PATH_PREFIX + "MultivariateTSCProblems\\Libras\\LibrasDimension2_TRAIN.arff");
+				TSC_DATASET_PATH_PREFIX + "multivariate" + File.separator + "Libras" + File.separator
+						+ "LibrasDimension2_TRAIN.arff");
 
 		final TimeSeriesDataset result = TimeSeriesLoader.loadArffs(datasetFile0, datasetFile1);
 
@@ -66,9 +69,11 @@ public class TimeSeriesLoaderTest {
 	public void testMultivariateArffFileLoadingStringClass() throws TimeSeriesLoadingException {
 
 		File datasetFile0 = new File(TSC_DATASET_PATH_PREFIX
-				+ "MultivariateTSCProblems\\FingerMovements\\FingerMovementsDimension1_TRAIN.arff");
+				+ "multivariate" + File.separator + "FingerMovements" + File.separator
+				+ "FingerMovementsDimension1_TRAIN.arff");
 		File datasetFile1 = new File(TSC_DATASET_PATH_PREFIX
-				+ "MultivariateTSCProblems\\FingerMovements\\FingerMovementsDimension2_TRAIN.arff");
+				+ "multivariate" + File.separator + "FingerMovements" + File.separator
+				+ "FingerMovementsDimension2_TRAIN.arff");
 
 		final TimeSeriesDataset result = TimeSeriesLoader.loadArffs(datasetFile0, datasetFile1);
 

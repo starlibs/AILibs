@@ -572,7 +572,7 @@ public class TimeSeriesTreeAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Ti
 	 * @param dataset
 	 *            The dataset which should be transformed
 	 * @param T1T2
-	 *            The stard and end interval pairs (see
+	 *            The start and end interval pairs (see
 	 *            {@link TimeSeriesTreeAlgorithm#sampleIntervals(int, int)})
 	 * @return Returns the transformed instances (shape: number of feature types x
 	 *         number of interval pairs x number of instances)

@@ -27,7 +27,7 @@ import timeseriesweka.classifiers.TSF;
 public class TimeSeriesForestRefTest {
 	private static final double EPS_DELTA = 0.000001;
 
-	private static final String UNIVARIATE_PREFIX = "D:\\Data\\TSC\\UnivariateTSCProblems\\";
+	private static final String UNIVARIATE_PREFIX = "data/univariate/";
 
 	@Test
 	public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
@@ -36,8 +36,8 @@ public class TimeSeriesForestRefTest {
 		org.apache.log4j.Logger.getLogger("jaicore").setLevel(Level.DEBUG);
 
 		String dataset = "Beef";
-		final String trainPath = UNIVARIATE_PREFIX + dataset + "\\" + dataset + "_TRAIN.arff";
-		final String testPath = UNIVARIATE_PREFIX + dataset + "\\" + dataset + "_TEST.arff";
+		final String trainPath = UNIVARIATE_PREFIX + dataset + File.separator + dataset + "_TRAIN.arff";
+		final String testPath = UNIVARIATE_PREFIX + dataset + File.separator + dataset + "_TEST.arff";
 
 		int seed = 42;
 		int numTrees = 500;

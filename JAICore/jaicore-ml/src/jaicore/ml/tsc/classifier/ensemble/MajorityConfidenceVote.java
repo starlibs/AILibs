@@ -1,5 +1,6 @@
 package jaicore.ml.tsc.classifier.ensemble;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import weka.classifiers.evaluation.Evaluation;
@@ -95,6 +96,13 @@ public class MajorityConfidenceVote extends Vote {
 			this.classifierWeights[i] /= (double) this.numFolds;
 
 			this.getClassifier(i).buildClassifier(newData);
+		}
+
+		// If no classifier predicted something correctly, assume uniform distribution
+		if (Arrays.stream(this.classifierWeights).allMatch(d -> d < 0.000001d)) {
+			for (int i = 0; i < this.classifierWeights.length; i++) {
+				this.classifierWeights[i] = 1d / (double) this.classifierWeights.length;
+			}
 		}
 	}
 

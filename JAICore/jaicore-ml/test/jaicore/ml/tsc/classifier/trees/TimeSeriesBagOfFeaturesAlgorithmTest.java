@@ -1,6 +1,7 @@
 package jaicore.ml.tsc.classifier.trees;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.basic.sets.SetUtil.Pair;
@@ -18,17 +19,38 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 */
 	private static final double EPS = 0.00001;
 
+	private TimeSeriesBagOfFeaturesAlgorithm algorithm;
+
+	/**
+	 * Hyperparameters
+	 */
+	private static final int SEED = 42;
+	private static final int NUM_BINS = 10;
+	private static final int NUM_FOLDS = 10;
+	private static final double Z_PROP = 0.1;
+	private static final int MIN_INTERVAL_LENGTH = 5;
+	private static final boolean USE_Z_NORMALIZATION = false;
+
+	/**
+	 * Setting up objects used within the tests.
+	 */
+	@Before
+	public void setup() {
+		algorithm = new TimeSeriesBagOfFeaturesAlgorithm(SEED, NUM_BINS, NUM_FOLDS, Z_PROP, MIN_INTERVAL_LENGTH,
+				USE_Z_NORMALIZATION);
+	}
+
 	/**
 	 * See
 	 * {@link TimeSeriesBagOfFeaturesAlgorithm#discretizeProbs(int, double[][])}.
 	 */
 	@Test
 	public void discretizeProbsTest() {
-		int numBins = 10;
 		double[][] probs = new double[][] { { 0.19, 0.21, 0.25 } };
 
-		Assert.assertArrayEquals(new int[] { 1, 2, 2 },
-				TimeSeriesBagOfFeaturesAlgorithm.discretizeProbs(numBins, probs)[0]);
+		Assert.assertArrayEquals("The calculated discretized probabilites do not match the expected results.",
+				new int[] { 1, 2, 2 },
+				TimeSeriesBagOfFeaturesAlgorithm.discretizeProbs(NUM_BINS, probs)[0]);
 	}
 
 	/**
@@ -49,11 +71,14 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 		int[][] relativeFreqs = result.getY();
 
 		// Check histograms
-		Assert.assertArrayEquals(new int[] { 0, 1, 0, 0, 0 }, histograms[0][0]);
-		Assert.assertArrayEquals(new int[] { 0, 0, 1, 0, 0 }, histograms[0][1]);
+		Assert.assertArrayEquals("The calculated histograms at first place do not match the expected results.",
+				new int[] { 0, 1, 0, 0, 0 }, histograms[0][0]);
+		Assert.assertArrayEquals("The calculated histograms at second place do not match the expected results.",
+				new int[] { 0, 0, 1, 0, 0 }, histograms[0][1]);
 
 		// Check relative freqs
-		Assert.assertArrayEquals(new int[] { 0, 0, 1 }, relativeFreqs[0]);
+		Assert.assertArrayEquals("The calculated relative class frequencies do not match the expected results.",
+				new int[] { 0, 0, 1 }, relativeFreqs[0]);
 
 	}
 
@@ -66,7 +91,8 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 		int[][][] histograms = new int[][][] { { { 1, 0, 1 }, { 0, 1, 1 } } };
 		int[][] relativeFreqsOfClasses = new int[][] { { 0, 2 } };
 
-		Assert.assertArrayEquals(new double[] { 1, 0, 1, 0, 1, 1, 0, 2 },
+		Assert.assertArrayEquals("The calculated histogram instances do not match the expected results.",
+				new double[] { 1, 0, 1, 0, 1, 1, 0, 2 },
 				TimeSeriesBagOfFeaturesAlgorithm.generateHistogramInstances(histograms, relativeFreqsOfClasses)[0],
 				EPS);
 	}
@@ -85,16 +111,20 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 				intervals);
 
 		// Features of the first interval (first instance)
-		Assert.assertArrayEquals(new double[] { 1.5, 0.25, 1 }, generatedFeatures[0][0][0], EPS);
+		Assert.assertArrayEquals("The generated features do not match the expected results.",
+				new double[] { 1.5, 0.25, 1 }, generatedFeatures[0][0][0], EPS);
 
 		// Features of the first interval (last instance)
-		Assert.assertArrayEquals(new double[] { 0, 0, 0 }, generatedFeatures[1][0][0], EPS);
+		Assert.assertArrayEquals("The generated features do not match the expected results.", new double[] { 0, 0, 0 },
+				generatedFeatures[1][0][0], EPS);
 
 		// Features of the subsequence (first instance)
-		Assert.assertArrayEquals(new double[] { 2, 0.66667, 1 }, generatedFeatures[0][0][1], EPS);
+		Assert.assertArrayEquals("The generated features do not match the expected results.",
+				new double[] { 2, 0.66667, 1 }, generatedFeatures[0][0][1], EPS);
 
 		// Features of the subsequence (last instance)
-		Assert.assertArrayEquals(new double[] { 0, 0, 0 }, generatedFeatures[1][0][1], EPS);
+		Assert.assertArrayEquals("The generated features do not match the expected results.", new double[] { 0, 0, 0 },
+				generatedFeatures[1][0][1], EPS);
 	}
 
 	/**
@@ -103,10 +133,6 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 	 */
 	@Test
 	public void generateSubsequencesAndIntervalsTest() {
-		final int minIntervalLength = 5;
-		
-		final TimeSeriesBagOfFeaturesAlgorithm algorithm = new TimeSeriesBagOfFeaturesAlgorithm(42, 10, 10, 0.1, minIntervalLength,
-				false);
 
 		final int r = 2;
 		final int d = 1;
@@ -119,15 +145,24 @@ public class TimeSeriesBagOfFeaturesAlgorithmTest {
 		final int[][][] intervals = subsequencesAndIntervals.getY();
 
 		// Check subsequences dimensionality
-		Assert.assertEquals(r - d, subsequences.length);
-		Assert.assertEquals(2, subsequences[0].length);
+		Assert.assertEquals("The dimensionality of the calculated subsequences does not match the expected result.",
+				r - d, subsequences.length);
+		Assert.assertEquals(
+				"The dimensionality of the calculated subsequence indices does not match the expected result.", 2,
+				subsequences[0].length);
 
 		// Check intervals dimensionality
-		Assert.assertEquals(r - d, intervals.length);
-		Assert.assertEquals(d, intervals[0].length);
+		Assert.assertEquals("The dimensionality of the calculated intervals does not match the expected result.",
+				r - d, intervals.length);
+		Assert.assertEquals(
+				"The dimensionality of the calculated intervals per subsequence does not match the expected result.", d,
+				intervals[0].length);
 		
 		// Check interval values
-		Assert.assertTrue(intervals[0][0][1] - intervals[0][0][0] > minIntervalLength);
-		Assert.assertTrue(subsequences[0][1] - subsequences[0][0] > lMin);
+		Assert.assertTrue("The range of the first intervals is not greater equals than the interval minimum length.",
+				intervals[0][0][1] - intervals[0][0][0] >= MIN_INTERVAL_LENGTH);
+		Assert.assertTrue(
+				"The range of the first subsequence is not greater equals than the minimum subsequence length.",
+				subsequences[0][1] - subsequences[0][0] >= lMin);
 	}
 }

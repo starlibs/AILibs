@@ -1,14 +1,20 @@
 package jaicore.ml.tsc.classifier.shapelets;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Iterables;
 
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.IAlgorithm;
@@ -22,7 +28,6 @@ import jaicore.ml.tsc.util.MathUtil;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.clusterers.SimpleKMeans;
-import weka.core.Debug.Random;
 import weka.core.Instances;
 
 /**
@@ -94,7 +99,7 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	/**
 	 * Indicator whether Bessel's correction should be used when normalizing arrays.
 	 */
-	public static final boolean USE_BIAS_CORRECTION = true;
+	public static final boolean USE_BIAS_CORRECTION = false;
 
 	/**
 	 * Predefined alpha parameter used within the calculations.
@@ -116,6 +121,12 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	 * should be derived from the number of total segments. False by default.
 	 */
 	private boolean estimateK = false;
+
+	/**
+	 * Indicator whether instances used for training should be reordered s.t. the
+	 * classes are used in an alternating manner.
+	 */
+	private boolean useInstanceReordering = true;
 
 	/**
 	 * Constructor of the algorithm to train a {@link LearnShapeletsClassifier}.
@@ -353,7 +364,7 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 
 		// Perform stochastic gradient descent
 		LOGGER.debug("Starting training for {} iterations...", this.maxIter);
-		this.performSGD(W, W_hist, W_0, W_0_hist, S, S_hist, dataMatrix, Y, beginTime);
+		this.performSGD(W, W_hist, W_0, W_0_hist, S, S_hist, dataMatrix, Y, beginTime, targetMatrix);
 		LOGGER.debug("Finished training.");
 
 		// Update model
@@ -415,7 +426,7 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	 */
 	public void performSGD(final double[][][] W, final double[][][] W_hist, final double[] W_0, final double[] W_0_hist,
 			final double[][][] S, final double[][][] S_hist, final double[][] dataMatrix, final int[][] Y,
-			final long beginTime) {
+			final long beginTime, final int[] targets) {
 		// Define the "helper" matrices used for the gradient calculations
 		double[][][][] D = new double[this.scaleR][][][];
 		double[][][][] Xi = new double[this.scaleR][][][];
@@ -439,8 +450,12 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 		// Stochastic gradient descent
 		LOGGER.debug("Starting training for {} iterations...", this.maxIter);
 		for (int it = 0; it < this.maxIter; it++) {
+
 			// Shuffle instances
-			Collections.shuffle(indices, new Random(this.seed + it));
+			if (this.useInstanceReordering) {
+				indices = this.shuffleAccordingToAlternatingClassScheme(indices, targets, new Random(this.seed + it));
+			} else
+				Collections.shuffle(indices, new Random(this.seed + it));
 
 			for (int idx = 0; idx < this.I; idx++) {
 				int i = indices.get(idx);
@@ -539,6 +554,64 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 				}
 			}
 		}
+	}
+
+	/**
+	 * Shuffles the data in a class alternating scheme. That means that at first,
+	 * all indices per class are shuffled. Then, the randomized indices are selected
+	 * in a round robin fashion among the classes.
+	 * 
+	 * @param instanceIndices
+	 *            The instance indices the original dataset
+	 * @param targets
+	 *            The targets of each instance
+	 * @param random
+	 *            Random object used for randomized shuffling
+	 * @return Returns the list of the shuffled indices of the alternating class
+	 *         scheme. Each index of <code>instanceIndices</code> is only used once
+	 *         (without replacement)
+	 */
+	public List<Integer> shuffleAccordingToAlternatingClassScheme(final List<Integer> instanceIndices,
+			final int[] targets, final Random random) {
+		if (instanceIndices.size() != targets.length)
+			throw new IllegalArgumentException(
+					"The number of instances must be equal to the number of available target values!");
+
+		// Extract indices per class
+		Map<Integer, List<Integer>> indicesPerClass = new HashMap<>();
+		for (int i = 0; i < instanceIndices.size(); i++) {
+			int classIdx = targets[i];
+
+			if (!indicesPerClass.containsKey(classIdx))
+				indicesPerClass.put(classIdx, new ArrayList<>());
+
+			indicesPerClass.get(classIdx).add(i);
+		}
+
+		// Shuffle all class indices
+		List<Iterator<Integer>> iteratorList = new ArrayList<>();
+		for (List<Integer> list : indicesPerClass.values()) {
+			Collections.shuffle(list, random);
+			iteratorList.add(list.iterator());
+		}
+
+		// Add indices to result list based on the alternating scheme
+		List<Integer> resultList = new ArrayList<>();
+		Iterator<Iterator<Integer>> roundRobinIt = Iterables.cycle(iteratorList).iterator();
+		for (int i = 0; i < instanceIndices.size(); i++) {
+			int tmpCounter = 0;
+			while (roundRobinIt.hasNext() && tmpCounter < this.C) {
+				Iterator<Integer> tmpIt = roundRobinIt.next();
+				if (!tmpIt.hasNext()) {
+					tmpCounter++;
+					continue;
+				} else {
+					resultList.add(tmpIt.next());
+					break;
+				}
+			}
+		}
+		return resultList;
 	}
 
 	/**
@@ -728,6 +801,36 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	 */
 	public void setEstimateK(boolean estimateK) {
 		this.estimateK = estimateK;
+	}
+
+	/**
+	 * @return the useInstanceReordering
+	 */
+	public boolean isUseInstanceReordering() {
+		return useInstanceReordering;
+	}
+
+	/**
+	 * @param useInstanceReordering
+	 *            the useInstanceReordering to set
+	 */
+	public void setUseInstanceReordering(boolean useInstanceReordering) {
+		this.useInstanceReordering = useInstanceReordering;
+	}
+
+	/**
+	 * @return the c
+	 */
+	public int getC() {
+		return C;
+	}
+
+	/**
+	 * @param c
+	 *            the c to set
+	 */
+	public void setC(int c) {
+		C = c;
 	}
 
 }

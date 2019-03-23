@@ -2,15 +2,16 @@ package jaicore.ml.tsc.classifier.shapelets;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.ml.tsc.quality_measures.FStat;
+import jaicore.ml.tsc.quality_measures.IQualityMeasure;
 import jaicore.ml.tsc.shapelets.Shapelet;
 import jaicore.ml.tsc.shapelets.search.EarlyAbandonMinimumDistanceSearchStrategy;
 import jaicore.ml.tsc.shapelets.search.ExhaustiveMinimumDistanceSearchStrategy;
@@ -30,6 +31,31 @@ public class ShapeletTransformAlgorithmTest {
 	private static final double EPS_DELTA = 0.000001;
 
 	/**
+	 * The algorithm object used within the tests.
+	 */
+	private ShapeletTransformAlgorithm algorithm;
+
+	/**
+	 * A commonly used sample instance vector
+	 */
+	private double[] sampleInstanceVector;
+
+	/**
+	 * Hyperparameters
+	 */
+	private static final int K = 10;
+	private static final int NUM_CLUSTERS = 5;
+	private static final IQualityMeasure QUALITY_MEASURE = new FStat();
+	private static final int SEED = 42;
+	private static final boolean CLUSTER = false;
+
+	@Before
+	public void setup() {
+		algorithm = new ShapeletTransformAlgorithm(K, NUM_CLUSTERS, QUALITY_MEASURE, SEED, CLUSTER);
+		sampleInstanceVector = new double[] { 1, 2, 3 };
+	}
+
+	/**
 	 * See
 	 * {@link ShapeletTransformAlgorithm#generateCandidates(double[], int, int)}.
 	 */
@@ -39,10 +65,13 @@ public class ShapeletTransformAlgorithmTest {
 		int l = 3;
 
 		Set<Shapelet> actResult = ShapeletTransformAlgorithm.generateCandidates(data, l, 0);
-		Assert.assertEquals(4, actResult.size());
+		Assert.assertEquals(
+				"The number of generated candidates does not match the expected number of generated candidates.", 4,
+				actResult.size());
 
 		Shapelet expectedShapelet = new Shapelet(TimeSeriesUtil.zNormalize(new double[] { 1, 2, 3 }, true), 0, 3, 0);
-		Assert.assertTrue(actResult.stream().anyMatch(s -> s.equals(expectedShapelet)));
+		Assert.assertTrue("The generated shapelets do not match the expected normalized shapelets.",
+				actResult.stream().anyMatch(s -> s.equals(expectedShapelet)));
 
 	}
 
@@ -55,23 +84,25 @@ public class ShapeletTransformAlgorithmTest {
 		double[][] dataMatrix = new double[][] { { 4, 2, 4, 6, 5 }, { 2, 2, 2, 2, 2 } };
 
 		// Using the non-optimized version
-		ShapeletTransformAlgorithm stAlgorithm = new ShapeletTransformAlgorithm(10, 5, new FStat(), 42, false);
-
-		List<Double> actResult = stAlgorithm.findDistances(shapelet, dataMatrix);
+		List<Double> actResult = algorithm.findDistances(shapelet, dataMatrix);
 
 		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.length, actResult.size());
 
-		Assert.assertEquals(0, actResult.get(0), EPS_DELTA);
-		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
+		Assert.assertEquals("The first generated distance does not match the expected distance.", 0, actResult.get(0),
+				EPS_DELTA);
+		Assert.assertEquals("The second generated distance does not match the expected distance.", 2d / 3,
+				actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
 
 		// Using the optimized version
-		stAlgorithm.setMinDistanceSearchStrategy(new EarlyAbandonMinimumDistanceSearchStrategy(true));
-		actResult = stAlgorithm.findDistances(shapelet, dataMatrix);
+		algorithm.setMinDistanceSearchStrategy(new EarlyAbandonMinimumDistanceSearchStrategy(true));
+		actResult = algorithm.findDistances(shapelet, dataMatrix);
 
 		Assert.assertEquals("A distance has to be found for each instance!", dataMatrix.length, actResult.size());
 
-		Assert.assertEquals(0, actResult.get(0), EPS_DELTA);
-		Assert.assertEquals(2d / 3, actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
+		Assert.assertEquals("The first generated distance does not match the expected distance.", 0, actResult.get(0),
+				EPS_DELTA);
+		Assert.assertEquals("The second generated distance does not match the expected distance.", 2d / 3,
+				actResult.get(1), EPS_DELTA); // (1.224744871 * 1.224744871 * 2) / 3,
 	}
 
 	/**
@@ -86,7 +117,8 @@ public class ShapeletTransformAlgorithmTest {
 		shapelets.add(new AbstractMap.SimpleEntry<Shapelet, Double>(new Shapelet(null, 5, 5, 0), 0d));
 		shapelets.add(new AbstractMap.SimpleEntry<Shapelet, Double>(new Shapelet(null, 10, 10, 0), 0d));
 
-		Assert.assertEquals(4, ShapeletTransformAlgorithm.removeSelfSimilar(shapelets).size());
+		Assert.assertEquals("The number of retained shapelets does not match the expected number.", 4,
+				ShapeletTransformAlgorithm.removeSelfSimilar(shapelets).size());
 	}
 
 	/**
@@ -115,9 +147,11 @@ public class ShapeletTransformAlgorithmTest {
 
 		List<Map.Entry<Shapelet, Double>> actResult = ShapeletTransformAlgorithm.merge(k, shapelets, newShapelets);
 
-		Assert.assertEquals(k, actResult.size());
-		Assert.assertTrue(actResult.contains(testEntry1));
-		Assert.assertFalse(actResult.contains(testEntry2));
+		Assert.assertEquals("The number of retained elements does not match the expected number.", k, actResult.size());
+		Assert.assertTrue("The retained shapelets do not contain an element which should be contained.",
+				actResult.contains(testEntry1));
+		Assert.assertFalse("The retained shapelets contain an element which sould not be contained.",
+				actResult.contains(testEntry2));
 	}
 
 	/**
@@ -125,17 +159,11 @@ public class ShapeletTransformAlgorithmTest {
 	 */
 	@Test
 	public void zNormalizeTest() {
-		double[] vector = new double[] { 1, 2, 3 };
-		// INDArray expectedResult = Nd4j.create(new double[] { -1.224744871, 0,
-		// +1.224744871 });
 		double[] expectedResult = new double[] { -1, 0, +1 };
 
-		double[] actResult = TimeSeriesUtil.zNormalize(vector, true);
-		Assert.assertArrayEquals(expectedResult, actResult, EPS_DELTA);
-
-		double[] array = new double[] { 2, 4, 6 };
-
-		System.out.println(Arrays.toString(TimeSeriesUtil.zNormalize(array, true)));
+		double[] actResult = TimeSeriesUtil.zNormalize(sampleInstanceVector, true);
+		Assert.assertArrayEquals("The normalized values of the vector do not match the expected results.",
+				expectedResult, actResult, EPS_DELTA);
 	}
 
 	/**
@@ -148,8 +176,7 @@ public class ShapeletTransformAlgorithmTest {
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest() {
 		double[] matrix = new double[] { 4, 1, 2, 4, 6, 5 };
 
-		double[] vector = new double[] { 1, 2, 3 };
-		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(vector, true), 0, 3, 0);
+		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(sampleInstanceVector, true), 0, 3, 0);
 
 		EarlyAbandonMinimumDistanceSearchStrategy optSearchStrategy = new EarlyAbandonMinimumDistanceSearchStrategy(
 				true);
@@ -157,23 +184,31 @@ public class ShapeletTransformAlgorithmTest {
 
 		double actResult = unoptSearchStrategy.findMinimumDistance(shapelet, matrix);
 
-		Assert.assertEquals(0.0, actResult, EPS_DELTA);
+		Assert.assertEquals("The result of the exhaustive search strategy does not match the expected result.", 0.0,
+				actResult, EPS_DELTA);
 
-		Assert.assertEquals(actResult,
+		Assert.assertEquals("The result of the optimimum search strategy does not match the expected result.",
+				actResult,
 				optSearchStrategy.findMinimumDistance(shapelet, matrix),
+				EPS_DELTA);
+
+		Shapelet shapelet2 = new Shapelet(TimeSeriesUtil.zNormalize(new double[] { 1, 4, 2 }, true), 0, 3, 0);
+		Assert.assertEquals("The result of the exhaustive search strategy does not match the expected result.",
+				0.8968975528613486d, unoptSearchStrategy.findMinimumDistance(shapelet2, matrix),
 				EPS_DELTA);
 	}
 
 	/**
-	 * See
-	 * {@link ShapeletTransformAlgorithm#singleSquaredEuclideanDistance(double[], double[])}.
+	 * See {@link MathUtil#singleSquaredEuclideanDistance(double[], double[])}.
 	 */
 	@Test
 	public void squareEuclideanDistanceTest() {
 		double[] vector = new double[] { 4, 2, 6 };
 		double[] vector2 = new double[] { 2, 4, 6 };
 
-		Assert.assertEquals(8d, MathUtil.singleSquaredEuclideanDistance(vector, vector2), EPS_DELTA);
+		Assert.assertEquals(
+				"The calculation of the single squared euclidean distance does not match the expected result.", 8d,
+				MathUtil.singleSquaredEuclideanDistance(vector, vector2), EPS_DELTA);
 	}
 
 	/**
@@ -186,11 +221,8 @@ public class ShapeletTransformAlgorithmTest {
 	@Test
 	public void getMinimumDistanceAmongAllSequencesOptimizedTest2() {
 		double[] matrix = new double[] { 4, 3, 6, 9, 23, 1 };
-		// INDArray matrix = Nd4j.create(new double[][] { { 4, 2, 4, 6, 5, } });
 
-		double[] vector = new double[] { 1, 2, 3 };
-		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(vector, true), 0, 3, 0);
-		System.out.println("Normalized vector: " + Arrays.toString(shapelet.getData()));
+		Shapelet shapelet = new Shapelet(TimeSeriesUtil.zNormalize(sampleInstanceVector, true), 0, 3, 0);
 
 		EarlyAbandonMinimumDistanceSearchStrategy optSearchStrategy = new EarlyAbandonMinimumDistanceSearchStrategy(
 				true);
@@ -200,6 +232,8 @@ public class ShapeletTransformAlgorithmTest {
 		double oldOptimizedResult = optSearchStrategy.findMinimumDistance(shapelet,
 				matrix);
 
-		Assert.assertEquals(oldResult, oldOptimizedResult, EPS_DELTA);
+		Assert.assertEquals(
+				"The minimum distance of the unoptimzied search strategy does not match the result of the optimzed search strategy.",
+				oldResult, oldOptimizedResult, EPS_DELTA);
 	}
 }

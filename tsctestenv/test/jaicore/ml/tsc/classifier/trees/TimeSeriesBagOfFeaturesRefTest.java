@@ -35,15 +35,15 @@ import weka.core.converters.ArffLoader.ArffReader;
 public class TimeSeriesBagOfFeaturesRefTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TimeSeriesBagOfFeaturesRefTest.class);
 
-	private static final String UNIVARIATE_PREFIX = "D:\\Data\\TSC\\UnivariateTSCProblems\\";
+	private static final String UNIVARIATE_PREFIX = "data/univariate/";
 
 	// @Test
 	public void compareClassifierPredictions()
 			throws TimeSeriesLoadingException, Exception {
 
 		String dataset = "Beef";
-		final String trainPath = UNIVARIATE_PREFIX + dataset + "\\" + dataset + "_TRAIN.arff";
-		final String testPath = UNIVARIATE_PREFIX + dataset + "\\" + dataset + "_TEST.arff";
+		final String trainPath = UNIVARIATE_PREFIX + dataset + File.separator + dataset + "_TRAIN.arff";
+		final String testPath = UNIVARIATE_PREFIX + dataset + File.separator + dataset + "_TEST.arff";
 
 		int seed = 2; // seedRandom.nextInt(100);
 
