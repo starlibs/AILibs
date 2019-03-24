@@ -56,8 +56,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlan.class);
 	
-	private AtomicInteger numberOfSolutions = new AtomicInteger(0);
-	
 	private String loggerName;
 
 	private Classifier selectedClassifier;
