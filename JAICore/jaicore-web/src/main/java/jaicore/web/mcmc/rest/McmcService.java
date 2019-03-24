@@ -165,6 +165,10 @@ public class McmcService {
 	private McmcResponse parseOutputFile(File outputFile) throws IOException {
 		// Read raw lines from output file
 		List<String> rawLines = FileUtils.readLines(outputFile, Charset.defaultCharset());
+		
+		if(rawLines.isEmpty()) {
+			throw new RuntimeException("The output file is empty");
+		}
 
 		// Include all lines into consideration that contain actual values
 		List<String> lines = new ArrayList<>();
@@ -188,6 +192,10 @@ public class McmcService {
 
 			lines.add(line);
 
+		}
+		
+		if(lines.isEmpty()) {
+			throw new RuntimeException("No valid lines could be read from output file!");
 		}
 
 		McmcResponse response = new McmcResponse();
