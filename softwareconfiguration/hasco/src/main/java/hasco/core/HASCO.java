@@ -81,7 +81,6 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	/* runtime variables of algorithm */
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
-
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem,
 			final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory,
@@ -251,17 +250,16 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 						score = this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
 					}
 				} catch (ObjectEvaluationFailedException e) {
-					//TODO what is happening here, weird -> fix it
+					// TODO what is happening here, weird -> fix it
 					e.printStackTrace();
 					score = solutionEvent.getSolutionCandidate().getScore();
 					System.err.println("Could not eval, setting score to " + score);
-					//throw new AlgorithmException(e, "Could not evaluate component instance.");
+					// throw new AlgorithmException(e, "Could not evaluate component instance.");
 					EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score,
 							searchPath);
-					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan,
-							this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
+					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, 0);
 					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(getId(), solution);
-					//this.post(hascoSolutionEvent);
+					// this.post(hascoSolutionEvent);
 					return hascoSolutionEvent;
 
 				}

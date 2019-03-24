@@ -146,6 +146,9 @@ public class WekaDyadRankingSimpleEvaluationExperimenter implements IExperimentS
 			System.out.println("Error Rate of the solution produced by ML-Plan: " + (100 - eval.pctCorrect()) / 100f);
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
+			results.put("exception", "Building the classifier failed: " + e.getMessage());
+			processor.processResults(results);
+			results.clear();
 			System.out.println("Total experiment time: " + (System.currentTimeMillis() - startTimeTotal) / 1000);
 			return;
 		}
