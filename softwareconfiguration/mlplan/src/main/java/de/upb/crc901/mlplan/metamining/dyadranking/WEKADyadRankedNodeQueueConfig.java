@@ -54,6 +54,13 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 		this.characterizer = new LandmarkerCharacterizer();
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public void configureBestFirst(BestFirst bestFirst) {
+		logger.trace("Configuring OPEN list of BF");
+		bestFirst.setOpen(new WEKADyadRankedNodeQueue(new DenseDoubleVector(contextCharacterization), components, ranker, scaler));
+	}
+
 	/**
 	 * Configure the data in the context of whose metafeatures the dyad ranker ranks
 	 * the pipelines.
@@ -75,12 +82,5 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 */
 	public void setComponents(Collection<Component> components) {
 		this.components = components;
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	@Override
-	public void configureBestFirst(BestFirst bestFirst) {
-		logger.trace("Configuring OPEN list of BF");
-		bestFirst.setOpen(new WEKADyadRankedNodeQueue(new DenseDoubleVector(contextCharacterization), components, ranker, scaler));
 	}
 }

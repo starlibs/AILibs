@@ -25,6 +25,7 @@ import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import jaicore.basic.FileUtil;
 import jaicore.basic.TimeOut;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
+import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
@@ -38,7 +39,8 @@ public class MLPlanBuilder {
 			FileInputStream fis = new FileInputStream(configFile);
 			props.load(fis);
 		} else {
-			System.out.println("Config file " + configFile.getAbsolutePath() + " not found, working with default parameters.");
+			System.out.println(
+					"Config file " + configFile.getAbsolutePath() + " not found, working with default parameters.");
 		}
 		return ConfigFactory.create(MLPlanClassifierConfig.class, props);
 	}
@@ -51,18 +53,21 @@ public class MLPlanBuilder {
 	private MLPlanClassifierConfig algorithmConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
 	private MultiClassPerformanceMeasure performanceMeasure = MultiClassPerformanceMeasure.ERRORRATE;
 	private boolean useCache = false;
+	private AbstractEvaluatorMeasureBridge<Double, Double> customEvaluatorBridge;
 	private boolean factoryPreparedWithData = false;
 	private PerformanceDBAdapter dbAdapter = null;
 
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
+	private boolean useCustomHASCOFactory = false;
 	private HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory;
 
 	public MLPlanBuilder() {
 		super();
 	}
 
-	public MLPlanBuilder(File searchSpaceConfigFile, File alhorithmConfigFile, MultiClassPerformanceMeasure performanceMeasure) {
+	public MLPlanBuilder(File searchSpaceConfigFile, File alhorithmConfigFile,
+			MultiClassPerformanceMeasure performanceMeasure) {
 		this();
 		this.searchSpaceConfigFile = searchSpaceConfigFile;
 		this.algorithmConfigFile = alhorithmConfigFile;
@@ -70,7 +75,8 @@ public class MLPlanBuilder {
 		this.useCache = false;
 	}
 
-	public MLPlanBuilder(File searchSpaceConfigFile, File alhorithmConfigFile, MultiClassPerformanceMeasure performanceMeasure, PerformanceDBAdapter dbAdapter) {
+	public MLPlanBuilder(File searchSpaceConfigFile, File alhorithmConfigFile,
+			MultiClassPerformanceMeasure performanceMeasure, PerformanceDBAdapter dbAdapter) {
 		this();
 		this.searchSpaceConfigFile = searchSpaceConfigFile;
 		this.algorithmConfigFile = alhorithmConfigFile;
@@ -108,7 +114,9 @@ public class MLPlanBuilder {
 		File fileOfPreferredComponents = getAlgorithmConfig().preferredComponents();
 		List<String> ordering;
 		if (!fileOfPreferredComponents.exists()) {
-			logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", fileOfPreferredComponents.getAbsolutePath());
+			logger.warn(
+					"The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.",
+					fileOfPreferredComponents.getAbsolutePath());
 			ordering = new ArrayList<>();
 		} else {
 			ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
@@ -134,20 +142,24 @@ public class MLPlanBuilder {
 	}
 
 	/**
-	 * This ADDs a new preferred node evaluator; requires that the search will be a best-first search.
+	 * This ADDs a new preferred node evaluator; requires that the search will be a
+	 * best-first search.
 	 * 
-	 * It is possible to specify several preferred node evaluators, which will be ordered by the order in which they are specified. The latest given evaluator is the most preferred one.
+	 * It is possible to specify several preferred node evaluators, which will be
+	 * ordered by the order in which they are specified. The latest given evaluator
+	 * is the most preferred one.
 	 * 
 	 * @param preferredNodeEvaluator
 	 * @return
 	 */
 	public MLPlanBuilder withPreferredNodeEvaluator(INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
-		
+
 		/* first update the preferred node evaluator */
 		if (this.preferredNodeEvaluator == null) {
 			this.preferredNodeEvaluator = preferredNodeEvaluator;
 		} else {
-			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, this.preferredNodeEvaluator);
+			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator,
+					this.preferredNodeEvaluator);
 		}
 		return this;
 	}
@@ -155,7 +167,8 @@ public class MLPlanBuilder {
 	@SuppressWarnings("unchecked")
 	public void prepareNodeEvaluatorInFactoryWithData(Instances data) {
 		if (!(hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
-			throw new IllegalStateException("Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
+			throw new IllegalStateException(
+					"Cannot define a preferred node evaluator if the hasco factory is not a HASCOViaFDAndBestFirstFactory (or a subclass of it)");
 		}
 		if (factoryPreparedWithData) {
 			throw new IllegalStateException("Factory has already been prepared with data. This can only be done once!");
@@ -169,13 +182,17 @@ public class MLPlanBuilder {
 
 		HASCOViaFDAndBestFirstFactory<Double> factory = (HASCOViaFDAndBestFirstFactory<Double>) hascoFactory;
 
-		/* now determine the real node evaluator to be used. A semantic node evaluator has highest priority */
+		/*
+		 * now determine the real node evaluator to be used. A semantic node evaluator
+		 * has highest priority
+		 */
 		INodeEvaluator<TFDNode, Double> actualNodeEvaluator;
 		if (pipelineValidityCheckingNodeEvaluator != null) {
 			pipelineValidityCheckingNodeEvaluator.setComponents(components);
 			pipelineValidityCheckingNodeEvaluator.setData(data);
 			if (preferredNodeEvaluator != null) {
-				actualNodeEvaluator = new AlternativeNodeEvaluator<>(pipelineValidityCheckingNodeEvaluator, this.preferredNodeEvaluator);
+				actualNodeEvaluator = new AlternativeNodeEvaluator<>(pipelineValidityCheckingNodeEvaluator,
+						this.preferredNodeEvaluator);
 			} else {
 				actualNodeEvaluator = pipelineValidityCheckingNodeEvaluator;
 			}
@@ -183,7 +200,9 @@ public class MLPlanBuilder {
 			actualNodeEvaluator = this.preferredNodeEvaluator;
 		}
 
-		/* set the node evaluator as the preferred node evaluator in the search factory */
+		/*
+		 * set the node evaluator as the preferred node evaluator in the search factory
+		 */
 		factory.getSearchFactory().setPreferredNodeEvaluator(actualNodeEvaluator);
 	}
 
@@ -196,10 +215,10 @@ public class MLPlanBuilder {
 
 	public MLPlanBuilder setHascoFactory(
 			HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory) {
+		this.useCustomHASCOFactory = true;
 		this.hascoFactory = hascoFactory;
 		return this;
 	}
-	
 
 	public void withTimeoutForSingleSolutionEvaluation(final TimeOut timeout) {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH,
@@ -210,7 +229,6 @@ public class MLPlanBuilder {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE,
 				String.valueOf(timeout.milliseconds()));
 	}
-
 
 	public boolean getUseCache() {
 		return useCache;
@@ -226,5 +244,20 @@ public class MLPlanBuilder {
 
 	public Collection<Component> getComponents() {
 		return components;
+	}
+
+	public AbstractEvaluatorMeasureBridge<Double, Double> getCustomEvaluatorBridge() {
+		return customEvaluatorBridge;
+	}
+
+	public MLPlanBuilder withCustomEvaluatorBridge(
+			AbstractEvaluatorMeasureBridge<Double, Double> customEvaluatorBridge) {
+		this.useCache = true;
+		this.customEvaluatorBridge = customEvaluatorBridge;
+		return this;
+	}
+
+	public boolean useCustomHASCOFactory() {
+		return useCustomHASCOFactory;
 	}
 }

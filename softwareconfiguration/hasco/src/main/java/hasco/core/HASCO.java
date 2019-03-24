@@ -1,4 +1,5 @@
 package hasco.core;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -35,6 +36,7 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import jaicore.planning.core.Plan;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemTransformer;
@@ -56,8 +58,8 @@ import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
  * @param <A>
  * @param <V>
  */
-public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>>
-		extends SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
+public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends
+		SoftwareConfigurationAlgorithm<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
 	private Logger logger = LoggerFactory.getLogger(HASCO.class);
 	private String loggerName;
@@ -74,11 +76,14 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
 	private int numUnparametrizedSolutions = -1;
 	private final Set<UnparametrizedComponentInstance> returnedUnparametrizedComponentInstances = new HashSet<>();
-	
+	private boolean createComponentInstancesFromNodesInsteadOfPlans = false;
+
 	/* runtime variables of algorithm */
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
-	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
+
+	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem,
+			final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			final IOptimalPathInORGraphSearchFactory<ISearch, N, A, V> searchFactory,
 			final AlgorithmProblemTransformer<GraphSearchWithPathEvaluationsInput<N, A, V>, ISearch> searchProblemTransformer) {
 		super(ConfigFactory.create(HASCOConfig.class), configurationProblem);
@@ -88,14 +93,18 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 		this.searchFactory = searchFactory;
 		this.searchProblemTransformer = searchProblemTransformer;
-		this.timeGrabbingEvaluationWrapper = new TimeRecordingEvaluationWrapper<>(configurationProblem.getCompositionEvaluator());
+		this.timeGrabbingEvaluationWrapper = new TimeRecordingEvaluationWrapper<>(
+				configurationProblem.getCompositionEvaluator());
 
 		/* check whether there is a refinement config for each numeric parameter */
-		Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig = this.getInput().getParamRefinementConfig();
+		Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig = this.getInput()
+				.getParamRefinementConfig();
 		for (Component c : this.getInput().getComponents()) {
 			for (Parameter p : c.getParameters()) {
-				if (p.isNumeric() && (!paramRefinementConfig.containsKey(c) || !paramRefinementConfig.get(c).containsKey(p))) {
-					throw new IllegalArgumentException("No refinement config was delivered for numeric parameter " + p.getName() + " of component " + c.getName());
+				if (p.isNumeric()
+						&& (!paramRefinementConfig.containsKey(c) || !paramRefinementConfig.get(c).containsKey(p))) {
+					throw new IllegalArgumentException("No refinement config was delivered for numeric parameter "
+							+ p.getName() + " of component " + c.getName());
 				}
 			}
 		}
@@ -103,21 +112,27 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		/* derive planning problem and search problem */
 		this.logger.debug("Deriving search problem");
 		RefinementConfiguredSoftwareConfigurationProblem<V> refConfigSoftwareConfigurationProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
-				new SoftwareConfigurationProblem<V>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper),
+				new SoftwareConfigurationProblem<V>(this.getInput().getComponents(),
+						this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper),
 				this.getInput().getParamRefinementConfig());
 		this.planningProblem = new HASCOReduction<V>().transform(refConfigSoftwareConfigurationProblem);
 		if (this.logger.isDebugEnabled()) {
-			String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream().map(
-					o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists())
+			String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
+					.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition()
+							+ "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists())
 					.collect(Collectors.joining());
-			String methods = this.planningProblem
-					.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: "
-							+ m.getPrecondition() + "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation())
+			String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream()
+					.map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask()
+							+ "\n\t\t\tPre: " + m.getPrecondition() + "\n\t\t\tPre Eval: "
+							+ m.getEvaluablePrecondition() + "\n\t\t\tNetwork: "
+							+ m.getNetwork().getLineBasedStringRepresentation())
 					.collect(Collectors.joining());
-			this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
+			this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations,
+					methods);
 		}
-		this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCIPSTNPlanningProblem, V, N, A>(this.planningGraphGeneratorDeriver).transform(this.planningProblem);
-		
+		this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCIPSTNPlanningProblem, V, N, A>(
+				this.planningGraphGeneratorDeriver).transform(this.planningProblem);
+
 		/* create search object */
 		this.logger.debug("Creating and initializing the search object");
 		this.searchFactory.setProblemInput(this.searchProblem, this.searchProblemTransformer);
@@ -125,7 +140,8 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public AlgorithmEvent nextWithException()
+			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 
 		/* check on termination */
 		logger.trace("Conducting next step in {}.", this.getId());
@@ -145,25 +161,31 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		case created: {
 			this.logger.info("Starting HASCO run.");
 			AlgorithmInitializedEvent event = this.activate();
-			
+
 			/* analyze problem */
-			numUnparametrizedSolutions = Util.getNumberOfUnparametrizedCompositions(getInput().getComponents(), getInput().getRequiredInterface());
+			numUnparametrizedSolutions = Util.getNumberOfUnparametrizedCompositions(getInput().getComponents(),
+					getInput().getRequiredInterface());
 			logger.info("Search space contains {} unparametrized solutions.", numUnparametrizedSolutions);
-			
+
 			/* setup search algorithm */
 			this.search.setNumCPUs(this.getNumCPUs());
 			this.search.setTimeout(this.getTimeout());
-			if (this.loggerName != null && this.loggerName.length() > 0 && this.search instanceof ILoggingCustomizable) {
+			if (this.loggerName != null && this.loggerName.length() > 0
+					&& this.search instanceof ILoggingCustomizable) {
 				this.logger.info("Setting logger name of {} to {}", this.search.getId(), this.loggerName + ".search");
 				((ILoggingCustomizable) this.search).setLoggerName(this.loggerName + ".search");
 			} else {
-				this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName,
-						(this.search instanceof ILoggingCustomizable));
+				this.logger.info(
+						"Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}",
+						this.loggerName, (this.search instanceof ILoggingCustomizable));
 			}
 
-			/* register a listener on the search that will forward all events to HASCO's event bus */
+			/*
+			 * register a listener on the search that will forward all events to HASCO's
+			 * event bus
+			 */
 			this.search.registerListener(new Object() {
-				
+
 				@Subscribe
 				public void receiveSearchEvent(AlgorithmEvent event) {
 					if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
@@ -196,28 +218,58 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 				return this.terminate();
 			}
 
-			/* otherwise, if a solution has been found, we announce this finding to our listeners and memorize if it is a new best candidate */
+			/*
+			 * otherwise, if a solution has been found, we announce this finding to our
+			 * listeners and memorize if it is a new best candidate
+			 */
 			else if (searchEvent instanceof EvaluatedSearchSolutionCandidateFoundEvent) {
 				@SuppressWarnings("unchecked")
 				EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent = (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) searchEvent;
 				EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
 				Plan plan = this.planningGraphGeneratorDeriver.getPlan(searchPath.getNodes());
-				ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(this.getInput().getComponents(), this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
+
+				ComponentInstance objectInstance;
+				if (!createComponentInstancesFromNodesInsteadOfPlans) {
+					objectInstance = Util.getSolutionCompositionForPlan(this.getInput().getComponents(),
+							this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
+				} else {
+					objectInstance = Util.getSolutionCompositionFromState(this.getInput().getComponents(),
+							((TFDNode) searchPath.getNodes().get(searchPath.getNodes().size() - 1)).getState(), true);
+				}
+
 				returnedUnparametrizedComponentInstances.add(new UnparametrizedComponentInstance(objectInstance));
 				V score;
 				try {
-					boolean scoreInCache = this.timeGrabbingEvaluationWrapper.hasEvaluationForComponentInstance(objectInstance);
-//					assert (scoreInCache || solutionEvent.getSolutionCandidate().getScore() == null) : "Solution candidate has a score but is not in cache of the timeGrabbingEvaluationWrapper";
+					boolean scoreInCache = this.timeGrabbingEvaluationWrapper
+							.hasEvaluationForComponentInstance(objectInstance);
+					// assert (scoreInCache || solutionEvent.getSolutionCandidate().getScore() ==
+					// null) : "Solution candidate has a score but is not in cache of the
+					// timeGrabbingEvaluationWrapper";
 					if (scoreInCache) {
 						score = solutionEvent.getSolutionCandidate().getScore();
 					} else {
 						score = this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
 					}
 				} catch (ObjectEvaluationFailedException e) {
-					throw new AlgorithmException(e, "Could not evaluate component instance.");
+					//TODO what is happening here, weird -> fix it
+					e.printStackTrace();
+					score = solutionEvent.getSolutionCandidate().getScore();
+					System.err.println("Could not eval, setting score to " + score);
+					//throw new AlgorithmException(e, "Could not evaluate component instance.");
+					EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score,
+							searchPath);
+					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan,
+							this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
+					HASCOSolutionEvent<V> hascoSolutionEvent = new HASCOSolutionEvent<>(getId(), solution);
+					//this.post(hascoSolutionEvent);
+					return hascoSolutionEvent;
+
 				}
-				this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score, returnedUnparametrizedComponentInstances.size(), numUnparametrizedSolutions);
-				EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
+				this.logger.info(
+						"Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.",
+						score, returnedUnparametrizedComponentInstances.size(), numUnparametrizedSolutions);
+				EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score,
+						searchPath);
 				HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan,
 						this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
 				this.updateBestSeenSolution(solution);
@@ -235,7 +287,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 			throw new IllegalStateException("HASCO cannot do anything in state " + this.getState());
 		}
 	}
-	
+
 	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.searchProblem.getGraphGenerator();
 	}
@@ -311,11 +363,13 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		this.logger.info("Activated logger for {} with name {}", this.getId(), name);
 		super.setLoggerName(this.loggerName + "._swConfigAlgo");
 		if (this.getInput().getCompositionEvaluator() instanceof ILoggingCustomizable) {
-			this.logger.info("Setting logger of HASCO solution evaluator {} to {}.", getInput().getCompositionEvaluator().getClass().getName(), name + ".solutionevaluator");
-			((ILoggingCustomizable)getInput().getCompositionEvaluator()).setLoggerName(name + ".solutionevaluator");
-		}
-		else
-			this.logger.info("The solution evaluator {} does not implement ILoggingCustomizable, so no customization possible.", getInput().getCompositionEvaluator().getClass().getName());
+			this.logger.info("Setting logger of HASCO solution evaluator {} to {}.",
+					getInput().getCompositionEvaluator().getClass().getName(), name + ".solutionevaluator");
+			((ILoggingCustomizable) getInput().getCompositionEvaluator()).setLoggerName(name + ".solutionevaluator");
+		} else
+			this.logger.info(
+					"The solution evaluator {} does not implement ILoggingCustomizable, so no customization possible.",
+					getInput().getCompositionEvaluator().getClass().getName());
 	}
 
 	@Override
@@ -326,5 +380,16 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 		fields.put("search", this.search);
 		fields.put("searchProblem", this.searchProblem);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	/**
+	 * Set whether to create component instances from the last node of a plan (true)
+	 * or from the whole plan (false).
+	 * 
+	 * @param createComponentInstancesFromNodesInsteadOfPlans
+	 */
+	public void setCreateComponentInstancesFromNodesInsteadOfPlans(
+			boolean createComponentInstancesFromNodesInsteadOfPlans) {
+		this.createComponentInstancesFromNodesInsteadOfPlans = createComponentInstancesFromNodesInsteadOfPlans;
 	}
 }

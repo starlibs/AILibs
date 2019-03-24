@@ -12,21 +12,28 @@ public class HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory extends HASCOV
 	public HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(
 			IBestFirstQueueConfiguration<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> OPENConfig) {
 		super();
-		this.setNodeEvaluator(n->0.0);
+		this.setNodeEvaluator(n -> 1.0);
 		this.setSearchFactory(new DyadRankedBestFirstFactory<>(OPENConfig));
 	}
 
 	@Override
 	public void setNodeEvaluator(INodeEvaluator<TFDNode, Double> nodeEvaluator) {
-		System.err.println("Set node eval correctly");
 		setSearchProblemTransformer(
 				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> {
 					if (n.isGoal()) {
-						System.err.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA Evaluate node");
-						return nodeEvaluator.f(n);
+						double f = nodeEvaluator.f(n); 
+						System.err.println("Returning " + f + " for goal node.");
+						return f;
 					} else {
-						return 0.0;
+						return 1.0;
 					}
 				}));
+	}
+
+	@Override
+	public HASCOViaFDAndBestFirst<Double> getAlgorithm() {
+		HASCOViaFDAndBestFirst<Double> hasco = super.getAlgorithm();
+		hasco.setCreateComponentInstancesFromNodesInsteadOfPlans(true);
+		return hasco;
 	}
 }
