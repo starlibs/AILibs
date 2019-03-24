@@ -160,6 +160,20 @@ allprojects {
 
 }
 
+task partialpipelinejar(type: Jar) {
+	zip64 = true
+    manifest {
+        attributes 'Main-Class': 'de.upb.crc901.mlplan.examples.dyadranking.WekaDyadRankingSimpleEvaluationExperimenter'
+    }
+    destinationDir = file("${projectDir}")
+    baseName = 'dyadmlplaninit'
+    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+    from sourceSets.main.allSource
+    from { (configurations.compile)
+            .collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
 dependencies{
 	compile project(":hasco")
 	compile project(":mlplan")
