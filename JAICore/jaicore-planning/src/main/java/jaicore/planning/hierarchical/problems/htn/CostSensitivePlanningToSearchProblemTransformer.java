@@ -1,14 +1,8 @@
 package jaicore.planning.hierarchical.problems.htn;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import jaicore.logging.ToJSONStringUtil;
 import jaicore.planning.core.EvaluatedPlan;
-import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
@@ -25,32 +19,7 @@ implements AlgorithmicProblemReduction<CostSensitiveHTNPlanningProblem<IPlanning
 
 	@Override
 	public GraphSearchWithPathEvaluationsInput<N, A, V> encodeProblem(final CostSensitiveHTNPlanningProblem<IPlanning, V> problem) {
-
-		ISolutionEvaluator<N, A, V> solutionEvaluator = new ISolutionEvaluator<N, A, V>() {
-
-			@Override
-			public V evaluateSolution(final SearchGraphPath<N, A> solutionPath) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
-				return problem.getPlanEvaluator().evaluate(CostSensitivePlanningToSearchProblemTransformer.this.graphGeneratorDeriver.decodeSolution(solutionPath));
-			}
-
-			@Override
-			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final SearchGraphPath<N, A> partialSolutionPath) {
-				return true;
-			}
-
-			@Override
-			public void cancel() {
-				// TODO Auto-generated method stub
-			}
-
-			@Override
-			public String toString() {
-				Map<String, Object> fields = new HashMap<>();
-				fields.put("problem", problem);
-				return ToJSONStringUtil.toJSONString(fields);
-			}
-		};
-		/* derive the concrete graph search problem input */
+		IObjectEvaluator<SearchGraphPath<N, A>, V> solutionEvaluator = solutionPath -> problem.getPlanEvaluator().evaluate(CostSensitivePlanningToSearchProblemTransformer.this.graphGeneratorDeriver.decodeSolution(solutionPath));
 		return new GraphSearchWithPathEvaluationsInput<>(this.graphGeneratorDeriver.encodeProblem(problem.getCorePlanningProblem()).getGraphGenerator(), solutionEvaluator);
 	}
 

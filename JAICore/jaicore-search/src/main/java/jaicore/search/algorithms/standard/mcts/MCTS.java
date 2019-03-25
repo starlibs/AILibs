@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -27,7 +28,6 @@ import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
@@ -65,7 +65,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 
 	protected final IPathUpdatablePolicy<N, A, V> treePolicy;
 	protected final IPolicy<N, A, V> defaultPolicy;
-	protected final ISolutionEvaluator<N, A, V> playoutSimulator;
+	protected final IObjectEvaluator<SearchGraphPath<N, A>, V> playoutSimulator;
 
 	private final Map<List<N>, V> scoreCache = new HashMap<>();
 
@@ -372,7 +372,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 						if (!this.scoreCache.containsKey(path)) {
 							this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
 							try {
-								V playoutScore = this.playoutSimulator.evaluateSolution(this.getPathForNodeList(path));
+								V playoutScore = this.playoutSimulator.evaluate(this.getPathForNodeList(path));
 								boolean isSolutionPlayout = this.nodeGoalTester.isGoal(path.get(path.size() - 1));
 								this.logger.debug("Determined playout score {}. Is goal: {}. Now updating the path.", playoutScore, isSolutionPlayout);
 								this.scoreCache.put(path, playoutScore);

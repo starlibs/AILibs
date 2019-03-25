@@ -1,5 +1,6 @@
 package jaicore.search.core.interfaces;
 
+import jaicore.basic.IObjectEvaluator;
 import jaicore.search.model.other.SearchGraphPath;
 
 /**
@@ -9,20 +10,10 @@ import jaicore.search.model.other.SearchGraphPath;
  *
  * @param <N>
  */
-public class EdgeCountingSolutionEvaluator<N, A> implements ISolutionEvaluator<N, A, Double> {
+public class EdgeCountingSolutionEvaluator<N, A> implements IObjectEvaluator<SearchGraphPath<N, A>, Double> {
 
 	@Override
-	public Double evaluateSolution(final SearchGraphPath<N, A> solutionPath) {
+	public Double evaluate(final SearchGraphPath<N, A> solutionPath) {
 		return solutionPath.getNodes().size() * 1.0;
-	}
-
-	@Override
-	public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final SearchGraphPath<N, A> partialSolutionPath) {
-		return true;
-	}
-
-	@Override
-	public void cancel() {
-		/* not necessary to explicitly cancel */
 	}
 }
