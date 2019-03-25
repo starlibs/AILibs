@@ -69,7 +69,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation);
+		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation, "Timeout for pipeline in search phase.");
 		try {
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
@@ -81,6 +81,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		} catch (InterruptedException e) {
 			this.logger.info("Received InterruptedException!");
 			assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t" + Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
+			this.logger.info("Checking whether interrupt is triggered by task {}", task);
 			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
 				this.logger.debug("This is a controlled interrupt of ourselves for task {}.", task);
 				Thread.interrupted(); // reset thread interruption flag, because the thread is not really interrupted but should only stop the evaluation

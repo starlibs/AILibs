@@ -299,7 +299,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 					return;
 				} catch (Exception e) {
-					BestFirst.this.logger.error("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
+					BestFirst.this.logger.debug("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
@@ -454,7 +454,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* currently, we only support tree search */
 		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n + "").reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
-				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
+		+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
@@ -609,7 +609,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				assert this.nodeSelectedForExpansion == null : "Node selected for expansion must be NULL when setting it!";
 				this.nodeSelectedForExpansion = node;
 				assert this.open.contains(node) : "OPEN must contain the node to be expanded.\n\tOPEN size: " + this.open.size() + "\n\tNode to be expanded: " + node + ".\n\tOPEN: "
-						+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
+				+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
 				this.open.remove(this.nodeSelectedForExpansion);
 				int openSizeAfter = this.open.size();
 				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getPoint()) : "A node chosen for expansion has no entry in the ext2int map!";
@@ -637,7 +637,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 * Preliminarily check that the active jobs are less than the additional threads
 		 */
 		assert this.additionalThreadsForNodeAttachment == 0 || this.activeJobs.get() < this.additionalThreadsForNodeAttachment : "Cannot expand nodes if number of active jobs (" + this.activeJobs.get()
-				+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
+		+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
 
 		/*
 		 * Step 1: determine node that will be expanded next. Either it already has been
@@ -746,8 +746,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					this.pool.submit(nb);
 				}
 			}
-			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, this.open.size(), this.activeJobs.get());
+			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			expansionEvent = new NodeExpansionJobSubmittedEvent<>(this.getId(), actualNodeSelectedForExpansion, successorDescriptions);
 		} else {
 			expansionEvent = new RemovedGoalNodeFromOpenEvent<>(this.getId(), actualNodeSelectedForExpansion);
@@ -883,7 +883,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		/* cancel node evaluator */
 		if (this.cancelableNodeEvaluator) {
 			this.logger.info("Canceling node evaluator.");
-			((ICancelableNodeEvaluator) this.nodeEvaluator).cancel();
+			((ICancelableNodeEvaluator) this.nodeEvaluator).cancelActiveTasks();
 		}
 		this.logger.info("Shutdown completed");
 	}
@@ -1180,8 +1180,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
 		}
 		this.additionalThreadsForNodeAttachment = threadsForExpansion;
-		if (this.additionalThreadsForNodeAttachment > this.getConfig().threads() - 2) { // timer and main thread must not add up here
-			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, this.getConfig().threads() - 2);
+		int maxThreads = this.getConfig().threads() > 0 ? this.getConfig().threads() : -1;
+		if (maxThreads > 0 && this.additionalThreadsForNodeAttachment > maxThreads - 2) { // timer and main thread must not add up here
+			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, maxThreads - 2);
 		}
 		if (this.additionalThreadsForNodeAttachment < 1) {
 			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", this.getConfig().threads());
