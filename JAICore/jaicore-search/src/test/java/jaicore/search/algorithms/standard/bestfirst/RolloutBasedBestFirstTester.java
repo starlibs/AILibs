@@ -13,8 +13,8 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 public class RolloutBasedBestFirstTester extends GraphSearchTester {
 
 	@Override
-	public <N,A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem) {
-		INodeEvaluator<N, Double> ne = new RandomCompletionBasedNodeEvaluator<N, Double>(new Random(0), 3, new AgnosticPathEvaluator<>());
+	public <N,A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
+		INodeEvaluator<N, Double> ne = new RandomCompletionBasedNodeEvaluator<>(new Random(0), 3, new AgnosticPathEvaluator<>());
 		GraphSearchWithSubpathEvaluationsInput<N, A, Double> transformed = new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), ne);
 		return new StandardBestFirst<>(transformed);
 	}

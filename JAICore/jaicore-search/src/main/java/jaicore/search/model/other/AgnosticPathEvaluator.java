@@ -1,21 +1,11 @@
 package jaicore.search.model.other;
 
-import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.basic.IObjectEvaluator;
 
-public class AgnosticPathEvaluator<N, A> implements ISolutionEvaluator<N, A, Double> {
+public class AgnosticPathEvaluator<N, A> implements IObjectEvaluator<SearchGraphPath<N, A>, Double> {
 
 	@Override
-	public Double evaluateSolution(final SearchGraphPath<N, A> solutionPath) {
+	public Double evaluate(final SearchGraphPath<N, A> solutionPath) {
 		return 0.0;
-	}
-
-	@Override
-	public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final SearchGraphPath<N, A> partialSolutionPath) {
-		return true;
-	}
-
-	@Override
-	public void cancel() {
-		/* not necessary to cancel */
 	}
 }

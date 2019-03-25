@@ -425,7 +425,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					BestFirst.this.logger.trace("Released activeJobsCounterLock after decrement.");
 				}
 				this.communicateJobFinished();
-				BestFirst.this.logger.debug("Builder exits.");
+				BestFirst.this.logger.debug("Builder exits. Interrupt-flag is {}", Thread.currentThread().isInterrupted());
 			}
 		}
 	}

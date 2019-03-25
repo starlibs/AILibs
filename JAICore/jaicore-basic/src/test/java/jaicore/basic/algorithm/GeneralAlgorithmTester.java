@@ -275,7 +275,6 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
 		long start = System.currentTimeMillis();
-		boolean timeoutedExceptionSeen = false;
 		boolean timeoutTriggered = false;
 		ThreadGroup tg = new ThreadGroup("TimeoutTestGroup");
 		Thread algorithmThread = new Thread(tg, task, "TimeoutTest Algorithm runner for " + algorithm.getId());
@@ -293,7 +292,6 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			this.logger.warn("Algorithm terminated without exception but with regular output. In general, this is allowed, but if the algorithm is not specialized on safe termination under timeouts, the tested problem might just have been too easy.");
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AlgorithmTimeoutedException) {
-				timeoutedExceptionSeen = true;
 				AlgorithmTimeoutedException ex = (AlgorithmTimeoutedException) e.getCause();
 				assertTrue ("The algorithm has sent a TimeoutException, which is correct, but the timeout was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of 2000ms.", ex.getDelay() <= 2000);
 			} else if (e.getCause() instanceof AlgorithmExecutionCanceledException && threadNumberViolated.get()) {
