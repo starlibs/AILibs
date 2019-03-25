@@ -44,6 +44,9 @@ allprojects {
 	project.group = 'ai.libs'
 	project.version = '0.0.8'
 	
+	def ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : System.getenv('ossrhUsername')
+	def ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : System.getenv('ossrhPassword')
+	
 	sourceSets {
 		main {
 			java {
