@@ -18,7 +18,6 @@ import com.google.common.eventbus.Subscribe;
 import jaicore.basic.BusyObjectEvaluator;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.PartiallyFailingObjectEvaluator;
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.sets.SetUtil;
@@ -26,19 +25,18 @@ import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSoluti
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import jaicore.search.core.interfaces.ISolutionEvaluator;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.testproblems.nqueens.QueenNode;
 
-public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNode, Double>> {
+public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNode, String, Double>> {
 
 	@Test
 	public void testThatEvaluationDependsOnSeed() throws NodeEvaluationException, InterruptedException {
 
 		Set<Double> seenScores = new HashSet<>();
 		for (int seed = 0; seed < 5; seed++) {
-			RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne = this.getSeededNodeEvaluator(seed, 10);
+			RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> ne = this.getSeededNodeEvaluator(seed, 10);
 			for (Node<QueenNode, Double> node : this.getNodesToTest(ne)) {
 				Double score = ne.f(node);
 				assertTrue("Score " + score + " has already been seen.", !seenScores.contains(score));
@@ -63,7 +61,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		/* this is cheap, test it several times */
 		for (int seed = 0; seed < 5; seed++) {
 			List<List<QueenNode>> seenSolutions = new ArrayList<>();
-			RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne = this.getSeededNodeEvaluator(seed, 20); // draw (up to 20 examples), but only 10 solutions exist
+			RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> ne = this.getSeededNodeEvaluator(seed, 20); // draw (up to 20 examples), but only 10 solutions exist
 			ne.setLoggerName("testednodeevaluator");
 			ne.registerSolutionListener(new Object() {
 				@Subscribe
@@ -96,7 +94,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 				List<Double> seenScores = new ArrayList<>();
 				List<Integer> successfulInvocations = new ArrayList<>();
 				successfulInvocations.add(successfulInvocation);
-				RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne = this.getNodeEvaluator(new PartiallyFailingObjectEvaluator<>(successfulInvocations, 0.0), seed, numSamples, -1);
+				RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> ne = this.getNodeEvaluator(new PartiallyFailingObjectEvaluator<>(successfulInvocations, 0.0), seed, numSamples, -1);
 				ne.setLoggerName("testednodeevaluator");
 				ne.registerSolutionListener(new Object() {
 					@Subscribe
@@ -119,49 +117,38 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		}
 	}
 
-	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getNodeEvaluator(final IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> oe, final int seed, final int numSamples, final int timeoutForNodeEvaluationInMs) {
-		ISolutionEvaluator<QueenNode, String, Double> se = new ISolutionEvaluator<QueenNode, String, Double>() {
+	public RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> getNodeEvaluator(final IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> oe, final int seed, final int numSamples, final int timeoutForNodeEvaluationInMs) {
+		IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> se = new IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double>() {
 
 			@Override
-			public Double evaluateSolution(final SearchGraphPath<QueenNode, String> solutionPath) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, ObjectEvaluationFailedException {
+			public Double evaluate(final SearchGraphPath<QueenNode, String> solutionPath) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 				return oe.evaluate(solutionPath);
-			}
-
-			@Override
-			public boolean doesLastActionAffectScoreOfAnySubsequentSolution(final SearchGraphPath<QueenNode, String> partialSolutionPath) {
-				return true;
-			}
-
-			@Override
-			public void cancel() {
-
-				/* no cancel required */
 			}
 		};
 		return new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, se, -1, timeoutForNodeEvaluationInMs);
 	}
 
-	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getSeededNodeEvaluator(final int seed, final int numSamples) {
+	public RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> getSeededNodeEvaluator(final int seed, final int numSamples) {
 		return this.getNodeEvaluator(n -> Math.random(), seed, numSamples, -1);
 	}
 
 	@Override
-	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getNodeEvaluator() {
+	public RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> getNodeEvaluator() {
 		return this.getSeededNodeEvaluator(0, 3);
 	}
 
 	@Override
-	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getBusyNodeEvaluator() {
+	public RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> getBusyNodeEvaluator() {
 		return this.getTimedNodeEvaluator(-1);
 	}
 
 	@Override
-	public RandomCompletionBasedNodeEvaluator<QueenNode, Double> getTimedNodeEvaluator(final int timeoutInMS) {
+	public RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> getTimedNodeEvaluator(final int timeoutInMS) {
 		return this.getNodeEvaluator(new BusyObjectEvaluator<>(), 0, 3, timeoutInMS);
 	}
 
 	@Override
-	public Collection<Node<QueenNode, Double>> getNodesToTest(final RandomCompletionBasedNodeEvaluator<QueenNode, Double> ne) {
+	public Collection<Node<QueenNode, Double>> getNodesToTest(final RandomCompletionBasedNodeEvaluator<QueenNode, String, Double> ne) {
 		StandardBestFirst<QueenNode, String, Double> bf = this.getBF(new AlternativeNodeEvaluator<>(n -> 0.0, ne)); // the n -> 0.0 is not really used except for efficient initialization
 		bf.setLoggerName("testedalgorithm");
 		bf.next();

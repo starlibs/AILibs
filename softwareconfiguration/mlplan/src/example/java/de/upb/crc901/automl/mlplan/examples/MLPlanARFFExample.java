@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.TimeOut;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -50,8 +49,8 @@ public class MLPlanARFFExample {
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(60, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(8);
+		mlplan.setTimeout(300, TimeUnit.SECONDS);
+		mlplan.setNumCPUs(5);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();
@@ -66,7 +65,7 @@ public class MLPlanARFFExample {
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			LOGGER.info("Finished build of the classifier.");
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("Chosen model is: {}", ((MLPipeline) mlplan.getSelectedClassifier()).toString());
+				LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
 			}
 			LOGGER.info("Training time was {}s.", trainTime);
 

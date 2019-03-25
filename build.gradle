@@ -57,6 +57,7 @@ allprojects {
 			}
 			resources {
 				srcDir 'conf'
+				srcDir 'resources'
 			}
 		}
 		test {
