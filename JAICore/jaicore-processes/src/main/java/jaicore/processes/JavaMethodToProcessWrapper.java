@@ -81,7 +81,7 @@ public class JavaMethodToProcessWrapper {
 	 */
 	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final int timeout, final Object... inputs) throws IOException, InvocationTargetException, InterruptedException {
 		TimeoutSubmitter submitter = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask timerTask = submitter.interruptMeAfterMS(timeout);
+		TimerTask timerTask = submitter.interruptMeAfterMS(timeout, "Process has timed out!");
 		Object c;
 		try {
 			c = this.run(clazz, method, target, inputs);

@@ -68,7 +68,7 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100);
+		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
 		try {
 			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {

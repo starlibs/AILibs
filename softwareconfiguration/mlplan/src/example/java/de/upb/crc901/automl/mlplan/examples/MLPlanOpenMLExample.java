@@ -37,9 +37,9 @@ public class MLPlanOpenMLExample {
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(0f);
-		mlplan.setLoggerName("testedalgorithm");
+		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(2);
+		mlplan.setNumCPUs(1);
 		
 		try {
 			long start = System.currentTimeMillis();

@@ -3,6 +3,7 @@ package jaicore.interrupt;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,7 @@ public class Interrupter {
 	public static Interrupter get() {
 		return instance;
 	}
-
+	
 	private final List<Interrupt> openInterrupts = new LinkedList<>();
 
 	public synchronized void interruptThread(final Thread t, final Object reason) {
@@ -59,7 +60,9 @@ public class Interrupter {
 	}
 
 	public boolean hasThreadBeenInterruptedWithReason(final Thread thread, final Object reason) {
-		return this.openInterrupts.stream().anyMatch(i -> i.getInterruptedThread() == thread && i.getReasonForInterruption().equals(reason));
+		boolean matches = this.openInterrupts.stream().anyMatch(i -> i.getInterruptedThread() == thread && i.getReasonForInterruption().equals(reason));
+		logger.debug("Reasons for why thread {} has currently been interrupted: {}. Checked reason {} matched? {}", thread, openInterrupts.stream().filter(t -> t.getInterruptedThread() == thread).map(Interrupt::getReasonForInterruption).collect(Collectors.toList()), reason, matches);
+		return matches;
 	}
 
 	public boolean hasCurrentThreadOpenInterrupts() {
