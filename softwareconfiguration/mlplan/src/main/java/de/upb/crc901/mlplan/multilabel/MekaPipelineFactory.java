@@ -25,6 +25,7 @@ import weka.core.OptionHandler;
 */
 public class MekaPipelineFactory implements IClassifierFactory {
 
+	/* loggin */
 	private static final Logger logger = LoggerFactory.getLogger(MekaPipelineFactory.class);
 
 	@Override
