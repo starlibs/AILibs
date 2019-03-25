@@ -55,4 +55,20 @@ public abstract class ADyadRankedNodeQueueConfig<N>
 		plranker.loadModelFromFile("conf/dyadranking/final_plnet_minmax.zip");
 		ranker = plranker;
 	}
+
+	public ADyadRanker getRanker() {
+		return ranker;
+	}
+
+	public void setRanker(ADyadRanker ranker) {
+		this.ranker = ranker;
+	}
+
+	public AbstractDyadScaler getScaler() {
+		return scaler;
+	}
+
+	public void setScaler(AbstractDyadScaler scaler) {
+		this.scaler = scaler;
+	}
 }

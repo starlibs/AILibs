@@ -42,6 +42,8 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 
 	/** for scaling the dyads */
 	protected AbstractDyadScaler scaler;
+	
+	private boolean useScaler = false;
 
 	/** the actual queue of nodes */
 	private List<Node<N, V>> queue = new ArrayList<>();
@@ -86,9 +88,11 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 		this(contextCharacterization);
 		this.dyadRanker = dyadRanker;
 		this.scaler = scaler;
-
-		// transform dataset
-		transformContextCharacterization();
+		if (scaler != null) {
+			useScaler = true;
+			// transform dataset
+			transformContextCharacterization();
+		}
 	}
 
 	/**
@@ -207,12 +211,16 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				Vector characterization = characterize(e);
 				nodeCharacterizations.add(characterization);
 
-				// scale node
 				Dyad newDyad = new Dyad(contextCharacterization, characterization);
 				queryDyads.add(newDyad);
-				DyadRankingDataset dataset = new DyadRankingDataset();
-				dataset.add(new DyadRankingInstance(Arrays.asList(newDyad)));
-				scaler.transformAlternatives(dataset);
+				
+				if (useScaler) {
+					// scale node
+					DyadRankingDataset dataset = new DyadRankingDataset();
+					dataset.add(new DyadRankingInstance(Arrays.asList(newDyad)));
+					scaler.transformAlternatives(dataset);
+				}
+
 				replaceNaNByZeroes(characterization);
 				
 				// add new pairing of node and characterization
@@ -333,7 +341,13 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	}
 
 	public void setScaler(AbstractDyadScaler scaler) {
-		LOGGER.trace("Update scaler. Was {} now is {}", this.scaler.getClass(), scaler.getClass());
+		if (useScaler) {
+			LOGGER.trace("Update scaler. Was {} now is {}", this.scaler.getClass(), scaler.getClass());
+		} else {
+			LOGGER.trace("Now using scaler {}.", scaler.getClass());
+			this.useScaler = true;
+		}
+
 		this.scaler = scaler;
 
 		// transform dataset
