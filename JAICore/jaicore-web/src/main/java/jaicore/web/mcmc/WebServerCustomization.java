@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class WebServerCustomization implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
-	public static final String PORT_CONFIG_ENV_VARIABLE = "WEBSERVER_PORT";
+	public static final String PORT_CONFIG_ENV_VARIABLE = "LC_PORT";
 
 	@Override
 	public void customize(ConfigurableServletWebServerFactory factory) {
