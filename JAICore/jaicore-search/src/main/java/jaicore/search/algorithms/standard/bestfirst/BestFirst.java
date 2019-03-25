@@ -454,7 +454,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* currently, we only support tree search */
 		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n + "").reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
-				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
+		+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
@@ -609,7 +609,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				assert this.nodeSelectedForExpansion == null : "Node selected for expansion must be NULL when setting it!";
 				this.nodeSelectedForExpansion = node;
 				assert this.open.contains(node) : "OPEN must contain the node to be expanded.\n\tOPEN size: " + this.open.size() + "\n\tNode to be expanded: " + node + ".\n\tOPEN: "
-						+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
+				+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
 				this.open.remove(this.nodeSelectedForExpansion);
 				int openSizeAfter = this.open.size();
 				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getPoint()) : "A node chosen for expansion has no entry in the ext2int map!";
@@ -637,7 +637,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 * Preliminarily check that the active jobs are less than the additional threads
 		 */
 		assert this.additionalThreadsForNodeAttachment == 0 || this.activeJobs.get() < this.additionalThreadsForNodeAttachment : "Cannot expand nodes if number of active jobs (" + this.activeJobs.get()
-				+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
+		+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
 
 		/*
 		 * Step 1: determine node that will be expanded next. Either it already has been
