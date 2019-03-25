@@ -37,8 +37,10 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	private List<IInstance> pool;
 	private boolean removeDyadsWhenQueried;
 	private HashSet<IDyadRankingInstance> queriedRankings;
+	private int numberQueries;
 
 	public DyadDatasetPoolProvider(DyadRankingDataset dataset) {
+		numberQueries = 0;
 		removeDyadsWhenQueried = false;
 		dyadsByInstances = new HashMap<Vector, Set<Dyad>>();
 		dyadsByAlternatives = new HashMap<Vector, Set<Dyad>>();
@@ -59,6 +61,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 
 	@Override
 	public IInstance query(IInstance queryInstance) {
+		numberQueries++;
 		if (!(queryInstance instanceof SparseDyadRankingInstance)) {
 			throw new IllegalArgumentException("Currently only supports SparseDyadRankingInstances!");
 		}
@@ -176,6 +179,10 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 		for(Set<Dyad> set : dyadsByInstances.values())
 			size+=set.size();
 		return size;
+	}
+	
+	public int getNumberQueries() {
+		return numberQueries;
 	}
 
 	@Override

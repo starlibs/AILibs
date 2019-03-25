@@ -46,9 +46,10 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 	private int seed;
 	private int minibatchSize;
 	private Clusterer clusterer;
-	
+
 	public ConfidenceIntervalClusteringBasedActiveDyadRanker(PLNetDyadRanker ranker,
-			IDyadRankingPoolProvider poolProvider, int seed, int numberRandomQueriesAtStart, int minibatchSize, Clusterer clusterer) {
+			IDyadRankingPoolProvider poolProvider, int seed, int numberRandomQueriesAtStart, int minibatchSize,
+			Clusterer clusterer) {
 		super(ranker, poolProvider);
 		this.dyadStats = new HashMap<Dyad, SummaryStatistics>();
 		this.instanceFeatures = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
@@ -142,7 +143,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						Instance intervalInstance = new DenseInstance(1.0d, attValues);
 						intervalInstances.add(intervalInstance);
 					}
-					
+
 //					NumberOfClustersRequestable clusterer;
 //					
 //					
@@ -185,51 +186,51 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 				for (int minibatchIndex = 0; minibatchIndex < minibatchSize; minibatchIndex++) {
 //					get the largest cluster
 					List<Dyad> curDyads = clusterQueue.poll();
-					if(curDyads.size() < 2) {
+					if (curDyads.size() < 2) {
 //						throw new IllegalStateException("ALARMO!");
 						continue;
 					}
 //					check overlap for all pairs of dyads in the current cluster
 					double curMax = -1;
-					int[] curPair = {0,1};
+					int[] curPair = { 0, 1 };
 					boolean changed = false;
-					for(int j = 1; j < curDyads.size(); j++) {
-						for(int k = 0; k < j; k++) {
+					for (int j = 1; j < curDyads.size(); j++) {
+						for (int k = 0; k < j; k++) {
 							Dyad dyad1 = curDyads.get(j);
 							Dyad dyad2 = curDyads.get(k);
 							double overlap = getConfidenceIntervalOverlapForDyads(dyad1, dyad2);
-							if(overlap > curMax) {
+							if (overlap > curMax) {
 								curPair[0] = j;
 								curPair[1] = k;
 								curMax = overlap;
 								System.out.println("Current Overlap: " + overlap);
 								changed = true;
 							}
-								
+
 						}
 					}
 //					if the pair hasn't changed, i.e. there are no overlapping intervals, sample a random pair
-					if(!changed) {
+					if (!changed) {
 						curPair[0] = random.nextInt(curDyads.size());
 						curPair[1] = random.nextInt(curDyads.size());
-						while(curPair[0] == curPair [1]) {
+						while (curPair[0] == curPair[1]) {
 							curPair[1] = random.nextInt(curDyads.size());
 						}
 					}
-					
+
 					// query them
 					LinkedList<Vector> alternatives = new LinkedList<Vector>();
 					alternatives.add(curDyads.get(curPair[0]).getAlternative());
 					alternatives.add(curDyads.get(curPair[1]).getAlternative());
-					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(curDyads.get(curPair[0]).getInstance(),
-							alternatives);
+					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(
+							curDyads.get(curPair[0]).getInstance(), alternatives);
 //					System.out.println(curPair[0] + " " + curPair[1]);
 					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
 					minibatch.add(trueRanking);
 				}
-				
+
 //				System.out.println(minibatch);
-				
+
 				// update the ranker
 				try {
 					System.out.println("Updating with: " + minibatch);
