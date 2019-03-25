@@ -49,10 +49,10 @@ uploadArchives {
 		mavenDeployer {
 			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        		authentication(userName: ossrhUsername, password: ossrhPassword)
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
       		}	
       		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        		authentication(userName: ossrhUsername, password: ossrhPassword)
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
       		}
 
       		pom.project {
@@ -60,7 +60,7 @@ uploadArchives {
         		packaging 'jar'
         		// optionally artifactId can be defined here 
         		description 'This project provides utils to deal with machine learning tasks. Especially it gives support to work with standard ML libraries in Java.'
-        		url 'http://libs.ai'
+        		url 'https://libs.ai'
 
         		scm {
           			connection 'scm:git:https://github.com/fmohr/AILibs.git'

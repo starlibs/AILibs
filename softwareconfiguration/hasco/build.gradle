@@ -17,10 +17,10 @@ uploadArchives {
 		mavenDeployer {
 			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        		authentication(userName: ossrhUsername, password: ossrhPassword)
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
       		}	
       		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        		authentication(userName: ossrhUsername, password: ossrhPassword)
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
       		}
 
       		pom.project {
@@ -28,7 +28,7 @@ uploadArchives {
         		packaging 'jar'
         		// optionally artifactId can be defined here 
         		description 'HASCO is a framework for reducing configuration tasks (e.g. software system configuration or algorithm configuration) into an HTN planning problem. This can then in turn be reduced to a graph search problem that can be solved by any kind of standard graph search algorithm, e.g., breadth-first-search.'
-        		url 'http://libs.ai'
+        		url 'https://libs.ai'
 
         		scm {
           			connection 'scm:git:https://github.com/fmohr/AILibs.git'
