@@ -121,6 +121,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 		this.twoPhaseHASCOFactory.setConfig(this.getConfig());
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
+		
+		builder.setSearchBenchmarkForNodeEvaluator(searchBenchmark);
 		this.optimizingFactory.registerListener(new Object() {
 
 			@Subscribe

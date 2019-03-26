@@ -16,8 +16,14 @@ public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 	public static final String SELECTION_MCCV_FOLDSIZE = "mlplan.selection.foldSize";
 	public static final String SELECTION_PORTION = "mlplan.selection.mccvPortion";
 	
+	public static final String NODE_EVALUATOR_KEY = "mlplan.nodeevaluator";
+	
 //	public static final String TIMEOUT_PER_EVAL_IN_SECONDS = "mlplan.timeoutPerEval";
 
+	@Key(NODE_EVALUATOR_KEY)
+	@DefaultValue("preference_based")
+	public String getNodeEvaluator();
+	
 	@Key(SEARCH_MCCV_ITERATIONS)
 	@DefaultValue("5")
 	public int numberOfMCIterationsDuringSearch();

@@ -55,6 +55,10 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+    <logger name="de.upb.crc901.mlplan.dyadranking">
+    <level value="info" />
+  </logger>
+  
   <logger name="jaicore">
     <level value="warn" />
     <appender-ref ref="console" />
@@ -122,22 +126,6 @@
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
     <level value="warn" />
   </logger>
-  
-    <logger name="jaicore.ml.dyadranking">
-    <level value="warn" />
-    </logger>
-    
-      <logger name="jaicore.ml.metafeatures">
-    <level value="warn" />
-    </logger>
-    
-    <logger name="de.upb.crc901.mlplan">
-    <level value="info" />
-  	</logger> 	
-  	
-  	    <logger name="jaicore.ml.dyadranking.search.RandomlyRankedNodeQueue">
-    <level value="warn" />
-  	</logger> 	
   
   <logger name="testedalgorithm">
     <level value="trace" />

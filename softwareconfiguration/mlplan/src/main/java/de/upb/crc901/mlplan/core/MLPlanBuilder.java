@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
+import de.upb.crc901.mlplan.metamining.dyadranking.DyadRankingBasedNodeEvaluator;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
@@ -20,9 +21,11 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import hasco.core.HASCOFactory;
 import hasco.model.Component;
+import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import jaicore.basic.FileUtil;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.TimeOut;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
@@ -108,20 +111,26 @@ public class MLPlanBuilder {
 	}
 
 	public MLPlanBuilder withAutoWEKAConfiguration() throws IOException {
+		return this.withAutoWEKAConfiguration(true);
+	}
+
+	public MLPlanBuilder withAutoWEKAConfiguration(boolean usePreferenceBasedNodeEvaluator) throws IOException {
 		if (this.searchSpaceConfigFile == null) {
 			withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
+		}	
+		if (usePreferenceBasedNodeEvaluator) {
+			File fileOfPreferredComponents = getAlgorithmConfig().preferredComponents();
+			List<String> ordering;
+			if (!fileOfPreferredComponents.exists()) {
+				logger.warn(
+						"The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.",
+						fileOfPreferredComponents.getAbsolutePath());
+				ordering = new ArrayList<>();
+			} else {
+				ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
+			}
+			withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(components, ordering));
 		}
-		File fileOfPreferredComponents = getAlgorithmConfig().preferredComponents();
-		List<String> ordering;
-		if (!fileOfPreferredComponents.exists()) {
-			logger.warn(
-					"The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.",
-					fileOfPreferredComponents.getAbsolutePath());
-			ordering = new ArrayList<>();
-		} else {
-			ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
-		}
-		withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(components, ordering));
 		this.classifierFactory = new WEKAPipelineFactory();
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
 		return this;
@@ -191,6 +200,11 @@ public class MLPlanBuilder {
 			pipelineValidityCheckingNodeEvaluator.setComponents(components);
 			pipelineValidityCheckingNodeEvaluator.setData(data);
 			if (preferredNodeEvaluator != null) {
+				if (preferredNodeEvaluator instanceof DyadRankingBasedNodeEvaluator) {
+					DyadRankingBasedNodeEvaluator<TFDNode, Double> dyadRanker = (DyadRankingBasedNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator;
+					dyadRanker.setDataset(data);
+					// dyadRanker.setGenerator(hascoFactory.getAlgorithm().getGraphGenerator());
+				}
 				actualNodeEvaluator = new AlternativeNodeEvaluator<>(pipelineValidityCheckingNodeEvaluator,
 						this.preferredNodeEvaluator);
 			} else {
@@ -259,5 +273,13 @@ public class MLPlanBuilder {
 
 	public boolean useCustomHASCOFactory() {
 		return useCustomHASCOFactory;
+	}
+	
+	public void setSearchBenchmarkForNodeEvaluator(IObjectEvaluator<ComponentInstance, Double> searchBenchmark) {
+		if (preferredNodeEvaluator instanceof DyadRankingBasedNodeEvaluator) {
+			DyadRankingBasedNodeEvaluator<TFDNode, Double> dyadRanker = (DyadRankingBasedNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator;
+			dyadRanker.setPipelineEvaluator(searchBenchmark);
+		}
+
 	}
 }

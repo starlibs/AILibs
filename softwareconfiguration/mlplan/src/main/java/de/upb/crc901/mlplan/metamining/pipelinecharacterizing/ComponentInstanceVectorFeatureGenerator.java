@@ -45,7 +45,6 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 	 */
 	public ComponentInstanceVectorFeatureGenerator(Collection<Component> collection) {
 		int counter = 0;
-		logger.debug("HELO {}", collection);
 		logger.debug("Got {} components as input.", collection.size());
 		for (Component component : collection) {
 			logger.debug("Inserting {} at position {}", component.getName(), counter);

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -190,6 +191,11 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
 		INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 		return dyadVector;
+	}
+	
+	public static DyadRankingDataset fromOrderedDyadList(List<Dyad> orderedDyad) {
+		List<IDyadRankingInstance> dyadRankingInstance = Arrays.asList(new DyadRankingInstance(orderedDyad));
+		return new DyadRankingDataset(dyadRankingInstance);
 	}
 
 	/**

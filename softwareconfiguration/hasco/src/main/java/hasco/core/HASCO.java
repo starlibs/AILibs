@@ -190,6 +190,7 @@ public class HASCO<ISearch extends GraphSearchInput<N, A>, N, A, V extends Compa
 					if (!(event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent))
 						post(event);
 				}
+				
 			});
 
 			/* now initialize the search */
