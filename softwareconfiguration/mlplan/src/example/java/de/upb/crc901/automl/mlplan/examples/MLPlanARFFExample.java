@@ -28,7 +28,7 @@ import weka.core.Instances;
 
 public class MLPlanARFFExample {
 
-	private static final boolean ACTIVATE_VISUALIZATION = false;
+	private static final boolean ACTIVATE_VISUALIZATION = true;
 
 	public static void main(final String[] args) throws Exception {
 
@@ -46,7 +46,7 @@ public class MLPlanARFFExample {
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(5);
+		mlplan.setNumCPUs(2);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();

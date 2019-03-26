@@ -115,7 +115,7 @@ public class Graph<T> {
 
 	private void checkNodeExistence(final T item) {
 		if (!this.nodes.keySet().contains(item)) {
-			throw new IllegalArgumentException("Cannot perform operation on node " + item + ", which does not exit!");
+			throw new IllegalArgumentException("Cannot perform operation on node " + item + ", which does not exist!");
 		}
 	}
 
