@@ -390,7 +390,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			throw new IllegalArgumentException(
 					"There must be at least one hidden layer in specified in the config file!");
 		ListBuilder configBuilder = new NeuralNetConfiguration.Builder().seed(configuration.plNetSeed())
-				// Gradient descent updater: SGD
+				// Gradient descent updater: Adam
 				.updater(new Adam(configuration.plNetLearningRate())).list();
 
 		// Build hidden layers
@@ -493,6 +493,14 @@ public class PLNetDyadRanker extends APLDyadRanker
 	public void loadModelFromFile(String filePath) throws IOException {
 		MultiLayerNetwork restored = ModelSerializer.restoreMultiLayerNetwork(filePath);
 		plNet = restored;
+	}
+	
+	public MultiLayerNetwork getPlNet() {
+		return plNet;
+	}
+	
+	public int getEpoch() {
+		return epoch;
 	}
 
 	@Override
