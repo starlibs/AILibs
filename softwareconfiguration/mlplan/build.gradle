@@ -1,71 +1,43 @@
-plugins {
-	id 'eclipse-wtp'
-}
-
 sourceSets {
     main {
-        java {
-            srcDir 'src'
-
-        }
         resources {
-        	srcDir 'conf'
         	srcDir 'resources'
     	}
-    }
-    test {
-   	java {
-   		srcDir 'test'
-   		srcDir 'examples'
-   	}
     }
 }
 
 dependencies {
-
-	// basic dependencies
+  	// basic dependencies
 	compile project(':hasco')
 
-	compile project(':JAICore:jaicore-logic')
+	// JAICore dependencies
 	compile project(':JAICore:jaicore-basic')
-	compile project(':JAICore:jaicore-graph')
+	compile project(':JAICore:jaicore-experiments')
+	compile project(':JAICore:jaicore-logic') 
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 
-	// Graph Stream
-	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
-	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
-
-	// Basics
-	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
-
-	// DB connector
-	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
-
-	// Jackson for JSON (used by JAICore but not contained in the JAR)
-	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
-
-	// OpenML connector
-	compile group: 'org.openml', name: 'apiconnector', version: '1.0.18'
-
-	// servicification dependencies
-	compile group: 'de.upb.isys', name: 'jase', version: '0.0.2'
-
-	// wrapped library dependencies
-	//compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
 
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
-	
 	// TreeMiner
-	compile 'com.github.helegraf:TreeMiner:-SNAPSHOT'
-	
+	compile 'com.github.helegraf:TreeMiner:df764c7b13'
 	// linear algebra
 	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
 	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
 	
-	// gradient descent
-	compile group: 'de.jungblut.common', name: 'thomasjungblut-common', version: '1.1'
+	// gradient descent (but forbid that the guy uses his log4j-stuff, which we will bride to slf4j)
+	compile ('de.jungblut.common:thomasjungblut-common:1.1') {
+	  exclude group: 'log4j'
+	  exclude group: 'org.slf4j'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+	}
+
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	
 }
+
+

@@ -4,9 +4,8 @@ def configPrefix = 'softwareconfiguration/'
 // JAICore
 
 include ":JAICore:jaicore-basic"
-include ":JAICore:jaicore-concurrent"
+include ":JAICore:jaicore-ea"
 include ":JAICore:jaicore-experiments"
-include ":JAICore:jaicore-graph"
 include ":JAICore:jaicore-graphvisualizer"
 include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-math"
@@ -15,7 +14,6 @@ include ":JAICore:jaicore-ml"
 include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"
 include ":JAICore:jaicore-search"
-include ":JAICore:jaicore-services"
 
 
 // Software-Configuration
@@ -24,6 +22,3 @@ project(":hasco").projectDir = new File(configPrefix,"hasco")
 
 include 'mlplan'
 project(":mlplan").projectDir = new File(configPrefix,"mlplan")
-
-includeFlat 'JASE'
-project(":JASE").projectDir = new File(configPrefix, "../JASE")

@@ -1,0 +1,75 @@
+edge {
+	padding: 100px;
+}
+
+node {
+	size-mode: fit;
+	fill-mode: dyn-plain;
+	fill-color: red, blue;
+	padding: 7px;
+}
+
+node.root {
+	padding: 14px;
+	fill-color: black;
+}
+
+
+node.expanding {
+	/*fill-color: blue;*/
+	padding: 10px,5px;
+}
+
+
+node.or_pruned {
+	shape: cross;
+}
+
+node.or_distributed {
+	/*fill-color: orange;*/
+	shape:diamond;
+	padding: 10,5px;
+	
+}
+
+node.or_threaded {
+	/*fill-color: brown;*/
+	shape:diamond;
+	padding: 5px,10px;
+}
+
+node.and_closed {
+	shape: box;
+	padding: 6px;
+	/*fill-color: brown;*/
+}
+
+node.and_open {
+	shape: box;
+	padding: 6px;
+	stroke-color: brown;
+	stroke-mode: plain;
+	stroke-width: 3px;
+}
+
+node.or_closed {
+	/*fill-color: purple;*/ 	 	
+}
+
+node.or_open {
+	shape: circle; 	
+	stroke-mode: plain;
+	stroke-color: rgb(207, 209, 61);
+	stroke-width: 3px;
+}
+
+node.and_solution {
+	shape: box;
+	padding: 6px;
+	fill-color: green;
+}
+
+node.or_solution {
+	shape: circle;
+	fill-color: green;
+}
