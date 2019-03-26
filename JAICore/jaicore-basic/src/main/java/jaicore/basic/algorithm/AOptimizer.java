@@ -1,7 +1,6 @@
 package jaicore.basic.algorithm;
 
 import java.util.NoSuchElementException;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,7 @@ import jaicore.basic.ScoredItem;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 /**
  * The AOptimizer represents an algorithm that is meant to optimize for a single best solution.
@@ -64,14 +64,14 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	}
 
 	@Override
-	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		O candidate = super.nextSolutionCandidate();
 		this.updateBestSeenSolution(candidate);
 		return candidate;
 	}
 
 	@Override
-	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
 			AlgorithmEvent event = this.nextWithException();
 			if (event instanceof SolutionCandidateFoundEvent) {
@@ -91,7 +91,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	}
 
 	@Override
-	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}

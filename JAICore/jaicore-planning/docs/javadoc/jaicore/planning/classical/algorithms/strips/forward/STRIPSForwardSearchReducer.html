@@ -106,7 +106,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>,jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&gt;, <a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/ISTRIPSPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.classical.algorithms.strips.forward">ISTRIPSPlanningGraphGeneratorDeriver</a>&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;, <a href="../../../../../../jaicore/planning/hierarchical/algorithms/IPathToPlanConverter.html" title="interface in jaicore.planning.hierarchical.algorithms">IPathToPlanConverter</a>&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>&gt;</dd>
+<dd>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>,<a href="../../../../../../jaicore/planning/core/Plan.html" title="class in jaicore.planning.core">Plan</a>,jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;,jaicore.search.model.other.SearchGraphPath&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&gt;, <a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/ISTRIPSPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.classical.algorithms.strips.forward">ISTRIPSPlanningGraphGeneratorDeriver</a>&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;</dd>
 </dl>
 <hr>
 <br>
@@ -150,11 +150,11 @@ implements <a href="../../../../../../jaicore/planning/classical/algorithms/stri
 </tr>
 <tr id="i0" class="altColor">
 <td class="colFirst"><code><a href="../../../../../../jaicore/planning/core/Plan.html" title="class in jaicore.planning.core">Plan</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/STRIPSForwardSearchReducer.html#getPlan-java.util.List-">getPlan</a></span>(java.util.List&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>&gt;&nbsp;path)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/STRIPSForwardSearchReducer.html#decodeSolution-jaicore.search.model.other.SearchGraphPath-">decodeSolution</a></span>(jaicore.search.model.other.SearchGraphPath&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&nbsp;solution)</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/STRIPSForwardSearchReducer.html#transform-jaicore.planning.classical.problems.strips.StripsPlanningProblem-">transform</a></span>(<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>&nbsp;problem)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/STRIPSForwardSearchReducer.html#encodeProblem-jaicore.planning.classical.problems.strips.StripsPlanningProblem-">encodeProblem</a></span>(<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>&nbsp;problem)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -195,29 +195,29 @@ implements <a href="../../../../../../jaicore/planning/classical/algorithms/stri
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="transform-jaicore.planning.classical.problems.strips.StripsPlanningProblem-">
+<a name="encodeProblem-jaicore.planning.classical.problems.strips.StripsPlanningProblem-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>transform</h4>
-<pre>public&nbsp;jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&nbsp;transform(<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>&nbsp;problem)</pre>
+<h4>encodeProblem</h4>
+<pre>public&nbsp;jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&nbsp;encodeProblem(<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>&nbsp;problem)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>transform</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>,jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&gt;</code></dd>
+<dd><code>encodeProblem</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>,<a href="../../../../../../jaicore/planning/core/Plan.html" title="class in jaicore.planning.core">Plan</a>,jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;,jaicore.search.model.other.SearchGraphPath&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
-<a name="getPlan-java.util.List-">
+<a name="decodeSolution-jaicore.search.model.other.SearchGraphPath-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>getPlan</h4>
-<pre>public&nbsp;<a href="../../../../../../jaicore/planning/core/Plan.html" title="class in jaicore.planning.core">Plan</a>&nbsp;getPlan(java.util.List&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>&gt;&nbsp;path)</pre>
+<h4>decodeSolution</h4>
+<pre>public&nbsp;<a href="../../../../../../jaicore/planning/core/Plan.html" title="class in jaicore.planning.core">Plan</a>&nbsp;decodeSolution(jaicore.search.model.other.SearchGraphPath&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&nbsp;solution)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../../../../jaicore/planning/hierarchical/algorithms/IPathToPlanConverter.html#getPlan-java.util.List-">getPlan</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../../../jaicore/planning/hierarchical/algorithms/IPathToPlanConverter.html" title="interface in jaicore.planning.hierarchical.algorithms">IPathToPlanConverter</a>&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>&gt;</code></dd>
+<dd><code>decodeSolution</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;<a href="../../../../../../jaicore/planning/classical/problems/strips/StripsPlanningProblem.html" title="class in jaicore.planning.classical.problems.strips">StripsPlanningProblem</a>,<a href="../../../../../../jaicore/planning/core/Plan.html" title="class in jaicore.planning.core">Plan</a>,jaicore.search.core.interfaces.GraphGenerator&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;,jaicore.search.model.other.SearchGraphPath&lt;<a href="../../../../../../jaicore/planning/classical/algorithms/strips/forward/StripsForwardPlanningNode.html" title="class in jaicore.planning.classical.algorithms.strips.forward">StripsForwardPlanningNode</a>,java.lang.String&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>

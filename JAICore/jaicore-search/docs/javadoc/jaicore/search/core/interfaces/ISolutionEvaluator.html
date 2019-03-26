@@ -90,7 +90,7 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">jaicore.search.core.interfaces</div>
-<h2 title="Interface ISolutionEvaluator" class="title">Interface ISolutionEvaluator&lt;N,V extends java.lang.Comparable&lt;V&gt;&gt;</h2>
+<h2 title="Interface ISolutionEvaluator" class="title">Interface ISolutionEvaluator&lt;N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</h2>
 </div>
 <div class="contentContainer">
 <div class="description">
@@ -102,7 +102,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <hr>
 <br>
-<pre>public interface <span class="typeNameLabel">ISolutionEvaluator&lt;N,V extends java.lang.Comparable&lt;V&gt;&gt;</span></pre>
+<pre>public interface <span class="typeNameLabel">ISolutionEvaluator&lt;N,A,V extends java.lang.Comparable&lt;V&gt;&gt;</span></pre>
 </li>
 </ul>
 </div>
@@ -127,11 +127,11 @@ var activeTableTab = "activeTableTab";
 </tr>
 <tr id="i1" class="rowColor">
 <td class="colFirst"><code>boolean</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#doesLastActionAffectScoreOfAnySubsequentSolution-java.util.List-">doesLastActionAffectScoreOfAnySubsequentSolution</a></span>(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>&gt;&nbsp;partialSolutionPath)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#doesLastActionAffectScoreOfAnySubsequentSolution-jaicore.search.model.other.SearchGraphPath-">doesLastActionAffectScoreOfAnySubsequentSolution</a></span>(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">A</a>&gt;&nbsp;partialSolutionPath)</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">V</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#evaluateSolution-java.util.List-">evaluateSolution</a></span>(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>&gt;&nbsp;solutionPath)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html#evaluateSolution-jaicore.search.model.other.SearchGraphPath-">evaluateSolution</a></span>(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">A</a>&gt;&nbsp;solutionPath)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -148,33 +148,33 @@ var activeTableTab = "activeTableTab";
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="evaluateSolution-java.util.List-">
+<a name="evaluateSolution-jaicore.search.model.other.SearchGraphPath-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>evaluateSolution</h4>
-<pre><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">V</a>&nbsp;evaluateSolution(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>&gt;&nbsp;solutionPath)
+<pre><a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">V</a>&nbsp;evaluateSolution(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">A</a>&gt;&nbsp;solutionPath)
             throws java.lang.InterruptedException,
-                   java.util.concurrent.TimeoutException,
+                   jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                    jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
                    jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException</code></dd>
 </dl>
 </li>
 </ul>
-<a name="doesLastActionAffectScoreOfAnySubsequentSolution-java.util.List-">
+<a name="doesLastActionAffectScoreOfAnySubsequentSolution-jaicore.search.model.other.SearchGraphPath-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
 <h4>doesLastActionAffectScoreOfAnySubsequentSolution</h4>
-<pre>boolean&nbsp;doesLastActionAffectScoreOfAnySubsequentSolution(java.util.List&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>&gt;&nbsp;partialSolutionPath)</pre>
+<pre>boolean&nbsp;doesLastActionAffectScoreOfAnySubsequentSolution(<a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">N</a>,<a href="../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="type parameter in ISolutionEvaluator">A</a>&gt;&nbsp;partialSolutionPath)</pre>
 </li>
 </ul>
 <a name="cancel--">

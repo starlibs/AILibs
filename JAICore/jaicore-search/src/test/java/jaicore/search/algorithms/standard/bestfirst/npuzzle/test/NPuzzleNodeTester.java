@@ -1,34 +1,33 @@
 package jaicore.search.algorithms.standard.bestfirst.npuzzle.test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import jaicore.search.testproblems.npuzzle.standard.NPuzzleNode;
+import jaicore.testproblems.npuzzle.NPuzzleState;
 
 public class NPuzzleNodeTester {
 
-	NPuzzleNode n;
-	NPuzzleNode n1;
-	NPuzzleNode n2;
+	NPuzzleState n;
+	NPuzzleState n1;
+	NPuzzleState n2;
 
-	
 	@Before
 	public void before() {
-		int [][] board = {{1,2,3},{4,5,6},{7,8,0}};
-		n = new NPuzzleNode(board,2,2,0);
-		board  = new int[][] {{1,5,2},{7,4,3},{0,8,6}};
-		n1 = new NPuzzleNode(board,2,0,0);
-		n2 = new NPuzzleNode(board,2,0,0);
-		
+		int[][] board = { { 1, 2, 3 }, { 4, 5, 6 }, { 7, 8, 0 } };
+		this.n = new NPuzzleState(board, 2, 2);
+		board = new int[][] { { 1, 5, 2 }, { 7, 4, 3 }, { 0, 8, 6 } };
+		this.n1 = new NPuzzleState(board, 2, 0);
+		this.n2 = new NPuzzleState(board, 2, 0);
+
 	}
+
 	@Test
 	public void testGetDistance() {
-		assertEquals(0,n.getDistance(),0);
-		assertEquals(6, n1.getDistance(),0);
-		assertEquals(n1,n2);
+		assertEquals(0, this.n.getDistance(), 0);
+		assertEquals(6, this.n1.getDistance(), 0);
+		assertEquals(this.n1, this.n2);
 	}
 
 }

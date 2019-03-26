@@ -93,7 +93,7 @@
 <ul>
 <li type="circle">jaicore.basic.algorithm.AAlgorithm&lt;I,O&gt; (implements jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, jaicore.basic.ILoggingCustomizable)
 <ul>
-<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.basic.algorithm.AOptimizer&lt;I,O,V&gt; (implements jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)
 <ul>
@@ -129,7 +129,7 @@
 <li type="circle">hasco.events.<a href="hasco/events/HASCORunStartedEvent.html" title="class in hasco.events"><span class="typeNameLink">HASCORunStartedEvent</span></a>&lt;T,V&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent&lt;O&gt;
+<li type="circle">jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent&lt;O&gt; (implements jaicore.basic.algorithm.events.SolutionCandidateFoundEvent&lt;O&gt;)
 <ul>
 <li type="circle">hasco.events.<a href="hasco/events/HASCOSolutionEvent.html" title="class in hasco.events"><span class="typeNameLink">HASCOSolutionEvent</span></a>&lt;V&gt; (implements jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent&lt;O,V&gt;)</li>
 </ul>
@@ -173,7 +173,7 @@
 </ul>
 </li>
 <li type="circle">hasco.observers.<a href="hasco/observers/HASCOModelStatisticsObserver.html" title="class in hasco.observers"><span class="typeNameLink">HASCOModelStatisticsObserver</span></a></li>
-<li type="circle">hasco.reduction.<a href="hasco/reduction/HASCOReduction.html" title="class in hasco.reduction"><span class="typeNameLink">HASCOReduction</span></a>&lt;V&gt; (implements jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)</li>
+<li type="circle">hasco.reduction.<a href="hasco/reduction/HASCOReduction.html" title="class in hasco.reduction"><span class="typeNameLink">HASCOReduction</span></a>&lt;V&gt; (implements jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;I1,O1,I2,O2&gt;)</li>
 <li type="circle">hasco.core.<a href="hasco/core/HASCORunReport.html" title="class in hasco.core"><span class="typeNameLink">HASCORunReport</span></a>&lt;V&gt;</li>
 <li type="circle">hasco.events.<a href="hasco/events/HASCORunTerminatedEvent.html" title="class in hasco.events"><span class="typeNameLink">HASCORunTerminatedEvent</span></a>&lt;T,V&gt;</li>
 <li type="circle">hasco.core.<a href="hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core"><span class="typeNameLink">HASCOSolutionCandidate</span></a>&lt;V&gt; (implements hasco.model.<a href="hasco/model/EvaluatedSoftwareConfigurationSolution.html" title="interface in hasco.model">EvaluatedSoftwareConfigurationSolution</a>&lt;V&gt;)</li>
@@ -296,9 +296,9 @@
 </ul>
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li type="circle">jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;
+<li type="circle">jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;I1,O1,I2,O2&gt;
 <ul>
-<li type="circle">jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;IPlanning,N,A&gt; (also extends jaicore.planning.hierarchical.algorithms.IPathToPlanConverter&lt;N&gt;)
+<li type="circle">jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;IPlanning,N,A&gt;
 <ul>
 <li type="circle">hasco.core.<a href="hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core"><span class="typeNameLink">IHASCOPlanningGraphGeneratorDeriver</span></a>&lt;N,A&gt;</li>
 </ul>
@@ -312,15 +312,6 @@
 </ul>
 </li>
 <li type="circle">hasco.metamining.<a href="hasco/metamining/IMetaMiner.html" title="interface in hasco.metamining"><span class="typeNameLink">IMetaMiner</span></a></li>
-<li type="circle">jaicore.planning.hierarchical.algorithms.IPathToPlanConverter&lt;N&gt;
-<ul>
-<li type="circle">jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;IPlanning,N,A&gt; (also extends jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)
-<ul>
-<li type="circle">hasco.core.<a href="hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core"><span class="typeNameLink">IHASCOPlanningGraphGeneratorDeriver</span></a>&lt;N,A&gt;</li>
-</ul>
-</li>
-</ul>
-</li>
 <li type="circle">jaicore.basic.ScoredItem&lt;V&gt;
 <ul>
 <li type="circle">hasco.model.<a href="hasco/model/EvaluatedSoftwareConfigurationSolution.html" title="interface in hasco.model"><span class="typeNameLink">EvaluatedSoftwareConfigurationSolution</span></a>&lt;V&gt;</li>

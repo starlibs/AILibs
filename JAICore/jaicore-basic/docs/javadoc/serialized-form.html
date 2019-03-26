@@ -131,6 +131,17 @@
 <!--   -->
 </a>
 <h3>Class <a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">jaicore.basic.algorithm.AlgorithmExecutionCanceledException</a> extends java.lang.Exception implements Serializable</h3>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>delay</h4>
+<pre>long delay</pre>
+</li>
+</ul>
+</li>
+</ul>
 </li>
 </ul>
 </li>
@@ -142,17 +153,17 @@
 </a>
 <h3>Class <a href="jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.AlgorithmException</a> extends java.lang.Exception implements Serializable</h3>
 </li>
-<li class="blockList"><a name="jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException">
+<li class="blockList"><a name="jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException">
 <!--   -->
 </a>
-<h3>Class <a href="jaicore/basic/algorithm/exceptions/DelayedCancellationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException</a> extends <a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTerminationCheckException</a> implements Serializable</h3>
+<h3>Class <a href="jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</a> extends java.util.concurrent.TimeoutException implements Serializable</h3>
 <ul class="blockList">
 <li class="blockList">
 <h3>Serialized Fields</h3>
 <ul class="blockList">
 <li class="blockListLast">
-<h4>exception</h4>
-<pre><a href="jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a> exception</pre>
+<h4>delay</h4>
+<pre>long delay</pre>
 </li>
 </ul>
 </li>
@@ -169,22 +180,6 @@
 <li class="blockListLast">
 <h4>delay</h4>
 <pre>long delay</pre>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="blockList"><a name="jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException">
-<!--   -->
-</a>
-<h3>Class <a href="jaicore/basic/algorithm/exceptions/DelayedTimeoutCheckException.html" title="class in jaicore.basic.algorithm.exceptions">jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException</a> extends <a href="jaicore/basic/algorithm/exceptions/DelayedTerminationCheckException.html" title="class in jaicore.basic.algorithm.exceptions">DelayedTerminationCheckException</a> implements Serializable</h3>
-<ul class="blockList">
-<li class="blockList">
-<h3>Serialized Fields</h3>
-<ul class="blockList">
-<li class="blockListLast">
-<h4>exception</h4>
-<pre>java.util.concurrent.TimeoutException exception</pre>
 </li>
 </ul>
 </li>
@@ -257,6 +252,71 @@
 <h4>order</h4>
 <pre>java.util.Map&lt;K,V&gt; order</pre>
 <div class="block">The order of this set. For an a the b's with a < b are stored.</div>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList">
+<h2 title="Package">Package&nbsp;jaicore.graph</h2>
+<ul class="blockList">
+<li class="blockList"><a name="jaicore.graph.Graph">
+<!--   -->
+</a>
+<h3>Class <a href="jaicore/graph/Graph.html" title="class in jaicore.graph">jaicore.graph.Graph</a> extends java.lang.Object implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>-4773369406288261706L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockList">
+<h4>nodes</h4>
+<pre>java.util.Map&lt;K,V&gt; nodes</pre>
+</li>
+<li class="blockListLast">
+<h4>edges</h4>
+<pre>java.util.Set&lt;E&gt; edges</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="jaicore.graph.LabeledGraph">
+<!--   -->
+</a>
+<h3>Class <a href="jaicore/graph/LabeledGraph.html" title="class in jaicore.graph">jaicore.graph.LabeledGraph</a> extends <a href="jaicore/graph/Graph.html" title="class in jaicore.graph">Graph</a>&lt;<a href="jaicore/graph/LabeledGraph.html" title="type parameter in LabeledGraph">T</a>&gt; implements Serializable</h3>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>labels</h4>
+<pre>java.util.Map&lt;K,V&gt; labels</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="blockList"><a name="jaicore.graph.NodeNotFoundException">
+<!--   -->
+</a>
+<h3>Class <a href="jaicore/graph/NodeNotFoundException.html" title="class in jaicore.graph">jaicore.graph.NodeNotFoundException</a> extends java.lang.Exception implements Serializable</h3>
+<dl class="nameValue">
+<dt>serialVersionUID:</dt>
+<dd>-8334959000362299402L</dd>
+</dl>
+<ul class="blockList">
+<li class="blockList">
+<h3>Serialized Fields</h3>
+<ul class="blockList">
+<li class="blockListLast">
+<h4>item</h4>
+<pre>java.lang.Object item</pre>
 </li>
 </ul>
 </li>

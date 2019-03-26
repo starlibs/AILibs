@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -23,7 +24,7 @@ import jaicore.basic.MathExt;
 
 /**
  * Utility class for sets.
- * 
+ *
  * @author fmohr, mbunse
  */
 public class SetUtil {
@@ -32,66 +33,90 @@ public class SetUtil {
 		private X x;
 		private Y y;
 
-		public Pair(X x, Y y) {
+		public Pair(final X x, final Y y) {
 			super();
 			this.x = x;
 			this.y = y;
 		}
 
 		public X getX() {
-			return x;
+			return this.x;
 		}
 
 		public Y getY() {
-			return y;
+			return this.y;
 		}
 
 		@Override
 		public String toString() {
-			return "<" + x + ", " + y + ">";
+			return "<" + this.x + ", " + this.y + ">";
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + ((x == null) ? 0 : x.hashCode());
-			result = prime * result + ((y == null) ? 0 : y.hashCode());
+			result = prime * result + ((this.x == null) ? 0 : this.x.hashCode());
+			result = prime * result + ((this.y == null) ? 0 : this.y.hashCode());
 			return result;
 		}
 
 		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
+		public boolean equals(final Object obj) {
+			if (this == obj) {
 				return true;
-			if (obj == null)
+			}
+			if (obj == null) {
 				return false;
-			if (getClass() != obj.getClass())
+			}
+			if (this.getClass() != obj.getClass()) {
 				return false;
+			}
 			@SuppressWarnings("unchecked")
-			Pair<X,Y> other = (Pair<X,Y>) obj;
-			if (x == null) {
-				if (other.x != null)
+			Pair<X, Y> other = (Pair<X, Y>) obj;
+			if (this.x == null) {
+				if (other.x != null) {
 					return false;
-			} else if (!x.equals(other.x))
+				}
+			} else if (!this.x.equals(other.x)) {
 				return false;
-			if (y == null) {
-				if (other.y != null)
+			}
+			if (this.y == null) {
+				if (other.y != null) {
 					return false;
-			} else if (!y.equals(other.y))
+				}
+			} else if (!this.y.equals(other.y)) {
 				return false;
+			}
 			return true;
 		}
 	}
 
 	/* BASIC SET OPERATIONS */
 	@SafeVarargs
-	public static <T> Collection<T> union(Collection<T>... set) {
+	public static <T> Collection<T> union(final Collection<T>... set) {
 		Collection<T> union = new HashSet<>();
 		for (int i = 0; i < set.length; i++) {
 			union.addAll(set[i]);
 		}
 		return union;
+	}
+
+	public static <T> Collection<T> symmetricDifference(final Collection<T> a, final Collection<T> b) {
+		return SetUtil.union(SetUtil.difference(a, b), SetUtil.difference(b, a));
+	}
+
+	public static <T> Collection<T> getMultiplyContainedItems(final List<T> list) {
+		Set<T> doubleEntries = new HashSet<>();
+		Set<T> observed = new HashSet<>();
+		for (T item : list) {
+			if (observed.contains(item)) {
+				doubleEntries.add(item);
+			} else {
+				observed.add(item);
+			}
+		}
+		return doubleEntries;
 	}
 
 	/**
@@ -101,7 +126,7 @@ public class SetUtil {
 	 *            The set B.
 	 * @return The intersection of sets A and B.
 	 */
-	public static <S, T extends S, U extends S> Collection<S> intersection(Collection<T> a, Collection<U> b) {
+	public static <S, T extends S, U extends S> Collection<S> intersection(final Collection<T> a, final Collection<U> b) {
 		List<S> out = new ArrayList<>();
 		Collection<? extends S> bigger = a.size() < b.size() ? b : a;
 		for (S item : ((a.size() >= b.size()) ? b : a)) {
@@ -112,7 +137,7 @@ public class SetUtil {
 		return out;
 	}
 
-	public static <S, T extends S, U extends S> boolean disjoint(Collection<T> a, Collection<U> b) {
+	public static <S, T extends S, U extends S> boolean disjoint(final Collection<T> a, final Collection<U> b) {
 		Collection<? extends S> bigger = a.size() < b.size() ? b : a;
 		for (S item : ((a.size() >= b.size()) ? b : a)) {
 			if (bigger.contains(item)) {
@@ -122,18 +147,20 @@ public class SetUtil {
 		return true;
 	}
 
-	public static <T> Collection<Collection<T>> getPotenceOfSet(Collection<T> set, byte exponent) {
+	public static <T> Collection<Collection<T>> getPotenceOfSet(final Collection<T> set, final byte exponent) {
 		Collection<Collection<T>> items = new ArrayList<Collection<T>>();
-		for (byte i = 0; i < exponent; i++)
+		for (byte i = 0; i < exponent; i++) {
 			items.add(set);
+		}
 		return getCartesianProductOfSetsOfSameClass(items);
 	}
 
-	public static <T> Collection<Collection<T>> getCartesianProductOfSetsOfSameClass(Collection<Collection<T>> items) {
+	public static <T> Collection<Collection<T>> getCartesianProductOfSetsOfSameClass(final Collection<Collection<T>> items) {
 
 		/* recursion abortion */
-		if (items.size() == 0)
+		if (items.isEmpty()) {
 			return new ArrayList<Collection<T>>();
+		}
 		if (items.size() == 1) {
 			Collection<Collection<T>> tuples = new ArrayList<Collection<T>>();
 			for (Collection<T> set : items) { // only one run exists here
@@ -151,9 +178,9 @@ public class SetUtil {
 		Collection<T> unconsideredDomain = null;
 		int i = 0, limit = items.size();
 		for (Collection<T> set : items) {
-			if (i < limit - 1)
+			if (i < limit - 1) {
 				subproblem.add(set);
-			else if (i == limit - 1) {
+			} else if (i == limit - 1) {
 				unconsideredDomain = set;
 				break;
 			}
@@ -175,7 +202,7 @@ public class SetUtil {
 	}
 
 	/* SUBSETS */
-	public static <T> Collection<Collection<T>> powerset(Collection<T> items) throws InterruptedException {
+	public static <T> Collection<Collection<T>> powerset(final Collection<T> items) throws InterruptedException {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
 			Collection<Collection<T>> setWithEmptySet = new ArrayList<Collection<T>>();
@@ -210,7 +237,7 @@ public class SetUtil {
 		return subsets;
 	}
 
-	public static <T> Collection<Collection<T>> getAllPossibleSubsets(Collection<T> items) {
+	public static <T> Collection<Collection<T>> getAllPossibleSubsets(final Collection<T> items) {
 
 		/* |M| = 0 */
 		if (items.isEmpty()) {
@@ -224,10 +251,11 @@ public class SetUtil {
 		Collection<T> restList = new ArrayList<T>();
 		int i = 0;
 		for (T item : items) {
-			if (i == 0)
+			if (i == 0) {
 				baseElement = item;
-			else
+			} else {
 				restList.add(item);
+			}
 			i++;
 		}
 		Collection<Collection<T>> subsets = getAllPossibleSubsets(restList);
@@ -253,8 +281,7 @@ public class SetUtil {
 		private Semaphore semThreads, semComplete;
 		private long goalSize;
 
-		public SubSetComputer(List<T> superSet, int k, int idx, Set<T> current, List<Set<T>> allSolutions, ExecutorService pool, Semaphore sem, long goalSize,
-				Semaphore semComplete) {
+		public SubSetComputer(final List<T> superSet, final int k, final int idx, final Set<T> current, final List<Set<T>> allSolutions, final ExecutorService pool, final Semaphore sem, final long goalSize, final Semaphore semComplete) {
 			super();
 			this.superSet = superSet;
 			this.pool = pool;
@@ -270,16 +297,17 @@ public class SetUtil {
 		@Override
 		public void run() {
 			List<Set<T>> localSolutions = new ArrayList<>();
-			performStep(superSet, k, idx, current, localSolutions);
-			synchronized (allSolutions) {
-				allSolutions.addAll(localSolutions);
-				if (allSolutions.size() == goalSize)
-					semComplete.release();
+			this.performStep(this.superSet, this.k, this.idx, this.current, localSolutions);
+			synchronized (this.allSolutions) {
+				this.allSolutions.addAll(localSolutions);
+				if (this.allSolutions.size() == this.goalSize) {
+					this.semComplete.release();
+				}
 			}
-			semThreads.release();
+			this.semThreads.release();
 		}
 
-		public void performStep(List<T> superSet, int k, int idx, Set<T> current, List<Set<T>> solution) {
+		public void performStep(final List<T> superSet, final int k, final int idx, final Set<T> current, final List<Set<T>> solution) {
 
 			// successful stop clause
 			if (current.size() == k) {
@@ -287,41 +315,42 @@ public class SetUtil {
 				return;
 			}
 			// unseccessful stop clause
-			if (idx == superSet.size())
+			if (idx == superSet.size()) {
 				return;
+			}
 			T x = superSet.get(idx);
 			current.add(x);
 
 			// "guess" x is in the subset
-			if (semThreads.tryAcquire()) {
+			if (this.semThreads.tryAcquire()) {
 
 				/* outsource first task in a new thread */
-				pool.submit(new SubSetComputer<T>(superSet, k, idx + 1, new HashSet<>(current), allSolutions, pool, semThreads, goalSize, semComplete));
+				this.pool.submit(new SubSetComputer<T>(superSet, k, idx + 1, new HashSet<>(current), this.allSolutions, this.pool, this.semThreads, this.goalSize, this.semComplete));
 
 				/* also try to outsorce the second task into its own thread */
 				current.remove(x);
-				if (semThreads.tryAcquire()) {
-					pool.submit(new SubSetComputer<T>(superSet, k, idx + 1, new HashSet<>(current), allSolutions, pool, semThreads, goalSize, semComplete));
+				if (this.semThreads.tryAcquire()) {
+					this.pool.submit(new SubSetComputer<T>(superSet, k, idx + 1, new HashSet<>(current), this.allSolutions, this.pool, this.semThreads, this.goalSize, this.semComplete));
 				} else {
 
 					/* solve the second task in this same thread */
-					performStep(superSet, k, idx + 1, current, solution);
+					this.performStep(superSet, k, idx + 1, current, solution);
 				}
 			} else {
-				performStep(superSet, k, idx + 1, current, solution);
+				this.performStep(superSet, k, idx + 1, current, solution);
 				current.remove(x);
 
 				/* now check if a new thread is available for the second task */
-				if (semThreads.tryAcquire()) {
-					pool.submit(new SubSetComputer<T>(superSet, k, idx + 1, new HashSet<>(current), allSolutions, pool, semThreads, goalSize, semComplete));
+				if (this.semThreads.tryAcquire()) {
+					this.pool.submit(new SubSetComputer<T>(superSet, k, idx + 1, new HashSet<>(current), this.allSolutions, this.pool, this.semThreads, this.goalSize, this.semComplete));
 				} else {
-					performStep(superSet, k, idx + 1, current, solution);
+					this.performStep(superSet, k, idx + 1, current, solution);
 				}
 			}
 		}
 	}
 
-	public static <T> Collection<Set<T>> subsetsOfSize(Collection<T> set, int size) throws InterruptedException {
+	public static <T> Collection<Set<T>> subsetsOfSize(final Collection<T> set, final int size) throws InterruptedException {
 		List<Set<T>> subsets = new ArrayList<>();
 		List<T> setAsList = new ArrayList<T>(); // for easier access
 		setAsList.addAll(set);
@@ -329,7 +358,7 @@ public class SetUtil {
 		return subsets;
 	}
 
-	private static <T> void getSubsetOfSizeRec(List<T> superSet, int k, int idx, Set<T> current, Collection<Set<T>> solution) throws InterruptedException {
+	private static <T> void getSubsetOfSizeRec(final List<T> superSet, final int k, final int idx, final Set<T> current, final Collection<Set<T>> solution) throws InterruptedException {
 		// successful stop clause
 		if (current.size() == k) {
 			solution.add(new HashSet<>(current));
@@ -351,15 +380,14 @@ public class SetUtil {
 		getSubsetOfSizeRec(superSet, k, idx + 1, current, solution);
 	}
 
-	public static <T> List<Set<T>> getAllPossibleSubsetsWithSizeParallely(Collection<T> superSet, int k) {
+	public static <T> List<Set<T>> getAllPossibleSubsetsWithSizeParallely(final Collection<T> superSet, final int k) {
 		List<Set<T>> res = new ArrayList<>();
 		int n = 1;
 		ExecutorService pool = Executors.newFixedThreadPool(n);
 		Semaphore solutionSemaphore = new Semaphore(1);
 		try {
 			solutionSemaphore.acquire();
-			pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k),
-					solutionSemaphore));
+			pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
 			solutionSemaphore.acquire();
 			pool.shutdown();
 		} catch (InterruptedException e) {
@@ -368,15 +396,16 @@ public class SetUtil {
 		return res;
 	}
 
-	private static <T> void getAllPossibleSubsetsWithSizeRecursive(List<T> superSet, int k, int idx, Set<T> current, List<Set<T>> solution) {
+	private static <T> void getAllPossibleSubsetsWithSizeRecursive(final List<T> superSet, final int k, final int idx, final Set<T> current, final List<Set<T>> solution) {
 		// successful stop clause
 		if (current.size() == k) {
 			solution.add(new HashSet<>(current));
 			return;
 		}
 		// unseccessful stop clause
-		if (idx == superSet.size())
+		if (idx == superSet.size()) {
 			return;
+		}
 		T x = superSet.get(idx);
 		current.add(x);
 		// "guess" x is in the subset
@@ -386,20 +415,20 @@ public class SetUtil {
 		getAllPossibleSubsetsWithSizeRecursive(superSet, k, idx + 1, current, solution);
 	}
 
-	public static <T> List<Set<T>> getAllPossibleSubsetsWithSize(Collection<T> superSet, int k) {
+	public static <T> List<Set<T>> getAllPossibleSubsetsWithSize(final Collection<T> superSet, final int k) {
 		List<Set<T>> res = new ArrayList<>();
 		getAllPossibleSubsetsWithSizeRecursive(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res);
 		return res;
 	}
 
-	public static <T> Collection<List<T>> getPermutations(Collection<T> set) {
+	public static <T> Collection<List<T>> getPermutations(final Collection<T> set) {
 		Collection<List<T>> permutations = new ArrayList<>();
 		List<T> setAsList = new ArrayList<>(set);
 		getPermutationsRec(setAsList, 0, permutations);
 		return permutations;
 	}
 
-	private static <T> void getPermutationsRec(List<T> list, int pointer, Collection<List<T>> solution) {
+	private static <T> void getPermutationsRec(final List<T> list, final int pointer, final Collection<List<T>> solution) {
 		if (pointer == list.size()) {
 			solution.add(list);
 			return;
@@ -419,32 +448,60 @@ public class SetUtil {
 	 *            The set B.
 	 * @return The difference A \ B.
 	 */
-	public static <S, T extends S, U extends S> Collection<S> difference(Collection<T> a, Collection<U> b) {
+	public static <S, T extends S, U extends S> Collection<S> difference(final Collection<T> a, final Collection<U> b) {
 
 		List<S> out = new ArrayList<>();
 
-		for (S item : a)
-			if (b == null || !b.contains(item))
+		for (S item : a) {
+			if (b == null || !b.contains(item)) {
 				out.add(item);
+			}
+		}
 
 		return out;
 	}
-	
-	public static <S, T extends S, U extends S> boolean differenceEmpty(Collection<T> a, Collection<U> b) {
-		if (a == null || a.isEmpty())
+
+	/**
+	 * @param a
+	 *            The set A.
+	 * @param b
+	 *            The set B.
+	 * @return The difference A \ B.
+	 */
+	public static <S, T extends S, U extends S> List<S> difference(final List<T> a, final Collection<U> b) {
+
+		List<S> out = new ArrayList<>();
+
+		for (S item : a) {
+			if (b == null || !b.contains(item)) {
+				out.add(item);
+			}
+		}
+
+		return out;
+	}
+
+	public static <S, T extends S, U extends S> boolean differenceEmpty(final Collection<T> a, final Collection<U> b) {
+		if (a == null || a.isEmpty()) {
 			return true;
-		for (S item : a)
-			if (!b.contains(item))
-				return false; 
+		}
+		for (S item : a) {
+			if (!b.contains(item)) {
+				return false;
+			}
+		}
 		return true;
 	}
-	
-	public static <S, T extends S, U extends S> boolean differenceNotEmpty(Collection<T> a, Collection<U> b) {
-		if (b == null)
+
+	public static <S, T extends S, U extends S> boolean differenceNotEmpty(final Collection<T> a, final Collection<U> b) {
+		if (b == null) {
 			return !a.isEmpty();
-		for (S item : a)
-			if (!b.contains(item))
-				return true; 
+		}
+		for (S item : a) {
+			if (!b.contains(item)) {
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -455,12 +512,14 @@ public class SetUtil {
 	 *            The set B.
 	 * @return The Cartesian product A x B.
 	 */
-	public static <S, T> Collection<Pair<S, T>> cartesianProduct(Collection<S> a, Collection<T> b) {
+	public static <S, T> Collection<Pair<S, T>> cartesianProduct(final Collection<S> a, final Collection<T> b) {
 		Set<Pair<S, T>> product = new HashSet<>();
 
-		for (S item1 : a)
-			for (T item2 : b)
+		for (S item1 : a) {
+			for (T item2 : b) {
 				product.add(new Pair<S, T>(item1, item2));
+			}
+		}
 		return product;
 	}
 
@@ -471,7 +530,7 @@ public class SetUtil {
 	 *            The set B.
 	 * @return The Cartesian product A x B.
 	 */
-	public static <T> Collection<List<T>> cartesianProduct(List<? extends Collection<T>> listOfSets) {
+	public static <T> Collection<List<T>> cartesianProduct(final List<? extends Collection<T>> listOfSets) {
 
 		/* compute expected number of items of the result */
 		int expectedSize = 1;
@@ -481,8 +540,9 @@ public class SetUtil {
 		}
 
 		/* there must be at least one set */
-		if (listOfSets.isEmpty())
+		if (listOfSets.isEmpty()) {
 			throw new IllegalArgumentException("Empty list of sets");
+		}
 
 		/*
 		 * if there is only one set, create tuples of size 1 and return the set of tuples
@@ -494,8 +554,7 @@ public class SetUtil {
 				tupleOfSize1.add(obj);
 				product.add(tupleOfSize1);
 			}
-			assert product.size() == expectedSize : "Invalid number of expected entries! Expected " + expectedSize + " but computed " + product.size() + " for a single set: "
-					+ listOfSets.get(0);
+			assert product.size() == expectedSize : "Invalid number of expected entries! Expected " + expectedSize + " but computed " + product.size() + " for a single set: " + listOfSets.get(0);
 			return product;
 		}
 
@@ -522,7 +581,7 @@ public class SetUtil {
 	 *            The set A.
 	 * @throws InterruptedException
 	 */
-	public static <S> Collection<List<S>> cartesianProduct(Collection<S> set, int number) throws InterruptedException {
+	public static <S> Collection<List<S>> cartesianProduct(final Collection<S> set, final int number) throws InterruptedException {
 		List<List<S>> product = new ArrayList<>();
 		List<S> setAsList = new ArrayList<>(set);
 		if (number <= 1) {
@@ -556,42 +615,44 @@ public class SetUtil {
 	}
 
 	/* RELATIONS */
-	public static <K, V> Collection<Pair<K, V>> relation(Collection<K> keys, Collection<V> values, Predicate<Pair<K, V>> relationPredicate) {
+	public static <K, V> Collection<Pair<K, V>> relation(final Collection<K> keys, final Collection<V> values, final Predicate<Pair<K, V>> relationPredicate) {
 		Collection<Pair<K, V>> relation = new HashSet<>();
 		for (K key : keys) {
 			for (V val : values) {
 				Pair<K, V> p = new Pair<K, V>(key, val);
-				if (relationPredicate.test(p))
+				if (relationPredicate.test(p)) {
 					relation.add(p);
+				}
 			}
 		}
 		return relation;
 	}
 
-	public static <K, V> Map<K, Collection<V>> relationAsFunction(Collection<K> keys, Collection<V> values, Predicate<Pair<K, V>> relationPredicate) {
+	public static <K, V> Map<K, Collection<V>> relationAsFunction(final Collection<K> keys, final Collection<V> values, final Predicate<Pair<K, V>> relationPredicate) {
 		Map<K, Collection<V>> relation = new HashMap<>();
 		for (K key : keys) {
 			relation.put(key, new HashSet<>());
 			for (V val : values) {
 				Pair<K, V> p = new Pair<K, V>(key, val);
-				if (relationPredicate.test(p))
+				if (relationPredicate.test(p)) {
 					relation.get(key).add(val);
+				}
 			}
 		}
 		return relation;
 	}
 
 	/* FUNCTIONS */
-	public static <K, V> Collection<Map<K, V>> allMappings(Collection<K> domain, Collection<V> range, boolean totalsOnly, boolean injectivesOnly, boolean surjectivesOnly)
-			throws InterruptedException {
+	public static <K, V> Collection<Map<K, V>> allMappings(final Collection<K> domain, final Collection<V> range, final boolean totalsOnly, final boolean injectivesOnly, final boolean surjectivesOnly) throws InterruptedException {
 
 		Collection<Map<K, V>> mappings = new ArrayList<>();
 
 		/* compute possible domains of the functions */
 		if (totalsOnly) {
 
-			if (domain.isEmpty())
+			if (domain.isEmpty()) {
 				return mappings;
+			}
 			List<K> domainAsList = new ArrayList<>(domain);
 			int n = domainAsList.size();
 			for (List<V> reducedRange : cartesianProduct(range, domain.size())) {
@@ -617,35 +678,38 @@ public class SetUtil {
 				}
 
 				/* check surjectivity (if required) */
-				if (surjectivesOnly && !coveredRange.containsAll(range))
+				if (surjectivesOnly && !coveredRange.containsAll(range)) {
 					considerMap = false;
+				}
 
 				/* if all criteria are satisfied, add map */
-				if (considerMap)
+				if (considerMap) {
 					mappings.add(map);
+				}
 			}
 		} else {
 			for (Collection<K> reducedDomain : powerset(domain)) {
 				mappings.addAll(allMappings(reducedDomain, range, true, injectivesOnly, surjectivesOnly));
 			}
-			if (!surjectivesOnly)
+			if (!surjectivesOnly) {
 				mappings.add(new HashMap<>()); // add the empty mapping
+			}
 		}
 		return mappings;
 	}
 
-	public static <K, V> Collection<Map<K, V>> allTotalMappings(Collection<K> domain, Collection<V> range) throws InterruptedException {
+	public static <K, V> Collection<Map<K, V>> allTotalMappings(final Collection<K> domain, final Collection<V> range) throws InterruptedException {
 		return allMappings(domain, range, true, false, false);
 	}
 
-	public static <K, V> Collection<Map<K, V>> allPartialMappings(Collection<K> domain, Collection<V> range) throws InterruptedException {
+	public static <K, V> Collection<Map<K, V>> allPartialMappings(final Collection<K> domain, final Collection<V> range) throws InterruptedException {
 		return allMappings(domain, range, false, false, false);
 	}
 
 	/**
 	 * Computes all total mappings that satisfy some given predicate. The predicate is already applied to the partial mappings from which the total mappings are computed in order to prune and speed up
 	 * the computation.
-	 * 
+	 *
 	 * @param domain
 	 *            The domain set.
 	 * @param range
@@ -654,11 +718,11 @@ public class SetUtil {
 	 *            The predicate that is evaluated for every partial
 	 * @return All partial mappings from the domain set to the range set.
 	 */
-	public static <K, V> Set<Map<K, V>> allTotalAndInjectiveMappingsWithConstraint(Collection<K> domain, Collection<V> range, Predicate<Map<K, V>> pPredicate)
-			throws InterruptedException {
+	public static <K, V> Set<Map<K, V>> allTotalAndInjectiveMappingsWithConstraint(final Collection<K> domain, final Collection<V> range, final Predicate<Map<K, V>> pPredicate) throws InterruptedException {
 		Set<Map<K, V>> mappings = new HashSet<>();
-		if (domain.isEmpty())
+		if (domain.isEmpty()) {
 			return mappings;
+		}
 
 		/* now run breadth first search */
 		List<K> domainAsList = new ArrayList<>(domain);
@@ -684,30 +748,31 @@ public class SetUtil {
 			for (V val : range) {
 
 				/* due to injectivity, skip this option */
-				if (partialMap.containsValue(val))
+				if (partialMap.containsValue(val)) {
 					continue;
+				}
 				Map<K, V> extendedMap = new HashMap<>(partialMap);
 				extendedMap.put(key, val);
-				if (pPredicate.test(extendedMap))
+				if (pPredicate.test(extendedMap)) {
 					open.add(extendedMap);
+				}
 			}
 		}
 		return mappings;
 
 	}
 
-	public static <K, V> Set<Map<K, V>> allTotalMappingsWithLocalConstraints(Collection<K> domain, Collection<V> range, Predicate<Pair<K, V>> pPredicate)
-			throws InterruptedException {
+	public static <K, V> Set<Map<K, V>> allTotalMappingsWithLocalConstraints(final Collection<K> domain, final Collection<V> range, final Predicate<Pair<K, V>> pPredicate) throws InterruptedException {
 		Map<K, Collection<V>> pairsThatSatisfyCondition = relationAsFunction(domain, range, pPredicate);
 		return allFuntionsFromFunctionallyDenotedRelation(pairsThatSatisfyCondition);
 
 	} // allPartialMappings
 
-	public static <K, V> Set<Map<K, V>> allFuntionsFromFunctionallyDenotedRelation(Map<K, Collection<V>> pRelation) throws InterruptedException {
+	public static <K, V> Set<Map<K, V>> allFuntionsFromFunctionallyDenotedRelation(final Map<K, Collection<V>> pRelation) throws InterruptedException {
 		return allFunctionsFromFunctionallyDenotedRelationRewritingReference(new HashMap<>(pRelation));
 	}
 
-	private static <K, V> Set<Map<K, V>> allFunctionsFromFunctionallyDenotedRelationRewritingReference(Map<K, Collection<V>> pRelation) throws InterruptedException {
+	private static <K, V> Set<Map<K, V>> allFunctionsFromFunctionallyDenotedRelationRewritingReference(final Map<K, Collection<V>> pRelation) throws InterruptedException {
 		Set<Map<K, V>> out = new HashSet<>();
 		if (pRelation.isEmpty()) {
 			out.add(new HashMap<>(0, 1.0f));
@@ -746,12 +811,13 @@ public class SetUtil {
 	}
 
 	/* ORDER OPERATIONS (SHUFFLE, SORT, PERMUTATE) */
-	public static <T> void shuffle(List<T> list) {
+	public static <T> void shuffle(final List<T> list) {
 
 		/* preliminaries */
 		List<Integer> unusedItems = new ArrayList<Integer>();
-		for (int i = 0; i < list.size(); i++)
+		for (int i = 0; i < list.size(); i++) {
 			unusedItems.add(i);
+		}
 		List<T> copy = new ArrayList<T>();
 		copy.addAll(list);
 		list.clear();
@@ -763,20 +829,24 @@ public class SetUtil {
 		}
 	}
 
-	public static <T> T getRandomElement(Collection<T> set) {
+	public static <T> T getRandomElement(final Collection<T> set) {
 		int choice = (int) Math.floor(Math.random() * set.size());
-		if (set instanceof List)
+		if (set instanceof List) {
 			return ((List<T>) set).get(choice);
+		}
 		int i = 0;
-		for (T elem : set)
-			if (i++ == choice)
+		for (T elem : set) {
+			if (i++ == choice) {
 				return elem;
+			}
+		}
 		return null;
 	}
 
-	public static <T extends Comparable<T>> List<T> mergeSort(Collection<T> set) {
-		if (set.isEmpty())
+	public static <T extends Comparable<T>> List<T> mergeSort(final Collection<T> set) {
+		if (set.isEmpty()) {
 			return new ArrayList<T>();
+		}
 		if (set.size() == 1) {
 			List<T> result = new ArrayList<T>();
 			result.addAll(set);
@@ -787,17 +857,19 @@ public class SetUtil {
 		List<T> sublist1 = new ArrayList<T>(), sublist2 = new ArrayList<T>();
 		int mid = (int) Math.ceil(set.size() / 2.0);
 		int i = 0;
-		for (T elem : set)
-			if (i++ < mid)
+		for (T elem : set) {
+			if (i++ < mid) {
 				sublist1.add(elem);
-			else
+			} else {
 				sublist2.add(elem);
+			}
+		}
 
 		/* sort sublists */
 		return mergeLists(mergeSort(sublist1), mergeSort(sublist2));
 	}
 
-	private static <T extends Comparable<T>> List<T> mergeLists(List<T> list1, List<T> list2) {
+	private static <T extends Comparable<T>> List<T> mergeLists(final List<T> list1, final List<T> list2) {
 		List<T> result = new ArrayList<T>();
 		while (!list1.isEmpty() && !list2.isEmpty()) {
 			if (list1.get(0).compareTo(list2.get(0)) < 0) {
@@ -819,9 +891,10 @@ public class SetUtil {
 		return result;
 	}
 
-	public static <K, V extends Comparable<V>> List<K> keySetSortedByValues(Map<K, V> map, boolean asc) {
-		if (map.isEmpty())
+	public static <K, V extends Comparable<V>> List<K> keySetSortedByValues(final Map<K, V> map, final boolean asc) {
+		if (map.isEmpty()) {
 			return new ArrayList<K>();
+		}
 		if (map.size() == 1) {
 			List<K> result = new ArrayList<K>();
 			result.addAll(map.keySet());
@@ -832,17 +905,19 @@ public class SetUtil {
 		Map<K, V> submap1 = new Hashtable<K, V>(), submap2 = new Hashtable<K, V>();
 		int mid = (int) Math.ceil(map.size() / 2.0);
 		int i = 0;
-		for (K key : map.keySet())
-			if (i++ < mid)
-				submap1.put(key, map.get(key));
-			else
-				submap2.put(key, map.get(key));
+		for (Entry<K, V> entry : map.entrySet()) {
+			if (i++ < mid) {
+				submap1.put(entry.getKey(), entry.getValue());
+			} else {
+				submap2.put(entry.getKey(), entry.getValue());
+			}
+		}
 
 		/* sort sublists */
 		return mergeMaps(keySetSortedByValues(submap1, asc), keySetSortedByValues(submap2, asc), map, asc);
 	}
 
-	private static <K, V extends Comparable<V>> List<K> mergeMaps(List<K> keys1, List<K> keys2, Map<K, V> map, boolean asc) {
+	private static <K, V extends Comparable<V>> List<K> mergeMaps(final List<K> keys1, final List<K> keys2, final Map<K, V> map, final boolean asc) {
 		List<K> result = new ArrayList<K>();
 		while (!keys1.isEmpty() && !keys2.isEmpty()) {
 			double comp = map.get(keys1.get(0)).compareTo(map.get(keys2.get(0)));
@@ -896,8 +971,9 @@ public class SetUtil {
 	private static <E> int getNumberOfAllowedPermutations(final PartialOrderedSet<E> set, final Queue<Set<E>> possibleEdges) throws InterruptedException {
 
 		/* if interrupted, return one ordering (which is a lower bound here) */
-		if (Thread.interrupted())
+		if (Thread.interrupted()) {
 			throw new InterruptedException();
+		}
 
 		/*
 		 * If there isn't an edge left, the given partial order actually is a total order.
@@ -938,57 +1014,63 @@ public class SetUtil {
 		return numberOfAllowedPermutations;
 	}
 
-	public static String serializeAsSet(Collection<String> set) {
+	public static String serializeAsSet(final Collection<String> set) {
 		return set.toString().replaceAll("\\[", "{").replaceAll("\\]", "}");
 	}
 
-	public static Set<String> unserializeSet(String setDescriptor) {
+	public static Set<String> unserializeSet(final String setDescriptor) {
 		Set<String> items = new HashSet<>();
 		for (String item : setDescriptor.substring(1, setDescriptor.length() - 1).split(",")) {
-			if (!item.trim().isEmpty())
+			if (!item.trim().isEmpty()) {
 				items.add(item.trim());
+			}
 		}
 		return items;
 	}
 
-	public static List<String> unserializeList(String listDescriptor) {
-		if (listDescriptor == null)
+	public static List<String> unserializeList(final String listDescriptor) {
+		if (listDescriptor == null) {
 			throw new IllegalArgumentException("Invalid list descriptor NULL.");
-		if (!listDescriptor.startsWith("[") || !listDescriptor.endsWith("]"))
+		}
+		if (!listDescriptor.startsWith("[") || !listDescriptor.endsWith("]")) {
 			throw new IllegalArgumentException("Invalid list descriptor \"" + listDescriptor + "\". Must start with '[' and end with ']'");
+		}
 		List<String> items = new ArrayList<>();
 		for (String item : listDescriptor.substring(1, listDescriptor.length() - 1).split(",")) {
-			if (!item.trim().isEmpty())
+			if (!item.trim().isEmpty()) {
 				items.add(item.trim());
+			}
 		}
 		return items;
 	}
 
-	public static Interval unserializeInterval(String intervalDescriptor) {
+	public static Interval unserializeInterval(final String intervalDescriptor) {
 		List<String> interval = unserializeList(intervalDescriptor);
 		double min = Double.valueOf(interval.get(0));
 		return new Interval(min, interval.size() == 1 ? min : Double.valueOf(interval.get(1)));
 	}
-	
-	public static <T> List<T> getInvertedCopyOfList(List<T> list) {
+
+	public static <T> List<T> getInvertedCopyOfList(final List<T> list) {
 		List<T> copy = new ArrayList<>();
 		int n = list.size();
-		for (int i = 0; i < n; i++)
+		for (int i = 0; i < n; i++) {
 			copy.add(list.get(n - i - 1));
+		}
 		return copy;
 	}
-	
-	public static <T> List<T> addAndGet(List<T> list, T item) {
+
+	public static <T> List<T> addAndGet(final List<T> list, final T item) {
 		list.add(item);
 		return list;
 	}
-	
-	public static <T,U> Map<U,Collection<T>> groupCollectionByAttribute(Collection<T> collection, IGetter<T,U> getter) {
-		Map<U,Collection<T>> groupedCollection = new HashMap<>();
+
+	public static <T, U> Map<U, Collection<T>> groupCollectionByAttribute(final Collection<T> collection, final IGetter<T, U> getter) {
+		Map<U, Collection<T>> groupedCollection = new HashMap<>();
 		collection.forEach(i -> {
 			U val = getter.getPropertyOf(i);
-			if (!groupedCollection.containsKey(val))
+			if (!groupedCollection.containsKey(val)) {
 				groupedCollection.put(val, new ArrayList<>());
+			}
 			groupedCollection.get(val).add(i);
 		});
 		return groupedCollection;

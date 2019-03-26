@@ -1,16 +1,11 @@
 package jaicore.search.core.interfaces;
 
-import java.util.concurrent.TimeoutException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.ASolutionCandidateIterator;
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
@@ -68,17 +63,5 @@ public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<N, A>, 
 	@Override
 	public String getLoggerName() {
 		return this.loggerName;
-	}
-	
-	protected void checkAndConductTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
-		try {
-			super.checkAndConductTermination();
-		} catch (DelayedTimeoutCheckException e) {
-			logger.warn("CheckTermination was called with delay. Message: \"{}\"", e.getMessage());
-			throw e.getException();
-		} catch (DelayedCancellationCheckException e) {
-			logger.warn("CheckTermination was called with delay. Message: \"{}\"", e.getMessage());
-			throw e.getException();
-		}
 	}
 }

@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -147,6 +147,10 @@ extends org.aeonbits.owner.Mutable</pre>
 </tr>
 <tr class="altColor">
 <td class="colFirst"><code>static java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html#K_THREADS">K_THREADS</a></span></code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>static java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html#K_TIMEOUT">K_TIMEOUT</a></span></code>&nbsp;</td>
 </tr>
 </table>
@@ -173,6 +177,10 @@ extends org.aeonbits.owner.Mutable</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html#memory--">memory</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html#threads--">threads</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>long</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html#timeout--">timeout</a></span>()</code>&nbsp;</td>
 </tr>
@@ -208,6 +216,19 @@ extends org.aeonbits.owner.Mutable</pre>
 <dl>
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../constant-values.html#jaicore.basic.algorithm.IAlgorithmConfig.K_CPUS">Constant Field Values</a></dd>
+</dl>
+</li>
+</ul>
+<a name="K_THREADS">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>K_THREADS</h4>
+<pre>static final&nbsp;java.lang.String K_THREADS</pre>
+<dl>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../constant-values.html#jaicore.basic.algorithm.IAlgorithmConfig.K_THREADS">Constant Field Values</a></dd>
 </dl>
 </li>
 </ul>
@@ -257,6 +278,21 @@ int&nbsp;cpus()</pre>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>Number of CPU cores available for parallelization.</dd>
+</dl>
+</li>
+</ul>
+<a name="threads--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>threads</h4>
+<pre>@Config.Key(value="threads")
+ @Config.DefaultValue(value="-1")
+int&nbsp;threads()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>Number of threads that may be spawned by the algorithm.</dd>
 </dl>
 </li>
 </ul>

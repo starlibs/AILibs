@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -46,8 +46,8 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/RandomCompletionGammaGraphGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/GraphBasedDistantSuccessorGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarFactory.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?jaicore/search/algorithms/standard/rstar/RStar.html" target="_top">Frames</a></li>
@@ -71,7 +71,7 @@ var activeTableTab = "activeTableTab";
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li><a href="#nested.classes.inherited.from.class.java.lang.Thread">Nested</a>&nbsp;|&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>
@@ -90,17 +90,32 @@ var activeTableTab = "activeTableTab";
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">jaicore.search.algorithms.standard.rstar</div>
-<h2 title="Class RStar" class="title">Class RStar&lt;T,A,D&gt;</h2>
+<h2 title="Class RStar" class="title">Class RStar&lt;T,A&gt;</h2>
 </div>
 <div class="contentContainer">
 <ul class="inheritance">
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li>java.lang.Thread</li>
+<li>jaicore.basic.algorithm.AAlgorithm&lt;I,O&gt;</li>
 <li>
 <ul class="inheritance">
-<li>jaicore.search.algorithms.standard.rstar.RStar&lt;T,A,D&gt;</li>
+<li>jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt;</li>
+<li>
+<ul class="inheritance">
+<li>jaicore.basic.algorithm.AOptimizer&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,V&gt;</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">jaicore.search.core.interfaces.AOptimalPathInORGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,T,A,java.lang.Double&gt;</li>
+<li>
+<ul class="inheritance">
+<li>jaicore.search.algorithms.standard.rstar.RStar&lt;T,A&gt;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -113,16 +128,15 @@ var activeTableTab = "activeTableTab";
 <dt><span class="paramLabel">Type Parameters:</span></dt>
 <dd><code>T</code> - a nodes external label i.e. a state of a problem</dd>
 <dd><code>A</code> - action (action space of problem)</dd>
-<dd><code>D</code> - type of Delta distance</dd>
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>java.lang.Runnable</dd>
+<dd>jaicore.basic.algorithm.IAlgorithm&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,java.lang.Double&gt;&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,java.lang.Double&gt;,java.lang.Double&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,java.lang.Double&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,java.lang.Double&gt;,T,A&gt;, <a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,T,A,java.lang.Double&gt;, <a href="../../../../../jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,java.lang.Double&gt;,T,A&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;T,A,java.lang.Double&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <hr>
 <br>
-<pre>public class <span class="typeNameLabel">RStar&lt;T,A,D&gt;</span>
-extends java.lang.Thread</pre>
+<pre>public class <span class="typeNameLabel">RStar&lt;T,A&gt;</span>
+extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;T,A&gt;,T,A,java.lang.Double&gt;</pre>
 <div class="block">Implementation of the R* algorithm.</div>
 </li>
 </ul>
@@ -130,21 +144,6 @@ extends java.lang.Thread</pre>
 <div class="summary">
 <ul class="blockList">
 <li class="blockList">
-<!-- ======== NESTED CLASS SUMMARY ======== -->
-<ul class="blockList">
-<li class="blockList"><a name="nested.class.summary">
-<!--   -->
-</a>
-<h3>Nested Class Summary</h3>
-<ul class="blockList">
-<li class="blockList"><a name="nested.classes.inherited.from.class.java.lang.Thread">
-<!--   -->
-</a>
-<h3>Nested classes/interfaces inherited from class&nbsp;java.lang.Thread</h3>
-<code>java.lang.Thread.State, java.lang.Thread.UncaughtExceptionHandler</code></li>
-</ul>
-</li>
-</ul>
 <!-- =========== FIELD SUMMARY =========== -->
 <ul class="blockList">
 <li class="blockList"><a name="field.summary">
@@ -158,19 +157,11 @@ extends java.lang.Thread</pre>
 <th class="colLast" scope="col">Field and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>protected java.util.ArrayList&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt;</code></td>
+<td class="colFirst"><code>protected java.util.ArrayList&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#closed">closed</a></span></code>&nbsp;</td>
 </tr>
 <tr class="rowColor">
-<td class="colFirst"><code>protected <a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#delta">delta</a></span></code>&nbsp;</td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><code>protected int</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#K">K</a></span></code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colFirst"><code>protected java.util.PriorityQueue&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt;</code></td>
+<td class="colFirst"><code>protected java.util.PriorityQueue&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#open">open</a></span></code>&nbsp;</td>
 </tr>
 <tr class="altColor">
@@ -178,13 +169,6 @@ extends java.lang.Thread</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#w">w</a></span></code>&nbsp;</td>
 </tr>
 </table>
-<ul class="blockList">
-<li class="blockList"><a name="fields.inherited.from.class.java.lang.Thread">
-<!--   -->
-</a>
-<h3>Fields inherited from class&nbsp;java.lang.Thread</h3>
-<code>MAX_PRIORITY, MIN_PRIORITY, NORM_PRIORITY</code></li>
-</ul>
 </li>
 </ul>
 <!-- ======== CONSTRUCTOR SUMMARY ======== -->
@@ -199,17 +183,10 @@ extends java.lang.Thread</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#RStar-jaicore.search.algorithms.standard.rstar.GammaGraphGenerator-double-int-D-">RStar</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar">GammaGraphGenerator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&gt;&nbsp;gammaGraphGenerator,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#RStar-jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic-double-int-double-">RStar</a></span>(<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>&gt;&nbsp;problem,
      double&nbsp;w,
-     int&nbsp;K,
-     <a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&nbsp;delta)</code>&nbsp;</td>
-</tr>
-<tr class="rowColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#RStar-jaicore.search.algorithms.standard.rstar.GammaGraphGenerator-double-int-D-jaicore.search.core.interfaces.ISolutionEvaluator-">RStar</a></span>(<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar">GammaGraphGenerator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&gt;&nbsp;gammaGraphGenerator,
-     double&nbsp;w,
-     int&nbsp;K,
-     <a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&nbsp;delta,
-     <a href="../../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,java.lang.Double&gt;&nbsp;solutionEvaluator)</code>&nbsp;</td>
+     int&nbsp;k,
+     double&nbsp;delta)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -227,49 +204,84 @@ extends java.lang.Thread</pre>
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>java.util.List&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#getGammaSolutionPath--">getGammaSolutionPath</a></span>()</code>
-<div class="block">Samples the backpointers from n_goal onwards to n_start.</div>
-</td>
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#cancel--">cancel</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a></code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#getGoalState--">getGoalState</a></span>()</code>
-<div class="block">Returns simply the goal state of current best solution.</div>
-</td>
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#getLoggerName--">getLoggerName</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i2" class="altColor">
-<td class="colFirst"><code>double</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#getSolutionCost--">getSolutionCost</a></span>()</code>&nbsp;</td>
+<td class="colFirst"><code>jaicore.basic.algorithm.events.AlgorithmEvent</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#nextWithException--">nextWithException</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code>java.util.List&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#getSolutionPath--">getSolutionPath</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code>java.util.List&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#inferProblemPath-java.util.List-">inferProblemPath</a></span>(java.util.List&lt;<a href="../../../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt;&nbsp;nodePath)</code>
-<div class="block">Infers the problem path from a given node path.</div>
-</td>
-</tr>
-<tr id="i5" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#run--">run</a></span>()</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html#setLoggerName-java.lang.String-">setLoggerName</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.java.lang.Thread">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch">
 <!--   -->
 </a>
-<h3>Methods inherited from class&nbsp;java.lang.Thread</h3>
-<code>activeCount, checkAccess, clone, countStackFrames, currentThread, destroy, dumpStack, enumerate, getAllStackTraces, getContextClassLoader, getDefaultUncaughtExceptionHandler, getId, getName, getPriority, getStackTrace, getState, getThreadGroup, getUncaughtExceptionHandler, holdsLock, interrupt, interrupted, isAlive, isDaemon, isInterrupted, join, join, join, resume, setContextClassLoader, setDaemon, setDefaultUncaughtExceptionHandler, setName, setPriority, setUncaughtExceptionHandler, sleep, sleep, start, stop, stop, suspend, toString, yield</code></li>
+<h3>Methods inherited from class&nbsp;jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a></h3>
+<code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getGraphGenerator--">getGraphGenerator</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#registerSolution-jaicore.search.model.other.EvaluatedSearchGraphPath-">registerSolution</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.AOptimizer">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AOptimizer</h3>
+<code>call, getBestSeenSolution, nextSolutionCandidate, updateBestSeenSolution</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ASolutionCandidateIterator">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.ASolutionCandidateIterator</h3>
+<code>collectAllSolutions</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.AAlgorithm">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
+<code>activate, checkAndConductTermination, computeTimeoutAware, getActivationTime, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
-<code>equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
+<code>nextSolutionCandidate</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithm">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
+<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.lang.Iterable</h3>
+<code>forEach, iterator, spliterator</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.Iterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.util.Iterator</h3>
+<code>forEachRemaining, hasNext, next, remove</code></li>
 </ul>
 </li>
 </ul>
@@ -291,7 +303,7 @@ extends java.lang.Thread</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>open</h4>
-<pre>protected&nbsp;java.util.PriorityQueue&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt; open</pre>
+<pre>protected&nbsp;java.util.PriorityQueue&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;&gt; open</pre>
 </li>
 </ul>
 <a name="closed">
@@ -300,34 +312,16 @@ extends java.lang.Thread</pre>
 <ul class="blockList">
 <li class="blockList">
 <h4>closed</h4>
-<pre>protected&nbsp;java.util.ArrayList&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt; closed</pre>
+<pre>protected&nbsp;java.util.ArrayList&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;&gt; closed</pre>
 </li>
 </ul>
 <a name="w">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>w</h4>
 <pre>protected final&nbsp;double w</pre>
-</li>
-</ul>
-<a name="K">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>K</h4>
-<pre>protected final&nbsp;int K</pre>
-</li>
-</ul>
-<a name="delta">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>delta</h4>
-<pre>protected final&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a> delta</pre>
 </li>
 </ul>
 </li>
@@ -338,40 +332,23 @@ extends java.lang.Thread</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="RStar-jaicore.search.algorithms.standard.rstar.GammaGraphGenerator-double-int-java.lang.Object-">
-<!--   -->
-</a><a name="RStar-jaicore.search.algorithms.standard.rstar.GammaGraphGenerator-double-int-D-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>RStar</h4>
-<pre>public&nbsp;RStar(<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar">GammaGraphGenerator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&gt;&nbsp;gammaGraphGenerator,
-             double&nbsp;w,
-             int&nbsp;K,
-             <a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&nbsp;delta)</pre>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>gammaGraphGenerator</code> - </dd>
-<dd><code>w</code> - </dd>
-<dd><code>K</code> - </dd>
-<dd><code>delta</code> - </dd>
-</dl>
-</li>
-</ul>
-<a name="RStar-jaicore.search.algorithms.standard.rstar.GammaGraphGenerator-double-int-java.lang.Object-jaicore.search.core.interfaces.ISolutionEvaluator-">
-<!--   -->
-</a><a name="RStar-jaicore.search.algorithms.standard.rstar.GammaGraphGenerator-double-int-D-jaicore.search.core.interfaces.ISolutionEvaluator-">
+<a name="RStar-jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic-double-int-double-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>RStar</h4>
-<pre>public&nbsp;RStar(<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar">GammaGraphGenerator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&gt;&nbsp;gammaGraphGenerator,
+<pre>public&nbsp;RStar(<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>&gt;&nbsp;problem,
              double&nbsp;w,
-             int&nbsp;K,
-             <a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">D</a>&nbsp;delta,
-             <a href="../../../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,java.lang.Double&gt;&nbsp;solutionEvaluator)</pre>
+             int&nbsp;k,
+             double&nbsp;delta)</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>gammaGraphGenerator</code> - </dd>
+<dd><code>w</code> - </dd>
+<dd><code>k</code> - </dd>
+<dd><code>delta</code> - </dd>
+</dl>
 </li>
 </ul>
 </li>
@@ -382,83 +359,68 @@ extends java.lang.Thread</pre>
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="run--">
+<a name="nextWithException--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>run</h4>
-<pre>public&nbsp;void&nbsp;run()</pre>
+<h4>nextWithException</h4>
+<pre>public&nbsp;jaicore.basic.algorithm.events.AlgorithmEvent&nbsp;nextWithException()
+                                                                throws java.lang.InterruptedException,
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmException,
+                                                                       jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</pre>
+<dl>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
+<dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
+</dl>
+</li>
+</ul>
+<a name="setLoggerName-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setLoggerName</h4>
+<pre>public&nbsp;void&nbsp;setLoggerName(java.lang.String&nbsp;name)</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>run</code>&nbsp;in interface&nbsp;<code>java.lang.Runnable</code></dd>
+<dd><code>setLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>run</code>&nbsp;in class&nbsp;<code>java.lang.Thread</code></dd>
+<dd><code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#setLoggerName-java.lang.String-">setLoggerName</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>&gt;,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>,java.lang.Double&gt;</code></dd>
 </dl>
 </li>
 </ul>
-<a name="getSolutionCost--">
+<a name="getLoggerName--">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>getSolutionCost</h4>
-<pre>public&nbsp;double&nbsp;getSolutionCost()</pre>
+<h4>getLoggerName</h4>
+<pre>public&nbsp;java.lang.String&nbsp;getLoggerName()</pre>
 <dl>
-<dt><span class="returnLabel">Returns:</span></dt>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getLoggerName--">getLoggerName</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a>&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>&gt;,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>,java.lang.Double&gt;</code></dd>
 </dl>
 </li>
 </ul>
-<a name="getSolutionPath--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getSolutionPath</h4>
-<pre>public&nbsp;java.util.List&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;&nbsp;getSolutionPath()</pre>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-</dl>
-</li>
-</ul>
-<a name="getGoalState--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>getGoalState</h4>
-<pre>public&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&nbsp;getGoalState()</pre>
-<div class="block">Returns simply the goal state of current best solution.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-</dl>
-</li>
-</ul>
-<a name="inferProblemPath-java.util.List-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>inferProblemPath</h4>
-<pre>public&nbsp;java.util.List&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>&gt;&nbsp;inferProblemPath(java.util.List&lt;<a href="../../../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt;&nbsp;nodePath)</pre>
-<div class="block">Infers the problem path from a given node path.</div>
-<dl>
-<dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>nodePath</code> - </dd>
-<dt><span class="returnLabel">Returns:</span></dt>
-</dl>
-</li>
-</ul>
-<a name="getGammaSolutionPath--">
+<a name="cancel--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>getGammaSolutionPath</h4>
-<pre>public&nbsp;java.util.List&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar">GammaNode</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar">RStarK</a>&gt;&gt;&nbsp;getGammaSolutionPath()</pre>
-<div class="block">Samples the backpointers from n_goal onwards to n_start.</div>
+<h4>cancel</h4>
+<pre>public&nbsp;void&nbsp;cancel()</pre>
 <dl>
-<dt><span class="returnLabel">Returns:</span></dt>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>cancel</code>&nbsp;in interface&nbsp;<code>jaicore.basic.Cancelable</code></dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code>cancel</code>&nbsp;in class&nbsp;<code>jaicore.basic.algorithm.AAlgorithm&lt;<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>&gt;,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">T</a>,<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="type parameter in RStar">A</a>,java.lang.Double&gt;&gt;</code></dd>
 </dl>
 </li>
 </ul>
@@ -489,8 +451,8 @@ extends java.lang.Thread</pre>
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/RandomCompletionGammaGraphGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/GraphBasedDistantSuccessorGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarFactory.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../../../index.html?jaicore/search/algorithms/standard/rstar/RStar.html" target="_top">Frames</a></li>
@@ -514,7 +476,7 @@ extends java.lang.Thread</pre>
 <div>
 <ul class="subNavList">
 <li>Summary:&nbsp;</li>
-<li><a href="#nested.classes.inherited.from.class.java.lang.Thread">Nested</a>&nbsp;|&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
 <li><a href="#field.summary">Field</a>&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
 <li><a href="#method.summary">Method</a></li>

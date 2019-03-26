@@ -6,7 +6,7 @@ import org.aeonbits.owner.Config.Sources;
 
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 
-@Sources({ "file:conf/automl/mlplan.properties" })
+@Sources({ "file:conf/mlplan.properties" })
 public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 
 	public static final String PREFERRED_COMPONENTS = "mlplan.preferredComponents";
@@ -15,8 +15,8 @@ public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 	public static final String SELECTION_MCCV_ITERATIONS = "mlplan.selection.mccvFolds";
 	public static final String SELECTION_MCCV_FOLDSIZE = "mlplan.selection.foldSize";
 	public static final String SELECTION_PORTION = "mlplan.selection.mccvPortion";
-	
-//	public static final String TIMEOUT_PER_EVAL_IN_SECONDS = "mlplan.timeoutPerEval";
+
+	// public static final String TIMEOUT_PER_EVAL_IN_SECONDS = "mlplan.timeoutPerEval";
 
 	@Key(SEARCH_MCCV_ITERATIONS)
 	@DefaultValue("5")
@@ -38,9 +38,9 @@ public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 	@DefaultValue("0.3")
 	public double dataPortionForSelection();
 
-//	@Key(TIMEOUT_PER_EVAL_IN_SECONDS)
-//	@DefaultValue("10")
-//	public int timeoutPerNodeFComputation();
+	// @Key(TIMEOUT_PER_EVAL_IN_SECONDS)
+	// @DefaultValue("10")
+	// public int timeoutPerNodeFComputation();
 
 	@Key(PREFERRED_COMPONENTS)
 	@DefaultValue("conf/mlplan/precedenceList.txt")

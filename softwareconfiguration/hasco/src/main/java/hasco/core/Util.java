@@ -6,12 +6,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
@@ -29,22 +29,32 @@ import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logic.fol.structure.Literal;
+import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 import jaicore.planning.core.Action;
 import jaicore.planning.core.Plan;
 import jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 
 public class Util {
 
+	private static final String LITERAL_RESOLVES = "resolves";
+	private static final String LITERAL_PARAMCONTAINER = "parameterContainer";
+	private static final String LITERAL_VAL = "val";
+	private static final String LITERAL_INTERFACEIDENTIFIER = "interfaceIdentifier";
+
 	private static final Logger logger = LoggerFactory.getLogger(Util.class);
+
+	private Util() {
+
+	}
 
 	static Map<String, String> getParameterContainerMap(final Monom state, final String objectName) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
-		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals("parameterContainer") && l.getParameters().get(2).getName().equals(objectName))
-				.collect(Collectors.toList());
+		List<Literal> containerLiterals = state.stream().filter(l -> l.getPropertyName().equals(LITERAL_PARAMCONTAINER) && l.getParameters().get(2).getName().equals(objectName)).collect(Collectors.toList());
 		containerLiterals.forEach(l -> parameterContainerMap.put(l.getParameters().get(1).getName(), l.getParameters().get(3).getName()));
 		return parameterContainerMap;
 	}
@@ -63,42 +73,45 @@ public class Util {
 		 * values of the data containers
 		 */
 		for (Literal l : state) {
-			String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
+			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			switch (l.getPropertyName()) {
-			case "resolves":
-				// String parentObjectName = params[0];
-				// String interfaceName = params[1];
+			case LITERAL_RESOLVES: // field 0 and 1 (parent object name and interface name) are ignored here
 				String componentName = params[2];
 				String objectName = params[3];
-				Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
-				ComponentInstance object = new ComponentInstance(component, new HashMap<>(), new HashMap<>());
+				Optional<Component> component = components.stream().filter(c -> c.getName().equals(componentName)).findAny();
+				assert component.isPresent() : "Could not find component with name " + componentName;
+				ComponentInstance object = new ComponentInstance(component.get(), new HashMap<>(), new HashMap<>());
 				objectMap.put(objectName, object);
 				break;
-			case "parameterContainer":
+			case LITERAL_PARAMCONTAINER:
 				if (!parameterContainerMap.containsKey(params[2])) {
 					parameterContainerMap.put(params[2], new HashMap<>());
 				}
 				parameterContainerMap.get(params[2]).put(params[1], params[3]);
 				break;
-			case "val":
+			case LITERAL_VAL:
 				if (overwrittenDataContainers.contains(params[0])) {
 					parameterValues.put(params[0], params[1]);
 				}
+				break;
+
+			default:
+
+				/* simply ignore other literals */
 				break;
 			}
 		}
 
 		/* update the configurations of the objects */
-		for (String objectName : objectMap.keySet()) {
+		for (Entry<String, ComponentInstance> entry : objectMap.entrySet()) {
 			Map<Parameter, String> paramValuesForThisComponent = new HashMap<>();
-			ComponentInstance object = objectMap.get(objectName);
+			String objectName = entry.getKey();
+			ComponentInstance object = entry.getValue();
 			parameterValuesPerComponentInstance.put(object, paramValuesForThisComponent);
 			for (Parameter p : object.getComponent().getParameters()) {
 
-				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName()
-						+ "!";
-				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName()
-						+ " is not defined!";
+				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined!";
 
 				String assignedValue = parameterValues.get(parameterContainerMap.get(objectName).get(p.getName()));
 				String interpretedValue = "";
@@ -145,40 +158,40 @@ public class Util {
 
 		/* create (empty) component instances, detect containers for parameter values, and register the values of the data containers */
 		for (Literal l : state) {
-			String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
+			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			switch (l.getPropertyName()) {
-			case "resolves":
-				// String parentObjectName = params[0];
-				// String interfaceName = params[1];
+			case LITERAL_RESOLVES: // field 0 and 1 (parent object name and interface name) are ignored here
 				String componentName = params[2];
 				String objectName = params[3];
 
-				Component component = components.stream().filter(c -> c.getName().equals(componentName)).findAny().get();
-				ComponentInstance object = new ComponentInstance(component, new HashMap<>(), new HashMap<>());
+				Optional<Component> component = components.stream().filter(c -> c.getName().equals(componentName)).findAny();
+				assert component.isPresent() : "Could not find component with name " + componentName;
+				ComponentInstance object = new ComponentInstance(component.get(), new HashMap<>(), new HashMap<>());
 				objectMap.put(objectName, object);
 				break;
-			case "parameterContainer":
+			case LITERAL_PARAMCONTAINER:
 				if (!parameterContainerMap.containsKey(params[2])) {
 					parameterContainerMap.put(params[2], new HashMap<>());
 				}
 				parameterContainerMap.get(params[2]).put(params[1], params[3]);
 				break;
-			case "val":
+			case LITERAL_VAL:
 				parameterValues.put(params[0], params[1]);
 				break;
-			case "interfaceIdentifier":
+			case LITERAL_INTERFACEIDENTIFIER:
 				interfaceContainerMap.put(params[3], params[1]);
+				break;
+			default:
+				/* simply ignore other cases */
 				break;
 			}
 		}
 
 		/* now establish the binding of the required interfaces of the component instances */
-		state.stream().filter(l -> l.getPropertyName().equals("resolves")).forEach(l -> {
-			String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
+		state.stream().filter(l -> l.getPropertyName().equals(LITERAL_RESOLVES)).forEach(l -> {
+			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			String parentObjectName = params[0];
-			// String interfaceName = params[1];
 			String objectName = params[3];
-
 			ComponentInstance object = objectMap.get(objectName);
 			if (!parentObjectName.equals("request")) {
 				assert interfaceContainerMap.containsKey(objectName) : "Object name " + objectName + " for requried interface must have a defined identifier ";
@@ -187,14 +200,13 @@ public class Util {
 		});
 
 		/* set the explicitly defined parameters (e.g. overwritten containers) in the component instances */
-		for (String objectName : objectMap.keySet()) {
-			ComponentInstance object = objectMap.get(objectName);
+		for (Entry<String, ComponentInstance> entry : objectMap.entrySet()) {
+			String objectName = entry.getKey();
+			ComponentInstance object = entry.getValue();
 			for (Parameter p : object.getComponent().getParameters()) {
 
-				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName()
-						+ "!";
-				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName()
-						+ " is not defined!";
+				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined!";
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);
@@ -206,14 +218,14 @@ public class Util {
 		return objectMap;
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
-			final Collection<Component> components, final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
-		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), resolveIntervals);
+	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver, final Collection<Component> components,
+			final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
+		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), resolveIntervals);
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver,
-			final Collection<Component> components, final Monom initState, final Node<N, ?> path, String name, final boolean resolveIntervals) {
-		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.getPlan(path.externalPath()), name, resolveIntervals);
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver, final Collection<Component> components,
+			final Monom initState, final Node<N, ?> path, final String name, final boolean resolveIntervals) {
+		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), name, resolveIntervals);
 	}
 
 	public static Monom getFinalStateOfPlan(final Monom initState, final Plan plan) {
@@ -228,8 +240,7 @@ public class Util {
 		return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan), resolveIntervals);
 	}
 
-	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan plan, String name,
-			final boolean resolveIntervals) {
+	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan plan, final String name, final boolean resolveIntervals) {
 		return getComponentInstanceFromState(components, getFinalStateOfPlan(initState, plan), name, resolveIntervals);
 	}
 
@@ -237,25 +248,25 @@ public class Util {
 		return getComponentInstanceFromState(components, state, "solution", resolveIntervals);
 	}
 
-	public static ComponentInstance getComponentInstanceFromState(final Collection<Component> components, final Monom state, String name, final boolean resolveIntervals) {
+	public static ComponentInstance getComponentInstanceFromState(final Collection<Component> components, final Monom state, final String name, final boolean resolveIntervals) {
 		return Util.getGroundComponentsFromState(state, components, resolveIntervals).get(name);
 	}
 
 	/**
 	 * Computes a String of component names that appear in the composition which can be used as an identifier for the composition
-	 * 
+	 *
 	 * @param composition
 	 * @return String of all component names in right to left depth-first order
 	 */
-	public static String getComponentNamesOfComposition(ComponentInstance composition) {
+	public static String getComponentNamesOfComposition(final ComponentInstance composition) {
 		StringBuilder builder = new StringBuilder();
-		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
+		Deque<ComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
 		ComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			builder.append(curInstance.getComponent().getName());
-			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
 			// This set should be ordered
 			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
@@ -268,19 +279,19 @@ public class Util {
 
 	/**
 	 * Computes a list of all components of the given composition.
-	 * 
+	 *
 	 * @param composition
 	 * @return List of components in right to left depth-first order
 	 */
-	public static List<Component> getComponentsOfComposition(ComponentInstance composition) {
-		List<Component> components = new LinkedList<Component>();
-		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
+	public static List<Component> getComponentsOfComposition(final ComponentInstance composition) {
+		List<Component> components = new LinkedList<>();
+		Deque<ComponentInstance> componentInstances = new ArrayDeque<>();
 		componentInstances.push(composition);
 		ComponentInstance curInstance;
 		while (!componentInstances.isEmpty()) {
 			curInstance = componentInstances.pop();
 			components.add(curInstance.getComponent());
-			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
 			// This set should be ordered
 			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
@@ -298,17 +309,19 @@ public class Util {
 
 		/* detect containers for parameter values, and register the values of the data containers */
 		for (Literal l : state) {
-			String[] params = l.getParameters().stream().map(p -> p.getName()).collect(Collectors.toList()).toArray(new String[] {});
+			String[] params = l.getParameters().stream().map(LiteralParam::getName).collect(Collectors.toList()).toArray(new String[] {});
 			switch (l.getPropertyName()) {
-			case "parameterContainer":
+			case LITERAL_PARAMCONTAINER:
 				if (!params[2].equals(objectIdentifierInState)) {
 					continue;
 				}
 				parameterContainerMap.put(params[1], params[3]);
 				parameterContainerMapInv.put(params[3], params[1]);
 				break;
-			case "val":
+			case LITERAL_VAL:
 				parameterValues.put(params[0], params[1]);
+				break;
+			default: // ignore other literals
 				break;
 			}
 		}
@@ -316,9 +329,13 @@ public class Util {
 		/* determine current values of the parameters of this component instance */
 		Map<Parameter, String> paramValuesForThisComponentInstance = new HashMap<>();
 		for (Parameter p : component.getParameters()) {
-			assert parameterContainerMap.containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + objectIdentifierInState + " is not defined!";
+			if (!parameterContainerMap.containsKey(p.getName())) {
+				throw new IllegalStateException("The data container for parameter " + p.getName() + " of " + objectIdentifierInState + " is not defined!");
+			}
 			String assignedValue = parameterValues.get(parameterContainerMap.get(p.getName()));
-			assert assignedValue != null : "No value has been assigned to parameter " + p.getName() + " stored in container " + parameterContainerMap.get(p.getName()) + " in state " + state;
+			if (assignedValue == null) {
+				throw new IllegalStateException("No value has been assigned to parameter " + p.getName() + " stored in container " + parameterContainerMap.get(p.getName()) + " in state " + state);
+			}
 			String value = getParamValue(p, assignedValue, false);
 			assert value != null : "Determined value NULL for parameter " + p.getName() + ", which is not plausible.";
 			paramValuesForThisComponentInstance.put(p, value);
@@ -330,30 +347,8 @@ public class Util {
 		ComponentInstance instance = getComponentInstanceFromState(components, state, objectIdentifierInState, false);
 
 		/* now compute the new domains based on the current values */
-//		Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().filter(containerName -> parameterContainerMap.containsValue(containerName))
-//				.map(containerName -> component.getParameterWithName(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
 		return getUpdatedDomainsOfComponentParameters(instance);
-		// return null;
 	}
-
-	// public static Map<Parameter, ParameterDomain> getUpdatedDomainsOfComponentParameters(final ComponentInstance instance) {
-	//
-	// /* detect containers for parameter values, and register the values of the data containers */
-	// Component component = instance.getComponent();
-	//
-	// /* determine current values of the parameters of this component instance */
-	// Map<Parameter, String> paramValuesForThisComponentInstance = new HashMap<>();
-	// for (Parameter p : component.getParameters()) {
-	// String assignedValue = instance.getParameterValues().get(p.getName());
-	// String value = getParamValue(p, assignedValue, false);
-	// paramValuesForThisComponentInstance.put(p, value);
-	// }
-	//
-	// /* now compute the new domains based on the current values */
-	//// Collection<Parameter> overwrittenParams = getOverwrittenDatacontainersInState(state).stream().filter(containerName -> parameterContainerMap.containsValue(containerName))
-	// // .map(containerName -> component.getParameter(parameterContainerMapInv.get(containerName))).collect(Collectors.toList());
-	// return getUpdatedDomainsOfComponentParameters(component, paramValuesForThisComponentInstance, new ArrayList<>());
-	// }
 
 	private static String getParamValue(final Parameter p, final String assignedValue, final boolean resolveIntervals) {
 		String interpretedValue = "";
@@ -419,35 +414,10 @@ public class Util {
 					} else {
 						logger.debug("Not changing domain of {} since it has already been set explicitly in the past.", param);
 					}
-					// }
-					// else
-					// logger.debug("Not changing domain of {} from {} to {}, because the current domain is already narrower.", newDomain.getX(), domains.get(newDomain.getX()), newDomain.getY());
-
-					// ParameterDomain intersection = null;
-					// if (param.isNumeric()) {
-					// NumericParameterDomain cConcludedDomain = (NumericParameterDomain)concludedDomain;
-					// NumericParameterDomain currentDomain = (NumericParameterDomain)domains.get(newDomain.getX());
-					// intersection = new NumericParameterDomain(cConcludedDomain.isInteger(),
-					// Math.max(cConcludedDomain.getMin(), currentDomain.getMin()), Math.min(cConcludedDomain.getMax(),
-					// currentDomain.getMax()));
-					// }
-					// else if (param.isCategorical()) {
-					// CategoricalParameterDomain cConcludedDomain = (CategoricalParameterDomain)concludedDomain;
-					// CategoricalParameterDomain currentDomain =
-					// (CategoricalParameterDomain)domains.get(newDomain.getX());
-					// intersection = new
-					// CategoricalParameterDomain(SetUtil.intersection(Arrays.asList(cConcludedDomain.getValues()),
-					// Arrays.asList(currentDomain.getValues())));
-					// }
-					// else
-					// throw new UnsupportedOperationException("Cannot currently handle parameters that are not numeric
-					// and not categorical.");
-					// assert intersection != null : "The intersection of the current domain and the domain dictated by
-					// a rule has failed";
-					// domains.put(param, intersection);
 				}
-			} else
+			} else {
 				logger.debug("Ignoring unsatisfied dependency {}.", dependency);
+			}
 		}
 		return domains;
 	}
@@ -457,8 +427,9 @@ public class Util {
 		for (Collection<Pair<Parameter, ParameterDomain>> condition : dependency.getPremise()) {
 			boolean check = isDependencyConditionSatisfied(condition, values);
 			logger.trace("Result of check for condition {}: {}", condition, check);
-			if (!check)
+			if (!check) {
 				return false;
+			}
 		}
 		return true;
 	}
@@ -468,15 +439,20 @@ public class Util {
 			ParameterDomain requiredDomain = conditionItem.getY();
 			Parameter param = conditionItem.getX();
 			ParameterDomain actualDomain = values.get(param);
-			assert values.containsKey(param) : "Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values;
-			assert values.get(param) != null : "Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is NULL in " + values;
-			if (!requiredDomain.subsumes(actualDomain))
+			if (!values.containsKey(param)) {
+				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values);
+			}
+			if (values.get(param) == null) {
+				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is NULL in " + values);
+			}
+			if (!requiredDomain.subsumes(actualDomain)) {
 				return false;
+			}
 		}
 		return true;
 	}
 
-	public static List<Interval> getNumericParameterRefinement(final Interval interval, double focus, boolean integer, final ParameterRefinementConfiguration refinementConfig) {
+	public static List<Interval> getNumericParameterRefinement(final Interval interval, final double focus, final boolean integer, final ParameterRefinementConfiguration refinementConfig) {
 
 		double inf = interval.getInf();
 		double sup = interval.getSup();
@@ -509,9 +485,11 @@ public class Util {
 		if (!refinementConfig.isInitRefinementOnLogScale()) {
 			List<Interval> proposedRefinements = refineOnLinearScale(interval, refinementConfig.getRefinementsPerStep(), refinementConfig.getIntervalLength());
 			for (Interval proposedRefinement : proposedRefinements) {
-				assert proposedRefinement.getInf() >= inf && proposedRefinement.getSup() <= sup : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-						+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
-				assert !proposedRefinement.equals(interval) : "No real refinement! Intervals are identical.";
+				assert proposedRefinement.getInf() >= inf && proposedRefinement.getSup() <= sup : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup() + "] is not a sub-interval of [" + inf + ", "
+						+ sup + "].";
+				if (proposedRefinement.equals(interval)) {
+					throw new IllegalStateException("No real refinement! Intervals are identical.");
+				}
 			}
 			return proposedRefinements;
 		}
@@ -519,9 +497,11 @@ public class Util {
 		List<Interval> proposedRefinements = refineOnLogScale(interval, refinementConfig.getRefinementsPerStep(), 2, focus);
 		for (Interval proposedRefinement : proposedRefinements) {
 			double epsilon = 1E-7;
-			assert proposedRefinement.getInf() + epsilon >= inf && proposedRefinement.getSup() <= sup + epsilon : "The proposed refinement [" + proposedRefinement.getInf() + ", "
-					+ proposedRefinement.getSup() + "] is not a sub-interval of [" + inf + ", " + sup + "].";
-			assert !proposedRefinement.equals(interval) : "No real refinement! Intervals are identical.";
+			assert proposedRefinement.getInf() + epsilon >= inf && proposedRefinement.getSup() <= sup + epsilon : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
+					+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
+			if (proposedRefinement.equals(interval)) {
+				throw new IllegalStateException("No real refinement! Intervals are identical.");
+			}
 		}
 		return proposedRefinements;
 	}
@@ -590,23 +570,24 @@ public class Util {
 		return list;
 	}
 
-	public static void refineRecursively(final Interval interval, final int maxNumberOfSubIntervalsPerRefinement, final double basis, final double pointOfConcentration,
-			final double factorForMaximumLengthOfFinestIntervals) {
+	public static void refineRecursively(final Interval interval, final int maxNumberOfSubIntervalsPerRefinement, final double basis, final double pointOfConcentration, final double factorForMaximumLengthOfFinestIntervals) {
 
 		/* first, do a logarithmic refinement */
 		List<Interval> initRefinement = refineOnLogScale(interval, maxNumberOfSubIntervalsPerRefinement, basis, pointOfConcentration);
 		Collections.reverse(initRefinement);
 
-		Stack<Interval> openRefinements = new Stack<>();
+		Deque<Interval> openRefinements = new LinkedList<>();
 		openRefinements.addAll(initRefinement);
 		int depth = 0;
 		do {
 			Interval intervalToRefine = openRefinements.pop();
-			String offset = "";
-			for (int i = 0; i < depth; i++) {
-				offset += "\t";
+			if (logger.isInfoEnabled()) {
+				StringBuilder offsetSB = new StringBuilder();
+				for (int i = 0; i < depth; i++) {
+					offsetSB.append("\t");
+				}
+				logger.info("{}[{}, {}]", offsetSB, intervalToRefine.getInf(), intervalToRefine.getSup());
 			}
-			logger.info("{}[{}, {}]", offset, intervalToRefine.getInf(), intervalToRefine.getSup());
 
 			/* compute desired granularity for this specific interval */
 			double distanceToPointOfContentration = Math.min(Math.abs(intervalToRefine.getInf() - pointOfConcentration), Math.abs(intervalToRefine.getSup() - pointOfConcentration));
@@ -625,47 +606,48 @@ public class Util {
 		} while (!openRefinements.isEmpty());
 	}
 
-	public static boolean isDefaultConfiguration(ComponentInstance instance) {
+	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
 		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
 				List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
 				double defaultValue = Double.parseDouble(p.getDefaultValue().toString());
 				boolean isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
 				if (!isCompatibleWithDefaultValue) {
-					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which does not subsume the default value " + defaultValue);
+					logger.info("{} has value {}, which does not subsume the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
 					return false;
+				} else {
+					logger.info("{} has value {}, which IS COMPATIBLE with the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
 				}
-				else
-					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which IS COMPATIBLE with the default value " + defaultValue);
 			} else {
 				if (!instance.getParameterValue(p).equals(p.getDefaultValue().toString())) {
-					logger.info(p.getName() + " has value " + instance.getParameterValue(p) + ", which is not the default " + p.getDefaultValue().toString());
+					logger.info("{} has value {}, which is not the default {}", p.getName(), instance.getParameterValue(p), p.getDefaultValue());
 					return false;
 				}
 			}
 		}
 		for (ComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {
-			if (!isDefaultConfiguration(child))
+			if (!isDefaultConfiguration(child)) {
 				return false;
+			}
 		}
 		return true;
 	}
-	
-	public static int getNumberOfUnparametrizedCompositions(Collection<Component> components, String requiredInterface) {
+
+	public static int getNumberOfUnparametrizedCompositions(final Collection<Component> components, final String requiredInterface) {
 		Collection<Component> candidates = components.stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
 		int numCandidates = 0;
 		for (Component candidate : candidates) {
 			int waysToResolveComponent = 0;
 			if (candidate.getRequiredInterfaces().isEmpty()) {
 				waysToResolveComponent = 1;
-			}
-			else {
+			} else {
 				for (String req : candidate.getRequiredInterfaces().keySet()) {
 					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, candidate.getRequiredInterfaces().get(req));
-					if (waysToResolveComponent > 0)
+					if (waysToResolveComponent > 0) {
 						waysToResolveComponent *= subSolutionsForThisInterface;
-					else
+					} else {
 						waysToResolveComponent = subSolutionsForThisInterface;
+					}
 				}
 			}
 			numCandidates += waysToResolveComponent;

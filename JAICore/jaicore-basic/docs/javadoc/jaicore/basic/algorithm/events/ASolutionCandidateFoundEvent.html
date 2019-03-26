@@ -115,12 +115,13 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a></dd>
+<dd><a href="../../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>, <a href="../../../../jaicore/basic/algorithm/events/SolutionCandidateFoundEvent.html" title="interface in jaicore.basic.algorithm.events">SolutionCandidateFoundEvent</a>&lt;O&gt;</dd>
 </dl>
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">ASolutionCandidateFoundEvent&lt;O&gt;</span>
-extends <a href="../../../../jaicore/basic/algorithm/events/AAlgorithmEvent.html" title="class in jaicore.basic.algorithm.events">AAlgorithmEvent</a></pre>
+extends <a href="../../../../jaicore/basic/algorithm/events/AAlgorithmEvent.html" title="class in jaicore.basic.algorithm.events">AAlgorithmEvent</a>
+implements <a href="../../../../jaicore/basic/algorithm/events/SolutionCandidateFoundEvent.html" title="interface in jaicore.basic.algorithm.events">SolutionCandidateFoundEvent</a>&lt;O&gt;</pre>
 <div class="block">This is to notify listeners that an algorithm has found a solution candidate. Note that this is generally not the answer returned by the algorithm but only one possible candidate.</div>
 </li>
 </ul>
@@ -177,6 +178,13 @@ extends <a href="../../../../jaicore/basic/algorithm/events/AAlgorithmEvent.html
 <h3>Methods inherited from class&nbsp;java.lang.Object</h3>
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.events.AlgorithmEvent">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.events.<a href="../../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a></h3>
+<code><a href="../../../../jaicore/basic/algorithm/events/AlgorithmEvent.html#getAlgorithmId--">getAlgorithmId</a>, <a href="../../../../jaicore/basic/algorithm/events/AlgorithmEvent.html#getTimestamp--">getTimestamp</a></code></li>
+</ul>
 </li>
 </ul>
 </li>
@@ -218,6 +226,10 @@ extends <a href="../../../../jaicore/basic/algorithm/events/AAlgorithmEvent.html
 <li class="blockList">
 <h4>getSolutionCandidate</h4>
 <pre>public&nbsp;<a href="../../../../jaicore/basic/algorithm/events/ASolutionCandidateFoundEvent.html" title="type parameter in ASolutionCandidateFoundEvent">O</a>&nbsp;getSolutionCandidate()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../jaicore/basic/algorithm/events/SolutionCandidateFoundEvent.html#getSolutionCandidate--">getSolutionCandidate</a></code>&nbsp;in interface&nbsp;<code><a href="../../../../jaicore/basic/algorithm/events/SolutionCandidateFoundEvent.html" title="interface in jaicore.basic.algorithm.events">SolutionCandidateFoundEvent</a>&lt;<a href="../../../../jaicore/basic/algorithm/events/ASolutionCandidateFoundEvent.html" title="type parameter in ASolutionCandidateFoundEvent">O</a>&gt;</code></dd>
+</dl>
 </li>
 </ul>
 </li>

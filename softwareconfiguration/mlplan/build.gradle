@@ -12,10 +12,8 @@ dependencies {
 
 	// JAICore dependencies
 	compile project(':JAICore:jaicore-basic')
-	compile project(':JAICore:jaicore-concurrent')
 	compile project(':JAICore:jaicore-experiments')
 	compile project(':JAICore:jaicore-logic') 
-	compile project(':JAICore:jaicore-graph')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
@@ -37,6 +35,7 @@ dependencies {
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
 	}
 
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
 	
 }

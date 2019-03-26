@@ -12,39 +12,44 @@ public class MCTSFactory<N, A, V extends Comparable<V>> extends StandardORGraphS
 	private boolean forbidDoublePaths;
 
 	public IPathUpdatablePolicy<N, A, V> getTreePolicy() {
-		return treePolicy;
+		return this.treePolicy;
 	}
 
-	public void setTreePolicy(IPathUpdatablePolicy<N, A, V> treePolicy) {
+	public void setTreePolicy(final IPathUpdatablePolicy<N, A, V> treePolicy) {
 		this.treePolicy = treePolicy;
 	}
 
 	public IPolicy<N, A, V> getDefaultPolicy() {
-		return defaultPolicy;
+		return this.defaultPolicy;
 	}
 
-	public void setDefaultPolicy(IPolicy<N, A, V> defaultPolicy) {
+	public void setDefaultPolicy(final IPolicy<N, A, V> defaultPolicy) {
 		this.defaultPolicy = defaultPolicy;
 	}
 
 	public V getEvaluationFailurePenalty() {
-		return evaluationFailurePenalty;
+		return this.evaluationFailurePenalty;
 	}
 
-	public void setEvaluationFailurePenalty(V evaluationFailurePenalty) {
+	public void setEvaluationFailurePenalty(final V evaluationFailurePenalty) {
 		this.evaluationFailurePenalty = evaluationFailurePenalty;
 	}
 
 	public boolean isForbidDoublePaths() {
-		return forbidDoublePaths;
+		return this.forbidDoublePaths;
 	}
 
-	public void setForbidDoublePaths(boolean forbidDoublePaths) {
+	public void setForbidDoublePaths(final boolean forbidDoublePaths) {
 		this.forbidDoublePaths = forbidDoublePaths;
 	}
 
 	@Override
 	public MCTS<N, A, V> getAlgorithm() {
-		return new MCTS<>(getInput(), treePolicy, defaultPolicy, evaluationFailurePenalty, forbidDoublePaths);
+		return this.getAlgorithm(this.getInput());
+	}
+
+	@Override
+	public MCTS<N, A, V> getAlgorithm(final GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
+		return new MCTS<>(problem, this.treePolicy, this.defaultPolicy, this.evaluationFailurePenalty, this.forbidDoublePaths);
 	}
 }

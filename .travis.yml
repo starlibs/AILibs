@@ -1,8 +1,5 @@
 stages:
-- name: dummy
-  if: commit_message = "Travis built JavaDoc. ]ci skip[" 
 - name: compile
-  if: commit_message != "Travis built JavaDoc. ]ci skip["
 - analysis
 - test
 #- sonarqube
@@ -25,12 +22,9 @@ install:
   - true
 jobs:
   include:
-  - stage: dummy
-    script: "echo Not doing anything. This is just here to have at least one active script entry when a recursive call after a JavaDoc build comes in"
   - stage: compile
     script:
     - "./gradlew build -x test"
-    - bash .travis_push_javadoc.sh 
   - stage: analysis
     addons:
       sonarcloud:

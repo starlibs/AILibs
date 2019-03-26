@@ -71,7 +71,6 @@
 <span class="packageHierarchyLabel">Package Hierarchies:</span>
 <ul class="horizontal">
 <li><a href="jaicore/planning/classical/algorithms/strips/forward/package-tree.html">jaicore.planning.classical.algorithms.strips.forward</a>, </li>
-<li><a href="jaicore/planning/classical/pddl/package-tree.html">jaicore.planning.classical.pddl</a>, </li>
 <li><a href="jaicore/planning/classical/problems/ce/package-tree.html">jaicore.planning.classical.problems.ce</a>, </li>
 <li><a href="jaicore/planning/classical/problems/ceoc/package-tree.html">jaicore.planning.classical.problems.ceoc</a>, </li>
 <li><a href="jaicore/planning/classical/problems/strips/package-tree.html">jaicore.planning.classical.problems.strips</a>, </li>
@@ -100,7 +99,7 @@
 <ul>
 <li type="circle">jaicore.basic.algorithm.AAlgorithm&lt;I,O&gt; (implements jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, jaicore.basic.ILoggingCustomizable)
 <ul>
-<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.basic.algorithm.AOptimizer&lt;I,O,V&gt; (implements jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)
 <ul>
@@ -122,7 +121,7 @@
 </li>
 <li type="circle">jaicore.basic.algorithm.events.AAlgorithmEvent (implements jaicore.basic.algorithm.events.AlgorithmEvent)
 <ul>
-<li type="circle">jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent&lt;O&gt;
+<li type="circle">jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent&lt;O&gt; (implements jaicore.basic.algorithm.events.SolutionCandidateFoundEvent&lt;O&gt;)
 <ul>
 <li type="circle">jaicore.planning.core.events.<a href="jaicore/planning/core/events/PlanFoundEvent.html" title="class in jaicore.planning.core.events"><span class="typeNameLink">PlanFoundEvent</span></a>&lt;A,V&gt; (implements jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent&lt;O,V&gt;)</li>
 </ul>
@@ -136,16 +135,6 @@
 <li type="circle">jaicore.planning.hierarchical.algorithms.forwarddecomposition.<a href="jaicore/planning/hierarchical/algorithms/forwarddecomposition/ForwardDecompositionHTNBestFirstPlannerFactory.html" title="class in jaicore.planning.hierarchical.algorithms.forwarddecomposition"><span class="typeNameLink">ForwardDecompositionHTNBestFirstPlannerFactory</span></a>&lt;IPlanning,V,ISearch&gt;</li>
 </ul>
 </li>
-</ul>
-</li>
-<li type="circle">jaicore.search.model.travesaltree.AbstractGraphGenerator&lt;T,A&gt; (implements jaicore.search.core.interfaces.GraphGenerator&lt;T,A&gt;)
-<ul>
-<li type="circle">jaicore.planning.classical.pddl.<a href="jaicore/planning/classical/pddl/PDDLGraphGenerator.html" title="class in jaicore.planning.classical.pddl"><span class="typeNameLink">PDDLGraphGenerator</span></a></li>
-</ul>
-</li>
-<li type="circle">jaicore.search.model.travesaltree.AbstractNode
-<ul>
-<li type="circle">jaicore.planning.classical.pddl.<a href="jaicore/planning/classical/pddl/PDDLNode.html" title="class in jaicore.planning.classical.pddl"><span class="typeNameLink">PDDLNode</span></a></li>
 </ul>
 </li>
 <li type="circle">jaicore.planning.core.<a href="jaicore/planning/core/Action.html" title="class in jaicore.planning.core"><span class="typeNameLink">Action</span></a> (implements java.io.Serializable)
@@ -162,7 +151,7 @@
 <li type="circle">jaicore.planning.hierarchical.problems.ceocstn.converters.<a href="jaicore/planning/hierarchical/problems/ceocstn/converters/CEOCSTN2Shop2.html" title="class in jaicore.planning.hierarchical.problems.ceocstn.converters"><span class="typeNameLink">CEOCSTN2Shop2</span></a></li>
 <li type="circle">jaicore.planning.hierarchical.problems.ceocstn.<a href="jaicore/planning/hierarchical/problems/ceocstn/CEOCSTNUtil.html" title="class in jaicore.planning.hierarchical.problems.ceocstn"><span class="typeNameLink">CEOCSTNUtil</span></a></li>
 <li type="circle">jaicore.planning.hierarchical.problems.htn.<a href="jaicore/planning/hierarchical/problems/htn/CostSensitiveHTNPlanningProblem.html" title="class in jaicore.planning.hierarchical.problems.htn"><span class="typeNameLink">CostSensitiveHTNPlanningProblem</span></a>&lt;IPlanning,V&gt;</li>
-<li type="circle">jaicore.planning.hierarchical.problems.htn.<a href="jaicore/planning/hierarchical/problems/htn/CostSensitivePlanningToSearchProblemTransformer.html" title="class in jaicore.planning.hierarchical.problems.htn"><span class="typeNameLink">CostSensitivePlanningToSearchProblemTransformer</span></a>&lt;IPlanning,V,N,A&gt; (implements jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)</li>
+<li type="circle">jaicore.planning.hierarchical.problems.htn.<a href="jaicore/planning/hierarchical/problems/htn/CostSensitivePlanningToSearchProblemTransformer.html" title="class in jaicore.planning.hierarchical.problems.htn"><span class="typeNameLink">CostSensitivePlanningToSearchProblemTransformer</span></a>&lt;IPlanning,V,N,A&gt; (implements jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;I1,O1,I2,O2&gt;)</li>
 <li type="circle">jaicore.planning.hierarchical.algorithms.forwarddecomposition.<a href="jaicore/planning/hierarchical/algorithms/forwarddecomposition/ForwardDecompositionReducer.html" title="class in jaicore.planning.hierarchical.algorithms.forwarddecomposition"><span class="typeNameLink">ForwardDecompositionReducer</span></a>&lt;IPlanning&gt; (implements jaicore.planning.hierarchical.problems.htn.<a href="jaicore/planning/hierarchical/problems/htn/IHierarchicalPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.hierarchical.problems.htn">IHierarchicalPlanningGraphGeneratorDeriver</a>&lt;IPlanning,N,A&gt;)</li>
 <li type="circle">jaicore.graph.Graph&lt;T&gt; (implements java.io.Serializable)
 <ul>
@@ -274,19 +263,13 @@
 </ul>
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li type="circle">jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;
+<li type="circle">jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;I1,O1,I2,O2&gt;
 <ul>
-<li type="circle">jaicore.planning.hierarchical.problems.htn.<a href="jaicore/planning/hierarchical/problems/htn/IHierarchicalPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.hierarchical.problems.htn"><span class="typeNameLink">IHierarchicalPlanningGraphGeneratorDeriver</span></a>&lt;IPlanning,N,A&gt; (also extends jaicore.planning.hierarchical.algorithms.<a href="jaicore/planning/hierarchical/algorithms/IPathToPlanConverter.html" title="interface in jaicore.planning.hierarchical.algorithms">IPathToPlanConverter</a>&lt;N&gt;)</li>
-<li type="circle">jaicore.planning.classical.algorithms.strips.forward.<a href="jaicore/planning/classical/algorithms/strips/forward/ISTRIPSPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.classical.algorithms.strips.forward"><span class="typeNameLink">ISTRIPSPlanningGraphGeneratorDeriver</span></a>&lt;N,A&gt; (also extends jaicore.planning.hierarchical.algorithms.<a href="jaicore/planning/hierarchical/algorithms/IPathToPlanConverter.html" title="interface in jaicore.planning.hierarchical.algorithms">IPathToPlanConverter</a>&lt;N&gt;)</li>
+<li type="circle">jaicore.planning.hierarchical.problems.htn.<a href="jaicore/planning/hierarchical/problems/htn/IHierarchicalPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.hierarchical.problems.htn"><span class="typeNameLink">IHierarchicalPlanningGraphGeneratorDeriver</span></a>&lt;IPlanning,N,A&gt;</li>
+<li type="circle">jaicore.planning.classical.algorithms.strips.forward.<a href="jaicore/planning/classical/algorithms/strips/forward/ISTRIPSPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.classical.algorithms.strips.forward"><span class="typeNameLink">ISTRIPSPlanningGraphGeneratorDeriver</span></a>&lt;N,A&gt;</li>
 </ul>
 </li>
 <li type="circle">jaicore.planning.classical.problems.strips.<a href="jaicore/planning/classical/problems/strips/GoalStateFunction.html" title="interface in jaicore.planning.classical.problems.strips"><span class="typeNameLink">GoalStateFunction</span></a></li>
-<li type="circle">jaicore.planning.hierarchical.algorithms.<a href="jaicore/planning/hierarchical/algorithms/IPathToPlanConverter.html" title="interface in jaicore.planning.hierarchical.algorithms"><span class="typeNameLink">IPathToPlanConverter</span></a>&lt;N&gt;
-<ul>
-<li type="circle">jaicore.planning.hierarchical.problems.htn.<a href="jaicore/planning/hierarchical/problems/htn/IHierarchicalPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.hierarchical.problems.htn"><span class="typeNameLink">IHierarchicalPlanningGraphGeneratorDeriver</span></a>&lt;IPlanning,N,A&gt; (also extends jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)</li>
-<li type="circle">jaicore.planning.classical.algorithms.strips.forward.<a href="jaicore/planning/classical/algorithms/strips/forward/ISTRIPSPlanningGraphGeneratorDeriver.html" title="interface in jaicore.planning.classical.algorithms.strips.forward"><span class="typeNameLink">ISTRIPSPlanningGraphGeneratorDeriver</span></a>&lt;N,A&gt; (also extends jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)</li>
-</ul>
-</li>
 <li type="circle">jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceociptfd.<a href="jaicore/planning/hierarchical/algorithms/forwarddecomposition/graphgenerators/ceociptfd/OracleTaskResolver.html" title="interface in jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.ceociptfd"><span class="typeNameLink">OracleTaskResolver</span></a></li>
 <li type="circle">java.io.Serializable
 <ul>

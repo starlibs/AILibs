@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -421,6 +422,20 @@ public class ComponentLoader {
 	 */
 	public Collection<Component> getComponents() {
 		return this.components;
+	}
+
+	/**
+	 * This method searches for a component with the given name. If such a component does not exist, a NoSuchElementException is thrown.
+	 * @param name The name of the component in question.
+	 * @return The component for the given name.
+	 */
+	public Component getComponentWithName(final String name) {
+		for (Component component : this.getComponents()) {
+			if (component.getName().equals(name)) {
+				return component;
+			}
+		}
+		throw new NoSuchElementException("There is no component with the requested name");
 	}
 
 	public static void main(final String[] args) throws IOException, UnresolvableRequiredInterfaceException {

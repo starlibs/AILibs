@@ -212,7 +212,7 @@ extends <a href="../../../../../jaicore/ea/algorithm/AEvolutionaryAlgorithm.html
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, cancel, checkAndConductTermination, getId, getLoggerName, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setLoggerName, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, cancel, checkAndConductTermination, computeTimeoutAware, getActivationTime, getId, getLoggerName, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setLoggerName, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -276,13 +276,13 @@ extends <a href="../../../../../jaicore/ea/algorithm/AEvolutionaryAlgorithm.html
 <pre>public&nbsp;jaicore.basic.algorithm.events.AlgorithmEvent&nbsp;nextWithException()
                                                                 throws java.lang.InterruptedException,
                                                                        jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                                                       java.util.concurrent.TimeoutException,
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                                                                        jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 </dl>
 </li>
@@ -332,13 +332,13 @@ extends <a href="../../../../../jaicore/ea/algorithm/AEvolutionaryAlgorithm.html
 <pre>public&nbsp;<a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/MOEAFrameworkAlgorithmResult.html" title="class in jaicore.ea.algorithm.moea.moeaframework">MOEAFrameworkAlgorithmResult</a>&nbsp;call()
                                   throws java.lang.InterruptedException,
                                          jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                         java.util.concurrent.TimeoutException,
+                                         jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                                          jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 </dl>
 </li>

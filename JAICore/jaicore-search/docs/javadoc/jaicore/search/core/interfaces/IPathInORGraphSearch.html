@@ -92,7 +92,7 @@
 <li class="blockList">
 <dl>
 <dt>All Superinterfaces:</dt>
-<dd>java.util.concurrent.Callable&lt;O&gt;, jaicore.basic.Cancelable, jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+<dd>java.util.concurrent.Callable&lt;O&gt;, jaicore.basic.Cancelable, jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <dl>
 <dt>All Known Subinterfaces:</dt>
@@ -100,12 +100,12 @@
 </dl>
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AAnyPathInORGraphSearch</a>, <a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/astar/AStar.html" title="class in jaicore.search.algorithms.standard.astar">AStar</a>, <a href="../../../../jaicore/search/algorithms/standard/awastar/AwaStarSearch.html" title="class in jaicore.search.algorithms.standard.awastar">AwaStarSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirst</a>, <a href="../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstEpsilon.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirstEpsilon</a>, <a href="../../../../jaicore/search/algorithms/standard/lds/BestFirstLimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">BestFirstLimitedDiscrepancySearch</a>, <a href="../../../../jaicore/search/util/GraphSanityChecker.html" title="class in jaicore.search.util">GraphSanityChecker</a>, <a href="../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>, <a href="../../../../jaicore/search/algorithms/standard/mcts/MCTS.html" title="class in jaicore.search.algorithms.standard.mcts">MCTS</a>, <a href="../../../../jaicore/search/algorithms/standard/rdfs/RandomizedDepthFirstSearch.html" title="class in jaicore.search.algorithms.standard.rdfs">RandomizedDepthFirstSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="class in jaicore.search.algorithms.standard.random">RandomSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirst.html" title="class in jaicore.search.algorithms.standard.bestfirst">StandardBestFirst</a>, <a href="../../../../jaicore/search/algorithms/standard/mcts/UCT.html" title="class in jaicore.search.algorithms.standard.mcts">UCT</a></dd>
+<dd><a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AAnyPathInORGraphSearch</a>, <a href="../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/astar/AStar.html" title="class in jaicore.search.algorithms.standard.astar">AStar</a>, <a href="../../../../jaicore/search/algorithms/standard/awastar/AwaStarSearch.html" title="class in jaicore.search.algorithms.standard.awastar">AwaStarSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirst</a>, <a href="../../../../jaicore/search/algorithms/standard/bestfirst/BestFirstEpsilon.html" title="class in jaicore.search.algorithms.standard.bestfirst">BestFirstEpsilon</a>, <a href="../../../../jaicore/search/algorithms/standard/lds/BestFirstLimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">BestFirstLimitedDiscrepancySearch</a>, <a href="../../../../jaicore/search/util/GraphSanityChecker.html" title="class in jaicore.search.util">GraphSanityChecker</a>, <a href="../../../../jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearch.html" title="class in jaicore.search.algorithms.standard.lds">LimitedDiscrepancySearch</a>, <a href="../../../../jaicore/search/algorithms/standard/mcts/MCTS.html" title="class in jaicore.search.algorithms.standard.mcts">MCTS</a>, <a href="../../../../jaicore/search/algorithms/standard/rdfs/RandomizedDepthFirstSearch.html" title="class in jaicore.search.algorithms.standard.rdfs">RandomizedDepthFirstSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/random/RandomSearch.html" title="class in jaicore.search.algorithms.standard.random">RandomSearch</a>, <a href="../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="class in jaicore.search.algorithms.standard.rstar">RStar</a>, <a href="../../../../jaicore/search/algorithms/standard/bestfirst/StandardBestFirst.html" title="class in jaicore.search.algorithms.standard.bestfirst">StandardBestFirst</a>, <a href="../../../../jaicore/search/algorithms/standard/mcts/UCT.html" title="class in jaicore.search.algorithms.standard.mcts">UCT</a></dd>
 </dl>
 <hr>
 <br>
 <pre>public interface <span class="typeNameLabel">IPathInORGraphSearch&lt;I extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;N,A&gt;,O extends <a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;N,A&gt;,N,A&gt;</span>
-extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;</pre>
+extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;</pre>
 </li>
 </ul>
 </div>
@@ -126,11 +126,18 @@ extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" t
 <code><a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html#getGraphGenerator--">getGraphGenerator</a></code></li>
 </ul>
 <ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
+<code>nextSolutionCandidate, nextSolutionCandidateEvent</code></li>
+</ul>
+<ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithm">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setNumCPUs, setTimeout, setTimeout</code></li>
+<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
@@ -152,13 +159,6 @@ extends <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" t
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.Cancelable</h3>
 <code>cancel</code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
-<code>nextSolutionCandidate, nextSolutionCandidateEvent</code></li>
 </ul>
 </li>
 </ul>

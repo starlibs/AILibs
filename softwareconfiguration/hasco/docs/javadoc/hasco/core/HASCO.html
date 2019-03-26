@@ -133,7 +133,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithm&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithm&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -162,10 +162,10 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#HASCO-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-hasco.core.IHASCOPlanningGraphGeneratorDeriver-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-jaicore.basic.algorithm.AlgorithmProblemTransformer-">HASCO</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;configurationProblem,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#HASCO-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-hasco.core.IHASCOPlanningGraphGeneratorDeriver-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">HASCO</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;configurationProblem,
      <a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>&gt;&nbsp;planningGraphGeneratorDeriver,
      jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;searchFactory,
-     jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;&nbsp;searchProblemTransformer)</code>&nbsp;</td>
+     jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&gt;&nbsp;searchProblemTransformer)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -219,7 +219,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#getSearchFactory--">getSearchFactory</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i9" class="rowColor">
-<td class="colFirst"><code>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;</code></td>
+<td class="colFirst"><code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCO.html#getSearchProblemTransformer--">getSearchProblemTransformer</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i10" class="altColor">
@@ -258,7 +258,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, checkAndConductTermination, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, checkAndConductTermination, computeTimeoutAware, getActivationTime, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -272,7 +272,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>getId, getInput, getNumCPUs, getTimeout, registerListener, setNumCPUs, setTimeout, setTimeout</code></li>
+<code>getId, getInput, getNumCPUs, getTimeout, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
@@ -302,7 +302,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="HASCO-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-hasco.core.IHASCOPlanningGraphGeneratorDeriver-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
+<a name="HASCO-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-hasco.core.IHASCOPlanningGraphGeneratorDeriver-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -311,7 +311,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <pre>public&nbsp;HASCO(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;configurationProblem,
              <a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>&gt;&nbsp;planningGraphGeneratorDeriver,
              jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&nbsp;searchFactory,
-             jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;&nbsp;searchProblemTransformer)</pre>
+             jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&gt;&nbsp;searchProblemTransformer)</pre>
 </li>
 </ul>
 </li>
@@ -331,13 +331,13 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <pre>public&nbsp;jaicore.basic.algorithm.events.AlgorithmEvent&nbsp;nextWithException()
                                                                 throws java.lang.InterruptedException,
                                                                        jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                                                       java.util.concurrent.TimeoutException,
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                                                                        jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 </dl>
 </li>
@@ -390,7 +390,7 @@ extends <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm.ht
 <ul class="blockList">
 <li class="blockList">
 <h4>getSearchProblemTransformer</h4>
-<pre>public&nbsp;jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>&gt;&nbsp;getSearchProblemTransformer()</pre>
+<pre>public&nbsp;jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">S</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">N</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">A</a>,<a href="../../hasco/core/HASCO.html" title="type parameter in HASCO">V</a>&gt;&gt;&nbsp;getSearchProblemTransformer()</pre>
 </li>
 </ul>
 <a name="getReport--">
