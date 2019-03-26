@@ -78,26 +78,42 @@
 <ul>
 <li type="circle">java.lang.Object
 <ul>
+<li type="circle">jaicore.basic.algorithm.AAlgorithm&lt;I,O&gt; (implements jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, jaicore.basic.ILoggingCustomizable)
+<ul>
+<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
+<ul>
+<li type="circle">jaicore.basic.algorithm.AOptimizer&lt;I,O,V&gt; (implements jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces"><span class="typeNameLink">AOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (implements jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;I,N,A,V&gt;)
+<ul>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStar</span></a>&lt;T,A&gt;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li type="circle">jaicore.basic.algorithm.AAlgorithmFactory&lt;I,O&gt; (implements jaicore.basic.algorithm.IAlgorithmFactory&lt;I,O&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/StandardORGraphSearchFactory.html" title="class in jaicore.search.core.interfaces"><span class="typeNameLink">StandardORGraphSearchFactory</span></a>&lt;I,O,N,A,V&gt; (implements jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IGraphSearchFactory</a>&lt;I,O,N,A&gt;)
+<ul>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarFactory.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStarFactory</span></a>&lt;T,A&gt;</li>
+</ul>
+</li>
+</ul>
+</li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/GraphBasedDistantSuccessorGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GraphBasedDistantSuccessorGenerator</span></a>&lt;N,A&gt; (implements jaicore.search.probleminputs.<a href="../../../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator</a>&lt;N,A&gt;, jaicore.basic.ILoggingCustomizable)</li>
 <li type="circle">jaicore.search.model.travesaltree.<a href="../../../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">Node</span></a>&lt;T,V&gt; (implements java.lang.Comparable&lt;T&gt;, java.io.Serializable)
 <ul>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GammaNode</span></a>&lt;T,V&gt;</li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GammaNode</span></a>&lt;T&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/PathAndCost.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">PathAndCost</span></a>&lt;T,V&gt;</li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/RandomCompletionGammaGraphGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RandomCompletionGammaGraphGenerator</span></a>&lt;T&gt; (implements jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar">GammaGraphGenerator</a>&lt;T,D&gt;)</li>
 <li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStarK</span></a> (implements java.lang.Comparable&lt;T&gt;)</li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/SimpleAStarGraphSearch.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">SimpleAStarGraphSearch</span></a>&lt;T,A&gt;</li>
-<li type="circle">java.lang.Thread (implements java.lang.Runnable)
-<ul>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/RStar.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStar</span></a>&lt;T,A,D&gt;</li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/SubPathGraphGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">SubPathGraphGenerator</span></a>&lt;N,A&gt; (implements jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;T,A&gt;)</li>
 </ul>
 </li>
-</ul>
-</li>
-</ul>
-<h2 title="Interface Hierarchy">Interface Hierarchy</h2>
-<ul>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="../../../../../jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GammaGraphGenerator</span></a>&lt;T,D&gt;</li>
 </ul>
 </div>
 <!-- ======= START OF BOTTOM NAVBAR ====== -->

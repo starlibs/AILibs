@@ -4,6 +4,9 @@ jaicore.basic.aggregate.reals
 jaicore.basic.algorithm
 jaicore.basic.algorithm.events
 jaicore.basic.algorithm.exceptions
+jaicore.basic.algorithm.reduction
 jaicore.basic.kvstore
 jaicore.basic.sets
+jaicore.concurrent
+jaicore.graph
 jaicore.logging

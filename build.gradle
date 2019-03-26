@@ -50,6 +50,7 @@ allprojects {
 			}
 			resources {
 				srcDir 'conf'
+				srcDir 'resources'
 			}
 		}
 		test {
@@ -104,7 +105,7 @@ allprojects {
 	//Sonarqube config
 	sonarqube {
 		properties {
-			properties["sonar.projectKey"] = project.name
+			properties["sonar.projectKey"] = "starlibs.ailibs"
 			properties["sonar.projectName"] = project.name
 			properties["sonar.projectDescription"] = project.description
 			properties["sonar.projectVersion"] = project.version
@@ -139,6 +140,11 @@ allprojects {
 		classifier = 'tests'
 		from sourceSets.test.output
 	}
+  
+	task sourcesJar(type: Jar, dependsOn: classes) {
+		classifier = 'sources'
+		from sourceSets.main.allSource
+	}
 	// Add a new configuration named testArtifacts
 	configurations {
 		testArtifacts
@@ -148,6 +154,8 @@ allprojects {
 	//      testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	artifacts {
 		testArtifacts testClassesJar
+		archives sourcesJar
+		archives javadocJar
 	}
 	
 	// generate JavaDoc for each project
@@ -164,10 +172,8 @@ dependencies{
 	compile project(":hasco")
 	compile project(":mlplan")
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-concurrent")
 	compile project(":JAICore:jaicore-ea")
 	compile project(":JAICore:jaicore-experiments")
-	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-logic")
 	compile project(":JAICore:jaicore-math")
@@ -175,7 +181,6 @@ dependencies{
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
-	compile project(":JAICore:jaicore-services")
 }
 
 publish.dependsOn shadowJar

@@ -16,6 +16,12 @@
     catch(err) {
     }
 //-->
+var methods = {"i0":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
 </script>
 <noscript>
 <div>JavaScript is disabled on your browser.</div>
@@ -41,7 +47,7 @@
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/basic/algorithm/AlgorithmState.html" title="enum in jaicore.basic.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" target="_top">Frames</a></li>
@@ -68,13 +74,13 @@
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#methods.inherited.from.class.java.lang.Throwable">Method</a></li>
+<li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li>Method</li>
+<li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
 <a name="skip.navbar.top">
@@ -138,7 +144,11 @@ extends java.lang.Exception</pre>
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#AlgorithmExecutionCanceledException--">AlgorithmExecutionCanceledException</a></span>()</code>&nbsp;</td>
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#AlgorithmExecutionCanceledException-long-">AlgorithmExecutionCanceledException</a></span>(long&nbsp;delay)</code>&nbsp;</td>
+</tr>
+<tr class="rowColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#AlgorithmExecutionCanceledException-java.lang.String-long-">AlgorithmExecutionCanceledException</a></span>(java.lang.String&nbsp;message,
+                                   long&nbsp;delay)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -149,6 +159,17 @@ extends java.lang.Exception</pre>
 <!--   -->
 </a>
 <h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code>long</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html#getDelay--">getDelay</a></span>()</code>&nbsp;</td>
+</tr>
+</table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Throwable">
 <!--   -->
@@ -177,13 +198,40 @@ extends java.lang.Exception</pre>
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="AlgorithmExecutionCanceledException--">
+<a name="AlgorithmExecutionCanceledException-long-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>AlgorithmExecutionCanceledException</h4>
+<pre>public&nbsp;AlgorithmExecutionCanceledException(long&nbsp;delay)</pre>
+</li>
+</ul>
+<a name="AlgorithmExecutionCanceledException-java.lang.String-long-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>AlgorithmExecutionCanceledException</h4>
-<pre>public&nbsp;AlgorithmExecutionCanceledException()</pre>
+<pre>public&nbsp;AlgorithmExecutionCanceledException(java.lang.String&nbsp;message,
+                                           long&nbsp;delay)</pre>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getDelay--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getDelay</h4>
+<pre>public&nbsp;long&nbsp;getDelay()</pre>
 </li>
 </ul>
 </li>
@@ -214,7 +262,7 @@ extends java.lang.Exception</pre>
 <div class="subNav">
 <ul class="navList">
 <li><a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
-<li><a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/basic/algorithm/AlgorithmState.html" title="enum in jaicore.basic.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
 <li><a href="../../../index.html?jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" target="_top">Frames</a></li>
@@ -241,13 +289,13 @@ extends java.lang.Exception</pre>
 <li>Nested&nbsp;|&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
-<li><a href="#methods.inherited.from.class.java.lang.Throwable">Method</a></li>
+<li><a href="#method.summary">Method</a></li>
 </ul>
 <ul class="subNavList">
 <li>Detail:&nbsp;</li>
 <li>Field&nbsp;|&nbsp;</li>
 <li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
-<li>Method</li>
+<li><a href="#method.detail">Method</a></li>
 </ul>
 </div>
 <a name="skip.navbar.bottom">

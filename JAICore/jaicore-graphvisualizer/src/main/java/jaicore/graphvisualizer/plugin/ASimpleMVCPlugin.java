@@ -16,62 +16,66 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	private final V view;
 	private final C controller;
 
+	@SuppressWarnings("unchecked")
 	public ASimpleMVCPlugin() {
 		super();
-		Type[] mvcPatternClasses = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
-		M model;
-		V view;
-		C controller;
+		Type[] mvcPatternClasses = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+		M myModel;
+		V myView;
+		C myController;
 		try {
-			System.out.println(mvcPatternClasses[0].getTypeName().replaceAll("(<.*>)", ""));
-			Class<M> modelClass = ((Class<M>) Class.forName(getClassNameWithoutGenerics(mvcPatternClasses[0].getTypeName())));
-			Class<V> viewClass = ((Class<V>) Class.forName(getClassNameWithoutGenerics(mvcPatternClasses[1].getTypeName())));
-			Class<C> controllerClass = ((Class<C>) Class.forName(getClassNameWithoutGenerics(mvcPatternClasses[2].getTypeName())));
-			model = modelClass.newInstance();
-			view = viewClass.getDeclaredConstructor(modelClass).newInstance(model);
-			controller = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(model, view);
-			controller.start();
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug(mvcPatternClasses[0].getTypeName().replaceAll("(<.*>)", ""));
+			}
+
+			Class<M> modelClass = ((Class<M>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[0].getTypeName())));
+			Class<V> viewClass = ((Class<V>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[1].getTypeName())));
+			Class<C> controllerClass = ((Class<C>) Class.forName(this.getClassNameWithoutGenerics(mvcPatternClasses[2].getTypeName())));
+			myModel = modelClass.newInstance();
+			myView = viewClass.getDeclaredConstructor(modelClass).newInstance(myModel);
+			myController = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(myModel, myView);
+			myController.start();
 		} catch (Exception e) {
-			logger.error("Could not initialize {} due to exception in building MVC.", this, e);
+			this.logger.error("Could not initialize {} due to exception in building MVC.", this, e);
 			this.model = null;
 			this.view = null;
 			this.controller = null;
 			return;
 		}
-		this.model = model;
-		this.view = view;
-		this.controller = controller;
-		this.model.setController(controller);
-		this.model.setView(view);
-		this.view.setController(controller);
+		this.model = myModel;
+		this.view = myView;
+		this.controller = myController;
+		this.model.setController(myController);
+		this.model.setView(myView);
+		this.view.setController(myController);
 	}
 
 	@Override
 	public C getController() {
-		return controller;
+		return this.controller;
 	}
 
 	@Override
 	public M getModel() {
-		return view.getModel();
+		return this.view.getModel();
 	}
 
 	@Override
 	public V getView() {
-		return view;
+		return this.view;
 	}
 
 	@Override
-	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource) {
-		graphEventSource.registerListener(controller);
+	public void setAlgorithmEventSource(final AlgorithmEventSource graphEventSource) {
+		graphEventSource.registerListener(this.controller);
 	}
 
 	@Override
-	public void setGUIEventSource(GUIEventSource guiEventSource) {
-		guiEventSource.registerListener(controller);
+	public void setGUIEventSource(final GUIEventSource guiEventSource) {
+		guiEventSource.registerListener(this.controller);
 	}
 
-	private String getClassNameWithoutGenerics(String className) {
+	private String getClassNameWithoutGenerics(final String className) {
 		return className.replaceAll("(<.*>)", "");
 	}
 }

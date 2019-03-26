@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6};
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -107,7 +107,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Known Subinterfaces:</dt>
-<dd><a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm">IOptimizationAlgorithm</a>&lt;I,O,V&gt;</dd>
+<dd><a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm">IOptimizationAlgorithm</a>&lt;I,O,V&gt;, <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;</dd>
 </dl>
 <dl>
 <dt>All Known Implementing Classes:</dt>
@@ -117,9 +117,13 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public interface <span class="typeNameLabel">IAlgorithm&lt;I,O&gt;</span>
 extends java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;, java.util.Iterator&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;, java.util.concurrent.Callable&lt;O&gt;, <a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a></pre>
-<div class="block">The algorithms should actually also be interruptible, but since this is often not the case, we require the cancel method to ensure that the authors of the algorithms provide a mechanism to stop the algorithm and free the used resources.
+<div class="block">The algorithms should actually also be interruptible, but since this is often not the case,
+ we require the cancel method to ensure that the authors of the algorithms provide a mechanism
+ to stop the algorithm and free the used resources.
 
- Implementation of both Iterable and Iterator: We envision that an object of an algorithm really only represents one run, so there is really no reason to have an additional object only to hold the state.</div>
+ Implementation of both Iterable and Iterator: We envision that an object of an algorithm really
+ only represents one run, so there is really no reason to have an additional object only to hold
+ the state.</div>
 </li>
 </ul>
 </div>
@@ -180,16 +184,24 @@ extends java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/A
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setNumCPUs-int-">setNumCPUs</a></span>(int&nbsp;numberOfCPUs)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setMaxNumThreads-int-">setMaxNumThreads</a></span>(int&nbsp;maxNumberOfThreads)</code>
+<div class="block">While setNumCPUs aims at telling the algorithm how many CPUs *should* be used for parallelization,
+ this method can be used to define a strict constraint on the number of threads that must be spawned
+ by the algorithm itself at most.</div>
+</td>
 </tr>
 <tr id="i9" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setNumCPUs-int-">setNumCPUs</a></span>(int&nbsp;numberOfCPUs)</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setTimeout-long-java.util.concurrent.TimeUnit-">setTimeout</a></span>(long&nbsp;timeout,
           java.util.concurrent.TimeUnit&nbsp;timeUnit)</code>
 <div class="block">Sets the timeout for the algorithm to the given value in the given time unit.</div>
 </td>
 </tr>
-<tr id="i10" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setTimeout-jaicore.basic.TimeOut-">setTimeout</a></span>(<a href="../../../jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a>&nbsp;timeout)</code>&nbsp;</td>
 </tr>
@@ -282,6 +294,33 @@ extends java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/A
 </dl>
 </li>
 </ul>
+<a name="setMaxNumThreads-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setMaxNumThreads</h4>
+<pre>void&nbsp;setMaxNumThreads(int&nbsp;maxNumberOfThreads)</pre>
+<div class="block">While setNumCPUs aims at telling the algorithm how many CPUs *should* be used for parallelization,
+ this method can be used to define a strict constraint on the number of threads that must be spawned
+ by the algorithm itself at most. The motivation for this functionality is that, on some systems,
+ processes get killed if they consume too much CPU resources. This can usually be avoided if the
+ number of threads is limited (e.g. to the number of cores that may be used). <code>setNumCPUs</code>
+ does not put such a restriction, because this is unnecessarily limiting in environment where such
+ constraints do not exist.
+
+ If the value is set to 0, no own threads must be used at all. Note that this may not be possible for
+ some algorithms that need observers in the background.
+
+ If the value is set to -1, any restriction on the number of threads is removed.
+
+ Note that different algorithms may have different default behaviors if this number is not set.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>maxNumberOfThreads</code> - The maximum number of threads that may be spawned by the algorithm itself.</dd>
+</dl>
+</li>
+</ul>
 <a name="setTimeout-long-java.util.concurrent.TimeUnit-">
 <!--   -->
 </a>
@@ -333,7 +372,7 @@ extends java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/A
 <pre><a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&nbsp;nextWithException()
                           throws java.lang.InterruptedException,
                                  <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
-                                 java.util.concurrent.TimeoutException,
+                                 <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a>,
                                  <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></pre>
 <div class="block">Continues the execution of the algorithm until the next event is emitted.</div>
 <dl>
@@ -343,7 +382,7 @@ extends java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/A
 <dd><code>java.lang.Exception</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
 </dl>
 </li>
@@ -370,7 +409,7 @@ extends java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/A
 <pre><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="type parameter in IAlgorithm">O</a>&nbsp;call()
 throws java.lang.InterruptedException,
        <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
-       java.util.concurrent.TimeoutException,
+       <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a>,
        <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></pre>
 <div class="block">Overrides the call of Callable to restrict the set of allowed exceptions</div>
 <dl>
@@ -379,7 +418,7 @@ throws java.lang.InterruptedException,
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
 </dl>
 </li>

@@ -3,9 +3,10 @@ package jaicore.search.probleminputs;
 import java.util.HashMap;
 import java.util.Map;
 
+import jaicore.basic.IObjectEvaluator;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.ISolutionEvaluator;
+import jaicore.search.model.other.SearchGraphPath;
 
 /**
  * In AILibs, a graph search problem always aims at identifying one or more paths from
@@ -21,14 +22,14 @@ import jaicore.search.core.interfaces.ISolutionEvaluator;
  * @param <V>
  */
 public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> {
-	private final ISolutionEvaluator<N, V> pathEvaluator;
+	private final IObjectEvaluator<SearchGraphPath<N, A>, V> pathEvaluator;
 
-	public GraphSearchWithPathEvaluationsInput(final GraphGenerator<N, A> graphGenerator, final ISolutionEvaluator<N, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final GraphGenerator<N, A> graphGenerator, final IObjectEvaluator<SearchGraphPath<N, A>, V> pathEvaluator) {
 		super(graphGenerator);
 		this.pathEvaluator = pathEvaluator;
 	}
 
-	public ISolutionEvaluator<N, V> getPathEvaluator() {
+	public IObjectEvaluator<SearchGraphPath<N, A>, V> getPathEvaluator() {
 		return this.pathEvaluator;
 	}
 

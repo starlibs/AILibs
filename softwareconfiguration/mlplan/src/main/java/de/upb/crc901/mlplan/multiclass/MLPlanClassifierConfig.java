@@ -6,7 +6,7 @@ import org.aeonbits.owner.Config.Sources;
 
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 
-@Sources({ "file:conf/automl/mlplan.properties" })
+@Sources({ "file:conf/mlplan.properties" })
 public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 
 	public static final String PREFERRED_COMPONENTS = "mlplan.preferredComponents";
@@ -44,9 +44,9 @@ public interface MLPlanClassifierConfig extends TwoPhaseHASCOConfig {
 	@DefaultValue("0.3")
 	public double dataPortionForSelection();
 
-//	@Key(TIMEOUT_PER_EVAL_IN_SECONDS)
-//	@DefaultValue("10")
-//	public int timeoutPerNodeFComputation();
+	// @Key(TIMEOUT_PER_EVAL_IN_SECONDS)
+	// @DefaultValue("10")
+	// public int timeoutPerNodeFComputation();
 
 	@Key(PREFERRED_COMPONENTS)
 	@DefaultValue("conf/mlplan/precedenceList.txt")

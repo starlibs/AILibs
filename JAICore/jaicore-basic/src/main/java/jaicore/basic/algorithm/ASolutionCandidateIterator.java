@@ -8,17 +8,18 @@ import java.util.concurrent.TimeoutException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 /**
  * A template for algorithms that iterate over solution candidates. By default,
  * if this algorithm is called, it returns the first solution it finds.
- * 
+ *
  * @author fmohr
  *
  * @param <I>
  * @param <O>
  */
-public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> implements ISolutionCandidateIterator<O> {
+public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> implements ISolutionCandidateIterator<I, O> {
 
 	public ASolutionCandidateIterator(final I input) {
 		super(input);
@@ -28,16 +29,16 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 		super(config,input);
 	}
 
-	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		SolutionCandidateFoundEvent<O> event = nextSolutionCandidateEvent();
-		O candidate = event.getSolutionCandidate();
-		return candidate;
+	@Override
+	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+		SolutionCandidateFoundEvent<O> event = this.nextSolutionCandidateEvent();
+		return event.getSolutionCandidate();
 	}
 
 	@Override
-	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		while (hasNext()) {
-			AlgorithmEvent event = nextWithException();
+	public SolutionCandidateFoundEvent<O> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+		while (this.hasNext()) {
+			AlgorithmEvent event = this.nextWithException();
 			if (event instanceof SolutionCandidateFoundEvent) {
 				@SuppressWarnings("unchecked")
 				SolutionCandidateFoundEvent<O> castedEvent = (SolutionCandidateFoundEvent<O>) event;
@@ -48,15 +49,15 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 	}
 
 	@Override
-	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		O candidate = nextSolutionCandidate();
-		terminate(); // make sure that a termination event is sent
+	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+		O candidate = this.nextSolutionCandidate();
+		this.terminate(); // make sure that a termination event is sent
 		return candidate;
 	}
-	
+
 	/**
 	 * Gathers all solutions that exist
-	 * 
+	 *
 	 * @return
 	 * @throws InterruptedException
 	 * @throws AlgorithmExecutionCanceledException
@@ -65,8 +66,8 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 	 */
 	public List<O> collectAllSolutions() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		List<O> solutions = new ArrayList<>();
-		while (hasNext()) {
-			solutions.add(nextSolutionCandidate());
+		while (this.hasNext()) {
+			solutions.add(this.nextSolutionCandidate());
 		}
 		return solutions;
 	}

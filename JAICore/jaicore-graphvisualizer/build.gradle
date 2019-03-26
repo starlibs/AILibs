@@ -11,7 +11,7 @@ eclipse {
     }
 }
 dependencies {
-	compile project(":JAICore:jaicore-graph")
+	compile project(":JAICore:jaicore-basic")
 	
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.7'
 	

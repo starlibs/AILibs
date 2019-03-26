@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":6,"i1":6,"i2":6};
+var methods = {"i0":6,"i1":6};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -98,7 +98,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Known Implementing Classes:</dt>
-<dd><a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="class in jaicore.basic.algorithm">AAlgorithmFactory</a>, <a href="../../../jaicore/basic/sets/LDSRelationComputerFactory.html" title="class in jaicore.basic.sets">LDSRelationComputerFactory</a>, <a href="../../../jaicore/basic/algorithm/StandardAlgorithmFactory.html" title="class in jaicore.basic.algorithm">StandardAlgorithmFactory</a></dd>
+<dd><a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="class in jaicore.basic.algorithm">AAlgorithmFactory</a>, <a href="../../../jaicore/basic/sets/LDSRelationComputerFactory.html" title="class in jaicore.basic.sets">LDSRelationComputerFactory</a></dd>
 </dl>
 <hr>
 <br>
@@ -126,13 +126,8 @@ var activeTableTab = "activeTableTab";
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#getAlgorithm--">getAlgorithm</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#setProblemInput-I-">setProblemInput</a></span>(<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>&nbsp;problemInput)</code>&nbsp;</td>
-</tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>&lt;P&gt;&nbsp;void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setProblemInput</a></span>(P&nbsp;problemInput,
-               <a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm">AlgorithmProblemTransformer</a>&lt;P,<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>&gt;&nbsp;reducer)</code>&nbsp;</td>
+<td class="colFirst"><code><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>,<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">O</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#getAlgorithm-I-">getAlgorithm</a></span>(<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>&nbsp;input)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -149,36 +144,24 @@ var activeTableTab = "activeTableTab";
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="setProblemInput-java.lang.Object-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
-<!--   -->
-</a><a name="setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setProblemInput</h4>
-<pre>&lt;P&gt;&nbsp;void&nbsp;setProblemInput(P&nbsp;problemInput,
-                         <a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm">AlgorithmProblemTransformer</a>&lt;P,<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>&gt;&nbsp;reducer)</pre>
-</li>
-</ul>
-<a name="setProblemInput-java.lang.Object-">
-<!--   -->
-</a><a name="setProblemInput-I-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setProblemInput</h4>
-<pre>void&nbsp;setProblemInput(<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>&nbsp;problemInput)</pre>
-</li>
-</ul>
 <a name="getAlgorithm--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAlgorithm</h4>
+<pre><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>,<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">O</a>&gt;&nbsp;getAlgorithm()</pre>
+</li>
+</ul>
+<a name="getAlgorithm-java.lang.Object-">
+<!--   -->
+</a><a name="getAlgorithm-I-">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
 <h4>getAlgorithm</h4>
-<pre><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>,<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">O</a>&gt;&nbsp;getAlgorithm()</pre>
+<pre><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>,<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">O</a>&gt;&nbsp;getAlgorithm(<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="type parameter in IAlgorithmFactory">I</a>&nbsp;input)</pre>
 </li>
 </ul>
 </li>

@@ -8,7 +8,7 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
 				- %m%n" /> -->
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+			<param name="ConversionPattern" value="%-5p [%t] [%c.%M (%C:%L)] - %m%n" />
 		</layout>
 	</appender>
 
@@ -42,7 +42,7 @@
 		<param name="Threshold" value="TRACE" />
 		<param name="Append" value="false" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
 		</layout>
 	</appender>
 
@@ -56,11 +56,11 @@
 	</logger>
 	
 	<logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
-	 <level value="trace" />
+	 <level value="info" />
 	</logger>
 	
 	<logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -69,8 +69,12 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="testedalgorithm.search">
+  <logger name="jaicore.search.algorithms.standard.bestfirst">
     <level value="warn" />
+  </logger>
+  
+  <logger name="testedalgorithm._orgraphsearch._algorithm">
+    <level value="info" />
   </logger>
   
   <logger name="testednodeevaluator">

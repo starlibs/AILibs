@@ -1,4 +1,0 @@
-tflib.NeuralNet:String
--epochs:String
--learning_rate:String
--batch_size:String

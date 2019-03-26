@@ -244,6 +244,9 @@ gradle-app.setting
 
 # End of https://www.gitignore.io/api/java,linux,macos,gradle,windows,eclipse,intellij
 
+# ignore sonarlint
+.sonarlint
+
 # Generated files by running skikitwrapper
 JAICore/jaicore-ml/tmp/
 JAICore/jaicore-ml/model_dumps/

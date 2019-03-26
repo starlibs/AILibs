@@ -12,6 +12,6 @@ import jaicore.basic.ScoredItem;
  * @param <O>
  * @param <V>
  */
-public interface IOptimizationAlgorithm<I, O extends ScoredItem<V>, V extends Comparable<V>> extends IAlgorithm<I, O>, ISolutionCandidateIterator<O> {
+public interface IOptimizationAlgorithm<I, O extends ScoredItem<V>, V extends Comparable<V>> extends IAlgorithm<I, O>, ISolutionCandidateIterator<I, O> {
 	
 }

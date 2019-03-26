@@ -43,10 +43,8 @@ allprojects {
 
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-concurrent")
 	compile project(":JAICore:jaicore-ea")
 	compile project(":JAICore:jaicore-experiments")
-	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-logic")
 	compile project(":JAICore:jaicore-math")
@@ -54,5 +52,4 @@ dependencies {
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
-	compile project(":JAICore:jaicore-services")
 }
