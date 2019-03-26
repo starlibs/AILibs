@@ -86,17 +86,17 @@ public class McmcService {
 		List<Double> yValues = request.getyValues();
 		Integer numSamples = request.getNumSamples();
 
-		String inputFilename = INPUT_FILENAME_PREFIX + System.currentTimeMillis() + INPUT_FILENAME_FILE_EXTENSION;
-		String outputFilename = OUTPUT_FILENAME_PREFIX + System.currentTimeMillis() + OUTPUT_FILENAME_FILE_EXTENSION;
+		String inputFilename = new File(INPUT_FILENAME_PREFIX + System.currentTimeMillis() + INPUT_FILENAME_FILE_EXTENSION).getAbsolutePath();
+		String outputFilename = new File(OUTPUT_FILENAME_PREFIX + System.currentTimeMillis() + OUTPUT_FILENAME_FILE_EXTENSION).getAbsolutePath();
 
 		generateInputDataFile(xValues, yValues, inputFilename);
 
 		ProcessBuilder pb;
 		if (numSamples == null) {
-			pb = new ProcessBuilder("stan/lc", "sample", "init=stan/init.R", "data", "file=" + inputFilename, "output",
+			pb = new ProcessBuilder("/stan/lc", "sample", "init=/stan/init.R", "data", "file=" + inputFilename, "output",
 					"file=" + outputFilename);
 		} else {
-			pb = new ProcessBuilder("stan/lc", "sample", "num_samples=" + numSamples, "init=stan/init.R", "data",
+			pb = new ProcessBuilder("/stan/lc", "sample", "num_samples=" + numSamples, "init=/stan/init.R", "data",
 					"file=" + inputFilename, "output", "file=" + outputFilename);
 		}
 		LOG.info("Starting Stan from input file {}. Timeout is {}ms", inputFilename, STAN_SAMPLING_TIMEOUT_MS);
