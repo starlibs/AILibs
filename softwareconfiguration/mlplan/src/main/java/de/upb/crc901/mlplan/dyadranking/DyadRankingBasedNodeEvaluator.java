@@ -207,7 +207,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 			this.scaler = (DyadMinMaxScaler) oin.readObject();
 		} catch (IOException e) {
-			logger.error("Could not load model for plnet in {}", Paths.get(config.getPlNetPath()).toString());
+			logger.error("Could not load model for plnet in {}", Paths.get(config.getPlNetPath()));
 		} catch (ClassNotFoundException e) {
 			logger.error("Could not read scaler.", e);
 		}
