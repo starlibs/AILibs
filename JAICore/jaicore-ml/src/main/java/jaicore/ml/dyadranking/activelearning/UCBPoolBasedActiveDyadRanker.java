@@ -23,7 +23,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * A prototypical active dyad ranker based on the UCB decision rule. It always queries the two 
- * @author jonas
+ * @author Jonas Hanselle
  *
  */
 public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
@@ -87,7 +87,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				// feed it to the ranker
 				try {
 					ranker.update(minibatch);
-					// update variances (confidence)
+					// update stds (confidence)
 					for(Vector inst : instanceFeatures) {
 						for(Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
 							double skill = ranker.getSkillForDyad(dyad);
@@ -109,15 +109,15 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					int index = random.nextInt(instanceFeatures.size());
 					Vector problemInstance = instanceFeatures.get(index);
 
-					// update empirical variance and compute upper confidence bound for each dyad
+					// update empirical standard deviation and compute upper confidence bound for each dyad
 					// from this dataset
 					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(problemInstance));
 					List<Pair<Dyad, Double>> dyadsWithUCB = new ArrayList<Pair<Dyad, Double>>(dyads.size());
 					for (Dyad dyad : dyads) {
 						double skill = ranker.getSkillForDyad(dyad);
-						double variance = dyadStats.get(dyad).getVariance();
+						double std = dyadStats.get(dyad).getStandardDeviation();
 //						System.out.println("current var:\t " + variance);
-						double ucb = skill + variance;
+						double ucb = skill + std;
 //						System.out.println("ucb:\t\t " + ucb);
 //						System.out.println();
 						dyadsWithUCB.add(new Pair<Dyad, Double>(dyad, ucb));
@@ -142,7 +142,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				// update the ranker
 				try {
 					ranker.update(minibatch);
-					// update variances (confidence)
+					// update stds (confidence)
 					for(Vector inst : instanceFeatures) {
 						for(Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
 							double skill = ranker.getSkillForDyad(dyad);
