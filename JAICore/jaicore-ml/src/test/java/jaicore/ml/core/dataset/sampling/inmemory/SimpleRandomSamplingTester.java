@@ -7,8 +7,7 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.SimpleRandomSampling;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 
 public class SimpleRandomSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
@@ -34,14 +33,12 @@ public class SimpleRandomSamplingTester<I extends IInstance> extends GeneralSamp
 
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
-				Random r = new Random(RANDOM_SEED);
-				ASamplingAlgorithm<I> algorithm = new SimpleRandomSampling<I>(r);
+				SimpleRandomSamplingFactory<I> factory = new SimpleRandomSamplingFactory<>();
 				if (this.input != null) {
-					algorithm.setInput(input);
 					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
-					algorithm.setSampleSize(sampleSize);
+					return factory.getAlgorithm(sampleSize, input, new Random(RANDOM_SEED));
 				}
-				return algorithm;
+				return null;
 			}
 		};
 	}

@@ -45,6 +45,19 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		this.searchBenchmark = new MonteCarloCrossValidationEvaluator(this.evaluationMeasurementBridge, numMCIterations, dataShownToSearch, trainFoldSize, seed);
 		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
 	}
+	
+	public SearchPhasePipelineEvaluator(ClassifierFactory classifierFactory, AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, int numMCIterations, Instances dataShownToSearch, double trainFoldSize, int seed,
+			int timeoutForSolutionEvaluation, IObjectEvaluator<Classifier, Double> searchBenchmark) {
+		super();
+		this.classifierFactory = classifierFactory;
+		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
+		this.seed = seed;
+		this.dataShownToSearch = dataShownToSearch;
+		this.numMCIterations = numMCIterations;
+		this.trainFoldSize = trainFoldSize;
+		this.searchBenchmark = searchBenchmark;
+		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
+	}
 
 	@Override
 	public String getLoggerName() {

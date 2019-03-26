@@ -17,29 +17,28 @@ import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  * Implementation of a sampling method using kmeans-clustering. This algorithm
  * produces clusters of the given points and checks weather all points in a
  * cluster have the same target Attribute. If yes only the point nearest to the
- * center is added, otherwise the whole cluster is added to the sample.<p>
- * Caution: This does ignore the given sample size! 
+ * center is added, otherwise the whole cluster is added to the sample.
+ * <p>
+ * Caution: This does ignore the given sample size!
  * 
  * @author jnowack
  *
  */
 public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
-	private KMeansPlusPlusClusterer<I> kMeansCluster;
-	private List<CentroidCluster<I>> clusterResults;
+	private List<CentroidCluster<I>> clusterResults = null;
 	private int currentCluster = 0;
 
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
 	private long seed;
 	/* number of clusters, if -1 use sample size */
 	private int k;
-	
-	
+
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
 	 * 
 	 * @param seed RAndom Seed
-	 * @param k number of clusters
+	 * @param k    number of clusters
 	 */
 	public KmeansSampling(long seed, int k) {
 		this.seed = seed;
@@ -47,33 +46,35 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	}
 
 	/**
-	 * Implementation of a sampling method using kmeans-clustering. The sample size will be used as the number of clusters. 
+	 * Implementation of a sampling method using kmeans-clustering. The sample size
+	 * will be used as the number of clusters.
 	 * 
 	 * @param seed Random Seed
-	 * @param dis {@link DistanceMeasure} to be used
+	 * @param dis  {@link DistanceMeasure} to be used
 	 */
 	public KmeansSampling(long seed, DistanceMeasure dis) {
 		this.seed = seed;
 		this.k = -1;
 		this.distanceMeassure = dis;
 	}
-	
+
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
 	 * 
 	 * @param seed Random Seed
-	 * @param k number of clusters
-	 * @param dis {@link DistanceMeasure} to be used
+	 * @param k    number of clusters
+	 * @param dis  {@link DistanceMeasure} to be used
 	 */
 	public KmeansSampling(long seed, int k, DistanceMeasure dis) {
 		this.seed = seed;
 		this.k = k;
 		this.distanceMeassure = dis;
 	}
-	
-	
-	
-	
+
+	public void setDistanceMeassure(DistanceMeasure distanceMeassure) {
+		this.distanceMeassure = distanceMeassure;
+	}
+
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
@@ -85,9 +86,13 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 			JDKRandomGenerator r = new JDKRandomGenerator();
 			r.setSeed(seed);
 			// update k if k=-1
-			if(k == -1) {k = sampleSize;}
-			kMeansCluster = new KMeansPlusPlusClusterer<I>(k, -1, distanceMeassure, r);
-			clusterResults = kMeansCluster.cluster(getInput());
+			if (k == -1) {
+				k = sampleSize;
+			}
+			if (clusterResults == null) {
+				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<I>(k, -1, distanceMeassure, r);
+				clusterResults = kMeansCluster.cluster(getInput());
+			}
 
 			return this.activate();
 		case active:
@@ -133,6 +138,13 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
 	}
-	
-	
+
+	public List<CentroidCluster<I>> getClusterResults() {
+		return clusterResults;
+	}
+
+	public void setClusterResults(List<CentroidCluster<I>> clusterResults) {
+		this.clusterResults = clusterResults;
+	}
+
 }

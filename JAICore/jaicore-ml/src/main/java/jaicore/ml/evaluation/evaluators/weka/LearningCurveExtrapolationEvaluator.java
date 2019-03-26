@@ -9,7 +9,8 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
+import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
@@ -32,7 +33,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private SubsamplingMethod subsamplingMethod;
+	private ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
 	private IDataset<IInstance> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
@@ -42,27 +43,28 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	/**
 	 * Create a classifier evaluator with learning curve extrapolation.
 	 * 
-	 * @param anchorpoints
-	 *            Anchorpoints for the learning curve extrapolation.
-	 * @param subsamplingMethod
-	 *            Subsampling method to create samples at the given anchorpoints.
-	 * @param dataset
-	 *            Dataset to evaluate the classifier with.
-	 * @param trainSplitForAnchorpointsMeasurement
-	 *            Ratio to split the subsamples at the anchorpoints into train and
-	 *            test.
-	 * @param extrapolationMethod
-	 *            Method to extrapolate a learning curve from the accuracy
-	 *            measurements at the anchorpoints.
-	 * @param seed
-	 *            Random seed.
+	 * @param anchorpoints                         Anchorpoints for the learning
+	 *                                             curve extrapolation.
+	 * @param samplingAlgorithmFactory             Subsampling factory to create a
+	 *                                             subsampler for the samples at the
+	 *                                             given anchorpoints.
+	 * @param dataset                              Dataset to evaluate the
+	 *                                             classifier with.
+	 * @param trainSplitForAnchorpointsMeasurement Ratio to split the subsamples at
+	 *                                             the anchorpoints into train and
+	 *                                             test.
+	 * @param extrapolationMethod                  Method to extrapolate a learning
+	 *                                             curve from the accuracy
+	 *                                             measurements at the anchorpoints.
+	 * @param seed                                 Random seed.
 	 */
-	public LearningCurveExtrapolationEvaluator(int[] anchorpoints, SubsamplingMethod subsamplingMethod,
+	public LearningCurveExtrapolationEvaluator(int[] anchorpoints,
+			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
 			IDataset<IInstance> dataset, double trainSplitForAnchorpointsMeasurement,
 			LearningCurveExtrapolationMethod extrapolationMethod, long seed) {
 		super();
 		this.anchorpoints = anchorpoints;
-		this.subsamplingMethod = subsamplingMethod;
+		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
 		this.dataset = dataset;
 		this.trainSplitForAnchorpointsMeasurement = trainSplitForAnchorpointsMeasurement;
 		this.extrapolationMethod = extrapolationMethod;
@@ -78,8 +80,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 			throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier,
-				dataset, this.trainSplitForAnchorpointsMeasurement, this.subsamplingMethod.getSubsampler(this.seed),
-				this.seed);
+				dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed);
 
 		try {
 			// Create the extrapolator and calculate the accuracy the classifier would have

@@ -1,29 +1,29 @@
 package jaicore.ml.core.dataset.sampling.inmemory;
 
+import java.util.Random;
+
 import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.GmeansSampling;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.GmeansSamplingFactory;
 
 public class GMeansSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
-	
-	private static final long SEED = 1;
-	private static final double SAMLPING_FRACTION = 1;
-	
-	
+
+	private static long SEED = 1;
+	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
+
 	@Override
 	public void testSampleSizeLargeProblem() throws Exception {
 		// Sample Size is not supported for GMeansSampling
 	}
-	
+
 	@Override
 	public void testSampleSizeSmallProblem() throws Exception {
 		// Sample Size is not supported for GMeansSampling
 	}
-	
+
 	@Override
 	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
 		return new IAlgorithmFactory<IDataset<I>, IDataset<I>>() {
@@ -42,17 +42,13 @@ public class GMeansSamplingTester<I extends IInstance> extends GeneralSamplingTe
 
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
-				ASamplingAlgorithm<I> algorithm;
+				GmeansSamplingFactory<I> factory = new GmeansSamplingFactory<>();
 				if (this.input != null) {
-					algorithm = new GmeansSampling<>(SEED);
-					algorithm.setInput(input);
-					int sampleSize = (int) (SAMLPING_FRACTION * (double) input.size());
-					algorithm.setSampleSize(sampleSize);
-					return algorithm;
+					factory.setClusterSeed(SEED);
+					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
+					return factory.getAlgorithm(sampleSize, input, new Random(SEED));
 				}
-				else {
-					throw new NullPointerException("Input is not allowed to be null");
-				}
+				return null;
 			}
 		};
 	}

@@ -10,8 +10,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawLearningCurve;
 import weka.classifiers.trees.J48;
@@ -55,7 +55,7 @@ public class InversePowerLawExtrapolationTester {
 
 		IDataset<IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
 		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(new InversePowerLawExtrapolationMethod(),
-				new J48(), simpleDataset, 0.7d, SubsamplingMethod.SIMPLE_RANDOM_SAMPLING, 1l);
+				new J48(), simpleDataset, 0.7d, new SimpleRandomSamplingFactory<IInstance>(), 1l);
 		return extrapolator;
 	}
 

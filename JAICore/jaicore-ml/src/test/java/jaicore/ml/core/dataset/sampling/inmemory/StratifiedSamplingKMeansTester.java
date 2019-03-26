@@ -9,10 +9,9 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.StratifiedSamplingFactory;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.IStratiAmountSelector;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.KMeansStratiAssigner;
-import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
 public class StratifiedSamplingKMeansTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
@@ -39,7 +38,7 @@ public class StratifiedSamplingKMeansTester<I extends IInstance> extends General
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
 				KMeansStratiAssigner<I> k = new KMeansStratiAssigner<I>(new ManhattanDistance(), RANDOM_SEED);
-				ASamplingAlgorithm<I> algorithm = new StratifiedSampling<I>(new IStratiAmountSelector<I>() {
+				StratifiedSamplingFactory<I> factory = new StratifiedSamplingFactory<>(new IStratiAmountSelector<I>() {
 					@Override
 					public void setNumCPUs(int numberOfCPUs) {
 					}
@@ -53,13 +52,12 @@ public class StratifiedSamplingKMeansTester<I extends IInstance> extends General
 					public int getNumCPUs() {
 						return 0;
 					}
-				}, k, new Random(RANDOM_SEED));
+				}, k);
 				if (this.input != null) {
-					algorithm.setInput(input);
 					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
-					algorithm.setSampleSize(sampleSize);
+					return factory.getAlgorithm(sampleSize, input, new Random(RANDOM_SEED));
 				}
-				return algorithm;
+				return null;
 			}
 		};
 	}

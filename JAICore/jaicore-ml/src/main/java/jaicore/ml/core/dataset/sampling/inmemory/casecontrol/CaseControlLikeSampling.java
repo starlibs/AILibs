@@ -9,13 +9,22 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
-public abstract class CaseControlLikeSampling <I extends IInstance> extends ASamplingAlgorithm<I>{
-	
+public abstract class CaseControlLikeSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
+
 	protected Random rand;
-	protected ArrayList<Pair<I, Double>> probabilityBoundaries;
-	
+	protected ArrayList<Pair<I, Double>> probabilityBoundaries = null;
+
+	public ArrayList<Pair<I, Double>> getProbabilityBoundaries() {
+		return probabilityBoundaries;
+	}
+
+	public void setProbabilityBoundaries(ArrayList<Pair<I, Double>> probabilityBoundaries) {
+		this.probabilityBoundaries = probabilityBoundaries;
+	}
+
 	/**
-	 * Count occurrences of every class. Needed to determine the probability for all instances of that class
+	 * Count occurrences of every class. Needed to determine the probability for all
+	 * instances of that class
 	 * 
 	 * @param dataset Dataset of the sample algorithm object
 	 * @return HashMap of occurrences
@@ -23,31 +32,32 @@ public abstract class CaseControlLikeSampling <I extends IInstance> extends ASam
 	 */
 	protected HashMap<Object, Integer> countClassOccurrences(IDataset<I> dataset) {
 		HashMap<Object, Integer> classOccurrences = new HashMap<Object, Integer>();
-		for(I instance: dataset) {
+		for (I instance : dataset) {
 			boolean classExists = false;
-			for(Object clazz: classOccurrences.keySet()) {
-				if(clazz.equals(instance.getTargetValue(new Object().getClass()).getValue())) {
+			for (Object clazz : classOccurrences.keySet()) {
+				if (clazz.equals(instance.getTargetValue(new Object().getClass()).getValue())) {
 					classExists = true;
 				}
 			}
-			if(classExists) {
-				classOccurrences.put(instance.getTargetValue(new Object().getClass()).getValue(), 
-						new Integer(classOccurrences.get(instance.getTargetValue(new Object().getClass()).getValue()).intValue() + 1)); 
-			}
-			else {
+			if (classExists) {
+				classOccurrences.put(instance.getTargetValue(new Object().getClass()).getValue(), new Integer(
+						classOccurrences.get(instance.getTargetValue(new Object().getClass()).getValue()).intValue()
+								+ 1));
+			} else {
 				classOccurrences.put(instance.getTargetValue(new Object().getClass()).getValue(), new Integer(0));
 			}
 		}
 		return classOccurrences;
 	}
-	
-	protected ArrayList<Pair<I, Double>> calculateInstanceBoundaries(HashMap<Object, Integer> classOccurrences, int numberOfClasses) {
+
+	protected ArrayList<Pair<I, Double>> calculateInstanceBoundaries(HashMap<Object, Integer> classOccurrences,
+			int numberOfClasses) {
 		double boundaryOfCurrentInstance = 0.0;
 		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<Pair<I, Double>>();
-		for(I instance: this.getInput()) {
-			boundaryOfCurrentInstance += ((double) 1 / 
-					classOccurrences.get(instance.getTargetValue(new Object().getClass()).getValue()).intValue()) /
-					numberOfClasses;
+		for (I instance : this.getInput()) {
+			boundaryOfCurrentInstance += ((double) 1
+					/ classOccurrences.get(instance.getTargetValue(new Object().getClass()).getValue()).intValue())
+					/ numberOfClasses;
 			probabilityBoundaries.add(new Pair<I, Double>(instance, new Double(boundaryOfCurrentInstance)));
 		}
 		return probabilityBoundaries;

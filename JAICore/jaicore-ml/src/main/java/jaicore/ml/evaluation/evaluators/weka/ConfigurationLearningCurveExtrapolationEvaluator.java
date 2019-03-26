@@ -8,19 +8,20 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
+import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.ConfigurationLearningCurveExtrapolator;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
-import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolator;
 import weka.classifiers.Classifier;
 
 /**
- * Predicts the accuracy of a classifier with certain configurations on
- * a point of its learning curve, given some anchorpoint and its configurations
- * using the LCNet of pybnn
+ * Predicts the accuracy of a classifier with certain configurations on a point
+ * of its learning curve, given some anchorpoint and its configurations using
+ * the LCNet of pybnn
  * 
- * Note: This code was copied from LearningCurveExtrapolationEvaluator and slightly reworked
+ * Note: This code was copied from LearningCurveExtrapolationEvaluator and
+ * slightly reworked
  * 
  * @author noni4
  */
@@ -31,7 +32,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private SubsamplingMethod subsamplingMethod;
+	private ISamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
 	private IDataset<IInstance> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
@@ -39,12 +40,14 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(int[] anchorpoints, SubsamplingMethod subsamplingMethod,
+	public ConfigurationLearningCurveExtrapolationEvaluator(int[] anchorpoints,
+			ISamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
 			IDataset<IInstance> dataset, double trainSplitForAnchorpointsMeasurement,
-			LearningCurveExtrapolationMethod extrapolationMethod, long seed, String identifier, double[] configurations) {
+			LearningCurveExtrapolationMethod extrapolationMethod, long seed, String identifier,
+			double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
-		this.subsamplingMethod = subsamplingMethod;
+		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
 		this.dataset = dataset;
 		this.trainSplitForAnchorpointsMeasurement = trainSplitForAnchorpointsMeasurement;
 		this.seed = seed;
@@ -60,8 +63,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	public Double evaluate(Classifier classifier)
 			throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
-		ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier, dataset, 
-				this.trainSplitForAnchorpointsMeasurement, this.subsamplingMethod.getSubsampler(this.seed), this.seed, 
+		ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier,
+				dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed,
 				this.identifier, this.configurations);
 
 		try {
@@ -85,4 +88,3 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	}
 
 }
-

@@ -19,7 +19,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.bouncycastle.crypto.RuntimeCryptoException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -39,7 +38,7 @@ public class LCNetClient {
 		if(xValues.length != yValues.length)
 			throw new RuntimeException("xValues must contain the same number of values as yValues");
 		if(xValues.length != configurations.length)
-			throw new RuntimeCryptoException("xValues must contain as much numbers as configurations configurations");
+			throw new RuntimeException("xValues must contain as much numbers as configurations configurations");
 		HttpURLConnection httpCon = this.establishHttpCon("train", identifier);
 		
 		JSONObject jsonData = new JSONObject();

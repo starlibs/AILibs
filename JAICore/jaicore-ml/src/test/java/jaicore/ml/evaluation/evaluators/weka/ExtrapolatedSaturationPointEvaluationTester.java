@@ -13,8 +13,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.SubsamplingMethod;
 import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
@@ -42,7 +42,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 
 		// Test classifier evaluation at saturation point
 		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(
-				new int[] { 8, 16, 64, 128 }, SubsamplingMethod.SYSTEMATIC_SAMPLING, this.train, 0.7,
+				new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<IInstance>(), this.train, 0.7,
 				new InversePowerLawExtrapolationMethod(), 123l, 0.0005d, this.test);
 		double evaluationResult = evaluator.evaluate(new SMO());
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);

@@ -24,20 +24,19 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	private IStratiAmountSelector<I> stratiAmountSelector;
 	private IStratiAssigner<I> stratiAssigner;
 	private Random random;
-	private IDataset<I>[] strati;
+	private IDataset<I>[] strati = null;
 	private IDataset<I> datasetCopy;
 	private ExecutorService executorService;
+	private boolean allDatapointsAssigned = false;
 	private boolean simpleRandomSamplingStarted;
 
 	/**
 	 * Constructor for Stratified Sampling.
 	 * 
-	 * @param stratiAmountSelector
-	 *            The custom selector for the used amount of strati.
-	 * @param stratiAssigner
-	 *            Custom logic to assign datapoints into strati.
-	 * @param random
-	 *            Random object for sampling inside of the strati.
+	 * @param stratiAmountSelector The custom selector for the used amount of
+	 *                             strati.
+	 * @param stratiAssigner       Custom logic to assign datapoints into strati.
+	 * @param random               Random object for sampling inside of the strati.
 	 */
 	public StratifiedSampling(IStratiAmountSelector<I> stratiAmountSelector, IStratiAssigner<I> stratiAssigner,
 			Random random) {
@@ -51,21 +50,23 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 		switch (this.getState()) {
 		case created:
 			this.sample = getInput().createEmpty();
-			this.datasetCopy = getInput().createEmpty();
-			this.datasetCopy.addAll(this.getInput());
-			this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
-			this.stratiAssigner.setNumCPUs(this.getNumCPUs());
-			this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
-			for (int i = 0; i < this.strati.length; i++) {
-				this.strati[i] = getInput().createEmpty();
+			if (!allDatapointsAssigned) {
+				this.datasetCopy = getInput().createEmpty();
+				this.datasetCopy.addAll(this.getInput());
+				this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
+				this.stratiAssigner.setNumCPUs(this.getNumCPUs());
+				this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
+				for (int i = 0; i < this.strati.length; i++) {
+					this.strati[i] = getInput().createEmpty();
+				}
+				this.stratiAssigner.init(this.datasetCopy, this.strati.length);
 			}
 			this.simpleRandomSamplingStarted = false;
-			this.stratiAssigner.init(this.datasetCopy, this.strati.length);
 			this.executorService = Executors.newCachedThreadPool();
 			return this.activate();
 		case active:
 			if (this.sample.size() < this.sampleSize) {
-				if (this.datasetCopy.size() >= 1) {
+				if (!allDatapointsAssigned) {
 					// Stratify the datapoints one by one.
 					I datapoint = this.datasetCopy.remove(0);
 					int assignedStrati = this.stratiAssigner.assignToStrati(datapoint);
@@ -73,6 +74,9 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 						throw new AlgorithmException("No existing strati for index " + assignedStrati);
 					} else {
 						this.strati[assignedStrati].add(datapoint);
+					}
+					if (this.datasetCopy.size() == 0) {
+						this.allDatapointsAssigned = true;
 					}
 					return new SampleElementAddedEvent(getId());
 				} else {
@@ -121,7 +125,6 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 		for (int i = 0; i < this.strati.length; i++) {
 			sampleSizeForStrati[i] = Math.round(
 					(float) (this.sampleSize * ((double) this.strati[i].size() / (double) this.getInput().size())));
-			System.out.println("Strati size: " + this.strati[i].size() + " sample amount " + sampleSizeForStrati[i]);
 		}
 
 		// Start a Simple Random Sampling thread for each stratum
@@ -146,6 +149,15 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 		}
 		// Prevent executor service from more threads being added.
 		this.executorService.shutdown();
+	}
+
+	public IDataset<I>[] getStrati() {
+		return strati;
+	}
+
+	public void setStrati(IDataset<I>[] strati) {
+		this.strati = strati;
+		this.allDatapointsAssigned = true;
 	}
 
 }

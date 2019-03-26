@@ -1,7 +1,5 @@
 package jaicore.ml.learningcurve.extrapolation;
 
-import java.awt.Point;
-
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;

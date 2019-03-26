@@ -7,9 +7,8 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.StratifiedSamplingFactory;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.GMeansStratiAmountSelectorAndAssigner;
-import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
 public class StratifiedSamplingGMeansTester<I extends IInstance> extends GeneralSamplingTester<I> {
 
@@ -36,13 +35,12 @@ public class StratifiedSamplingGMeansTester<I extends IInstance> extends General
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
 				GMeansStratiAmountSelectorAndAssigner<I> g = new GMeansStratiAmountSelectorAndAssigner<I>(RANDOM_SEED);
-				ASamplingAlgorithm<I> algorithm = new StratifiedSampling<I>(g, g, new Random(RANDOM_SEED));
+				StratifiedSamplingFactory<I> factory = new StratifiedSamplingFactory<>(g, g);
 				if (this.input != null) {
-					algorithm.setInput(input);
 					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
-					algorithm.setSampleSize(sampleSize);
+					return factory.getAlgorithm(sampleSize, input, new Random(RANDOM_SEED));
 				}
-				return algorithm;
+				return null;
 			}
 		};
 	}

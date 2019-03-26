@@ -26,16 +26,16 @@ import jaicore.ml.core.dataset.standard.SimpleInstance;
  * Implementation of a sampling method using gmeans-clustering. This algorithm
  * produces clusters of the given points and checks weather all points in a
  * cluster have the same target Attribute. If yes only the point nearest to the
- * center is added, otherwise the whole cluster is added to the sample.<p>
- * Caution: This does ignore the given sample size! 
+ * center is added, otherwise the whole cluster is added to the sample.
+ * <p>
+ * Caution: This does ignore the given sample size!
  * 
  * @author jnowack
  *
  */
 public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
-	private GMeans<I> gMeansCluster;
-	private List<CentroidCluster<I>> clusterResults;
+	private List<CentroidCluster<I>> clusterResults = null;
 	private int currentCluster = 0;
 
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
@@ -56,8 +56,19 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 		this.seed = seed;
 		this.distanceMeassure = dist;
 	}
-	
-	
+
+	public List<CentroidCluster<I>> getClusterResults() {
+		return clusterResults;
+	}
+
+	public void setClusterResults(List<CentroidCluster<I>> clusterResults) {
+		this.clusterResults = clusterResults;
+	}
+
+	public void setDistanceMeassure(DistanceMeasure distanceMeassure) {
+		this.distanceMeassure = distanceMeassure;
+	}
+
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
@@ -65,9 +76,11 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 			// Initialize variables
 			this.sample = getInput().createEmpty();
 
-			// create cluster
-			gMeansCluster = new GMeans<I>(getInput(), distanceMeassure, seed);
-			clusterResults = gMeansCluster.cluster();
+			if (this.clusterResults == null) {
+				// create cluster
+				GMeans<I> gMeansCluster = new GMeans<I>(getInput(), distanceMeassure, seed);
+				clusterResults = gMeansCluster.cluster();
+			}
 
 			return this.activate();
 		case active:

@@ -1,5 +1,5 @@
 from flask import Flask, Response, jsonify, request
-import pickle
+import pickle,os
 
 app = Flask(__name__)
 model = None
@@ -39,4 +39,8 @@ def extract_anchorpoints(x_values, y_values):
 
 if __name__ == "__main__":
     model = pickle.load( open( "InversePowerLawModel.pcl", "rb" ) )
-    app.run("0.0.0.0", port=8081, debug=True)
+    if 'IPL_PORT' in os.environ:
+        port = os.environ['IPL_PORT']
+    else:
+        port = 8081
+    app.run("0.0.0.0", port=port, debug=True)

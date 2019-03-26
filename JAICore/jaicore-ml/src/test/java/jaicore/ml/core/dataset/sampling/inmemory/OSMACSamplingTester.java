@@ -7,13 +7,12 @@ import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.casecontrol.OSMAC;
-import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.OSMACSamplingFactory;
 
 public class OSMACSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
 	
-	private static long SEED = 1;
-	private static double SAMLPING_FRACTION = 0.1;
+	private static long RANDOM_SEED = 1;
+	private static double DEFAULT_SAMPLE_FRACTION = 0.1;
 	private static double PRE_SAMPLING_FRACTION = 0.01;
 	
 	@Override
@@ -34,18 +33,13 @@ public class OSMACSamplingTester<I extends IInstance> extends GeneralSamplingTes
 
 			@Override
 			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
-				Random r = new Random(SEED);
-				ASamplingAlgorithm<I> algorithm;
+				OSMACSamplingFactory<I> factory = new OSMACSamplingFactory<>();
 				if (this.input != null) {
-					algorithm = new OSMAC(r, (int) (PRE_SAMPLING_FRACTION * (double) input.size()));
-					algorithm.setInput(input);
-					int sampleSize = (int) (SAMLPING_FRACTION * (double) input.size());
-					algorithm.setSampleSize(sampleSize);
-					return algorithm;
+					factory.setPreSampleSize((int) (PRE_SAMPLING_FRACTION * input.size()));
+					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
+					return factory.getAlgorithm(sampleSize, input, new Random(RANDOM_SEED));
 				}
-				else {
-					throw new NullPointerException("Input is not allowed to be null");
-				}
+				return null;
 			}
 		};
 	}
