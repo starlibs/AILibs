@@ -77,6 +77,7 @@ public class ActiveDyadRankingGATSPTest {
 
 	@Test
 	public void test() {
+		System.out.println(ranker.getConfiguration());
 		SummaryStatistics[] stats = new SummaryStatistics[100];
 		for (int i = 0; i < stats.length; i++)
 			stats[i] = new SummaryStatistics();
@@ -143,9 +144,9 @@ public class ActiveDyadRankingGATSPTest {
 //			System.out.println(obj);
 //		}
 
-		UCBPoolBasedActiveDyadRanker activeRanker = new UCBPoolBasedActiveDyadRanker(ranker, poolProvider, seed, 5, MAX_BATCH_SIZE);
-//			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
-//					poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH, 5, 5);
+//		UCBPoolBasedActiveDyadRanker activeRanker = new UCBPoolBasedActiveDyadRanker(ranker, poolProvider, seed, 5, MAX_BATCH_SIZE);
+			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
+					poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH, 5, 5);
 //		RandomPoolBasedActiveDyadRanker activeRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, MAX_BATCH_SIZE, seed);
 
 //		SimpleKMeans skm = new SimpleKMeans();
