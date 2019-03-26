@@ -102,8 +102,7 @@ public class DyadRankingInstanceSupplier {
 	public static double inputOptimizerTestScore(Dyad dyad) {
 		Vector inst = dyad.getInstance();
 		Vector alt = dyad.getAlternative();
-		double score = Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1))
-					/* + Math.abs(inst.getValue(0)) + Math.abs(inst.getValue(1)) + Math.abs(alt.getValue(0)) + Math.abs(alt.getValue(1)) */;
+		double score = Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1));
 		return score;
 	}
 	
