@@ -14,12 +14,12 @@ import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 public class BOSSClassifierRefTest {
 	
 	  /** Local path for the datasets arff files. */
-    private static final String PATH = "./tsctestenv/data/UCR_TS_Archive_2015/";
+    private static final String PATH = "P:\\Dokumente\\PG\\Classifier_project\\tsctestenv\\data\\Downloads\\";
 
     /** Path for pen digits dataset. */
-    private static final String CAR_TRAIN = PATH + "Car/Car_TRAIN.arff";
+    private static final String CAR_TRAIN = PATH + "Car\\Car\\Car_TRAIN.arff";
     
-    private static final String CAR_TEST = PATH + "Car/Car_TEST.arff";
+    private static final String CAR_TEST = PATH + "Car\\Car\\Car_TEST.arff";
 
     /** Dataset used for comparison tests. */
     private TimeSeriesDataset dataset;

@@ -133,7 +133,7 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 		multivirateHistograms.clear();
 		
 		HistogramBuilder histoBuilder = new HistogramBuilder();
-		SFA sfa = new SFA(alphabet, alphabetSize,meanCorrected);
+		SFA sfa = new SFA(alphabet, wordlength,meanCorrected);
 		
 		//calculates the lookup table for the alphabet for the whole input dataset.
 		
@@ -149,7 +149,6 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 				 * Every instance results in an own histogram there for has its own HashMap of
 				 * the the from key: word value: count of word.
 				 */
-				HashMap<Integer,Integer> histogram = null;
 				
 				/*
 				 * By the special fit transform an instance is transformed to a dataset. This
@@ -160,13 +159,17 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 				try {
 					/* The from one instance resulting dataset is z-normalized. */ 
 					ZTransformer znorm = new ZTransformer();
-					TimeSeriesDataset normed = znorm.fitTransform(tmp);
-					
+					for(int i = 0; i < tmp.getValues(0).length; i++) {
+						tmp.getValues(0)[i] = znorm.fitTransform(tmp.getValues(0)[i]);
+					}
 					
 					// The SFA words for that dataset are computed using the precomputed MCB quantisation intervals 
-					TimeSeriesDataset tmpTransformed = sfa.fitTransform(normed);
+					TimeSeriesDataset tmpTransformed = sfa.fitTransform(tmp);
 					// The occurring SFA words of the instance are getting counted with a parallel numerosity reduction.
-					histogram = histoBuilder.histogramForInstance(tmpTransformed);
+					  
+					  HashMap<Integer,Integer> histogram = histoBuilder.histogramForInstance(tmpTransformed);
+					// Each instance in the dataset has its own histogram so the original dataset results in a list of histograms.
+						histograms.add((HashMap<Integer,Integer>)histogram.clone());
 					}
 				
 				catch (IllegalArgumentException e) {
@@ -174,8 +177,7 @@ public class BOSSAlgorithm extends ASimplifiedTSCAlgorithm<Integer, BOSSClassifi
 				} catch (NoneFittedFilterExeception e) {
 					e.printStackTrace();
 				}
-				// Each instance in the dataset has its own histogram so the original dataset results in a list of histograms.
-				histograms.add(histogram);
+				
 			}
 			// In the case of a multivariate dataset each matrix would have a list of histograms which than results
 			// in a list of lists of histograms. 

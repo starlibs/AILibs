@@ -32,11 +32,17 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	private ArrayList<ArrayList<HashMap<Integer,Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer,Integer>>> ();
 	
 	private ArrayList<HashMap<Integer, Integer>> univirateHistograms;
+	
+
 	//---------------------------------------------------------------
 	// All needed for every predict. 
 	private SlidingWindowBuilder slide = new SlidingWindowBuilder();
 	private HistogramBuilder histoBuilder = new HistogramBuilder();
 	private ZTransformer znorm = new ZTransformer();
+	
+	public ArrayList<HashMap<Integer, Integer>> getUnivirateHistograms() {
+		return univirateHistograms;
+	}
 	
 	public void setTrainingData(TimeSeriesDataset trainingData) {
 		this.trainingData = trainingData;
@@ -84,21 +90,41 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	@Override
 	public Integer predict(double[] univInstance) throws PredictionException {
 		//TODO Exceptions 
-		SFA sfa = new SFA(alphabet, alphabetSize, meanCorrected);
-		TimeSeriesDataset tmpznormedsfaTransformed = null;
+		SFA sfa = new SFA(alphabet, wordLength, meanCorrected);
+		 
 		
 		//create windows for test instance an there for a small dataset with 
 		//windows as instances.
 		TimeSeriesDataset tmp = slide.specialFitTransform(univInstance);
 		try {
-			TimeSeriesDataset tmpznormed = new TimeSeriesDataset(tmp.getValueMatrices(),null,null);
+			
 			// need to call a new fit for each predict because each window gets z normalized by its own.
 			//c.f.p. 1509 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
 			for(int instance = 0; instance < tmp.getValues(0).length; instance++) {
-				tmpznormed.getValues(0)[instance] = znorm.fitTransform(tmp.getValues(0)[instance]);
+				tmp.getValues(0)[instance] = znorm.fitTransform(tmp.getValues(0)[instance]);
 			}
 			
-			 tmpznormedsfaTransformed= sfa.fitTransform(tmpznormed);
+			TimeSeriesDataset tmpznormedsfaTransformed= sfa.fitTransform(tmp);
+			HashMap<Integer,Integer> histogram = histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
+			
+			
+			// Calculate distance for all histograms for all instances in the training set.
+			// Remember index of histogram with minimum distance in list because it corresponds to the 
+			// instance that produced that histogram with minimum distance. 
+			int indexOFminDistInstance = 0;
+			double minDist = Double.MAX_VALUE;
+			
+			for(int i = 0; i< univirateHistograms.size(); i++) {
+				double dist = BossDistance(histogram, univirateHistograms.get(i));
+				if(dist < minDist) {
+					minDist = dist;
+					indexOFminDistInstance = i;
+				}
+			}
+			
+			// return the target of that instance that had the minimum distance. 
+			return trainingData.getTargets()[indexOFminDistInstance];
+			
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -106,23 +132,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		HashMap<Integer,Integer> histogram = histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
-		
-		// Calculate distance for all histograms for all instances in the training set.
-		// Remember index of histogram with minimum distance in list because it corresponds to the 
-		// instance that produced that histogram with minimum distance. 
-		int indexOFminDistInstance = 0;
-		double minDist = Double.MAX_VALUE;
-		
-		
-		for(int i = 0; i< univirateHistograms.size(); i++) {
-			double dist = BossDistance(histogram, univirateHistograms.get(i));
-			if(dist < minDist) {
-				indexOFminDistInstance = i;
-			}
-		}
-		// return the target of that instance that had the minimum distance. 
-		return trainingData.getTargets()[indexOFminDistInstance];
+		return null;
 	}
 
 	@Override
@@ -163,7 +173,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 				result += (Math.pow(a.get(key)-b.get(key),2));
 			}
 			else {
-				result+=Math.pow(a.get(key),2);
+				result += Math.pow(a.get(key),2);
 			}
 		}
 		return result;

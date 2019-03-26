@@ -56,7 +56,7 @@ public class ZTransformer implements IFilter {
 			ztransformedDataset.add(fitTransform(input.getValues(matrix)));
 			fittedMatrix = false;
 		}
-
+		fitted = false;
 		return new TimeSeriesDataset(ztransformedDataset);
 	}
 
@@ -80,7 +80,7 @@ public class ZTransformer implements IFilter {
 	
 	@Override
 	public double[] transform(double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-		if(!fitted) {
+		if(!fittedInstance) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transfom method is called");
 		}
 		if(input.length == 0) {
@@ -93,6 +93,7 @@ public class ZTransformer implements IFilter {
 				ztransform[entry] = (entry-mean)/deviation;
 			}
 		}
+		fittedInstance = false;
 		return ztransform;
 	}
 	
@@ -139,6 +140,7 @@ public class ZTransformer implements IFilter {
 			ztransformedMatrix[instance] = fitTransform(input[instance]);
 			fittedInstance = false;
 		}
+		fittedMatrix = false;
 		return ztransformedMatrix;
 	}
 
