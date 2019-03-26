@@ -3,7 +3,6 @@ package jaicore.ml.core.dataset.util;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
@@ -42,7 +41,7 @@ public class StratifiedSplit {
 			this.testData = dataset.createEmpty();
 			testData.addAll(dataset);
 			testData.removeAll(trainingData);
-		} catch (InterruptedException | AlgorithmExecutionCanceledException | TimeoutException | AlgorithmException e) {
+		} catch (InterruptedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
 			throw new RuntimeException("Cannot do stratified split", e);
 		}
 	}

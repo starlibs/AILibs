@@ -9,7 +9,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.TempFileHandler;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -61,7 +60,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 
 	@Override
 	public AlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			// Sort dataset and skip with reader the ARFF header.

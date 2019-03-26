@@ -1,7 +1,6 @@
 package jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 
 import java.util.Random;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
@@ -54,7 +53,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 
 	@Override
 	public AlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch(this.getState()) {
 		case created:
 			this.sample = this.getInput().createEmpty();

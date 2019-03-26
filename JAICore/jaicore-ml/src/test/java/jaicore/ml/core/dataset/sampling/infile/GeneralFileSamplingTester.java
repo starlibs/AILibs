@@ -15,9 +15,7 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
-import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.ArffUtilities;
 import jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
 
@@ -28,7 +26,7 @@ import jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
  * 
  * @author Lukas Brandt
  */
-public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<Object, File, File> {
+public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
 	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 	protected static final double DEFAULT_SAMPLE_FRACTION = 0.1;
@@ -60,9 +58,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 	}
 
 	private void testSampleSize(File input) throws Exception {
-		IAlgorithmFactory<File, File> factory = this.getFactory();
-		factory.setProblemInput(input);
-		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) factory.getAlgorithm();
+		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
@@ -70,7 +66,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 		samplingAlgorithm.call();
 		int outputSize = ArffUtilities.countDatasetEntries(new File(OUTPUT_FILE_NAME), true);
 		// Allow sample size to be one off, in case of rounding errors
-		assertTrue(sampleSize >= outputSize -1 && sampleSize <= outputSize + 1);
+		assertTrue(sampleSize >= outputSize - 1 && sampleSize <= outputSize + 1);
 	}
 
 	/**
@@ -96,11 +92,9 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 		File input = this.getDifficultProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(input);
 	}
-	
+
 	private void testNoDuplicates(File input) throws Exception {
-		IAlgorithmFactory<File, File> factory = this.getFactory();
-		factory.setProblemInput(input);
-		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) factory.getAlgorithm();
+		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
@@ -127,16 +121,16 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 	}
 
 	/**
-	 * Verifies that the sampling algorithm does not modify the original input dataset file.
-	 * @throws Exception 
+	 * Verifies that the sampling algorithm does not modify the original input
+	 * dataset file.
+	 * 
+	 * @throws Exception
 	 */
 	@Test
 	public void testOriginalDatasetFileNotModified() throws Exception {
 		File originalDataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		long changed = originalDataset.lastModified();
-		IAlgorithmFactory<File, File> factory = this.getFactory();
-		factory.setProblemInput(originalDataset);
-		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) factory.getAlgorithm();
+		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(originalDataset);
 		int inputSize = ArffUtilities.countDatasetEntries(originalDataset, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
@@ -144,13 +138,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 		samplingAlgorithm.call();
 		assertEquals(originalDataset.lastModified(), changed);
 	}
-	
-	@Override
-	public AlgorithmProblemTransformer<Object, File> getProblemReducer() {
-		throw new UnsupportedOperationException("Problem reducer not applicable for sampling algorithms!");
-	}
 
-	@Override
 	public File getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		OpenmlConnector client = new OpenmlConnector();
 		DataSetDescription description = client.dataGet(188);
@@ -158,7 +146,6 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 		return file;
 	}
 
-	@Override
 	public File getDifficultProblemInputForGeneralTestPurposes() throws Exception {
 		OpenmlConnector client = new OpenmlConnector();
 		DataSetDescription description = client.dataGet(182);
@@ -170,5 +157,5 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester<O
 	public static void removeOutputFile() {
 		new File(OUTPUT_FILE_NAME).deleteOnExit();
 	}
-	
+
 }

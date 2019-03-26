@@ -31,6 +31,9 @@ import jaicore.basic.FileUtil;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
+import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.ml.evaluation.evaluators.weka.factory.ExtrapolatedSaturationPointEvaluatorFactory;
 import jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
@@ -303,6 +306,10 @@ public class MLPlanBuilder {
 
 	public void withTimeoutForSingleSolutionEvaluation(final TimeOut timeout) {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, String.valueOf(timeout.milliseconds()));
+	}
+
+	public void withTimeoutForNodeEvaluation(final TimeOut timeout) {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout.milliseconds()));
 	}
 
 	public void withExtrapolatedSaturationPointEvaluation(int[] anchorpoints,

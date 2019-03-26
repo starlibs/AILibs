@@ -1,7 +1,6 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
 import java.util.Random;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +89,7 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 
 	@Override
 	public Double evaluate(Classifier classifier)
-			throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+			throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier,
 				train, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed);

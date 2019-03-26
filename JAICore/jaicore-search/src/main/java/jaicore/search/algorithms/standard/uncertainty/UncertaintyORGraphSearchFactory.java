@@ -74,7 +74,7 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
 			}
 			break;
 		case PARETO_FRONT_SELECTION:
-			PriorityQueue<ParetoNode<N, V>> pareto = new PriorityQueue<>(this.oversearchAvoidanceConfig.getParetoComperator());
+			PriorityQueue<Node<N, V>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
 			search.setOpen(new ParetoSelection<>(pareto));
 			break;
 		default:

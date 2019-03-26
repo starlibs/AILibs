@@ -1,7 +1,5 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
-import java.util.concurrent.TimeoutException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +59,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 	@Override
 	public Double evaluate(Classifier classifier)
-			throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+			throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier,
 				dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed,
