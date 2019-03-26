@@ -8,7 +8,7 @@
     <layout class="org.apache.log4j.PatternLayout">
       <!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
         - %m%n" /> -->
-      <param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="%-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -55,10 +55,6 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-    <logger name="de.upb.crc901.mlplan.dyadranking">
-    <level value="info" />
-  </logger>
-  
   <logger name="jaicore">
     <level value="warn" />
     <appender-ref ref="console" />
@@ -76,6 +72,10 @@
     <level value="warn" />
   </logger>
   
+  <logger name="jaicore.interrupt">
+    <level value="info" />
+  </logger>
+  
   <logger name="hasco">
     <level value="warn" />
     <appender-ref ref="console" />
@@ -85,30 +85,44 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="mlplan">
-    <level value="trace" />
+  <logger name="sklmlplanc">
+    <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
   </logger>
-
-	<logger name="org.nd4j">
-		<level value="info" />
-		<appender-ref ref="console" />
-	</logger>
-
-  <logger name="mlplan.optimizingfactory.optAlgo">
+  <logger name="sklmlplanc.mlplan.optimizingfactory">
     <level value="warn" />
   </logger>
+  <logger name="sklmlplanc.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
+    <level value="debug" />
+  </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco">
+  <logger name="mlplan">
+    <level value="info" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="jaicore.search.algorithms.standard.mcts.MCTS">
+  	 <level value="info" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo">
     <level value="info" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco">
     <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+    <level value="info" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
@@ -119,12 +133,24 @@
     <level value="warn" />
   </logger>
   
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
+    <level value="warn" />
+  </logger>
+  
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
     <level value="warn" />
   </logger>
   
   <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
     <level value="warn" />
+  </logger>
+  
+  <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
+  	<level value="warn" />
   </logger>
   
   <logger name="testedalgorithm">

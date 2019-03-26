@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -31,7 +32,7 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 	}
 
 	@SuppressWarnings("unchecked")
-	public ComponentInstance readAsTree(TreeNode p) throws IOException {
+	public ComponentInstance readAsTree(final TreeNode p) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		// read the parameter values
 		Map<String, String> parameterValues = mapper.treeToValue(p.get("parameterValues"), HashMap.class);
@@ -48,14 +49,14 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 		Iterator<String> fields = n.fieldNames();
 		while (fields.hasNext()) {
 			String key = fields.next();
-			satisfactionOfRequiredInterfaces.put(key, readAsTree(n.get(key)));
+			satisfactionOfRequiredInterfaces.put(key, this.readAsTree(n.get(key)));
 		}
 		return new ComponentInstance(component, parameterValues, satisfactionOfRequiredInterfaces);
 	}
 
 	@Override
-	public ComponentInstance deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-		return readAsTree(p.readValueAsTree());
+	public ComponentInstance deserialize(final JsonParser p, final DeserializationContext ctxt) throws IOException {
+		return this.readAsTree(p.readValueAsTree());
 	}
 
 }

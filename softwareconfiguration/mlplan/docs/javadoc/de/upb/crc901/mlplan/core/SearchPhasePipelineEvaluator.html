@@ -131,12 +131,13 @@ implements jaicore.basic.IObjectEvaluator&lt;hasco.model.ComponentInstance,java.
 <th class="colOne" scope="col">Constructor and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/SearchPhasePipelineEvaluator.html#SearchPhasePipelineEvaluator-de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory-jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge-int-weka.core.Instances-double-int-">SearchPhasePipelineEvaluator</a></span>(<a href="../../../../../de/upb/crc901/mlplan/multiclass/wekamlplan/ClassifierFactory.html" title="interface in de.upb.crc901.mlplan.multiclass.wekamlplan">ClassifierFactory</a>&nbsp;classifierFactory,
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/SearchPhasePipelineEvaluator.html#SearchPhasePipelineEvaluator-de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory-jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge-int-weka.core.Instances-double-int-int-">SearchPhasePipelineEvaluator</a></span>(<a href="../../../../../de/upb/crc901/mlplan/multiclass/wekamlplan/ClassifierFactory.html" title="interface in de.upb.crc901.mlplan.multiclass.wekamlplan">ClassifierFactory</a>&nbsp;classifierFactory,
                             jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge&lt;java.lang.Double,java.lang.Double&gt;&nbsp;evaluationMeasurementBridge,
                             int&nbsp;numMCIterations,
                             weka.core.Instances&nbsp;dataShownToSearch,
                             double&nbsp;trainFoldSize,
-                            int&nbsp;seed)</code>&nbsp;</td>
+                            int&nbsp;seed,
+                            int&nbsp;timeoutForSolutionEvaluation)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -187,7 +188,7 @@ implements jaicore.basic.IObjectEvaluator&lt;hasco.model.ComponentInstance,java.
 <!--   -->
 </a>
 <h3>Constructor Detail</h3>
-<a name="SearchPhasePipelineEvaluator-de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory-jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge-int-weka.core.Instances-double-int-">
+<a name="SearchPhasePipelineEvaluator-de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory-jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge-int-weka.core.Instances-double-int-int-">
 <!--   -->
 </a>
 <ul class="blockListLast">
@@ -198,7 +199,8 @@ implements jaicore.basic.IObjectEvaluator&lt;hasco.model.ComponentInstance,java.
                                     int&nbsp;numMCIterations,
                                     weka.core.Instances&nbsp;dataShownToSearch,
                                     double&nbsp;trainFoldSize,
-                                    int&nbsp;seed)</pre>
+                                    int&nbsp;seed,
+                                    int&nbsp;timeoutForSolutionEvaluation)</pre>
 </li>
 </ul>
 </li>
@@ -242,14 +244,14 @@ implements jaicore.basic.IObjectEvaluator&lt;hasco.model.ComponentInstance,java.
 <li class="blockList">
 <h4>evaluate</h4>
 <pre>public&nbsp;java.lang.Double&nbsp;evaluate(hasco.model.ComponentInstance&nbsp;c)
-                          throws java.util.concurrent.TimeoutException,
+                          throws jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                                  java.lang.InterruptedException,
                                  jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>evaluate</code>&nbsp;in interface&nbsp;<code>jaicore.basic.IObjectEvaluator&lt;hasco.model.ComponentInstance,java.lang.Double&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException</code></dd>
 </dl>

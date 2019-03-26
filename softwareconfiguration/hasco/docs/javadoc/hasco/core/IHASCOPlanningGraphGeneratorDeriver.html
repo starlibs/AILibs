@@ -92,7 +92,7 @@
 <li class="blockList">
 <dl>
 <dt>All Superinterfaces:</dt>
-<dd>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,jaicore.search.core.interfaces.GraphGenerator&lt;N,A&gt;&gt;, jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,N,A&gt;, jaicore.planning.hierarchical.algorithms.IPathToPlanConverter&lt;N&gt;</dd>
+<dd>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,jaicore.planning.core.Plan,jaicore.search.probleminputs.GraphSearchInput&lt;N,A&gt;,jaicore.search.model.other.SearchGraphPath&lt;N,A&gt;&gt;, jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver&lt;jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem,N,A&gt;</dd>
 </dl>
 <dl>
 <dt>All Known Implementing Classes:</dt>
@@ -115,18 +115,11 @@ extends jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGen
 </a>
 <h3>Method Summary</h3>
 <ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.AlgorithmProblemTransformer">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction">
 <!--   -->
 </a>
-<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.AlgorithmProblemTransformer</h3>
-<code>transform</code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.planning.hierarchical.algorithms.IPathToPlanConverter">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;jaicore.planning.hierarchical.algorithms.IPathToPlanConverter</h3>
-<code>getPlan</code></li>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction</h3>
+<code>decodeSolution, encodeProblem</code></li>
 </ul>
 </li>
 </ul>

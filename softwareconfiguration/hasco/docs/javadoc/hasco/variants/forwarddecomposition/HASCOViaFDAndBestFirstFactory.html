@@ -97,10 +97,15 @@ var activeTableTab = "activeTableTab";
 <li>java.lang.Object</li>
 <li>
 <ul class="inheritance">
-<li><a href="../../../hasco/core/HASCOFactory.html" title="class in hasco.core">hasco.core.HASCOFactory</a>&lt;jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,V&gt;,jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,V&gt;</li>
+<li><a href="../../../hasco/core/HASCOFactory.html" title="class in hasco.core">hasco.core.HASCOFactory</a>&lt;ISearch,jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,V&gt;</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDFactory.html" title="class in hasco.variants.forwarddecomposition">hasco.variants.forwarddecomposition.HASCOViaFDFactory</a>&lt;jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,V&gt;,V&gt;</li>
 <li>
 <ul class="inheritance">
 <li>hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory&lt;V&gt;</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -124,7 +129,7 @@ var activeTableTab = "activeTableTab";
 <hr>
 <br>
 <pre>public class <span class="typeNameLabel">HASCOViaFDAndBestFirstFactory&lt;V extends java.lang.Comparable&lt;V&gt;&gt;</span>
-extends <a href="../../../hasco/core/HASCOFactory.html" title="class in hasco.core">HASCOFactory</a>&lt;jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,V&gt;,jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,V&gt;</pre>
+extends <a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDFactory.html" title="class in hasco.variants.forwarddecomposition">HASCOViaFDFactory</a>&lt;jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,V&gt;,V&gt;</pre>
 <div class="block">This factory makes it easier to create HASCO objects.
  In contrast to the standard HASCOFactory, it is only necessary to set the problem and a node evaluator
  
@@ -191,7 +196,7 @@ extends <a href="../../../hasco/core/HASCOFactory.html" title="class in hasco.co
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;hasco.core.<a href="../../../hasco/core/HASCOFactory.html" title="class in hasco.core">HASCOFactory</a></h3>
-<code><a href="../../../hasco/core/HASCOFactory.html#getPlanningGraphGeneratorDeriver--">getPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#setPlanningGraphGeneratorDeriver-hasco.core.IHASCOPlanningGraphGeneratorDeriver-">setPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setProblemInput</a>, <a href="../../../hasco/core/HASCOFactory.html#setProblemInput-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">setProblemInput</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-">setSearchFactory</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchProblemTransformer-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setSearchProblemTransformer</a></code></li>
+<code><a href="../../../hasco/core/HASCOFactory.html#getAlgorithm-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">getAlgorithm</a>, <a href="../../../hasco/core/HASCOFactory.html#getPlanningGraphGeneratorDeriver--">getPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#getProblem--">getProblem</a>, <a href="../../../hasco/core/HASCOFactory.html#setPlanningGraphGeneratorDeriver-hasco.core.IHASCOPlanningGraphGeneratorDeriver-">setPlanningGraphGeneratorDeriver</a>, <a href="../../../hasco/core/HASCOFactory.html#setProblemInput-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">setProblemInput</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-">setSearchFactory</a>, <a href="../../../hasco/core/HASCOFactory.html#setSearchProblemTransformer-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">setSearchProblemTransformer</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">

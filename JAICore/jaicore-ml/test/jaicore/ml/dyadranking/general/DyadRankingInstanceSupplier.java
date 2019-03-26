@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.dyadranking.Dyad;
@@ -23,19 +23,32 @@ public class DyadRankingInstanceSupplier {
 	 * Creates a random {@link jaicore.ml.dyadranking.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
 	 * 
-	 * @param maxLength
-	 *            the amount of dyads
+	 * @param maxLength The amount of dyads
+	 * @param seed Seed for generating random dyads
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
 	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int seed) {
 		List<Dyad> dyads = new ArrayList<Dyad>();
-		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
-
-		for (int i = 0; i < actualLength; i++) {
-			Dyad dyad = DyadSupplier.getRandomDyad(30, 2);
+		
+		int actualLength = new Random(seed).nextInt(maxLength+1);
+		for(int i = 0; i < actualLength; i++) {
+			Dyad dyad = DyadSupplier.getRandomDyad(i, 2, 2);
 			dyads.add(dyad);
 		}
 		Comparator<Dyad> comparator = complexDyadRanker();
+		Collections.sort(dyads, comparator);
+		return new DyadRankingInstance(dyads);
+	}
+	
+	public static DyadRankingInstance getInputOptDyadRankingInstance(int maxLength, int seed) {
+		List<Dyad> dyads = new ArrayList<Dyad>();
+		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
+
+		for (int i = 0; i < actualLength; i++) {
+			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
+			dyads.add(dyad);
+		}
+		Comparator<Dyad> comparator = inputOptimizerTestRanker();
 		Collections.sort(dyads, comparator);
 		return new DyadRankingInstance(dyads);
 	}
@@ -63,6 +76,28 @@ public class DyadRankingInstanceSupplier {
 		};
 		return comparator;
 	}
+	
+	public static double inputOptimizerTestScore(Dyad dyad) {
+		Vector inst = dyad.getInstance();
+		Vector alt = dyad.getAlternative();
+		double score = Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1))
+					/* + Math.abs(inst.getValue(0)) + Math.abs(inst.getValue(1)) + Math.abs(alt.getValue(0)) + Math.abs(alt.getValue(1)) */;
+		return score;
+	}
+	
+	public static Comparator<Dyad> inputOptimizerTestRanker() {
+		Comparator<Dyad> comparator = new Comparator<Dyad>() {
+
+			@Override
+			public int compare(Dyad d1, Dyad d2) {
+				double score1 = inputOptimizerTestScore(d1);
+				double score2 = inputOptimizerTestScore(d2);
+				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
+			}	
+		};
+		return comparator;
+	}
+	
 	/**
 	 * A simple function that can be learned by a bilinear feature transform:
 	 * <code>
@@ -93,6 +128,14 @@ public class DyadRankingInstanceSupplier {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
 			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, seed));
+		}
+		return dataset;
+	}
+	
+	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size, int seed) {
+		DyadRankingDataset dataset = new DyadRankingDataset();
+		for (int i = 0; i < size; i++) {
+			dataset.add(DyadRankingInstanceSupplier.getInputOptDyadRankingInstance(maxLengthDyadRankingInstance, seed));
 		}
 		return dataset;
 	}

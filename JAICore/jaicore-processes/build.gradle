@@ -1,6 +1,5 @@
 dependencies{
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-concurrent")
 	compile group: 'net.java.dev.jna', name: 'jna', version: '4.5.2'
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
 }

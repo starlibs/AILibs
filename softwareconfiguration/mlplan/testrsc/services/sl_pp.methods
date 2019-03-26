@@ -1,9 +1,0 @@
-selectSLPreprocessing; chooseFeaturePreprocessor(x,config); x,config; ; ; slChoose_pp_as(config)
-configureSLPreprocessing; configureFeaturePreprocessor(x,config); x,config; ; ; slConfigure_pp_as(config)
-
-## 
-#slunichoose;	slChoosePreprocessor(config); config; ; ; associateWithAssertion('sklearn.feature_selection.GenericUnivariateSelect',config)
-#sluniconfig;	slConfigurePreprocessor(config); config,handle; associated('sklearn.feature_selection.GenericUnivariateSelect',config) ; ;  de.upb.crc901.mlplan.services.MLPipelinePlan:addAttributeSelection(config, 'sklearn.feature_selection.GenericUnivariateSelect', handle)
-
-
-INCLUDE testrsc/services/gen/sl_as_pp.methods

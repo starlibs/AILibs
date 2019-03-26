@@ -46,7 +46,7 @@ var activeTableTab = "activeTableTab";
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer.html" title="interface in jaicore.search.probleminputs"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">
@@ -143,7 +143,7 @@ extends <a href="../../../jaicore/search/probleminputs/GraphSearchInput.html" ti
 </tr>
 <tr class="altColor">
 <td class="colOne"><code><span class="memberNameLink"><a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html#GraphSearchWithPathEvaluationsInput-jaicore.search.core.interfaces.GraphGenerator-jaicore.search.core.interfaces.ISolutionEvaluator-">GraphSearchWithPathEvaluationsInput</a></span>(<a href="../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">A</a>&gt;&nbsp;graphGenerator,
-                                   <a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;&nbsp;pathEvaluator)</code>&nbsp;</td>
+                                   <a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">A</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;&nbsp;pathEvaluator)</code>&nbsp;</td>
 </tr>
 </table>
 </li>
@@ -161,7 +161,7 @@ extends <a href="../../../jaicore/search/probleminputs/GraphSearchInput.html" ti
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code><a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;</code></td>
+<td class="colFirst"><code><a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">A</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html#getPathEvaluator--">getPathEvaluator</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
@@ -204,7 +204,7 @@ extends <a href="../../../jaicore/search/probleminputs/GraphSearchInput.html" ti
 <li class="blockList">
 <h4>GraphSearchWithPathEvaluationsInput</h4>
 <pre>public&nbsp;GraphSearchWithPathEvaluationsInput(<a href="../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">A</a>&gt;&nbsp;graphGenerator,
-                                           <a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;&nbsp;pathEvaluator)</pre>
+                                           <a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">A</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;&nbsp;pathEvaluator)</pre>
 </li>
 </ul>
 </li>
@@ -221,7 +221,7 @@ extends <a href="../../../jaicore/search/probleminputs/GraphSearchInput.html" ti
 <ul class="blockList">
 <li class="blockList">
 <h4>getPathEvaluator</h4>
-<pre>public&nbsp;<a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;&nbsp;getPathEvaluator()</pre>
+<pre>public&nbsp;<a href="../../../jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">N</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">A</a>,<a href="../../../jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="type parameter in GraphSearchWithPathEvaluationsInput">V</a>&gt;&nbsp;getPathEvaluator()</pre>
 </li>
 </ul>
 <a name="toString--">
@@ -264,7 +264,7 @@ extends <a href="../../../jaicore/search/probleminputs/GraphSearchInput.html" ti
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer.html" title="interface in jaicore.search.probleminputs"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
 <li><a href="../../../jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
 </ul>
 <ul class="navList">

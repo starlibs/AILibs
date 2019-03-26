@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10};
+var methods = {"i0":10,"i1":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -160,11 +160,6 @@ implements <a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" tit
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html#setProblemInput-I-">setProblemInput</a></span>(<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">I</a>&nbsp;problemInput)</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
-<td class="colFirst"><code>&lt;P&gt;&nbsp;void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html#setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setProblemInput</a></span>(P&nbsp;problemInput,
-               <a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm">AlgorithmProblemTransformer</a>&lt;P,<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">I</a>&gt;&nbsp;reducer)</code>&nbsp;</td>
-</tr>
 </table>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -178,7 +173,7 @@ implements <a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" tit
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="interface in jaicore.basic.algorithm">IAlgorithmFactory</a></h3>
-<code><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#getAlgorithm--">getAlgorithm</a></code></li>
+<code><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#getAlgorithm--">getAlgorithm</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#getAlgorithm-I-">getAlgorithm</a></code></li>
 </ul>
 </li>
 </ul>
@@ -211,22 +206,6 @@ implements <a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" tit
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="setProblemInput-java.lang.Object-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
-<!--   -->
-</a><a name="setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setProblemInput</h4>
-<pre>public&nbsp;&lt;P&gt;&nbsp;void&nbsp;setProblemInput(P&nbsp;problemInput,
-                                <a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm">AlgorithmProblemTransformer</a>&lt;P,<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">I</a>&gt;&nbsp;reducer)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setProblemInput</a></code>&nbsp;in interface&nbsp;<code><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="interface in jaicore.basic.algorithm">IAlgorithmFactory</a>&lt;<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">I</a>,<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">O</a>&gt;</code></dd>
-</dl>
-</li>
-</ul>
 <a name="setProblemInput-java.lang.Object-">
 <!--   -->
 </a><a name="setProblemInput-I-">
@@ -236,10 +215,6 @@ implements <a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" tit
 <li class="blockList">
 <h4>setProblemInput</h4>
 <pre>public&nbsp;void&nbsp;setProblemInput(<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">I</a>&nbsp;problemInput)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html#setProblemInput-I-">setProblemInput</a></code>&nbsp;in interface&nbsp;<code><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="interface in jaicore.basic.algorithm">IAlgorithmFactory</a>&lt;<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">I</a>,<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="type parameter in AAlgorithmFactory">O</a>&gt;</code></dd>
-</dl>
 </li>
 </ul>
 <a name="getInput--">

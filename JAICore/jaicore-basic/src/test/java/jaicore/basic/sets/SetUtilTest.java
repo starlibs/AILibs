@@ -77,9 +77,6 @@ public class SetUtilTest {
 //			return true;
 //		});
 		long end1 = System.currentTimeMillis();
-
-		
-		System.out.println((end1 - start1) + "ms. Result: " + maps.size());
 		
 		Collection<Map<Integer,Integer>> maps2 = SetUtil.allMappings(a, b, true, false, false);
 		Set<Map<Integer,Integer>> out2 = new HashSet<>();
@@ -95,10 +92,60 @@ public class SetUtilTest {
 				out2.add(map);
 		}
 		long end2 = System.currentTimeMillis();
-		
-		
-		System.out.println(maps.size() + "/" + out2.size());
-		System.out.println((end2 - end1) + "ms");
+	}
+	
+	@Test
+	public void testDifferenceEmptyPositiveCase() {
+		Collection<String> a = new ArrayList<>();
+		a.add("i1");
+		a.add("i2");
+		a.add("i3");
+		Collection<String> b = new HashSet<>();
+		b.add("i1");
+		b.add("i2");
+		b.add("i3");
+		assertTrue("Difference IS empty, but SetUtil.differenceEmpty returns false", SetUtil.differenceEmpty(a, b));
+	}
+	
+	@Test
+	public void testDifferenceEmptyNegativeCase() {
+		Collection<String> a = new ArrayList<>();
+		a.add("i1");
+		a.add("i2");
+		a.add("i3");
+		a.add("i4");
+		a.add("i5");
+		Collection<String> b = new ArrayList<>();
+		b.add("i2");
+		b.add("i3");
+		assertTrue(!SetUtil.differenceEmpty(a, b));
+	}
+	
+	@Test
+	public void testDifferenceNotEmptyPositiveCase() {
+		Collection<String> a = new ArrayList<>();
+		a.add("i1");
+		a.add("i2");
+		a.add("i3");
+		a.add("i4");
+		a.add("i5");
+		Collection<String> b = new ArrayList<>();
+		b.add("i2");
+		b.add("i3");
+		assertTrue(SetUtil.differenceNotEmpty(a, b));
+	}
+	
+	@Test
+	public void testDifferenceNotEmptyNegativeCase() {
+		Collection<String> a = new ArrayList<>();
+		a.add("i1");
+		a.add("i2");
+		a.add("i3");
+		Collection<String> b = new HashSet<>();
+		b.add("i1");
+		b.add("i2");
+		b.add("i3");
+		assertTrue("Difference IS empty, but SetUtil.differenceNotEmpty returns true", !SetUtil.differenceNotEmpty(a, b));
 	}
 	
 	//@Test

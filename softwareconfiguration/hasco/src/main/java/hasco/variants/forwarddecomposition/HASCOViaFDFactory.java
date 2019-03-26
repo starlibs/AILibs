@@ -7,15 +7,15 @@ import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenera
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public class HASCOViaFDFactory<ISearch extends GraphSearchInput<TFDNode, String>, V extends Comparable<V>> extends HASCOFactory<ISearch, TFDNode, String, V> {
-	
+public class HASCOViaFDFactory<S extends GraphSearchInput<TFDNode, String>, V extends Comparable<V>> extends HASCOFactory<S, TFDNode, String, V> {
+
 	public HASCOViaFDFactory() {
 		super();
-		setPlanningGraphGeneratorDeriver(new DefaultHASCOPlanningGraphGeneratorDeriver<>(new ForwardDecompositionReducer<>()));
+		this.setPlanningGraphGeneratorDeriver(new DefaultHASCOPlanningGraphGeneratorDeriver<>(new ForwardDecompositionReducer<>()));
 	}
-	
-	public HASCOViaFDFactory(IOptimalPathInORGraphSearchFactory<ISearch, TFDNode, String, V> searchFactory) {
+
+	public HASCOViaFDFactory(final IOptimalPathInORGraphSearchFactory<S, TFDNode, String, V> searchFactory) {
 		this();
-		setSearchFactory(searchFactory);
+		this.setSearchFactory(searchFactory);
 	}
 }

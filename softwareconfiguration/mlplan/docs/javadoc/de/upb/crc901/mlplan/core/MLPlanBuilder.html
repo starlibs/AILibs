@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10,"i11":10,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -195,40 +195,45 @@ extends java.lang.Object</pre>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#prepareNodeEvaluatorInFactoryWithData-weka.core.Instances-">prepareNodeEvaluatorInFactoryWithData</a></span>(weka.core.Instances&nbsp;data)</code>&nbsp;</td>
 </tr>
 <tr id="i10" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#setHascoFactory-hasco.core.HASCOFactory-">setHascoFactory</a></span>(hasco.core.HASCOFactory&lt;? extends jaicore.search.probleminputs.GraphSearchInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String&gt;,jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,java.lang.Double&gt;&nbsp;hascoFactory)</code>&nbsp;</td>
-</tr>
-<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withAlgorithmConfig-de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig-">withAlgorithmConfig</a></span>(<a href="../../../../../de/upb/crc901/mlplan/multiclass/MLPlanClassifierConfig.html" title="interface in de.upb.crc901.mlplan.multiclass">MLPlanClassifierConfig</a>&nbsp;config)</code>&nbsp;</td>
 </tr>
-<tr id="i12" class="altColor">
+<tr id="i11" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withAlgorithmConfigFile-java.io.File-">withAlgorithmConfigFile</a></span>(java.io.File&nbsp;algorithmConfigFile)</code>&nbsp;</td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i12" class="altColor">
 <td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withAutoWEKAConfiguration--">withAutoWEKAConfiguration</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i13" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withPerformanceMeasure-jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure-">withPerformanceMeasure</a></span>(jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure&nbsp;performanceMeasure)</code>&nbsp;</td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i14" class="altColor">
 <td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withPreferredNodeEvaluator-jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator-">withPreferredNodeEvaluator</a></span>(jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.Double&gt;&nbsp;preferredNodeEvaluator)</code>
 <div class="block">This ADDs a new preferred node evaluator; requires that the search will be a best-first search.</div>
 </td>
 </tr>
+<tr id="i15" class="rowColor">
+<td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withRandomCompletionBasedBestFirstSearch--">withRandomCompletionBasedBestFirstSearch</a></span>()</code>&nbsp;</td>
+</tr>
 <tr id="i16" class="altColor">
+<td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">withSearchFactory</a></span>(jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&nbsp;searchFactory,
+                 jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&nbsp;transformer)</code>&nbsp;</td>
+</tr>
+<tr id="i17" class="rowColor">
 <td class="colFirst"><code><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a></code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withSearchSpaceConfigFile-java.io.File-">withSearchSpaceConfigFile</a></span>(java.io.File&nbsp;searchSpaceConfig)</code>&nbsp;</td>
 </tr>
-<tr id="i17" class="rowColor">
+<tr id="i18" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withTimeoutForNodeEvaluation-jaicore.basic.TimeOut-">withTimeoutForNodeEvaluation</a></span>(jaicore.basic.TimeOut&nbsp;timeout)</code>&nbsp;</td>
 </tr>
-<tr id="i18" class="altColor">
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html#withTimeoutForSingleSolutionEvaluation-jaicore.basic.TimeOut-">withTimeoutForSingleSolutionEvaluation</a></span>(jaicore.basic.TimeOut&nbsp;timeout)</code>&nbsp;</td>
 </tr>
@@ -398,7 +403,7 @@ extends java.lang.Object</pre>
 <h4>withPreferredNodeEvaluator</h4>
 <pre>public&nbsp;<a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a>&nbsp;withPreferredNodeEvaluator(jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.Double&gt;&nbsp;preferredNodeEvaluator)</pre>
 <div class="block">This ADDs a new preferred node evaluator; requires that the search will be a best-first search.
- 
+
  It is possible to specify several preferred node evaluators, which will be ordered by the order in which they are specified. The latest given evaluator is the most preferred one.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -425,13 +430,23 @@ extends java.lang.Object</pre>
 <pre>public&nbsp;hasco.core.HASCOFactory&lt;? extends jaicore.search.probleminputs.GraphSearchInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String&gt;,jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,java.lang.Double&gt;&nbsp;getHASCOFactory()</pre>
 </li>
 </ul>
-<a name="setHascoFactory-hasco.core.HASCOFactory-">
+<a name="withSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>setHascoFactory</h4>
-<pre>public&nbsp;void&nbsp;setHascoFactory(hasco.core.HASCOFactory&lt;? extends jaicore.search.probleminputs.GraphSearchInput&lt;jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String&gt;,jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode,java.lang.String,java.lang.Double&gt;&nbsp;hascoFactory)</pre>
+<h4>withSearchFactory</h4>
+<pre>public&nbsp;<a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a>&nbsp;withSearchFactory(jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&nbsp;searchFactory,
+                                       jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&nbsp;transformer)</pre>
+</li>
+</ul>
+<a name="withRandomCompletionBasedBestFirstSearch--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>withRandomCompletionBasedBestFirstSearch</h4>
+<pre>public&nbsp;<a href="../../../../../de/upb/crc901/mlplan/core/MLPlanBuilder.html" title="class in de.upb.crc901.mlplan.core">MLPlanBuilder</a>&nbsp;withRandomCompletionBasedBestFirstSearch()</pre>
 </li>
 </ul>
 <a name="withTimeoutForSingleSolutionEvaluation-jaicore.basic.TimeOut-">

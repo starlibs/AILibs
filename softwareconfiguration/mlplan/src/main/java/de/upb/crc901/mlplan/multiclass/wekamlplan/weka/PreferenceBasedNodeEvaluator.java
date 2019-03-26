@@ -21,15 +21,15 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	private final List<String> ORDERING_OF_CLASSIFIERS;
 	private final static Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
 	private boolean sentLogMessageForHavingEnteredSecondSubPhase = false;
-	
+
 	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> ORDERING_OF_CLASSIFIERS) {
 		super();
 		this.components = components;
 		this.ORDERING_OF_CLASSIFIERS = ORDERING_OF_CLASSIFIERS;
 	}
-	
+
 	public PreferenceBasedNodeEvaluator(final Collection<Component> components) {
-		this (components, new ArrayList<>());
+		this(components, new ArrayList<>());
 	}
 
 	@Override
@@ -71,9 +71,9 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				score *= 1.0e-10;
 			} else {
 				score = null;
-				if (!sentLogMessageForHavingEnteredSecondSubPhase) {
-					if ((Double)n.getParent().getInternalLabel() > 1.0e-6) {
-						sentLogMessageForHavingEnteredSecondSubPhase = true;
+				if (!this.sentLogMessageForHavingEnteredSecondSubPhase) {
+					if ((Double) n.getParent().getInternalLabel() > 1.0e-6) {
+						this.sentLogMessageForHavingEnteredSecondSubPhase = true;
 						logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", n.getParent().getInternalLabel());
 					}
 				}
@@ -85,6 +85,6 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 
 	@Override
 	public String toString() {
-		return "PreferenceBasedNodeEvaluator [ORDERING_OF_CLASSIFIERS=" + ORDERING_OF_CLASSIFIERS + "]";
+		return "PreferenceBasedNodeEvaluator [ORDERING_OF_CLASSIFIERS=" + this.ORDERING_OF_CLASSIFIERS + "]";
 	}
 }

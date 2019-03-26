@@ -23,7 +23,7 @@
 			"parameter" : [ ]
 		},
 		{
-			"name" : "make_forward",
+			"name" : "mlplan.util.model.make_forward",
 			"providedInterface" : [ "AbstractPreprocessor", "MakeForward" ],
 			"requiredInterface" : [ { "id": "base", "name": "BasicPreprocessor"}, {"id": "source", "name": "AbstractPreprocessor"} ],
 			"parameter" : [ ]

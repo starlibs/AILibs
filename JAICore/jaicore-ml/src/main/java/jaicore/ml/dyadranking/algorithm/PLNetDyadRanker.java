@@ -280,22 +280,23 @@ public class PLNetDyadRanker extends APLDyadRanker
 
 	@Override
 	public void update(Set<IInstance> instances) throws TrainingException {
+		IDyadRankingInstance drInstance = null;
 		for (IInstance instance : instances) {
 			if (!(instance instanceof IDyadRankingInstance)) {
 				throw new IllegalArgumentException(
 						"Can only train the Plackett-Luce net dyad ranker with a dyad ranking instances!");
 			}
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			if (this.plNet == null) {
-				int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
-						+ (drInstance.getDyadAtPosition(0).getAlternative().length());
-				this.plNet = createNetwork(dyadSize);
-				this.plNet.init();
-			}
-//			this.update(instance);
-			List<IInstance> minibatch = new ArrayList<IInstance>(instances);
-			this.updateWithMinibatch(minibatch);
+			drInstance = (IDyadRankingInstance) instance;
 		}
+		if (this.plNet == null) {
+			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			this.plNet = createNetwork(dyadSize);
+			this.plNet.init();
+		}
+		for (IInstance instance : instances)
+			this.update(instance);
+
 	}
 
 	@Override
@@ -390,7 +391,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			throw new IllegalArgumentException(
 					"There must be at least one hidden layer in specified in the config file!");
 		ListBuilder configBuilder = new NeuralNetConfiguration.Builder().seed(configuration.plNetSeed())
-				// Gradient descent updater: SGD
+				// Gradient descent updater: Adam
 				.updater(new Adam(configuration.plNetLearningRate())).list();
 
 		// Build hidden layers
@@ -493,6 +494,14 @@ public class PLNetDyadRanker extends APLDyadRanker
 	public void loadModelFromFile(String filePath) throws IOException {
 		MultiLayerNetwork restored = ModelSerializer.restoreMultiLayerNetwork(filePath);
 		plNet = restored;
+	}
+	
+	public MultiLayerNetwork getPlNet() {
+		return plNet;
+	}
+	
+	public int getEpoch() {
+		return epoch;
 	}
 
 	@Override

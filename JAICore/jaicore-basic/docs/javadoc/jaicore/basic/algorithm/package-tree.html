@@ -80,7 +80,7 @@
 <ul>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">AAlgorithm</span></a>&lt;I,O&gt; (implements jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;, jaicore.basic.<a href="../../../jaicore/basic/ILoggingCustomizable.html" title="interface in jaicore.basic">ILoggingCustomizable</a>)
 <ul>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">ASolutionCandidateIterator</span></a>&lt;I,O&gt; (implements jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">ASolutionCandidateIterator</span></a>&lt;I,O&gt; (implements jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/AOptimizer.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">AOptimizer</span></a>&lt;I,O,V&gt; (implements jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm">IOptimizationAlgorithm</a>&lt;I,O,V&gt;)</li>
 </ul>
@@ -88,7 +88,6 @@
 </ul>
 </li>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/AAlgorithmFactory.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">AAlgorithmFactory</span></a>&lt;I,O&gt; (implements jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="interface in jaicore.basic.algorithm">IAlgorithmFactory</a>&lt;I,O&gt;)</li>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/StandardAlgorithmFactory.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">StandardAlgorithmFactory</span></a>&lt;I,O&gt; (implements jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="interface in jaicore.basic.algorithm">IAlgorithmFactory</a>&lt;I,O&gt;)</li>
 <li type="circle">java.lang.Throwable (implements java.io.Serializable)
 <ul>
 <li type="circle">java.lang.Exception
@@ -103,12 +102,16 @@
 </ul>
 <h2 title="Interface Hierarchy">Interface Hierarchy</h2>
 <ul>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">AlgorithmProblemTransformer</span></a>&lt;A,B&gt;</li>
 <li type="circle">java.util.concurrent.Callable&lt;V&gt;
 <ul>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IAlgorithm</span></a>&lt;I,O&gt; (also extends jaicore.basic.<a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a>, java.lang.Iterable&lt;T&gt;, java.util.Iterator&lt;E&gt;)
 <ul>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">ISolutionCandidateIterator</span></a>&lt;I,O&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -117,22 +120,27 @@
 <ul>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IAlgorithm</span></a>&lt;I,O&gt; (also extends java.util.concurrent.Callable&lt;V&gt;, java.lang.Iterable&lt;T&gt;, java.util.Iterator&lt;E&gt;)
 <ul>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">ISolutionCandidateIterator</span></a>&lt;I,O&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </li>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IAlgorithmFactory</span></a>&lt;I,O&gt;</li>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">ISolutionCandidateIterator</span></a>&lt;O&gt;
-<ul>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;)</li>
-</ul>
-</li>
 <li type="circle">java.lang.Iterable&lt;T&gt;
 <ul>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IAlgorithm</span></a>&lt;I,O&gt; (also extends java.util.concurrent.Callable&lt;V&gt;, jaicore.basic.<a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a>, java.util.Iterator&lt;E&gt;)
 <ul>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">ISolutionCandidateIterator</span></a>&lt;I,O&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -141,7 +149,12 @@
 <ul>
 <li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IAlgorithm</span></a>&lt;I,O&gt; (also extends java.util.concurrent.Callable&lt;V&gt;, jaicore.basic.<a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a>, java.lang.Iterable&lt;T&gt;)
 <ul>
-<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;)</li>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">ISolutionCandidateIterator</span></a>&lt;I,O&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">IOptimizationAlgorithm</span></a>&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

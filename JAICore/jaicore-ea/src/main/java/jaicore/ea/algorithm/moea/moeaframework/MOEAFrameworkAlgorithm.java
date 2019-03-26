@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import org.moeaframework.core.Algorithm;
 import org.moeaframework.core.Initialization;
@@ -24,8 +23,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ea.algorithm.AEvolutionaryAlgorithm;
 import jaicore.ea.algorithm.moea.moeaframework.event.MOEAFrameworkAlgorithmResultEvent;
 import jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
@@ -42,14 +40,8 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
-		try {
-			this.checkAndConductTermination();
-		} catch (DelayedTimeoutCheckException e) {
-			e.printStackTrace();
-		} catch (DelayedCancellationCheckException e) {
-			throw new TimeoutException(e.getMessage());
-		}
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+		this.checkAndConductTermination();
 
 		if (this.getClass().getName().equals("ndea.core.simplend.nd.NDOptimizationEA")) {
 			System.out.println(this.getClass().getName() + " step1: " + this.getState());
@@ -88,7 +80,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 				this.numberOfGenerationsWOChange = 0;
 			}
 
-			return new MOEAFrameworkAlgorithmResultEvent(getId(), this.getCurrentResult());
+			return new MOEAFrameworkAlgorithmResultEvent(this.getId(), this.getCurrentResult());
 		default:
 		case inactive:
 			throw new AlgorithmException("The current algorithm state is >inactive<.");
@@ -125,7 +117,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 	}
 
 	@Override
-	public MOEAFrameworkAlgorithmResult call() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public MOEAFrameworkAlgorithmResult call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while ((this.getState() == AlgorithmState.created || this.getState() == AlgorithmState.active) && (this.getConfig().numberOfGenerations() <= 0 || this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations())
 				&& (this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations())) {
 			this.nextWithException();
