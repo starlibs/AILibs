@@ -23,8 +23,9 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
+ * @deprecated
  * A pool provider which is created out of a list of {@link Dyad}s and ground
- * truth scores.
+ * truth scores. It is currently not used.
  * 
  * @author Jonas Hanselle
  *

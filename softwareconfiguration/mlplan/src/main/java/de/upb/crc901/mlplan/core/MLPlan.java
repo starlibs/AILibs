@@ -59,9 +59,12 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	public MLPlan(final MLPlanBuilder builder, final Instances data) throws IOException {
 		super(builder.getAlgorithmConfig(), data);
-		builder.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.getConfig().randomSeed(), this.getConfig().numberOfRandomCompletions(), this.getConfig().timeoutForCandidateEvaluation(),
-				this.getConfig().timeoutForNodeEvaluation()));
-		builder.prepareNodeEvaluatorInFactoryWithData(data);
+		// SANITY CHECK - DO NOT OVERWRITE PARAMETERS THAT HAVE BEEN SET FROM THE OUTSIDE!!!!!!!!!!
+		if (!builder.useCustomHASCOFactory()) {
+			builder.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.getConfig().randomSeed(), this.getConfig().numberOfRandomCompletions(), this.getConfig().timeoutForCandidateEvaluation(),
+					this.getConfig().timeoutForNodeEvaluation()));
+			builder.prepareNodeEvaluatorInFactoryWithData(data);
+		}
 
 		/* sanity checks */
 		this.logger.info("Starting an ML-Plan instance.");
@@ -76,7 +79,12 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		ADecomposableDoubleMeasure<Double> measure = new MultiClassMeasureBuilder().getEvaluator(builder.getPerformanceMeasure());
 		AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
 		if (builder.getUseCache()) {
-			evaluationMeasurementBridge = new CacheEvaluatorMeasureBridge(measure, builder.getDBAdapter());
+			if (builder.getCustomEvaluatorBridge() != null) {
+				evaluationMeasurementBridge = builder.getCustomEvaluatorBridge();
+				evaluationMeasurementBridge.setBasicEvaluator(measure);
+			} else {
+				evaluationMeasurementBridge = new CacheEvaluatorMeasureBridge(measure, builder.getDBAdapter());
+			}			
 		} else {
 			evaluationMeasurementBridge = new SimpleEvaluatorMeasureBridge(measure);
 		}
@@ -113,6 +121,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 		this.twoPhaseHASCOFactory.setConfig(this.getConfig());
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
+		
+		builder.setSearchBenchmarkForNodeEvaluator(searchBenchmark);
 		this.optimizingFactory.registerListener(new Object() {
 
 			@Subscribe

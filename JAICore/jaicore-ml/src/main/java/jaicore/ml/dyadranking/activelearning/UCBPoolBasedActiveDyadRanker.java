@@ -23,7 +23,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * A prototypical active dyad ranker based on the UCB decision rule. It always queries the two 
- * @author jonas
+ * @author Jonas Hanselle
  *
  */
 public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
@@ -109,7 +109,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					int index = random.nextInt(instanceFeatures.size());
 					Vector problemInstance = instanceFeatures.get(index);
 
-					// update empirical variance and compute upper confidence bound for each dyad
+					// update empirical standard deviation and compute upper confidence bound for each dyad
 					// from this dataset
 					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(problemInstance));
 					List<Pair<Dyad, Double>> dyadsWithUCB = new ArrayList<Pair<Dyad, Double>>(dyads.size());

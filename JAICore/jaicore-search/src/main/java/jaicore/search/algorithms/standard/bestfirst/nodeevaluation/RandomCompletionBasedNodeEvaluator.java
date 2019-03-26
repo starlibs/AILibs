@@ -34,6 +34,7 @@ import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
@@ -420,6 +421,7 @@ public class RandomCompletionBasedNodeEvaluator<T, V extends Comparable<V>> exte
 		}
 		V f = this.fValues.get(n);
 		this.logger.info("Returning f-value: {}", f);
+		eventBus.post(new FValueEvent<V>(f, startOfComputation - System.currentTimeMillis()));
 		return f;
 	}
 

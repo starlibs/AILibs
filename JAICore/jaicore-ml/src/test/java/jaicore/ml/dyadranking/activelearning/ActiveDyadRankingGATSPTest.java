@@ -45,9 +45,6 @@ import weka.clusterers.SimpleKMeans;
 @RunWith(Parameterized.class)
 public class ActiveDyadRankingGATSPTest {
 
-//	private static final String XXL_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-LR.txt";
-//	private static final String ALTERNATIVES_FEATURE_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/GAMeta72-labeldescriptions.csv";
-//	private static final String ORDERINGS_FILE = "testsrc/ml/dyadranking/ga-tsp/data_meta/orderings.csv";
 	private static final String GATSP_DATASET_FILE = "testsrc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
 
 	private static final int MAX_BATCH_SIZE = 5;
@@ -191,119 +188,6 @@ public class ActiveDyadRankingGATSPTest {
 		for (int i = 0; i < stats.length; i++)
 			System.out.print(stats[i].getMean() + ",");
 	}
-
-	/**
-	 * Loads the dataset from the xxl and the csv files.
-	 * 
-	 * @return {@link DyadRankingDataset} constructed of the instances and
-	 *         alternatives in the corresponding files
-	 */
-//	private static DyadRankingDataset loadDatasetFromXXLAndCSV() {
-//
-//		DyadRankingDataset dataset = new DyadRankingDataset();
-//
-//		// this is a bit messy and hand tailored towards the input we expect
-//		int[][] orderings = new int[246][72];
-//
-//		List<List<String>> records = new ArrayList<>();
-//		try (BufferedReader br = new BufferedReader(new FileReader(ORDERINGS_FILE))) {
-//			String line;
-//			int i = 0;
-//			while ((line = br.readLine()) != null) {
-//				int j = 0;
-//				String[] values = line.split(",");
-//				records.add(Arrays.asList(values));
-//				for (String value : values) {
-//					orderings[i][j] = Integer.parseInt(value);
-//					j++;
-//				}
-//				i++;
-//			}
-//		} catch (FileNotFoundException e1) {
-//			e1.printStackTrace();
-//		} catch (IOException e1) {
-//			e1.printStackTrace();
-//		}
-//
-//		List<Vector> alternativeFeatures = new ArrayList<Vector>(100);
-//
-//		// parse the file containing the features of the alternatives
-//		File alternativeFile = new File(ALTERNATIVES_FEATURE_FILE);
-//		try {
-//			BufferedReader reader = new BufferedReader(new FileReader(alternativeFile));
-//			String line;
-//			while ((line = reader.readLine()) != null) {
-//				String[] tokens = line.split(",");
-//				DenseDoubleVector vector = new DenseDoubleVector(tokens.length);
-//				for (int i = 0; i < vector.length(); i++) {
-//					vector.setValue(i, Double.parseDouble(tokens[i]));
-//				}
-//				alternativeFeatures.add(vector);
-//			}
-//			reader.close();
-//
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//
-//		// parse XXL file
-//		File xxlFile = new File(XXL_FILE);
-//		int numAttributes = 0;
-//		int numLabels = 0;
-//		try {
-//			BufferedReader reader = new BufferedReader(new FileReader(xxlFile));
-//			// read the first line and setup counters accordingly
-//			String line = reader.readLine();
-//			String[] tokens = line.split("\t");
-//			for (String token : tokens) {
-//				switch (token.charAt(0)) {
-//				case 'A':
-//					numAttributes++;
-//					break;
-//				case 'L':
-//					numLabels++;
-//					break;
-//				}
-//			}
-//
-//			// skip two lines
-//			reader.readLine();
-//			reader.readLine();
-//
-//			List<Vector> instanceFeatures = new ArrayList<Vector>(246);
-//			List<ArrayList<Vector>> alternativesList = new ArrayList<ArrayList<Vector>>(246);
-//			int lineIndex = 0;
-//			while ((line = reader.readLine()) != null) {
-//				tokens = line.split("\t");
-//				Vector instance = new DenseDoubleVector(numAttributes);
-//				ArrayList<Vector> alternatives = new ArrayList<Vector>(numLabels);
-//
-//				// add the instances to the dyad ranking instance
-//				for (int i = 0; i < numAttributes; i++) {
-//					double val = Double.parseDouble(tokens[i]);
-//					instance.setValue(i, val);
-//				}
-//
-//				// add the alternatives to the dyad ranking instance
-//				for (int i = numAttributes; i < tokens.length; i++) {
-//					int index = orderings[lineIndex][i - numAttributes] - 1;
-//					alternatives.add(alternativeFeatures.get(index));
-//				}
-//				instanceFeatures.add(instance);
-//				alternativesList.add(alternatives);
-//
-//			}
-//
-//			for (int i = 0; i < instanceFeatures.size(); i++) {
-//				dataset.add(new SparseDyadRankingInstance(instanceFeatures.get(i), alternativesList.get(i)));
-//			}
-//
-//			reader.close();
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		return dataset;
-//	}
 
 	/**
 	 * Trims the sparse dyad ranking instances by randomly selecting alternatives
