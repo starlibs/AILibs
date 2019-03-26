@@ -15,8 +15,11 @@ import weka.core.Instances;
 public abstract class AbstractEvaluatorMeasureBridge <I, O>{
 	
 	
-	protected final IMeasure<I, O> basicEvaluator;
+	protected  IMeasure<I, O> basicEvaluator;
 
+	public AbstractEvaluatorMeasureBridge() {
+		
+	}
 	
 	public AbstractEvaluatorMeasureBridge(final IMeasure<I, O> basicEvaluator) {
 		this.basicEvaluator = basicEvaluator;
@@ -26,5 +29,9 @@ public abstract class AbstractEvaluatorMeasureBridge <I, O>{
 
 	public IMeasure<I, O> getBasicEvaluator(){
 		return basicEvaluator;
+	}
+
+	public void setBasicEvaluator(IMeasure<I, O> measure) {
+		this.basicEvaluator = measure;
 	}
 }

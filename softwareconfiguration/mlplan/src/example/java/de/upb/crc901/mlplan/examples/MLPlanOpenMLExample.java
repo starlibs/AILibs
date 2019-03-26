@@ -35,10 +35,12 @@ public class MLPlanOpenMLExample {
 
 		/* initialize mlplan, and let it run for 30 seconds */
 
-		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
-		PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
+	//	SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
+      //  PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter, "performance_cache");
 
-		MLPlanBuilder builder = new MLPlanBuilder(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"), MultiClassPerformanceMeasure.ERRORRATE, pAdapter);
+		MLPlanBuilder builder = new MLPlanBuilder(
+				new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"), new File("conf/mlplan.properties"),
+				MultiClassPerformanceMeasure.ERRORRATE);
 
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 

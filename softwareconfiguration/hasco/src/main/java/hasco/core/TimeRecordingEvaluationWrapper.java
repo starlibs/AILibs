@@ -2,6 +2,7 @@ package hasco.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
 import hasco.model.ComponentInstance;
@@ -12,7 +13,7 @@ import jaicore.logging.ToJSONStringUtil;
 public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V> {
 
 	private final IObjectEvaluator<ComponentInstance, V> baseEvaluator;
-	private final Map<ComponentInstance, Integer> consumedTimes = new HashMap<>();
+	private final Map<ComponentInstance, Integer> consumedTimes = new ConcurrentHashMap<>();
 
 	public TimeRecordingEvaluationWrapper(final IObjectEvaluator<ComponentInstance, V> baseEvaluator) {
 		super();

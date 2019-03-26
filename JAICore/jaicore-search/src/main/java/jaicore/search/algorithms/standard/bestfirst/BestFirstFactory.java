@@ -37,6 +37,7 @@ public class BestFirstFactory<P extends GraphSearchWithSubpathEvaluationsInput<N
 		search.setTimeoutForComputationOfF(this.timeoutForFInMS, this.timeoutEvaluator);
 		if (getLoggerName() != null && getLoggerName().length() > 0)
 			search.setLoggerName(getLoggerName());
+
 		return search;
 	}
 

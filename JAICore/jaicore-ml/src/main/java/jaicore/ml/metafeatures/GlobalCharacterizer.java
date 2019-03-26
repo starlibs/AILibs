@@ -15,6 +15,8 @@ import org.openml.webapplication.fantail.dc.statistical.NominalAttDistinctValues
 import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
 import org.openml.webapplication.fantail.dc.statistical.Statistical;
 import org.openml.webapplication.features.GlobalMetafeatures;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import weka.core.Instances;
 import weka.core.Utils;
@@ -27,12 +29,14 @@ import weka.core.Utils;
  *
  */
 public class GlobalCharacterizer extends Characterizer {
+	
+	private final Logger logger = LoggerFactory.getLogger(GlobalCharacterizer.class);
 
-	private final String preprocessingPrefix = "-E \"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\" -S \"weka.attributeSelection.BestFirst -D 1 -N 5\" -W ";
-	private final String cp1NN = "weka.classifiers.lazy.IBk";
-	private final String cpNB = "weka.classifiers.bayes.NaiveBayes";
-	private final String cpASC = "weka.classifiers.meta.AttributeSelectedClassifier";
-	private final String cpDS = "weka.classifiers.trees.DecisionStump";
+	protected final String preprocessingPrefix = "-E \"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\" -S \"weka.attributeSelection.BestFirst -D 1 -N 5\" -W ";
+	protected final String cp1NN = "weka.classifiers.lazy.IBk";
+	protected final String cpNB = "weka.classifiers.bayes.NaiveBayes";
+	protected final String cpASC = "weka.classifiers.meta.AttributeSelectedClassifier";
+	protected final String cpDS = "weka.classifiers.trees.DecisionStump";
 
 	/**
 	 * The names of all the meta features that are computed by this characterizer
@@ -62,6 +66,7 @@ public class GlobalCharacterizer extends Characterizer {
 	 * @throws Exception
 	 */
 	public GlobalCharacterizer() throws Exception {
+		logger.trace("Initialize");
 		initializeCharacterizers();
 		initializeCharacterizerNames();
 		initializeMetaFeatureIds();
@@ -69,6 +74,8 @@ public class GlobalCharacterizer extends Characterizer {
 
 	@Override
 	public Map<String, Double> characterize(Instances instances) {
+		logger.trace("Characterize dataset \"{}\" ...", instances.relationName());
+		
 		TreeMap<String, Double> metaFeatures = new TreeMap<String, Double>();
 		StopWatch watch = new StopWatch();
 		characterizers.forEach(characterizer -> {
@@ -85,6 +92,9 @@ public class GlobalCharacterizer extends Characterizer {
 				computationTimes.put(characterizer.toString(), Double.NaN);
 			}
 		});
+		
+		logger.trace("Done characterizing dataset. Feature length: {}",metaFeatures.size());
+		
 		return metaFeatures;
 	}
 
