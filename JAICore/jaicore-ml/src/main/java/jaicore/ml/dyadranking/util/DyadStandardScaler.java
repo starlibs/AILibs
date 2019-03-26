@@ -7,6 +7,7 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
+import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * A scaler that can be fit to a certain dataset and then be used to standardize

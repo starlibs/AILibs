@@ -22,9 +22,6 @@ import org.junit.runners.Parameterized.Parameters;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.exception.PredictionException;
-import jaicore.ml.core.exception.TrainingException;
-import jaicore.ml.dyadranking.algorithm.ADyadRanker;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
@@ -33,8 +30,9 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import jaicore.ml.dyadranking.loss.KendallsTauOfTopK;
+import jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import jaicore.ml.dyadranking.util.DyadStandardScaler;
+import jaicore.ml.dyadranking.util.DyadUnitIntervalScaler;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -64,10 +62,10 @@ public class DyadRankerGATSPTest {
 	// seed for shuffling the dataset
 	private static final long seed = 15;
 
-	ADyadRanker ranker;
+	PLNetDyadRanker ranker;
 	DyadRankingDataset dataset;
 
-	public DyadRankerGATSPTest(ADyadRanker ranker) {
+	public DyadRankerGATSPTest(PLNetDyadRanker ranker) {
 		this.ranker = ranker;
 	}
 
@@ -75,45 +73,55 @@ public class DyadRankerGATSPTest {
 	public void init() {
 		// load dataset
 		dataset = loadDatasetFromXXLAndCSV();
+//		try {
+////			dataset.serialize(new FileOutputStream(new File("GATSP-Data.txt")));
+//		} catch (FileNotFoundException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 
 	@Test
 	public void test() {
+		dataset = randomlyTrimSparseDyadRankingInstances(dataset, M);
 
 		Collections.shuffle(dataset, new Random(seed));
 
 		// split data
 		DyadRankingDataset trainData = new DyadRankingDataset(dataset.subList(0, N));
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList(N, dataset.size()));
-		
+
 		// trim dyad ranking instances for train data
-		trainData = randomlyTrimSparseDyadRankingInstances(trainData, M);
 
 		// standardize data
-		DyadStandardScaler scaler = new DyadStandardScaler();
+		AbstractDyadScaler scaler = new DyadStandardScaler();
+
 		scaler.fit(trainData);
 		scaler.transformInstances(trainData);
 		scaler.transformInstances(testData);
 
-		KendallsTauOfTopK ktotk = new KendallsTauOfTopK(15, 0.75);
-		System.out.println(ktotk.loss(trainData.get(0), trainData.get(0)));
-		
-//		try {
-//
-//			// train the ranker
+		try {
+
+			// train the ranker
 //			ranker.train(trainData);
-//			double avgKendallTau = 0.0d;
-//			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
+			double avgKendallTau = 0.0d;
+			ranker.train(trainData);
+//			ranker.update(trainData.get(0));
+//			for(IInstance instance : trainData)
+//				ranker.update(instance);
 //			List<IDyadRankingInstance> predictions = ranker.predict(testData);
-//			KendallsTauOfTopK ktotk = new KendallsTauOfTopK(15, Math.PI);
-//			for(int i = 0; i < testData.size(); i++) {
-//				System.out.println(ktotk.loss(testData.get(i), testData.get(i)));
+//			for(int i = 0; i < trainData.size(); i++) {
+//				System.out.println("Train prob: " + ranker.getLogProbabilityOfTopRanking(trainData.get(i)));
 //			}
-//			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
-//			assertTrue(avgKendallTau > 0.5d);
-//		} catch (TrainingException | PredictionException e) {
-//			e.printStackTrace();
-//		}
+//			for(int i = 0; i < testData.size(); i++) {
+////				System.out.println("Test prob: " + ranker.getLogProbabilityOfTopRanking(testData.get(i)));
+//			}
+			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
+			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
+			assertTrue(avgKendallTau > 0.5d);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -123,7 +131,7 @@ public class DyadRankerGATSPTest {
 	 * @return {@link DyadRankingDataset} constructed of the instances and
 	 *         alternatives in the corresponding files
 	 */
-	private static DyadRankingDataset loadDatasetFromXXLAndCSV() {
+	public static DyadRankingDataset loadDatasetFromXXLAndCSV() {
 
 		DyadRankingDataset dataset = new DyadRankingDataset();
 
@@ -216,7 +224,6 @@ public class DyadRankerGATSPTest {
 				}
 				instanceFeatures.add(instance);
 				alternativesList.add(alternatives);
-
 			}
 
 			for (int i = 0; i < instanceFeatures.size(); i++) {
