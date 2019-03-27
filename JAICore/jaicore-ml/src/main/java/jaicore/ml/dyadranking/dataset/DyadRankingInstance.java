@@ -1,8 +1,12 @@
 package jaicore.ml.dyadranking.dataset;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
@@ -24,8 +28,7 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 	 * Construct a new dyad ranking instance that saves the given ordering of dyads
 	 * immutably.
 	 * 
-	 * @param dyads
-	 *            the ordering of dyads to be stored in this instance
+	 * @param dyads the ordering of dyads to be stored in this instance
 	 */
 	public DyadRankingInstance(List<Dyad> dyads) {
 		this.dyads = Collections.unmodifiableList(dyads);
@@ -86,13 +89,25 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 		result = result * 31 + dyads.hashCode();
 		return result;
 	}
-	
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("DyadRankingInstance: ");
 		builder.append(dyads);
 		return builder.toString();
+	}
+
+	@Override
+	public INDArray toMatrix() {
+		List<INDArray> dyadList = new ArrayList<INDArray>(this.length());
+		for (Dyad dyad : this) {
+			INDArray dyadVector = dyad.toVector();
+			dyadList.add(dyadVector);
+		}
+		INDArray dyadMatrix;
+		dyadMatrix = Nd4j.vstack(dyadList);
+		return dyadMatrix;
 	}
 
 }

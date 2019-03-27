@@ -1,5 +1,11 @@
 package jaicore.ml.dyadranking.dataset;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 
@@ -16,16 +22,23 @@ public interface IDyadRankingInstance extends IInstance, Iterable<Dyad> {
 	 * Get the dyad at the specified position in the ordering contained in this
 	 * instance.
 	 * 
-	 * @param position
-	 *            The position in the ordering for which to get the dyad
+	 * @param position The position in the ordering for which to get the dyad
 	 * @return The dyad at the specified position
 	 */
 	public Dyad getDyadAtPosition(int position);
-	
+
 	/**
 	 * Get the number of dyads in the ranking.
 	 * 
 	 * @return The number of dyads in the ranking.
 	 */
 	public int length();
+
+	/**
+	 * Converts a dyad ranking to a {@link INDArray} matrix where each row
+	 * corresponds to a dyad.
+	 * 
+	 * @return The dyad ranking in {@link INDArray} matrix form.
+	 */
+	public INDArray toMatrix();
 }
