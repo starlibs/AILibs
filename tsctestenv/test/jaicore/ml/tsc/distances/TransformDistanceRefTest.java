@@ -1,5 +1,6 @@
 package jaicore.ml.tsc.distances;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -9,31 +10,29 @@ import org.junit.Test;
 
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
+import jaicore.ml.tsc.filter.transform.CosineTransform;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
+import timeseriesweka.classifiers.DTD_C;
+import timeseriesweka.classifiers.DTD_C.TransformType;
+import timeseriesweka.classifiers.DTD_C.TransformWeightedDTW;
 
-import timeseriesweka.elastic_distance_measures.TWEDistance;
 import weka.classifiers.lazy.kNN;
 
 /**
- * Tests performance and correctness of the {@link TimeWarpEditDistance} against
- * the reference implementation.
- * 
- * The reference implementation uses a squared distance as pointwise distance
- * metric..
+ * TransformDistanceRefTest
  */
-public class TimeWarpEditDistanceRefTest {
+public class TransformDistanceRefTest {
 
     @Test
     public void testCorrectnessForDistanceCalculationOnCarDataset() throws IOException, TimeSeriesLoadingException {
-        double nu = 1;
-        double lambda = 1;
+        double alpha = 0;
 
         double delta = 0.001;
         File arffFile = DistanceRefTestUtil.getCarArffFile();
 
-        weka.core.EuclideanDistance referenceImplementation = this.getReferenceTimeWarpEditDistance(lambda, nu);
-        ITimeSeriesDistance ownImplementation = new TimeWarpEditDistance(lambda, nu,
-                ScalarDistanceUtil.getSquaredDistance());
+        weka.core.EuclideanDistance referenceImplementation = this.getReferenceTransformDistance();
+        ITimeSeriesDistance ownImplementation = new TransformDistance(alpha, new CosineTransform(),
+                new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance()));
 
         // String result =
         // DistanceRefTestUtil.runCorrectnessTest(referenceImplementation,
@@ -41,21 +40,20 @@ public class TimeWarpEditDistanceRefTest {
         // delta);
 
         // assertNull(result, result);
-        // I am not able to identify the bug in the reference implementation.
+        // The calculate the square root on both, the value and derivate distance,
+        // before combining them (see line 251). This behaviour is not correct.
     }
 
     @Test
     public void testPerformanceForDistanceCalculationUsingEuclideanDistanceOnCarDataset()
             throws IOException, TimeSeriesLoadingException {
-        double nu = 1;
-        double lambda = 1;
-
+        double alpha = 0.5;
         double delta = 0.001;
         File arffFile = DistanceRefTestUtil.getCarArffFile();
 
-        weka.core.EuclideanDistance referenceImplementation = this.getReferenceTimeWarpEditDistance(lambda, nu);
-        ITimeSeriesDistance ownImplementation = new TimeWarpEditDistance(lambda, nu,
-                ScalarDistanceUtil.getSquaredDistance());
+        weka.core.EuclideanDistance referenceImplementation = this.getReferenceTransformDistance();
+        ITimeSeriesDistance ownImplementation = new TransformDistance(alpha, new CosineTransform(),
+                new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance()));
 
         Pair<Double, Double> times = DistanceRefTestUtil.runPerformanceTest(referenceImplementation, ownImplementation,
                 arffFile);
@@ -68,16 +66,15 @@ public class TimeWarpEditDistanceRefTest {
         assertTrue(message, refTime > ownTime);
     }
 
-    // Time Warp Edit Distance.
-
-    public weka.core.EuclideanDistance getReferenceTimeWarpEditDistance(double lambda, double nu) {
-        return new TWEDistance(lambda, nu);
+    public weka.core.EuclideanDistance getReferenceTransformDistance() {
+        TransformWeightedDTW td = new TransformWeightedDTW(TransformType.COS);
+        // Cant set a and b here.
+        return td;
     }
 
-    public kNN getReferenceNearestNeighborWithTimeWarpEditDistance(double lambda, double nu) {
-        kNN knn = new kNN();
-        weka.core.EuclideanDistance distance = getReferenceTimeWarpEditDistance(lambda, nu);
-        knn.setDistanceFunction(distance);
-        return knn;
+    public kNN getReferenceNearestNeighborWithTransformDistance(double a, double b) {
+        DTD_C referenceTransformDistance = new DTD_C(TransformType.COS);
+        referenceTransformDistance.setAandB(a, b);
+        return referenceTransformDistance;
     }
 }
