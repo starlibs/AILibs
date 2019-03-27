@@ -9,17 +9,14 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlpipeline_evaluation.SimpleUploaderMeasureBridge;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.metamining.dyadranking.WEKADyadRankedNodeQueueConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory;
 import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
-import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
@@ -42,11 +39,10 @@ public class WekaDyadRankingExample {
 
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
 		MLPlanBuilder builder = new MLPlanBuilder()
-				.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
-				.withAlgorithmConfigFile(new File("conf/automl/mlplan.properties"))
+				.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
+				.withAlgorithmConfigFile(new File("conf/mlplan.properties"))
 				.withPerformanceMeasure(MultiClassPerformanceMeasure.ERRORRATE)
-				.setHascoFactory(new HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(openConfig)).withCustomEvaluatorBridge(new SimpleUploaderMeasureBridge());
-		builder.prepareNodeEvaluatorInFactoryWithData(data);
+				.withOPENListConfiguration(openConfig);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 		openConfig.setComponents(mlplan.getComponents());
