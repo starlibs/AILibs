@@ -101,16 +101,14 @@ public class LearnShapeletsAlgorithmTest {
 		final int j = 0; // Start with first index
 
 		Assert.assertEquals("The calculated distance of the given instance does not match the expected distance.", 0d,
-				LearnShapeletsAlgorithm.calculateD(S, minShapeLength, r, instance, K, j),
-				EPS_DELTA);
+				LearnShapeletsAlgorithm.calculateD(S, minShapeLength, r, instance, 0, j), EPS_DELTA);
 
 		final double[] instance2 = new double[] { 2, 3, 4 }; // Shifted by one => Differs 1 per position
 
 		final double expected = 3d / 3d;
 		
 		Assert.assertEquals("The calculated distance of the given instance does not match the expected distance.",
-				expected, LearnShapeletsAlgorithm.calculateD(S, minShapeLength, r, instance2, K, j),
-				EPS_DELTA);
+				expected, LearnShapeletsAlgorithm.calculateD(S, minShapeLength, r, instance2, 0, j), EPS_DELTA);
 	}
 	
 	/**
@@ -126,12 +124,12 @@ public class LearnShapeletsAlgorithmTest {
 
 		// getNumberOfSegments(Q=4, minShapeLength=3, r=0) = 1
 		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d,
-				LearnShapeletsAlgorithm.calculateM_hat(S, minShapeLength, r, instance, K, instance.length, alpha));
+				LearnShapeletsAlgorithm.calculateM_hat(S, minShapeLength, r, instance, 0, instance.length, alpha));
 
 		final double[] instance2 = new double[] { 1, 2, 3 };
 		// getNumberOfSegments(Q=3, minShapeLength=3, r=0) = 0
 		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d,
-				LearnShapeletsAlgorithm.calculateM_hat(S, minShapeLength, r, instance2, K, instance2.length, alpha));
+				LearnShapeletsAlgorithm.calculateM_hat(S, minShapeLength, r, instance2, 0, instance2.length, alpha));
 	}
 
 	/**

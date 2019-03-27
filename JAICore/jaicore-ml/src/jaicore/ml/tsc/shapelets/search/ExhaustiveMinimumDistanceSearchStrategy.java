@@ -49,7 +49,7 @@ public class ExhaustiveMinimumDistanceSearchStrategy extends AMinimumDistanceSea
 
 		// TODO: Reference implementation uses i < n-l => Leads sometimes to a better
 		// performance => Check this
-		for (int i = 0; i < n - l; i++) {
+		for (int i = 0; i <= n - l; i++) {
 			double tmpED = MathUtil.singleSquaredEuclideanDistance(normalizedShapeletData,
 					TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, i, i + l),
 							this.useBiasCorrection));

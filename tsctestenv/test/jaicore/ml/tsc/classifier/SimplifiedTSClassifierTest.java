@@ -353,9 +353,10 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 			int scaleR = 3;
 			double minShapeLength = 0.2;
 			int maxIter = 600;
+			double gamma = 0.5;
 
 			ownClassifier = new LearnShapeletsClassifier(K, learningRate, regularization, scaleR, minShapeLength,
-					maxIter, (int) seed);
+					maxIter, gamma, (int) seed);
 
 			refClassifier = new LearnShapelets();
 			((LearnShapelets) refClassifier).setSeed(seed);
@@ -438,9 +439,10 @@ public class SimplifiedTSClassifierTest extends TSClassifierTest {
 			int scaleR = Integer.parseInt(parameters.get("ls_scaleR"));
 			double minShapeLength = Double.parseDouble(parameters.get("ls_minShapeLength"));
 			int maxIter = Integer.parseInt(parameters.get("ls_maxIteration"));
+			double gamma = 0.5d;
 
 			ownClassifier = new LearnShapeletsClassifier(K, learningRate, regularization, scaleR, minShapeLength,
-					maxIter, (int) seed);
+					maxIter, gamma, (int) seed);
 			((LearnShapeletsClassifier) ownClassifier).setEstimateK(true); // As used in reference implementation
 
 			refClassifier = new LearnShapelets();

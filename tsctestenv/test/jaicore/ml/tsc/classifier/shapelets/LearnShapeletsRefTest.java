@@ -33,7 +33,7 @@ public class LearnShapeletsRefTest {
 		// TODO: Change this?
 		Logger.getLogger("jaicore").setLevel(Level.DEBUG);
 
-		String dataset = "ItalyPowerDemand";
+		String dataset = "Beef";
 		final String trainPath = UNIVARIATE_PREFIX + dataset + File.separator + dataset + "_TRAIN.arff";
 		final String testPath = UNIVARIATE_PREFIX + dataset + File.separator + dataset + "_TEST.arff";
 
@@ -47,9 +47,10 @@ public class LearnShapeletsRefTest {
 		double minShapeLength = 0.2; // (int) (0.2d * Q);
 		int maxIter = 600;
 		int seed = 42;
+		double gamma = 0.7;
 
 		LearnShapeletsClassifier ownClf = new LearnShapeletsClassifier(K, learningRate, regularization, scaleR,
-				minShapeLength, maxIter, seed);
+				minShapeLength, maxIter, gamma, seed);
 		// Use same K as in reference implementation
 		ownClf.setEstimateK(true);
 

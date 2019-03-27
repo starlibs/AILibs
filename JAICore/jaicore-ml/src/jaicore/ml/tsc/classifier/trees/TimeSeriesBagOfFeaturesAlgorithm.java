@@ -461,8 +461,7 @@ public class TimeSeriesBagOfFeaturesAlgorithm
 		for (int i = 0; i < numFolds; i++) {
 			// Generate training instances for fold
 			Pair<TimeSeriesDataset, TimeSeriesDataset> trainingTestDatasets = TimeSeriesUtil
-					.getTrainingAndTestDataForFold(i, numFolds, numTestInstsPerFold, numClasses, subSeqValueMatrix,
-							targetMatrix);
+					.getTrainingAndTestDataForFold(i, numFolds, subSeqValueMatrix, targetMatrix);
 			TimeSeriesDataset trainingDS = trainingTestDatasets.getX();
 
 			WekaUtil.buildWekaClassifierFromSimplifiedTS(rf, trainingDS);

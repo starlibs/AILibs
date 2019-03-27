@@ -129,6 +129,11 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 	private boolean useInstanceReordering = true;
 
 	/**
+	 * Gamma value used for momentum during gradient descent. Defaults to 0.5.
+	 */
+	private double gamma = 0.5;
+
+	/**
 	 * Constructor of the algorithm to train a {@link LearnShapeletsClassifier}.
 	 * 
 	 * @param K
@@ -392,10 +397,10 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 		Random rand = new Random(this.seed);
 
 		for (int i = 0; i < this.C; i++) {
-			W_0[i] = 2 * EPS * rand.nextDouble() - 1;
+			W_0[i] = EPS * rand.nextDouble() * Math.pow(-1, rand.nextInt(2));
 			for (int j = 0; j < this.scaleR; j++) {
 				for (int k = 0; k < this.K; k++) {
-					W[i][j][k] = 2 * EPS * rand.nextDouble() - 1;
+					W[i][j][k] = EPS * rand.nextDouble() * Math.pow(-1, rand.nextInt(2));
 				}
 			}
 		}
@@ -449,6 +454,18 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 
 		// Stochastic gradient descent
 		LOGGER.debug("Starting training for {} iterations...", this.maxIter);
+
+		// Initialize velocities used within training with zeros
+		double[][][] velocitiesW = new double[W.length][W[0].length][W[0][0].length];
+		double[] velocitiesW0 = new double[W_0.length];
+		double[][][] velocitiesS = new double[S.length][][];
+		for (int i = 0; i < S.length; i++) {
+			velocitiesS[i] = new double[S[i].length][];
+			for (int j = 0; j < S[i].length; j++) {
+				velocitiesS[i][j] = new double[S[i][j].length];
+			}
+		}
+
 		for (int it = 0; it < this.maxIter; it++) {
 
 			// Shuffle instances
@@ -512,10 +529,10 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 																// shapelet length
 							double wStep = (-1d) * Theta[i][c] * M_hat[r][i][k]
 									+ 2d * this.regularization / (this.I) * W[c][r][k];
-
+							velocitiesW[c][r][k] = this.gamma * velocitiesW[c][r][k] + this.learningRate * wStep;
 							W_hist[c][r][k] += wStep * wStep;
 
-							W[c][r][k] -= (this.learningRate * wStep / Math.sqrt(W_hist[c][r][k] + EPS));
+							W[c][r][k] -= (velocitiesW[c][r][k] / Math.sqrt(W_hist[c][r][k] + EPS));
 
 							int J_r = numberOfSegments[r];
 
@@ -532,15 +549,20 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 									shapeletDiff += distDiff[j] * (S[r][k][l] - dataMatrix[i][j + l]);
 
 								double sStep = (-1d) * gradW_0 * shapeletDiff * W[c][r][k] * phiDenominator;
+
+
+								velocitiesS[r][k][l] = this.gamma * velocitiesS[r][k][l] + this.learningRate * sStep;
 								S_hist[r][k][l] += sStep * sStep;
 
-								S[r][k][l] -= this.learningRate * sStep / Math.sqrt(S_hist[r][k][l] + EPS);
+								S[r][k][l] -= velocitiesS[r][k][l] / Math.sqrt(S_hist[r][k][l] + EPS);
 							}
 						}
 					}
 
+					velocitiesW0[c] = this.gamma * velocitiesW0[c] + this.learningRate * gradW_0;
 					W_0_hist[c] += gradW_0 * gradW_0;
-					W_0[c] += this.learningRate * gradW_0 / Math.sqrt(W_0_hist[c] + EPS);
+					W_0[c] += velocitiesW0[c] / Math.sqrt(W_0_hist[c] + EPS);
+
 				}
 			}
 
@@ -833,4 +855,18 @@ public class LearnShapeletsAlgorithm extends ASimplifiedTSCAlgorithm<Integer, Le
 		C = c;
 	}
 
+	/**
+	 * @return the gamma
+	 */
+	public double getGamma() {
+		return gamma;
+	}
+
+	/**
+	 * @param gamma
+	 *            the gamma to set
+	 */
+	public void setGamma(double gamma) {
+		this.gamma = gamma;
+	}
 }

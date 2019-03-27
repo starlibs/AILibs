@@ -47,7 +47,6 @@ public class TimeSeriesBagOfFeaturesRefTest {
 
 		int seed = 2; // seedRandom.nextInt(100);
 
-		Random random = new Random(seed);
 		int numBins = 20; // 1 + random.nextInt(20); // As in the reference implementation
 		int numFolds = 15; // 3 + random.nextInt(15); // As in the reference implementation
 		double zProp = 0.75; // z[i % z.length];// 0.01 + random.nextDouble(); // As in the reference
@@ -70,9 +69,6 @@ public class TimeSeriesBagOfFeaturesRefTest {
 				.loadArff(new File(trainPath));
 		TimeSeriesDataset train = trainPair.getX();
 		ownClf.setClassMapper(trainPair.getY());
-		Pair<TimeSeriesDataset, ClassMapper> testPair = SimplifiedTimeSeriesLoader
-				.loadArff(new File(testPath));
-		TimeSeriesDataset test = testPair.getX();
 
 		ArffReader arffReader = new ArffReader(new FileReader(new File(trainPath)));
 		final Instances trainingInstances = arffReader.getData();
@@ -91,10 +87,9 @@ public class TimeSeriesBagOfFeaturesRefTest {
 			PredictionException, IOException, TimeSeriesLoadingException, ClassNotFoundException,
 			IllegalAccessException {
 
-		// TODO: Change this?
 		org.apache.log4j.Logger.getLogger("jaicore").setLevel(org.apache.log4j.Level.DEBUG);
 
-		String dataset = "Beef";
+		String dataset = "ItalyPowerDemand";
 		final String trainPath = UNIVARIATE_PREFIX + dataset + "\\" + dataset + "_TRAIN.arff";
 		final String testPath = UNIVARIATE_PREFIX + dataset + "\\" + dataset + "_TEST.arff";
 
@@ -105,14 +100,12 @@ public class TimeSeriesBagOfFeaturesRefTest {
 		// int minIntervalLength = 5; // As in the reference implementation
 
 		double currBest = 0;
-		double[] z = new double[] { 0.1, 0.25, 0.5, 0.75 };
+		// double[] z = new double[] { 0.1, 0.25, 0.5, 0.75 };
 
 		int numTotalIterations = 1;
-		Random seedRandom = new Random(42);
 		for (int i = 0; i < numTotalIterations; i++) {
 			int seed = 30; // seedRandom.nextInt(100);
 
-			Random random = new Random(seed);
 			int numBins = 10; // 1 + random.nextInt(20); // As in the reference implementation
 			int numFolds = 10; // 3 + random.nextInt(15); // As in the reference implementation
 			double zProp = 0.7; // z[i % z.length];// 0.01 + random.nextDouble(); // As in the reference
@@ -141,31 +134,24 @@ public class TimeSeriesBagOfFeaturesRefTest {
 						currBest, numBins, numFolds, zProp, minIntervalLength, seed);
 			}
 			
-			System.out.println(String.format("subSeries = %s.", Arrays.deepToString(ownClf.getSubsequences())));
-			System.out.println(String.format("intervals = %s.", Arrays.deepToString(ownClf.getIntervals())));
-			System.out.println(
+			LOGGER.debug(String.format("subSeries = %s.", Arrays.deepToString(ownClf.getSubsequences())));
+			LOGGER.debug(String.format("intervals = %s.", Arrays.deepToString(ownClf.getIntervals())));
+			LOGGER.debug(
 					"Ref subseries: "
 							+ Arrays.deepToString((int[][]) FieldUtils.readDeclaredField(refClf, "subSeries", true)));
-			System.out.println(
+			LOGGER.debug(
 					"Ref intervals: "
 							+ Arrays.deepToString((int[][][]) FieldUtils.readDeclaredField(refClf, "intervals", true)));
-
-			// System.out.println("own clf performance: " + result.get("accuracy"));
-			// System.out.println("ref clf performance: " + result.get("ref_accuracy"));
 
 			if (i % 100 == 0)
 				LOGGER.info("{}/{}", i, numTotalIterations);
 		}
 
 		LOGGER.info("Final best score: {}", currBest);
-
-		// System.out.println("Ref clf parameters: " + refClf.getParameters());
-		// System.out.println(result.toString());
 	}
 
 	public static void main(String[] args) throws IllegalAccessException, FileNotFoundException, EvaluationException,
 			TrainingException, PredictionException, IOException, TimeSeriesLoadingException {
-		// TODO: Change this?
 		org.apache.log4j.Logger.getLogger("jaicore").setLevel(org.apache.log4j.Level.INFO);
 
 		// int seed = 42;
@@ -186,7 +172,6 @@ public class TimeSeriesBagOfFeaturesRefTest {
 		for (int i = 0; i < numTotalIterations; i++) {
 			int seed = seedRandom.nextInt(100);
 
-			Random random = new Random(seed);
 			int numBins = 10; // 1 + random.nextInt(20); // As in the reference implementation
 			int numFolds = 10; // 3 + random.nextInt(15); // As in the reference implementation
 			double zProp = z[i % z.length];// 0.01 + random.nextDouble(); // As in the reference implementation
@@ -218,8 +203,5 @@ public class TimeSeriesBagOfFeaturesRefTest {
 		}
 
 		LOGGER.info("Final best score: {}", currBest);
-
-		// System.out.println("Ref clf parameters: " + refClf.getParameters());
-		// System.out.println(result.toString());
 	}
 }
