@@ -26,9 +26,9 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  * learning procedure, it keeps track over the standard deviation of the skill
  * values predicted for a dyad. First a constant number of random queries is
  * sampled at the beginning. Then the sampling strategy randomly selects problem
- * instances and picks the two dyads with largest skill + standard
- * deviation for pairwise comparison. On each query step, this is repeated a
- * constant number of times to create a minibatch.
+ * instances and picks the two dyads with largest skill + standard deviation for
+ * pairwise comparison. On each query step, this is repeated a constant number
+ * of times to create a minibatch.
  * 
  * @author Jonas Hanselle
  *
@@ -86,7 +86,6 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					alternatives.add(dyads.get(1).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
 							alternatives);
-//					System.out.println(queryInstance.toString());
 					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
 					minibatch.add(trueRanking);
 				}
@@ -101,7 +100,6 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 						}
 					}
 				} catch (TrainingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -123,10 +121,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					for (Dyad dyad : dyads) {
 						double skill = ranker.getSkillForDyad(dyad);
 						double std = dyadStats.get(dyad).getStandardDeviation();
-//						System.out.println("current var:\t " + variance);
 						double ucb = skill + std;
-//						System.out.println("ucb:\t\t " + ucb);
-//						System.out.println();
 						dyadsWithUCB.add(new Pair<Dyad, Double>(dyad, ucb));
 					}
 
@@ -157,7 +152,6 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 						}
 					}
 				} catch (TrainingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

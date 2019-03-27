@@ -100,6 +100,11 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 		return dyadsByAlternatives.get(alternativeFeatures);
 	}
 
+	/**
+	 * Adds a {@link IDyadRankingInstance} instance to the pool.
+	 * 
+	 * @param instance
+	 */
 	private void addDyadRankingInstance(IDyadRankingInstance instance) {
 		// Add the dyad ranking instance to the pool
 		pool.add(instance);
@@ -172,15 +177,20 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	public void setRemoveDyadsWhenQueried(boolean flag) {
 		this.removeDyadsWhenQueried = flag;
 	}
-	
+
 	@Override
 	public int getPoolSize() {
 		int size = 0;
-		for(Set<Dyad> set : dyadsByInstances.values())
-			size+=set.size();
+		for (Set<Dyad> set : dyadsByInstances.values())
+			size += set.size();
 		return size;
 	}
-	
+
+	/**
+	 * Returns the number of queries the pool provider has answered so far.
+	 * 
+	 * @return Number of queries this pool provider has answered.
+	 */
 	public int getNumberQueries() {
 		return numberQueries;
 	}
@@ -189,6 +199,5 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	public DyadRankingDataset getQueriedRankings() {
 		return new DyadRankingDataset(new ArrayList<IDyadRankingInstance>(queriedRankings));
 	}
-	
 
 }

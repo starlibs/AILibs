@@ -355,8 +355,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 	private double computeAvgError(List<INDArray> drTest) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		for (INDArray dyadRankingInstance : drTest) {
-			// IDyadRankingInstance drInstance = (IDyadRankingInstance) dyadRankingInstance;
-			// INDArray dyadMatrix = dyadRankingToMatrix(drInstance);
 			INDArray outputs = plNet.output(dyadRankingInstance);
 			outputs = outputs.transpose();
 			double score = PLNetLoss.computeLoss(outputs).getDouble(0);
@@ -602,7 +600,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		// TODO use top k selection
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 1;
@@ -645,7 +642,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		// TODO use top k selection
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 0;
@@ -689,7 +685,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		// TODO use top k selection
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 0;

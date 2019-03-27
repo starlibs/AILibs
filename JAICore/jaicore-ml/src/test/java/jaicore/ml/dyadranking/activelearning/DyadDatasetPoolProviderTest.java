@@ -8,17 +8,12 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import org.junit.Test;
-import org.nd4j.linalg.api.ops.impl.transforms.SpaceToBatch;
-
-import com.google.common.collect.Lists;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
@@ -39,7 +34,6 @@ public class DyadDatasetPoolProviderTest {
 		try {
 			dataset.deserialize(new FileInputStream(new File(GATSP_DATASET_FILE)));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(dataset);

@@ -114,7 +114,6 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						}
 					}
 				} catch (TrainingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -190,7 +189,6 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 								curPair[0] = j;
 								curPair[1] = k;
 								curMax = overlap;
-								System.out.println("Current Overlap: " + overlap);
 								changed = true;
 							}
 
@@ -218,7 +216,6 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 
 				// update the ranker
 				try {
-					System.out.println("Updating with: " + minibatch);
 					ranker.update(minibatch);
 //					update variances (confidence)
 					for (Vector inst : instanceFeatures) {
