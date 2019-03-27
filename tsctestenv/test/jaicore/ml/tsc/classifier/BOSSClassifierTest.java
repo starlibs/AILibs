@@ -47,14 +47,16 @@ public class BOSSClassifierTest {
     PredictionException, IOException, ClassNotFoundException {
 	   //File arffFile = new File(CAR_TRAIN);
 		System.out.println("Hallo");
-		String s = "P:\\Dokumente\\PG\\Classifier_project\\tsctestenv\\data\\Downloads\\Car\\Car\\Car_TRAIN.arff";
+		//String s = "P:\\Dokumente\\PG\\Classifier_project\\tsctestenv\\data\\Downloads\\Car\\Car\\Car_TRAIN.arff";
+		String s = ".\\data\\Downloads\\Car\\Car\\Car_TRAIN.arff";
+		String s1 = ".\\data\\Downloads\\Car\\Car\\Car_TEST.arff";
 		System.out.println("Hallo");
 		File arffFile = new File(s);
 	   Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader.loadArff(arffFile);
 	   dataset = trainPair.getX();
 	   
 	   //File arffFile2 = new File(CAR_TEST);
-	   File arffFile2 = new File("P:\\Dokumente\\PG\\Classifier_project\\tsctestenv\\data\\Downloads\\Car\\Car\\Car_TEST.arff");
+	   File arffFile2 = new File(s1);
 	   Pair<TimeSeriesDataset, ClassMapper> testPair = SimplifiedTimeSeriesLoader.loadArff(arffFile2);
 	   dataset2 = testPair.getX();
 	}
