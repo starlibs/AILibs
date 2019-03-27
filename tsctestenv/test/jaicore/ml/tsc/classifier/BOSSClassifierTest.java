@@ -39,8 +39,10 @@ public class BOSSClassifierTest {
 	//private static final String ARROW_TRAIN = 
 
     /** Dataset used for comparison tests. */
-    private TimeSeriesDataset dataset;
-    private TimeSeriesDataset dataset2;
+	/*
+	 * private TimeSeriesDataset dataset; private TimeSeriesDataset dataset2;
+	 */
+    ArrayList<TimeSeriesDataset> datasets = new ArrayList<TimeSeriesDataset>();
 		
 	@Before
 	public void setUp() throws TimeSeriesLoadingException, FileNotFoundException, EvaluationException, TrainingException,
@@ -50,24 +52,178 @@ public class BOSSClassifierTest {
 		//String s = "P:\\Dokumente\\PG\\Classifier_project\\tsctestenv\\data\\Downloads\\Car\\Car\\Car_TRAIN.arff";
 		String s = ".\\data\\Downloads\\Car\\Car\\Car_TRAIN.arff";
 		String s1 = ".\\data\\Downloads\\Car\\Car\\Car_TEST.arff";
-		System.out.println("Hallo");
-		File arffFile = new File(s);
-	   Pair<TimeSeriesDataset, ClassMapper> trainPair = SimplifiedTimeSeriesLoader.loadArff(arffFile);
-	   dataset = trainPair.getX();
-	   
-	   //File arffFile2 = new File(CAR_TEST);
-	   File arffFile2 = new File(s1);
-	   Pair<TimeSeriesDataset, ClassMapper> testPair = SimplifiedTimeSeriesLoader.loadArff(arffFile2);
-	   dataset2 = testPair.getX();
+		
+		String s2 = ".\\data\\Downloads\\ArrowHead\\ArrowHead\\ArrowHead_TRAIN.arff";
+		String s3 = ".\\data\\Downloads\\ArrowHead\\ArrowHead\\ArrowHead_TEST.arff";
+		
+		String s4 = ".\\data\\Downloads\\RacketSports\\RacketSports\\RacketSports_TRAIN.arff";
+		String s5 = ".\\data\\Downloads\\RacketSports\\RacketSports\\RacketSports_TEST.arff";
+		
+		String s6 = ".\\data\\Downloads\\ItalyPowerDemand\\ItalyPowerDemand\\ItalyPowerDemand_TRAIN.arff";
+		String s7 = ".\\data\\Downloads\\ItalyPowerDemand\\ItalyPowerDemand\\ItalyPowerDemand_TEST.arff"; 
+		
+		ArrayList<String> datasetPaths = new ArrayList<String>();
+		datasetPaths.add(s);
+		datasetPaths.add(s1);
+		
+		datasetPaths.add(s2);
+		datasetPaths.add(s3);
+		
+		//datasetPaths.add(s4);
+		//datasetPaths.add(s5);
+		
+		datasetPaths.add(s6);
+		datasetPaths.add(s7);
+		
+		
+		
+		for(String str : datasetPaths) {
+			File arffile = new File(str);
+			Pair<TimeSeriesDataset, ClassMapper> pair = SimplifiedTimeSeriesLoader.loadArff(arffile);
+			TimeSeriesDataset dataset = pair.getX();
+			
+			datasets.add(dataset);
+		}
+		/*
+		 * System.out.println("Hallo"); File arffFile = new File(s);
+		 * Pair<TimeSeriesDataset, ClassMapper> trainPair =
+		 * SimplifiedTimeSeriesLoader.loadArff(arffFile); dataset = trainPair.getX();
+		 * 
+		 * //File arffFile2 = new File(CAR_TEST); File arffFile2 = new File(s1);
+		 * Pair<TimeSeriesDataset, ClassMapper> testPair =
+		 * SimplifiedTimeSeriesLoader.loadArff(arffFile2); dataset2 = testPair.getX();
+		 */
 	}
 	
 	@Test
 	public void testPerformance() throws TimeSeriesLoadingException, FileNotFoundException, EvaluationException, TrainingException,
     PredictionException, IOException, ClassNotFoundException {
-		double[] alphabet = {2.0,3.0,1.0,4.0};
+		ArrayList<double[]> alphabets = new ArrayList<double[]>();
+		double[] alphabet1 = {2.0,3.0,1.0,4.0};
+		double[] alphabet2 = {2.0,1.0};
+		double[] alphabet3 = {2.0,3.0,1.0,4.0,5.0};
+		alphabets.add(alphabet1);
+		alphabets.add(alphabet2);
+		alphabets.add(alphabet3);
+		
+		int [] windowLength = {10,20,30};
+		int [] wordLength = {8,10,12,16};
+		
+		double[] bestAccus = new double[4];
+		int count = 0;
+		
+		ArrayList<double[][]> bestfoundInfos = new ArrayList<double[][]>();
+		
+		ArrayList<ArrayList<Double>> foundAccus = new ArrayList<ArrayList<Double>>();
+		
+		boolean[] mean = {true,false};
 		//double[] alphabet = {1.0};
-		BOSSClassifier test = new BOSSClassifier(26, 16, alphabet.length, alphabet, true);
-		test.setTrainingData(dataset);
+		
+		for(int i = 0; i < datasets.size()-1; i+=2) {
+			ArrayList<Double> localfoundAccus = new ArrayList<Double>();
+			System.out.println("------------------------------------------------------------");
+			System.out.println("NEW DATASET");
+			double [][] bestfoundInfo = new double [4][5];
+			double bestfound = 0;
+			for(double[] alphabet : alphabets) {
+				for(int window : windowLength) {
+					for(int word : wordLength) {
+						for(boolean m : mean) {
+							int instancelength = datasets.get(i).getValues(0)[0].length;
+							if(window < instancelength) {
+							if(word < window) {
+								BOSSClassifier test = new BOSSClassifier(window, word, alphabet.length, alphabet, m);
+								test.setTrainingData(datasets.get(i));
+								
+								
+								try {
+									long start = System.currentTimeMillis();
+									test.train(datasets.get(i));
+									long end = System.currentTimeMillis();
+									System.out.println("Alphabet "+Arrays.toString(alphabet) + " window length "+ window + " word length "+ word + " mean correctd "+ m);
+									
+									System.out.println("Train time: "+(end-start));
+									//System.out.println("Number of instances "+ dataset.getNumberOfInstances());
+									//System.out.println("Lenght of instance "+dataset.getValues(0)[0].length);
+									//int count =  0;
+								
+									double sum = 0;
+									try {
+										
+										for(int j = 0; j <datasets.get(i+1).getValues(0).length; j++) {
+//											long ownStart = System.currentTimeMillis();
+											int prediction = test.predict(datasets.get(i+1).getValues(0)[j]);
+											/*
+											 * long ownEnd = System.currentTimeMillis();
+											 * System.out.println("Time for prediction "+(ownEnd-ownStart));
+											 */
+											
+											int targets = datasets.get(i+1).getTargets()[j];
+//											System.out.println("original " + targets + " prediction "+prediction);
+											if(targets == prediction) {
+												sum++;
+											}
+											
+										}
+										
+										double accu = sum/datasets.get(i+1).getNumberOfInstances();
+										localfoundAccus.add(accu);
+										System.out.println("Accuracy: "+ accu);
+										if(accu > bestfound) {
+											bestfound = accu;
+											int t = 0;
+											for(double d : alphabet) {
+													bestfoundInfo[0][t] = d;
+													t++;
+												
+											}
+											bestfoundInfo[1][0] = window;
+											bestfoundInfo[2][0] = word;
+											if(m) {
+												bestfoundInfo[3][0] = 1;
+											}
+											
+										}
+										
+										
+										
+									} catch (PredictionException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									
+								} catch (TrainingException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+							}
+						}
+					}
+				}
+			}
+			
+			bestAccus[count] = bestfound;
+			bestfoundInfos.add(bestfoundInfo);
+			foundAccus.add(localfoundAccus);
+			count++;
+		}
+		
+		System.out.println("Best accus for datasets "+ Arrays.toString(bestAccus));
+		for(double [][] d : bestfoundInfos) {
+			System.out.println("With this configs: Alphabet "+ Arrays.toString(d[0])+" window length "+ d[1][0]+ " word length "+ d[2][0] + " mean correction "+ d[3][0]);
+		}
+		
+		System.out.println("Average accu ");
+		
+		for(ArrayList<Double> d : foundAccus) {
+			double sum = 0;
+			for(double doub : d ) {
+				sum +=doub;
+			}
+			sum  = sum/d.size();
+			System.out.println(sum);
+		}
 		
 		
 		// Load the train data
@@ -98,72 +254,23 @@ public class BOSSClassifierTest {
 		 */
 		
 		
-		try {
-			long start = System.currentTimeMillis();
-			test.train(dataset);
-			long end = System.currentTimeMillis();
-			System.out.println("Train time: "+(end-start));
-			System.out.println("Number of instances "+ dataset.getNumberOfInstances());
-			System.out.println("Lenght of instance "+dataset.getValues(0)[0].length);
-			int count =  0;
-			/*
-			 * for(HashMap<Integer,Integer>histo : test.getUnivirateHistograms()) {
-			 * System.out.println(count+") "+histo.toString()); count++; }
-			 */
-			
-			//ArrayList<TimeSeriesDataset> crossSplit = datasetSplit(dataset2);
-			double sum = 0;
-			try {
-				
-				for(int i = 0; i <dataset2.getValues(0).length; i++) {
-					long ownStart = System.currentTimeMillis();
-					int prediction = test.predict(dataset2.getValues(0)[i]);
-					long ownEnd = System.currentTimeMillis();
-					System.out.println("Time for prediction "+(ownEnd-ownStart));
-					
-					int targets = dataset2.getTargets()[i];
-//					System.out.println("original " + targets + " prediction "+prediction);
-					if(targets == prediction) {
-						sum++;
-					}
-					
-				}
-				System.out.println("Accuracy: "+ sum/dataset2.getNumberOfInstances());
-				
-			} catch (PredictionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		} catch (TrainingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		
 		
 	}
 	
-	private ArrayList<TimeSeriesDataset> datasetSplit(TimeSeriesDataset data){
-		ArrayList<TimeSeriesDataset> crossVal = new ArrayList<TimeSeriesDataset>();
-		System.out.println("test2");
-		for(int i = 0; i < data.getValues(0).length; i++) {
-			double[][] matrix = new double[data.getNumberOfInstances()-1][dataset2.getValues(0)[0].length];
-			int[] targets = new int[data.getTargets().length-1];
-			for(int j = 0; j < data.getValues(0).length; j++) {
-				if(j>i) {
-					j = j-1;
-				}
-				if(j!=i) {
-					matrix[j] = data.getValues(0)[j];
-					targets[j] = data.getTargets()[j];
-				}
-			}
-			ArrayList<double[][]> matrices = new ArrayList<double[][]>();
-			matrices.add(matrix);
-			System.out.println("new dataset");
-			TimeSeriesDataset time = new TimeSeriesDataset(matrices, targets);
-			crossVal.add(time);
-		}
-		return crossVal;
-	}
+	/*
+	 * private ArrayList<TimeSeriesDataset> datasetSplit(TimeSeriesDataset data){
+	 * ArrayList<TimeSeriesDataset> crossVal = new ArrayList<TimeSeriesDataset>();
+	 * System.out.println("test2"); for(int i = 0; i < data.getValues(0).length;
+	 * i++) { double[][] matrix = new
+	 * double[data.getNumberOfInstances()-1][dataset2.getValues(0)[0].length]; int[]
+	 * targets = new int[data.getTargets().length-1]; for(int j = 0; j <
+	 * data.getValues(0).length; j++) { if(j>i) { j = j-1; } if(j!=i) { matrix[j] =
+	 * data.getValues(0)[j]; targets[j] = data.getTargets()[j]; } }
+	 * ArrayList<double[][]> matrices = new ArrayList<double[][]>();
+	 * matrices.add(matrix); System.out.println("new dataset"); TimeSeriesDataset
+	 * time = new TimeSeriesDataset(matrices, targets); crossVal.add(time); } return
+	 * crossVal; }
+	 */
 }
 
