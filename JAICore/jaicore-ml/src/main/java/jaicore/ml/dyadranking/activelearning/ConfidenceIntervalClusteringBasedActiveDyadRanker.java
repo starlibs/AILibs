@@ -21,9 +21,6 @@ import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import weka.clusterers.Clusterer;
-import weka.clusterers.HierarchicalClusterer;
-import weka.clusterers.NumberOfClustersRequestable;
-import weka.clusterers.SimpleKMeans;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -103,10 +100,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 					alternatives.add(dyads.get(1).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
 							alternatives);
-//					System.out.println(queryInstance.toString());
 					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
-//					System.out.println("adding to minibatch");
-//					System.out.println(trueRanking + "\n\n");
 					minibatch.add(trueRanking);
 				}
 				// feed it to the ranker
@@ -134,11 +128,9 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 				for (Vector inst : instanceFeatures) {
 					// Create instances for clustering
 					Attribute upperAttr = new Attribute("upper_bound");
-//					Attribute centerAttr = new Attribute("center");
 					Attribute lowerAttr = new Attribute("lower_bound");
 					ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 					attributes.add(upperAttr);
-//					attributes.add(centerAttr);
 					attributes.add(lowerAttr);
 					Instances intervalInstances = new Instances("confidence_intervalls", attributes,
 							poolProvider.getDyadsByInstance(inst).size());
@@ -147,29 +139,17 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						double skill = ranker.getSkillForDyad(dyad);
 						dyadStats.get(dyad).addValue(skill);
 						double[] attValues = new double[2];
-//						System.out.println(skill);
 						attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
 						attValues[1] = skill - dyadStats.get(dyad).getStandardDeviation();
 						Instance intervalInstance = new DenseInstance(1.0d, attValues);
 						intervalInstances.add(intervalInstance);
 					}
 
-//					NumberOfClustersRequestable clusterer;
-//					
-//					
-//					try {
-//						clusterer.setNumClusters(this.numClusters);
-//					} catch (Exception e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
-
 					try {
 						clusterer.buildClusterer(intervalInstances);
 
 						List<List<Dyad>> instanceClusters = new ArrayList<List<Dyad>>();
 						int numClusters = clusterer.numberOfClusters();
-//						System.out.println("Number of clusters: " + numClusters);
 						for (int clusterIndex = 0; clusterIndex < numClusters; clusterIndex++) {
 							instanceClusters.add(new ArrayList<Dyad>());
 						}
@@ -177,7 +157,6 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
 							double skill = ranker.getSkillForDyad(dyad);
 							double[] attValues = new double[2];
-//						System.out.println(skill);
 							attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
 							attValues[1] = skill - dyadStats.get(dyad).getStandardDeviation();
 							Instance intervalInstance = new DenseInstance(1.0d, attValues);
@@ -186,11 +165,9 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						}
 
 						for (int j = 0; j < instanceClusters.size(); j++) {
-//						System.out.println("cluster " + j + ": " + instanceClusters.get(j).size());
 							clusterQueue.add(instanceClusters.get(j));
 						}
 					} catch (Exception e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 				}
@@ -198,7 +175,6 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 //					get the largest cluster
 					List<Dyad> curDyads = clusterQueue.poll();
 					if (curDyads.size() < 2) {
-//						throw new IllegalStateException("ALARMO!");
 						continue;
 					}
 //					check overlap for all pairs of dyads in the current cluster
@@ -235,12 +211,10 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 					alternatives.add(curDyads.get(curPair[1]).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(
 							curDyads.get(curPair[0]).getInstance(), alternatives);
-//					System.out.println(curPair[0] + " " + curPair[1]);
 					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
 					minibatch.add(trueRanking);
 				}
 
-//				System.out.println(minibatch);
 
 				// update the ranker
 				try {
@@ -254,7 +228,6 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						}
 					}
 				} catch (TrainingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
