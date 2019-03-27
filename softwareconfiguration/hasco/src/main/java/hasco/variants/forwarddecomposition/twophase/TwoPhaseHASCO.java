@@ -29,6 +29,7 @@ import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
@@ -316,6 +317,7 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 
 	protected HASCOSolutionCandidate<Double> selectModel() {
 		final IObjectEvaluator<ComponentInstance, Double> evaluator = this.getInput().getSelectionBenchmark();
+		
 		final HASCOSolutionCandidate<Double> bestSolution = this.phase1ResultQueue.stream()
 				.min((s1, s2) -> s1.getScore().compareTo(s2.getScore())).get();
 		double scoreOfBestSolution = bestSolution.getScore();
@@ -447,6 +449,9 @@ public class TwoPhaseHASCO<ISearch extends GraphSearchInput<N, A>, N, A> extends
 						}
 					}
 					try {
+						if(evaluator instanceof IInformedObjectEvaluatorExtension) {
+							((IInformedObjectEvaluatorExtension<Double>)evaluator).updateBestScore(scoreOfBestSolution);
+						}
 						double selectionScore = evaluator.evaluate(c.getComponentInstance());
 						long trueEvaluationTime = (System.currentTimeMillis() - timestampStart);
 						TwoPhaseHASCO.this.logger.info(

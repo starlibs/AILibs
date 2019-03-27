@@ -105,7 +105,8 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 		this.logger.debug("Deriving search problem");
 		RefinementConfiguredSoftwareConfigurationProblem<V> refConfigSoftwareConfigurationProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
 				new SoftwareConfigurationProblem<V>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper), this.getInput().getParamRefinementConfig());
-		this.planningProblem = new HASCOReduction<V>().transform(refConfigSoftwareConfigurationProblem);
+		HASCOReduction<V> hascoReduction = new HASCOReduction<>(() -> getBestSeenSolution());
+		this.planningProblem = hascoReduction.transform(refConfigSoftwareConfigurationProblem);
 		if (this.logger.isDebugEnabled()) {
 			String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
 					.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());

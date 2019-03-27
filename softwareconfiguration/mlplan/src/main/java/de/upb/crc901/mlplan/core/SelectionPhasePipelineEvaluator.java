@@ -13,14 +13,21 @@ import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
-import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import weka.core.Instances;
 
-public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, ILoggingCustomizable {
+/**
+ * Evaluator used in the selection phase of mlplan. Uses MCCV by default, but can be configured to use other Benchmarks.
+ * 
+ * @author fmohr
+ * @author jnowack
+ */
+public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SelectionPhasePipelineEvaluator.class);
 
@@ -33,6 +40,8 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	private final double trainFoldSize;
 	private final int timeoutForSolutionEvaluation;
 
+	private Double bestScore;
+	
 	public SelectionPhasePipelineEvaluator(ClassifierFactory classifierFactory, AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, int numMCIterations, Instances dataShownToSearch, double trainFoldSize, int seed,
 			int timeoutForSolutionEvaluation) {
 		super();
@@ -63,7 +72,7 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 		}
 
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, numMCIterations, dataShownToSelectionPhase, trainFoldSize, seed);
+		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, numMCIterations, bestScore, dataShownToSelectionPhase, trainFoldSize, seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
@@ -89,6 +98,11 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		double percentile = stats.getPercentile(75f);
 		logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
 		return percentile;
+	}
+	
+	@Override
+	public void updateBestScore(Double bestScore) {
+		this.bestScore = bestScore;
 	}
 
 }

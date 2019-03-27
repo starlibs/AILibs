@@ -12,15 +12,22 @@ import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
-import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
-public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, ILoggingCustomizable {
+/**
+ * Evaluator used in the search phase of mlplan. Uses MCCV by default, but can be configured to use other Benchmarks.
+ * 
+ * @author fmohr
+ * @author jnowack
+ */
+public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SearchPhasePipelineEvaluator.class);
 
@@ -33,6 +40,8 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	private final IObjectEvaluator<Classifier, Double> searchBenchmark;
 	private final int timeoutForSolutionEvaluation;
 
+	private Double bestScore = 1.0;
+	
 	public SearchPhasePipelineEvaluator(ClassifierFactory classifierFactory, AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, int numMCIterations, Instances dataShownToSearch, double trainFoldSize, int seed,
 			int timeoutForSolutionEvaluation) {
 		super();
@@ -42,7 +51,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		this.dataShownToSearch = dataShownToSearch;
 		this.numMCIterations = numMCIterations;
 		this.trainFoldSize = trainFoldSize;
-		this.searchBenchmark = new MonteCarloCrossValidationEvaluator(this.evaluationMeasurementBridge, numMCIterations, dataShownToSearch, trainFoldSize, seed);
+		this.searchBenchmark = new ProbabilisticMonteCarloCrossValidationEvaluator(this.evaluationMeasurementBridge, numMCIterations, 0.0, dataShownToSearch, trainFoldSize, seed);
 		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
 	}
 	
@@ -75,6 +84,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			logger.info("Benchmark {} does not implement ILoggingCustomizable, not customizing its logger.", searchBenchmark.getClass().getName());
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Double evaluate(ComponentInstance c) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
 		final AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
@@ -86,8 +96,11 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.evaluationMeasurementBridge).getShallowCopy(c);
 				long seed = this.seed + c.hashCode();
-				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, numMCIterations, this.dataShownToSearch, trainFoldSize, seed);
+				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, numMCIterations, bestScore, this.dataShownToSearch, trainFoldSize, seed);
 				return copiedSearchBenchmark.evaluate(classifierFactory.getComponentInstantiation(c));
+			}
+			if(searchBenchmark instanceof IInformedObjectEvaluatorExtension) {
+				((IInformedObjectEvaluatorExtension<Double>)searchBenchmark).updateBestScore(bestScore);
 			}
 			return searchBenchmark.evaluate(classifierFactory.getComponentInstantiation(c));
 		} catch (InterruptedException e) {
@@ -102,6 +115,11 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			sub.cancelTimeout(task);
 			logger.debug("Canceled timeout job {}", task);
 		}
+	}
+
+	@Override
+	public void updateBestScore(Double bestScore) {
+		this.bestScore = bestScore;
 	}
 
 }
