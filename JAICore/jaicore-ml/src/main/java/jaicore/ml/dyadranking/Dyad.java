@@ -1,5 +1,8 @@
 package jaicore.ml.dyadranking;
 
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
+
 import de.upb.isys.linearalgebra.Vector;
 
 /**
@@ -86,5 +89,18 @@ public class Dyad {
 		result = result * 31 + instance.hashCode();
 		result = result * 31 + alternative.hashCode();
 		return result;
+	}
+	
+	/**
+	 * Converts a dyad to a {@link INDArray} row vector consisting of a
+	 * concatenation of the instance and alternative features.
+	 * 
+	 * @return The dyad in {@link INDArray} row vector form.
+	 */
+	public INDArray toVector() {
+		INDArray instanceOfDyad = Nd4j.create(this.getInstance().asArray());
+		INDArray alternativeOfDyad = Nd4j.create(this.getAlternative().asArray());
+		INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
+		return dyadVector;
 	}
 }

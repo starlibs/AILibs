@@ -18,6 +18,9 @@ import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
+import weka.clusterers.HierarchicalClusterer;
+import weka.core.Attribute;
+import weka.core.Instances;
 
 public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
@@ -89,6 +92,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 		}
 
 		else {
+
 
 			for (int i = 0; i < numberOfQueries; i++) {
 

@@ -280,25 +280,25 @@ public class PLNetDyadRanker extends APLDyadRanker
 
 	@Override
 	public void update(Set<IInstance> instances) throws TrainingException {
-		IDyadRankingInstance drInstance = null;
+		
+		List<INDArray> minibatch = new ArrayList<INDArray>(instances.size());
 		for (IInstance instance : instances) {
 			if (!(instance instanceof IDyadRankingInstance)) {
 				throw new IllegalArgumentException(
 						"Can only train the Plackett-Luce net dyad ranker with dyad ranking instances!");
 			}
-			drInstance = (IDyadRankingInstance) instance;
+			IDyadRankingInstance drInstance = ((IDyadRankingInstance) instance);
+			if (this.plNet == null) {
+				int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+						+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+				this.plNet = createNetwork(dyadSize);
+				this.plNet.init();
+			}
+			minibatch.add(drInstance.toMatrix());
 		}
-		if (this.plNet == null) {
-			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
-					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
-			this.plNet = createNetwork(dyadSize);
-			this.plNet.init();
-		}
-		for (IInstance instance : instances)
-			this.update(instance);
-
+		this.updateWithMinibatch(minibatch);
 	}
-
+	
 	@Override
 	public IDyadRankingInstance predict(IInstance instance) throws PredictionException {
 		if (!(instance instanceof IDyadRankingInstance)) {

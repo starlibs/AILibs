@@ -1,9 +1,13 @@
 package jaicore.ml.dyadranking.dataset;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
@@ -123,6 +127,18 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 		}
 
 		return true;
+	}
+
+	@Override
+	public INDArray toMatrix() {
+		List<INDArray> dyadList = new ArrayList<INDArray>(this.length());
+		for (Dyad dyad : this) {
+			INDArray dyadVector = dyad.toVector();
+			dyadList.add(dyadVector);
+		}
+		INDArray dyadMatrix;
+		dyadMatrix = Nd4j.vstack(dyadList);
+		return dyadMatrix;
 	}
 
 }

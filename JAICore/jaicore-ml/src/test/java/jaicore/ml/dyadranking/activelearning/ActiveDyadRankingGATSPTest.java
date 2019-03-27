@@ -16,10 +16,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -28,6 +26,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 import jaicore.ml.dyadranking.util.DyadStandardScaler;
+import weka.clusterers.SimpleKMeans;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -47,7 +46,7 @@ import jaicore.ml.dyadranking.util.DyadStandardScaler;
 public class ActiveDyadRankingGATSPTest {
 
 	private static final String GATSP_DATASET_FILE = "testsrc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
-	
+
 	private static final int MAX_BATCH_SIZE = 5;
 	private static final int TOP_RANKING_LENGTH = 5;
 	private static final double RATIO_OF_OLD_SAMPLES_IN_MINIBATCH = 0.0d;
@@ -78,15 +77,16 @@ public class ActiveDyadRankingGATSPTest {
 
 	@Test
 	public void test() {
+		System.out.println(ranker.getConfiguration());
 		SummaryStatistics[] stats = new SummaryStatistics[100];
-		for(int i = 0; i < stats.length; i++)
+		for (int i = 0; i < stats.length; i++)
 			stats[i] = new SummaryStatistics();
 		int seed = 0;
 //		for(int seed = 0; seed < 20; seed++) {
 //		dataset = randomlyTrimSparseDyadRankingInstances(dataset, 20);
-		
+
 		Collections.shuffle(dataset, new Random(seed));
-		
+
 //		dataset = randomlyTrimSparseDyadRankingInstances(dataset, 5);
 
 		// split data
@@ -105,10 +105,10 @@ public class ActiveDyadRankingGATSPTest {
 //			// TODO Auto-generated catch block
 //			e1.printStackTrace();
 //		}
-		
+
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
 		poolProvider.setRemoveDyadsWhenQueried(false);
-		
+
 // 		List<Vector> instFeat = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
 //		List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instFeat.get(0)));
 //		List<Vector> alts1 = new ArrayList<Vector>();
@@ -143,8 +143,7 @@ public class ActiveDyadRankingGATSPTest {
 //		for(Object obj : poolProvider.getQueriedRankings()) {
 //			System.out.println(obj);
 //		}
-		
-		
+
 //		UCBPoolBasedActiveDyadRanker activeRanker = new UCBPoolBasedActiveDyadRanker(ranker, poolProvider, seed, 5, MAX_BATCH_SIZE);
 			PrototypicalPoolBasedActiveDyadRanker activeRanker = new PrototypicalPoolBasedActiveDyadRanker(ranker,
 					poolProvider, MAX_BATCH_SIZE, TOP_RANKING_LENGTH, RATIO_OF_OLD_SAMPLES_IN_MINIBATCH, 5, 5);
@@ -155,17 +154,19 @@ public class ActiveDyadRankingGATSPTest {
 			// train the ranker
 //			for(IInstance inst : trainData)
 //				System.out.println(((IDyadRankingInstance) inst).getDyadAtPosition(0).getInstance());
-			for(int i = 0; i < 100; i++) {
-			activeRanker.activelyTrain(1);
-			double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, ranker);
-			double avgKendallTauIS = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), new DyadRankingDataset(poolProvider.getQueriedRankings()), ranker);
+			for (int i = 0; i < 100; i++) {
+				activeRanker.activelyTrain(1);
+				double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
+						testData, ranker);
+				double avgKendallTauIS = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(),
+						new DyadRankingDataset(poolProvider.getQueriedRankings()), ranker);
 //			System.out.print(avgKendallTau + ",");
-			System.out.println("Current Kendalls Tau: " + avgKendallTau);
-			System.out.println("Current Kendalls Tau IS: " + avgKendallTauIS);
-			System.out.println(poolProvider.getQueriedRankings());
+				System.out.println("Current Kendalls Tau: " + avgKendallTau);
+				System.out.println("Current Kendalls Tau IS: " + avgKendallTauIS);
+//				System.out.println(poolProvider.getQueriedRankings());
 //			stats[i].addValue(avgKendallTau);
 			}
-			
+
 //			double avgKendallTau = 0.0d;
 //			System.out.println("Average Kendall's tau for " + ranker.getClass().getSimpleName() + ": " + avgKendallTau);
 //			assertTrue(avgKendallTau > 0.5d);
@@ -174,7 +175,7 @@ public class ActiveDyadRankingGATSPTest {
 		}
 //		}
 		System.out.println("final results: ");
-		for(int i = 0; i < stats.length; i++)
+		for (int i = 0; i < stats.length; i++)
 			System.out.print(stats[i].getMean() + ",");
 	}
 
