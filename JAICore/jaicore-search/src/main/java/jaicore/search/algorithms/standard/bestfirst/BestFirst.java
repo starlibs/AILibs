@@ -313,10 +313,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				if (BestFirst.this.getConfig().parentDiscarding() != ParentDiscarding.NONE) {
 					BestFirst.this.openLock.lockInterruptibly();
 					try {
-						/*
-						 * determine whether we already have the node AND it is worse than the one we
-						 * want to insert
-						 */
+
+						/* determine whether we already have the node AND it is worse than the one we want to insert */
 						Optional<Node<N, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
 						if (existingIdenticalNodeOnOpen.isPresent()) {
 							Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
