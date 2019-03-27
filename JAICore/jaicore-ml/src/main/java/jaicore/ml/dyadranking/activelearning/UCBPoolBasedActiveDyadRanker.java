@@ -22,8 +22,13 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
- * A prototypical active dyad ranker based on the UCB decision rule. It always
- * queries the two
+ * A prototypical active dyad ranker based on the UCB decision rule. During the
+ * learning procedure, it keeps track over the standard deviation of the skill
+ * values predicted for a dyad. First a constant number of random queries is
+ * sampled at the beginning. Then the sampling strategy randomly selects problem
+ * instances and picks the two dyads with largest skill + standard
+ * deviation for pairwise comparison. On each query step, this is repeated a
+ * constant number of times to create a minibatch.
  * 
  * @author Jonas Hanselle
  *

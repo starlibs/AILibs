@@ -22,6 +22,18 @@ import weka.clusterers.HierarchicalClusterer;
 import weka.core.Attribute;
 import weka.core.Instances;
 
+/**
+ * A prototypical active dyad ranker based on the idea of uncertainty sampling.
+ * First a constant number of random queries is sampled at the beginning. Then
+ * the sampling strategy randomly selects a problem instance in each query step.
+ * Afterwards it selects those two alternatives for pairwise comparison, for
+ * which the difference of the skill values is minimal, as these are the pairs
+ * the Plackett Luce model is least certain about. This procedure is repeated a
+ * constant number of times to create a minibatch for updating the model.
+ * 
+ * @author Jonas Hanselle
+ *
+ */
 public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 	private ArrayList<IInstance> seenInstances;
@@ -92,7 +104,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 		}
 
 		else {
-
 
 			for (int i = 0; i < numberOfQueries; i++) {
 

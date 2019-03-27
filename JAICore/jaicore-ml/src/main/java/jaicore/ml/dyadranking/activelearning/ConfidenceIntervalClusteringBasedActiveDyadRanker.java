@@ -30,10 +30,20 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * A prototypical active dyad ranker based on the UCB decision rule. It always
- * queries the two
+ * A prototypical active dyad ranker based on clustering of pseudo confidence
+ * intervals. During the learning procedure, it keeps track over the standard
+ * deviation of the skill values predicted for a dyad. First a constant number
+ * of random queries is sampled at the beginning. Then the sampling strategy
+ * clusteres the skill values of all alternatives for each instance according to
+ * the lower and upper bounds of the confidence intervals of the skill for all
+ * corresponding dyads. Confidence intervals are given by [skill - std, skill +
+ * std] where skill denotes the skill and std denotes the empirical standard
+ * deviaition of the skill for a dyad. Afterwards, it picks one of the largest
+ * clusters and then selects the two dyads for which the confidence intervals
+ * overlap the most within the cluster for pairwise comparison, until a
+ * minibatch of constant size is filled.
  * 
- * @author jonas
+ * @author Jonas Hanselle
  *
  */
 public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDyadRanker {
@@ -97,7 +107,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
 //					System.out.println("adding to minibatch");
 //					System.out.println(trueRanking + "\n\n");
-//					minibatch.add(trueRanking);
+					minibatch.add(trueRanking);
 				}
 				// feed it to the ranker
 				try {
@@ -159,6 +169,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 
 						List<List<Dyad>> instanceClusters = new ArrayList<List<Dyad>>();
 						int numClusters = clusterer.numberOfClusters();
+//						System.out.println("Number of clusters: " + numClusters);
 						for (int clusterIndex = 0; clusterIndex < numClusters; clusterIndex++) {
 							instanceClusters.add(new ArrayList<Dyad>());
 						}

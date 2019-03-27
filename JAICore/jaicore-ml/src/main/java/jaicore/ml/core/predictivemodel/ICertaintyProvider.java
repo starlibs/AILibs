@@ -3,7 +3,7 @@ package jaicore.ml.core.predictivemodel;
 import jaicore.ml.core.dataset.IInstance;
 
 /**
- * The {@link ICertaintyProvider} models a {@link IPredictiveModel} that
+ * The {@link ICertaintyProvider} models an {@link IPredictiveModel} that
  * provides uncertainty information for queries in form of {@link IInstance}s.
  * 
  * @author Jonas Hanselle
