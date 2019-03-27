@@ -28,6 +28,7 @@ import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;
 import jaicore.basic.IObjectEvaluator;
@@ -35,6 +36,7 @@ import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
+import jaicore.ml.dyadranking.search.ADyadRankedNodeQueueConfig;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
@@ -103,7 +105,6 @@ public class MLPlanBuilder {
 
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
-	private boolean useCustomHASCOFactory = false;
 @SuppressWarnings("rawtypes")
 	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double>();
 
@@ -320,13 +321,6 @@ public class MLPlanBuilder {
 		return this;
 	}
 
-	public MLPlanBuilder setHascoFactory(
-		HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double> hascoFactory) {
-		this.useCustomHASCOFactory = true;
-		this.hascoFactory = hascoFactory;
-		return this;
-	}
-
 	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
 		this.hascoFactory.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
 		this.updateSearchProblemTransformer();
@@ -345,6 +339,11 @@ public class MLPlanBuilder {
 
 	public void withTimeoutForNodeEvaluation(final TimeOut timeout) {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout.milliseconds()));
+	}
+	
+	public MLPlanBuilder withOPENListConfiguration(ADyadRankedNodeQueueConfig<TFDNode> openConfig) {
+		this.hascoFactory = new HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(openConfig);
+		return this;
 	}
 
 	public boolean getUseCache() {
@@ -381,10 +380,6 @@ public class MLPlanBuilder {
 		this.useCache = true;
 		this.customEvaluatorBridge = customEvaluatorBridge;
 		return this;
-	}
-
-	public boolean useCustomHASCOFactory() {
-		return useCustomHASCOFactory;
 	}
 	
 	public void setSearchBenchmarkForNodeEvaluator(IObjectEvaluator<ComponentInstance, Double> searchBenchmark) {

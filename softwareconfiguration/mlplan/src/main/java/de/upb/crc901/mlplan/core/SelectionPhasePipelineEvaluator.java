@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
+import de.upb.crc901.mlpipeline_evaluation.SimpleUploaderMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
@@ -88,6 +89,11 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 			return result;
 		}
 
+		return evaluate(c, bridge);
+	}
+
+	private Double evaluate(final ComponentInstance c, AbstractEvaluatorMeasureBridge<Double, Double> bridge)
+			throws ObjectEvaluationFailedException, InterruptedException {
 		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();

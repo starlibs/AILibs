@@ -45,7 +45,7 @@ public class WekaDyadRankingExample {
 				.withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
 				.withAlgorithmConfigFile(new File("conf/automl/mlplan.properties"))
 				.withPerformanceMeasure(MultiClassPerformanceMeasure.ERRORRATE)
-				.setHascoFactory(new HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(openConfig)).withCustomEvaluatorBridge(new SimpleUploaderMeasureBridge());
+				.withOPENListConfiguration(openConfig).withCustomEvaluatorBridge(new SimpleUploaderMeasureBridge());
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
