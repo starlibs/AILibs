@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,7 +146,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 */
 	public Double getAsDouble(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Boolean) {
+		if (value instanceof Double) {
 			return (Double) value;
 		} else if (value instanceof String) {
 			return Double.valueOf((String) value);
@@ -232,6 +233,9 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 *            Key for which the value shall be returned.
 	 */
 	public List<Double> getAsDoubleList(final String key, final String separator) {
+		if (this.get(key) == null) {
+			return new LinkedList<>();
+		}
 		return Stream.of(this.getAsString(key).split(separator)).map(Double::valueOf).collect(Collectors.toList());
 	}
 
@@ -327,6 +331,10 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	public boolean matches(final Map<String, String> selection) {
 		boolean doesNotMatchAllSelectionCriteria = selection.entrySet().stream().anyMatch(x -> {
 			boolean isEqual = this.getAsString(x.getKey()).equals(x.getValue());
+
+			if (!x.getValue().contains("*")) {
+				return !x.getValue().equals(this.getAsString(x.getKey()));
+			}
 
 			String[] exprSplit = x.getValue().split("\\*");
 			String currentValue = x.getValue();

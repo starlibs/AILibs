@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import jaicore.logging.ToJSONStringUtil;
+
 /**
  * Automatically partitions a KVStoreCollection according to the values of the partitioning key when KVStores or KVStoreCollections are added.
  *
@@ -46,10 +48,11 @@ public class KVStoreCollectionPartition implements Iterable<Entry<String, KVStor
 		 */
 	void add(final KVStore store) {
 		/* First ensure that nested maps contain the required keys and KVStoreCollection respectively. */
-		if (!this.data.containsKey(this.partitionKey)) {
-			this.data.put(this.partitionKey, new KVStoreCollection());
+		String keyForPartition = store.getAsString(this.partitionKey);
+		if (!this.data.containsKey(keyForPartition)) {
+			this.data.put(keyForPartition, new KVStoreCollection());
 		}
-		this.data.get(this.partitionKey).add(store);
+		this.data.get(keyForPartition).add(store);
 	}
 
 	/**
@@ -70,5 +73,13 @@ public class KVStoreCollectionPartition implements Iterable<Entry<String, KVStor
 	@Override
 	public Iterator<Entry<String, KVStoreCollection>> iterator() {
 		return this.data.entrySet().iterator();
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("partitionKey", this.partitionKey);
+		fields.put("data", this.data);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }

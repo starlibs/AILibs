@@ -79,12 +79,14 @@ public class KVStoreStatisticsUtil {
 		grouped.group(setting, sampleID);
 
 		KVStoreCollectionPartition partition = new KVStoreCollectionPartition(setting, collection);
+
 		for (Entry<String, KVStoreCollection> entry : partition) {
-			OptionalDouble min = entry.getValue().stream().filter(x -> sampleIDsToConsider.contains(x.getAsString(sampleID))).mapToDouble(x -> StatisticsUtil.min(x.getAsDoubleList(sampledValues))).min();
+			OptionalDouble min = entry.getValue().stream().filter(x -> sampleIDsToConsider.contains(x.getAsString(sampleID)))
+					.mapToDouble(x -> (x.get(sampledValues) != null) ? StatisticsUtil.mean(x.getAsDoubleList(sampledValues)) : Double.MAX_VALUE).min();
 			if (min.isPresent()) {
 				double minimum = min.getAsDouble();
 				for (KVStore store : entry.getValue()) {
-					store.put(output, StatisticsUtil.min(store.getAsDoubleList(sampledValues)) == minimum);
+					store.put(output, ((store.get(sampledValues) != null) ? StatisticsUtil.mean(store.getAsDoubleList(sampledValues)) : Double.MAX_VALUE) == minimum);
 				}
 			}
 		}
