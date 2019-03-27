@@ -10,6 +10,7 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
  * This class is used to compute Histograms for the found sfa words.
  * This includes a numerosity reduction.
  * (in form of double sequences which are used as key by using the Arrays class HashCode which are Integer).
+ * c.f. p. 1514 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
  */
 public class HistogramBuilder {
 	private HashMap<Integer,Integer> histogram = new HashMap<Integer,Integer>();

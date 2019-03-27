@@ -13,6 +13,8 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 /**
  * @author Helen Beierling
  *	This class normalizes the mean of an instance to be zero and the deviation to be one. 
+ *	s.https://jmotif.github.io/sax-vsm_site/morea/algorithm/znorm.html
+ * 	one loop: https://www.strchr.com/standard_deviation_in_one_pass?allcomments=1
  */
 public class ZTransformer implements IFilter {
 	
