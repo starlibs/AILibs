@@ -30,7 +30,7 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.quality_measures.IQualityMeasure;
 import jaicore.ml.tsc.shapelets.Shapelet;
 import jaicore.ml.tsc.shapelets.search.AMinimumDistanceSearchStrategy;
-import jaicore.ml.tsc.shapelets.search.ExhaustiveMinimumDistanceSearchStrategy;
+import jaicore.ml.tsc.shapelets.search.EarlyAbandonMinimumDistanceSearchStrategy;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 import jaicore.ml.tsc.util.WekaUtil;
 import weka.classifiers.Classifier;
@@ -116,7 +116,7 @@ public class ShapeletTransformAlgorithm extends ASimplifiedTSCAlgorithm<Integer,
 	/**
 	 * Strategy used for the minimum distance search.
 	 */
-	private AMinimumDistanceSearchStrategy minDistanceSearchStrategy = new ExhaustiveMinimumDistanceSearchStrategy(
+	private AMinimumDistanceSearchStrategy minDistanceSearchStrategy = new EarlyAbandonMinimumDistanceSearchStrategy(
 			USE_BIAS_CORRECTION);
 
 	/**

@@ -14,6 +14,10 @@ import timeseriesweka.classifiers.LPS;
 /**
  * Reference tests for the {@link LearnPatternSimilarityClassifier}.
  * 
+ * Info: This was only used for experimental purposes. The tests performed in
+ * the package <code>jaicore.ml.tsc.classifier</code> in the test environment
+ * were used for empirical performance study.
+ * 
  * @author Julian Lienen
  *
  */

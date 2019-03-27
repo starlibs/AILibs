@@ -194,8 +194,7 @@ public class ShapeletTransformAlgorithmTest {
 
 		Shapelet shapelet2 = new Shapelet(TimeSeriesUtil.zNormalize(new double[] { 1, 4, 2 }, true), 0, 3, 0);
 		Assert.assertEquals("The result of the exhaustive search strategy does not match the expected result.",
-				0.8968975528613486d, unoptSearchStrategy.findMinimumDistance(shapelet2, matrix),
-				EPS_DELTA);
+				0.024025991917379048d, unoptSearchStrategy.findMinimumDistance(shapelet2, matrix), EPS_DELTA);
 	}
 
 	/**

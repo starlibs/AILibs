@@ -1,5 +1,8 @@
 package jaicore.ml.tsc.util;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,8 +11,6 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import junit.framework.Assert;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Time series util unit tests.
@@ -21,7 +22,7 @@ public class TimeSeriesUtilTest {
 	/**
 	 * Epsilon delta used for double comparisons.
 	 */
-	private static final double EPS_DELTA = 0.0000001;
+	private static final double EPS_DELTA = 0.0001;
 
 	/**
 	 * See {@link TimeSeriesUtil#normalizeINDArray(INDArray, boolean)}.

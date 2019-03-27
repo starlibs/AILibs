@@ -106,11 +106,15 @@ public class LearnShapeletsClassifier extends ASimplifiedTSClassifier<Integer> {
 	 *            See {@link LearnShapeletsAlgorithm#maxIter}
 	 * @param seed
 	 *            See {@link LearnShapeletsAlgorithm#seed}
+	 * @param gamma
+	 *            See {@link LearnShapeletsAlgorithm#gamma}
 	 */
 	public LearnShapeletsClassifier(final int K, final double learningRate, final double regularization,
-			final int scaleR, final double minShapeLengthPercentage, final int maxIter, final int seed) {
+			final int scaleR, final double minShapeLengthPercentage, final int maxIter, final double gamma,
+			final int seed) {
 		super(new LearnShapeletsAlgorithm(K, learningRate, regularization, scaleR, minShapeLengthPercentage, maxIter,
 				seed));
+		((LearnShapeletsAlgorithm) this.algorithm).setGamma(gamma);
 		this.scaleR = scaleR;
 	}
 

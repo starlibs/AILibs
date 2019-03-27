@@ -532,10 +532,6 @@ public class TimeSeriesUtil {
 	 *            The current fold for which the datasets should be prepared
 	 * @param numFolds
 	 *            Number of total folds using within the performed cross validation
-	 * @param numTestInstsPerFold
-	 *            Number of instances used for tests within every fold iteration
-	 * @param numClasses
-	 *            Number of classes in the targets
 	 * @param srcValueMatrix
 	 *            Source dataset from which the instances are copied
 	 * @param srcTargetMatrix
@@ -543,12 +539,12 @@ public class TimeSeriesUtil {
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
 	public static Pair<TimeSeriesDataset, TimeSeriesDataset> getTrainingAndTestDataForFold(final int fold,
-			final int numFolds, final int numTestInstsPerFold, final int numClasses, final double[][] srcValueMatrix,
+			final int numFolds, final double[][] srcValueMatrix,
 			final int[] srcTargetMatrix) {
 		return new Pair<TimeSeriesDataset, TimeSeriesDataset>(
-				selectTrainingDataForFold(fold, numFolds, numTestInstsPerFold, numClasses, srcValueMatrix,
+				selectTrainingDataForFold(fold, numFolds, srcValueMatrix,
 						srcTargetMatrix),
-				selectTestDataForFold(fold, numFolds, numTestInstsPerFold, numClasses, srcValueMatrix,
+				selectTestDataForFold(fold, numFolds, srcValueMatrix,
 						srcTargetMatrix));
 	}
 
@@ -561,10 +557,6 @@ public class TimeSeriesUtil {
 	 *            The current fold for which the datasets should be prepared
 	 * @param numFolds
 	 *            Number of total folds using within the performed cross validation
-	 * @param numTestInstsPerFold
-	 *            Number of instances used for tests within every fold iteration
-	 * @param numClasses
-	 *            Number of classes in the targets
 	 * @param srcValueMatrix
 	 *            Source dataset from which the instances are copied
 	 * @param srcTargetMatrix
@@ -572,10 +564,11 @@ public class TimeSeriesUtil {
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
 	private static TimeSeriesDataset selectTrainingDataForFold(final int fold, final int numFolds,
-			final int numTestInstsPerFold, final int numClasses, final double[][] srcValueMatrix,
-			final int[] srcTargetMatrix) {
+			final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
 
-		double[][] destValueMatrix = new double[(numFolds - 1) * numTestInstsPerFold][numClasses];
+		int numTestInstsPerFold = (int) ((double) srcValueMatrix.length / (double) numFolds);
+
+		double[][] destValueMatrix = new double[(numFolds - 1) * numTestInstsPerFold][srcValueMatrix[0].length];
 		int[] destTargetMatrix = new int[(numFolds - 1) * numTestInstsPerFold];
 
 		if (fold == 0) { // First fold
@@ -614,8 +607,6 @@ public class TimeSeriesUtil {
 	 *            The current fold for which the datasets should be prepared
 	 * @param numFolds
 	 *            Number of total folds using within the performed cross validation
-	 * @param numTestInstsPerFold
-	 *            Number of instances used for tests within every fold iteration
 	 * @param numClasses
 	 *            Number of classes in the targets
 	 * @param srcValueMatrix
@@ -625,16 +616,18 @@ public class TimeSeriesUtil {
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
 	private static TimeSeriesDataset selectTestDataForFold(final int fold, final int numFolds,
-			final int numTestInstsPerFold, final int numClasses, final double[][] srcValueMatrix,
-			final int[] srcTargetMatrix) {
+			final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
+
+		int numTestInstsPerFold = (int) ((double) srcValueMatrix.length / (double) numFolds);
+
 		double[][] currTestMatrix;
 		int[] currTestTargetMatrix;
 		if (fold == (numFolds - 1)) {
 			int remainingLength = srcValueMatrix.length - (numFolds - 1) * numTestInstsPerFold;
-			currTestMatrix = new double[remainingLength][numClasses];
+			currTestMatrix = new double[remainingLength][srcValueMatrix[0].length];
 			currTestTargetMatrix = new int[remainingLength];
 		} else {
-			currTestMatrix = new double[numTestInstsPerFold][numClasses];
+			currTestMatrix = new double[numTestInstsPerFold][srcValueMatrix[0].length];
 			currTestTargetMatrix = new int[numTestInstsPerFold];
 		}
 
