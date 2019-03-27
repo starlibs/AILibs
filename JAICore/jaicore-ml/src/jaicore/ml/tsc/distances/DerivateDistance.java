@@ -2,6 +2,7 @@ package jaicore.ml.tsc.distances;
 
 import jaicore.ml.tsc.filter.derivate.ADerivateFilter;
 import jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
  * Implementation of the Derivate Distance (DD) measure as published in "Using
@@ -146,7 +147,7 @@ public class DerivateDistance implements ITimeSeriesDistance {
         double[] derivateA = this.derivate.transform(A);
         double[] derivateB = this.derivate.transform(B);
 
-        return a * timeSeriesDistance.distance(A, B) + b * derivateDistance.distance(derivateA, derivateB);
+        return this.a * timeSeriesDistance.distance(A, B) + this.b * derivateDistance.distance(derivateA, derivateB);
     }
 
     /**
