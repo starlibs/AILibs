@@ -19,6 +19,10 @@ import timeseriesweka.classifiers.LearnShapelets;
 /**
  * Reference tests for the {@link LearnShapeletsClassifier}.
  * 
+ * Info: This was only used for experimental purposes. The tests performed in
+ * the package <code>jaicore.ml.tsc.classifier</code> in the test environment
+ * were used for empirical performance study.
+ * 
  * @author Julian Lienen
  *
  */
@@ -30,7 +34,6 @@ public class LearnShapeletsRefTest {
 	public void testClassifier() throws FileNotFoundException, EvaluationException, TrainingException,
 			PredictionException, IOException, TimeSeriesLoadingException, ClassNotFoundException {
 
-		// TODO: Change this?
 		Logger.getLogger("jaicore").setLevel(Level.DEBUG);
 
 		String dataset = "Beef";

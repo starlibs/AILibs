@@ -29,6 +29,10 @@ import weka.core.converters.ArffLoader.ArffReader;
 /**
  * Reference tests for {@link TimeSeriesBagOfFeaturesClassifier} objects.
  * 
+ * Info: This was only used for experimental purposes. The tests performed in
+ * the package <code>jaicore.ml.tsc.classifier</code> in the test environment
+ * were used for empirical performance study.
+ * 
  * @author Julian Lienen
  *
  */
