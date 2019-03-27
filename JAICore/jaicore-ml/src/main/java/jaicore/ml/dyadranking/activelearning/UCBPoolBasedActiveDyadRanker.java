@@ -22,7 +22,9 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
- * A prototypical active dyad ranker based on the UCB decision rule. It always queries the two 
+ * A prototypical active dyad ranker based on the UCB decision rule. It always
+ * queries the two
+ * 
  * @author Jonas Hanselle
  *
  */
@@ -51,7 +53,6 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			}
 		}
 		this.random = new Random(seed);
-
 	}
 
 	@Override
@@ -59,7 +60,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 		for (int i = 0; i < numberOfQueries; i++) {
 
-			// For the first query steps, sample randomly			
+			// For the first query steps, sample randomly
 			if (iteration < numberRandomQueriesAtStart) {
 
 				Set<IInstance> minibatch = new HashSet<IInstance>();
@@ -88,8 +89,8 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				try {
 					ranker.update(minibatch);
 					// update stds (confidence)
-					for(Vector inst : instanceFeatures) {
-						for(Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
+					for (Vector inst : instanceFeatures) {
+						for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
 							double skill = ranker.getSkillForDyad(dyad);
 							dyadStats.get(dyad).addValue(skill);
 						}
@@ -109,7 +110,8 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					int index = random.nextInt(instanceFeatures.size());
 					Vector problemInstance = instanceFeatures.get(index);
 
-					// update empirical standard deviation and compute upper confidence bound for each dyad
+					// update empirical standard deviation and compute upper confidence bound for
+					// each dyad
 					// from this dataset
 					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(problemInstance));
 					List<Pair<Dyad, Double>> dyadsWithUCB = new ArrayList<Pair<Dyad, Double>>(dyads.size());
@@ -143,8 +145,8 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				try {
 					ranker.update(minibatch);
 					// update stds (confidence)
-					for(Vector inst : instanceFeatures) {
-						for(Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
+					for (Vector inst : instanceFeatures) {
+						for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
 							double skill = ranker.getSkillForDyad(dyad);
 							dyadStats.get(dyad).addValue(skill);
 						}

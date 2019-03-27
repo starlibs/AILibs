@@ -1,0 +1,32 @@
+{
+	"repository" : "ML-Plan With TPOT-SEARCHSPACE",
+	"include": ["./scikit-learn-classifiers-tpot.json", "./scikit-learn-preprocessors-tpot.json"],
+	"components" : [
+	  	{
+	  	    "name" : "sklearn.pipeline.make_pipeline",
+	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "preprocessor",
+	  	    		"name": "AbstractPreprocessor"
+	  	    	}, { 
+	  	    		"id": "classifier",
+	  	    		"name": "BasicClassifier"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    },
+  		{
+  			"name" : "sklearn.pipeline.make_union",
+			"providedInterface" : [ "AbstractPreprocessor", "MakeUnion" ],
+			"requiredInterface" : [ { "id": "p1", "name": "BasicPreprocessor" },{ "id": "p2", "name": "BasicPreprocessor" } ],
+			"parameter" : [ ]
+		},
+		{
+			"name" : "make_forward",
+			"providedInterface" : [ "AbstractPreprocessor", "MakeForward" ],
+			"requiredInterface" : [ { "id": "base", "name": "BasicPreprocessor"}, {"id": "source", "name": "AbstractPreprocessor"} ],
+			"parameter" : [ ]
+		}
+	]
+}

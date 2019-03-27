@@ -284,7 +284,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		for (IInstance instance : instances) {
 			if (!(instance instanceof IDyadRankingInstance)) {
 				throw new IllegalArgumentException(
-						"Can only train the Plackett-Luce net dyad ranker with a dyad ranking instances!");
+						"Can only train the Plackett-Luce net dyad ranker with dyad ranking instances!");
 			}
 			drInstance = (IDyadRankingInstance) instance;
 		}
