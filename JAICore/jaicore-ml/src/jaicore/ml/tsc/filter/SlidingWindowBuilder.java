@@ -10,6 +10,7 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
  * @author Helen Beierling
  * This class cuts an instance or a set of instances into a number of smaller instances which are
  * typically saved in an matrix per instance and the matrices in a list. 
+ * c.f. p.1508 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
  */
 public class SlidingWindowBuilder implements IFilter{
 	

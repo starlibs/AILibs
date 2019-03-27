@@ -8,6 +8,7 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 /**
  * @author Helen Beierling
+ *  c.f. p. 1511 p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
  *	This class combines the MCB of finding the bins for a given set of DFT coefficients and SFA
  *	which selects the right letter for a DFT coefficient.
  */
@@ -149,8 +150,6 @@ public class SFA implements IFilter {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 		
 		for(int matrix = 0; matrix < dFTDataset.getNumberOfVariables(); matrix++) {
 			//for each part of every coefficient calculate the bins for the alphabet (number of bins == number of letters)

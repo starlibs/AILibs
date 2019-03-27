@@ -17,7 +17,7 @@ import jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
  *	(1998), pp. 249–257. (1)
  *
  *	Schäfer, P.: The BOSS is concerned with time series classification in the presence of noise. DMKD (2015)
- *	p.1510 (2)
+ *	p.1510 p.1516  (2)
  */
 public class DFT implements IFilter {
 
