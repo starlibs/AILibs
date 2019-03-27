@@ -37,8 +37,10 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	private List<IInstance> pool;
 	private boolean removeDyadsWhenQueried;
 	private HashSet<IDyadRankingInstance> queriedRankings;
+	private int numberQueries;
 
 	public DyadDatasetPoolProvider(DyadRankingDataset dataset) {
+		numberQueries = 0;
 		removeDyadsWhenQueried = false;
 		dyadsByInstances = new HashMap<Vector, Set<Dyad>>();
 		dyadsByAlternatives = new HashMap<Vector, Set<Dyad>>();
@@ -59,6 +61,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 
 	@Override
 	public IInstance query(IInstance queryInstance) {
+		numberQueries++;
 		if (!(queryInstance instanceof SparseDyadRankingInstance)) {
 			throw new IllegalArgumentException("Currently only supports SparseDyadRankingInstances!");
 		}
@@ -97,6 +100,11 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 		return dyadsByAlternatives.get(alternativeFeatures);
 	}
 
+	/**
+	 * Adds a {@link IDyadRankingInstance} instance to the pool.
+	 * 
+	 * @param instance
+	 */
 	private void addDyadRankingInstance(IDyadRankingInstance instance) {
 		// Add the dyad ranking instance to the pool
 		pool.add(instance);
@@ -169,19 +177,27 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	public void setRemoveDyadsWhenQueried(boolean flag) {
 		this.removeDyadsWhenQueried = flag;
 	}
-	
+
 	@Override
 	public int getPoolSize() {
 		int size = 0;
-		for(Set<Dyad> set : dyadsByInstances.values())
-			size+=set.size();
+		for (Set<Dyad> set : dyadsByInstances.values())
+			size += set.size();
 		return size;
+	}
+
+	/**
+	 * Returns the number of queries the pool provider has answered so far.
+	 * 
+	 * @return Number of queries this pool provider has answered.
+	 */
+	public int getNumberQueries() {
+		return numberQueries;
 	}
 
 	@Override
 	public DyadRankingDataset getQueriedRankings() {
 		return new DyadRankingDataset(new ArrayList<IDyadRankingInstance>(queriedRankings));
 	}
-	
 
 }

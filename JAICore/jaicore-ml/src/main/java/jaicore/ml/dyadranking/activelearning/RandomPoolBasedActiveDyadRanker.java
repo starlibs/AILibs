@@ -16,6 +16,15 @@ import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
+/**
+ * A random active dyad ranker. The sampling strategy picks a problem instance
+ * at random and then picks two alternatives at random for pairwise comparison.
+ * This is repeated for a constant number of times to create a minibatch for
+ * updating the ranker.
+ * 
+ * @author Jonas Hanselle
+ *
+ */
 public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 	private Random random;
@@ -57,16 +66,13 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				alternatives.add(dyads.get(1).getAlternative());
 				SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
 						alternatives);
-//				System.out.println(queryInstance.toString());
 				IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
 				minibatch.add(trueRanking);
 			}
 			// feed it to the ranker
 			try {
-				System.out.println(minibatch);
 				ranker.update(minibatch);
 			} catch (TrainingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

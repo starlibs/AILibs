@@ -86,7 +86,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 	public PLNetDyadRanker(IPLNetDyadRankerConfiguration config) {
 		this.configuration = config;
 	}
-	
+
 	@Override
 	public void train(IDataset dataset) throws TrainingException {
 		if (!(dataset instanceof DyadRankingDataset)) {
@@ -96,7 +96,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
 		train(drDataset.toND4j());
 	}
-	
+
 	public void train(List<INDArray> dataset) throws TrainingException {
 		train(dataset, configuration.plNetMaxEpochs(), configuration.plNetEarlyStoppingTrainRatio());
 		if (configuration.plNetEarlyStoppingRetrain()) {
@@ -105,16 +105,15 @@ public class PLNetDyadRanker extends APLDyadRanker
 			train(dataset, maxEpochs, 1.0);
 		}
 	}
-	
-	public void train(DyadRankingDataset dataset, int maxEpochs, double earlyStoppingTrainRatio) throws TrainingException {
+
+	public void train(DyadRankingDataset dataset, int maxEpochs, double earlyStoppingTrainRatio)
+			throws TrainingException {
 		train(dataset.toND4j(), maxEpochs, earlyStoppingTrainRatio);
 	}
-	
+
 	public void train(List<INDArray> dataset, int maxEpochs, double earlyStoppingTrainRatio) throws TrainingException {
-		List<INDArray> drTrain = dataset.subList(0,
-				(int) (earlyStoppingTrainRatio * dataset.size()));
-		List<INDArray> drTest = dataset
-				.subList((int) (earlyStoppingTrainRatio * dataset.size()), dataset.size());
+		List<INDArray> drTrain = dataset.subList(0, (int) (earlyStoppingTrainRatio * dataset.size()));
+		List<INDArray> drTest = dataset.subList((int) (earlyStoppingTrainRatio * dataset.size()), dataset.size());
 
 		if (this.plNet == null) {
 			int dyadSize = dataset.get(0).columns();
@@ -164,7 +163,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		}
 		plNet = currentBestModel;
 	}
-	
+
 	private INDArray computeScaledGradient(INDArray dyadMatrix) {
 		int dyadRankingLength = dyadMatrix.rows();
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
@@ -184,8 +183,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 			plNet.getUpdater().update(plNet, deltaWk, iteration, epoch, 1, LayerWorkspaceMgr.noWorkspaces());
 			deltaW.addi(deltaWk.gradient());
 		}
-		
-		return deltaW;	
+
+		return deltaW;
 	}
 
 	/**
@@ -234,10 +233,11 @@ public class PLNetDyadRanker extends APLDyadRanker
 	}
 
 	/**
-	 * Updates this {@link PLNetDyadRanker} based on a given mini batch of {@link INDarray}s
-	 * representing dyad rankings.
+	 * Updates this {@link PLNetDyadRanker} based on a given mini batch of
+	 * {@link INDarray}s representing dyad rankings.
 	 * 
-	 * @param minibatch	A mini batch consisting of a {@link List} of {@link INDarray}.
+	 * @param minibatch A mini batch consisting of a {@link List} of
+	 *                  {@link INDarray}.
 	 */
 	private void updateWithMinibatch(List<INDArray> minibatch) {
 		double actualMiniBatchSize = minibatch.size();
@@ -280,23 +280,23 @@ public class PLNetDyadRanker extends APLDyadRanker
 
 	@Override
 	public void update(Set<IInstance> instances) throws TrainingException {
-		IDyadRankingInstance drInstance = null;
+
+		List<INDArray> minibatch = new ArrayList<INDArray>(instances.size());
 		for (IInstance instance : instances) {
 			if (!(instance instanceof IDyadRankingInstance)) {
 				throw new IllegalArgumentException(
-						"Can only train the Plackett-Luce net dyad ranker with a dyad ranking instances!");
+						"Can only train the Plackett-Luce net dyad ranker with dyad ranking instances!");
 			}
-			drInstance = (IDyadRankingInstance) instance;
+			IDyadRankingInstance drInstance = ((IDyadRankingInstance) instance);
+			if (this.plNet == null) {
+				int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
+						+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+				this.plNet = createNetwork(dyadSize);
+				this.plNet.init();
+			}
+			minibatch.add(drInstance.toMatrix());
 		}
-		if (this.plNet == null) {
-			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
-					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
-			this.plNet = createNetwork(dyadSize);
-			this.plNet.init();
-		}
-		for (IInstance instance : instances)
-			this.update(instance);
-
+		this.updateWithMinibatch(minibatch);
 	}
 
 	@Override
@@ -355,8 +355,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 	private double computeAvgError(List<INDArray> drTest) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		for (INDArray dyadRankingInstance : drTest) {
-			//IDyadRankingInstance drInstance = (IDyadRankingInstance) dyadRankingInstance;
-			//INDArray dyadMatrix = dyadRankingToMatrix(drInstance);
 			INDArray outputs = plNet.output(dyadRankingInstance);
 			outputs = outputs.transpose();
 			double score = PLNetLoss.computeLoss(outputs).getDouble(0);
@@ -397,15 +395,18 @@ public class PLNetDyadRanker extends APLDyadRanker
 		// Build hidden layers
 		String activation = configuration.plNetActivationFunction();
 		int inputsFirstHiddenLayer = configuration.plNetHiddenNodes().get(0);
-		configBuilder.layer(0, new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
-				.weightInit(WeightInit.SIGMOID_UNIFORM).activation(Activation.fromString(activation)).hasBias(true).build());
+		configBuilder.layer(0,
+				new DenseLayer.Builder().nIn(numInputs).nOut(inputsFirstHiddenLayer)
+						.weightInit(WeightInit.SIGMOID_UNIFORM).activation(Activation.fromString(activation))
+						.hasBias(true).build());
 		List<Integer> hiddenNodes = configuration.plNetHiddenNodes();
 
 		for (int i = 0; i < hiddenNodes.size() - 1; i++) {
 			int numIn = hiddenNodes.get(i);
 			int numOut = hiddenNodes.get(i + 1);
-			configBuilder.layer(i + 1, new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.SIGMOID_UNIFORM)
-					.activation(Activation.fromString(activation)).hasBias(true).build());
+			configBuilder.layer(i + 1,
+					new DenseLayer.Builder().nIn(numIn).nOut(numOut).weightInit(WeightInit.SIGMOID_UNIFORM)
+							.activation(Activation.fromString(activation)).hasBias(true).build());
 		}
 
 		// Build output layer. Since we are using an external error for training,
@@ -495,11 +496,11 @@ public class PLNetDyadRanker extends APLDyadRanker
 		MultiLayerNetwork restored = ModelSerializer.restoreMultiLayerNetwork(filePath);
 		plNet = restored;
 	}
-	
+
 	public MultiLayerNetwork getPlNet() {
 		return plNet;
 	}
-	
+
 	public int getEpoch() {
 		return epoch;
 	}
@@ -537,7 +538,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet = createNetwork(dyadSize);
 			this.plNet.init();
 		}
-		
+
 		if (drInstance.length() < 2) {
 			throw new IllegalArgumentException("The query instance must contain at least 2 dyads!");
 		}
@@ -563,12 +564,22 @@ public class PLNetDyadRanker extends APLDyadRanker
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty + 1).getLeft());
 		DyadRankingInstance leastCertainPair = new DyadRankingInstance(leastCertainDyads);
-//		System.out.println("Pair: " + leastCertainPair);
-//		System.out.println("Certainty: " + currentlyLowestCertainty);
-//		System.out.println();
 		return leastCertainPair;
 	}
 
+	/**
+	 * Returns the probablity of the top ranking for a given
+	 * {@link IDyadRankingInstance} under the Plackett Luce model parametrized by
+	 * the latent skill values predicted by the PLNet. This may be useful as the
+	 * probability of a particular ranking diminishes drastically with increasing
+	 * length of the ranking.
+	 * 
+	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
+	 *                   computed.
+	 * @return Probablity of the top ranking for a given
+	 *         {@link IDyadRankingInstance} given the Plackett Luce model
+	 *         parametrized by the skill values predicted by the PLNet.
+	 */
 	public double getProbabilityOfTopRanking(IDyadRankingInstance drInstance) {
 		return getProbabilityOfTopKRanking(drInstance, drInstance.length());
 	}
@@ -589,7 +600,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		// TODO use top k selection
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 1;
@@ -603,6 +613,19 @@ public class PLNetDyadRanker extends APLDyadRanker
 		return currentProbability;
 	}
 
+	/**
+	 * Returns the the log of the probablity of the top ranking for a given
+	 * {@link IDyadRankingInstance} under the Plackett Luce model parametrized by
+	 * the latent skill values predicted by the PLNet. This may be useful as the
+	 * probability of a particular ranking diminishes drastically with increasing
+	 * length of the ranking.
+	 * 
+	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
+	 *                   computed.
+	 * @return Log of the probablity of the top ranking for a given
+	 *         {@link IDyadRankingInstance} given the Plackett Luce model
+	 *         parametrized by the skill values predicted by the PLNet.
+	 */
 	public double getLogProbabilityOfTopRanking(IDyadRankingInstance drInstance) {
 
 		if (this.plNet == null) {
@@ -619,7 +642,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		// TODO use top k selection
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 0;
@@ -633,6 +655,20 @@ public class PLNetDyadRanker extends APLDyadRanker
 		return currentProbability;
 	}
 
+	/**
+	 * Returns the log of the probablity of the top k of a given
+	 * {@link IDyadRankingInstance} under the Plackett Luce model parametrized by
+	 * the latent skill values predicted by the PLNet. This may be useful as the
+	 * probability of a particular ranking diminishes drastically with increasing
+	 * length of the ranking.
+	 * 
+	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
+	 *                   computed.
+	 * @param k          Number of top dyads to be considered.
+	 * @return Log of the probablity of the top k of a the given
+	 *         {@link IDyadRankingInstance} given the Plackett Luce model
+	 *         parametrized by the skill values predicted by the PLNet.
+	 */
 	public double getLogProbabilityOfTopKRanking(IDyadRankingInstance drInstance, int k) {
 
 		if (this.plNet == null) {
@@ -649,7 +685,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
 		}
 		// sort the instance in descending order of utility values
-		// TODO use top k selection
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		// compute the probability of this ranking according to the Plackett-Luce model
 		double currentProbability = 0;
@@ -663,6 +698,17 @@ public class PLNetDyadRanker extends APLDyadRanker
 		return currentProbability;
 	}
 
+	/**
+	 * Returns the probablity of a given {@link IDyadRankingInstance} under the
+	 * Plackett Luce model parametrized by the latent skill values predicted by the
+	 * PLNet.
+	 * 
+	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
+	 *                   computed.
+	 * @return Probability of the given {@link IDyadRankingInstance} given the
+	 *         Plackett Luce model parametrized by the skill values predicted by the
+	 *         PLNet.
+	 */
 	public double getProbabilityRanking(IDyadRankingInstance drInstance) {
 
 		if (this.plNet == null) {
@@ -725,13 +771,20 @@ public class PLNetDyadRanker extends APLDyadRanker
 		}
 		return currentProbability;
 	}
-	
+
+	/**
+	 * Returns the latent skill value predicted by the PLNet for a given
+	 * {@link Dyad}.
+	 * 
+	 * @param dyad {@link Dyad} for which the skill is to be predicted.
+	 * @return Skill of the given {@link Dyad}.
+	 */
 	public double getSkillForDyad(Dyad dyad) {
-		if(plNet == null)
+		if (plNet == null)
 			return Double.NaN;
 		INDArray plNetInput = dyadToVector(dyad);
 		double plNetOutput = plNet.output(plNetInput).getDouble(0);
 		return plNetOutput;
 	}
-	
+
 }

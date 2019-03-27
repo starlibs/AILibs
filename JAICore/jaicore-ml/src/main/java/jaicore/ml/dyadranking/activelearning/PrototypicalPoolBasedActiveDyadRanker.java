@@ -19,6 +19,18 @@ import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
+/**
+ * A prototypical active dyad ranker based on the idea of uncertainty sampling.
+ * First a constant number of random queries is sampled at the beginning. Then
+ * the sampling strategy randomly selects a problem instance in each query step.
+ * Afterwards it selects those two alternatives for pairwise comparison, for
+ * which the difference of the skill values is minimal, as these are the pairs
+ * the Plackett Luce model is least certain about. This procedure is repeated a
+ * constant number of times to create a minibatch for updating the model.
+ * 
+ * @author Jonas Hanselle
+ *
+ */
 public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 	private ArrayList<IInstance> seenInstances;
@@ -29,11 +41,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	private int iteration;
 	private int seed;
 	private Random random;
-
-//	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider) {
-//		super(ranker, poolProvider);
-//		seenInstances = new ArrayList<IInstance>(poolProvider.getPool().size());
-//	}
 
 	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider,
 			int maxBatchSize, int lengthOfTopRankingToConsider, double ratioOfOldInstancesForMinibatch,
@@ -73,7 +80,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					alternatives.add(dyads.get(1).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
 							alternatives);
-//					System.out.println(queryInstance.toString());
 					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
 					minibatch.add(trueRanking);
 				}
@@ -81,7 +87,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				try {
 					ranker.update(minibatch);
 				} catch (TrainingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				iteration++;
@@ -97,17 +102,10 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				Set<IInstance> minibatch = new HashSet<IInstance>();
 				List<Pair<Vector, Double>> dStarWithProbability = new ArrayList<Pair<Vector, Double>>(maxBatchSize);
 				for (Vector instanceFeatures : poolProvider.getInstanceFeatures()) {
-//				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instanceFeatures));
-//				IDyadRankingInstance queryRanking = new DyadRankingInstance(dyads);
-////				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, lengthOfTopRankingToConsider);
-//				double prob = ranker.getLogProbabilityOfTopRanking(queryRanking);
-////				double prob = ranker.getProbabilityOfTopKRanking(queryRanking, 5);
-//				dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, prob));
 					dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, 54d));
 				}
 
 				Collections.shuffle(dStarWithProbability);
-//			Collections.sort(dStarWithProbability, Comparator.comparing(p -> (-p.getRight())));
 
 				int numberOfOldInstances = Integer.min((int) (ratioOfOldInstancesForMinibatch * maxBatchSize),
 						seenInstances.size());
@@ -115,8 +113,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 				for (int batchIndex = 0; batchIndex < numberOfNewInstances; batchIndex++) {
 					Vector curDStar = dStarWithProbability.get(batchIndex).getFirst();
-//					System.out.println("Choose " + batchIndex + ": " + dStarWithProbability.get(batchIndex).getLeft());
-//					System.out.println("with log probability: " + dStarWithProbability.get(batchIndex).getRight());
 					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(curDStar));
 					if (dyads.size() < 2)
 						break;
@@ -150,10 +146,8 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				minibatch.addAll(oldInstances);
 
 				try {
-//				System.out.println("Minibatch size: " + minibatch.size());
 					ranker.update(minibatch);
 				} catch (TrainingException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				iteration++;
