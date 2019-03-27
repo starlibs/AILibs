@@ -1,8 +1,8 @@
 package jaicore.ml.tsc.complexity;
 
 /**
- * Stretching Complexity metric as described in "A Complexity-Invariant Distance
- * Measure for Time Series". Note that the equation in the paper is not correct.
+ * Stretching Complexity that calulates the length of a time series when
+ * stretched to a straight line.
  * 
  * $$ c = sum_{i=1}^n-1 \sqrt{ (t_2 - t_1)^2 + (T_{i+1} - T_i)^2 }$$
  * 
