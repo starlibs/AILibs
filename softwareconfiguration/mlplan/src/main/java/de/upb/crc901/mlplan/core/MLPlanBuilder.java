@@ -42,6 +42,7 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNo
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import weka.core.Instances;
 
@@ -321,7 +322,7 @@ public class MLPlanBuilder {
 	}
 
 	public MLPlanBuilder setHascoFactory(
-		HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double> hascoFactory) {
+		HASCOViaFDFactory<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, Double> hascoFactory) {
 		this.useCustomHASCOFactory = true;
 		this.hascoFactory = hascoFactory;
 		return this;
