@@ -44,7 +44,7 @@ public abstract class ADyadRankedNodeQueueConfig<N>
 	 */
 	public ADyadRankedNodeQueueConfig() throws IOException, ClassNotFoundException {
 		logger.trace("Load MinMaxScaler");	
-		FileInputStream fis = new FileInputStream(new File("resources/draco/partial_pipeline_ranking/minmaxscaler.ser"));
+		FileInputStream fis = new FileInputStream(new File("resources/draco/partial_pipeline_ranking/models/minmax_2500.ser"));
 		ObjectInputStream ois = new ObjectInputStream(fis);		
 		scaler = (DyadMinMaxScaler) ois.readObject();
 		fis.close();
@@ -52,7 +52,7 @@ public abstract class ADyadRankedNodeQueueConfig<N>
 		
 		logger.trace("Load PL-Net Dyad Ranker");
 		PLNetDyadRanker plranker = new PLNetDyadRanker();
-		plranker.loadModelFromFile("resources/draco/partial_pipeline_ranking/final_plnet_minmax.zip");
+		plranker.loadModelFromFile("resources/draco/partial_pipeline_ranking/models/ranker_2500.zip");
 		ranker = plranker;
 	}
 
