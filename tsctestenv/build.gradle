@@ -22,7 +22,7 @@ dependencies {
 	
 	// Reference repositories
 	compile 'com.github.patrickzib:SFA:v0.1'
-	//compile files('lib/TimeSeriesClassification.jar')
+	compile files('lib/TimeSeriesClassification.jar')
 	
 	// DB connector
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
