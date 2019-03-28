@@ -12,14 +12,52 @@ import jaicore.basic.SQLAdapter;
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 
+/**
+ * Uploads intermediate evaluations during a run of ML-Plan.
+ * 
+ * @author Helena Graf
+ *
+ */
 public class SimpleResultsUploader {
 
+	/**
+	 * db adapter for uploading
+	 */
 	SQLAdapter adapter;
+
+	/**
+	 * table to use for intermediate results
+	 */
 	String table;
+
+	/**
+	 * the name of the algorithm for which results are uploaded
+	 */
 	String algorithmName;
+
+	/**
+	 * the id of the experiment for which results are uploaded
+	 */
 	int experimentId;
+
+	/**
+	 * start time of the search
+	 */
 	long timeStart = System.currentTimeMillis();
 
+	/**
+	 * Construct a new simple results uploader with the given configuration for the
+	 * entries and table.
+	 * 
+	 * @param adapter
+	 *            db adapter for uploading
+	 * @param table
+	 *            table to use for intermediate results
+	 * @param algorithmName
+	 *            the name of the algorithm for which results are uploaded
+	 * @param experimentId
+	 *            the id of the experiment for which results are uploaded
+	 */
 	public SimpleResultsUploader(SQLAdapter adapter, String table, String algorithmName, int experimentId) {
 		this.adapter = adapter;
 		this.table = table;
@@ -27,6 +65,19 @@ public class SimpleResultsUploader {
 		this.experimentId = experimentId;
 	}
 
+	/**
+	 * Uploads the given intermediate results
+	 * 
+	 * @param classifier
+	 *            the pipeline for which a result was found
+	 * @param evaluationTime
+	 *            the time it took to evaluate the pipeline
+	 * @param solutionQuality
+	 *            the error of the pipeline
+	 * @param phase
+	 *            the phase in which the pipeline was found (search or selection)
+	 * @throws SQLException
+	 */
 	public void uploadResult(MLPipeline classifier, long evaluationTime, double solutionQuality, String phase)
 			throws SQLException {
 		String solutionString = getSolutionString(classifier);
@@ -47,11 +98,18 @@ public class SimpleResultsUploader {
 		}
 	}
 
+	/**
+	 * Converts the given pipeline to a simple string representation
+	 * 
+	 * @param classifier
+	 *            the pipeline to convert
+	 * @return the string representation
+	 */
 	public static String getSolutionString(MLPipeline classifier) {
 		if (classifier == null) {
 			return "error";
 		}
-		
+
 		Classifier baseClassifier = classifier.getBaseClassifier();
 		String[] classifierOptionsArray;
 		String classifierOptionsString = "";

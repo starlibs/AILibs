@@ -7,7 +7,7 @@ import weka.core.Instances;
  * Connection between an Evaluator (e.g. MCC) and a loss Function. Able to evaluate instances based on training data and validation data.
  * This bridge may modify this process, for example by using a cache.
  *  
- * @author mirko
+ * @author mirko, Helena Graf
  *
  * @param <I> the input type
  * @param <O> the output type

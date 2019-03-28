@@ -20,6 +20,12 @@ import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasu
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
+/**
+ * Demonstrated the usage of ML-Plan with a dyad ranked OPEN list
+ * 
+ * @author Helena Graf
+ *
+ */
 public class WekaDyadRankingExample {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(WekaDyadRankingExample.class);
@@ -33,24 +39,19 @@ public class WekaDyadRankingExample {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit((Instances) data, (new Random(0)).nextLong(), 0.7d);
 
-		// SQLAdapter adapter = new SQLAdapter("host", "user", "password", "database");
-		// PerformanceDBAdapter pAdapter = new PerformanceDBAdapter(adapter,
-		// "performance_cache");
-
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
 		MLPlanBuilder builder = new MLPlanBuilder()
 				.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
 				.withAlgorithmConfigFile(new File("conf/mlplan.properties"))
-				.withPerformanceMeasure(MultiClassPerformanceMeasure.ERRORRATE)
-				.withOPENListConfiguration(openConfig);
+				.withPerformanceMeasure(MultiClassPerformanceMeasure.ERRORRATE).withOPENListConfiguration(openConfig);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 		openConfig.setComponents(mlplan.getComponents());
 		openConfig.setData(data);
-		
+
 		try {
 			long start = System.currentTimeMillis();
-			mlplan.setTimeout(new TimeOut(60-(start-starttime)/1000, TimeUnit.SECONDS));
+			mlplan.setTimeout(new TimeOut(60 - (start - starttime) / 1000, TimeUnit.SECONDS));
 			mlplan.buildClassifier(split.get(0));
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
 			System.out.println("Finished build of the classifier. Training time was " + trainTime + "s.");
@@ -62,6 +63,6 @@ public class WekaDyadRankingExample {
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}
-		System.out.println("Total experiment time: " + (System.currentTimeMillis()-starttime)/1000);
+		System.out.println("Total experiment time: " + (System.currentTimeMillis() - starttime) / 1000);
 	}
 }

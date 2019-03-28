@@ -2,6 +2,9 @@ package de.upb.crc901.mlplan.metamining.dyadranking;
 
 import java.util.Collection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
@@ -23,6 +26,8 @@ import jaicore.search.model.travesaltree.Node;
  */
 public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Double> {
 
+	private Logger logger = LoggerFactory.getLogger(ADyadRankedNodeQueue.class);
+
 	/**
 	 * the allowed components of the pipelines
 	 */
@@ -38,9 +43,14 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	 * constructed from the given components in the given context.
 	 * 
 	 * @param contextCharacterization
-	 *            the characterization of the context
+	 *            the characterization of the dataset (the context)
 	 * @param components
-	 *            the components
+	 *            the search space components
+	 * @param ranker
+	 *            the ranker to use to rank the dyads - must be pre-trained
+	 * @param scaler
+	 *            the scaler to use to scale the dataset - must have been fit to
+	 *            data already
 	 */
 	public WEKADyadRankedNodeQueue(Vector contextCharacterization, Collection<Component> components, ADyadRanker ranker,
 			AbstractDyadScaler scaler) {
@@ -54,10 +64,12 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 		ComponentInstance cI = Util.getComponentInstanceFromState(components, node.getPoint().getState(), "solution",
 				true);
 		if (cI != null) {
+			logger.debug("Characterizing new node.");
 			return new DenseDoubleVector(characterizer.characterize(cI));
 		} else {
+			logger.debug("CI from node for characterization is null.");
 			return new DenseDoubleVector(characterizer.getLengthOfCharacterization(), 0);
 		}
-		
+
 	}
 }

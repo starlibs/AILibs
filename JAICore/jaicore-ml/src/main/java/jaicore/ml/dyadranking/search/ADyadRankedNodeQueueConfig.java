@@ -34,40 +34,63 @@ public abstract class ADyadRankedNodeQueueConfig<N>
 	 */
 	protected ADyadRanker ranker;
 	
-	/** for scaling the dyads */
+	/** 
+	 * for scaling the dyads 
+	 */
 	protected AbstractDyadScaler scaler;
 
 	/**
 	 * Construct a new dyad ranking node queue configuration.
-	 * @throws IOException 
-	 * @throws ClassNotFoundException 
+	 * 
+	 * @throws IOException if the files for the default ranker and scaler are invalid or cannot be found
+	 * @throws ClassNotFoundException  if the default scaler or ranker cannot be instantiated
 	 */
 	public ADyadRankedNodeQueueConfig() throws IOException, ClassNotFoundException {
 		logger.trace("Load MinMaxScaler");	
 		FileInputStream fis = new FileInputStream(new File("resources/draco/partial_pipeline_ranking/models/minmax_2500.ser"));
-		ObjectInputStream ois = new ObjectInputStream(fis);		
-		scaler = (DyadMinMaxScaler) ois.readObject();
-		fis.close();
-		ois.close();
-		
+		try(ObjectInputStream ois = new ObjectInputStream(fis)) {
+			scaler = (DyadMinMaxScaler) ois.readObject();
+			fis.close();
+		}
+				
 		logger.trace("Load PL-Net Dyad Ranker");
 		PLNetDyadRanker plranker = new PLNetDyadRanker();
 		plranker.loadModelFromFile("resources/draco/partial_pipeline_ranking/models/ranker_2500.zip");
 		ranker = plranker;
 	}
 
+	/**
+	 * Set the ranker used to rank the OPEN list.
+	 * 
+	 * @return ranker the used ranker
+	 */
 	public ADyadRanker getRanker() {
 		return ranker;
 	}
 
+	/**
+	 * Set the ranker used to rank the OPEN list.
+	 * 
+	 * @param ranker the used ranker
+	 */
 	public void setRanker(ADyadRanker ranker) {
 		this.ranker = ranker;
 	}
 
+	/**
+	 * Get the scaler used to scale the dataset. Is pre-fit.
+	 * 
+	 * @return the used scaler
+	 */
 	public AbstractDyadScaler getScaler() {
 		return scaler;
 	}
 
+	/**
+	 * Set the scaler used to scale the dataset. Must be pre-fit.
+	 * 
+	 * @param scaler the used scaler
+	 */
 	public void setScaler(AbstractDyadScaler scaler) {
 		this.scaler = scaler;
 	}
