@@ -15,8 +15,6 @@ include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"
 include ":JAICore:jaicore-search"
 
-include ":JAICore:jaicore-web"
-
 
 // Software-Configuration
 include 'hasco'
