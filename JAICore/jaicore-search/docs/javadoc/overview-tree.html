@@ -109,7 +109,7 @@
 <li type="circle">jaicore.basic.algorithm.AAlgorithm&lt;I,O&gt; (implements jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, jaicore.basic.ILoggingCustomizable)
 <ul>
 <li type="circle">jaicore.search.algorithms.andor.<a href="jaicore/search/algorithms/andor/AndORBottomUpFilter.html" title="class in jaicore.search.algorithms.andor"><span class="typeNameLink">AndORBottomUpFilter</span></a>&lt;N,A,V&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;)</li>
-<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.ASolutionCandidateIterator&lt;I,O&gt; (implements jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces"><span class="typeNameLink">AAnyPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)
 <ul>
@@ -140,6 +140,7 @@
 <li type="circle">jaicore.search.algorithms.standard.mcts.<a href="jaicore/search/algorithms/standard/mcts/UCT.html" title="class in jaicore.search.algorithms.standard.mcts"><span class="typeNameLink">UCT</span></a>&lt;T,A&gt;</li>
 </ul>
 </li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/RStar.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStar</span></a>&lt;T,A&gt;</li>
 </ul>
 </li>
 </ul>
@@ -150,7 +151,7 @@
 </li>
 <li type="circle">jaicore.basic.algorithm.events.AAlgorithmEvent (implements jaicore.basic.algorithm.events.AlgorithmEvent)
 <ul>
-<li type="circle">jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent&lt;O&gt;
+<li type="circle">jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent&lt;O&gt; (implements jaicore.basic.algorithm.events.SolutionCandidateFoundEvent&lt;O&gt;)
 <ul>
 <li type="circle">jaicore.search.algorithms.standard.bestfirst.events.<a href="jaicore/search/algorithms/standard/bestfirst/events/GraphSearchSolutionCandidateFoundEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events"><span class="typeNameLink">GraphSearchSolutionCandidateFoundEvent</span></a>&lt;N,A,S&gt;
 <ul>
@@ -168,7 +169,9 @@
 </ul>
 </li>
 <li type="circle">jaicore.search.algorithms.standard.bestfirst.events.<a href="jaicore/search/algorithms/standard/bestfirst/events/LastEventBeforeTermination.html" title="class in jaicore.search.algorithms.standard.bestfirst.events"><span class="typeNameLink">LastEventBeforeTermination</span></a></li>
+<li type="circle">jaicore.search.algorithms.standard.bestfirst.events.<a href="jaicore/search/algorithms/standard/bestfirst/events/NodeExpansionCompletedEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events"><span class="typeNameLink">NodeExpansionCompletedEvent</span></a>&lt;N&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.lds.<a href="jaicore/search/algorithms/standard/lds/NoMoreNodesOnLevelEvent.html" title="class in jaicore.search.algorithms.standard.lds"><span class="typeNameLink">NoMoreNodesOnLevelEvent</span></a></li>
+<li type="circle">jaicore.search.algorithms.standard.bestfirst.events.<a href="jaicore/search/algorithms/standard/bestfirst/events/RemovedGoalNodeFromOpenEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events"><span class="typeNameLink">RemovedGoalNodeFromOpenEvent</span></a>&lt;N&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.bestfirst.events.<a href="jaicore/search/algorithms/standard/bestfirst/events/RolloutEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events"><span class="typeNameLink">RolloutEvent</span></a>&lt;N,V&gt;</li>
 </ul>
 </li>
@@ -184,14 +187,15 @@
 <li type="circle">jaicore.search.algorithms.standard.uncertainty.<a href="jaicore/search/algorithms/standard/uncertainty/UncertaintyORGraphSearchFactory.html" title="class in jaicore.search.algorithms.standard.uncertainty"><span class="typeNameLink">UncertaintyORGraphSearchFactory</span></a>&lt;N,A,V&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.search.algorithms.standard.lds.<a href="jaicore/search/algorithms/standard/lds/BestFirstLimitedDiscrepancySearchFactory.html" title="class in jaicore.search.algorithms.standard.lds"><span class="typeNameLink">BestFirstLimitedDiscrepancySearchFactory</span></a>&lt;T,A,V&gt;</li>
-<li type="circle">jaicore.search.algorithms.standard.lds.<a href="jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="class in jaicore.search.algorithms.standard.lds"><span class="typeNameLink">LimitedDiscrepancySearchFactory</span></a>&lt;T,A,V&gt;</li>
+<li type="circle">jaicore.search.algorithms.standard.lds.<a href="jaicore/search/algorithms/standard/lds/BestFirstLimitedDiscrepancySearchFactory.html" title="class in jaicore.search.algorithms.standard.lds"><span class="typeNameLink">BestFirstLimitedDiscrepancySearchFactory</span></a>&lt;N,A,V&gt;</li>
+<li type="circle">jaicore.search.algorithms.standard.lds.<a href="jaicore/search/algorithms/standard/lds/LimitedDiscrepancySearchFactory.html" title="class in jaicore.search.algorithms.standard.lds"><span class="typeNameLink">LimitedDiscrepancySearchFactory</span></a>&lt;N,A,V&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.mcts.<a href="jaicore/search/algorithms/standard/mcts/MCTSFactory.html" title="class in jaicore.search.algorithms.standard.mcts"><span class="typeNameLink">MCTSFactory</span></a>&lt;N,A,V&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearchFactory</a>&lt;I,N,A,V&gt;)
 <ul>
 <li type="circle">jaicore.search.algorithms.standard.mcts.<a href="jaicore/search/algorithms/standard/mcts/UCTFactory.html" title="class in jaicore.search.algorithms.standard.mcts"><span class="typeNameLink">UCTFactory</span></a>&lt;T,A&gt;</li>
 </ul>
 </li>
 <li type="circle">jaicore.search.algorithms.standard.random.<a href="jaicore/search/algorithms/standard/random/RandomSearchFactory.html" title="class in jaicore.search.algorithms.standard.random"><span class="typeNameLink">RandomSearchFactory</span></a>&lt;N,A&gt;</li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/RStarFactory.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStarFactory</span></a>&lt;T,A&gt;</li>
 </ul>
 </li>
 </ul>
@@ -220,7 +224,7 @@
 </li>
 <li type="circle">jaicore.search.model.travesaltree.<a href="jaicore/search/model/travesaltree/AbstractGraphGenerator.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">AbstractGraphGenerator</span></a>&lt;T,A&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;T,A&gt;)</li>
 <li type="circle">jaicore.search.model.travesaltree.<a href="jaicore/search/model/travesaltree/AbstractNode.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">AbstractNode</span></a></li>
-<li type="circle">jaicore.search.model.other.<a href="jaicore/search/model/other/AgnosticPathEvaluator.html" title="class in jaicore.search.model.other"><span class="typeNameLink">AgnosticPathEvaluator</span></a>&lt;N&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,V&gt;)</li>
+<li type="circle">jaicore.search.model.other.<a href="jaicore/search/model/other/AgnosticPathEvaluator.html" title="class in jaicore.search.model.other"><span class="typeNameLink">AgnosticPathEvaluator</span></a>&lt;N,A&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,A,V&gt;)</li>
 <li type="circle">jaicore.search.algorithms.andor.<a href="jaicore/search/algorithms/andor/AndORBottomUpFilter.InnerNodeLabel.html" title="class in jaicore.search.algorithms.andor"><span class="typeNameLink">AndORBottomUpFilter.InnerNodeLabel</span></a></li>
 <li type="circle">jaicore.graphvisualizer.plugin.ASimpleMVCPlugin&lt;M,V,C&gt; (implements jaicore.graphvisualizer.plugin.IGUIPlugin)
 <ul>
@@ -250,7 +254,7 @@
 <li type="circle">jaicore.search.algorithms.parallel.parallelexploration.distributed.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/DistributedComputationResult.html" title="class in jaicore.search.algorithms.parallel.parallelexploration.distributed"><span class="typeNameLink">DistributedComputationResult</span></a>&lt;T,V&gt; (implements java.io.Serializable)</li>
 <li type="circle">jaicore.search.algorithms.parallel.parallelexploration.distributed.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/DistributedSearchManager.html" title="class in jaicore.search.algorithms.parallel.parallelexploration.distributed"><span class="typeNameLink">DistributedSearchManager</span></a>&lt;T,A,V&gt;</li>
 <li type="circle">jaicore.search.model.travesaltree.<a href="jaicore/search/model/travesaltree/Edge.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">Edge</span></a>&lt;T,V&gt;</li>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="class in jaicore.search.core.interfaces"><span class="typeNameLink">EdgeCountingSolutionEvaluator</span></a>&lt;N&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,V&gt;)</li>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/EdgeCountingSolutionEvaluator.html" title="class in jaicore.search.core.interfaces"><span class="typeNameLink">EdgeCountingSolutionEvaluator</span></a>&lt;N,A&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces">ISolutionEvaluator</a>&lt;N,A,V&gt;)</li>
 <li type="circle">com.google.common.eventbus.EventBus
 <ul>
 <li type="circle">jaicore.search.model.travesaltree.<a href="jaicore/search/model/travesaltree/GraphEventBus.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">GraphEventBus</span></a>&lt;T&gt;</li>
@@ -259,41 +263,48 @@
 </li>
 <li type="circle">jaicore.search.algorithms.standard.uncertainty.paretosearch.<a href="jaicore/search/algorithms/standard/uncertainty/paretosearch/FirstInFirstOutComparator.html" title="class in jaicore.search.algorithms.standard.uncertainty.paretosearch"><span class="typeNameLink">FirstInFirstOutComparator</span></a>&lt;T,V&gt; (implements java.util.Comparator&lt;T&gt;)</li>
 <li type="circle">jaicore.search.algorithms.parallel.parallelexploration.distributed.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/FolderBasedDistributedSearchCommunicationLayer.html" title="class in jaicore.search.algorithms.parallel.parallelexploration.distributed"><span class="typeNameLink">FolderBasedDistributedSearchCommunicationLayer</span></a>&lt;T,A,V&gt; (implements jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/interfaces/DistributedSearchCommunicationLayer.html" title="interface in jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces">DistributedSearchCommunicationLayer</a>&lt;T,A,V&gt;)</li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/GraphBasedDistantSuccessorGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GraphBasedDistantSuccessorGenerator</span></a>&lt;N,A&gt; (implements jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator.html" title="interface in jaicore.search.probleminputs">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator</a>&lt;N,A&gt;, jaicore.basic.ILoggingCustomizable)</li>
 <li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchInput</span></a>&lt;N,A&gt;
 <ul>
 <li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNodeRecommenderInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNodeRecommenderInput</span></a>&lt;N,A&gt;</li>
 <li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithPathEvaluationsInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithPathEvaluationsInput</span></a>&lt;N,A,V&gt;</li>
 <li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithSubpathEvaluationsInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithSubpathEvaluationsInput</span></a>&lt;N,A,V&gt;
 <ul>
-<li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluation</span></a>&lt;N,A&gt;</li>
+<li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluation</span></a>&lt;N,A&gt;
+<ul>
+<li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic</span></a>&lt;N,A&gt;</li>
+</ul>
+</li>
 <li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithUncertaintyBasedSubpathEvaluationInput.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithUncertaintyBasedSubpathEvaluationInput</span></a>&lt;N,A,V&gt;</li>
 </ul>
 </li>
 </ul>
 </li>
-<li type="circle">jaicore.search.problemtransformers.<a href="jaicore/search/problemtransformers/GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer.html" title="class in jaicore.search.problemtransformers"><span class="typeNameLink">GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer</span></a>&lt;N,A,V&gt; (implements jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)
+<li type="circle">jaicore.search.problemtransformers.<a href="jaicore/search/problemtransformers/GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer.html" title="class in jaicore.search.problemtransformers"><span class="typeNameLink">GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer</span></a>&lt;N,A,V&gt; (implements jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;I1,O1,I2,O2&gt;)
 <ul>
 <li type="circle">jaicore.search.problemtransformers.<a href="jaicore/search/problemtransformers/GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS.html" title="class in jaicore.search.problemtransformers"><span class="typeNameLink">GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS</span></a>&lt;N,A,V&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.search.problemtransformers.<a href="jaicore/search/problemtransformers/GraphSearchProblemInputToUninformedGeneralEvaluatedTraversalTree.html" title="class in jaicore.search.problemtransformers"><span class="typeNameLink">GraphSearchProblemInputToUninformedGeneralEvaluatedTraversalTree</span></a>&lt;N,A&gt; (implements jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;A,B&gt;)</li>
+<li type="circle">jaicore.search.problemtransformers.<a href="jaicore/search/problemtransformers/GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness.html" title="class in jaicore.search.problemtransformers"><span class="typeNameLink">GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness</span></a>&lt;N,A&gt; (implements jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;I1,O1,I2,O2&gt;)</li>
+<li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer</span></a>&lt;N&gt; (implements jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;)
+<ul>
+<li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer.html" title="class in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer</span></a>&lt;N&gt;</li>
+</ul>
+</li>
 <li type="circle">jaicore.search.model.travesaltree.<a href="jaicore/search/model/travesaltree/JaicoreNodeInfoGenerator.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">JaicoreNodeInfoGenerator</span></a>&lt;N,V&gt; (implements jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator&lt;N&gt;)</li>
 <li type="circle">jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/LinearCombiningNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation"><span class="typeNameLink">LinearCombiningNodeEvaluator</span></a>&lt;T&gt; (implements jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;)</li>
 <li type="circle">jaicore.search.model.travesaltree.<a href="jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">Node</span></a>&lt;T,V&gt; (implements java.lang.Comparable&lt;T&gt;, java.io.Serializable)
 <ul>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GammaNode</span></a>&lt;T,V&gt;</li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/GammaNode.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GammaNode</span></a>&lt;T&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.search.algorithms.standard.bestfirst.events.<a href="jaicore/search/algorithms/standard/bestfirst/events/NodeExpansionCompletedEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events"><span class="typeNameLink">NodeExpansionCompletedEvent</span></a>&lt;N&gt;</li>
 <li type="circle">jaicore.search.model.travesaltree.<a href="jaicore/search/model/travesaltree/NodeExpansionDescription.html" title="class in jaicore.search.model.travesaltree"><span class="typeNameLink">NodeExpansionDescription</span></a>&lt;S,A&gt;</li>
 <li type="circle">jaicore.search.algorithms.parallel.parallelexploration.distributed.events.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/events/NodePassedToCoworkerEvent.html" title="class in jaicore.search.algorithms.parallel.parallelexploration.distributed.events"><span class="typeNameLink">NodePassedToCoworkerEvent</span></a>&lt;T&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.uncertainty.<a href="jaicore/search/algorithms/standard/uncertainty/OversearchAvoidanceConfig.html" title="class in jaicore.search.algorithms.standard.uncertainty"><span class="typeNameLink">OversearchAvoidanceConfig</span></a>&lt;N,V&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.uncertainty.paretosearch.<a href="jaicore/search/algorithms/standard/uncertainty/paretosearch/ParetoFrontVisualizer.html" title="class in jaicore.search.algorithms.standard.uncertainty.paretosearch"><span class="typeNameLink">ParetoFrontVisualizer</span></a></li>
 <li type="circle">jaicore.search.algorithms.standard.uncertainty.paretosearch.<a href="jaicore/search/algorithms/standard/uncertainty/paretosearch/ParetoNode.html" title="class in jaicore.search.algorithms.standard.uncertainty.paretosearch"><span class="typeNameLink">ParetoNode</span></a>&lt;T,V&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.uncertainty.paretosearch.<a href="jaicore/search/algorithms/standard/uncertainty/paretosearch/ParetoSelection.html" title="class in jaicore.search.algorithms.standard.uncertainty.paretosearch"><span class="typeNameLink">ParetoSelection</span></a>&lt;T,V&gt; (implements java.util.Queue&lt;E&gt;)</li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/PathAndCost.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">PathAndCost</span></a>&lt;T,V&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.uncertainty.paretosearch.<a href="jaicore/search/algorithms/standard/uncertainty/paretosearch/RandomComparator.html" title="class in jaicore.search.algorithms.standard.uncertainty.paretosearch"><span class="typeNameLink">RandomComparator</span></a>&lt;T,V&gt; (implements java.util.Comparator&lt;T&gt;)</li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/RandomCompletionGammaGraphGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RandomCompletionGammaGraphGenerator</span></a>&lt;T&gt; (implements jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar">GammaGraphGenerator</a>&lt;T,D&gt;)</li>
 <li type="circle">jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/RandomizedDepthFirstNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation"><span class="typeNameLink">RandomizedDepthFirstNodeEvaluator</span></a>&lt;T&gt; (implements jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/interfaces/SerializableNodeEvaluator.html" title="interface in jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces">SerializableNodeEvaluator</a>&lt;T,V&gt;)</li>
 <li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/RStarK.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStarK</span></a> (implements java.lang.Comparable&lt;T&gt;)</li>
 <li type="circle">jaicore.search.util.<a href="jaicore/search/util/SanityCheckResult.html" title="class in jaicore.search.util"><span class="typeNameLink">SanityCheckResult</span></a>
@@ -313,9 +324,9 @@
 <li type="circle">jaicore.search.probleminputs.builders.<a href="jaicore/search/probleminputs/builders/GraphSearchWithSubpathEvaluationsInputBuilder.html" title="class in jaicore.search.probleminputs.builders"><span class="typeNameLink">GraphSearchWithSubpathEvaluationsInputBuilder</span></a>&lt;N,A,V&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/SimpleAStarGraphSearch.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">SimpleAStarGraphSearch</span></a>&lt;T,A&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/SkippingNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation"><span class="typeNameLink">SkippingNodeEvaluator</span></a>&lt;T,V&gt; (implements jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;)</li>
 <li type="circle">jaicore.search.structure.graphgenerator.<a href="jaicore/search/structure/graphgenerator/SubGraphGenerator.html" title="class in jaicore.search.structure.graphgenerator"><span class="typeNameLink">SubGraphGenerator</span></a>&lt;N,A&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;T,A&gt;)</li>
+<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/SubPathGraphGenerator.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">SubPathGraphGenerator</span></a>&lt;N,A&gt; (implements jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;T,A&gt;)</li>
 <li type="circle">java.lang.Thread (implements java.lang.Runnable)
 <ul>
 <li type="circle">jaicore.graphvisualizer.plugin.ASimpleMVCPluginController&lt;M,V&gt; (implements jaicore.graphvisualizer.plugin.IGUIPluginController)
@@ -323,7 +334,6 @@
 <li type="circle">jaicore.search.gui.plugins.rollouthistograms.<a href="jaicore/search/gui/plugins/rollouthistograms/SearchRolloutHistogramPluginController.html" title="class in jaicore.search.gui.plugins.rollouthistograms"><span class="typeNameLink">SearchRolloutHistogramPluginController</span></a>&lt;N&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/RStar.html" title="class in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">RStar</span></a>&lt;T,A,D&gt;</li>
 </ul>
 </li>
 <li type="circle">java.lang.Throwable (implements java.io.Serializable)
@@ -345,7 +355,7 @@
 </li>
 <li type="circle">jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/TimeAwareNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation"><span class="typeNameLink">TimeAwareNodeEvaluator</span></a>&lt;T,V&gt; (implements jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/INodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">INodeEvaluator</a>&lt;T,V&gt;)
 <ul>
-<li type="circle">jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/RandomCompletionBasedNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation"><span class="typeNameLink">RandomCompletionBasedNodeEvaluator</span></a>&lt;T,V&gt; (implements jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">ICancelableNodeEvaluator</a>, jaicore.basic.ILoggingCustomizable, jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallyGraphDependentNodeEvaluator</a>&lt;T,V&gt;, jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallySolutionReportingNodeEvaluator</a>&lt;T,V&gt;, jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IUncertaintyAnnotatingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IUncertaintyAnnotatingNodeEvaluator</a>&lt;N,V&gt;, jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/interfaces/SerializableNodeEvaluator.html" title="interface in jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces">SerializableNodeEvaluator</a>&lt;T,V&gt;)</li>
+<li type="circle">jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/RandomCompletionBasedNodeEvaluator.html" title="class in jaicore.search.algorithms.standard.bestfirst.nodeevaluation"><span class="typeNameLink">RandomCompletionBasedNodeEvaluator</span></a>&lt;T,V&gt; (implements jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/ICancelableNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">ICancelableNodeEvaluator</a>, jaicore.basic.ILoggingCustomizable, jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallyGraphDependentNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallyGraphDependentNodeEvaluator</a>&lt;T,V&gt;, jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IPotentiallySolutionReportingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IPotentiallySolutionReportingNodeEvaluator</a>&lt;T,V&gt;, jaicore.search.algorithms.standard.bestfirst.nodeevaluation.<a href="jaicore/search/algorithms/standard/bestfirst/nodeevaluation/IUncertaintyAnnotatingNodeEvaluator.html" title="interface in jaicore.search.algorithms.standard.bestfirst.nodeevaluation">IUncertaintyAnnotatingNodeEvaluator</a>&lt;N,V&gt;)</li>
 </ul>
 </li>
 <li type="circle">jaicore.search.algorithms.standard.mcts.<a href="jaicore/search/algorithms/standard/mcts/UCBPolicy.html" title="class in jaicore.search.algorithms.standard.mcts"><span class="typeNameLink">UCBPolicy</span></a>&lt;T,A&gt; (implements jaicore.basic.ILoggingCustomizable, jaicore.search.algorithms.standard.mcts.<a href="jaicore/search/algorithms/standard/mcts/IPathUpdatablePolicy.html" title="interface in jaicore.search.algorithms.standard.mcts">IPathUpdatablePolicy</a>&lt;T,A,V&gt;)</li>
@@ -366,16 +376,30 @@
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IGraphSearch</span></a>&lt;I,O,N,A&gt;
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
 </ul>
 </li>
 </ul>
 </li>
-<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+</ul>
+</li>
+<li type="circle">jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+</ul>
+</li>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -389,16 +413,30 @@
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IGraphSearch</span></a>&lt;I,O,N,A&gt;
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
 </ul>
 </li>
 </ul>
 </li>
-<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+</ul>
+</li>
+<li type="circle">jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+</ul>
+</li>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -407,7 +445,6 @@
 </li>
 <li type="circle">jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/interfaces/DistributedSearchCommunicationLayer.html" title="interface in jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces"><span class="typeNameLink">DistributedSearchCommunicationLayer</span></a>&lt;T,A,V&gt;</li>
 <li type="circle">jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.<a href="jaicore/search/algorithms/parallel/parallelexploration/distributed/interfaces/DistributionSearchAdapter.html" title="interface in jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces"><span class="typeNameLink">DistributionSearchAdapter</span></a>&lt;T,V&gt;</li>
-<li type="circle">jaicore.search.algorithms.standard.rstar.<a href="jaicore/search/algorithms/standard/rstar/GammaGraphGenerator.html" title="interface in jaicore.search.algorithms.standard.rstar"><span class="typeNameLink">GammaGraphGenerator</span></a>&lt;T,D&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.gbf.<a href="jaicore/search/algorithms/standard/gbf/GeneralBestFirstEvaluationAggregation.html" title="interface in jaicore.search.algorithms.standard.gbf"><span class="typeNameLink">GeneralBestFirstEvaluationAggregation</span></a>&lt;T&gt;</li>
 <li type="circle">jaicore.search.algorithms.standard.gbf.<a href="jaicore/search/algorithms/standard/gbf/GeneralBestFirstEvaluationOrSelector.html" title="interface in jaicore.search.algorithms.standard.gbf"><span class="typeNameLink">GeneralBestFirstEvaluationOrSelector</span></a>&lt;T&gt;</li>
 <li type="circle">jaicore.search.structure.graphgenerator.<a href="jaicore/search/structure/graphgenerator/GoalTester.html" title="interface in jaicore.search.structure.graphgenerator"><span class="typeNameLink">GoalTester</span></a>&lt;T&gt;
@@ -424,6 +461,8 @@
 </ul>
 </li>
 <li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer.html" title="interface in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluation.EdgeCostComputer</span></a>&lt;N&gt;</li>
+<li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator.html" title="interface in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator</span></a>&lt;N,A&gt;</li>
+<li type="circle">jaicore.search.probleminputs.<a href="jaicore/search/probleminputs/GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator.html" title="interface in jaicore.search.probleminputs"><span class="typeNameLink">GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator</span></a>&lt;N&gt;</li>
 <li type="circle">jaicore.basic.algorithm.IAlgorithmFactory&lt;I,O&gt;
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearchFactory.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IGraphSearchFactory</span></a>&lt;I,O,N,A&gt;</li>
@@ -446,7 +485,28 @@
 <li type="circle">jaicore.search.algorithms.standard.mcts.<a href="jaicore/search/algorithms/standard/mcts/IPathUpdatablePolicy.html" title="interface in jaicore.search.algorithms.standard.mcts"><span class="typeNameLink">IPathUpdatablePolicy</span></a>&lt;T,A,V&gt;</li>
 </ul>
 </li>
-<li type="circle">jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;
+<li type="circle">jaicore.search.algorithms.standard.uncertainty.<a href="jaicore/search/algorithms/standard/uncertainty/ISolutionDistanceMetric.html" title="interface in jaicore.search.algorithms.standard.uncertainty"><span class="typeNameLink">ISolutionDistanceMetric</span></a>&lt;T&gt;</li>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">ISolutionEvaluator</span></a>&lt;N,A,V&gt;</li>
+<li type="circle">java.lang.Iterable&lt;T&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt; (also extends java.util.concurrent.Callable&lt;V&gt;, jaicore.basic.Cancelable, java.util.Iterator&lt;E&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IGraphSearch</span></a>&lt;I,O,N,A&gt;
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+</ul>
+</li>
+<li type="circle">jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;
 <ul>
 <li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;)
 <ul>
@@ -460,27 +520,6 @@
 </li>
 </ul>
 </li>
-<li type="circle">jaicore.search.algorithms.standard.uncertainty.<a href="jaicore/search/algorithms/standard/uncertainty/ISolutionDistanceMetric.html" title="interface in jaicore.search.algorithms.standard.uncertainty"><span class="typeNameLink">ISolutionDistanceMetric</span></a>&lt;T&gt;</li>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/ISolutionEvaluator.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">ISolutionEvaluator</span></a>&lt;N,V&gt;</li>
-<li type="circle">java.lang.Iterable&lt;T&gt;
-<ul>
-<li type="circle">jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt; (also extends java.util.concurrent.Callable&lt;V&gt;, jaicore.basic.Cancelable, java.util.Iterator&lt;E&gt;)
-<ul>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IGraphSearch</span></a>&lt;I,O,N,A&gt;
-<ul>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
-<ul>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
-<ul>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
-</ul>
-</li>
 </ul>
 </li>
 </ul>
@@ -492,16 +531,30 @@
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IGraphSearch</span></a>&lt;I,O,N,A&gt;
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
-<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
 </ul>
 </li>
 </ul>
 </li>
-<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;)
+<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;)
 <ul>
 <li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+</ul>
+</li>
+<li type="circle">jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;
+<ul>
+<li type="circle">jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt; (also extends jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;)</li>
+</ul>
+</li>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IPathInORGraphSearch</span></a>&lt;I,O,N,A&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;)
+<ul>
+<li type="circle">jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces"><span class="typeNameLink">IOptimalPathInORGraphSearch</span></a>&lt;I,N,A,V&gt; (also extends jaicore.search.core.interfaces.<a href="jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,O,V&gt;)</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

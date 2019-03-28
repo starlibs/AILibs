@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -125,7 +125,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;O&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithm&lt;I,O&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,O&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, <a href="../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,O,N,A&gt;, <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,O,N,A&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;O&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -183,22 +183,18 @@ implements <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSea
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr id="i0" class="altColor">
-<td class="colFirst"><code>protected void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html#checkAndConductTermination--">checkAndConductTermination</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i1" class="rowColor">
 <td class="colFirst"><code><a href="../../../../jaicore/search/core/interfaces/GraphGenerator.html" title="interface in jaicore.search.core.interfaces">GraphGenerator</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">A</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html#getGraphGenerator--">getGraphGenerator</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i1" class="rowColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html#getLoggerName--">getLoggerName</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
+<tr id="i2" class="altColor">
 <td class="colFirst"><code>protected <a href="../../../../jaicore/search/algorithms/standard/bestfirst/events/GraphSearchSolutionCandidateFoundEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events">GraphSearchSolutionCandidateFoundEvent</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">A</a>,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">O</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html#registerSolution-O-">registerSolution</a></span>(<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">O</a>&nbsp;path)</code>&nbsp;</td>
 </tr>
-<tr id="i4" class="altColor">
+<tr id="i3" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html#setLoggerName-java.lang.String-">setLoggerName</a></span>(java.lang.String&nbsp;name)</code>&nbsp;</td>
 </tr>
@@ -215,7 +211,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSea
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, cancel, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, cancel, checkAndConductTermination, computeTimeoutAware, getActivationTime, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -225,11 +221,18 @@ implements <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSea
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
 </ul>
 <ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
+<code>nextSolutionCandidate, nextSolutionCandidateEvent</code></li>
+</ul>
+<ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithm">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setNumCPUs, setTimeout, setTimeout</code></li>
+<code>call, getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
@@ -251,13 +254,6 @@ implements <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSea
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.Cancelable</h3>
 <code>cancel</code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
-<code>nextSolutionCandidate, nextSolutionCandidateEvent</code></li>
 </ul>
 </li>
 </ul>
@@ -346,7 +342,7 @@ implements <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSea
 <a name="getLoggerName--">
 <!--   -->
 </a>
-<ul class="blockList">
+<ul class="blockListLast">
 <li class="blockList">
 <h4>getLoggerName</h4>
 <pre>public&nbsp;java.lang.String&nbsp;getLoggerName()</pre>
@@ -355,26 +351,6 @@ implements <a href="../../../../jaicore/search/core/interfaces/IPathInORGraphSea
 <dd><code>getLoggerName</code>&nbsp;in interface&nbsp;<code>jaicore.basic.ILoggingCustomizable</code></dd>
 <dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
 <dd><code>getLoggerName</code>&nbsp;in class&nbsp;<code>jaicore.basic.algorithm.AAlgorithm&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">I</a> extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">A</a>&gt;,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">O</a> extends <a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">A</a>&gt;&gt;</code></dd>
-</dl>
-</li>
-</ul>
-<a name="checkAndConductTermination--">
-<!--   -->
-</a>
-<ul class="blockListLast">
-<li class="blockList">
-<h4>checkAndConductTermination</h4>
-<pre>protected&nbsp;void&nbsp;checkAndConductTermination()
-                                   throws java.util.concurrent.TimeoutException,
-                                          jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                          java.lang.InterruptedException</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
-<dd><code>checkAndConductTermination</code>&nbsp;in class&nbsp;<code>jaicore.basic.algorithm.AAlgorithm&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">I</a> extends <a href="../../../../jaicore/search/probleminputs/GraphSearchInput.html" title="class in jaicore.search.probleminputs">GraphSearchInput</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">A</a>&gt;,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">O</a> extends <a href="../../../../jaicore/search/model/other/SearchGraphPath.html" title="class in jaicore.search.model.other">SearchGraphPath</a>&lt;<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">N</a>,<a href="../../../../jaicore/search/core/interfaces/AAnyPathInORGraphSearch.html" title="type parameter in AAnyPathInORGraphSearch">A</a>&gt;&gt;</code></dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
-<dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.lang.InterruptedException</code></dd>
 </dl>
 </li>
 </ul>

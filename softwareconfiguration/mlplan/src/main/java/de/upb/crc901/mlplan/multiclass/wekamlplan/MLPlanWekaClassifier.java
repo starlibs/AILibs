@@ -1,9 +1,8 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +10,20 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
+import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import hasco.model.Component;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
+import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import jaicore.ml.evaluation.IInstancesClassifier;
+import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
+import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -35,28 +43,60 @@ import weka.core.OptionHandler;
  * @author wever, fmohr
  *
  */
-public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable {
+public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IInstancesClassifier {
 
-	/** Logger for controlled output. */
+	/* Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
-	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
-	private double internalValidationErrorOfSelectedClassifier;
-	private final MLPlanBuilder builder;
-	private TimeOut timeout;
-	private MLPlan mlplan;
-	private Classifier classifierFoundByMLPlan;
+	private boolean visualizationEnabled = false;
 
-	public MLPlanWekaClassifier(MLPlanBuilder builder) throws IOException {
+	/* MLPlan Builder and the instance of mlplan */
+	private final MLPlanBuilder builder;
+
+	/* The timeout for the selecting a classifier. */
+	private TimeOut timeout;
+
+	/* The output of mlplan, i.e., the selected classifier and the internal validation error measured on the given data. */
+	private Classifier classifierFoundByMLPlan;
+	private double internalValidationErrorOfSelectedClassifier;
+
+	public MLPlanWekaClassifier(final MLPlanBuilder builder) {
 		this.builder = builder;
 	}
 
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
-		mlplan = new MLPlan(builder, data);
-		mlplan.setTimeout(timeout);
-		classifierFoundByMLPlan = mlplan.call();
+		Objects.requireNonNull(this.timeout, "Timeout must be set before running ML-Plan.");
+
+		MLPlan mlplan = new MLPlan(this.builder, data);
+		mlplan.setTimeout(this.timeout);
+		if (this.loggerName != null) {
+			mlplan.setLoggerName(this.loggerName + "." + "mlplan");
+		}
+
+		if (this.visualizationEnabled) {
+			new JFXPanel();
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+			Platform.runLater(window);
+		}
+
+		this.classifierFoundByMLPlan = mlplan.call();
+	}
+
+	@Override
+	public double[] classifyInstances(final Instances instances) throws Exception {
+		/* If the selected classifier can handle batch classification, use this feature. */
+		if (this.getSelectedClassifier() instanceof IInstancesClassifier) {
+			return ((IInstancesClassifier) this.getSelectedClassifier()).classifyInstances(instances);
+		}
+
+		double[] predictions = new double[instances.size()];
+		for (int i = 0; i < instances.size(); i++) {
+			predictions[i] = this.getSelectedClassifier().classifyInstance(instances.get(i));
+		}
+		return predictions;
 	}
 
 	@Override
@@ -101,32 +141,55 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 
 	@Override
 	public Enumeration<Option> listOptions() {
+		/* As there are no options, simply return null. */
 		return null;
 	}
 
 	@Override
 	public void setOptions(final String[] options) throws Exception {
-		// for (int i = 0; i < options.length; i++) {
-		// switch (options[i].toLowerCase()) {
-		// case "-t": {
-		// this.setTimeout(Integer.parseInt(options[++i]));
-		// break;
-		// }
-		// case "-r": {
-		// this.setRandom(Integer.parseInt(options[++i]));
-		// break;
-		// }
-		// default: {
-		// throw new IllegalArgumentException("Unknown option " + options[i] + ".");
-		// }
-		// }
-		// }
+		/* Intentionally left blank. */
 	}
 
 	@Override
 	public String[] getOptions() {
-		// TODO Auto-generated method stub
-		return null;
+		/* As there are no options, simply return an empty array. */
+		return new String[] {};
+	}
+
+	public void setTimeout(final TimeOut timeout) {
+		this.timeout = timeout;
+	}
+
+	public MLPlanClassifierConfig getMLPlanConfig() {
+		return this.builder.getAlgorithmConfig();
+	}
+
+	public Collection<Component> getComponents() {
+		return this.builder.getComponents();
+	}
+
+	/**
+	 * Enables the GUI of the MLPlanWekaClassifier if set to true. By default the visualization is deactivated.
+	 * The flag needs to be set before buildClassifier is called.
+	 *
+	 * @param visualizationEnabled Flag whether the visualization is enabled or not.
+	 */
+	public void setVisualizationEnabled(final boolean visualizationEnabled) {
+		this.visualizationEnabled = visualizationEnabled;
+	}
+
+	/**
+	 * @return An object of the classifier ML-Plan has selected during the build.
+	 */
+	public Classifier getSelectedClassifier() {
+		return this.classifierFoundByMLPlan;
+	}
+
+	/**
+	 * @return The internal validation error (during selection phase) of the selected classifier.
+	 */
+	public double getInternalValidationErrorOfSelectedClassifier() {
+		return this.internalValidationErrorOfSelectedClassifier;
 	}
 
 	@Override
@@ -137,64 +200,9 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		this.logger.info("Switched ML-Plan logger to {}", name);
 	}
 
-	public void setPortionOfDataForPhase2(final float portion) {
-		getMLPlanConfig().setProperty(MLPlanClassifierConfig.SELECTION_PORTION, String.valueOf(portion));
-	}
-
-	public void activateVisualization() {
-		getMLPlanConfig().setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(true));
-	}
-
-	public void deactivateVisualization() {
-		getMLPlanConfig().setProperty(MLPlanClassifierConfig.K_VISUALIZE, String.valueOf(false));
-	}
-
 	@Override
 	public String getLoggerName() {
 		return this.loggerName;
 	}
 
-	public INodeEvaluator<TFDNode, Double> getPreferredNodeEvaluator() {
-		return this.preferredNodeEvaluator;
-	}
-	
-	public void setTimeout(final TimeOut timeout) {
-		this.timeout = timeout;
-	}
-
-	public void setPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
-		this.preferredNodeEvaluator = preferredNodeEvaluator;
-	}
-
-	public MLPlanClassifierConfig getMLPlanConfig() {
-		return builder.getAlgorithmConfig();
-	}
-
-	public File getComponentFile() {
-		return builder.getSearchSpaceConfigFile();
-	}
-	
-	public Collection<Component> getComponents() {
-		return builder.getComponents();
-	}
-
-	public void setTimeoutForSingleSolutionEvaluation(final int timeout) {
-		getMLPlanConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, String.valueOf(timeout * 1000));
-	}
-
-	public void setTimeoutForNodeEvaluation(final int timeout) {
-		getMLPlanConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout * 1000));
-	}
-
-	public void setRandomSeed(final int seed) {
-		getMLPlanConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, String.valueOf(seed));
-	}
-
-	public Classifier getSelectedClassifier() {
-		return this.classifierFoundByMLPlan;
-	}
-	
-	public double getInternalValidationErrorOfSelectedClassifier() {
-		return this.internalValidationErrorOfSelectedClassifier;
-	}
 }

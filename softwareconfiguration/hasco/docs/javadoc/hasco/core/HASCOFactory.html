@@ -16,7 +16,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -157,37 +157,40 @@ implements <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#getAlgorithm--">getAlgorithm</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../hasco/core/HASCO.html" title="class in hasco.core">HASCO</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#getAlgorithm-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">getAlgorithm</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;problem)</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
 <td class="colFirst"><code><a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#getPlanningGraphGeneratorDeriver--">getPlanningGraphGeneratorDeriver</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i2" class="altColor">
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code><a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#getProblem--">getProblem</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i4" class="altColor">
 <td class="colFirst"><code>jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#getSearchFactory--">getSearchFactory</a></span>()</code>&nbsp;</td>
 </tr>
-<tr id="i3" class="rowColor">
-<td class="colFirst"><code>jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>&gt;</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#getSearchProblemTransformer--">getSearchProblemTransformer</a></span>()</code>&nbsp;</td>
-</tr>
-<tr id="i4" class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setPlanningGraphGeneratorDeriver-hasco.core.IHASCOPlanningGraphGeneratorDeriver-">setPlanningGraphGeneratorDeriver</a></span>(<a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>&gt;&nbsp;planningGraphGeneratorDeriver)</code>&nbsp;</td>
-</tr>
 <tr id="i5" class="rowColor">
-<td class="colFirst"><code>&lt;P&gt;&nbsp;void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setProblemInput</a></span>(P&nbsp;problemInput,
-               jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;P,<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&nbsp;reducer)</code>&nbsp;</td>
+<td class="colFirst"><code>jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#getSearchProblemTransformer--">getSearchProblemTransformer</a></span>()</code>&nbsp;</td>
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setProblemInput-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">setProblemInput</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;problemInput)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setPlanningGraphGeneratorDeriver-hasco.core.IHASCOPlanningGraphGeneratorDeriver-">setPlanningGraphGeneratorDeriver</a></span>(<a href="../../hasco/core/IHASCOPlanningGraphGeneratorDeriver.html" title="interface in hasco.core">IHASCOPlanningGraphGeneratorDeriver</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>&gt;&nbsp;planningGraphGeneratorDeriver)</code>&nbsp;</td>
 </tr>
 <tr id="i7" class="rowColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-">setSearchFactory</a></span>(jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;searchFactory)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setProblemInput-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">setProblemInput</a></span>(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;problemInput)</code>&nbsp;</td>
 </tr>
 <tr id="i8" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setSearchProblemTransformer-jaicore.basic.algorithm.AlgorithmProblemTransformer-">setSearchProblemTransformer</a></span>(jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>&gt;&nbsp;searchProblemTransformer)</code>&nbsp;</td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setSearchFactory-jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory-">setSearchFactory</a></span>(jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;searchFactory)</code>&nbsp;</td>
+</tr>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../hasco/core/HASCOFactory.html#setSearchProblemTransformer-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">setSearchProblemTransformer</a></span>(jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&nbsp;searchProblemTransformer)</code>&nbsp;</td>
 </tr>
 </table>
 <ul class="blockList">
@@ -228,22 +231,6 @@ implements <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="setProblemInput-java.lang.Object-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
-<!--   -->
-</a><a name="setProblemInput-P-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>setProblemInput</h4>
-<pre>public&nbsp;&lt;P&gt;&nbsp;void&nbsp;setProblemInput(P&nbsp;problemInput,
-                                jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;P,<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&nbsp;reducer)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>setProblemInput</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&gt;</code></dd>
-</dl>
-</li>
-</ul>
 <a name="setProblemInput-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">
 <!--   -->
 </a>
@@ -251,10 +238,6 @@ implements <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm
 <li class="blockList">
 <h4>setProblemInput</h4>
 <pre>public&nbsp;void&nbsp;setProblemInput(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;problemInput)</pre>
-<dl>
-<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code>setProblemInput</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&gt;</code></dd>
-</dl>
 </li>
 </ul>
 <a name="getAlgorithm--">
@@ -267,6 +250,21 @@ implements <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code><a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithmFactory.html#getAlgorithm--">getAlgorithm</a></code>&nbsp;in interface&nbsp;<code><a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithmFactory.html" title="interface in hasco.optimizingfactory">SoftwareConfigurationAlgorithmFactory</a>&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;</code></dd>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getAlgorithm</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&gt;</code></dd>
+</dl>
+</li>
+</ul>
+<a name="getAlgorithm-hasco.core.RefinementConfiguredSoftwareConfigurationProblem-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAlgorithm</h4>
+<pre>public&nbsp;<a href="../../hasco/core/HASCO.html" title="class in hasco.core">HASCO</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;getAlgorithm(<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;problem)</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithmFactory.html#getAlgorithm-P-">getAlgorithm</a></code>&nbsp;in interface&nbsp;<code><a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithmFactory.html" title="interface in hasco.optimizingfactory">SoftwareConfigurationAlgorithmFactory</a>&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;</code></dd>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>getAlgorithm</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithmFactory&lt;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;,<a href="../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a> extends java.lang.Comparable&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&gt;</code></dd>
 </dl>
@@ -314,16 +312,25 @@ implements <a href="../../hasco/optimizingfactory/SoftwareConfigurationAlgorithm
 <ul class="blockList">
 <li class="blockList">
 <h4>getSearchProblemTransformer</h4>
-<pre>public&nbsp;jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>&gt;&nbsp;getSearchProblemTransformer()</pre>
+<pre>public&nbsp;jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&nbsp;getSearchProblemTransformer()</pre>
 </li>
 </ul>
-<a name="setSearchProblemTransformer-jaicore.basic.algorithm.AlgorithmProblemTransformer-">
+<a name="setSearchProblemTransformer-jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setSearchProblemTransformer</h4>
+<pre>public&nbsp;void&nbsp;setSearchProblemTransformer(jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>,jaicore.search.model.other.EvaluatedSearchGraphPath&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&gt;&nbsp;searchProblemTransformer)</pre>
+</li>
+</ul>
+<a name="getProblem--">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>setSearchProblemTransformer</h4>
-<pre>public&nbsp;void&nbsp;setSearchProblemTransformer(jaicore.basic.algorithm.AlgorithmProblemTransformer&lt;jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">N</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">A</a>,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;,<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">ISearch</a>&gt;&nbsp;searchProblemTransformer)</pre>
+<h4>getProblem</h4>
+<pre>public&nbsp;<a href="../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;<a href="../../hasco/core/HASCOFactory.html" title="type parameter in HASCOFactory">V</a>&gt;&nbsp;getProblem()</pre>
 </li>
 </ul>
 </li>

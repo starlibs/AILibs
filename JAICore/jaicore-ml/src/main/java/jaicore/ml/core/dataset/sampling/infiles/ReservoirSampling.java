@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
-import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -34,7 +33,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 
 	@Override
 	public AlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables.

@@ -15,25 +15,30 @@ public class RandomSearchFactory<N, A> extends StandardORGraphSearchFactory<Grap
 
 	@Override
 	public RandomSearch<N, A> getAlgorithm() {
-		if (getInput().getGraphGenerator() == null)
+		if (this.getInput().getGraphGenerator() == null) {
 			throw new IllegalStateException("Cannot produce RandomSearch searches before the graph generator is set in the problem.");
-		RandomSearch<N, A> search = new RandomSearch<>(getInput(), seed);
-		return search;
+		}
+		return this.getAlgorithm(this.getInput());
+	}
+
+	@Override
+	public RandomSearch<N, A> getAlgorithm(final GraphSearchInput<N, A> input) {
+		return new RandomSearch<>(input, this.seed);
 	}
 
 	public int getSeed() {
-		return seed;
+		return this.seed;
 	}
 
-	public void setSeed(int seed) {
+	public void setSeed(final int seed) {
 		this.seed = seed;
 	}
 
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
-	public void setLoggerName(String loggerName) {
+	public void setLoggerName(final String loggerName) {
 		this.loggerName = loggerName;
 	}
 }

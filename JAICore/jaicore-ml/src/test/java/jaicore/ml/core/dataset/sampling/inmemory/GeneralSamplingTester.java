@@ -12,13 +12,9 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
-import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -32,8 +28,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @author Felix Weiland
  *
  */
-public abstract class GeneralSamplingTester<I extends IInstance>
-		extends GeneralAlgorithmTester<Object, IDataset<I>, IDataset<I>> {
+public abstract class GeneralSamplingTester<I extends IInstance> extends GeneralAlgorithmTester {
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
@@ -68,9 +63,8 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 	}
 
 	private void testSampleSize(IDataset<I> dataset, double sampleFraction) {
-		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
-		factory.setProblemInput(dataset);
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
+		@SuppressWarnings("unchecked")
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		IDataset<I> sample = getSample(samplingAlgorithm);
@@ -107,9 +101,8 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 	}
 
 	private void testNoDuplicates(IDataset<I> dataset) {
-		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
-		factory.setProblemInput(dataset);
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
+		@SuppressWarnings("unchecked")
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		IDataset<I> sample = getSample(samplingAlgorithm);
@@ -129,9 +122,8 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 	public void checkOriginalDataSetNotModified() throws Exception {
 		IDataset<I> dataset = this.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
-		IAlgorithmFactory<IDataset<I>, IDataset<I>> factory = this.getFactory();
-		factory.setProblemInput(dataset);
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) factory.getAlgorithm();
+		@SuppressWarnings("unchecked")
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		getSample(samplingAlgorithm);
@@ -151,18 +143,11 @@ public abstract class GeneralSamplingTester<I extends IInstance>
 		return sample;
 	}
 
-	@Override
-	public AlgorithmProblemTransformer<Object, IDataset<I>> getProblemReducer() {
-		throw new UnsupportedOperationException("Problem reducer not applicable for sampling algorithms!");
-	}
-
-	@Override
 	public IDataset<I> getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		// Load whine quality data set
 		return loadDatasetFromOpenML(287);
 	}
 
-	@Override
 	public IDataset<I> getDifficultProblemInputForGeneralTestPurposes() throws Exception {
 		// Load higgs data set
 		return loadDatasetFromOpenML(23512);

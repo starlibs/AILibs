@@ -116,7 +116,7 @@ var activeTableTab = "activeTableTab";
 </dl>
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;, <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;, <a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a>, <a href="../../../jaicore/basic/ILoggingCustomizable.html" title="interface in jaicore.basic">ILoggingCustomizable</a>, java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;, java.util.concurrent.Callable&lt;O&gt;, java.util.Iterator&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;</dd>
+<dd><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;, <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;, <a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a>, <a href="../../../jaicore/basic/ILoggingCustomizable.html" title="interface in jaicore.basic">ILoggingCustomizable</a>, java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;, java.util.concurrent.Callable&lt;O&gt;, java.util.Iterator&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;</dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -126,7 +126,7 @@ var activeTableTab = "activeTableTab";
 <br>
 <pre>public abstract class <span class="typeNameLabel">ASolutionCandidateIterator&lt;I,O&gt;</span>
 extends <a href="../../../jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a>&lt;I,O&gt;
-implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;</pre>
+implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;</pre>
 <div class="block">A template for algorithms that iterate over solution candidates. By default,
  if this algorithm is called, it returns the first solution it finds.</div>
 </li>
@@ -197,7 +197,7 @@ implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a></h3>
-<code><a href="../../../jaicore/basic/algorithm/AAlgorithm.html#activate--">activate</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#cancel--">cancel</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#checkAndConductTermination--">checkAndConductTermination</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getConfig--">getConfig</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getId--">getId</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getInput--">getInput</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getLoggerName--">getLoggerName</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getNumCPUs--">getNumCPUs</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getRemainingTimeToDeadline--">getRemainingTimeToDeadline</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getState--">getState</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getTimeout--">getTimeout</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getTimerAndCreateIfNotExistent--">getTimerAndCreateIfNotExistent</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#hasNext--">hasNext</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#hasThreadBeenInterruptedDuringShutdown-java.lang.Thread-">hasThreadBeenInterruptedDuringShutdown</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isCanceled--">isCanceled</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isShutdownInitialized--">isShutdownInitialized</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isStopCriterionSatisfied--">isStopCriterionSatisfied</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isTimeouted--">isTimeouted</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#iterator--">iterator</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#next--">next</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#post-java.lang.Object-">post</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#registerActiveThread--">registerActiveThread</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#registerListener-java.lang.Object-">registerListener</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setConfig-jaicore.basic.algorithm.IAlgorithmConfig-">setConfig</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setLoggerName-java.lang.String-">setLoggerName</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setNumCPUs-int-">setNumCPUs</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setState-jaicore.basic.algorithm.AlgorithmState-">setState</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setTimeout-long-java.util.concurrent.TimeUnit-">setTimeout</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setTimeout-jaicore.basic.TimeOut-">setTimeout</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#shutdown--">shutdown</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#terminate--">terminate</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#unregisterActiveThread--">unregisterActiveThread</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#unregisterThreadAndShutdown--">unregisterThreadAndShutdown</a></code></li>
+<code><a href="../../../jaicore/basic/algorithm/AAlgorithm.html#activate--">activate</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#cancel--">cancel</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#checkAndConductTermination--">checkAndConductTermination</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#computeTimeoutAware-java.util.concurrent.Callable-">computeTimeoutAware</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getActivationTime--">getActivationTime</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getConfig--">getConfig</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getId--">getId</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getInput--">getInput</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getLoggerName--">getLoggerName</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getNumCPUs--">getNumCPUs</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getRemainingTimeToDeadline--">getRemainingTimeToDeadline</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getState--">getState</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getTimeout--">getTimeout</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#getTimerAndCreateIfNotExistent--">getTimerAndCreateIfNotExistent</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#hasNext--">hasNext</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#hasThreadBeenInterruptedDuringShutdown-java.lang.Thread-">hasThreadBeenInterruptedDuringShutdown</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isCanceled--">isCanceled</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isShutdownInitialized--">isShutdownInitialized</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isStopCriterionSatisfied--">isStopCriterionSatisfied</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#isTimeouted--">isTimeouted</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#iterator--">iterator</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#next--">next</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#post-java.lang.Object-">post</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#registerActiveThread--">registerActiveThread</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#registerListener-java.lang.Object-">registerListener</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setConfig-jaicore.basic.algorithm.IAlgorithmConfig-">setConfig</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setLoggerName-java.lang.String-">setLoggerName</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setMaxNumThreads-int-">setMaxNumThreads</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setNumCPUs-int-">setNumCPUs</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setState-jaicore.basic.algorithm.AlgorithmState-">setState</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setTimeout-long-java.util.concurrent.TimeUnit-">setTimeout</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#setTimeout-jaicore.basic.TimeOut-">setTimeout</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#shutdown--">shutdown</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#terminate--">terminate</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#unregisterActiveThread--">unregisterActiveThread</a>, <a href="../../../jaicore/basic/algorithm/AAlgorithm.html#unregisterThreadAndShutdown--">unregisterThreadAndShutdown</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -211,21 +211,28 @@ implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a></h3>
-<code><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#nextWithException--">nextWithException</a></code></li>
+<code><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getConfig--">getConfig</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getId--">getId</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getInput--">getInput</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getNumCPUs--">getNumCPUs</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getTimeout--">getTimeout</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#nextWithException--">nextWithException</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#registerListener-java.lang.Object-">registerListener</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setMaxNumThreads-int-">setMaxNumThreads</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setNumCPUs-int-">setNumCPUs</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setTimeout-long-java.util.concurrent.TimeUnit-">setTimeout</a>, <a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setTimeout-jaicore.basic.TimeOut-">setTimeout</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;java.lang.Iterable</h3>
-<code>forEach, spliterator</code></li>
+<code>forEach, iterator, spliterator</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.util.Iterator">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;java.util.Iterator</h3>
-<code>forEachRemaining, remove</code></li>
+<code>forEachRemaining, hasNext, next, remove</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.Cancelable">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.<a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a></h3>
+<code><a href="../../../jaicore/basic/Cancelable.html#cancel--">cancel</a></code></li>
 </ul>
 </li>
 </ul>
@@ -281,15 +288,15 @@ implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.
 <pre>public&nbsp;<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">O</a>&nbsp;nextSolutionCandidate()
                         throws java.lang.InterruptedException,
                                <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
-                               java.util.concurrent.TimeoutException,
+                               <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a>,
                                <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html#nextSolutionCandidate--">nextSolutionCandidate</a></code>&nbsp;in interface&nbsp;<code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">O</a>&gt;</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html#nextSolutionCandidate--">nextSolutionCandidate</a></code>&nbsp;in interface&nbsp;<code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">I</a>,<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">O</a>&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
 </dl>
 </li>
@@ -303,15 +310,15 @@ implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.
 <pre>public&nbsp;<a href="../../../jaicore/basic/algorithm/events/SolutionCandidateFoundEvent.html" title="interface in jaicore.basic.algorithm.events">SolutionCandidateFoundEvent</a>&lt;<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">O</a>&gt;&nbsp;nextSolutionCandidateEvent()
                                                           throws java.lang.InterruptedException,
                                                                  <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
-                                                                 java.util.concurrent.TimeoutException,
+                                                                 <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a>,
                                                                  <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
-<dd><code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a></code>&nbsp;in interface&nbsp;<code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">O</a>&gt;</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a></code>&nbsp;in interface&nbsp;<code><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">I</a>,<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">O</a>&gt;</code></dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
 </dl>
 </li>
@@ -325,7 +332,7 @@ implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.
 <pre>public&nbsp;<a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="type parameter in ASolutionCandidateIterator">O</a>&nbsp;call()
        throws java.lang.InterruptedException,
               <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
-              java.util.concurrent.TimeoutException,
+              <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a>,
               <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></pre>
 <div class="block"><span class="descfrmTypeLabel">Description copied from interface:&nbsp;<code><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#call--">IAlgorithm</a></code></span></div>
 <div class="block">Overrides the call of Callable to restrict the set of allowed exceptions</div>
@@ -337,7 +344,7 @@ implements <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
 <dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
 </dl>
 </li>

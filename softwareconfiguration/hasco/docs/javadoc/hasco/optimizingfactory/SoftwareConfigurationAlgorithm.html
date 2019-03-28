@@ -115,7 +115,7 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithm&lt;P,O&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;P,O,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;O&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;O&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithm&lt;P,O&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;P,O,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;P,O&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;O&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -180,7 +180,7 @@ extends jaicore.basic.algorithm.AOptimizer&lt;P,O,V&gt;</pre>
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, cancel, checkAndConductTermination, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, cancel, checkAndConductTermination, computeTimeoutAware, getActivationTime, getConfig, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -194,7 +194,7 @@ extends jaicore.basic.algorithm.AOptimizer&lt;P,O,V&gt;</pre>
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setNumCPUs, setTimeout, setTimeout</code></li>
+<code>getConfig, getId, getInput, getNumCPUs, getTimeout, nextWithException, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">

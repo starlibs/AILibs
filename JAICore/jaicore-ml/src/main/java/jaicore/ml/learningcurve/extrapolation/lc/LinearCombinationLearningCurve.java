@@ -517,6 +517,7 @@ public class LinearCombinationLearningCurve implements AnalyticalLearningCurve {
 				retries_left--;
 				LOG.warn("Retries left: {} / {}", retries_left, ROOT_COMPUTATION_RETIRES);
 				upperIntervalBound *= 2;
+				lowerIntervalBound *= 2;
 			}
 		}
 
@@ -526,7 +527,7 @@ public class LinearCombinationLearningCurve implements AnalyticalLearningCurve {
 				LOG.info("Trying to find root with offset {} in interval [{}/{}]", offset, lowerIntervalBound,
 						upperIntervalBound);
 
-				result = solver.solve(1000, this.derivative, 10, upperIntervalBound);
+				result = solver.solve(1000, this.derivative, 50, upperIntervalBound);
 			} catch (NoBracketingException e) {
 				LOG.warn("Cannot find root in interval [{},{}]: {}", lowerIntervalBound, upperIntervalBound,
 						e.getMessage());

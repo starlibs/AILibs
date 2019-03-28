@@ -1,6 +1,5 @@
 package jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import jaicore.planning.core.Plan;
@@ -14,11 +13,13 @@ import jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import jaicore.planning.hierarchical.problems.stn.STNPlanningProblem;
 import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.other.SearchGraphPath;
+import jaicore.search.probleminputs.GraphSearchInput;
 
 public class ForwardDecompositionReducer<IPlanning extends IHTNPlanningProblem> implements IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, TFDNode, String> {
 
 	@Override
-	public GraphGenerator<TFDNode, String> transform(IHTNPlanningProblem planningProblem) {
+	public GraphSearchInput<TFDNode, String> encodeProblem(final IHTNPlanningProblem planningProblem) {
 		GraphGenerator<TFDNode, String> graphGenerator;
 		if (planningProblem instanceof CEOCIPSTNPlanningProblem) {
 			graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem);
@@ -29,11 +30,11 @@ public class ForwardDecompositionReducer<IPlanning extends IHTNPlanningProblem> 
 		} else {
 			throw new IllegalArgumentException("HTN problems of class \"" + planningProblem.getClass().getName() + "\" are currently not supported.");
 		}
-		return graphGenerator;
+		return new GraphSearchInput<>(graphGenerator);
 	}
-	
+
 	@Override
-	public Plan getPlan(List<TFDNode> path) {
-		return new Plan(path.stream().filter(n -> n.getAppliedAction() != null).map(n -> n.getAppliedAction()).collect(Collectors.toList()));
+	public Plan decodeSolution(final SearchGraphPath<TFDNode, String> solution) {
+		return new Plan(solution.getNodes().stream().filter(n -> n.getAppliedAction() != null).map(TFDNode::getAppliedAction).collect(Collectors.toList()));
 	}
 }

@@ -1,7 +1,5 @@
 package jaicore.search.core.interfaces;
 
-import java.util.concurrent.TimeoutException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,8 +8,7 @@ import jaicore.basic.algorithm.AOptimizer;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
@@ -19,9 +16,9 @@ import jaicore.search.probleminputs.GraphSearchInput;
 /**
  * This is a template for algorithms that aim at finding paths from a root to
  * goal nodes in a graph. This template does not assume paths to have a score.
- * 
+ *
  * The output type of this algorithm is fixed to EvaluatedSearchGraphPath<NSrc, ASrc, V>
- * 
+ *
  * @author fmohr
  *
  * @param <I>
@@ -32,7 +29,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
  * @param <Asearch>
  */
 public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends AOptimizer<I, EvaluatedSearchGraphPath<N, A, V>, V>
-		implements IOptimalPathInORGraphSearch<I, N, A, V> {
+implements IOptimalPathInORGraphSearch<I, N, A, V> {
 
 	/* Logger variables */
 	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
@@ -48,13 +45,13 @@ public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<N, 
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> nextSolutionCandidateEvent() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		return (EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>) super.nextSolutionCandidateEvent();
 	}
-	
+
 	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> path) {
-		updateBestSeenSolution(path);
-		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(getId(), path);
+		this.updateBestSeenSolution(path);
+		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), path);
 		this.logger.info("Identified solution with score {}. Actions: {}", path.getScore(), path.getEdges());
 		this.post(event);
 		return event;
@@ -63,18 +60,6 @@ public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<N, 
 	@Override
 	public GraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
-	}
-	
-	protected void checkAndConductTermination() throws TimeoutException, AlgorithmExecutionCanceledException, InterruptedException {
-		try {
-			super.checkAndConductTermination();
-		} catch (DelayedTimeoutCheckException e) {
-			e.printStackTrace();
-			throw e.getException();
-		} catch (DelayedCancellationCheckException e) {
-			e.printStackTrace();
-			throw e.getException();
-		}
 	}
 
 	@Override

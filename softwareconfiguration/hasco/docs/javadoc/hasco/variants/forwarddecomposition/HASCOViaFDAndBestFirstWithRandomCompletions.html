@@ -135,7 +135,7 @@
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithm&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithm&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;<a href="../../../hasco/core/RefinementConfiguredSoftwareConfigurationProblem.html" title="class in hasco.core">RefinementConfiguredSoftwareConfigurationProblem</a>&lt;V&gt;,<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../../hasco/core/HASCOSolutionCandidate.html" title="class in hasco.core">HASCOSolutionCandidate</a>&lt;V&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <hr>
 <br>
@@ -209,7 +209,7 @@ extends <a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestF
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, checkAndConductTermination, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, checkAndConductTermination, computeTimeoutAware, getActivationTime, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -223,7 +223,7 @@ extends <a href="../../../hasco/variants/forwarddecomposition/HASCOViaFDAndBestF
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>getId, getInput, getNumCPUs, getTimeout, registerListener, setNumCPUs, setTimeout, setTimeout</code></li>
+<code>getId, getInput, getNumCPUs, getTimeout, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">

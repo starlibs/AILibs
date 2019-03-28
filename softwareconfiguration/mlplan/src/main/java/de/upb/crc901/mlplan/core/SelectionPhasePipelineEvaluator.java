@@ -1,9 +1,8 @@
 package de.upb.crc901.mlplan.core;
 
-import java.util.concurrent.TimeoutException;
+import java.util.TimerTask;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.nd4j.linalg.primitives.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +13,11 @@ import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import weka.core.Instances;
@@ -60,12 +61,12 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	}
 
 	@Override
-	public void setLoggerName(String name) {
+	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 	}
 
 	@Override
-	public Double evaluate(ComponentInstance c) throws TimeoutException, InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 
 		AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
 		if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
@@ -75,28 +76,26 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, numMCIterations, bestScore, dataShownToSelectionPhase, trainFoldSize, seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		int task = sub.interruptMeAfterMS(timeoutForSolutionEvaluation - 100, () -> {
-			controlledInterrupt.set(true);
-		});
+		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
 		try {
-			mccv.evaluate(classifierFactory.getComponentInstantiation(c), stats);
+			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {
-			if (controlledInterrupt.get())
+			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
 				throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed since the timeout was hit.");
+			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
 		} finally {
-			sub.cancelTimeout(task);
-			logger.debug("Canceled timeout job {}", task);
+			task.cancel();
+			this.logger.debug("Canceled timeout job {}", task);
 		}
 
 		/* now retrieve .75-percentile from stats */
 		double mean = stats.getMean();
 		double percentile = stats.getPercentile(75f);
-		logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
+		this.logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
 		return percentile;
 	}
 	

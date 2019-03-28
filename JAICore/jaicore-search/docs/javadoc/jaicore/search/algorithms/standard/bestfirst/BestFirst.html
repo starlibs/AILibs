@@ -126,7 +126,7 @@ var activeTableTab = "activeTableTab";
 <li class="blockList">
 <dl>
 <dt>All Implemented Interfaces:</dt>
-<dd>jaicore.basic.algorithm.IAlgorithm&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;, <a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;I,N,A,V&gt;, <a href="../../../../../jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+<dd>jaicore.basic.algorithm.IAlgorithm&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, jaicore.basic.algorithm.IOptimizationAlgorithm&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,V&gt;, jaicore.basic.algorithm.ISolutionCandidateIterator&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, <a href="../../../../../jaicore/search/core/interfaces/IGraphSearch.html" title="interface in jaicore.search.core.interfaces">IGraphSearch</a>&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;, <a href="../../../../../jaicore/search/core/interfaces/IOptimalPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IOptimalPathInORGraphSearch</a>&lt;I,N,A,V&gt;, <a href="../../../../../jaicore/search/core/interfaces/IPathInORGraphSearch.html" title="interface in jaicore.search.core.interfaces">IPathInORGraphSearch</a>&lt;I,<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;,N,A&gt;, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../../../../jaicore/search/model/other/EvaluatedSearchGraphPath.html" title="class in jaicore.search.model.other">EvaluatedSearchGraphPath</a>&lt;N,A,V&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
 </dl>
 <dl>
 <dt>Direct Known Subclasses:</dt>
@@ -290,7 +290,7 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 </td>
 </tr>
 <tr id="i6" class="altColor">
-<td class="colFirst"><code>protected <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/events/NodeExpansionJobSubmittedEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events">NodeExpansionJobSubmittedEvent</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">V</a>&gt;</code></td>
+<td class="colFirst"><code>protected jaicore.basic.algorithm.events.AlgorithmEvent</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html#expandNextNode--">expandNextNode</a></span>()</code>
 <div class="block">This method conducts the expansion of the next node.</div>
 </td>
@@ -458,7 +458,7 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.search.core.interfaces.<a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html" title="class in jaicore.search.core.interfaces">AOptimalPathInORGraphSearch</a></h3>
-<code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#checkAndConductTermination--">checkAndConductTermination</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getGraphGenerator--">getGraphGenerator</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a></code></li>
+<code><a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#getGraphGenerator--">getGraphGenerator</a>, <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORGraphSearch.html#nextSolutionCandidateEvent--">nextSolutionCandidateEvent</a></code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.AOptimizer">
@@ -479,7 +479,7 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, cancel, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, cancel, checkAndConductTermination, computeTimeoutAware, getActivationTime, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -489,11 +489,18 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, wait, wait, wait</code></li>
 </ul>
 <ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
+<code>nextSolutionCandidate</code></li>
+</ul>
+<ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithm">
 <!--   -->
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
-<code>call, getId, getInput, getNumCPUs, getTimeout, registerListener, setNumCPUs, setTimeout, setTimeout</code></li>
+<code>call, getId, getInput, getNumCPUs, getTimeout, registerListener, setMaxNumThreads, setNumCPUs, setTimeout, setTimeout</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
@@ -515,13 +522,6 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 </a>
 <h3>Methods inherited from interface&nbsp;jaicore.basic.Cancelable</h3>
 <code>cancel</code></li>
-</ul>
-<ul class="blockList">
-<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.ISolutionCandidateIterator">
-<!--   -->
-</a>
-<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.ISolutionCandidateIterator</h3>
-<code>nextSolutionCandidate</code></li>
 </ul>
 </li>
 </ul>
@@ -735,16 +735,16 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <li class="blockList">
 <h4>labelNode</h4>
 <pre>protected&nbsp;void&nbsp;labelNode(<a href="../../../../../jaicore/search/model/travesaltree/Node.html" title="class in jaicore.search.model.travesaltree">Node</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">V</a>&gt;&nbsp;node)
-                  throws <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a>,
-                         java.util.concurrent.TimeoutException,
+                  throws jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                          jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                         java.lang.InterruptedException</pre>
+                         java.lang.InterruptedException,
+                         jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a></code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 </dl>
 </li>
 </ul>
@@ -755,17 +755,18 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <li class="blockList">
 <h4>initGraph</h4>
 <pre>protected&nbsp;void&nbsp;initGraph()
-                  throws <a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a>,
-                         java.util.concurrent.TimeoutException,
+                  throws jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                          jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                         java.lang.InterruptedException</pre>
+                         java.lang.InterruptedException,
+                         jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <div class="block">This method setups the graph by inserting the root nodes.</div>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 <dd><code>java.util.concurrent.TimeoutException</code></dd>
-<dd><code><a href="../../../../../jaicore/search/algorithms/standard/bestfirst/exceptions/NodeEvaluationException.html" title="class in jaicore.search.algorithms.standard.bestfirst.exceptions">NodeEvaluationException</a></code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 </dl>
 </li>
 </ul>
@@ -789,10 +790,11 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <ul class="blockList">
 <li class="blockList">
 <h4>expandNextNode</h4>
-<pre>protected&nbsp;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/events/NodeExpansionJobSubmittedEvent.html" title="class in jaicore.search.algorithms.standard.bestfirst.events">NodeExpansionJobSubmittedEvent</a>&lt;<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">N</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">A</a>,<a href="../../../../../jaicore/search/algorithms/standard/bestfirst/BestFirst.html" title="type parameter in BestFirst">V</a>&gt;&nbsp;expandNextNode()
-                                                        throws java.lang.InterruptedException,
-                                                               jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                                               java.util.concurrent.TimeoutException</pre>
+<pre>protected&nbsp;jaicore.basic.algorithm.events.AlgorithmEvent&nbsp;expandNextNode()
+                                                                throws java.lang.InterruptedException,
+                                                                       jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <div class="block">This method conducts the expansion of the next node. Unless the next node has been selected from outside, it selects the first node on OPEN (if OPEN is empty but active jobs are running, it waits until those terminate)</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
@@ -800,6 +802,8 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
 <dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 </dl>
 </li>
 </ul>
@@ -920,13 +924,13 @@ extends <a href="../../../../../jaicore/search/core/interfaces/AOptimalPathInORG
 <pre>public&nbsp;jaicore.basic.algorithm.events.AlgorithmEvent&nbsp;nextWithException()
                                                                 throws java.lang.InterruptedException,
                                                                        jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                                                       java.util.concurrent.TimeoutException,
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException,
                                                                        jaicore.basic.algorithm.exceptions.AlgorithmException</pre>
 <dl>
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 </dl>
 </li>

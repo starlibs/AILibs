@@ -1,23 +1,10 @@
-sourceSets {
-    main {
-      java {
-          srcDir 'src/main/java'
-          srcDir 'ext'
-      }
-    }
-    test {
-     	java {
-     		srcDir 'test/main/java'
-     	}
-    }
-}
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-concurrent")
 	compile project(":JAICore:jaicore-experiments")
-	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-search")
+	
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
 	compile group: 'de.upb.isys', name: 'omlwebapp', version: '0.0.1'

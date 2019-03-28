@@ -11,72 +11,76 @@ import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsea
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.UncertaintyExplorationOpenSelection;
-import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
+import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
-public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
+public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
+		extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
-	
+
 	private OversearchAvoidanceConfig<N, V> oversearchAvoidanceConfig;
-	
+
 	@Override
 	public BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> getAlgorithm() {
-		if (oversearchAvoidanceConfig == null)
+		if (this.oversearchAvoidanceConfig == null) {
 			throw new IllegalStateException("Uncertainty Config has not been set yet.");
-
-		/* let the best first factory configure general aspects of the best first search */
-		BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> search = super.getAlgorithm();
-		
-		/* now set uncertainty-specific behavior */
-		switch (oversearchAvoidanceConfig.getOversearchAvoidanceMode()) {
-			case NONE:
-				logger.warn("Usage of OversearchAvoidanceMode.NONE is deprecated! Use StandardBestFirst search instead.");
-				break;
-			case TWO_PHASE_SELECTION:
-				if (oversearchAvoidanceConfig.getAdjustPhaseLengthsDynamically()) {
-					search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(
-							oversearchAvoidanceConfig.getTimeout(),
-							oversearchAvoidanceConfig.getInterval(),
-							oversearchAvoidanceConfig.getExploitationScoreThreshold(),
-							oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
-							new BasicClockModelPhaseLengthAdjuster(),
-							oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-							new BasicExplorationCandidateSelector<N, V>(oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
-					));
-				} else {
-					search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(
-							oversearchAvoidanceConfig.getTimeout(),
-							oversearchAvoidanceConfig.getInterval(),
-							oversearchAvoidanceConfig.getExploitationScoreThreshold(),
-							oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
-							new IPhaseLengthAdjuster() {
-								
-								@Override
-								public int[] getInitialPhaseLengths(int interval) {
-									return new int[] {interval / 2, interval - (interval / 2)};
-								}
-								
-								@Override
-								public int[] adjustPhaseLength(int currentExplorationLength, int currentExploitationLength, long passedTime,
-										long timeout) {
-									return new int[] {currentExplorationLength, currentExploitationLength};
-								}
-							},
-							oversearchAvoidanceConfig.getSolutionDistanceMetric(),
-							new BasicExplorationCandidateSelector<N, V>(oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
-					));
-				}
-				break;
-			case PARETO_FRONT_SELECTION:
-				PriorityQueue<ParetoNode<N, V>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
-				search.setOpen(new ParetoSelection<>(pareto));
-				break;
-			default:
-				throw new UnsupportedOperationException("Mode " + oversearchAvoidanceConfig.getOversearchAvoidanceMode() + " is currently not supported.");
 		}
-		
+
+		/*
+		 * let the best first factory configure general aspects of the best first search
+		 */
+		BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> search = super.getAlgorithm();
+
+		/* now set uncertainty-specific behavior */
+		switch (this.oversearchAvoidanceConfig.getOversearchAvoidanceMode()) {
+		case NONE:
+			logger.warn("Usage of OversearchAvoidanceMode.NONE is deprecated! Use StandardBestFirst search instead.");
+			break;
+		case TWO_PHASE_SELECTION:
+			if (this.oversearchAvoidanceConfig.getAdjustPhaseLengthsDynamically()) {
+				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(
+						this.oversearchAvoidanceConfig.getTimeout(),
+						this.oversearchAvoidanceConfig.getInterval(),
+						this.oversearchAvoidanceConfig.getExploitationScoreThreshold(),
+						this.oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
+						new BasicClockModelPhaseLengthAdjuster(),
+						this.oversearchAvoidanceConfig.getSolutionDistanceMetric(),
+						new BasicExplorationCandidateSelector<N, V>(this.oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
+						));
+			} else {
+				search.setOpen(new UncertaintyExplorationOpenSelection<N, V>(
+						this.oversearchAvoidanceConfig.getTimeout(),
+						this.oversearchAvoidanceConfig.getInterval(),
+						this.oversearchAvoidanceConfig.getExploitationScoreThreshold(),
+						this.oversearchAvoidanceConfig.getExplorationUncertaintyThreshold(),
+						new IPhaseLengthAdjuster() {
+
+							@Override
+							public int[] getInitialPhaseLengths(final int interval) {
+								return new int[] {interval / 2, interval - (interval / 2)};
+							}
+
+							@Override
+							public int[] adjustPhaseLength(final int currentExplorationLength, final int currentExploitationLength, final long passedTime,
+									final long timeout) {
+								return new int[] {currentExplorationLength, currentExploitationLength};
+							}
+						},
+						this.oversearchAvoidanceConfig.getSolutionDistanceMetric(),
+						new BasicExplorationCandidateSelector<N, V>(this.oversearchAvoidanceConfig.getMinimumSolutionDistanceForExploration())
+						));
+			}
+			break;
+		case PARETO_FRONT_SELECTION:
+			PriorityQueue<Node<N, V>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
+			search.setOpen(new ParetoSelection<>(pareto));
+			break;
+		default:
+			throw new UnsupportedOperationException("Mode " + this.oversearchAvoidanceConfig.getOversearchAvoidanceMode() + " is currently not supported.");
+		}
+
 		return search;
 	}
 
@@ -84,7 +88,7 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> exte
 		return this.oversearchAvoidanceConfig;
 	}
 
-	public void setConfig(OversearchAvoidanceConfig<N, V> config) {
+	public void setConfig(final OversearchAvoidanceConfig<N, V> config) {
 		this.oversearchAvoidanceConfig = config;
 	}
 }

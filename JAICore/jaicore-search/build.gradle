@@ -1,12 +1,7 @@
 dependencies {
-	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-concurrent")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	
-	compile group: 'org.knowm.xchart', name: 'xchart', version: '3.5.2'
-	compile group: 'it.unimi.dsi', name: 'fastutil', version: '8.2.1'
-  testCompile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+	compile group: 'org.knowm.xchart', name: 'xchart', version: '3.5.2' // currently only used for the ParetoFronVisualization
   testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
-
 }

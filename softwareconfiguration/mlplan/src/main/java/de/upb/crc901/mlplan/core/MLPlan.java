@@ -2,7 +2,6 @@ package de.upb.crc901.mlplan.core;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +30,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -54,7 +54,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlan.class);
-	
 	private String loggerName;
 
 	private Classifier selectedClassifier;
@@ -64,21 +63,21 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	private Instances dataShownToSearch = null;
 
-	public MLPlan(MLPlanBuilder builder, final Instances data) throws IOException {
+	public MLPlan(final MLPlanBuilder builder, final Instances data) throws IOException {
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
 		/* sanity checks */
-		logger.info("Starting an ML-Plan instance.");
-		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists())
-			throw new IllegalArgumentException(
-					"The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
-		if (builder.getClassifierFactory() == null)
+		this.logger.info("Starting an ML-Plan instance.");
+		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
+			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
+		}
+		if (builder.getClassifierFactory() == null) {
 			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
+		}
 
 		/* set evaluation measure bridge */
-		ADecomposableDoubleMeasure<Double> measure = new MultiClassMeasureBuilder()
-				.getEvaluator(builder.getPerformanceMeasure());
+		ADecomposableDoubleMeasure<Double> measure = new MultiClassMeasureBuilder().getEvaluator(builder.getPerformanceMeasure());
 		AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
 		if (builder.getUseCache()) {
 			evaluationMeasurementBridge = new CacheEvaluatorMeasureBridge(measure, builder.getDBAdapter());
@@ -89,8 +88,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		/* set up exact splits */
 		double selectionDataPortion = this.getConfig().dataPortionForSelection();
 		if (selectionDataPortion > 0) {
-			List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.getInput(), this.getConfig().randomSeed(),
-					selectionDataPortion);
+			List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(this.getInput(), this.getConfig().randomSeed(), selectionDataPortion);
 			this.dataShownToSearch = selectionSplit.get(1);
 		} else {
 			this.dataShownToSearch = this.getInput();
@@ -100,14 +98,10 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		}
 
 		/* dynamically compute blow-ups */
-		double blowUpInSelectionPhase = MathExt.round(1f / this.getConfig().getMCCVTrainFoldSizeDuringSearch()
-				* this.getConfig().numberOfMCIterationsDuringSelection()
-				/ this.getConfig().numberOfMCIterationsDuringSearch(), 2);
-		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getConfig().dataPortionForSelection()))
-				/ this.getConfig().numberOfMCIterationsDuringSelection(), 2);
+		double blowUpInSelectionPhase = MathExt.round(1f / this.getConfig().getMCCVTrainFoldSizeDuringSearch() * this.getConfig().numberOfMCIterationsDuringSelection() / this.getConfig().numberOfMCIterationsDuringSearch(), 2);
+		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getConfig().dataPortionForSelection())) / this.getConfig().numberOfMCIterationsDuringSelection(), 2);
 		this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
-		this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS,
-				String.valueOf(blowUpInPostprocessing));
+		this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 
 		/* create 2-phase software configuration problem */
 		IClassifierEvaluator classifierEvaluator;
@@ -141,77 +135,65 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
 
 		/* create 2-phase HASCO */
-		logger.info("Creating the twoPhaseHASCOFactory.");
-		OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(
-				builder.getClassifierFactory(), problem);
-		HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = builder
-				.getHASCOFactory();
+		this.logger.info("Creating the twoPhaseHASCOFactory.");
+		OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(builder.getClassifierFactory(), problem);
+		HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = builder.getHASCOFactory();
 		this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 		this.twoPhaseHASCOFactory.setConfig(this.getConfig());
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
 		this.optimizingFactory.registerListener(new Object() {
-
 			@Subscribe
-			public void receiveEventFromFactory(AlgorithmEvent event) {
-				if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent)
+			public void receiveEventFromFactory(final AlgorithmEvent event) {
+				if (event instanceof AlgorithmInitializedEvent || event instanceof AlgorithmFinishedEvent) {
 					return;
+				}
 				if (event instanceof HASCOSolutionEvent) {
 					@SuppressWarnings("unchecked")
-					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event)
-							.getSolutionCandidate();
+					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 					try {
-						logger.info("Received new solution {} with score {} and evaluation time {}ms",
-								builder.getClassifierFactory()
-										.getComponentInstantiation(solution.getComponentInstance()),
-								solution.getScore(), solution.getTimeToEvaluateCandidate());
+						MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore(),
+								solution.getTimeToEvaluateCandidate());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 					try {
-						post(new ClassifierFoundEvent(getId(), builder.getClassifierFactory()
-								.getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
+						MLPlan.this.post(new ClassifierFoundEvent(MLPlan.this.getId(), builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
 					} catch (ComponentInstantiationFailedException e) {
 						e.printStackTrace();
 					}
 				} else {
-					post(event);
+					MLPlan.this.post(event);
 				}
 			}
 		});
-
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException()
-			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
 		case created: {
 			AlgorithmInitializedEvent event = this.activate();
 
 			/* check number of CPUs assigned */
 			if (this.getConfig().cpus() < 1) {
-				throw new IllegalStateException(
-						"Cannot generate search where number of CPUs is " + this.getConfig().cpus());
+				throw new IllegalStateException("Cannot generate search where number of CPUs is " + this.getConfig().cpus());
 			}
 
 			/* set timeout of optimizing factory */
 			// this.twoPhaseHASCOFactory.setTimeout(this.getTimeout());
 
 			/* communicate the parameters with which ML-Plan will run */
-			this.logger.info(
-					"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tMCCV for search: {} iterations with {}% for training\n\tMCCV for select: {} iterations with {}% for training\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-					this.getInput().relationName(), MultiClassPerformanceMeasure.ERRORRATE, this.getConfig().cpus(),
-					this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
-					this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(),
-					MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2),
-					this.getConfig().numberOfMCIterationsDuringSearch(),
-					(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSearch()),
-					this.getConfig().numberOfMCIterationsDuringSelection(),
-					(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSelection()),
-					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
-			logger.info("Initializing the optimization factory.");
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info(
+						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tMCCV for search: {} iterations with {}% for training\n\tMCCV for select: {} iterations with {}% for training\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
+						this.getInput().relationName(), MultiClassPerformanceMeasure.ERRORRATE, this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
+						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2),
+						this.getConfig().numberOfMCIterationsDuringSearch(), (int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSearch()), this.getConfig().numberOfMCIterationsDuringSelection(),
+						(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSelection()), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+			}
+			this.logger.info("Initializing the optimization factory.");
 			this.optimizingFactory.init();
-			logger.info("Started and activated ML-Plan.");
+			this.logger.info("Started and activated ML-Plan.");
 			return event;
 
 		}
@@ -228,9 +210,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				throw new AlgorithmException(e, "Training the classifier failed!");
 			}
 			long endBuildTime = System.currentTimeMillis();
-			this.logger.info(
-					"Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms",
-					endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
+			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
 			return this.terminate();
 		}
 		default:
@@ -240,8 +220,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	}
 
 	@Override
-	public Classifier call()
-			throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
+	public Classifier call() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}
@@ -253,9 +232,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.loggerName = name;
 		this.logger.info("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Activated ML-Plan logger {}. Now setting logger of twoPhaseHASCO to {}.2phasehasco", name,
-				name);
-		this.logger.info("Setting logger of {} to {}", this.optimizingFactory, this.loggerName + ".optimizingfactory");
+		this.logger.info("Activated ML-Plan logger {}. Now setting logger of twoPhaseHASCO to {}.2phasehasco", name, name);
+		this.logger.info("Setting logger of {} to {}.optimizingfactory", this.optimizingFactory.getClass().getName(), this.loggerName);
 		this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingfactory");
 
 		this.logger.info("Switched ML-Plan logger to {}", name);
@@ -285,11 +263,20 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	@SuppressWarnings("unchecked")
 	public GraphGenerator<TFDNode, String> getGraphGenerator() {
-		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) optimizingFactory
-				.getOptimizer()).getGraphGenerator();
+		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphGenerator();
 	}
 
 	public double getInternalValidationErrorOfSelectedClassifier() {
 		return this.internalValidationErrorOfSelectedClassifier;
+	}
+
+	@Override
+	public void cancel() {
+		this.logger.info("Received cancel. First canceling optimizer, then invoking general shutdown.");
+		this.optimizingFactory.cancel();
+		this.logger.debug("Now canceling main ML-Plan routine");
+		super.cancel();
+		assert this.isCanceled() : "Canceled-flag is not positive at the end of the cancel routine!";
+		this.logger.info("Completed cancellation of ML-Plan. Cancel status is {}", this.isCanceled());
 	}
 }

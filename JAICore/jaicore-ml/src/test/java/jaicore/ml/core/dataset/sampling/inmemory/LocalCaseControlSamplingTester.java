@@ -2,9 +2,7 @@ package jaicore.ml.core.dataset.sampling.inmemory;
 
 import java.util.Random;
 
-import jaicore.basic.algorithm.AlgorithmProblemTransformer;
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.LocalCaseControlSamplingFactory;
@@ -16,31 +14,15 @@ public class LocalCaseControlSamplingTester<I extends IInstance> extends General
 	private static double PRE_SAMPLING_FRACTION = 0.01;
 
 	@Override
-	public IAlgorithmFactory<IDataset<I>, IDataset<I>> getFactory() {
-		return new IAlgorithmFactory<IDataset<I>, IDataset<I>>() {
-
-			private IDataset<I> input;
-
-			@Override
-			public void setProblemInput(IDataset<I> problemInput) {
-				this.input = problemInput;
-			}
-
-			@Override
-			public <P> void setProblemInput(P problemInput, AlgorithmProblemTransformer<P, IDataset<I>> reducer) {
-				throw new UnsupportedOperationException("Problem input not applicable for subsampling algorithms!");
-			}
-
-			@Override
-			public IAlgorithm<IDataset<I>, IDataset<I>> getAlgorithm() {
-				LocalCaseControlSamplingFactory<I> factory = new LocalCaseControlSamplingFactory<>();
-				if (this.input != null) {
-					factory.setPreSampleSize((int) (PRE_SAMPLING_FRACTION * input.size()));
-					int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) input.size());
-					return factory.getAlgorithm(sampleSize, input, new Random(RANDOM_SEED));
-				}
-				return null;
-			}
-		};
+	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
+		@SuppressWarnings("unchecked")
+		IDataset<I> dataset = (IDataset<I>) problem;
+		LocalCaseControlSamplingFactory<I> factory = new LocalCaseControlSamplingFactory<>();
+		if (dataset != null) {
+			factory.setPreSampleSize((int) (PRE_SAMPLING_FRACTION * dataset.size()));
+			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) dataset.size());
+			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
+		}
+		return null;
 	}
 }

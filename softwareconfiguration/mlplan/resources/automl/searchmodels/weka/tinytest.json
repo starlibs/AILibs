@@ -1,0 +1,40 @@
+{
+  "repository" : "Tiny repository",
+  "components" : [
+  {
+    "name" : "weka.classifiers.bayes.BayesNet",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "Test" ],
+    "parameter" : [ {
+      "name" : "D",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "Q",
+      "type" : "cat",
+      "default" : "weka.classifiers.bayes.net.search.local.K2",
+      "values" : [ "weka.classifiers.bayes.net.search.local.K2", "weka.classifiers.bayes.net.search.local.HillClimber", "weka.classifiers.bayes.net.search.local.LAGDHillClimber", "weka.classifiers.bayes.net.search.local.SimulatedAnnealing", "weka.classifiers.bayes.net.search.local.TabuSearch", "weka.classifiers.bayes.net.search.local.TAN" ]
+    } ],
+    "dependencies" : [ ]
+  },
+  {
+    "name" : "weka.classifiers.trees.J48",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "Test" ],
+    "parameter" : [ {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "U",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "true"
+    }],
+    "dependencies" : [ ]
+  }
+  ]
+}

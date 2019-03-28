@@ -80,31 +80,29 @@
 </tr>
 <tbody>
 <tr class="altColor">
-<td class="colFirst"><a href="../../../jaicore/basic/algorithm/AlgorithmProblemTransformer.html" title="interface in jaicore.basic.algorithm">AlgorithmProblemTransformer</a>&lt;A,B&gt;</td>
-<td class="colLast">&nbsp;</td>
-</tr>
-<tr class="rowColor">
 <td class="colFirst"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="interface in jaicore.basic.algorithm">IAlgorithm</a>&lt;I,O&gt;</td>
 <td class="colLast">
-<div class="block">The algorithms should actually also be interruptible, but since this is often not the case, we require the cancel method to ensure that the authors of the algorithms provide a mechanism to stop the algorithm and free the used resources.</div>
+<div class="block">The algorithms should actually also be interruptible, but since this is often not the case,
+ we require the cancel method to ensure that the authors of the algorithms provide a mechanism
+ to stop the algorithm and free the used resources.</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html" title="interface in jaicore.basic.algorithm">IAlgorithmConfig</a></td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><a href="../../../jaicore/basic/algorithm/IAlgorithmFactory.html" title="interface in jaicore.basic.algorithm">IAlgorithmFactory</a>&lt;I,O&gt;</td>
 <td class="colLast">&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm">IOptimizationAlgorithm</a>&lt;I,O extends <a href="../../../jaicore/basic/ScoredItem.html" title="interface in jaicore.basic">ScoredItem</a>&lt;V&gt;,V extends java.lang.Comparable&lt;V&gt;&gt;</td>
 <td class="colLast">
 <div class="block">Optimizers usually do not compute their output ad-hoc but, in many iterations, update the currently best known solution.</div>
 </td>
 </tr>
-<tr class="rowColor">
-<td class="colFirst"><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;O&gt;</td>
+<tr class="altColor">
+<td class="colFirst"><a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;</td>
 <td class="colLast">&nbsp;</td>
 </tr>
 </tbody>
@@ -137,10 +135,6 @@
 <td class="colLast">
 <div class="block">A template for algorithms that iterate over solution candidates.</div>
 </td>
-</tr>
-<tr class="altColor">
-<td class="colFirst"><a href="../../../jaicore/basic/algorithm/StandardAlgorithmFactory.html" title="class in jaicore.basic.algorithm">StandardAlgorithmFactory</a>&lt;I,O&gt;</td>
-<td class="colLast">&nbsp;</td>
 </tr>
 </tbody>
 </table>

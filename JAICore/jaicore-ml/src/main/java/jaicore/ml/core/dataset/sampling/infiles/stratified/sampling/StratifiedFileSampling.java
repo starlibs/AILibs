@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.TempFileHandler;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -48,7 +47,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 
 	@Override
 	public AlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables.

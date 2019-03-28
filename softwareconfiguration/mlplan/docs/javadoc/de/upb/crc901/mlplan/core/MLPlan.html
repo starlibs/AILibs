@@ -200,7 +200,7 @@ implements jaicore.basic.ILoggingCustomizable</pre>
 <!--   -->
 </a>
 <h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
-<code>activate, cancel, checkAndConductTermination, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+<code>activate, cancel, checkAndConductTermination, computeTimeoutAware, getActivationTime, getId, getInput, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
 </ul>
 <ul class="blockList">
 <li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
@@ -270,7 +270,7 @@ implements jaicore.basic.ILoggingCustomizable</pre>
                                                                 throws jaicore.basic.algorithm.exceptions.AlgorithmException,
                                                                        java.lang.InterruptedException,
                                                                        jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                                                       java.util.concurrent.TimeoutException</pre>
+                                                                       jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>nextWithException</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithm&lt;weka.core.Instances,weka.classifiers.Classifier&gt;</code></dd>
@@ -278,7 +278,7 @@ implements jaicore.basic.ILoggingCustomizable</pre>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 </dl>
 </li>
 </ul>
@@ -292,7 +292,7 @@ implements jaicore.basic.ILoggingCustomizable</pre>
                                  throws jaicore.basic.algorithm.exceptions.AlgorithmException,
                                         java.lang.InterruptedException,
                                         jaicore.basic.algorithm.AlgorithmExecutionCanceledException,
-                                        java.util.concurrent.TimeoutException</pre>
+                                        jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</pre>
 <dl>
 <dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
 <dd><code>call</code>&nbsp;in interface&nbsp;<code>jaicore.basic.algorithm.IAlgorithm&lt;weka.core.Instances,weka.classifiers.Classifier&gt;</code></dd>
@@ -302,7 +302,7 @@ implements jaicore.basic.ILoggingCustomizable</pre>
 <dd><code>jaicore.basic.algorithm.exceptions.AlgorithmException</code></dd>
 <dd><code>java.lang.InterruptedException</code></dd>
 <dd><code>jaicore.basic.algorithm.AlgorithmExecutionCanceledException</code></dd>
-<dd><code>java.util.concurrent.TimeoutException</code></dd>
+<dd><code>jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException</code></dd>
 </dl>
 </li>
 </ul>

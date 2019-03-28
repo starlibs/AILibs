@@ -5,7 +5,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +13,7 @@ import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.DelayedCancellationCheckException;
-import jaicore.basic.algorithm.exceptions.DelayedTimeoutCheckException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.core.dataset.ArffUtilities;
 
 /**
@@ -42,8 +40,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 	}
 
 	@Override
-	public File call()
-			throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public File call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		Instant timeoutTime = null;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
@@ -80,14 +77,14 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 		while (this.hasNext()) {
 			try {
 				checkAndConductTermination();
-			} catch (DelayedTimeoutCheckException | DelayedCancellationCheckException e) {
+			} catch (AlgorithmTimeoutedException e) {
 				cleanUp();
 				throw new AlgorithmException(e.getMessage());
 			}
 			if (Instant.now().isAfter(timeoutTime)) {
 				LOG.warn("Algorithm is running even though it has been timeouted. Cancelling..");
 				this.cancel();
-				throw new TimeoutException();
+				throw new AlgorithmException("Algorithm is running even though it has been timeouted");
 			} else {
 				this.next();
 			}
@@ -102,10 +99,10 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 		cleanUp();
 		return new File(outputFilePath);
 	}
-	
+
 	/**
 	 * Implement custom clean up behaviour.
 	 */
 	protected abstract void cleanUp();
-	
+
 }

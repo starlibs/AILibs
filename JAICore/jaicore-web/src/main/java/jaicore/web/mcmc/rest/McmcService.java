@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -65,7 +66,7 @@ public class McmcService {
 	private static final String OUTPUT_FILENAME_FILE_EXTENSION = ".csv";
 
 	/** Timeout in ms given to Stan for sampling */
-	private static final int STAN_SAMPLING_TIMEOUT_MS = 60000;
+	private static final int STAN_SAMPLING_TIMEOUT_MS = 90000;
 
 	/**
 	 * Number of checkpoints at which the sampled function is checked for validity
@@ -86,15 +87,23 @@ public class McmcService {
 		List<Double> yValues = request.getyValues();
 		Integer numSamples = request.getNumSamples();
 
-		String inputFilename = new File(INPUT_FILENAME_PREFIX + System.currentTimeMillis() + INPUT_FILENAME_FILE_EXTENSION).getAbsolutePath();
-		String outputFilename = new File(OUTPUT_FILENAME_PREFIX + System.currentTimeMillis() + OUTPUT_FILENAME_FILE_EXTENSION).getAbsolutePath();
+		File inputFile = new File(INPUT_FILENAME_PREFIX + UUID.randomUUID().toString() + INPUT_FILENAME_FILE_EXTENSION);
+
+		if (inputFile.exists()) {
+			throw new RuntimeException("Input file already exists!");
+		}
+
+		String inputFilename = inputFile.getAbsolutePath();
+		String outputFilename = new File(
+				OUTPUT_FILENAME_PREFIX + UUID.randomUUID().toString() + OUTPUT_FILENAME_FILE_EXTENSION)
+						.getAbsolutePath();
 
 		generateInputDataFile(xValues, yValues, inputFilename);
 
 		ProcessBuilder pb;
 		if (numSamples == null) {
-			pb = new ProcessBuilder("/stan/lc", "sample", "init=/stan/init.R", "data", "file=" + inputFilename, "output",
-					"file=" + outputFilename);
+			pb = new ProcessBuilder("/stan/lc", "sample", "init=/stan/init.R", "data", "file=" + inputFilename,
+					"output", "file=" + outputFilename);
 		} else {
 			pb = new ProcessBuilder("/stan/lc", "sample", "num_samples=" + numSamples, "init=/stan/init.R", "data",
 					"file=" + inputFilename, "output", "file=" + outputFilename);
@@ -103,7 +112,19 @@ public class McmcService {
 		Process p = pb.start();
 		p.waitFor(STAN_SAMPLING_TIMEOUT_MS, TimeUnit.MILLISECONDS);
 
-		LOG.info("Stan finished work. Parsing output from {}", outputFilename);
+		if (p.isAlive()) {
+			LOG.error("Stan did not terminate within the given timeout of {}ms. Cleaning up..",
+					STAN_SAMPLING_TIMEOUT_MS);
+			p.destroy();
+			File outputFile = new File(outputFilename);
+			if (outputFile.exists()) {
+				outputFile.delete();
+			}
+			inputFile.delete();
+			throw new RuntimeException("Stan did not terminate");
+		}
+
+		LOG.info("Stan finished. Parsing output from {}", outputFilename);
 		File outputFile = new File(outputFilename);
 
 		if (!outputFile.exists()) {
@@ -114,7 +135,7 @@ public class McmcService {
 
 		// Cleanup input and output files
 		outputFile.delete();
-		new File(inputFilename).delete();
+		inputFile.delete();
 
 		LOG.info("Finished request processing");
 		return ResponseEntity.ok().body(response);
@@ -165,10 +186,12 @@ public class McmcService {
 	private McmcResponse parseOutputFile(File outputFile) throws IOException {
 		// Read raw lines from output file
 		List<String> rawLines = FileUtils.readLines(outputFile, Charset.defaultCharset());
-		
-		if(rawLines.isEmpty()) {
+
+		if (rawLines.isEmpty()) {
 			throw new RuntimeException("The output file is empty");
 		}
+
+		LOG.info("File has {} lines", rawLines.size());
 
 		// Include all lines into consideration that contain actual values
 		List<String> lines = new ArrayList<>();
@@ -193,8 +216,8 @@ public class McmcService {
 			lines.add(line);
 
 		}
-		
-		if(lines.isEmpty()) {
+
+		if (lines.isEmpty()) {
 			throw new RuntimeException("No valid lines could be read from output file!");
 		}
 
