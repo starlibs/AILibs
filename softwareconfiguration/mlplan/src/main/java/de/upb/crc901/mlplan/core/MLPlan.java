@@ -41,7 +41,7 @@ import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasu
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -116,8 +116,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 						.setFullDatasetSize(MLPlan.this.getInput().size());
 			}
 		} else {
-			classifierEvaluator = new MonteCarloCrossValidationEvaluator(evaluationMeasurementBridge,
-					this.getConfig().numberOfMCIterationsDuringSearch(), dataShownToSearch,
+			classifierEvaluator = new ProbabilisticMonteCarloCrossValidationEvaluator(evaluationMeasurementBridge,
+					this.getConfig().numberOfMCIterationsDuringSearch(), 1.0, dataShownToSearch,
 					this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
 		}
 

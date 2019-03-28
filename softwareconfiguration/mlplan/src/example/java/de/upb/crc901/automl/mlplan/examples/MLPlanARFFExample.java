@@ -20,8 +20,8 @@ import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
+//import javafx.application.Platform;
+//import javafx.embed.swing.JFXPanel;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
@@ -48,12 +48,13 @@ public class MLPlanARFFExample {
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
 		mlplan.setNumCPUs(2);
 
+		/*
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();
 			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
 					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
 			Platform.runLater(window);
-		}
+		}*/
 
 		try {
 			long start = System.currentTimeMillis();

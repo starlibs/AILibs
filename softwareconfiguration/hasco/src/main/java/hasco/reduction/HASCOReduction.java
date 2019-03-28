@@ -7,8 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
 import hasco.core.isNotRefinable;
@@ -20,6 +23,7 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.IObjectEvaluator;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
@@ -71,6 +75,12 @@ public class HASCOReduction<V extends Comparable<V>>
 	private Collection<Component> components;
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 
+	private Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier;
+	
+	public HASCOReduction(Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier) {
+		this.bestSolutionSupplier = bestSolutionSupplier;
+	}
+	
 	public Monom getInitState() {
 		if (this.originalProblem == null) {
 			throw new IllegalStateException("Cannot compute init state before transformation has been invoked.");
@@ -80,7 +90,7 @@ public class HASCOReduction<V extends Comparable<V>>
 		init.add(new Literal("component('request')"));
 		return init;
 	}
-
+	
 	public Collection<String> getExistingInterfaces() {
 		if (this.originalProblem == null) {
 			throw new IllegalStateException("Cannot compute existing interfaces before transformation has been invoked.");
@@ -284,13 +294,18 @@ public class HASCOReduction<V extends Comparable<V>>
 		/* derive a plan evaluator from the configuration evaluator */
 		IObjectEvaluator<Plan, V> planEvaluator = new IObjectEvaluator<Plan, V>() {
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public V evaluate(final Plan plan) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 				ComponentInstance solution = HASCOReduction.this.decodeSolution(plan);
 				if (solution == null) {
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
 				}
-				return problem.getCompositionEvaluator().evaluate(solution);
+				IObjectEvaluator<ComponentInstance, V> evaluator = problem.getCompositionEvaluator();
+				if(evaluator instanceof IInformedObjectEvaluatorExtension && bestSolutionSupplier.get() != null) {
+					((IInformedObjectEvaluatorExtension<V>) evaluator).updateBestScore(bestSolutionSupplier.get().getScore());
+				}
+				return evaluator.evaluate(solution);
 			}
 
 			@Override
