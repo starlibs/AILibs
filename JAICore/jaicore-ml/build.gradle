@@ -1,6 +1,27 @@
+sourceSets {
+    main {
+      java {
+          srcDir 'src'
+      }
+    }
+    test {
+     	java {
+     		srcDir 'test'
+     	}
+    }
+}
+
+repositories {
+   flatDir {
+       dirs 'lib'
+   }
+}   
+
 dependencies {
 	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-concurrent")
 	compile project(":JAICore:jaicore-experiments")
+	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-search")
 	
@@ -20,5 +41,7 @@ dependencies {
 	
 	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
-
+	
+	compile group: 'com.github.fommil.netlib', name: 'core', version: '1.1.2'
+    compile name: 'mtj'
 }

@@ -1,7 +1,29 @@
+sourceSets {
+    main {
+      java {
+          srcDir 'src'
+      }
+    }
+    test {
+     	java {
+     		srcDir 'test'
+     	}
+    }
+}
 dependencies {
 	compile project(":JAICore:jaicore-search")
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-logic")
 	compile project(":JAICore:jaicore-graphvisualizer")
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	compile project(":JAICore:jaicore-graph")
+	
+	//pddl4j
+	compile ('com.github.pellierd:pddl4j:v3.5.0') {
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+  }
+	runtime ('com.github.pellierd:pddl4j:v3.5.0')  {
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+  }
 }

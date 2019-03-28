@@ -1,0 +1,6 @@
+{
+	"repository": "MLPlan-MultiTarget",
+	"include": ["./meka-multitarget.json","./meka-multitarget-meta.json"],
+	"parameters": [	],
+	"components": [	]
+}
