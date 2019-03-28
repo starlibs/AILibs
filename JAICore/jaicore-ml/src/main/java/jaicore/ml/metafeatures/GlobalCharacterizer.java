@@ -29,14 +29,15 @@ import weka.core.Utils;
  *
  */
 public class GlobalCharacterizer extends Characterizer {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(GlobalCharacterizer.class);
 
-	protected final String preprocessingPrefix = "-E \"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\" -S \"weka.attributeSelection.BestFirst -D 1 -N 5\" -W ";
-	protected final String cp1NN = "weka.classifiers.lazy.IBk";
-	protected final String cpNB = "weka.classifiers.bayes.NaiveBayes";
-	protected final String cpASC = "weka.classifiers.meta.AttributeSelectedClassifier";
-	protected final String cpDS = "weka.classifiers.trees.DecisionStump";
+	// preprocessor prefixes
+	protected static final String PREPROCESSING_PREFIX = "-E \"weka.attributeSelection.CfsSubsetEval -P 1 -E 1\" -S \"weka.attributeSelection.BestFirst -D 1 -N 5\" -W ";
+	protected static final String CP_IBK = "weka.classifiers.lazy.IBk";
+	protected static final String CP_NB = "weka.classifiers.bayes.NaiveBayes";
+	protected static final String CP_ASC = "weka.classifiers.meta.AttributeSelectedClassifier";
+	protected static final String CP_DS = "weka.classifiers.trees.DecisionStump";
 
 	/**
 	 * The names of all the meta features that are computed by this characterizer
@@ -56,27 +57,35 @@ public class GlobalCharacterizer extends Characterizer {
 	/**
 	 * The time it took to compute the meta features for each characterizer by name
 	 */
-	protected Map<String, Double> computationTimes = new HashMap<String, Double>();
+	protected Map<String, Double> computationTimes = new HashMap<>();
 
 	/**
 	 * Initializes a new characterizer. Calls {@link #initializeCharacterizers()},
 	 * {@link #initializeCharacterizerNames()} and
 	 * {@link #initializeMetaFeatureIds()} in order.
 	 * 
-	 * @throws Exception
+	 * @throws DatasetCharacterizerInitializationFailedException
+	 *             if the characterizer cannot be initialized properly
 	 */
-	public GlobalCharacterizer() throws Exception {
+	public GlobalCharacterizer() throws DatasetCharacterizerInitializationFailedException {
 		logger.trace("Initialize");
-		initializeCharacterizers();
+		try {
+			initializeCharacterizers();
+		} catch (Exception e) {
+			throw new DatasetCharacterizerInitializationFailedException(e);
+		}
 		initializeCharacterizerNames();
 		initializeMetaFeatureIds();
 	}
 
 	@Override
 	public Map<String, Double> characterize(Instances instances) {
-		logger.trace("Characterize dataset \"{}\" ...", instances.relationName());
-		
-		TreeMap<String, Double> metaFeatures = new TreeMap<String, Double>();
+
+		if (logger.isTraceEnabled()) {
+			logger.trace("Characterize dataset \"{}\" ...", instances.relationName());
+		}
+
+		TreeMap<String, Double> metaFeatures = new TreeMap<>();
 		StopWatch watch = new StopWatch();
 		characterizers.forEach(characterizer -> {
 			try {
@@ -92,9 +101,9 @@ public class GlobalCharacterizer extends Characterizer {
 				computationTimes.put(characterizer.toString(), Double.NaN);
 			}
 		});
-		
-		logger.trace("Done characterizing dataset. Feature length: {}",metaFeatures.size());
-		
+
+		logger.trace("Done characterizing dataset. Feature length: {}", metaFeatures.size());
+
 		return metaFeatures;
 	}
 
@@ -106,8 +115,8 @@ public class GlobalCharacterizer extends Characterizer {
 		for (Characterizer characterizer : characterizers) {
 			builder.append(characterizer.toString());
 			builder.append(System.lineSeparator());
-			String[] ids = characterizer.getIDs();
-			for (String id : ids) {
+			String[] baseCharacterizerIds = characterizer.getIDs();
+			for (String id : baseCharacterizerIds) {
 				builder.append(id + ",");
 			}
 			builder.append(System.lineSeparator());
@@ -121,7 +130,7 @@ public class GlobalCharacterizer extends Characterizer {
 	 * 
 	 * @return The characterizers
 	 */
-	public ArrayList<Characterizer> getCharacterizers() {
+	public List<Characterizer> getCharacterizers() {
 		return characterizers;
 	}
 
@@ -143,8 +152,8 @@ public class GlobalCharacterizer extends Characterizer {
 	 * @return The names of the characterizers
 	 */
 	public List<String> getCharacterizerNames() {
-		List<String> names = new ArrayList<String>();
-		characterizerNames.values().forEach(name -> names.add(name));
+		List<String> names = new ArrayList<>();
+		characterizerNames.values().forEach(names::add);
 		return names;
 	}
 
@@ -163,10 +172,8 @@ public class GlobalCharacterizer extends Characterizer {
 	 * @return The mapping of Characterizer names to their meta features
 	 */
 	public Map<String, List<String>> getCharacterizerGroups() {
-		Map<String, List<String>> results = new HashMap<String, List<String>>();
-		characterizerNames.forEach((characterizer, name) -> {
-			results.put(name, Arrays.asList(characterizer.getIDs()));
-		});
+		Map<String, List<String>> results = new HashMap<>();
+		characterizerNames.forEach((characterizer, name) -> results.put(name, Arrays.asList(characterizer.getIDs())));
 		return results;
 	}
 
@@ -182,21 +189,23 @@ public class GlobalCharacterizer extends Characterizer {
 	 */
 	protected void initializeCharacterizers() throws Exception {
 		Characterizer[] characterizerArray = { new SimpleMetaFeatures(), new Statistical(),
-				new NominalAttDistinctValues(), new Cardinality(), new GenericLandmarker("kNN1N", cp1NN, 2, null),
-				new GenericLandmarker("NaiveBayes", cpNB, 2, null),
-				new GenericLandmarker("DecisionStump", cpDS, 2, null),
-				new GenericLandmarker("CfsSubsetEval_kNN1N", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cp1NN)),
-				new GenericLandmarker("CfsSubsetEval_NaiveBayes", cpASC, 2,
-						Utils.splitOptions(preprocessingPrefix + cpNB)),
-				new GenericLandmarker("CfsSubsetEval_DecisionStump", cpASC, 2,
-						Utils.splitOptions(preprocessingPrefix + cpDS)) };
+				new NominalAttDistinctValues(), new Cardinality(), new GenericLandmarker("kNN1N", CP_IBK, 2, null),
+				new GenericLandmarker("NaiveBayes", CP_NB, 2, null),
+				new GenericLandmarker("DecisionStump", CP_DS, 2, null),
+				new GenericLandmarker("CfsSubsetEval_kNN1N", CP_ASC, 2,
+						Utils.splitOptions(PREPROCESSING_PREFIX + CP_IBK)),
+				new GenericLandmarker("CfsSubsetEval_NaiveBayes", CP_ASC, 2,
+						Utils.splitOptions(PREPROCESSING_PREFIX + CP_NB)),
+				new GenericLandmarker("CfsSubsetEval_DecisionStump", CP_ASC, 2,
+						Utils.splitOptions(PREPROCESSING_PREFIX + CP_DS)) };
 		ArrayList<Characterizer> characterizerList = new ArrayList<>(Arrays.asList(characterizerArray));
-		String zeros = "0";
+		StringBuilder zeroes = new StringBuilder();
+		zeroes.append("0");
 		for (int i = 1; i <= 3; ++i) {
-			zeros += "0";
-			String[] j48Option = { "-C", "." + zeros + "1" };
+			zeroes.append("0");
+			String[] j48Option = { "-C", "." + zeroes.toString() + "1" };
 			characterizerList
-					.add(new GenericLandmarker("J48." + zeros + "1.", "weka.classifiers.trees.J48", 2, j48Option));
+					.add(new GenericLandmarker("J48." + zeroes.toString() + "1.", "weka.classifiers.trees.J48", 2, j48Option));
 
 			String[] repOption = { "-L", "" + i };
 			characterizerList
@@ -214,11 +223,11 @@ public class GlobalCharacterizer extends Characterizer {
 	 * Initializes {@link #characterizerNames}.
 	 */
 	protected void initializeCharacterizerNames() {
-		characterizerNames = new HashMap<Characterizer, String>();
+		characterizerNames = new HashMap<>();
 		characterizers.forEach(characterizer -> {
 			if (characterizer.getClass().equals(GenericLandmarker.class)) {
-				String AUCName = characterizer.getIDs()[0];
-				String name = AUCName.substring(0, AUCName.length() - 3);
+				String aUCName = characterizer.getIDs()[0];
+				String name = aUCName.substring(0, aUCName.length() - 3);
 				characterizerNames.put(characterizer, name);
 			} else {
 				characterizerNames.put(characterizer, characterizer.getClass().getSimpleName());
@@ -230,7 +239,7 @@ public class GlobalCharacterizer extends Characterizer {
 	 * Initializes {@link #ids}.
 	 */
 	protected void initializeMetaFeatureIds() {
-		List<String> metaFeatures = new ArrayList<String>();
+		List<String> metaFeatures = new ArrayList<>();
 		for (Characterizer characterizer : characterizers) {
 			for (String metaFeature : characterizer.getIDs()) {
 				metaFeatures.add(metaFeature);

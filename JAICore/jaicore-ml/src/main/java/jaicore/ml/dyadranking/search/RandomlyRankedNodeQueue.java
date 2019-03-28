@@ -12,6 +12,15 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.search.model.travesaltree.Node;
 
+/**
+ * A node queue for the best first search that inserts new nodes at a random
+ * position in the list.
+ * 
+ * @author Helena Graf
+ *
+ * @param <N>
+ * @param <V>
+ */
 public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> implements Queue<Node<N, V>> {
 
 	private Random random;
@@ -88,8 +97,7 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> implements Queu
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		// TODO: implement
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

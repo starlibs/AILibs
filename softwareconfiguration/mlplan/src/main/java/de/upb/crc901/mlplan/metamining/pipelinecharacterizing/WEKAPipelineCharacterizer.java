@@ -36,10 +36,6 @@ import treeminer.TreeRepresentationUtils;
 public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
 	private static final Logger log = LoggerFactory.getLogger(WEKAPipelineCharacterizer.class);
-
-	/** The default path for pre computed algorithm patterns. */
-	private static final String ALGORITHM_PATTERNS_PATH = "draco/algorithm_patterns.csv";
-
 	
 	/** The default path for pre computed algorithm patterns. */
 	private static final String ALGORITHM_PATTERNS_SUPPORT_5_PATH = "draco/patterns_support_5.csv";

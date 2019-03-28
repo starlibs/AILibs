@@ -7,13 +7,25 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
 
+/**
+ * HASCO variant factory using best first and a dyad-ranked OPEN list.
+ * 
+ * @author Helena Graf
+ *
+ */
 public class HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory extends HASCOViaFDAndBestFirstFactory<Double> {
 
+	/**
+	 * Constructs a new HASCO factory with a dyad ranked OPEN list configured with
+	 * the given parameters.
+	 * 
+	 * @param openConfig
+	 */
 	public HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(
-			IBestFirstQueueConfiguration<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> OPENConfig) {
+			IBestFirstQueueConfiguration<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> openConfig) {
 		super();
 		this.setNodeEvaluator(n -> 1.0);
-		this.setSearchFactory(new DyadRankedBestFirstFactory<>(OPENConfig));
+		this.setSearchFactory(new DyadRankedBestFirstFactory<>(openConfig));
 	}
 
 	@Override
@@ -21,9 +33,7 @@ public class HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory extends HASCOV
 		setSearchProblemTransformer(
 				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> {
 					if (n.isGoal()) {
-						double f = nodeEvaluator.f(n); 
-						System.err.println("Returning " + f + " for goal node.");
-						return f;
+						return nodeEvaluator.f(n);
 					} else {
 						return 1.0;
 					}

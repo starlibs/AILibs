@@ -26,14 +26,20 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 
 	private static final Logger logger = LoggerFactory.getLogger(ComponentInstanceVectorFeatureGenerator.class);
 
-	/*
+	/**
 	 * Maps the name of a component to a map that maps the name of the hyper
 	 * parameter to its index in the dyad vector.
 	 */
 	private Map<String, Map<String, Integer>> componentNameToParameterDyadIndex = new HashMap<>();
 
+	/**
+	 * Maps the name of a component to 
+	 */
 	private Map<String, Integer> componentNameToDyadIndex = new HashMap<>();
 
+	/**
+	 * Number of found patterns.
+	 */
 	private int patternCount;
 
 	/**
@@ -91,34 +97,9 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 			String parameterName = param.getName();
 			int parameterIndex = parameterIndices.get(parameterName);
 			if (param.isNumeric()) {
-				if (cI.getParameterValue(param) != null) {
-					double value = Double.parseDouble(cI.getParameterValue(param));
-					patterns.setValue(parameterIndex, value);
-				} else {
-					double value = (double) param.getDefaultValue();
-					patterns.setValue(parameterIndex, value);
-				}
+				handleNumericalParameter(cI, patterns, param, parameterIndex);
 			} else if (param.isCategorical()) {
-				// the parameters are one-hot-encoded, where the parameterIndex specifies the
-				// one hot index for the first categorical parameter, parameterIndex+1 is the
-				// one-hot index for the second parameter etc.
-				String parameterValue = cI.getParameterValue(param);
-				if (parameterValue == null) {
-					if (param.getDefaultValue() instanceof String) {
-					parameterValue = (String) param.getDefaultValue();
-					} else {
-						parameterValue = String.valueOf(param.getDefaultValue());
-					}
-				}
-				CategoricalParameterDomain domain = (CategoricalParameterDomain) param.getDefaultDomain();
-				for (int i = 0; i < domain.getValues().length; i++) {
-					if (domain.getValues()[i].equals(parameterValue)) {
-						patterns.setValue(parameterIndex + i, 1);
-					} else {
-						patterns.setValue(parameterIndex + i, 0);
-					}
-				}
-
+				handleCatergoricalParameter(cI, patterns, param, parameterIndex);
 			}
 		}
 
@@ -128,6 +109,39 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 		}
 
 		return patterns.asArray();
+	}
+
+	private void handleNumericalParameter(ComponentInstance cI, Vector patterns, Parameter param, int parameterIndex) {
+		if (cI.getParameterValue(param) != null) {
+			double value = Double.parseDouble(cI.getParameterValue(param));
+			patterns.setValue(parameterIndex, value);
+		} else {
+			double value = (double) param.getDefaultValue();
+			patterns.setValue(parameterIndex, value);
+		}
+	}
+
+	private void handleCatergoricalParameter(ComponentInstance cI, Vector patterns, Parameter param,
+			int parameterIndex) {
+		// the parameters are one-hot-encoded, where the parameterIndex specifies the
+		// one hot index for the first categorical parameter, parameterIndex+1 is the
+		// one-hot index for the second parameter etc.
+		String parameterValue = cI.getParameterValue(param);
+		if (parameterValue == null) {
+			if (param.getDefaultValue() instanceof String) {
+			parameterValue = (String) param.getDefaultValue();
+			} else {
+				parameterValue = String.valueOf(param.getDefaultValue());
+			}
+		}
+		CategoricalParameterDomain domain = (CategoricalParameterDomain) param.getDefaultDomain();
+		for (int i = 0; i < domain.getValues().length; i++) {
+			if (domain.getValues()[i].equals(parameterValue)) {
+				patterns.setValue(parameterIndex + i, 1);
+			} else {
+				patterns.setValue(parameterIndex + i, 0);
+			}
+		}
 	}
 
 	@Override

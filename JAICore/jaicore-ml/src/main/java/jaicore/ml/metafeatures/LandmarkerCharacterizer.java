@@ -18,7 +18,7 @@ import weka.core.Utils;
  *
  */
 public class LandmarkerCharacterizer extends GlobalCharacterizer {
-	
+
 	private Logger logger = LoggerFactory.getLogger(LandmarkerCharacterizer.class);
 
 	/**
@@ -26,30 +26,32 @@ public class LandmarkerCharacterizer extends GlobalCharacterizer {
 	 * {@link ranker.core.metafeatures.GlobalCharacterizer}, except that only
 	 * Characterizers that do not use probing are initialized.
 	 * 
-	 * @throws Exception
+	 * @throws DatasetCharacterizerInitializationFailedException
+	 *             if the characterizer cannot be initialized properly
 	 */
-	public LandmarkerCharacterizer() throws Exception {
+	public LandmarkerCharacterizer() throws DatasetCharacterizerInitializationFailedException {
 		super();
 		logger.trace("Initialize");
 	}
 
 	@Override
-	protected void initializeCharacterizers() throws Exception {	
+	protected void initializeCharacterizers() throws Exception {
 		Characterizer[] characterizerArray = {
-				new GenericLandmarker("CfsSubsetEval_DecisionStump", cpASC, 2,
-						Utils.splitOptions(preprocessingPrefix + cpDS)),
-				new GenericLandmarker("CfsSubsetEval_kNN1N", cpASC, 2, Utils.splitOptions(preprocessingPrefix + cp1NN)),
-				new GenericLandmarker("CfsSubsetEval_NaiveBayes", cpASC, 2,
-						Utils.splitOptions(preprocessingPrefix + cpNB)),
-				new GenericLandmarker("DecisionStump", cpDS, 2, null), new GenericLandmarker("kNN1N", cp1NN, 2, null),
-				new GenericLandmarker("NaiveBayes", cpNB, 2, null), };
+				new GenericLandmarker("CfsSubsetEval_DecisionStump", CP_ASC, 2,
+						Utils.splitOptions(PREPROCESSING_PREFIX + CP_DS)),
+				new GenericLandmarker("CfsSubsetEval_kNN1N", CP_ASC, 2, Utils.splitOptions(PREPROCESSING_PREFIX + CP_IBK)),
+				new GenericLandmarker("CfsSubsetEval_NaiveBayes", CP_ASC, 2,
+						Utils.splitOptions(PREPROCESSING_PREFIX + CP_NB)),
+				new GenericLandmarker("DecisionStump", CP_DS, 2, null), new GenericLandmarker("kNN1N", CP_IBK, 2, null),
+				new GenericLandmarker("NaiveBayes", CP_NB, 2, null), };
 		ArrayList<Characterizer> characterizerList = new ArrayList<>(Arrays.asList(characterizerArray));
-		String zeros = "0";
+		StringBuilder zeroes = new StringBuilder();
+		zeroes.append("0");
 		for (int i = 1; i <= 3; ++i) {
-			zeros += "0";
-			String[] j48Option = { "-C", "." + zeros + "1" };
-			characterizerList
-					.add(new GenericLandmarker("J48." + zeros + "1.", "weka.classifiers.trees.J48", 2, j48Option));
+			zeroes.append("0");
+			String[] j48Option = { "-C", "." + zeroes.toString() + "1" };
+			characterizerList.add(new GenericLandmarker("J48." + zeroes.toString() + "1.", "weka.classifiers.trees.J48",
+					2, j48Option));
 
 			String[] repOption = { "-L", "" + i };
 			characterizerList

@@ -16,24 +16,56 @@ import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
 
+/**
+ * A measure bridge for uploading some simple intermediate results. Uploads
+ * averages of an MCCV, and a simplified component representation.
+ * 
+ * @author Helena Graf
+ *
+ */
 public class SimpleUploaderMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double> {
 
-	private SimpleResultsUploader uploader;
 	private Logger logger = LoggerFactory.getLogger(SimpleUploaderMeasureBridge.class);
 
-	public SimpleUploaderMeasureBridge() {
+	/**
+	 * Uploader used to upload the results
+	 */
+	private SimpleResultsUploader uploader;
 
-	}
-
+	/**
+	 * Construct a bridge using the given uploader. Basic evaluator must then be set
+	 * later before it can be used.
+	 * 
+	 * @param simpleResultsUploader
+	 */
 	public SimpleUploaderMeasureBridge(SimpleResultsUploader simpleResultsUploader) {
 		this.uploader = simpleResultsUploader;
 	}
 
+	/**
+	 * Construct a brdige using the given uploader and basic evaluator.
+	 * 
+	 * @param basicEvaluator
+	 * @param uploader
+	 */
 	public SimpleUploaderMeasureBridge(IMeasure<Double, Double> basicEvaluator, SimpleResultsUploader uploader) {
 		super(basicEvaluator);
 		this.uploader = uploader;
 	}
 
+	/**
+	 * Uploads the found classifier with the given result, phase, and time it took
+	 * to evaluate the classifier.
+	 * 
+	 * @param classifier
+	 *            the found pipeline
+	 * @param result
+	 *            the error of the pipeline
+	 * @param phase
+	 *            the phase in which it was found (search or selection)
+	 * @param time
+	 *            how long it took too evaluate the classifier
+	 */
 	public void receiveFinalResult(Classifier classifier, double result, String phase, long time) {
 		try {
 			uploader.uploadResult((MLPipeline) classifier, time, result, phase);
