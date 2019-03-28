@@ -14,7 +14,8 @@ public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorith
 	
 	private IDataset<I> copyDataset;
 
-	public SimpleRandomSampling(Random random) {
+	public SimpleRandomSampling(Random random, IDataset<I> input) {
+		super(input);
 		this.random = random;
 	}
 

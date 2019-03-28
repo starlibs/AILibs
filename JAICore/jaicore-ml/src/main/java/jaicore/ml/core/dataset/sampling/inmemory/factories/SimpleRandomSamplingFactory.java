@@ -12,9 +12,8 @@ public class SimpleRandomSamplingFactory<I extends IInstance>
 
 	@Override
 	public SimpleRandomSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
-		SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<>(random);
+		SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<>(random, inputDataset);
 		simpleRandomSampling.setSampleSize(sampleSize);
-		simpleRandomSampling.setInput(inputDataset);
 		return simpleRandomSampling;
 	}
 

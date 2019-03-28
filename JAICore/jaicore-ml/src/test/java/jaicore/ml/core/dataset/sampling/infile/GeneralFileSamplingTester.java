@@ -12,6 +12,9 @@ import java.util.UUID;
 
 import org.junit.AfterClass;
 import org.junit.Test;
+import org.junit.internal.runners.JUnit4ClassRunner;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
@@ -26,6 +29,7 @@ import jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
  * 
  * @author Lukas Brandt
  */
+@RunWith(JUnit4.class)
 public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
 	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";

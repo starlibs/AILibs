@@ -1,6 +1,7 @@
 package jaicore.ml.core.dataset.sampling.infiles;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
@@ -27,7 +28,8 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 	private int streamedDatapoints;
 	private String[] sampledDatapoints;
 
-	public ReservoirSampling(Random random) {
+	public ReservoirSampling(Random random, File input) {
+		super(input);
 		this.random = random;
 	}
 

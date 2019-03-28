@@ -18,7 +18,8 @@ public class SystematicSamplingFactory<I extends IInstance>
 	 * Set a custom comparator that will be used to sort the datapoints before
 	 * sampling.
 	 * 
-	 * @param datapointComparator Comparator for two datapoints.
+	 * @param datapointComparator
+	 *            Comparator for two datapoints.
 	 */
 	public void setDatapointComparator(Comparator<I> datapointComparator) {
 		this.datapointComparator = datapointComparator;
@@ -33,12 +34,11 @@ public class SystematicSamplingFactory<I extends IInstance>
 	public SystematicSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
 		SystematicSampling<I> systematicSampling;
 		if (this.datapointComparator != null) {
-			systematicSampling = new SystematicSampling<>(random, this.datapointComparator);
+			systematicSampling = new SystematicSampling<>(random, this.datapointComparator, inputDataset);
 		} else {
-			systematicSampling = new SystematicSampling<>(random);
+			systematicSampling = new SystematicSampling<>(random, inputDataset);
 		}
 		systematicSampling.setSampleSize(sampleSize);
-		systematicSampling.setInput(inputDataset);
 		if (previousRun != null && previousRun.getSortedDataset() != null) {
 			systematicSampling.setSortedDataset(previousRun.getSortedDataset());
 		}

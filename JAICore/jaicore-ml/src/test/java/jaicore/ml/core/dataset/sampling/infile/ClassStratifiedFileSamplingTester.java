@@ -18,11 +18,10 @@ public class ClassStratifiedFileSamplingTester extends GeneralFileSamplingTester
 	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
 		File input = (File) problem;
 		Random r = new Random(RANDOM_SEED);
-		AFileSamplingAlgorithm algorithm = new StratifiedFileSampling(r, new ClassStratiFileAssigner());
+		AFileSamplingAlgorithm algorithm = new StratifiedFileSampling(r, new ClassStratiFileAssigner(), input);
 		try {
 			algorithm.setOutputFileName(OUTPUT_FILE_NAME);
 			if (input != null) {
-				algorithm.setInput(input);
 				int inputSize = ArffUtilities.countDatasetEntries(input, true);
 				int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
 				algorithm.setSampleSize(sampleSize);

@@ -43,7 +43,7 @@ import jaicore.interrupt.Interrupter;
  * the concrete type may depend on the input itself.
  */
 
-@RunWith(Parameterized.class)
+///@RunWith(Parameterized.class)
 public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	private String loggerName;

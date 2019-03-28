@@ -29,13 +29,12 @@ public class OSMACSamplingFactory<I extends IInstance> implements IRerunnableSam
 
 	@Override
 	public OSMAC<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
-		OSMAC<I> osmac = new OSMAC<>(random, this.preSampleSize);
+		OSMAC<I> osmac = new OSMAC<>(random, this.preSampleSize, inputDataset);
 		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null
 				&& this.previousRun != null) {
 			osmac.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
 			osmac.setChosenInstance(previousRun.getChosenInstance());
 		}
-		osmac.setInput(inputDataset);
 		osmac.setSampleSize(sampleSize);
 		return osmac;
 	}

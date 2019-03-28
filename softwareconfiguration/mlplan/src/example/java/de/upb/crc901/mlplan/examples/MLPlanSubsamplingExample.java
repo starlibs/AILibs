@@ -39,8 +39,7 @@ public class MLPlanSubsamplingExample {
 		File sampleFile = new File("testrsc/car_sample.arff");
 		sampleFile.deleteOnExit();
 		AFileSamplingAlgorithm samplingAlgorithm = new StratifiedFileSampling(new Random(1l),
-				new ClassStratiFileAssigner());
-		samplingAlgorithm.setInput(file);
+				new ClassStratiFileAssigner(), file);
 		samplingAlgorithm.setSampleSize(1000);
 		samplingAlgorithm.setOutputFileName(sampleFile.getAbsolutePath());
 		samplingAlgorithm.call();

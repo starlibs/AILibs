@@ -10,6 +10,7 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
@@ -37,10 +38,13 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
 	 * 
-	 * @param seed RAndom Seed
-	 * @param k    number of clusters
+	 * @param seed
+	 *            RAndom Seed
+	 * @param k
+	 *            number of clusters
 	 */
-	public KmeansSampling(long seed, int k) {
+	public KmeansSampling(long seed, int k, IDataset<I> input) {
+		super(input);
 		this.seed = seed;
 		this.k = k;
 	}
@@ -49,10 +53,13 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	 * Implementation of a sampling method using kmeans-clustering. The sample size
 	 * will be used as the number of clusters.
 	 * 
-	 * @param seed Random Seed
-	 * @param dis  {@link DistanceMeasure} to be used
+	 * @param seed
+	 *            Random Seed
+	 * @param dis
+	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(long seed, DistanceMeasure dis) {
+	public KmeansSampling(long seed, DistanceMeasure dis, IDataset<I> input) {
+		super(input);
 		this.seed = seed;
 		this.k = -1;
 		this.distanceMeassure = dis;
@@ -61,11 +68,15 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
 	 * 
-	 * @param seed Random Seed
-	 * @param k    number of clusters
-	 * @param dis  {@link DistanceMeasure} to be used
+	 * @param seed
+	 *            Random Seed
+	 * @param k
+	 *            number of clusters
+	 * @param dis
+	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(long seed, int k, DistanceMeasure dis) {
+	public KmeansSampling(long seed, int k, DistanceMeasure dis, IDataset<I> input) {
+		super(input);
 		this.seed = seed;
 		this.k = k;
 		this.distanceMeassure = dis;

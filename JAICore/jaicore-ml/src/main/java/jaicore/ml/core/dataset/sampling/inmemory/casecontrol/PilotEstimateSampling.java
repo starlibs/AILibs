@@ -24,6 +24,10 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 	private Double r = null;
 	private I chosenInstance = null;
 
+	protected PilotEstimateSampling(IDataset<I> input) {
+		super(input);
+	}
+
 	public I getChosenInstance() {
 		return chosenInstance;
 	}

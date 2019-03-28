@@ -33,13 +33,16 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	/**
 	 * Constructor for Stratified Sampling.
 	 * 
-	 * @param stratiAmountSelector The custom selector for the used amount of
-	 *                             strati.
-	 * @param stratiAssigner       Custom logic to assign datapoints into strati.
-	 * @param random               Random object for sampling inside of the strati.
+	 * @param stratiAmountSelector
+	 *            The custom selector for the used amount of strati.
+	 * @param stratiAssigner
+	 *            Custom logic to assign datapoints into strati.
+	 * @param random
+	 *            Random object for sampling inside of the strati.
 	 */
 	public StratifiedSampling(IStratiAmountSelector<I> stratiAmountSelector, IStratiAssigner<I> stratiAssigner,
-			Random random) {
+			Random random, IDataset<I> input) {
+		super(input);
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 		this.random = random;
@@ -133,8 +136,7 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 			this.executorService.execute(new Runnable() {
 				@Override
 				public void run() {
-					SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<I>(random);
-					simpleRandomSampling.setInput(strati[index]);
+					SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<I>(random, strati[index]);
 					simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
 					try {
 						synchronized (sample) {

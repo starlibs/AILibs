@@ -45,14 +45,16 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	/**
 	 * Implementation of a sampling method using gmeans-clustering.
 	 */
-	public GmeansSampling(long seed) {
+	public GmeansSampling(long seed, IDataset<I> input) {
+		super(input);
 		this.seed = seed;
 	}
 
 	/**
 	 * Implementation of a sampling method using gmeans-clustering.
 	 */
-	public GmeansSampling(long seed, DistanceMeasure dist) {
+	public GmeansSampling(long seed, DistanceMeasure dist, IDataset<I> input) {
+		super(input);
 		this.seed = seed;
 		this.distanceMeassure = dist;
 	}
@@ -149,8 +151,7 @@ public class GmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 		// GMeansStratiAmountSelectorAndAssigner<SimpleInstance> gm = new
 		// GMeansStratiAmountSelectorAndAssigner<>(45);
 
-		ASamplingAlgorithm<SimpleInstance> sampling = new GmeansSampling<SimpleInstance>(45);
-		sampling.setInput(ds);
+		ASamplingAlgorithm<SimpleInstance> sampling = new GmeansSampling<SimpleInstance>(45, ds);
 		sampling.setSampleSize(1000);
 
 		IDataset<SimpleInstance> dsOut = sampling.call();

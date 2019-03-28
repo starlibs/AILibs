@@ -29,6 +29,10 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 	protected Integer sampleSize = null;
 	private String outputFilePath = null;
 	protected FileWriter outputFileWriter;
+	
+	protected AFileSamplingAlgorithm(File input) {
+		super(input);
+	}
 
 	public void setSampleSize(int size) {
 		this.sampleSize = size;

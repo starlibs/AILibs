@@ -1,6 +1,7 @@
 package jaicore.ml.core.dataset.sampling.infiles.stratified.sampling;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -39,7 +40,8 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 	 * @param random             Random object for sampling inside of the strati.
 	 * @param stratiFileAssigner Assigner for datapoints to strati.
 	 */
-	public StratifiedFileSampling(Random random, IStratiFileAssigner stratiFileAssigner) {
+	public StratifiedFileSampling(Random random, IStratiFileAssigner stratiFileAssigner, File input) {
+		super(input);
 		this.random = random;
 		this.assigner = stratiFileAssigner;
 		this.tempFileHandler = new TempFileHandler();
@@ -159,8 +161,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 				@Override
 				public void run() {
 					String outputFile = tempFileHandler.createTempFile();
-					ReservoirSampling reservoirSampling = new ReservoirSampling(random);
-					reservoirSampling.setInput(tempFileHandler.getTempFile(uuid));
+					ReservoirSampling reservoirSampling = new ReservoirSampling(random, tempFileHandler.getTempFile(uuid));
 					reservoirSampling.setSampleSize(sampleSizeForStrati[index]);
 					try {
 						reservoirSampling.setOutputFileName(tempFileHandler.getTempFile(outputFile).getAbsolutePath());

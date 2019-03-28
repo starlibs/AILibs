@@ -29,10 +29,9 @@ public class StratifiedSamplingFactory<I extends IInstance>
 	@Override
 	public StratifiedSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
 		StratifiedSampling<I> stratifiedSampling = new StratifiedSampling<>(this.stratiAmountSelector,
-				this.stratiAssigner, random);
+				this.stratiAssigner, random, inputDataset);
 
 		stratifiedSampling.setSampleSize(sampleSize);
-		stratifiedSampling.setInput(inputDataset);
 		if (previousRun != null && previousRun.getStrati() != null) {
 			stratifiedSampling.setStrati(previousRun.getStrati());
 		}

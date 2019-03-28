@@ -32,8 +32,7 @@ public class StratifiedSplit {
 		AttributeBasedStratiAmountSelectorAndAssigner<IInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
 				attributeIndices, DiscretizationStrategy.EQUAL_SIZE, 10);
 		StratifiedSampling<IInstance> stratifiedSampling = new StratifiedSampling<>(selectorAndAssigner,
-				selectorAndAssigner, r);
-		stratifiedSampling.setInput(dataset);
+				selectorAndAssigner, r, dataset);
 		int sampleSize = (int) (trainPortion * dataset.size());
 		stratifiedSampling.setSampleSize(sampleSize);
 		try {
@@ -53,7 +52,5 @@ public class StratifiedSplit {
 	public IDataset<IInstance> getTestData() {
 		return testData;
 	}
-	
-	
 
 }

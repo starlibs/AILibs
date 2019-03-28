@@ -46,7 +46,8 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	 * @param random
 	 *            Random Object for determining the sampling start point.
 	 */
-	public SystematicSampling(Random random) {
+	public SystematicSampling(Random random, IDataset<I> input) {
+		super(input);
 		this.random = random;
 	}
 
@@ -58,7 +59,8 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	 * @param datapointComparator
 	 *            Comparator to sort the dataset.
 	 */
-	public SystematicSampling(Random random, Comparator<I> datapointComparator) {
+	public SystematicSampling(Random random, Comparator<I> datapointComparator, IDataset<I> input) {
+		super(input);
 		this.random = random;
 		this.datapointComparator = datapointComparator;
 	}

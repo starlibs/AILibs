@@ -39,20 +39,23 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	/**
 	 * Simple constructor that uses the default datapoint comparator.
 	 * 
-	 * @param random Random Object for determining the sampling start point.
+	 * @param random
+	 *            Random Object for determining the sampling start point.
 	 */
-	public SystematicFileSampling(Random random) {
-		this(random, null);
+	public SystematicFileSampling(Random random, File input) {
+		this(random, null, input);
 	}
 
 	/**
 	 * Constructor for a custom datapoint comparator.
 	 * 
-	 * @param random              Random Object for determining the sampling start
-	 *                            point.
-	 * @param datapointComparator Comparator to sort the dataset.
+	 * @param random
+	 *            Random Object for determining the sampling start point.
+	 * @param datapointComparator
+	 *            Comparator to sort the dataset.
 	 */
-	public SystematicFileSampling(Random random, Comparator<String> datapointComparator) {
+	public SystematicFileSampling(Random random, Comparator<String> datapointComparator, File input) {
+		super(input);
 		this.random = random;
 		this.datapointComparator = datapointComparator;
 		this.tempFileHandler = new TempFileHandler();

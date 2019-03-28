@@ -14,6 +14,10 @@ public abstract class CaseControlLikeSampling<I extends IInstance> extends ASamp
 	protected Random rand;
 	protected ArrayList<Pair<I, Double>> probabilityBoundaries = null;
 
+	protected CaseControlLikeSampling(IDataset<I> input) {
+		super(input);
+	}
+
 	public ArrayList<Pair<I, Double>> getProbabilityBoundaries() {
 		return probabilityBoundaries;
 	}
@@ -26,7 +30,8 @@ public abstract class CaseControlLikeSampling<I extends IInstance> extends ASamp
 	 * Count occurrences of every class. Needed to determine the probability for all
 	 * instances of that class
 	 * 
-	 * @param dataset Dataset of the sample algorithm object
+	 * @param dataset
+	 *            Dataset of the sample algorithm object
 	 * @return HashMap of occurrences
 	 * @throws ClassNotFoundException
 	 */

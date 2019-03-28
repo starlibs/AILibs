@@ -20,7 +20,8 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 	 * Constructor
 	 * @param rand RandomObject for reproducibility
 	 */
-	public CaseControlSampling(Random rand) {
+	public CaseControlSampling(Random rand, IDataset<I> input) {
+		super(input);
 		this.rand = rand;
 	}
 	

@@ -19,11 +19,14 @@ import weka.core.Instances;
 import weka.core.UnsupportedAttributeTypeException;
 
 /**
- * The idea behind this Sampling method is to weight instances depended on the way a pilot estimator p classified them.
- * Instances that p classified right but was unsure contain the most information and are most likely to be chosen. Instances that p
- * is very sure about and Instances that p is quite sure about their actual class and classified them falsely, are medium likely to be chosen. Instances that
- * p is very unsure about their actual class and classified them falsely are not likely to be chosen.
- * Note that any instance still has a base probability to be chosen.
+ * The idea behind this Sampling method is to weight instances depended on the
+ * way a pilot estimator p classified them. Instances that p classified right
+ * but was unsure contain the most information and are most likely to be chosen.
+ * Instances that p is very sure about and Instances that p is quite sure about
+ * their actual class and classified them falsely, are medium likely to be
+ * chosen. Instances that p is very unsure about their actual class and
+ * classified them falsely are not likely to be chosen. Note that any instance
+ * still has a base probability to be chosen.
  * 
  * @author noni4
  *
@@ -31,13 +34,14 @@ import weka.core.UnsupportedAttributeTypeException;
  */
 
 public class ClassifierWeightedSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
-	
+
 	private Classifier pilotEstimator;
 	private EnumeratedIntegerDistribution finalDistribution;
 	private double addForRightClassification;
 	private double baseValue;
-	
-	public ClassifierWeightedSampling(Random rand, Instances instances) {
+
+	public ClassifierWeightedSampling(Random rand, Instances instances, IDataset<I> input) {
+		super(input);
 		this.rand = rand;
 		this.pilotEstimator = new NaiveBayes();
 		try {
@@ -54,11 +58,11 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 	@Override
 	public AlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		switch(this.getState()) {
+		switch (this.getState()) {
 		case created:
 			this.sample = this.getInput().createEmpty();
 			IDataset<I> sampleCopy = this.getInput().createEmpty();
-			for(I instance: this.getInput()) {
+			for (I instance : this.getInput()) {
 				sampleCopy.add(instance);
 			}
 			try {
@@ -67,18 +71,17 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			} catch (UnsupportedAttributeTypeException e) {
 				e.printStackTrace();
-			}	
+			}
 			return this.activate();
 		case active:
 			I choosenInstance;
-			if(this.sample.size() < this.sampleSize) {
+			if (this.sample.size() < this.sampleSize) {
 				do {
 					choosenInstance = this.getInput().get(this.finalDistribution.sample());
-				} while(this.sample.contains(choosenInstance));
+				} while (this.sample.contains(choosenInstance));
 				this.sample.add(choosenInstance);
 				return new SampleElementAddedEvent(getId());
-			}
-			else {
+			} else {
 				return this.terminate();
 			}
 		case inactive:
@@ -87,25 +90,24 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 			} else {
 				return this.terminate();
 			}
-		default: 
-			throw new IllegalStateException("Unknown algorithm state "+ this.getState());	
+		default:
+			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
 	}
-	
-	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(
-			Instances instances, Classifier pilotEstimator) {
+
+	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(Instances instances,
+			Classifier pilotEstimator) {
 		double[] weights = new double[instances.size()];
-		for(int i = 0; i < instances.size(); i++) {
+		for (int i = 0; i < instances.size(); i++) {
 			try {
 				double clazz = this.pilotEstimator.classifyInstance(instances.get(i));
-				if(clazz == instances.get(i).classValue()) {
-					weights[i] = this.addForRightClassification - pilotEstimator.distributionForInstance(instances.get(i))[(int) instances.get(i).classValue()];
-				}
-				else {
+				if (clazz == instances.get(i).classValue()) {
+					weights[i] = this.addForRightClassification - pilotEstimator
+							.distributionForInstance(instances.get(i))[(int) instances.get(i).classValue()];
+				} else {
 					weights[i] = this.baseValue + pilotEstimator.distributionForInstance(instances.get(i))[(int) clazz];
 				}
-			}
-			catch(Exception e) {
+			} catch (Exception e) {
 				weights[i] = 0;
 			}
 		}
@@ -113,15 +115,15 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 		EnumeratedIntegerDistribution finalDistribution = new EnumeratedIntegerDistribution(indices, weights);
 		return finalDistribution;
 	}
-	
-	private double getMean(Instances instances) { 
-    	double sum = 0.0; 
-        for(Instance instance : instances)
+
+	private double getMean(Instances instances) {
+		double sum = 0.0;
+		for (Instance instance : instances)
 			try {
 				sum += this.pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
 			} catch (Exception e) {
 				e.printStackTrace();
-			} 
-        return sum/instances.size(); 
-    } 
+			}
+		return sum / instances.size();
+	}
 }

@@ -26,7 +26,8 @@ public class KmeansSamplingFactory<I extends IInstance>
 	/**
 	 * Set how many clusters shall be created. Default is the sample size;
 	 * 
-	 * @param k Parameter k of k-means.
+	 * @param k
+	 *            Parameter k of k-means.
 	 */
 	public void setK(int k) {
 		this.k = k;
@@ -58,9 +59,8 @@ public class KmeansSamplingFactory<I extends IInstance>
 		if (this.k > 0) {
 			kValue = k;
 		}
-		KmeansSampling<I> kmeansSampling = new KmeansSampling<I>(this.clusterSeed, kValue);
+		KmeansSampling<I> kmeansSampling = new KmeansSampling<I>(this.clusterSeed, kValue, inputDataset);
 		kmeansSampling.setSampleSize(sampleSize);
-		kmeansSampling.setInput(inputDataset);
 		kmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (previousRun != null && previousRun.getClusterResults() != null) {
 			kmeansSampling.setClusterResults(previousRun.getClusterResults());

@@ -29,6 +29,10 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 
 	protected Integer sampleSize = null;
 	protected IDataset<I> sample = null;
+	
+	protected ASamplingAlgorithm(IDataset<I> input) {
+		super(input);
+	}
 
 	public void setSampleSize(int size) {
 		this.sampleSize = size;
