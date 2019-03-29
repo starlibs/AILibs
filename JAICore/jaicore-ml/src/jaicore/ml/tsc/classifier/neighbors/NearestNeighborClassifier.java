@@ -13,7 +13,20 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.distances.ITimeSeriesDistance;
 
 /**
- * NearestNeighborClassifier
+ * K-Nearest-Neighbor classifier for time series.
+ * 
+ * Given an integer <code>k</code>, a distance measure <code>d</code>
+ * ({@link jaicore.ml.tsc.distances}), a training set of time series
+ * <code>TRAIN</code> and a test time series <code>T</code> (or a set of test
+ * time series). The k-nearest-neighbor classifier calculates the distance from
+ * <code>T</code> to every time series from <code>TRAIN</code>
+ * <code>D = { d(T, S) | S in TRAIN }</code> and aggregates the labels of the
+ * <code>k</code> time series <code>TRAIN_k</code> with
+ * <code>d(T, S) <= U</code> for all
+ * <code>S in TRAIN_k, U in TRAIN\TRAIN_k, </code> to prediciton for
+ * <code>T</code>.
+ * 
+ * @author fischor
  */
 public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> {
 
@@ -68,13 +81,28 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
     /** Type of the voting. */
     private VoteType voteType;
 
-    /** Values. Set by algorithm. */
-    private double[][] values;
-    private double[][] timestamps;
-    private int[] targets;
+    /** Value matrix containing the time series instances. Set by algorithm. */
+    protected double[][] values;
 
-    // Constructors.
+    /**
+     * Timestamp matrix containing the timestamps of the instances. Set by the
+     * algorihm.
+     */
+    protected double[][] timestamps;
 
+    /** Target values for the instances. Set by the algorithm. */
+    protected int[] targets;
+
+    /**
+     * Creates a k nearest neighbor classifier.
+     * 
+     * @param k               The number of nearest neighbors.
+     * @param distanceMeasure Distance measure for calculating the distances between
+     *                        every pair of train and test instances.
+     * @param voteType        Vote type to use to aggregate the the classes of the
+     *                        the k nearest neighbors into a single class
+     *                        prediction.
+     */
     public NearestNeighborClassifier(int k, ITimeSeriesDistance distanceMeasure, VoteType voteType) {
         super(new NearestNeighborAlgorithm());
 
@@ -90,15 +118,89 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
         this.voteType = voteType;
     }
 
+    /**
+     * Creates a k nearest neighbor classifier using majority vote.
+     * 
+     * @param k               The number of nearest neighbors.
+     * @param distanceMeasure Distance measure for calculating the distances between
+     *                        every pair of train and test instances.
+     */
     public NearestNeighborClassifier(int k, ITimeSeriesDistance distanceMeasure) {
         this(k, distanceMeasure, VoteType.MAJORITY);
     }
 
+    /**
+     * Creates a 1 nearest neighbor classifier using majority vote.
+     * 
+     * @param distanceMeasure Distance measure for calculating the distances between
+     *                        every pair of train and test instances.
+     */
     public NearestNeighborClassifier(ITimeSeriesDistance distanceMeasure) {
         this(1, distanceMeasure, VoteType.MAJORITY);
     }
 
-    // Main methods.
+    /**
+     * Predicts on univariate instance.
+     * 
+     * @param univInstance The univariate instance.
+     * @return Class prediction for the instance.
+     */
+    @Override
+    public Integer predict(double[] univInstance) throws PredictionException {
+        if (univInstance == null) {
+            throw new IllegalArgumentException("Instance to predict must not be null.");
+        }
+        return calculatePrediction(univInstance);
+    }
+
+    /**
+     * Predicts on a multivariate instance. This is not supported yet.
+     * 
+     * @param multivInstance The multivariate instance.
+     * @return Class prediciton for the instance.
+     */
+    @Override
+    public Integer predict(List<double[]> multivInstance) throws PredictionException {
+        throw new PredictionException("Can't predict on multivariate data yet.");
+    }
+
+    /**
+     * Predicts on a dataset.
+     * 
+     * @param dataset The dataset.
+     * @return List of class predicitons for each instance of the dataset.
+     */
+    @Override
+    public List<Integer> predict(TimeSeriesDataset dataset) throws PredictionException {
+        // Parameter checks.
+        if (dataset == null)
+            throw new IllegalArgumentException("Dataset must not be null.");
+        double[][] testInstances = dataset.getValuesOrNull(0);
+        if (testInstances == null) {
+            throw new PredictionException("Can't predict on empty dataset.");
+        }
+        // Calculate predictions.
+        ArrayList<Integer> predictions = new ArrayList<>(dataset.getNumberOfInstances());
+        for (double[] testInstance : testInstances) {
+            int prediction = calculatePrediction(testInstance);
+            predictions.add(prediction);
+        }
+        return predictions;
+    }
+
+    /**
+     * Calculates predicition on a single test instance.
+     * 
+     * @param testInstance The test instance (not null assured within class).
+     * @return
+     */
+    protected int calculatePrediction(double[] testInstance) {
+        // Determine the k nearest neighbors for the test instance.
+        PriorityQueue<Pair<Integer, Double>> nearestNeighbors = calculateNearestNeigbors(testInstance);
+        // Vote on determined neighbors to create prediction and return prediction.
+        int prediction = vote(nearestNeighbors);
+        return prediction;
+    }
 
     /**
      * Determine the k nearest neighbors for a test instance.
@@ -156,7 +258,6 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
      */
     protected int voteWeightedStepwise(PriorityQueue<Pair<Integer, Double>> nearestNeighbors) {
         // Voting.
-        System.out.print("Hello");
         HashMap<Integer, Integer> votes = new HashMap<>();
         int weight = 1;
         while (!nearestNeighbors.isEmpty()) {
@@ -253,76 +354,60 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
     }
 
     /**
-     * Calculates predicition on a single test instance.
+     * Sets the value matrix.
      * 
-     * @param testInstance The test instance (not null assured within class).
-     * @return
+     * @param values
      */
-    protected int calculatePrediction(double[] testInstance) {
-        // Determine the k nearest neighbors for the test instance.
-        PriorityQueue<Pair<Integer, Double>> nearestNeighbors = calculateNearestNeigbors(testInstance);
-        // Vote on determined neighbors to create prediction and return prediction.
-        int prediction = vote(nearestNeighbors);
-        return prediction;
-    }
-
-    // Inherited methods.
-
-    @Override
-    public Integer predict(double[] univInstance) throws PredictionException {
-        if (univInstance == null) {
-            throw new IllegalArgumentException("Instance to predict must not be null.");
-        }
-        return calculatePrediction(univInstance);
-    }
-
-    @Override
-    public Integer predict(List<double[]> multivInstance) throws PredictionException {
-        throw new PredictionException("Can't predict on multivariate data yet.");
-    }
-
-    @Override
-    public List<Integer> predict(TimeSeriesDataset dataset) throws PredictionException {
-        // Parameter checks.
-        if (dataset == null)
-            throw new IllegalArgumentException("Dataset must not be null.");
-        double[][] testInstances = dataset.getValuesOrNull(0);
-        if (testInstances == null) {
-            throw new PredictionException("Can't predict on empty dataset.");
-        }
-        // Calculate predictions.
-        ArrayList<Integer> predictions = new ArrayList<>(dataset.getNumberOfInstances());
-        for (double[] testInstance : testInstances) {
-            int prediction = calculatePrediction(testInstance);
-            predictions.add(prediction);
-        }
-        return predictions;
-    }
-
-    // Getter and setter.
-
     protected void setValues(double[][] values) {
         if (values == null)
             throw new IllegalArgumentException("Values must not be null");
         this.values = values;
     }
 
+    /**
+     * Sets the timestamps.
+     * 
+     * @param timestamps
+     */
     protected void setTimestamps(double[][] timestamps) {
         this.timestamps = timestamps;
     }
 
+    /**
+     * Sets the targets.
+     * 
+     * @param targets
+     */
     protected void setTargets(int[] targets) {
         if (targets == null)
             throw new IllegalArgumentException("Targets must not be null");
         this.targets = targets;
     }
 
+    /**
+     * Getter for the k value, @see #k.
+     * 
+     * @return k
+     */
     public int getK() {
-        return k;
+        return this.k;
     }
 
+    /**
+     * Getter for the vote type. @see #voteType.
+     * 
+     * @return The vote type.
+     */
     public VoteType getVoteType() {
-        return voteType;
+        return this.voteType;
     }
 
+    /**
+     * Getter for the distance measure. @see #distanceMeasure.
+     * 
+     * @return
+     */
+    public ITimeSeriesDistance getDistanceMeasure() {
+        return this.distanceMeasure;
+    }
 }

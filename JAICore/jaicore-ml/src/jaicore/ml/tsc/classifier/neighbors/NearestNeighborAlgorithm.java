@@ -13,8 +13,10 @@ import jaicore.ml.tsc.classifier.ASimplifiedTSCAlgorithm;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /**
- * Algorithm that backs all nearest neighbor classifiers. When called, it hands
- * the dataset over to the classifier.
+ * Algorithm for the nearest neighbors classifier.
+ * 
+ * This algorithm just delegates the value matrix, timestamps and targets to the
+ * classifier.
  */
 public class NearestNeighborAlgorithm extends ASimplifiedTSCAlgorithm<Integer, NearestNeighborClassifier> {
 
