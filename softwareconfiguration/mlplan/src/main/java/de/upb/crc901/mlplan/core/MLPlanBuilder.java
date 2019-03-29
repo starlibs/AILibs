@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
+import de.upb.crc901.mlplan.metamining.dyadranking.DyadRankingBasedNodeEvaluator;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
@@ -24,14 +25,19 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import hasco.core.HASCOFactory;
 import hasco.model.Component;
+import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
+import jaicore.ml.dyadranking.search.ADyadRankedNodeQueueConfig;
+import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -93,13 +99,13 @@ public class MLPlanBuilder {
 	private MLPlanClassifierConfig algorithmConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
 	private MultiClassPerformanceMeasure performanceMeasure = MultiClassPerformanceMeasure.ERRORRATE;
 	private boolean useCache = false;
+	private AbstractEvaluatorMeasureBridge<Double, Double> customEvaluatorBridge;
 	private boolean factoryPreparedWithData = false;
 	private PerformanceDBAdapter dbAdapter = null;
 
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
-
-	@SuppressWarnings("rawtypes")
+@SuppressWarnings("rawtypes")
 	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double>();
 
 	private Predicate<TFDNode> priorizingPredicate = null;
@@ -108,7 +114,8 @@ public class MLPlanBuilder {
 		super();
 	}
 
-	public MLPlanBuilder(final File searchSpaceConfigFile, final File alhorithmConfigFile, final MultiClassPerformanceMeasure performanceMeasure) {
+	public MLPlanBuilder(final File searchSpaceConfigFile, final File alhorithmConfigFile,
+	final MultiClassPerformanceMeasure performanceMeasure) {
 		this();
 		this.searchSpaceConfigFile = searchSpaceConfigFile;
 		this.algorithmConfigFile = alhorithmConfigFile;
@@ -170,11 +177,8 @@ public class MLPlanBuilder {
 	}
 
 	public MLPlanBuilder withAutoWEKAConfiguration() throws IOException {
-		this.classifierFactory = new WEKAPipelineFactory();
-		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
-		return this.withDefaultConfig(DefaultConfig.AUTO_WEKA);
+		return this.withAutoWEKAConfiguration(true);
 	}
-
 	public MLPlanBuilder withTinyTestConfiguration() throws IOException {
 		this.classifierFactory = new WEKAPipelineFactory();
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
@@ -195,9 +199,31 @@ public class MLPlanBuilder {
 		}
 		this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
 		this.withRandomCompletionBasedBestFirstSearch();
-
 		return this;
 	}
+	
+	public MLPlanBuilder withAutoWEKAConfiguration(boolean usePreferenceBasedNodeEvaluator) throws IOException {
+		if (this.searchSpaceConfigFile == null) {
+			withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
+		}	
+		if (usePreferenceBasedNodeEvaluator) {
+			File fileOfPreferredComponents = getAlgorithmConfig().preferredComponents();
+			List<String> ordering;
+			if (!fileOfPreferredComponents.exists()) {
+				logger.warn(
+						"The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.",
+						fileOfPreferredComponents.getAbsolutePath());
+				ordering = new ArrayList<>();
+			} else {
+				ordering = FileUtil.readFileAsList(fileOfPreferredComponents);
+			}
+			withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(components, ordering));
+		}
+		this.classifierFactory = new WEKAPipelineFactory();
+		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
+		return this;
+	}
+
 
 	public MLPlanBuilder withAlgorithmConfigFile(final File algorithmConfigFile) throws IOException {
 		return this.withAlgorithmConfig(loadOwnerConfig(algorithmConfigFile));
@@ -231,7 +257,8 @@ public class MLPlanBuilder {
 		if (this.preferredNodeEvaluator == null) {
 			this.preferredNodeEvaluator = preferredNodeEvaluator;
 		} else {
-			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, this.preferredNodeEvaluator);
+			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator,
+					this.preferredNodeEvaluator);
 		}
 		this.updateSearchProblemTransformer();
 		return this;
@@ -251,13 +278,24 @@ public class MLPlanBuilder {
 			return;
 		}
 
-		/* now determine the real node evaluator to be used. A semantic node evaluator has highest priority */
+		HASCOViaFDAndBestFirstFactory<Double> factory = (HASCOViaFDAndBestFirstFactory<Double>) hascoFactory;
+
+		/*
+		 * now determine the real node evaluator to be used. A semantic node evaluator
+		 * has highest priority
+		 */
 		INodeEvaluator<TFDNode, Double> actualNodeEvaluator;
-		if (this.pipelineValidityCheckingNodeEvaluator != null) {
-			this.pipelineValidityCheckingNodeEvaluator.setComponents(this.components);
-			this.pipelineValidityCheckingNodeEvaluator.setData(data);
-			if (this.preferredNodeEvaluator != null) {
-				actualNodeEvaluator = new AlternativeNodeEvaluator<>(this.pipelineValidityCheckingNodeEvaluator, this.preferredNodeEvaluator);
+		if (pipelineValidityCheckingNodeEvaluator != null) {
+			pipelineValidityCheckingNodeEvaluator.setComponents(components);
+			pipelineValidityCheckingNodeEvaluator.setData(data);
+			if (preferredNodeEvaluator != null) {
+				if (preferredNodeEvaluator instanceof DyadRankingBasedNodeEvaluator) {
+					DyadRankingBasedNodeEvaluator<TFDNode, Double> dyadRanker = (DyadRankingBasedNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator;
+					dyadRanker.setDataset(data);
+					// dyadRanker.setGenerator(hascoFactory.getAlgorithm().getGraphGenerator());
+				}
+				actualNodeEvaluator = new AlternativeNodeEvaluator<>(pipelineValidityCheckingNodeEvaluator,
+						this.preferredNodeEvaluator);
 			} else {
 				actualNodeEvaluator = this.pipelineValidityCheckingNodeEvaluator;
 			}
@@ -302,6 +340,11 @@ public class MLPlanBuilder {
 	public void withTimeoutForNodeEvaluation(final TimeOut timeout) {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout.milliseconds()));
 	}
+	
+	public MLPlanBuilder withOPENListConfiguration(ADyadRankedNodeQueueConfig<TFDNode> openConfig) {
+		this.hascoFactory = new HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(openConfig);
+		return this;
+	}
 
 	public boolean getUseCache() {
 		return this.useCache;
@@ -326,5 +369,24 @@ public class MLPlanBuilder {
 		fields.put("algorithmConfigFile", this.algorithmConfigFile);
 		fields.put("classifierFactory", this.classifierFactory);
 		return ToJSONStringUtil.toJSONString(fields);
+	}
+
+	public AbstractEvaluatorMeasureBridge<Double, Double> getCustomEvaluatorBridge() {
+		return customEvaluatorBridge;
+	}
+
+	public MLPlanBuilder withCustomEvaluatorBridge(
+			AbstractEvaluatorMeasureBridge<Double, Double> customEvaluatorBridge) {
+		this.useCache = true;
+		this.customEvaluatorBridge = customEvaluatorBridge;
+		return this;
+	}
+	
+	public void setSearchBenchmarkForNodeEvaluator(IObjectEvaluator<ComponentInstance, Double> searchBenchmark) {
+		if (preferredNodeEvaluator instanceof DyadRankingBasedNodeEvaluator) {
+			DyadRankingBasedNodeEvaluator<TFDNode, Double> dyadRanker = (DyadRankingBasedNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator;
+			dyadRanker.setPipelineEvaluator(searchBenchmark);
+		}
+
 	}
 }

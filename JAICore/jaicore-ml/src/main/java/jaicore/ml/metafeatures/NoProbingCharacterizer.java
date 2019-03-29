@@ -22,10 +22,10 @@ public class NoProbingCharacterizer extends GlobalCharacterizer {
 	 * Constructs a new NoProbingCharacterizer. Construction is the same as for the
 	 * {@link ranker.core.metafeatures.GlobalCharacterizer}, except that only Characterizers that do not use probing
 	 * are initialized.
+	 * @throws DatasetCharacterizerInitializationFailedException if the characterizer cannot be initialized properly
 	 * 
-	 * @throws Exception
 	 */
-	public NoProbingCharacterizer() throws Exception {
+	public NoProbingCharacterizer() throws DatasetCharacterizerInitializationFailedException {
 		super();
 	}
 

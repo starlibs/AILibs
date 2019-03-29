@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
+import de.upb.crc901.mlpipeline_evaluation.SimpleUploaderMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
@@ -62,8 +63,37 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
 		if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
+		} else if (this.evaluationMeasurementBridge instanceof SimpleUploaderMeasureBridge) {
+			SimpleUploaderMeasureBridge bridge2 = (SimpleUploaderMeasureBridge) evaluationMeasurementBridge;
+			long start = System.currentTimeMillis();
+			double result = 0;
+			try {
+				result = evaluate(c, bridge2);
+			} catch (ObjectEvaluationFailedException e) {
+				try {
+					bridge2.receiveFinalResult(classifierFactory.getComponentInstantiation(c), 1, "Selection",
+							System.currentTimeMillis() - start);
+				} catch (ComponentInstantiationFailedException e1) {
+					logger.warn("Could not instantiate component instance!");
+				}
+				throw e;
+
+			}
+
+			try {
+				bridge2.receiveFinalResult(classifierFactory.getComponentInstantiation(c), result, "Selection",
+						System.currentTimeMillis() - start);
+			} catch (ComponentInstantiationFailedException e) {
+				logger.warn("Could not instantiate component instance!");
+			}
+			return result;
 		}
 
+		return evaluate(c, bridge);
+	}
+
+	private Double evaluate(final ComponentInstance c, AbstractEvaluatorMeasureBridge<Double, Double> bridge)
+			throws ObjectEvaluationFailedException, InterruptedException {
 		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();

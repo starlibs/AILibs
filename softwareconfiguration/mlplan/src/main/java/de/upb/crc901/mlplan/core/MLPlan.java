@@ -18,6 +18,7 @@ import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.OptimizingFactory;
 import hasco.optimizingfactory.OptimizingFactoryProblem;
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
@@ -58,7 +59,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	public MLPlan(final MLPlanBuilder builder, final Instances data) throws IOException {
 		super(builder.getAlgorithmConfig(), data);
-		builder.prepareNodeEvaluatorInFactoryWithData(data);
+		builder.prepareNodeEvaluatorInFactoryWithData(data);	
 
 		/* sanity checks */
 		this.logger.info("Starting an ML-Plan instance.");
@@ -73,7 +74,12 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		ADecomposableDoubleMeasure<Double> measure = new MultiClassMeasureBuilder().getEvaluator(builder.getPerformanceMeasure());
 		AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
 		if (builder.getUseCache()) {
-			evaluationMeasurementBridge = new CacheEvaluatorMeasureBridge(measure, builder.getDBAdapter());
+			if (builder.getCustomEvaluatorBridge() != null) {
+				evaluationMeasurementBridge = builder.getCustomEvaluatorBridge();
+				evaluationMeasurementBridge.setBasicEvaluator(measure);
+			} else {
+				evaluationMeasurementBridge = new CacheEvaluatorMeasureBridge(measure, builder.getDBAdapter());
+			}			
 		} else {
 			evaluationMeasurementBridge = new SimpleEvaluatorMeasureBridge(measure);
 		}
@@ -110,6 +116,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 		this.twoPhaseHASCOFactory.setConfig(this.getConfig());
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, this.twoPhaseHASCOFactory);
+		
+		builder.setSearchBenchmarkForNodeEvaluator(searchBenchmark);
 		this.optimizingFactory.registerListener(new Object() {
 			@Subscribe
 			public void receiveEventFromFactory(final AlgorithmEvent event) {

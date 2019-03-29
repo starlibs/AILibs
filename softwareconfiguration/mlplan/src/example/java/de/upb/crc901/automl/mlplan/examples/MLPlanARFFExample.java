@@ -9,8 +9,10 @@ import java.util.concurrent.TimeUnit;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
+import de.upb.crc901.mlplan.metamining.dyadranking.DyadRankingBasedNodeEvaluator;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import hasco.serialization.ComponentLoader;
 import jaicore.basic.TimeOut;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
@@ -28,7 +30,7 @@ import weka.core.Instances;
 
 public class MLPlanARFFExample {
 
-	private static final boolean ACTIVATE_VISUALIZATION = false;
+	private static final boolean ACTIVATE_VISUALIZATION = true;
 
 	public static void main(final String[] args) throws Exception {
 
@@ -46,7 +48,7 @@ public class MLPlanARFFExample {
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(5);
+		mlplan.setNumCPUs(2);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();

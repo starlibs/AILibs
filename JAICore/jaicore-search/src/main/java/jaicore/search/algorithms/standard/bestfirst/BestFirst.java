@@ -46,6 +46,7 @@ import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
+import jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
@@ -313,10 +314,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				if (BestFirst.this.getConfig().parentDiscarding() != ParentDiscarding.NONE) {
 					BestFirst.this.openLock.lockInterruptibly();
 					try {
-						/*
-						 * determine whether we already have the node AND it is worse than the one we
-						 * want to insert
-						 */
+
+						/* determine whether we already have the node AND it is worse than the one we want to insert */
 						Optional<Node<N, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
 						if (existingIdenticalNodeOnOpen.isPresent()) {
 							Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
@@ -1285,6 +1284,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	public Object getNodeAnnotation(final N node, final String annotation) {
 		Node<N, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotation(annotation);
+	}
+	
+	@Subscribe
+	public void onFValueReceivedEvent(FValueEvent<V> event) {
+		this.post(event);
 	}
 
 	@Override

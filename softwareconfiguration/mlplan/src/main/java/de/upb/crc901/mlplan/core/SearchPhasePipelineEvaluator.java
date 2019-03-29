@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
+import de.upb.crc901.mlpipeline_evaluation.SimpleUploaderMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
@@ -76,6 +77,20 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 				int subSeed = this.seed + c.hashCode();
 				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSearch, this.trainFoldSize, subSeed);
 				return copiedSearchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
+			} else if (this.evaluationMeasurementBridge instanceof SimpleUploaderMeasureBridge) {
+				SimpleUploaderMeasureBridge bridge = (SimpleUploaderMeasureBridge) evaluationMeasurementBridge;
+				long start = System.currentTimeMillis();
+				Classifier classifier = classifierFactory.getComponentInstantiation(c);
+				double result = 0;
+				try {
+					result = searchBenchmark.evaluate(classifier);
+				} catch(ObjectEvaluationFailedException e) {
+					bridge.receiveFinalResult(classifier, 1, "Search", System.currentTimeMillis()-start);
+					throw e;
+				}
+				
+				bridge.receiveFinalResult(classifier, result, "Search", System.currentTimeMillis()-start);
+				return result;
 			}
 			return this.searchBenchmark.evaluate(this.classifierFactory.getComponentInstantiation(c));
 		} catch (InterruptedException e) {

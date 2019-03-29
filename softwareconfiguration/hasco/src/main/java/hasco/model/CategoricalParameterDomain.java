@@ -3,10 +3,14 @@ package hasco.model;
 import java.util.Arrays;
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CategoricalParameterDomain extends ParameterDomain {
 	private final String[] values;
 
-	public CategoricalParameterDomain(final String[] values) {
+	@JsonCreator
+	public CategoricalParameterDomain(@JsonProperty("values")final String[] values) {
 		super();
 		this.values = values;
 	}
