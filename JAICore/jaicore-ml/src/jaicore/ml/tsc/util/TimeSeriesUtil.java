@@ -197,8 +197,8 @@ public class TimeSeriesUtil {
 	/**
 	 * Creates equidistant timestamps for a time series.
 	 * 
-	 * @param timeSeries
-	 *            Time series to generate timestamps for. Let n be its length.
+	 * @param timeSeries Time series to generate timestamps for. Let n be its
+	 *                   length.
 	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
 	 */
 	public static INDArray createEquidistantTimestamps(INDArray timeSeries) {
@@ -211,8 +211,8 @@ public class TimeSeriesUtil {
 	/**
 	 * Creates equidistant timestamps for a time series.
 	 * 
-	 * @param timeSeries
-	 *            Time series to generate timestamps for. Let n be its length.
+	 * @param timeSeries Time series to generate timestamps for. Let n be its
+	 *                   length.
 	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
 	 */
 	public static double[] createEquidistantTimestamps(double[] timeSeries) {
@@ -225,12 +225,9 @@ public class TimeSeriesUtil {
 	 * Function extracting the interval [start, end (exclusive)] out of the given
 	 * <code>timeSeries</code> vector.
 	 * 
-	 * @param timeSeries
-	 *            Time series vector source
-	 * @param start
-	 *            Start of the interval
-	 * @param end
-	 *            End index of the interval (exclusive)
+	 * @param timeSeries Time series vector source
+	 * @param start      Start of the interval
+	 * @param end        End index of the interval (exclusive)
 	 * @return Returns the specified interval as a double array
 	 */
 	public static double[] getInterval(double[] timeSeries, int start, int end) {
@@ -247,11 +244,9 @@ public class TimeSeriesUtil {
 	/**
 	 * Normalizes an INDArray vector object.
 	 * 
-	 * @param array
-	 *            INDArray row vector with single shape dimension
-	 * @param inplace
-	 *            Indication whether the normalization should be performed in place
-	 *            or on a new array copy
+	 * @param array   INDArray row vector with single shape dimension
+	 * @param inplace Indication whether the normalization should be performed in
+	 *                place or on a new array copy
 	 * @return Returns the view on the transformed INDArray (if inplace) or a
 	 *         normalized copy of the input array (if not inplace)
 	 */
@@ -277,8 +272,7 @@ public class TimeSeriesUtil {
 	 * Returns the mode of the given <code>array</code>. If there are multiple
 	 * values with the same frequency, the lower value will be taken.
 	 * 
-	 * @param array
-	 *            The array which mode should be returned
+	 * @param array The array which mode should be returned
 	 * @return Returns the mode, i. e. the most frequently occurring int value
 	 */
 	public static int getMode(final int[] array) {
@@ -298,8 +292,7 @@ public class TimeSeriesUtil {
 	 * Returns the key with the maximum integer value. If there are multiple values
 	 * with the same value, the lower key with regard to its type will be taken.
 	 * 
-	 * @param map
-	 *            The map storing the keys with its corresponding integer values
+	 * @param map The map storing the keys with its corresponding integer values
 	 * @return Returns the key of type <T> storing the maximum integer value
 	 */
 	public static <T> T getMaximumKeyByValue(final Map<T, Integer> map) {
@@ -319,11 +312,9 @@ public class TimeSeriesUtil {
 	 * Z-normalizes a given <code>dataVector</code>. Uses Bessel's correction
 	 * (1/(n-1) in the calculation of the standard deviation) if set.
 	 * 
-	 * @param dataVector
-	 *            Vector to be z-normalized
-	 * @param besselsCorrection
-	 *            Indicator whether the std dev correction using n-1 instead of n
-	 *            should be applied
+	 * @param dataVector        Vector to be z-normalized
+	 * @param besselsCorrection Indicator whether the std dev correction using n-1
+	 *                          instead of n should be applied
 	 * @return Z-normalized vector
 	 */
 	// TODO: Unify with Helen's calculation
@@ -360,10 +351,8 @@ public class TimeSeriesUtil {
 	 * Sorts the indices of the given <code>vector</code> based on the the vector's
 	 * values (argsort).
 	 * 
-	 * @param vector
-	 *            Vector where the values are extracted from
-	 * @param ascending
-	 *            Indicator whether the indices should be sorted ascending
+	 * @param vector    Vector where the values are extracted from
+	 * @param ascending Indicator whether the indices should be sorted ascending
 	 * @return Returns the list of indices which are sorting based on the vector's
 	 *         values
 	 */
@@ -393,8 +382,7 @@ public class TimeSeriesUtil {
 	 * Counts the number of unique classes occurring in the given
 	 * <code>dataset</code>.
 	 * 
-	 * @param dataset
-	 *            Dataset to be evaluated
+	 * @param dataset Dataset to be evaluated
 	 * @return Returns the number of unique classes occurring in target matrix of
 	 *         the given <code>dataset</code>
 	 */
@@ -410,8 +398,7 @@ public class TimeSeriesUtil {
 	 * Returns a list storing the unique Integer class values in the given
 	 * <code>dataset</code>.
 	 * 
-	 * @param dataset
-	 *            Dataset to be evaluated
+	 * @param dataset Dataset to be evaluated
 	 * @return Returns a {@link java.util.List} object storing the unique Integer
 	 *         class values of the dataset
 	 */
@@ -428,10 +415,8 @@ public class TimeSeriesUtil {
 	 * Shuffles the given {@link TimeSeriesDataset} object using the given
 	 * <code>seed</code>.
 	 * 
-	 * @param dataset
-	 *            The dataset to be shuffled
-	 * @param seed
-	 *            The seed used within the randomized shuffling
+	 * @param dataset The dataset to be shuffled
+	 * @param seed    The seed used within the randomized shuffling
 	 */
 	public static void shuffleTimeSeriesDataset(final TimeSeriesDataset dataset, final int seed) {
 
@@ -469,10 +454,8 @@ public class TimeSeriesUtil {
 	 * <code>indices</code>. It copies the values into a new result array sharing
 	 * the dimensionality of <code>srcMatrix</code>.
 	 * 
-	 * @param srcMatrix
-	 *            The source matrix to be shuffled
-	 * @param indices
-	 *            The Integer indices representing the new shuffled order
+	 * @param srcMatrix The source matrix to be shuffled
+	 * @param indices   The Integer indices representing the new shuffled order
 	 * @return Returns the matrix copied from the given source matrix and the
 	 *         indices
 	 */
@@ -496,10 +479,8 @@ public class TimeSeriesUtil {
 	 * <code>indices</code>. It copies the values into a new result array sharing
 	 * the dimensionality of <code>srcMatrix</code>.
 	 * 
-	 * @param srcMatrix
-	 *            The source matrix to be shuffled
-	 * @param indices
-	 *            The Integer indices representing the new shuffled order
+	 * @param srcMatrix The source matrix to be shuffled
+	 * @param indices   The Integer indices representing the new shuffled order
 	 * @return Returns the matrix copied from the given source matrix and the
 	 *         indices
 	 */
@@ -528,24 +509,19 @@ public class TimeSeriesUtil {
 	 * and
 	 * {@link TimeSeriesUtil#selectTestDataForFold(int, int, int, int, double[][], int[])}.
 	 * 
-	 * @param fold
-	 *            The current fold for which the datasets should be prepared
-	 * @param numFolds
-	 *            Number of total folds using within the performed cross validation
-	 * @param srcValueMatrix
-	 *            Source dataset from which the instances are copied
-	 * @param srcTargetMatrix
-	 *            Source targets from which the targets are copied
+	 * @param fold            The current fold for which the datasets should be
+	 *                        prepared
+	 * @param numFolds        Number of total folds using within the performed cross
+	 *                        validation
+	 * @param srcValueMatrix  Source dataset from which the instances are copied
+	 * @param srcTargetMatrix Source targets from which the targets are copied
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
 	public static Pair<TimeSeriesDataset, TimeSeriesDataset> getTrainingAndTestDataForFold(final int fold,
-			final int numFolds, final double[][] srcValueMatrix,
-			final int[] srcTargetMatrix) {
+			final int numFolds, final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
 		return new Pair<TimeSeriesDataset, TimeSeriesDataset>(
-				selectTrainingDataForFold(fold, numFolds, srcValueMatrix,
-						srcTargetMatrix),
-				selectTestDataForFold(fold, numFolds, srcValueMatrix,
-						srcTargetMatrix));
+				selectTrainingDataForFold(fold, numFolds, srcValueMatrix, srcTargetMatrix),
+				selectTestDataForFold(fold, numFolds, srcValueMatrix, srcTargetMatrix));
 	}
 
 	/**
@@ -553,14 +529,12 @@ public class TimeSeriesUtil {
 	 * {@link TimeSeriesUtil#getTrainingAndTestDataForFold(int, int, int, int, double[][], int[])
 	 * for further details.
 	 * 
-	 * @param fold
-	 *            The current fold for which the datasets should be prepared
-	 * @param numFolds
-	 *            Number of total folds using within the performed cross validation
-	 * @param srcValueMatrix
-	 *            Source dataset from which the instances are copied
-	 * @param srcTargetMatrix
-	 *            Source targets from which the targets are copied
+	 * @param fold            The current fold for which the datasets should be
+	 *                        prepared
+	 * @param numFolds        Number of total folds using within the performed cross
+	 *                        validation
+	 * @param srcValueMatrix  Source dataset from which the instances are copied
+	 * @param srcTargetMatrix Source targets from which the targets are copied
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
 	private static TimeSeriesDataset selectTrainingDataForFold(final int fold, final int numFolds,
@@ -603,16 +577,13 @@ public class TimeSeriesUtil {
 	 * {@link TimeSeriesUtil#getTrainingAndTestDataForFold(int, int, int, int, double[][], int[])
 	 * for further details.
 	 * 
-	 * @param fold
-	 *            The current fold for which the datasets should be prepared
-	 * @param numFolds
-	 *            Number of total folds using within the performed cross validation
-	 * @param numClasses
-	 *            Number of classes in the targets
-	 * @param srcValueMatrix
-	 *            Source dataset from which the instances are copied
-	 * @param srcTargetMatrix
-	 *            Source targets from which the targets are copied
+	 * @param fold            The current fold for which the datasets should be
+	 *                        prepared
+	 * @param numFolds        Number of total folds using within the performed cross
+	 *                        validation
+	 * @param numClasses      Number of classes in the targets
+	 * @param srcValueMatrix  Source dataset from which the instances are copied
+	 * @param srcTargetMatrix Source targets from which the targets are copied
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
 	private static TimeSeriesDataset selectTestDataForFold(final int fold, final int numFolds,
@@ -644,10 +615,8 @@ public class TimeSeriesUtil {
 	 * Function creating a {@link TimeSeriesDataset} object given the
 	 * <code>targets</code> and one or multiple <code>valueMatrices</code>.
 	 * 
-	 * @param targets
-	 *            The target values of the instances
-	 * @param valueMatrices
-	 *            One or more matrices storing the time series values
+	 * @param targets       The target values of the instances
+	 * @param valueMatrices One or more matrices storing the time series values
 	 * @return Returns a {@link TimeSeriesDataset} object constructed out of the
 	 *         given parameters
 	 */
@@ -668,8 +637,7 @@ public class TimeSeriesUtil {
 	 * Function creating a {@link TimeSeriesDataset} object given one or multiple
 	 * <code>valueMatrices</code>.
 	 * 
-	 * @param valueMatrices
-	 *            One or more matrices storing the time series values
+	 * @param valueMatrices One or more matrices storing the time series values
 	 * @return Returns a {@link TimeSeriesDataset} object constructed out of the
 	 *         given parameters
 	 */
@@ -677,7 +645,7 @@ public class TimeSeriesUtil {
 		return createDatasetForMatrix(null, valueMatrices);
 	}
 
-  /**
+	/**
 	 * Enables printing of time series.
 	 * 
 	 * @param timeSeries Time series to print.
@@ -868,10 +836,13 @@ public class TimeSeriesUtil {
 		return Math.sqrt(variance(T));
 	}
 
+	public static double EPSILON = 0.0000001;
+
 	public static double[] zTransform(double[] T) {
 		double mean = mean(T);
 		double standardDeviation = standardDeviation(T);
-		if (standardDeviation == 0) { // TODO: How to handle zero standard deviation properly.
+		// TODO: How to handle zero standard deviation properly.
+		if ((-EPSILON < standardDeviation) && (standardDeviation < EPSILON)) {
 			return new double[T.length]; // All zeros.
 		}
 		double[] zTransformedT = new double[T.length];
