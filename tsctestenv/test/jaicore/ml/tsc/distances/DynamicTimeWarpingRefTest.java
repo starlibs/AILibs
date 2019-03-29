@@ -1,22 +1,16 @@
 package jaicore.ml.tsc.distances;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
-import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
-import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
 import timeseriesweka.elastic_distance_measures.BasicDTW;
 import weka.classifiers.lazy.kNN;
 
@@ -96,6 +90,15 @@ public class DynamicTimeWarpingRefTest {
         weka.core.EuclideanDistance distance = getReferenceDynamicTimeWarping();
         knn.setDistanceFunction(distance);
         return knn;
+    }
+
+    // Evaluation.
+
+    @Test
+    public void evaluatePerformance() throws IOException, TimeSeriesLoadingException {
+        weka.core.EuclideanDistance referenceImplementation = new BasicDTW();
+        ITimeSeriesDistance ownImplementation = new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance());
+        DistanceRefTestUtil.evaluatePerformance("DTW", referenceImplementation, ownImplementation);
     }
 
 }

@@ -120,4 +120,24 @@ public class DerivateDistanceRefTest {
         return nnDD_ED;
     }
 
+    // Evaluation.
+
+    @Test
+    public void evaluatePerformanceED() throws IOException, TimeSeriesLoadingException {
+        double alpha = 0.5;
+        weka.core.EuclideanDistance referenceImplementation = new GoreckiDerivativesEuclideanDistance(alpha);
+        ITimeSeriesDistance ownImplementation = new DerivateDistance(alpha, new BackwardDifferenceDerivate(),
+                new EuclideanDistance());
+        DistanceRefTestUtil.evaluatePerformance("DD_ED", referenceImplementation, ownImplementation);
+    }
+
+    @Test
+    public void evaluatePerformanceDTW() throws IOException, TimeSeriesLoadingException {
+        double alpha = 0.5;
+        weka.core.EuclideanDistance referenceImplementation = new GoreckiDerivativesDTW(alpha);
+        ITimeSeriesDistance ownImplementation = new DerivateDistance(alpha, new BackwardDifferenceDerivate(),
+                new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance()));
+        DistanceRefTestUtil.evaluatePerformance("DD_DTW", referenceImplementation, ownImplementation);
+    }
+
 }

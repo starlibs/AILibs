@@ -77,4 +77,16 @@ public class TransformDistanceRefTest {
         referenceTransformDistance.setAandB(a, b);
         return referenceTransformDistance;
     }
+
+    // Evaluation.
+
+    @Test
+    public void evaluatePerformance() throws IOException, TimeSeriesLoadingException {
+        double alpha = 0.5;
+        // a and b fixed, alpha 0.5.
+        weka.core.EuclideanDistance referenceImplementation = new TransformWeightedDTW(TransformType.COS);
+        ITimeSeriesDistance ownImplementation = new TransformDistance(alpha, new CosineTransform(),
+                new DynamicTimeWarping(ScalarDistanceUtil.getSquaredDistance()));
+        DistanceRefTestUtil.evaluatePerformance("TD_DTW^COS", referenceImplementation, ownImplementation);
+    }
 }
