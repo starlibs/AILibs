@@ -68,7 +68,7 @@ public class TimeSeriesUtilTest {
 
 		testArray = new int[] { 1, 1, 2, 2 };
 		Assert.assertEquals(1, TimeSeriesUtil.getMode(testArray));
-  }
+	}
 
 	double[] T = { 1, 2, 3, 4, 5, 6, 7, 8 };
 	double[] U = { 1, 1, 1, 1, 1, 1 };
@@ -102,6 +102,14 @@ public class TimeSeriesUtilTest {
 	}
 
 	@Test
+	public void testVariance3() {
+		double[] T = { 0.2, 0.2, 0.2 };
+		double variance = TimeSeriesUtil.variance(T);
+		double expectation = 0;
+		assertEquals(expectation, variance, 1e-5);
+	}
+
+	@Test
 	public void testStandardDeviation() {
 		double standardDeviation = TimeSeriesUtil.standardDeviation(T);
 		double expectation = Math.sqrt(5.25);
@@ -116,6 +124,14 @@ public class TimeSeriesUtilTest {
 	}
 
 	@Test
+	public void testStandardDeviation33() {
+		double[] T = { 0.2, 0.2, 0.2 };
+		double standardDeviation = TimeSeriesUtil.standardDeviation(T);
+		double expectation = 0;
+		assertEquals(expectation, standardDeviation, 1e-5);
+	}
+
+	@Test
 	public void testZTransformWithzeroStandardDeviation() {
 		double[] zTransformed = TimeSeriesUtil.zTransform(U);
 		double[] expectation = { 0, 0, 0, 0, 0, 0 };
@@ -124,6 +140,14 @@ public class TimeSeriesUtilTest {
 		assertArrayEquals(
 				String.format(message, TimeSeriesUtil.toString(zTransformed), TimeSeriesUtil.toString(expectation)),
 				expectation, zTransformed, 0.);
+	}
+
+	@Test
+	public void testZTransform() {
+		double[] T = { 0.2, 0.2, 0.2 };
+		double[] zTransformed = TimeSeriesUtil.zTransform(T);
+		double[] expectation = { 0, 0, 0 };
+		assertArrayEquals(expectation, zTransformed, 1e-5);
 	}
 
 }

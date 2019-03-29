@@ -10,29 +10,10 @@ import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
-import jaicore.ml.tsc.util.ScalarDistanceUtil;
 
-import timeseriesweka.classifiers.NN_CID.CIDDistance;
-import timeseriesweka.elastic_distance_measures.BasicDTW;
-import timeseriesweka.elastic_distance_measures.DTW;
-import timeseriesweka.elastic_distance_measures.MSMDistance;
-import timeseriesweka.elastic_distance_measures.TWEDistance;
-import timeseriesweka.elastic_distance_measures.WeightedDTW;
-import weka.classifiers.lazy.kNN;
-import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
-
-import timeseriesweka.classifiers.DD_DTW.GoreckiDerivativesEuclideanDistance;
-import timeseriesweka.classifiers.DTD_C.TransformType;
-import timeseriesweka.classifiers.DTD_C.TransformWeightedDTW;
-
-import timeseriesweka.classifiers.DD_DTW;
-import timeseriesweka.classifiers.DTD_C;
-import timeseriesweka.classifiers.NN_CID;
-import timeseriesweka.classifiers.DD_DTW.DistanceType;
-import timeseriesweka.classifiers.DD_DTW.GoreckiDerivativesDTW;
 
 public class DistanceRefTestUtil {
 
@@ -40,7 +21,25 @@ public class DistanceRefTestUtil {
     private static final String PATH = "./tsctestenv/data/univariate/";
 
     /** Path for car dataset. */
-    private static final String CAR = PATH + "PenDigits/PenDigitsDimension1_TRAIN.arff";
+    private static final String CAR = PATH + "Car/Car_TRAIN.arff";
+
+    private static final String ARROW_HEAD = PATH + "crickitX/crickitX_TRAIN.arff";
+
+    private static final String BEEF = PATH + "Beef/Beef_TEST.arff";
+
+    private static final String ELECTRIC_DEVICES = PATH + "computers/computers_TRAIN.arff";
+
+    private static final String CRICKIT_X = PATH + "CricketX/CricketX_TRAIN.arff"; // 390 x 300
+
+    private static final String COMPUTERS = PATH + "Computers/Computers_TRAIN.arff"; // 250 x 720
+
+    private static final String ECG200 = PATH + "ECG200/ECG200_TRAIN.arff"; // 100 x 96
+
+    private static final String ITALY_POWER_DEMAND = PATH + "ItalyPowerDemand/ItalyPowerDemand_TRAIN.arff"; // 67 x 24
+
+    private static final String SYNTHETIC_CONTROL = PATH + "SyntheticControl/SyntheticControl_TRAIN.arff"; // 300 x 60
+
+    private static final String CHINATOWN = PATH + "Chinatown/Chinatown_TRAIN.arff";
 
     public static String runCorrectnessTest(weka.core.EuclideanDistance referenceImplementation,
             ITimeSeriesDistance ownImplementation, File arffFile, double delta)
@@ -85,6 +84,64 @@ public class DistanceRefTestUtil {
         return null;
     }
 
+    public static void evaluatePerformance(String descr, weka.core.EuclideanDistance referenceImplementation,
+            ITimeSeriesDistance ownImplementation) throws IOException, TimeSeriesLoadingException {
+        int runs = 4;
+        double[] tChinatown_own = new double[runs];
+        double[] tChinatown_ref = new double[runs];
+        double[] tEcg200_own = new double[runs];
+        double[] tEcg200_ref = new double[runs];
+        double[] tSYNTHETIC_CONTROL_own = new double[runs];
+        double[] tSYNTHETIC_CONTROL_ref = new double[runs];
+
+        File crickitX = new File(CHINATOWN);
+        File ecg200 = new File(ECG200);
+        File synthetic = new File(SYNTHETIC_CONTROL);
+
+        for (int i = 0; i < runs; i++) {
+            // crickitX
+            Pair<Double, Double> crickitXTimes = DistanceRefTestUtil.runPerformanceTest(referenceImplementation,
+                    ownImplementation, crickitX);
+            tChinatown_ref[i] = crickitXTimes.getX();
+            tChinatown_own[i] = crickitXTimes.getY();
+        }
+        System.out.println(String.format("%s on chinatown dataset - Own: %.3f ms (%.3f), Ref: %.3f ms (%.3f), p = %.3f",
+                descr, TimeSeriesUtil.mean(tChinatown_own), TimeSeriesUtil.standardDeviation(tChinatown_own),
+                TimeSeriesUtil.mean(tChinatown_ref), TimeSeriesUtil.standardDeviation(tChinatown_ref),
+                TimeSeriesUtil.mean(tChinatown_own) / TimeSeriesUtil.mean(tChinatown_ref)));
+
+        // for (int i = 0; i < runs; i++) {
+        // // ecg200
+        // Pair<Double, Double> ecg200Times =
+        // DistanceRefTestUtil.runPerformanceTest(referenceImplementation,
+        // ownImplementation, ecg200);
+        // tEcg200_ref[i] = ecg200Times.getX();
+        // tEcg200_own[i] = ecg200Times.getY();
+        // }
+        // System.out.println(String.format("%s on ecg200 dataset - Own: %.3f ms (%.3f),
+        // Ref: %.3f ms (%.3f). p = %.3f",
+        // descr, TimeSeriesUtil.mean(tEcg200_own),
+        // TimeSeriesUtil.standardDeviation(tEcg200_own),
+        // TimeSeriesUtil.mean(tEcg200_ref),
+        // TimeSeriesUtil.standardDeviation(tEcg200_ref),
+        // TimeSeriesUtil.mean(tEcg200_own) / TimeSeriesUtil.mean(tEcg200_ref)));
+
+        for (int i = 0; i < runs; i++) {
+            // computers
+            Pair<Double, Double> syntheticTimes = DistanceRefTestUtil.runPerformanceTest(referenceImplementation,
+                    ownImplementation, synthetic);
+            tSYNTHETIC_CONTROL_ref[i] = syntheticTimes.getX();
+            tSYNTHETIC_CONTROL_own[i] = syntheticTimes.getY();
+        }
+        System.out.println(String.format(
+                "%s on SYNTHETIC_CONTROL dataset - Own: %.3f ms (%.3f), Ref: %.3f ms (%.3f). p = %.3f", descr,
+                TimeSeriesUtil.mean(tSYNTHETIC_CONTROL_own), TimeSeriesUtil.standardDeviation(tSYNTHETIC_CONTROL_own),
+                TimeSeriesUtil.mean(tSYNTHETIC_CONTROL_ref), TimeSeriesUtil.standardDeviation(tSYNTHETIC_CONTROL_ref),
+                TimeSeriesUtil.mean(tSYNTHETIC_CONTROL_own) / TimeSeriesUtil.mean(tSYNTHETIC_CONTROL_ref)));
+        System.out.println("-----");
+
+    }
+
     public static Pair<Double, Double> runPerformanceTest(weka.core.EuclideanDistance referenceImplementation,
             ITimeSeriesDistance ownImplementation, File arffFile) throws IOException, TimeSeriesLoadingException {
         // Set cutoff to max for now.
@@ -101,7 +158,7 @@ public class DistanceRefTestUtil {
         // Measure time for own implementation.
         double ownStart = System.currentTimeMillis();
         for (int i = 0; i < numberOfInstances; i++) {
-            for (int j = i; j < numberOfInstances; j++) {
+            for (int j = 0; j < numberOfInstances; j++) {
                 ownImplementation.distance(values[i], values[j]);
             }
         }
@@ -110,7 +167,7 @@ public class DistanceRefTestUtil {
         // Measure time for reference implementation.
         double refStart = System.currentTimeMillis();
         for (int i = 0; i < numberOfInstances; i++) {
-            for (int j = i; j < numberOfInstances; j++) {
+            for (int j = 0; j < numberOfInstances; j++) {
                 referenceImplementation.distance(wekaInstances.get(i), wekaInstances.get(j), cutoff);
             }
         }

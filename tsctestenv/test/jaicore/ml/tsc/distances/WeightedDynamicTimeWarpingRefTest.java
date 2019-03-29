@@ -11,12 +11,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
-import jaicore.ml.tsc.util.ClassMapper;
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
-import jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
 import timeseriesweka.elastic_distance_measures.WeightedDTW;
 import weka.classifiers.lazy.kNN;
 
@@ -86,5 +82,17 @@ public class WeightedDynamicTimeWarpingRefTest {
         WeightedDTW referenceWeightedDynamicTimeWarping = new WeightedDTW(g); // Wmax = 1 fixed
         refClf.setDistanceFunction(referenceWeightedDynamicTimeWarping);
         return refClf;
+    }
+
+    // Evaluation.
+
+    @Test
+    public void evaluatePerformance() throws IOException, TimeSeriesLoadingException {
+        double g = 1;
+        double Wmax = 1;
+        weka.core.EuclideanDistance referenceImplementation = new WeightedDTW(g); // Wmax = 1 fixed
+        ITimeSeriesDistance ownImplementation = new WeightedDynamicTimeWarping(g, Wmax,
+                ScalarDistanceUtil.getSquaredDistance());
+        DistanceRefTestUtil.evaluatePerformance("WDTW", referenceImplementation, ownImplementation);
     }
 }

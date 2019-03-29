@@ -106,4 +106,13 @@ public class ShotgunDistance implements ITimeSeriesDistance {
         return totalDistance;
     }
 
+    /**
+     * Sets the window length.
+     * 
+     * @param windowLength @see #windowLength
+     */
+    public void setWindowLength(int windowLength) {
+        this.windowLength = windowLength;
+    }
+
 }

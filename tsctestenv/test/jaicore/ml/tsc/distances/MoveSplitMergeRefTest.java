@@ -69,4 +69,14 @@ public class MoveSplitMergeRefTest {
         knn.setDistanceFunction(distance);
         return knn;
     }
+
+    // Evaluation
+
+    @Test
+    public void evaluatePerformance() throws IOException, TimeSeriesLoadingException {
+        double c = 1;
+        weka.core.EuclideanDistance referenceImplementation = new MSMDistance(c);
+        ITimeSeriesDistance ownImplementation = new MoveSplitMerge(c);
+        DistanceRefTestUtil.evaluatePerformance("MSM", referenceImplementation, ownImplementation);
+    }
 }

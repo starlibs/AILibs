@@ -80,4 +80,16 @@ public class TimeWarpEditDistanceRefTest {
         knn.setDistanceFunction(distance);
         return knn;
     }
+
+    // Evaluation.
+
+    @Test
+    public void evaluatePerformanceED() throws IOException, TimeSeriesLoadingException {
+        double nu = 1;
+        double lambda = 1;
+        weka.core.EuclideanDistance referenceImplementation = new TWEDistance(lambda, nu);
+        ITimeSeriesDistance ownImplementation = new TimeWarpEditDistance(lambda, nu,
+                ScalarDistanceUtil.getSquaredDistance());
+        DistanceRefTestUtil.evaluatePerformance("TWED", referenceImplementation, ownImplementation);
+    }
 }
