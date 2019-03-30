@@ -1,5 +1,6 @@
 package jaicore.ml.evaluation.evaluators.weka.factory;
 
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
@@ -29,11 +30,15 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierE
 	@Override
 	public IClassifierEvaluator getIClassifierEvaluator(IDataset<IInstance> dataset, long seed) {
 		StratifiedSplit split = new StratifiedSplit(dataset, seed);
-		split.doSplit(0.7);
+		try {
+			split.doSplit(0.7);
+		} catch (AlgorithmException e) {
+			throw new RuntimeException("Cannot compute split", e);
+		}
 		IDataset<IInstance> train = split.getTrainingData();
 		IDataset<IInstance> test = split.getTestData();
 		return new ExtrapolatedSaturationPointEvaluator(anchorpoints, subsamplingAlgorithmFactory, train,
-				trainSplitForAnchorpointsMeasurement, extrapolationMethod, seed, 0.1, test);
+				trainSplitForAnchorpointsMeasurement, extrapolationMethod, seed, test);
 	}
 
 }

@@ -59,7 +59,7 @@ public class KmeansSamplingFactory<I extends IInstance>
 		if (this.k > 0) {
 			kValue = k;
 		}
-		KmeansSampling<I> kmeansSampling = new KmeansSampling<I>(this.clusterSeed, kValue, inputDataset);
+		KmeansSampling<I> kmeansSampling = new KmeansSampling<>(this.clusterSeed, kValue, inputDataset);
 		kmeansSampling.setSampleSize(sampleSize);
 		kmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (previousRun != null && previousRun.getClusterResults() != null) {

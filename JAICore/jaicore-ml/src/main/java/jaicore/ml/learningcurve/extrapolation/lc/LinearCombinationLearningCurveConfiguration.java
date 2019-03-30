@@ -38,14 +38,17 @@ public class LinearCombinationLearningCurveConfiguration {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		LinearCombinationLearningCurveConfiguration other = (LinearCombinationLearningCurveConfiguration) obj;
 		if (parameterSets == null) {
-			if (other.parameterSets != null)
+			if (other.parameterSets != null) {
 				return false;
-		} else if (!parameterSets.equals(other.parameterSets))
+			}
+		} else if (!parameterSets.equals(other.parameterSets)) {
 			return false;
+		}
 		return true;
 	}
 

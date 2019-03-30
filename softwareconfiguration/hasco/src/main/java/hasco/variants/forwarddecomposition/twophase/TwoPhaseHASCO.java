@@ -32,7 +32,6 @@ import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;

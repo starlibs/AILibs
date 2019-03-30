@@ -43,7 +43,8 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		// Test classifier evaluation at saturation point
 		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(
 				new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<IInstance>(), this.train, 0.7,
-				new InversePowerLawExtrapolationMethod(), 123l, 0.0005d, this.test);
+				new InversePowerLawExtrapolationMethod(), 123l, this.test);
+		evaluator.setEpsilon(0.0005d);
 		double evaluationResult = evaluator.evaluate(new SMO());
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}

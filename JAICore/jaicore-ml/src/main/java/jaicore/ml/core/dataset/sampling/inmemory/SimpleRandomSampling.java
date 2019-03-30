@@ -11,7 +11,7 @@ import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private Random random;
-	
+
 	private IDataset<I> copyDataset;
 
 	public SimpleRandomSampling(Random random, IDataset<I> input) {
@@ -36,13 +36,8 @@ public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorith
 			} else {
 				return this.terminate();
 			}
-		case inactive: {
-			if (this.sample.size() < this.sampleSize) {
-				throw new AlgorithmException("Expected sample size was not reached before termination");
-			} else {
-				return this.terminate();
-			}
-		}
+		case inactive:
+			this.doInactiveStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}

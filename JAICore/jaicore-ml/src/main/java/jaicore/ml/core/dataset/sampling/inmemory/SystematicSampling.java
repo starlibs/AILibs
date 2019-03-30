@@ -24,20 +24,16 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	private int index;
 
 	// Default Comparator to sort datapoints by their vector representation.
-	private Comparator<I> datapointComparator = new Comparator<I>() {
-		@Override
-		public int compare(I o1, I o2) {
-			double[] v1 = o1.getPoint();
-			double[] v2 = o2.getPoint();
-			for (int i = 0; i < Math.min(v1.length, v2.length); i++) {
-				int c = Double.compare(v1[i], v2[i]);
-				if (c != 0) {
-					return c;
-				}
+	private Comparator<I> datapointComparator = (o1, o2) -> {
+		double[] v1 = o1.getPoint();
+		double[] v2 = o2.getPoint();
+		for (int i = 0; i < Math.min(v1.length, v2.length); i++) {
+			int c = Double.compare(v1[i], v2[i]);
+			if (c != 0) {
+				return c;
 			}
-			return 0;
 		}
-
+		return 0;
 	};
 
 	/**
@@ -77,7 +73,7 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 				this.sortedDataset.sort(this.datapointComparator);
 			}
 			this.startIndex = this.random.nextInt(this.sortedDataset.size());
-			this.k = (int) Math.floor(this.sortedDataset.size() / this.sampleSize);
+			this.k = this.sortedDataset.size() / this.sampleSize;
 			this.index = 0;
 			return this.activate();
 		case active:
@@ -90,13 +86,8 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 			} else {
 				return this.terminate();
 			}
-		case inactive: {
-			if (this.sample.size() < this.sampleSize) {
-				throw new AlgorithmException("Expected sample size was not reached before termination");
-			} else {
-				return this.terminate();
-			}
-		}
+		case inactive:
+			this.doInactiveStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}

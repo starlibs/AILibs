@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Test;
 
@@ -483,7 +484,7 @@ public class LinearCombinationLearningCurveTester {
 	}
 
 	@Test
-	public void completeTest() throws InvalidAnchorPointsException, InterruptedException {
+	public void completeTest() throws InvalidAnchorPointsException, InterruptedException, ExecutionException {
 		// Generate learning curve from real anchor points
 		int[] xValues = { 4, 8, 16, 32, 64, 128, 256 };
 		double[] yValues = { 0.1672, 0.2513, 0.4161, 0.5485, 0.7381, 0.7961, 0.8471 };

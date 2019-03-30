@@ -5,8 +5,8 @@ import java.util.Map;
 /**
  * This class encapsulates all parameters that are required in order to create a
  * weighted linear combination of parameterized functions. Hence, a
- * LinearCombinationParameterSet object contains a weight for each function
- * and, for each function, a map which maps parameter names to its values.
+ * LinearCombinationParameterSet object contains a weight for each function and,
+ * for each function, a map which maps parameter names to its values.
  * 
  * @author Felix Weiland
  *
@@ -50,19 +50,24 @@ public class LinearCombinationParameterSet {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		LinearCombinationParameterSet other = (LinearCombinationParameterSet) obj;
 		if (parameters == null) {
-			if (other.parameters != null)
+			if (other.parameters != null) {
 				return false;
-		} else if (!parameters.equals(other.parameters))
+			}
+		} else if (!parameters.equals(other.parameters)) {
 			return false;
+		}
 		if (weights == null) {
-			if (other.weights != null)
+			if (other.weights != null) {
 				return false;
-		} else if (!weights.equals(other.weights))
+			}
+		} else if (!weights.equals(other.weights)) {
 			return false;
+		}
 		return true;
 	}
 

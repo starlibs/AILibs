@@ -4,6 +4,8 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -35,6 +37,8 @@ import weka.core.UnsupportedAttributeTypeException;
 
 public class ClassifierWeightedSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
 
+	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
+
 	private Classifier pilotEstimator;
 	private EnumeratedIntegerDistribution finalDistribution;
 	private double addForRightClassification;
@@ -47,7 +51,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 		try {
 			this.pilotEstimator.buildClassifier(instances);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Cannot build pilot estimator", e);
 		}
 		double mid = this.getMean(instances);
 		// base probability to be chosen
@@ -85,11 +89,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 				return this.terminate();
 			}
 		case inactive:
-			if (this.sample.size() < this.sampleSize) {
-				throw new RuntimeException("Expected sample size was not reached before termination");
-			} else {
-				return this.terminate();
-			}
+			this.doInactiveStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
@@ -112,8 +112,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 			}
 		}
 		int[] indices = IntStream.range(0, this.getInput().size()).toArray();
-		EnumeratedIntegerDistribution finalDistribution = new EnumeratedIntegerDistribution(indices, weights);
-		return finalDistribution;
+		return new EnumeratedIntegerDistribution(indices, weights);
 	}
 
 	private double getMean(Instances instances) {
@@ -122,7 +121,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 			try {
 				sum += this.pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Unexpected error in pilot estimator", e);
 			}
 		return sum / instances.size();
 	}

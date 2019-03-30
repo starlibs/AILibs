@@ -1,5 +1,7 @@
 package jaicore.ml.core.dataset.sampling.inmemory;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Random;
 
 import jaicore.basic.algorithm.IAlgorithm;
@@ -15,11 +17,13 @@ public class GMeansSamplingTester<I extends IInstance> extends GeneralSamplingTe
 	@Override
 	public void testSampleSizeLargeProblem() throws Exception {
 		// Sample Size is not supported for GMeansSampling
+		assertTrue(true);
 	}
 
 	@Override
 	public void testSampleSizeSmallProblem() throws Exception {
 		// Sample Size is not supported for GMeansSampling
+		assertTrue(true);
 	}
 
 	@Override

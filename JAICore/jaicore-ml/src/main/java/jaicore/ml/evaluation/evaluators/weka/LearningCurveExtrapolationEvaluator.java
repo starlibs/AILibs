@@ -27,7 +27,7 @@ import weka.classifiers.Classifier;
  */
 public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator {
 
-	private final static Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
+	private static final Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;

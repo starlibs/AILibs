@@ -61,20 +61,26 @@ public class ExtrapolationRequest {
 			return false;
 		ExtrapolationRequest other = (ExtrapolationRequest) obj;
 		if (numSamples == null) {
-			if (other.numSamples != null)
+			if (other.numSamples != null) {
 				return false;
-		} else if (!numSamples.equals(other.numSamples))
+			}
+		} else if (!numSamples.equals(other.numSamples)) {
 			return false;
+		}
 		if (xValues == null) {
-			if (other.xValues != null)
+			if (other.xValues != null) {
 				return false;
-		} else if (!xValues.equals(other.xValues))
+			}
+		} else if (!xValues.equals(other.xValues)) {
 			return false;
+		}
 		if (yValues == null) {
-			if (other.yValues != null)
+			if (other.yValues != null) {
 				return false;
-		} else if (!yValues.equals(other.yValues))
+			}
+		} else if (!yValues.equals(other.yValues)) {
 			return false;
+		}
 		return true;
 	}
 

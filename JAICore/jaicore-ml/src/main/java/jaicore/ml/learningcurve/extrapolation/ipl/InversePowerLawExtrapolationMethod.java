@@ -1,5 +1,7 @@
 package jaicore.ml.learningcurve.extrapolation.ipl;
 
+import java.util.concurrent.ExecutionException;
+
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
@@ -34,7 +36,7 @@ public class InversePowerLawExtrapolationMethod implements LearningCurveExtrapol
 
 	@Override
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
-			throws InvalidAnchorPointsException, InterruptedException {
+			throws InvalidAnchorPointsException, InterruptedException, ExecutionException {
 		// Request model parameters to create learning curve
 		ExtrapolationServiceClient<InversePowerLawConfiguration> client = new ExtrapolationServiceClient<>(serviceUrl,
 				InversePowerLawConfiguration.class);

@@ -44,7 +44,7 @@ public class GmeansSamplingFactory<I extends IInstance>
 
 	@Override
 	public GmeansSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
-		GmeansSampling<I> gmeansSampling = new GmeansSampling<I>(this.clusterSeed, inputDataset);
+		GmeansSampling<I> gmeansSampling = new GmeansSampling<>(this.clusterSeed, inputDataset);
 		gmeansSampling.setSampleSize(sampleSize);
 		gmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (previousRun != null && previousRun.getClusterResults() != null) {

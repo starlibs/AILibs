@@ -17,11 +17,11 @@ import jaicore.ml.core.dataset.ArffUtilities;
  * @author Lukas Brandt
  */
 public class DatasetFileSorter {
-	
+
 	private File datasetFile;
 	private TempFileHandler tempFileHandler;
 	private boolean usesOwnTempFileHandler;
-	
+
 	// Default comperator, which compared the single features as strings
 	private Comparator<String> comparator = (s1, s2) -> {
 		String[] f1 = s1.trim().split(",");
@@ -35,45 +35,45 @@ public class DatasetFileSorter {
 		}
 		return 0;
 	};
-	
+
 	public DatasetFileSorter(File datasetFile, TempFileHandler tempFileHandler) {
 		this.datasetFile = datasetFile;
 		this.tempFileHandler = tempFileHandler;
 		this.usesOwnTempFileHandler = false;
 	}
-	
+
 	public DatasetFileSorter(File datasetFile) {
 		this(datasetFile, new TempFileHandler());
 		this.usesOwnTempFileHandler = true;
 	}
-	
+
 	/**
-	 * @param comparator Custom comparator for the dataset file lines.
+	 * @param comparator
+	 *            Custom comparator for the dataset file lines.
 	 */
 	public void setComparator(Comparator<String> comparator) {
 		this.comparator = comparator;
 	}
-	
+
 	/**
 	 * 
 	 * @param sortedFilePath
 	 * @return
 	 * @throws IOException
 	 */
-	public File sort(String sortedFilePath) throws IOException{
-		FileWriter fileWriter = null;
+	public File sort(String sortedFilePath) throws IOException {
 		IOException exception;
-		try {
+		try (FileWriter fileWriter = new FileWriter(new File(sortedFilePath));
+				FileReader fr = new FileReader(this.datasetFile);
+				BufferedReader datasetFileReader = new BufferedReader(fr)) {
 			// Create a new file for the sorted dataset with the ARFF header
 			String arffHeader;
 			arffHeader = ArffUtilities.extractArffHeader(this.datasetFile);
-			fileWriter = new FileWriter(new File(sortedFilePath));
 			fileWriter.write(arffHeader);
-			
+
 			// Create a temp file with all datapoints
 			String tempFileUUID = this.tempFileHandler.createTempFile();
 			FileWriter tempFileWriter = this.tempFileHandler.getFileWriterForTempFile(tempFileUUID);
-			BufferedReader datasetFileReader = new BufferedReader(new FileReader(this.datasetFile));
 			String dataPointLine;
 			boolean datastarted = false;
 			while ((dataPointLine = datasetFileReader.readLine()) != null) {
@@ -90,11 +90,11 @@ public class DatasetFileSorter {
 			}
 			tempFileWriter.flush();
 			datasetFileReader.close();
-			
+
 			// Sort the temp file
 			String sortedFileUUID = mergesort(tempFileUUID);
-			
-			//Write the sorted lines from the temp file to the output file.
+
+			// Write the sorted lines from the temp file to the output file.
 			BufferedReader sortedReader = this.tempFileHandler.getFileReaderForTempFile(sortedFileUUID);
 			String line;
 			while ((line = sortedReader.readLine()) != null) {
@@ -102,20 +102,18 @@ public class DatasetFileSorter {
 			}
 			fileWriter.flush();
 			return new File(sortedFilePath);
-		}catch (IOException e) {
+		} catch (IOException e) {
 			exception = e;
 		} finally {
-			// Start clean up of the temporary file handler if a new one was used for this sorting.
+			// Start clean up of the temporary file handler if a new one was used for this
+			// sorting.
 			if (usesOwnTempFileHandler) {
 				this.tempFileHandler.close();
-			}
-			if (fileWriter != null) {
-				fileWriter.close();
 			}
 		}
 		throw exception;
 	}
-	
+
 	private String mergesort(String fileUUID) throws IOException {
 		int length = ArffUtilities.countDatasetEntries(this.tempFileHandler.getTempFile(fileUUID), false);
 		if (length <= 1) {
@@ -142,14 +140,15 @@ public class DatasetFileSorter {
 			// Sort the two halfs
 			String sortedLeftUUID = mergesort(leftUUID);
 			String sortedRightUUID = mergesort(rightUUID);
-			// Merge the sorted halfs back together ande delete the left and right temp files
+			// Merge the sorted halfs back together ande delete the left and right temp
+			// files
 			String mergedFileUUID = merge(sortedLeftUUID, sortedRightUUID);
 			this.tempFileHandler.deleteTempFile(leftUUID);
 			this.tempFileHandler.deleteTempFile(rightUUID);
 			return mergedFileUUID;
 		}
 	}
-	
+
 	private String merge(String leftUUID, String rightUUID) throws IOException {
 		String uuid = this.tempFileHandler.createTempFile();
 		FileWriter writer = this.tempFileHandler.getFileWriterForTempFile(uuid);
@@ -157,7 +156,7 @@ public class DatasetFileSorter {
 		BufferedReader rightReader = this.tempFileHandler.getFileReaderForTempFile(rightUUID);
 		String leftLine = leftReader.readLine();
 		String rightLine = rightReader.readLine();
-		while(leftLine != null || rightLine != null) {
+		while (leftLine != null || rightLine != null) {
 			if (leftLine == null) {
 				writer.write(rightLine + "\n");
 				rightLine = rightReader.readLine();
@@ -171,12 +170,12 @@ public class DatasetFileSorter {
 					rightLine = rightReader.readLine();
 				} else {
 					writer.write(leftLine + "\n");
-					leftLine = leftReader .readLine();
+					leftLine = leftReader.readLine();
 				}
 			}
 		}
 		writer.flush();
 		return uuid;
 	}
-	
+
 }

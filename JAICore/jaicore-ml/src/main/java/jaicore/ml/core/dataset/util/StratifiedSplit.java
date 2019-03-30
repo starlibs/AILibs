@@ -16,7 +16,9 @@ public class StratifiedSplit {
 
 	private final IDataset<IInstance> dataset;
 
-	private IDataset<IInstance> trainingData, testData;
+	private IDataset<IInstance> trainingData;
+
+	private IDataset<IInstance> testData;
 
 	private final long seed;
 
@@ -26,7 +28,7 @@ public class StratifiedSplit {
 		this.seed = seed;
 	}
 
-	public void doSplit(double trainPortion) {
+	public void doSplit(double trainPortion) throws AlgorithmException {
 		Random r = new Random(seed);
 		List<Integer> attributeIndices = Collections.singletonList(dataset.getNumberOfAttributes());
 		AttributeBasedStratiAmountSelectorAndAssigner<IInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
@@ -40,8 +42,10 @@ public class StratifiedSplit {
 			this.testData = dataset.createEmpty();
 			testData.addAll(dataset);
 			testData.removeAll(trainingData);
-		} catch (InterruptedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
-			throw new RuntimeException("Cannot do stratified split", e);
+		} catch (AlgorithmExecutionCanceledException e) {
+			throw new AlgorithmException("Stratified split has been cancelled");
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 

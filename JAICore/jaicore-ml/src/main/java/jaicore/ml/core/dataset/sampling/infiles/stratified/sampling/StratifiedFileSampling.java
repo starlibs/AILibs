@@ -7,9 +7,13 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.basic.TempFileHandler;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -23,6 +27,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEvent;
 
 public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 
+	private Logger logger = LoggerFactory.getLogger(StratifiedFileSampling.class);
 	private Random random;
 	private TempFileHandler tempFileHandler;
 	private BufferedReader reader;
@@ -37,8 +42,10 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 	/**
 	 * Constructor for a Stratified File Sampler.
 	 * 
-	 * @param random             Random object for sampling inside of the strati.
-	 * @param stratiFileAssigner Assigner for datapoints to strati.
+	 * @param random
+	 *            Random object for sampling inside of the strati.
+	 * @param stratiFileAssigner
+	 *            Assigner for datapoints to strati.
 	 */
 	public StratifiedFileSampling(Random random, IStratiFileAssigner stratiFileAssigner, File input) {
 		super(input);
@@ -99,9 +106,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 						if (this.executorService.isTerminated()) {
 							this.stratiSamplingFinished = true;
 						} else {
-							synchronized (Thread.currentThread()) {
-								Thread.currentThread().wait(100);
-							}
+							Thread.sleep(100);
 						}
 						return new WaitForSamplingStepEvent(getId());
 					} else {
@@ -118,14 +123,13 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 					}
 				}
 			}
-		case inactive: {
+		case inactive:
 			if (this.streamedDatapoints < this.datapointAmount || !this.stratiSamplingStarted
 					|| !this.stratiSamplingFinished) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
 			}
-		}
 		default:
 			this.cleanUp();
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
@@ -155,32 +159,28 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 
 		// Start a Reservoir Sampling thread for each stratum
 		i = 0;
-		for (String uuid : strati.keySet()) {
+		for (Entry<String, Integer> entry : strati.entrySet()) {
 			int index = i;
-			this.executorService.execute(new Runnable() {
-				@Override
-				public void run() {
-					String outputFile = tempFileHandler.createTempFile();
-					ReservoirSampling reservoirSampling = new ReservoirSampling(random, tempFileHandler.getTempFile(uuid));
-					reservoirSampling.setSampleSize(sampleSizeForStrati[index]);
-					try {
-						reservoirSampling.setOutputFileName(tempFileHandler.getTempFile(outputFile).getAbsolutePath());
-						reservoirSampling.call();
-						BufferedReader bufferedReader = tempFileHandler.getFileReaderForTempFile(outputFile);
-						ArffUtilities.skipWithReaderToDatapoints(bufferedReader);
-						String line;
-						while ((line = bufferedReader.readLine()) != null) {
-							if (line.trim().equals("") || line.trim().charAt(0) == '%') {
-								continue;
-							} else {
-								synchronized (sample) {
-									sample.add(line);
-								}
+			this.executorService.execute(() -> {
+				String outputFile = tempFileHandler.createTempFile();
+				ReservoirSampling reservoirSampling = new ReservoirSampling(random,
+						tempFileHandler.getTempFile(entry.getKey()));
+				reservoirSampling.setSampleSize(sampleSizeForStrati[index]);
+				try {
+					reservoirSampling.setOutputFileName(tempFileHandler.getTempFile(outputFile).getAbsolutePath());
+					reservoirSampling.call();
+					BufferedReader bufferedReader = tempFileHandler.getFileReaderForTempFile(outputFile);
+					ArffUtilities.skipWithReaderToDatapoints(bufferedReader);
+					String line;
+					while ((line = bufferedReader.readLine()) != null) {
+						if (!(line.trim().equals("") || line.trim().charAt(0) == '%')) {
+							synchronized (sample) {
+								sample.add(line);
 							}
 						}
-					} catch (Exception e) {
-						e.printStackTrace();
 					}
+				} catch (Exception e) {
+					logger.error("Unexpected exception during reservoir sampling!", e);
 				}
 			});
 			i++;

@@ -13,6 +13,9 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 
 /**
@@ -28,6 +31,8 @@ import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
  */
 public class ExtrapolationServiceClient<C> {
 
+	private Logger logger = LoggerFactory.getLogger(ExtrapolationServiceClient.class);
+
 	private String serviceUrl;
 	private Class<C> configClass;
 
@@ -36,7 +41,8 @@ public class ExtrapolationServiceClient<C> {
 		this.configClass = configClass;
 	}
 
-	public C getConfigForAnchorPoints(int[] xValuesArr, double[] yValuesArr) throws InvalidAnchorPointsException, InterruptedException {
+	public C getConfigForAnchorPoints(int[] xValuesArr, double[] yValuesArr)
+			throws InvalidAnchorPointsException, InterruptedException, ExecutionException {
 		// Create request
 		ExtrapolationRequest request = new ExtrapolationRequest();
 		List<Integer> xValues = new ArrayList<>();
@@ -56,7 +62,8 @@ public class ExtrapolationServiceClient<C> {
 		try {
 			target = client.target(new URI(this.serviceUrl));
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Cannot build WebTarget", e);
+			throw new IllegalStateException("No WebTarget!", e);
 		}
 
 		// Send request and wait for response
@@ -64,20 +71,13 @@ public class ExtrapolationServiceClient<C> {
 				.post(Entity.entity(request, MediaType.APPLICATION_JSON));
 
 		Response response;
-		try {
-			response = future.get();
-		} catch (ExecutionException e) {
-			throw new RuntimeException("Exception while waiting for server response", e);
-		}
+		response = future.get();
 
 		if (response.getStatus() == 500 && response.readEntity(String.class).equals("Invalid anchorpoints")) {
 			throw new InvalidAnchorPointsException();
 		}
 
-		// Create configuration object from response
-		C configuration = response.readEntity(this.configClass);
-
-		return configuration;
+		return response.readEntity(this.configClass);
 	}
 
 }

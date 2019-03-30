@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -36,7 +37,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.Discretizat
 public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		implements IStratiAmountSelector<I>, IStratiAssigner<I> {
 
-	private static Logger LOG = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
 
 	/** Default strategy for discretization */
 	private static final DiscretizationStrategy DEFAULT_DISCRETIZATION_STRATEGY = DiscretizationStrategy.EQUAL_SIZE;
@@ -121,7 +122,9 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		for (Set<Object> values : this.attributeValues.values()) {
 			noStrati *= values.size();
 		}
-		LOG.info(String.format("%d strati are needed", noStrati));
+		if (LOG.isInfoEnabled()) {
+			LOG.info(String.format("%d strati are needed", noStrati));
+		}
 		return noStrati;
 	}
 
@@ -138,11 +141,15 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		if (this.attributeIndices == null || this.attributeIndices.isEmpty()) {
 			// We assume that the last attribute is the target attribute
 			int targetIndex = this.dataset.getNumberOfAttributes();
-			LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d",
-					targetIndex));
+			if (LOG.isInfoEnabled()) {
+				LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d",
+						targetIndex));
+			}
 			this.attributeIndices = Collections.singletonList(targetIndex);
 		}
-		LOG.debug("Computing attribute values for attribute indices {}", attributeIndices.toString());
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Computing attribute values for attribute indices {}", attributeIndices);
+		}
 
 		// Check validity of the attribute indices
 		for (int attributeIndex : attributeIndices) {
@@ -153,7 +160,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		}
 
 		// Map containing for each attribute the set of possible values
-		Map<Integer, Set<Object>> attributeValues = new HashMap<>();
+		this.attributeValues = new HashMap<>();
 
 		// Setup map with empty sets
 		for (int attributeIndex : attributeIndices) {
@@ -165,7 +172,9 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		List<Future<Map<Integer, Set<Object>>>> futures = new ArrayList<>();
 
 		// Start threads
-		LOG.info(String.format("Starting %d threads for computation..", this.numCPUs));
+		if (LOG.isInfoEnabled()) {
+			LOG.info(String.format("Starting %d threads for computation..", this.numCPUs));
+		}
 		int listSize = dataset.size() / this.numCPUs;
 		for (List<I> sublist : Lists.partition(dataset, listSize)) {
 			futures.add(threadPool.submit(new ListProcessor<I>(sublist, new HashSet<>(attributeIndices), dataset)));
@@ -176,11 +185,14 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 			try {
 				// Merge locally computed attribute values into the global list
 				Map<Integer, Set<Object>> localAttributeValues = future.get();
-				for (int attributeIndex : attributeValues.keySet()) {
-					attributeValues.get(attributeIndex).addAll(localAttributeValues.get(attributeIndex));
+				for (Entry<Integer, Set<Object>> entry : attributeValues.entrySet()) {
+					attributeValues.get(entry.getKey()).addAll(localAttributeValues.get(entry.getKey()));
 				}
-			} catch (InterruptedException | ExecutionException e) {
+			} catch (ExecutionException e) {
 				LOG.error("Exception while waiting for future to complete..", e);
+			} catch (InterruptedException e) {
+				LOG.error("Thread has been interrupted");
+				Thread.currentThread().interrupt();
 			}
 		}
 
@@ -197,12 +209,13 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		}
 
 		if (!discretizationPolicies.isEmpty()) {
-			LOG.info("Discretizing numeric attributes using policies: {}", discretizationPolicies.toString());
+			if (LOG.isInfoEnabled()) {
+				LOG.info("Discretizing numeric attributes using policies: {}", discretizationPolicies);
+			}
 			discretizationHelper.discretizeAttributeValues(discretizationPolicies, attributeValues);
 		}
 
 		LOG.info("computeAttributeValues(): leave");
-		this.attributeValues = attributeValues;
 	}
 
 	@Override
@@ -240,14 +253,13 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		}
 
 		// Each set represents the set of possible attribute values
-		List<Set<Object>> sets = new ArrayList<Set<Object>>(attributeValues.values());
+		List<Set<Object>> sets = new ArrayList<>(attributeValues.values());
 		Set<List<Object>> cartesianProducts = Sets.cartesianProduct(sets);
 		stratumAssignments = new MultiKeyMap<>();
 
 		LOG.info("There are {} elements in the cartesian product of the attribute values", cartesianProducts.size());
 
 		LOG.info("Assigning stratum numbers to elements in the cartesian product..");
-		// TODO: Could this be done in parallel?
 		// Add mapping for each element in the Cartesian product
 		int stratumCounter = 0;
 		for (List<Object> cartesianProduct : cartesianProducts) {
@@ -255,7 +267,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 			cartesianProduct.toArray(arr);
 			MultiKey<Object> multiKey = new MultiKey<>(arr);
 			if (stratumAssignments.containsKey(multiKey)) {
-				throw new RuntimeException(String.format("Mulitkey %s occured twice!", multiKey.toString()));
+				throw new IllegalStateException(String.format("Mulitkey %s occured twice!", multiKey.toString()));
 			}
 			stratumAssignments.put(new MultiKey<>(arr), stratumCounter++);
 		}
@@ -272,7 +284,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 		}
 
 		// Compute concrete attribute values for the particular instance
-		Object[] attributeValues = new Object[attributeIndices.size()];
+		Object[] instanceAttributeValues = new Object[attributeIndices.size()];
 		for (int i = 0; i < attributeIndices.size(); i++) {
 			int attributeIndex = attributeIndices.get(i);
 
@@ -294,15 +306,17 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
 				}
 			}
 
-			attributeValues[i] = value;
+			instanceAttributeValues[i] = value;
 		}
-		LOG.debug(String.format("Attribute values are: %s", Arrays.toString(attributeValues)));
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format("Attribute values are: %s", Arrays.toString(instanceAttributeValues)));
+		}
 
 		// Request mapping for the concrete attribute values
-		MultiKey<Object> multiKey = new MultiKey<>(attributeValues);
+		MultiKey<Object> multiKey = new MultiKey<>(instanceAttributeValues);
 		if (!stratumAssignments.containsKey(multiKey)) {
-			throw new RuntimeException(String.format("No assignment available for attribute combination %s",
-					Arrays.toString(attributeValues)));
+			throw new IllegalStateException(String.format("No assignment available for attribute combination %s",
+					Arrays.toString(instanceAttributeValues)));
 		}
 
 		int stratum = stratumAssignments.get(multiKey);
@@ -326,7 +340,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
  */
 class ListProcessor<I extends IInstance> implements Callable<Map<Integer, Set<Object>>> {
 
-	private static Logger LOG = LoggerFactory.getLogger(ListProcessor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ListProcessor.class);
 
 	private List<I> list;
 
@@ -343,7 +357,9 @@ class ListProcessor<I extends IInstance> implements Callable<Map<Integer, Set<Ob
 
 	@Override
 	public Map<Integer, Set<Object>> call() {
-		LOG.info(String.format("Starting computation on local sublist of length %d", list.size()));
+		if (LOG.isInfoEnabled()) {
+			LOG.info(String.format("Starting computation on local sublist of length %d", list.size()));
+		}
 
 		// Setup local map
 		Map<Integer, Set<Object>> attributeValues = new HashMap<>();

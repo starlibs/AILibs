@@ -21,7 +21,7 @@ public class LocalCaseControlSampling<I extends IInstance> extends PilotEstimate
 	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances,
 			Classifier pilotEstimator) {
 		double boundaryOfCurrentInstance = 0.0;
-		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<Pair<Instance, Double>>();
+		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;
 		double loss;
 		for (Instance instance : instances) {
@@ -39,11 +39,10 @@ public class LocalCaseControlSampling<I extends IInstance> extends PilotEstimate
 				loss = 1;
 			}
 			boundaryOfCurrentInstance += loss / sumOfDistributionLosses;
-			instanceProbabilityBoundaries
-					.add(new Pair<Instance, Double>(instance, new Double(boundaryOfCurrentInstance)));
+			instanceProbabilityBoundaries.add(new Pair<Instance, Double>(instance, boundaryOfCurrentInstance));
 		}
 		IDataset<IInstance> dataset = WekaInstancesUtil.wekaInstancesToDataset(instances);
-		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<Pair<I, Double>>();
+		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<>();
 		int iterator = 0;
 		for (IInstance instance : dataset) {
 			probabilityBoundaries

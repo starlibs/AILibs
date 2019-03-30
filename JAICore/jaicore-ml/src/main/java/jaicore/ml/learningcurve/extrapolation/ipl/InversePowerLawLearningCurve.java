@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.ml.interfaces.AnalyticalLearningCurve;
 
@@ -18,19 +20,31 @@ import jaicore.ml.interfaces.AnalyticalLearningCurve;
  */
 public class InversePowerLawLearningCurve implements AnalyticalLearningCurve {
 
-	private double a, b, c;
+	private Logger logger = LoggerFactory.getLogger(InversePowerLawLearningCurve.class);
+
+	private double a;
+	private double b;
+	private double c;
 
 	public InversePowerLawLearningCurve(double a, double b, double c) {
-		assert a > 0 && a < 1;
-		assert c > -1 && c < 0;
+		if (!(a > 0 && a < 1)) {
+			throw new IllegalArgumentException("Parameter a has to be in (0,1)");
+		}
+		if (!(c > -1 && c < 0)) {
+			throw new IllegalArgumentException("Parameter c has to be in (-1,0)");
+		}
 		this.a = a;
 		this.b = b;
 		this.c = c;
 	}
 
 	public InversePowerLawLearningCurve(InversePowerLawConfiguration configuration) {
-		assert configuration.getA() > 0 && configuration.getA() < 1;
-		assert configuration.getC() > -1 && configuration.getC() < 0;
+		if (!(configuration.getA() > 0 && configuration.getA() < 1)) {
+			throw new IllegalArgumentException("Parameter a has to be in (0,1)");
+		}
+		if (!(configuration.getC() > -1 && configuration.getC() < 0)) {
+			throw new IllegalArgumentException("Parameter c has to be in (-1,0)");
+		}
 		this.a = configuration.getA();
 		this.b = configuration.getB();
 		this.c = configuration.getC();
@@ -38,11 +52,12 @@ public class InversePowerLawLearningCurve implements AnalyticalLearningCurve {
 
 	@Override
 	public double getSaturationPoint(double epsilon) {
-		assert epsilon > 0;
+		if (epsilon <= 0) {
+			throw new IllegalArgumentException("Parameter epsilon has to be >= 0");
+		}
 		double n = this.c - 1.0d;
 		double base = -(epsilon / (this.b * this.c));
-		double result = Math.pow(Math.E, Math.log(base) / n);
-		return result;
+		return Math.pow(Math.E, Math.log(base) / n);
 	}
 
 	@Override
@@ -57,8 +72,8 @@ public class InversePowerLawLearningCurve implements AnalyticalLearningCurve {
 
 	@Override
 	public String toString() {
-		return "(1 - " + new BigDecimal(this.a).toPlainString() + ") - " + new BigDecimal(this.b).toPlainString()
-				+ " * x ^ " + new BigDecimal(this.c).toPlainString();
+		return "(1 - " + BigDecimal.valueOf(this.a).toPlainString() + ") - "
+				+ BigDecimal.valueOf(this.b).toPlainString() + " * x ^ " + BigDecimal.valueOf(this.c).toPlainString();
 	}
 
 	@Override
@@ -66,14 +81,14 @@ public class InversePowerLawLearningCurve implements AnalyticalLearningCurve {
 		UnivariateSolver solver = new BrentSolver(0, 1.0d);
 		double convergencePoint = -1;
 		int upperIntervalBound = 10000;
-		int retries_left = 8;
-		while (retries_left > 0 && convergencePoint == -1) {
+		int retriesLeft = 8;
+		while (retriesLeft > 0 && convergencePoint == -1) {
 			try {
 				convergencePoint = solver.solve(1000, (x) -> this.getDerivativeCurveValue(x) - 0.0000001, 1,
 						upperIntervalBound);
 			} catch (NoBracketingException e) {
-				System.out.println(e.getMessage());
-				retries_left--;
+				logger.warn(String.format("No solution could be found in interval [1,%d]", upperIntervalBound));
+				retriesLeft--;
 				upperIntervalBound *= 2;
 			}
 		}

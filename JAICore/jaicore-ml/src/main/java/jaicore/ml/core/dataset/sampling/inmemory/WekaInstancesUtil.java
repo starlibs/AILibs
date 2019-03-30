@@ -23,6 +23,10 @@ import weka.core.UnsupportedAttributeTypeException;
 
 public class WekaInstancesUtil {
 
+	private WekaInstancesUtil() {
+
+	}
+
 	public static IDataset wekaInstancesToDataset(final Instances data) {
 		List<IAttributeType<?>> attributeTypeList = new LinkedList<>();
 		for (int i = 0; i < data.numAttributes(); i++) {
@@ -46,7 +50,8 @@ public class WekaInstancesUtil {
 					if (type instanceof NumericAttributeType) {
 						attributeValuesList.add(new NumericAttributeValue((NumericAttributeType) type, inst.value(i)));
 					} else {
-						attributeValuesList.add(new CategoricalAttributeValue((CategoricalAttributeType) type, inst.attribute(i).value((int) inst.value(i))));
+						attributeValuesList.add(new CategoricalAttributeValue((CategoricalAttributeType) type,
+								inst.attribute(i).value((int) inst.value(i))));
 					}
 					attIx++;
 				} else {
@@ -54,7 +59,8 @@ public class WekaInstancesUtil {
 					if (type instanceof NumericAttributeType) {
 						targetValue = new NumericAttributeValue((NumericAttributeType) type, inst.value(i));
 					} else if (type instanceof CategoricalAttributeType) {
-						targetValue = new CategoricalAttributeValue((CategoricalAttributeType) type, inst.classAttribute().value((int) inst.value(i)));
+						targetValue = new CategoricalAttributeValue((CategoricalAttributeType) type,
+								inst.classAttribute().value((int) inst.value(i)));
 					}
 				}
 			}
@@ -66,7 +72,8 @@ public class WekaInstancesUtil {
 		return dataset;
 	}
 
-	public static Instances datasetToWekaInstances(final IDataset<? extends IInstance> dataset) throws UnsupportedAttributeTypeException {
+	public static Instances datasetToWekaInstances(final IDataset<? extends IInstance> dataset)
+			throws UnsupportedAttributeTypeException {
 		List<Attribute> attributes = new LinkedList<>();
 		Attribute classAttribute;
 
@@ -123,7 +130,7 @@ public class WekaInstancesUtil {
 		return wekaInstances;
 	}
 
-	public static IAttributeType<?> transformWEKAAttributeToAttributeType(final Attribute att) {
+	public static IAttributeType transformWEKAAttributeToAttributeType(final Attribute att) {
 		if (att.isNumeric()) {
 			return new NumericAttributeType();
 		} else if (att.isNominal()) {

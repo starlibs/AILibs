@@ -22,7 +22,7 @@ import jaicore.ml.interfaces.AnalyticalLearningCurve;
  */
 public class LinearCombinationLearningCurve implements AnalyticalLearningCurve {
 
-	private static Logger LOG = LoggerFactory.getLogger(LinearCombinationLearningCurve.class);
+	private static final Logger LOG = LoggerFactory.getLogger(LinearCombinationLearningCurve.class);
 
 	/**
 	 * Constant value describing the number of times the size of the interval in
@@ -502,11 +502,11 @@ public class LinearCombinationLearningCurve implements AnalyticalLearningCurve {
 		double result = -1;
 		int lowerIntervalBound = 1;
 		int upperIntervalBound = upperIntervalBoundStart;
-		int retries_left = ROOT_COMPUTATION_RETIRES;
+		int retriesLeft = ROOT_COMPUTATION_RETIRES;
 
 		this.derivative.setOffset(offset);
 
-		while (retries_left > 0 && result == -1) {
+		while (retriesLeft > 0 && result == -1) {
 			try {
 				LOG.info("Trying to find root with offset {} in interval [{}/{}]", offset, lowerIntervalBound,
 						upperIntervalBound);
@@ -514,8 +514,8 @@ public class LinearCombinationLearningCurve implements AnalyticalLearningCurve {
 			} catch (NoBracketingException e) {
 				LOG.warn("Cannot find root in interval [{},{}]: {}", lowerIntervalBound, upperIntervalBound,
 						e.getMessage());
-				retries_left--;
-				LOG.warn("Retries left: {} / {}", retries_left, ROOT_COMPUTATION_RETIRES);
+				retriesLeft--;
+				LOG.warn("Retries left: {} / {}", retriesLeft, ROOT_COMPUTATION_RETIRES);
 				upperIntervalBound *= 2;
 				lowerIntervalBound *= 2;
 			}

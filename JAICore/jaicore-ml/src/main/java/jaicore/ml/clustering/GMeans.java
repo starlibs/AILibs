@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
@@ -18,22 +19,24 @@ import org.apache.commons.math3.random.RandomGenerator;
 /**
  * Implementation of Gmeans based on Helen Beierlings implementation of
  * GMeans(https://github.com/helebeen/AILibs/blob/master/JAICore/jaicore-modifiedISAC/src/main/java/jaicore/modifiedISAC/ModifiedISACgMeans.java).<br>
- * For more Information see: "Hamerly, G., and Elkan, C. 2003. Learning the k in kmeans. in proceedings of the seventeenth annual conference on neural information processing systems (nips)".
- * <br><br>
- * This implementation uses {@link KMeansPlusPlusClusterer} as the k-means cluster algorithm. 
+ * For more Information see: "Hamerly, G., and Elkan, C. 2003. Learning the k in
+ * kmeans. in proceedings of the seventeenth annual conference on neural
+ * information processing systems (nips)". <br>
+ * <br>
+ * This implementation uses {@link KMeansPlusPlusClusterer} as the k-means
+ * cluster algorithm.
  * 
  * @author Helen Beierling
  * @author jnowack
  *
- * @param <C> Points to cluster.
+ * @param <C>
+ *            Points to cluster.
  */
 public class GMeans<C extends Clusterable> {
 
 	private ArrayList<double[]> center = new ArrayList<>();
 
-	private ArrayList<CentroidCluster<C>> gmeansCluster = new  ArrayList<>();
-
-	private List<double[]> intermediateCenter;
+	private ArrayList<CentroidCluster<C>> gmeansCluster = new ArrayList<>();
 
 	private HashMap<double[], List<C>> currentPoints = new HashMap<>();
 
@@ -41,38 +44,40 @@ public class GMeans<C extends Clusterable> {
 
 	private ArrayList<C> points = new ArrayList<>();
 
-	private List<C> loopPoints;
-
 	private DistanceMeasure distanceMeasure = new ManhattanDistance();
 
 	private RandomGenerator randomGenerator;
-	
-	
-	/** Initializes a basic cluster for the given Point using Mannhatten distance and seed=1
+
+	/**
+	 * Initializes a basic cluster for the given Point using Mannhatten distance and
+	 * seed=1
 	 * 
-	 * @param toClusterPoints Points which should be clustered
+	 * @param toClusterPoints
+	 *            Points which should be clustered
 	 */
 	public GMeans(Collection<C> toClusterPoints) {
 		this(toClusterPoints, new ManhattanDistance(), 1);
 	}
-	
+
 	/**
-	 *  Initializes a cluster for the given Point using a given distance meassure and a seed.
+	 * Initializes a cluster for the given Point using a given distance meassure and
+	 * a seed.
 	 * 
-	 * @param toClusterPoints P
+	 * @param toClusterPoints
+	 *            P
 	 * @param distanceMeasure
 	 * @param seed
 	 */
 	public GMeans(Collection<C> toClusterPoints, DistanceMeasure distanceMeasure, long seed) {
 		this.points = new ArrayList<>(toClusterPoints);
 		this.distanceMeasure = distanceMeasure;
-		this.gmeansCluster = new ArrayList<CentroidCluster<C>>();
+		this.gmeansCluster = new ArrayList<>();
 		this.randomGenerator = new JDKRandomGenerator();
 		randomGenerator.setSeed(seed);
 	}
 
 	public List<CentroidCluster<C>> cluster() {
-		HashMap<Integer, double[]> positionOfCenter = new HashMap<Integer, double[]>();
+		HashMap<Integer, double[]> positionOfCenter = new HashMap<>();
 		int tmp = 1;
 
 		int k = 1;
@@ -80,7 +85,6 @@ public class GMeans<C extends Clusterable> {
 		// creates a k means clustering instance with all points and an L1 distance
 		// metric as metric
 		KMeansPlusPlusClusterer<C> test = new KMeansPlusPlusClusterer<>(k, -1, distanceMeasure, randomGenerator);
-		// ModifiedISACkMeans test = new ModifiedISACkMeans(points, dist);
 
 		// clusters all points with k = 1
 		List<CentroidCluster<C>> currentPointsTemp = test.cluster(points);
@@ -102,17 +106,17 @@ public class GMeans<C extends Clusterable> {
 
 		while (i <= k) {
 			// looppoints are S_i the points are the points of the considered center C_i
-			loopPoints = currentPoints.get(positionOfCenter.get(i));
+			List<C> loopPoints = currentPoints.get(positionOfCenter.get(i));
 
 			// makes a new instance with of kmeans with S_i as base
-			KMeansPlusPlusClusterer<C> loopCluster = new KMeansPlusPlusClusterer<>(2, -1, distanceMeasure, randomGenerator);
-			// ModifiedISACkMeans loopCluster = new ModifiedISACkMeans(loopPoints, dist);
+			KMeansPlusPlusClusterer<C> loopCluster = new KMeansPlusPlusClusterer<>(2, -1, distanceMeasure,
+					randomGenerator);
 
 			// clusters S_I into to cluster intermediate points is a HashMap of center with
 			// an ArrayList of thier
 			// corresponding points
-			intermediateCenter = new ArrayList<>(2);
-			if(loopPoints.size() <2) {
+			List<double[]> intermediateCenter = new ArrayList<>(2);
+			if (loopPoints.size() < 2) {
 				break;
 			}
 			List<CentroidCluster<C>> intermediatePointsTemp = loopCluster.cluster(loopPoints);
@@ -134,6 +138,10 @@ public class GMeans<C extends Clusterable> {
 					w += Math.pow(v[l], 2);
 				}
 			}
+			
+			if(w == 0) {
+				throw new RuntimeException("All entries in v are NaN, cannot compute w!");
+			}
 
 			double[] y = new double[loopPoints.size()];
 			// All points are projected onto a points by multiplying every entry of point
@@ -143,10 +151,8 @@ public class GMeans<C extends Clusterable> {
 			// if the entry of v is Nan or the entry of the point the entry is ignored
 			for (int r = 0; r < loopPoints.size(); r++) {
 				for (int p = 0; p < loopPoints.get(r).getPoint().length; p++) {
-					if (!Double.isNaN(loopPoints.get(r).getPoint()[p])) {
-						if (!Double.isNaN(v[p])) {
-							y[r] += (v[p] * loopPoints.get(r).getPoint()[p]) / w;
-						}
+					if (!Double.isNaN(loopPoints.get(r).getPoint()[p]) && !Double.isNaN(v[p])) {
+						y[r] += (v[p] * loopPoints.get(r).getPoint()[p]) / w;
 						// TODO soll ich wenn v an der stelle NaN ist einfach so tuen als w�re es
 						// 1 oder nichts machen ?
 					}
@@ -172,14 +178,9 @@ public class GMeans<C extends Clusterable> {
 			}
 		}
 		mergeCluster(currentPoints);
-		for (double[] d : currentPoints.keySet()) {
-			List<C> pointsInCluster = currentPoints.get(d);
-			CentroidCluster<C> c = new CentroidCluster<>(new Clusterable() {
-				@Override
-				public double[] getPoint() {
-					return d;
-				}
-			});
+		for (Entry<double[], List<C>> entry : currentPoints.entrySet()) {
+			List<C> pointsInCluster = currentPoints.get(entry.getKey());
+			CentroidCluster<C> c = new CentroidCluster<>(() -> entry.getKey());
 			for (C point : pointsInCluster) {
 				c.addPoint(point);
 			}
@@ -189,26 +190,26 @@ public class GMeans<C extends Clusterable> {
 	}
 
 	private void mergeCluster(HashMap<double[], List<C>> currentPoints) {
-		ArrayList<double[]> toMergeCenter = new ArrayList<double[]>();
-		for (double[] d : currentPoints.keySet()) {
-			if (currentPoints.get(d).size() <= 2) {
-				toMergeCenter.add(d);
+		ArrayList<double[]> toMergeCenter = new ArrayList<>();
+		for (Entry<double[], List<C>> entry : currentPoints.entrySet()) {
+			if (currentPoints.get(entry.getKey()).size() <= 2) {
+				toMergeCenter.add(entry.getKey());
 			}
 		}
 
 		for (double[] d : toMergeCenter) {
 			List<C> tmp = currentPoints.remove(d);
-			for (C points : tmp) {
+			for (C tmpPoints : tmp) {
 				double minDist = Double.MAX_VALUE;
 				double[] myCenter = null;
 				for (double[] c : currentPoints.keySet()) {
-					double tmpDist = distanceMeasure.compute(points.getPoint(), c);
+					double tmpDist = distanceMeasure.compute(tmpPoints.getPoint(), c);
 					if (tmpDist <= minDist) {
 						myCenter = c;
 						minDist = tmpDist;
 					}
 				}
-				currentPoints.get(myCenter).add(points);
+				currentPoints.get(myCenter).add(tmpPoints);
 			}
 		}
 	}
@@ -250,7 +251,7 @@ public class GMeans<C extends Clusterable> {
 		// Are also negative!!
 		// total value is equivalent to y.length
 		// first part of A^2 is -n overall A^2 = -n-second Part.
-		double aSquare1 = (-1) * y.length;
+		double aSquare1 = (-1.0) * y.length;
 
 		double aSquare2 = 0;
 		// creates a normal distribution with mean 0 and standard deviation 1
@@ -264,17 +265,12 @@ public class GMeans<C extends Clusterable> {
 
 						((Math.log(normal.cumulativeProbability(y[i - 1])))
 								+ Math.log(1 - (normal.cumulativeProbability(y[((y.length) - i)]))));
-
-//				aSquare2 += ((2 * i - 1) * (Math.log(normal.cumulativeProbability(y[i - 1])))
-//						+ (2 * (y.length - i) + 1) * (Math.log(1 - normal.cumulativeProbability(y[i - 1]))));
 			}
 		}
 		// A^2 is divided by the the sample size to complete the second part of A^2^*.
 		aSquare2 = aSquare2 / y.length;
 		// By substracting part 2 from part 1 A^2^* is completed
 		double aSqurestar = aSquare1 - aSquare2;
-		// double aSqurestar = aSqure * (1 + (4 / y.length) - (25 / (Math.pow(y.length,
-		// 2))));
 		// for different sample sizes the threshold weather the distribution is normal
 		// or not varies a little.
 		// Overall if A^2^* is greater than the threshold than the test fails
@@ -320,13 +316,6 @@ public class GMeans<C extends Clusterable> {
 			}
 		}
 		return c;
-	}
-
-	private void printDoubleArray(double[] d) {
-		for (int i = 0; i < d.length; i++) {
-			System.out.print("|" + d[i] + "|");
-		}
-		System.out.println(" ");
 	}
 
 }

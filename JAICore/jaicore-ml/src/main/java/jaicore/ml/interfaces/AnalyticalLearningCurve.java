@@ -2,9 +2,10 @@ package jaicore.ml.interfaces;
 
 /**
  * Added some analytical functions to a learning curve.
+ * 
  * @author Lukas Brandt
  */
-public interface AnalyticalLearningCurve extends LearningCurve{
+public interface AnalyticalLearningCurve extends LearningCurve {
 
 	/**
 	 * Calculates or looks-up the value of the derivative of the learning point at a
@@ -24,7 +25,6 @@ public interface AnalyticalLearningCurve extends LearningCurve{
 	 * @return
 	 */
 	public double getConvergenceValue();
-	
 
 	/**
 	 * Calculated or search a saturation point with a tolerance of epsilon.
