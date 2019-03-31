@@ -19,7 +19,11 @@ import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
  *
  */
 public class DyadRankingInstanceSupplier {
-
+	
+	private DyadRankingInstanceSupplier() {
+		//Intentionally left blank
+	}
+	
 	/**
 	 * Creates a random {@link jaicore.ml.dyadranking.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
@@ -29,9 +33,12 @@ public class DyadRankingInstanceSupplier {
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
 	public static DyadRankingInstance getDyadRankingInstance(int maxLength, int seed) {
-		List<Dyad> dyads = new ArrayList<Dyad>();
+		List<Dyad> dyads = new ArrayList<>();
 		
 		int actualLength = new Random(seed).nextInt(maxLength+1);
+		while (actualLength == 0) {
+			actualLength = new Random(seed).nextInt(maxLength+1);
+		}
 		for(int i = 0; i < actualLength; i++) {
 			Dyad dyad = DyadSupplier.getRandomDyad(i, 2, 2);
 			dyads.add(dyad);
@@ -50,19 +57,18 @@ public class DyadRankingInstanceSupplier {
 	 * @return Comparator for dyads with 2 instances and 2 alternatives
 	 */
 	public static Comparator<Dyad> complexDyadRanker() {
-		Comparator<Dyad> comparator = new Comparator<Dyad>() {
-			@Override
-			public int compare(Dyad d1, Dyad d2) {
-				Vector scoreVecI = d1.getInstance();
-				Vector scoreVecA = d1.getAlternative();
-				Vector scoreVecI2 = d2.getInstance();
-				Vector scoreVecA2 = d2.getAlternative();
-				double score1 = bilinFunc(scoreVecI, scoreVecA);
-				double score2 = bilinFunc(scoreVecI2, scoreVecA2);
-				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
-			}
+		return (Dyad d1, Dyad d2) -> 
+		{
+			Vector scoreVecI = d1.getInstance();
+			Vector scoreVecA = d1.getAlternative();
+			Vector scoreVecI2 = d2.getInstance();
+			Vector scoreVecA2 = d2.getAlternative();
+			double score1 = bilinFunc(scoreVecI, scoreVecA);
+			double score2 = bilinFunc(scoreVecI2, scoreVecA2);
+			double scoreDiff = score1 - score2;
+			int comparison = scoreDiff > 0 ? 1 : -1;
+			return score1 - score2 == 0 ? 0 : (comparison);
 		};
-		return comparator;
 	}
 
 	/**
@@ -102,25 +108,21 @@ public class DyadRankingInstanceSupplier {
 	public static double inputOptimizerTestScore(Dyad dyad) {
 		Vector inst = dyad.getInstance();
 		Vector alt = dyad.getAlternative();
-		double score = Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1));
-		return score;
+		return Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1));
 	}
 	
 	public static Comparator<Dyad> inputOptimizerTestRanker() {
-		Comparator<Dyad> comparator = new Comparator<Dyad>() {
-
-			@Override
-			public int compare(Dyad d1, Dyad d2) {
-				double score1 = inputOptimizerTestScore(d1);
-				double score2 = inputOptimizerTestScore(d2);
-				return score1 - score2 == 0 ? 0 : (score1 - score2 > 0 ? 1 : -1);
-			}	
+		return (Dyad d1, Dyad d2) ->
+		{
+			double score1 = inputOptimizerTestScore(d1);
+			double score2 = inputOptimizerTestScore(d2);
+			int comparison = score1 - score2 > 0 ? 1 : -1;
+			return score1 - score2 == 0 ? 0 : comparison;
 		};
-		return comparator;
 	}
 	
-	public static DyadRankingInstance getInputOptDyadRankingInstance(int maxLength, int seed) {
-		List<Dyad> dyads = new ArrayList<Dyad>();
+	public static DyadRankingInstance getInputOptDyadRankingInstance(int maxLength) {
+		List<Dyad> dyads = new ArrayList<>();
 		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
 
 		for (int i = 0; i < actualLength; i++) {
@@ -132,10 +134,10 @@ public class DyadRankingInstanceSupplier {
 		return new DyadRankingInstance(dyads);
 	}
 	
-	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size, int seed) {
+	public static DyadRankingDataset getInputOptTestSet(int maxLengthDyadRankingInstance, int size) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
 		for (int i = 0; i < size; i++) {
-			dataset.add(DyadRankingInstanceSupplier.getInputOptDyadRankingInstance(maxLengthDyadRankingInstance, seed));
+			dataset.add(DyadRankingInstanceSupplier.getInputOptDyadRankingInstance(maxLengthDyadRankingInstance));
 		}
 		return dataset;
 	}

@@ -27,10 +27,9 @@ public class InputOptimizerTest {
 
 	@Test
 	public void testPLNetInputOptimizer() throws TrainingException {
-		int seed = 12;
 		
 		PLNetDyadRanker testnet = new PLNetDyadRanker();
-		DyadRankingDataset train = DyadRankingInstanceSupplier.getInputOptTestSet(5, 2000, seed);
+		DyadRankingDataset train = DyadRankingInstanceSupplier.getInputOptTestSet(5, 2000);
 		testnet.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8,6,4,4");
 		testnet.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.01");
 		testnet.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
