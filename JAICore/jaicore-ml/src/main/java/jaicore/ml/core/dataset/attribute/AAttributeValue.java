@@ -63,23 +63,6 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 		}
 		this.value = value;
 	}
-	
-	
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-
-		if (this == obj)
-			return true;
-
-		if (getClass() != obj.getClass())
-			return false;
-
-		IAttributeValue<?> other = (IAttributeValue<?>) obj;
-		return getValue().equals(other.getValue());
-	}
 
 	@Override
 	public boolean equals(Object obj) {
