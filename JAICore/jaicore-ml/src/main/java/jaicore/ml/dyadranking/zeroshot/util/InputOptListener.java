@@ -15,8 +15,8 @@ public class InputOptListener {
 	
 	public InputOptListener(int[] indicesToWatch) {
 		this.indicesToWatch = indicesToWatch;
-		this.inputList = new ArrayList<INDArray>();
-		this.outputList = new ArrayList<Double>();
+		this.inputList = new ArrayList<>();
+		this.outputList = new ArrayList<>();
 	}
 	
 	public void reportOptimizationStep(INDArray plNetInput, double plNetOutput) {
