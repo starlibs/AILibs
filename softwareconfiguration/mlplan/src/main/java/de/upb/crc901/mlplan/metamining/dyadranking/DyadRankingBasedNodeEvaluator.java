@@ -70,17 +70,17 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import weka.core.Instances;
 
 /**
- * 1 Nicer Node Evaluator.
- * 
- * This Node Evaluator stole literally all its code from the
- * {@link RandomCompletionBasedNodeEvaluator}, however, i removed all the crap
- * ;)
+ * This NodeEvaluator can calculate the f-Value for nodes using dyad ranking.
+ * Thereby, a huge amount of random completion will be drawn in a node, then
+ * these pipelines will ranked using dyad ranking and finally the top k
+ * pipelines will be evaluated, using the best observed score as the f-Value of
+ * the node.
  * 
  * @param <T>
  *            the node type, typically it is {@link TFDNode}
  * @param <V>
- *            the type of the score, literally always Double...
- * @author Mirko!
+ *            the type of the score
+ * @author Mirko Juergens
  *
  */
 public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
@@ -499,18 +499,29 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	@Override
 	public void setGenerator(GraphGenerator<T, ?> generator) {
 		this.graphGenerator = generator;
-		initializeRandomSearch(generator);
+		initializeRandomSearch();
 	}
 
-	private void initializeRandomSearch(GraphGenerator<T, ?> generator) {
+	/**
+	 * Can be used to reinitialize the random-search at every call of the f-Value
+	 * computation.
+	 * 
+	 * @param generator
+	 */
+	private void initializeRandomSearch() {
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
-				(GraphGenerator<T, String>) generator, nodeEvaluator);
+				(GraphGenerator<T, String>) graphGenerator, nodeEvaluator);
 		randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);
 		while (!(randomPathCompleter.next() instanceof AlgorithmInitializedEvent))
 			;
 	}
 
+	/**
+	 * Sets the data set in the node evaluator and calculates its meta features.
+	 * 
+	 * @param dataset
+	 */
 	public void setDataset(Instances dataset) {
 
 		// first we split the dataset into train & testdata
@@ -555,6 +566,16 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 	}
 
+	/**
+	 * Posts the solution to the EventBus of the search.
+	 * 
+	 * @param solution
+	 *            evaluated pipeline
+	 * @param time
+	 *            time it took
+	 * @param score
+	 *            the observed score
+	 */
 	protected void postSolution(final ComponentInstance solution, long time, V score) {
 		try {
 			@SuppressWarnings("unchecked")
@@ -573,7 +594,6 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	public void setPipelineEvaluator(IObjectEvaluator<ComponentInstance, V> wrappedSearchBenchmark) {
-		System.out.println("called");
 		this.pipelineEvaluator = wrappedSearchBenchmark;
 	}
 
