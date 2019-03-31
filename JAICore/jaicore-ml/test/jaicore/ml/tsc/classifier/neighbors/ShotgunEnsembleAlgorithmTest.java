@@ -15,7 +15,11 @@ import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /**
- * ShotgunEnsembleAlgorithmTest
+ * Test suite for the
+ * {@link jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleAlgorithm}
+ * implementation.
+ * 
+ * @author fischor
  */
 public class ShotgunEnsembleAlgorithmTest {
 

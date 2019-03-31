@@ -24,6 +24,8 @@ package jaicore.ml.tsc.distances;
  * Move-Split-Merge distance between to time series <code>A</code> and
  * <code>B</code> is defined be the cost of the lowest-cost transformation
  * <code>S*</code>, such that <code>transform(S*, A) = B</code>.
+ * 
+ * @author fischor
  */
 public class MoveSplitMerge implements ITimeSeriesDistance {
 

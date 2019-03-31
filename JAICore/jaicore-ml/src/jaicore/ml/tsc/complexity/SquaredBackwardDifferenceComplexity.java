@@ -4,9 +4,11 @@ package jaicore.ml.tsc.complexity;
  * Complexity metric as described in "A Complexity-Invariant Distance Measure
  * for Time Series".
  * 
- * $$ c = sum_{i=1}^n-1 \sqrt{ (T_I - T_{i+1})^2 }$$
+ * $$ c = sum_{i=1}^n-1 \sqrt{ (T_i - T_{i+1})^2 }$$
  * 
  * where $T_i$ are the values of the time series.
+ * 
+ * @author fischor
  */
 public class SquaredBackwardDifferenceComplexity implements ITimeSeriesComplexity {
 

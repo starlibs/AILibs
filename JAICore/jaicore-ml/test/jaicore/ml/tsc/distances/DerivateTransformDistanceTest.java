@@ -13,6 +13,8 @@ import jaicore.ml.tsc.filter.transform.HilbertTransform;
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.DerivateTransformDistance}
  * implementation.
+ * 
+ * @author fischor
  */
 public class DerivateTransformDistanceTest {
 

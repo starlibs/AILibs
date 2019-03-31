@@ -2,7 +2,6 @@ package jaicore.ml.tsc.distances;
 
 import jaicore.ml.tsc.filter.derivate.ADerivateFilter;
 import jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
-import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
  * Implementation of the Derivate Distance (DD) measure as published in "Using
@@ -31,6 +30,8 @@ import jaicore.ml.tsc.util.TimeSeriesUtil;
  * It is also possible to use a distinct distance measure to calculate the
  * distance between the time series and its derivates.
  * </p>
+ * 
+ * @author fischor
  */
 public class DerivateDistance implements ITimeSeriesDistance {
 

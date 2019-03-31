@@ -8,6 +8,8 @@ package jaicore.ml.tsc.complexity;
  * 
  * where $t_i$ are the timestamps (here $t_i = i$) an $T_i$ are the values of
  * the time series.
+ * 
+ * @author fischor
  */
 public class StretchingComplexity implements ITimeSeriesComplexity {
 

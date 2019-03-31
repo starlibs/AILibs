@@ -5,12 +5,18 @@ import java.util.List;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import jaicore.ml.tsc.filter.IFilter;
 
 /**
- * Pipeline
+ * Pipeline for a time series classification task.
  * 
- * @param <IFiler>
+ * A pipeline consists of a list of filters and a classifier. When given a
+ * datset the pipeline applies each filters in order to a specific value matrix
+ * of the dataset. After each filter is applied, the fitlered dataset is given
+ * to the classifier. This procedure applies to the train and test phase
+ * equally.
+ * 
+ * @param TARGETDOMAIN The type of the targets for the classification task.
+ * @author fischor
  */
 public class Pipeline<TARGETDOMAIN> {
 
@@ -18,7 +24,7 @@ public class Pipeline<TARGETDOMAIN> {
     public ASimplifiedTSClassifier<TARGETDOMAIN> classifier;
 
     public void train(TimeSeriesDataset dataset) {
-
+        // TODO
     }
 
     public TARGETDOMAIN predict(final double[] univInstance) throws PredictionException {
@@ -33,7 +39,6 @@ public class Pipeline<TARGETDOMAIN> {
         return this.classifier.predict(multivInstance);
     };
 
-    // TODO: Just a single timestamp.
     public TARGETDOMAIN predict(final List<double[]> multivInstance, final List<double[]> timestamps)
             throws PredictionException {
         return this.classifier.predict(multivInstance, timestamps);

@@ -1,7 +1,15 @@
 package jaicore.ml.tsc.filter.transform;
 
 /**
- * CosineTransform
+ * Calculates the cosine transform of a time series. For this implementation,
+ * the definition as given in "Non-isometric transforms in time series
+ * classification using DTW" by Tomasz Gorecki and Maciej Luczak (2014) is used.
+ * 
+ * The cosine transform <code>f = {f(k): k = 1 to n}</code> of a time series
+ * <code>T = {T(i): i = 1 to n }</code> is defined as
+ * <code>f(k) = sum_{i=1}^{n} T(i) * cos[(PI/n)*(i-0.5)*(k-1)]</code>.
+ * 
+ * @author fischor
  */
 public class CosineTransform extends ATransformFilter {
 

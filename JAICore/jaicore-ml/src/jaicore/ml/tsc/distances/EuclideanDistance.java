@@ -10,6 +10,8 @@ import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
  * of length <code>n</code> is defined as
  * <code>\sqrt{\sum_{i=0}^{n} (A_i - B_i)^2 }</code>. Therefore, it is required
  * for <code>A</code> and <code>B</code> to be of the same length.
+ * 
+ * @author fischor
  */
 public class EuclideanDistance implements ITimeSeriesDistance {
 

@@ -6,6 +6,8 @@ import jaicore.ml.tsc.filter.IFilter;
 /**
  * Class used within a pipeline that specified how to apply a filter on a
  * dataset.
+ * 
+ * @author fischor
  */
 public class FilterHandler {
 

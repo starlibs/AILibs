@@ -6,6 +6,8 @@ import org.junit.Test;
 
 /**
  * Test suite for the {@link HilbertTransform} implementation.
+ * 
+ * @author fischor
  */
 public class HilbertTransformTest {
 

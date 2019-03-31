@@ -16,6 +16,8 @@ import java.util.Map;
  * DTW (WDTW), which is a penalty-based DTW. [Their] approach penalizes points
  * with higher phase difference between a reference point and a testing point in
  * order to prevent minimum distance distortion caused by outliers.
+ * 
+ * @author fischor
  */
 public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
 

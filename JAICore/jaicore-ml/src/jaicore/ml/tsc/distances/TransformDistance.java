@@ -30,6 +30,8 @@ import jaicore.ml.tsc.filter.transform.CosineTransform;
  * It is also possible to use a distinct distance measure to calculate the
  * distance between the time series and its transforms.
  * </p>
+ * 
+ * @author fischor
  */
 public class TransformDistance implements ITimeSeriesDistance {
 

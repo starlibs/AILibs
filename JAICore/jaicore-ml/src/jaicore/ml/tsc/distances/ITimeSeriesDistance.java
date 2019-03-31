@@ -2,6 +2,8 @@ package jaicore.ml.tsc.distances;
 
 /**
  * Interface that describes a distance measure of two time series.
+ * 
+ * @author fischor
  */
 public interface ITimeSeriesDistance {
 

@@ -9,6 +9,8 @@ import org.junit.Test;
 /**
  * Test suite for the {@link aicore.ml.tsc.distances.ShotgunDistance}
  * implementation.
+ * 
+ * @author fischor
  */
 public class ShotgunDistanceTest {
 

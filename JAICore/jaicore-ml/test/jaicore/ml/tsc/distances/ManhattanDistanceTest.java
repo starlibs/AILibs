@@ -9,6 +9,8 @@ import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.ManhattanDistance}
  * implementation.
+ * 
+ * @author fischor
  */
 public class ManhattanDistanceTest {
 

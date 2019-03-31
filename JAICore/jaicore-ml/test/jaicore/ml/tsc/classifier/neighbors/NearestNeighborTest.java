@@ -19,6 +19,8 @@ import jaicore.ml.tsc.distances.EuclideanDistance;
  * Test suite for the
  * {@link jaicore.ml.tsc.classifier.neighbors.NearestNeighborClassifer}
  * implementation.
+ * 
+ * @author fischor
  */
 public class NearestNeighborTest {
 

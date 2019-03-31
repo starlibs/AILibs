@@ -6,6 +6,8 @@ import org.junit.Test;
 
 /**
  * Test suite for the {@link CosineTransform} implementation.
+ * 
+ * @author fischor
  */
 public class CosineTransformTest {
 

@@ -17,14 +17,16 @@ import jaicore.ml.tsc.distances.ITimeSeriesDistance;
  * 
  * Given an integer <code>k</code>, a distance measure <code>d</code>
  * ({@link jaicore.ml.tsc.distances}), a training set of time series
- * <code>TRAIN</code> and a test time series <code>T</code> (or a set of test
- * time series). The k-nearest-neighbor classifier calculates the distance from
- * <code>T</code> to every time series from <code>TRAIN</code>
- * <code>D = { d(T, S) | S in TRAIN }</code> and aggregates the labels of the
- * <code>k</code> time series <code>TRAIN_k</code> with
- * <code>d(T, S) <= U</code> for all
- * <code>S in TRAIN_k, U in TRAIN\TRAIN_k, </code> to prediciton for
- * <code>T</code>.
+ * <code>TRAIN = {(x, y)}</code> and a test time series <code>T</code> (or a set
+ * of test time series).
+ * <p>
+ * The set of k nearest neighbors <code>NN</code> for <code>T</code> is a subset
+ * (or equal) of <code>TRAIN</code> with cardinality <code>k</code> such that
+ * for all <code>(T, S)</code> with <code>S</code> in <code>TRAIN\NN</code>
+ * holds <code>d(S, T) >= max_{T' in NN} d(S, T')</code>.
+ * </p>
+ * From the labels of the instances in <code>NN</code> the label for
+ * <code>T</code> is aggregated, e.g. via majority vote.
  * 
  * @author fischor
  */

@@ -13,19 +13,20 @@ import jaicore.ml.tsc.distances.ITimeSeriesDistance;
 import jaicore.ml.tsc.distances.ShotgunDistance;
 
 /**
- * Implementation of Shotgun Ensemble Classifier measure as published in
- * "Towards Time Series Classfication without Human Preprocessing" by Patrick
- * Schäfer (2014).
+ * Implementation of Shotgun Ensemble Classifier as published in "Towards Time
+ * Series Classfication without Human Preprocessing" by Patrick Schäfer (2014).
  * 
  * The Shotgun Classifier is based 1-NN and the Shotgun Distance.
  * 
- * The Shotgun Ensemble determines for each of the specified window lengths the
- * number of correct predicitions on the training data using the leave-one-out
- * technique. The <code>bestScore</code> is the highest number of correct
- * predicitions over all window lengths. Given a <code>factor</code> in
- * <code>(0,1]</code>, the window lengths where
+ * The Shotgun Ensemble Algorithm {@link ShotgunEnsembleAlgoritm} determines for
+ * specific window lengths the number of correct predicitions on the training
+ * data using the leave-one-out technique. The <code>bestScore</code> is the
+ * highest number of correct predicitions over all window lengths. Given a
+ * <code>factor</code> in <code>(0,1]</code>, the window lengths where
  * <code>correct * factor > bestScore</code> are used in an ensemble of Shotgun
  * Classifiers to create an overall predicition.
+ * 
+ * @author fischor
  */
 public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> {
 

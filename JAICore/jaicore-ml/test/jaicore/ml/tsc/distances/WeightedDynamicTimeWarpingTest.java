@@ -8,6 +8,8 @@ import jaicore.ml.tsc.util.ScalarDistanceUtil;
 /**
  * Test suite for the
  * {@link jaicore.ml.tsc.distances.WeightedDynamicTimeWarping} implementation.
+ * 
+ * @author fischor
  */
 public class WeightedDynamicTimeWarpingTest {
 

@@ -16,7 +16,16 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.distances.ShotgunDistance;
 
 /**
- * ShotgunEnsembleAlgorithm
+ * Implementation of Shotgun Ensemble Algorihm as published in "Towards Time
+ * Series Classfication without Human Preprocessing" by Patrick Schäfer (2014).
+ * 
+ * Given a maximal window length <code>maxWindowLength</code> and a minumum
+ * window length <code>minWindowLength</code>, the Shotgun Ensemble algorithm
+ * determines for each of the window lengths form <code>maxWindowLength</code>
+ * downto <code>minWindowLength</code> the number of correct predicitions on the
+ * training data using the leave-one-out technique.
+ * 
+ * @author fischor
  */
 public class ShotgunEnsembleAlgorithm extends ASimplifiedTSCAlgorithm<Integer, ShotgunEnsembleClassifier> {
 

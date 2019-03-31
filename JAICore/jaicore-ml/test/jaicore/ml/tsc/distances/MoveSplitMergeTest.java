@@ -7,6 +7,8 @@ import org.junit.Test;
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.MoveSplitMerge}
  * implementation.
+ * 
+ * @author fischor
  */
 public class MoveSplitMergeTest {
 

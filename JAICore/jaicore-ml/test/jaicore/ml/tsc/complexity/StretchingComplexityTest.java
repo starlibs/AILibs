@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Test cases for the Stretching Complexity measure.
+ * Test suite for the {@link StretchingComplexity} implementation.
+ * 
+ * @author fischor
  */
 public class StretchingComplexityTest {
 

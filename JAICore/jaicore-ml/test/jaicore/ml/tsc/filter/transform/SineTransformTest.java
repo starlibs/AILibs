@@ -6,6 +6,8 @@ import org.junit.Test;
 
 /**
  * Test suite for the {@link SineTransform} implementation.
+ * 
+ * @author fischor
  */
 public class SineTransformTest {
 

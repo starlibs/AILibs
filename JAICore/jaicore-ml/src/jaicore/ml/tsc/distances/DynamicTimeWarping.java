@@ -2,8 +2,8 @@ package jaicore.ml.tsc.distances;
 
 /**
  * Implementation of the Dynamic Time Warping (DTW) measure as published in
- * "Using DynamicTimeWarpingto FindPatterns in Time Series" Donald J. Berndt and
- * James Clifford.
+ * "Using Dynamic Time Warping to FindPatterns in Time Series" Donald J. Berndt
+ * and James Clifford.
  * 
  * In DTW the time series are "warped" non-linearly in the time dimension to
  * determine a measure of their similarity independent of certain non-linear
@@ -16,6 +16,8 @@ package jaicore.ml.tsc.distances;
  * <code>i,j</code> and
  * <code>delta(i,j) is the point distance between <code>A_i</code> and
  * <code>B_i</code>.
+ * 
+ * @author fischor
  */
 public class DynamicTimeWarping implements ITimeSeriesDistance {
 

@@ -5,7 +5,10 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Test cases for the Stretching Complexity measure.
+ * Test suite for the {@link SquaredBackwardDifferenceComplexity}
+ * implementation.
+ * 
+ * @author fischor
  */
 public class SquaredBackwardDifferenceComplexityTest {
 

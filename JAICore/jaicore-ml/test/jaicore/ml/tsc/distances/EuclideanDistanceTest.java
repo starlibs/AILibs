@@ -9,10 +9,10 @@ import jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.EuclideanDistance}
  * implementation.
+ * 
+ * @author fischor
  */
 public class EuclideanDistanceTest {
-
-    // { 0.10, 0.10, 0.10, 0.10, 0.10 }
 
     /**
      * Correctness test. Tests the distance calculation based on an defined input

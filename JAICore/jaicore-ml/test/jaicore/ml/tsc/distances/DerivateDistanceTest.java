@@ -8,6 +8,8 @@ import org.junit.Test;
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.DerivateDistance}
  * implementation.
+ * 
+ * @author fischor
  */
 public class DerivateDistanceTest {
 

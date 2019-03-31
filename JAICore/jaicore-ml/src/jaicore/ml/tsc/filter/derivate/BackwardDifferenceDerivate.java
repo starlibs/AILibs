@@ -1,7 +1,12 @@
 package jaicore.ml.tsc.filter.derivate;
 
 /**
- * BackwardDifferenceDerivate f'(n) = f(n) - f(n-1)
+ * Filter that calculate the Backward Difference derivate. The Backward
+ * Difference derivate <code>t'</code> for a time series
+ * <code>T = {T(1), T(2), .., T(n)}<code> is defined as <code>T'(i) = T(i) - T(i-1)</code>
+ * for <code>i = 1 to n</code>. When padded, <code>T'(0) = T'(1)</code>.
+ * 
+ * @author fischor
  */
 public class BackwardDifferenceDerivate extends ADerivateFilter {
 

@@ -8,6 +8,8 @@ import org.junit.Test;
  * Test suite for the
  * {@link jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate}
  * implementation.
+ * 
+ * @author fischor
  */
 public class BackwardDifferenceDerivateTest {
 

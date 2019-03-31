@@ -1,9 +1,9 @@
 package jaicore.ml.tsc.exceptions;
 
-import jaicore.ml.core.exception.CheckedJaicoreMLException;
-
 /**
- * Exception class encapsultaing faulty behaviour with lenght of time series.
+ * Exception class encapsultes faulty behaviour with length of time series.
+ * 
+ * @author fischor
  */
 public class TimeSeriesLengthException extends IllegalArgumentException {
 

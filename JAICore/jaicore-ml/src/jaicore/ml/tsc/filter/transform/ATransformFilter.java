@@ -4,11 +4,11 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.filter.IFilter;
 
 /**
- * ATransformFilter
+ * Abstract superclass for all transform filters.
+ * 
+ * @author fischor
  */
 public abstract class ATransformFilter implements IFilter {
-
-    // Transform.
 
     @Override
     public TimeSeriesDataset transform(TimeSeriesDataset input) {
@@ -27,8 +27,6 @@ public abstract class ATransformFilter implements IFilter {
         return transformed;
     }
 
-    // Fit.
-
     @Override
     public void fit(TimeSeriesDataset input) {
         // Do nothing.
@@ -43,8 +41,6 @@ public abstract class ATransformFilter implements IFilter {
     public void fit(double[][] input) {
         // Do nothing.
     }
-
-    // Fit and transform.
 
     @Override
     public TimeSeriesDataset fitTransform(TimeSeriesDataset input) {

@@ -1,7 +1,12 @@
 package jaicore.ml.tsc.filter.derivate;
 
 /**
- * ForwardDifferenceDerivate f'(n) = f(n+1) - f(n)
+ * Filter that calculate the Forward Difference derivate. The Forward Difference
+ * derivate <code>T'</code> for a time series
+ * <code>T = {T(0), T(1), T(2), .., T(n)}<code> is defined as <code>T'(i) = T(i+1) - T(i)</code>
+ * for <code>i = 0 to n-1</code>. When padded, <code>T'(n) = T'(n-1)</code>.
+ * 
+ * @author fischor
  */
 public class ForwardDifferenceDerivate extends ADerivateFilter {
 

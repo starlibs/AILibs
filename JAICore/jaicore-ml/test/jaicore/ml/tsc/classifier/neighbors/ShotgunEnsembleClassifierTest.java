@@ -14,7 +14,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * ShotgunEnsembleClassifierTest
+ * Test suite for the
+ * {@link jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleAlgorithm}
+ * implementation.
+ * 
+ * @author fischor
  */
 public class ShotgunEnsembleClassifierTest {
 

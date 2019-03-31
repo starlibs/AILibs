@@ -11,6 +11,8 @@ import jaicore.ml.tsc.complexity.StretchingComplexity;
 /**
  * Test suite for the
  * {@link jaicore.ml.tsc.distances.ComplexityInvariantDistance} implementation.
+ * 
+ * @author fischor
  */
 public class ComplexityInvariantDistanceTest {
 

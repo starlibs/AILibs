@@ -10,6 +10,8 @@ import jaicore.ml.tsc.util.ScalarDistanceUtil;
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.TimeWarpEditDistance}
  * implementation.
+ * 
+ * @author fischor
  */
 public class TimeWarpEditDistanceTest {
 

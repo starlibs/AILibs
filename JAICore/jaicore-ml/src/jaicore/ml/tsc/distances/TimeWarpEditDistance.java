@@ -2,15 +2,15 @@ package jaicore.ml.tsc.distances;
 
 import jaicore.ml.tsc.util.ScalarDistanceUtil;
 
-import static jaicore.ml.tsc.util.TimeSeriesUtil.*;
-
 /**
- * TimeWarpEditDistance Implementation of Shotgun Distance measure as published
- * in "Time Warp Edit Distance with Stiffness Adjustment for Time Series
- * Matching" by Pierre-Francois Marteau (2009).
+ * Time Warp Edit Distance as published in "Time Warp Edit Distance with
+ * Stiffness Adjustment for Time Series Matching" by Pierre-Francois Marteau
+ * (2009).
  * 
  * The similarity between two time series is measured as the minimum cost
  * sequence of edit operations needed to transform one time series into another.
+ * 
+ * @author fischor
  */
 public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
 
@@ -62,29 +62,7 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
     }
 
     @Override
-    public double distance(double[] A, double[] B) {
-        // Create dummy timestamps for A and B.
-        double[] tA = createEquidistantTimestamps(A);
-        double[] tB = createEquidistantTimestamps(B);
-
-        return calculateDistance(A, tA, B, tB);
-    }
-
-    @Override
     public double distance(double[] A, double[] tA, double[] B, double[] tB) {
-        return calculateDistance(A, tA, B, tB);
-    }
-
-    /**
-     * The distance caluculation for the Time Warp Edit Distance.
-     * 
-     * @param A  Time series A[1..n]
-     * @param tA Timestamps of time series A, tA[1..n]
-     * @param B  Time Series B[1..m]
-     * @param tB Timestamps of time series B, tB[1..m]
-     * @return Distance between A and B.
-     */
-    private double calculateDistance(double[] A, double[] tA, double[] B, double[] tB) {
         int n = A.length;
         int m = B.length;
 

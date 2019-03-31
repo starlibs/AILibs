@@ -1,7 +1,15 @@
 package jaicore.ml.tsc.filter.transform;
 
 /**
- * HilbertTransform
+ * Calculates the Hilbert transform of a time series. For this implementation,
+ * the definition as given in "Non-isometric transforms in time series
+ * classification using DTW" by Tomasz Gorecki and Maciej Luczak (2014) is used.
+ * 
+ * The Hilbert transform <code>f = {f(k): k = 1 to n}</code> of a time series
+ * <code>T = {T(i): i = 1 to n }</code> is defined as
+ * <code>f(k) = sum_{i=1, i!=k}^{n} f(i) / (k-i)</code>.
+ * 
+ * @author fischor
  */
 public class HilbertTransform extends ATransformFilter {
 

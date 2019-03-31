@@ -11,6 +11,8 @@ import jaicore.ml.tsc.filter.transform.HilbertTransform;
 /**
  * Test suite for the {@link jaicore.ml.tsc.distances.TransformDistance}
  * implementation.
+ * 
+ * @author fischor
  */
 public class TransformDistanceTest {
 

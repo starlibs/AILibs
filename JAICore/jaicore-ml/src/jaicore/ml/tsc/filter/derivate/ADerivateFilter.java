@@ -3,8 +3,17 @@ package jaicore.ml.tsc.filter.derivate;
 import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.filter.IFilter;
 
+/**
+ * Abstract superclass for all derivate filters.
+ * 
+ * @author fischor
+ */
 public abstract class ADerivateFilter implements IFilter {
 
+    /**
+     * Flag that states wheter the filter should add a padding to the derivate
+     * assure that is has the same length as the origin time series or not.
+     */
     protected boolean withBoundaries;
 
     public ADerivateFilter(boolean withBoundaries) {
@@ -15,11 +24,24 @@ public abstract class ADerivateFilter implements IFilter {
         this.withBoundaries = false;
     }
 
+    /**
+     * Calculates the derivate of a time series.
+     * 
+     * @param T The time series to calculate the derivate for.
+     * @return The derivate of the time series.
+     */
     protected abstract double[] derivate(double[] T);
 
+    /**
+     * Calcuates the derivates of a time series. In contrast to the normal
+     * {@link derivate} calculation, this method is guaranteed to return a derivate
+     * that has the same length than the original time series. This is accomplished
+     * via padding.
+     * 
+     * @param T The time series to calculate the derivate for.
+     * @return The, possibly padded, derivate of the time series.
+     */
     protected abstract double[] derivateWithBoundaries(double[] T);
-
-    // Transform.
 
     @Override
     public TimeSeriesDataset transform(TimeSeriesDataset input) {
@@ -44,8 +66,6 @@ public abstract class ADerivateFilter implements IFilter {
         return transformed;
     }
 
-    // Fit.
-
     @Override
     public void fit(TimeSeriesDataset input) {
         // Do nothing.
@@ -60,8 +80,6 @@ public abstract class ADerivateFilter implements IFilter {
     public void fit(double[][] input) {
         // Do nothing.
     }
-
-    // Fit and transform.
 
     @Override
     public TimeSeriesDataset fitTransform(TimeSeriesDataset input) {

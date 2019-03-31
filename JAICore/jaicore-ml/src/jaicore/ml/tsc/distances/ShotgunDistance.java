@@ -17,6 +17,8 @@ import jaicore.ml.tsc.util.TimeSeriesUtil;;
  * the sample time series (with stride 1) to find the best matching position in
  * terms of minimizing a distance metric (e.g. Euclidean distance or DTW
  * distance).
+ * 
+ * @author fischor
  */
 public class ShotgunDistance implements ITimeSeriesDistance {
 

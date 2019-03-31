@@ -16,7 +16,7 @@ import junit.framework.Assert;
  * Time series util unit tests.
  * 
  * @author Julian Lienen
- *
+ * @author fischor
  */
 public class TimeSeriesUtilTest {
 	/**

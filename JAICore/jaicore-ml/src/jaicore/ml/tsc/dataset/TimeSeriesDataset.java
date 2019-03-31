@@ -2,8 +2,32 @@ package jaicore.ml.tsc.dataset;
 
 import java.util.List;
 
+import jaicore.ml.tsc.util.ClassMapper;
+
 /**
- * UnivariateDataset
+ * Dataset for time series.
+ * 
+ * <p>
+ * The dataset consists of a value matrices and timestamp matrices. In the
+ * univariate case, there exists one value matrix, either with or without a
+ * corresponding timestamp matrix. In the multivariate case there exists
+ * multiple value matrices, each either with or without a corresponding
+ * timestamp matrix. Each value matrix is associated with an integer index. Each
+ * timestamp matrix is associated with an integer index. Two corresponding value
+ * and timestamp matrices are associated with the same index. The dimensions of
+ * two corresponding value and timestamp matrices are assured to be the same.
+ * All value matrices have the same number of rows, but not necessarily the same
+ * number of columns. The <code>i</code>-th row of each matrix corresponds to
+ * the <code>i</code>-th instance of the dataset.
+ * <p>
+ * <p>
+ * The targets contained in this dataset are always integers. The can be mapped
+ * back and forth with the {@link ClassMapper}. Targets are represented as an
+ * integer array. The <code>i</code>-th entry of this array corresponds to the
+ * <code>i</code>-th instance of the dataset.
+ * </p>
+ * 
+ * @author fischor
  */
 public class TimeSeriesDataset {
 
@@ -172,99 +196,178 @@ public class TimeSeriesDataset {
             timestampMatrices.set(index, timestampMatrix);
     }
 
+    /**
+     * Getter for the target values.
+     * 
+     * @return The targets.
+     */
     public int[] getTargets() {
         return targets;
     }
 
+    /**
+     * Returns the number of variables, i.e. the number of value matrices contained
+     * in the dataset.
+     * 
+     * @return The number of variables.
+     */
     public int getNumberOfVariables() {
         return valueMatrices.size();
     }
 
+    /**
+     * Returns the number of instances contained in the dataset.
+     * 
+     * @return The number of instances contained in the dataset.
+     */
     public int getNumberOfInstances() {
         return numberOfInstances;
     }
 
+    /**
+     * Getter for the value matrix at a specific index. Throws an exception if no
+     * timestamp matrix exists at this index.
+     * 
+     * @param index The index of the value matrix.
+     * @return The value matrix at index <code>index</code>.
+     * @throws IndexOutOfBoundsException If there is no value matrix at index
+     *                                   <code>index</code>.
+     */
     public double[][] getValues(int index) throws IndexOutOfBoundsException {
         return valueMatrices.get(index);
     }
 
+    /**
+     * Getter for the timestamp matrix at a specific index.
+     * 
+     * @param index The index of the timestamp matrix.
+     * @return The timestamp matrix at index <code>index</code>.
+     * @throws IndexOutOfBoundsException If there is no value timestamp at index
+     *                                   <code>index</code>.
+     */
     public double[][] getTimestamps(int index) throws IndexOutOfBoundsException {
         return timestampMatrices.get(index);
     }
 
+    /**
+     * Getter for the value matrix at a specific index.
+     * 
+     * @param index The index of the timestamp matrix.
+     * @return The value matrix at index <code>index</code>. Or <code>null</code>,
+     *         if no value matrix exists at index <code>index</code>.
+     */
     public double[][] getValuesOrNull(int index) {
         return valueMatrices.size() > index ? valueMatrices.get(index) : null;
     }
 
+    /**
+     * Getter for the timestamp matrix at a specific index.
+     * 
+     * @param index The index of the timestamp matrix.
+     * @return The timestamp matrix at index <code>index</code>. Or
+     *         <code>null</code>, if no timestamp matrix exists at index
+     *         <code>index</code>.
+     */
     public double[][] getTimestampsOrNull(int index) {
-        return timestampMatrices != null && timestampMatrices.size() > index ? timestampMatrices.get(index) : null;
+        return timestampMatrices.size() > index ? timestampMatrices.get(index) : null;
     }
 
+    /**
+     * States whether the dataset is empty, i.e. contains no value matrices, or not.
+     * 
+     * @return <code>True</code>, if the dataset is empty. <code>False</code>,
+     *         otherwise.
+     */
     public boolean isEmpty() {
         return valueMatrices.size() == 0;
     }
 
+    /**
+     * States whether the dataset is a univariate dataset, i.e. contains exactly one
+     * value matrix, or not.
+     * 
+     * @return <code>True</code>, if the dataset is univariate. <code>False</code>,
+     *         otherwise.
+     */
     public boolean isUnivariate() {
         return valueMatrices.size() == 1;
     }
 
+    /**
+     * States whether the dataset is a univariate dataset, i.e. contains more than
+     * one value matrix, or not.
+     * 
+     * @return <code>True</code>, if the dataset is multivariate.
+     *         <code>False</code>, otherwise.
+     */
     public boolean isMultivariate() {
         return valueMatrices.size() > 1;
     }
 
+    /**
+     * States whether the dataset is a training dataset, i.e. contains valid targets
+     * after initialization, or not.
+     * 
+     * @return <code>True</code>, if the dataset is a training dataset.
+     *         <code>False</code>, otherwise.
+     */
     public boolean isTrain() {
         return train;
     }
 
+    /**
+     * States whether the dataset is a test dataset, i.e. contains no valid targets
+     * after initialization, or not.
+     * 
+     * @return <code>True</code>, if the dataset is a test dataset.
+     *         <code>False</code>, otherwise.
+     */
     public boolean isTest() {
         return !train;
     }
 
-	/**
-	 * Getter for {@link TimeSeriesDataset#valueMatrices}.
-	 * 
-	 * @return the valueMatrices
-	 */
-	public List<double[][]> getValueMatrices() {
-		return valueMatrices;
-	}
+    /**
+     * Getter for {@link TimeSeriesDataset#valueMatrices}.
+     * 
+     * @return the valueMatrices
+     */
+    public List<double[][]> getValueMatrices() {
+        return valueMatrices;
+    }
 
-	/**
-	 * Getter for {@link TimeSeriesDataset#timestampMatrices}.
-	 * 
-	 * @return the timestampMatrices
-	 */
-	public List<double[][]> getTimestampMatrices() {
-		return timestampMatrices;
-	}
+    /**
+     * Getter for {@link TimeSeriesDataset#timestampMatrices}.
+     * 
+     * @return the timestampMatrices
+     */
+    public List<double[][]> getTimestampMatrices() {
+        return timestampMatrices;
+    }
 
-	/**
-	 * Setter for {@link TimeSeriesDataset#valueMatrices}.
-	 * 
-	 * @param valueMatrices
-	 *            the valueMatrices to set
-	 */
-	public void setValueMatrices(List<double[][]> valueMatrices) {
-		this.valueMatrices = valueMatrices;
-	}
+    /**
+     * Setter for {@link TimeSeriesDataset#valueMatrices}.
+     * 
+     * @param valueMatrices the valueMatrices to set
+     */
+    public void setValueMatrices(List<double[][]> valueMatrices) {
+        this.valueMatrices = valueMatrices;
+    }
 
-	/**
-	 * Setter for {@link TimeSeriesDataset#timestampMatrices}.
-	 * 
-	 * @param timestampMatrices
-	 *            the timestampMatrices to set
-	 */
-	public void setTimestampMatrices(List<double[][]> timestampMatrices) {
-		this.timestampMatrices = timestampMatrices;
-	}
+    /**
+     * Setter for {@link TimeSeriesDataset#timestampMatrices}.
+     * 
+     * @param timestampMatrices the timestampMatrices to set
+     */
+    public void setTimestampMatrices(List<double[][]> timestampMatrices) {
+        this.timestampMatrices = timestampMatrices;
+    }
 
-	/**
-	 * Setter for {@link TimeSeriesDataset#targets}.
-	 * 
-	 * @param targets
-	 *            the targets to set
-	 */
-	public void setTargets(int[] targets) {
-		this.targets = targets;
-	}
+    /**
+     * Setter for {@link TimeSeriesDataset#targets}.
+     * 
+     * @param targets the targets to set
+     */
+    public void setTargets(int[] targets) {
+        this.targets = targets;
+    }
 }

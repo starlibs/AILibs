@@ -15,6 +15,8 @@ import jaicore.ml.tsc.complexity.ITimeSeriesComplexity;
  * <code>d</code>, the Complexity Invariant Distance for the two time series
  * <code>A</code> and <code>B</code> is:
  * <code>d(A, B) * (max(c(A), c(B)) / min(c(A), c(B)))</code>.
+ * 
+ * @author fischor
  */
 public class ComplexityInvariantDistance implements ITimeSeriesDistance {
 
