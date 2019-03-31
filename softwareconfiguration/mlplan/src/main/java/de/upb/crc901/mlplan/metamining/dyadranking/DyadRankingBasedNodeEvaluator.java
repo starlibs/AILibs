@@ -200,13 +200,17 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 		String scalerPath = config.scalerPath();
 
-		// load the dyadranker from the config
-		try (ObjectInputStream oin = new ObjectInputStream(new FileInputStream(Paths.get(scalerPath).toFile()));) {
+		try {
 			this.dyadRanker.loadModelFromFile(Paths.get(config.getPlNetPath()).toString());
-
-			this.scaler = (DyadMinMaxScaler) oin.readObject();
 		} catch (IOException e) {
 			logger.error("Could not load model for plnet in {}", Paths.get(config.getPlNetPath()));
+		}
+
+		// load the dyadranker from the config
+		try (ObjectInputStream oin = new ObjectInputStream(new FileInputStream(Paths.get(scalerPath).toFile()));) {
+			this.scaler = (DyadMinMaxScaler) oin.readObject();
+		} catch (IOException e) {
+			logger.error("Could not load sclader for plnet in {}", Paths.get(config.scalerPath()));
 		} catch (ClassNotFoundException e) {
 			logger.error("Could not read scaler.", e);
 		}
@@ -214,7 +218,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	@Override
-	public V f(Node<T, ?> node) {
+	public V f(Node<T, ?> node) throws InterruptedException {
 		if (firstEvaluation == null) {
 			this.firstEvaluation = Instant.now();
 		}
@@ -223,7 +227,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			return null;
 		}
 		/* Reinitializing random search... */
-	//	initializeRandomSearch(this.graphGenerator);
+		// initializeRandomSearch(this.graphGenerator);
 		/* Time measuring */
 		Instant startOfEvaluation = Instant.now();
 
@@ -236,7 +240,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 				} catch (InterruptedException e) {
 					logger.error("Interrupted in path completion!");
 					Thread.currentThread().interrupt();
-					return null;
+					Thread.interrupted();
+					throw new InterruptedException();
 				}
 			}
 		}
@@ -247,7 +252,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		} catch (InterruptedException | TimeoutException e) {
 			logger.error("Interrupted in path completion!");
 			Thread.currentThread().interrupt();
-			return null;
+			Thread.interrupted();
+			throw new InterruptedException();
 		}
 		// order them according to dyad ranking
 		List<ComponentInstance> allRankedPaths = getDyadRankedPaths(randomPaths);
@@ -265,7 +271,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		} catch (InterruptedException | TimeoutException e) {
 			logger.error("Interrupted while predicitng next best solution");
 			Thread.currentThread().interrupt();
-			return null;
+			Thread.interrupted();
+			throw new InterruptedException();
 		} catch (ExecutionException e2) {
 			logger.error("Couldn't evaluate solution candidates- Returning null as FValue!.");
 			return null;
@@ -344,7 +351,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			} else {
 				Vector y = new DenseDoubleVector(characterizer.characterize(cI));
 				if (scaler != null) {
-					List<IDyadRankingInstance> asList = Arrays.asList(new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures), Arrays.asList(y)));
+					List<IDyadRankingInstance> asList = Arrays.asList(new SparseDyadRankingInstance(
+							new DenseDoubleVector(datasetMetaFeatures), Arrays.asList(y)));
 					DyadRankingDataset dataset = new DyadRankingDataset(asList);
 					scaler.transformAlternatives(dataset);
 				}
@@ -452,13 +460,13 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		for (int i = 0; i < topKRankedPaths.size(); i++) {
 			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(),
 					i + 1, topKRankedPaths.size());
-			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(5, TimeUnit.SECONDS);
+			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(20, TimeUnit.SECONDS);
 			if (evaluatedPipe == null) {
 				logger.info("Didn't receive any futures (expected {} futures)", topKRankedPaths.size());
 				continue;
 			}
 			try {
-				Pair<ComponentInstance, V> solution = evaluatedPipe.get(5, TimeUnit.SECONDS);
+				Pair<ComponentInstance, V> solution = evaluatedPipe.get(20, TimeUnit.SECONDS);
 				if (solution != null) {
 					logger.info("Evaluation was successful. Adding {} to solutions", solution.getY());
 					evaluatedSolutions.add(solution);
@@ -469,7 +477,6 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 			} catch (Exception e) {
 				logger.info("Got exception while evaluating {}", e.getMessage());
-				// evaluatedPipe.cancel(true);
 			}
 
 		}
@@ -566,6 +573,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	public void setPipelineEvaluator(IObjectEvaluator<ComponentInstance, V> wrappedSearchBenchmark) {
+		System.out.println("called");
 		this.pipelineEvaluator = wrappedSearchBenchmark;
 	}
 
