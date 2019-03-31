@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
 import jaicore.basic.SQLAdapter;
@@ -20,30 +23,32 @@ import weka.core.OptionHandler;
  */
 public class SimpleResultsUploader {
 
+	private Logger logger = LoggerFactory.getLogger(SimpleResultsUploader.class);
+
 	/**
 	 * db adapter for uploading
 	 */
-	SQLAdapter adapter;
+	private SQLAdapter adapter;
 
 	/**
 	 * table to use for intermediate results
 	 */
-	String table;
+	private String table;
 
 	/**
 	 * the name of the algorithm for which results are uploaded
 	 */
-	String algorithmName;
+	private String algorithmName;
 
 	/**
 	 * the id of the experiment for which results are uploaded
 	 */
-	int experimentId;
+	private int experimentId;
 
 	/**
 	 * start time of the search
 	 */
-	long timeStart = System.currentTimeMillis();
+	private long timeStart = System.currentTimeMillis();
 
 	/**
 	 * Construct a new simple results uploader with the given configuration for the
@@ -83,8 +88,8 @@ public class SimpleResultsUploader {
 		String solutionString = getSolutionString(classifier);
 
 		if (adapter == null) {
-			System.out.println("upload result after " + evaluationTime + " value " + solutionQuality + " solution: "
-					+ solutionString);
+			logger.warn("Not uploading result after {}ms with value {}. Solution: {}", evaluationTime, solutionQuality,
+					solutionString);
 		} else {
 			Map<String, Object> map = new HashMap<>();
 			map.put("classifier", solutionString);

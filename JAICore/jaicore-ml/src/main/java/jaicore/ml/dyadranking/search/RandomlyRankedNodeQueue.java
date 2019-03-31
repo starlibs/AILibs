@@ -31,46 +31,46 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> implements Queu
 	}
 
 	/** the actual queue of nodes */
-	private List<Node<N, V>> queue = new ArrayList<>();
+	private List<Node<N, V>> openList = new ArrayList<>();
 
 	@Override
 	public int size() {
-		return queue.size();
+		return openList.size();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return queue.isEmpty();
+		return openList.isEmpty();
 	}
 
 	@Override
 	public boolean contains(Object o) {
-		return queue.contains(o);
+		return openList.contains(o);
 	}
 
 	@Override
 	public Iterator<Node<N, V>> iterator() {
-		return queue.iterator();
+		return openList.iterator();
 	}
 
 	@Override
 	public Object[] toArray() {
-		return queue.toArray();
+		return openList.toArray();
 	}
 
 	@Override
 	public <T> T[] toArray(T[] a) {
-		return queue.toArray(a);
+		return openList.toArray(a);
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		return queue.remove(o);
+		return openList.remove(o);
 	}
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		return queue.containsAll(c);
+		return openList.containsAll(c);
 	}
 
 	@Override
@@ -102,14 +102,14 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> implements Queu
 
 	@Override
 	public void clear() {
-		queue.clear();
+		openList.clear();
 	}
 
 	@Override
 	public boolean add(Node<N, V> e) {
-		int position = random.nextInt(queue.size() + 1);
-		logger.debug("Add node at random position {} to OPEN list of size {}.", position, queue.size());
-		queue.add(position, e);
+		int position = random.nextInt(openList.size() + 1);
+		logger.debug("Add node at random position {} to OPEN list of size {}.", position, openList.size());
+		openList.add(position, e);
 		return true;
 	}
 
@@ -121,7 +121,7 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> implements Queu
 
 	@Override
 	public Node<N, V> remove() {
-		return queue.remove(0);
+		return openList.remove(0);
 	}
 
 	@Override
@@ -135,7 +135,7 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> implements Queu
 
 	@Override
 	public Node<N, V> element() {
-		return queue.get(0);
+		return openList.get(0);
 	}
 
 	@Override

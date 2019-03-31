@@ -28,18 +28,18 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	/**
 	 * Location of the ontology used by this connector
 	 */
-	private static final String ontologyFileName = "DMOP_modified.owl";
+	private static final String ONTOLOGY_FILE_NAME = "DMOP_modified.owl";
 
 	/**
 	 * IRI of the elements in this ontology
 	 */
-	private static final String ontologyIRI = "http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl";
+	private static final String ONTOLOGY_IRI = "http://www.e-lico.eu/ontologies/dmo/DMOP/DMOP.owl";
 
 	/**
 	 * Separator that separates the ontology IRI from the name of an ontology
 	 * element
 	 */
-	private static final String ontologyIRISeparator = "#";
+	private static final String ONTOLOGY_IRI_SEPARATOR = "#";
 
 	/**
 	 * List of all classifiers that can be characterized by this ontology connector
@@ -90,22 +90,22 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	/**
 	 * The common ancestor of all classifiers in the ontology
 	 */
-	private static final String classifierTopNode = "ModelingAlgorithm";
+	private static final String CLASSIFIER_TOP_NODE = "ModelingAlgorithm";
 
 	/**
 	 * The common ancestor of all searchers in the ontology
 	 */
-	private static final String searcherTopNode = "DataProcessingAlgorithm";
+	private static final String SEARCHER_TOP_NODE = "DataProcessingAlgorithm";
 
 	/**
 	 * The common ancestor of all evaluator in the ontology
 	 */
-	private static final String evaluatorTopNode = "DataProcessingAlgorithm";
+	private static final String EVALUTATOR_TOP_NODE = "DataProcessingAlgorithm";
 
 	/**
 	 * The common ancestor of all kernel functions in the ontology
 	 */
-	private static final String kernelFunctionTopNode = "KernelFunction";
+	private static final String KERNEL_FUNCTION_TOP_NODE = "KernelFunction";
 
 	/**
 	 * The data factory used to get ontology elements from Strings
@@ -132,20 +132,21 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	public WEKAOntologyConnector() throws OWLOntologyCreationException {
 		OWLOntologyManager ontologyManager = OWLManager.createOWLOntologyManager();
 		dataFactory = ontologyManager.getOWLDataFactory();
-		InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(ontologyFileName);
+		InputStream inputStream = Thread.currentThread().getContextClassLoader()
+				.getResourceAsStream(ONTOLOGY_FILE_NAME);
 		ontology = ontologyManager.loadOntologyFromOntologyDocument(inputStream);
 	}
 
 	@Override
 	public List<String> getAncestorsOfAlgorithm(String algorithmName) {
 		if (classifierPortfolio.contains(algorithmName)) {
-			return getAncestorsOfAlgorithmUntil(algorithmName, classifierTopNode);
+			return getAncestorsOfAlgorithmUntil(algorithmName, CLASSIFIER_TOP_NODE);
 		} else if (searcherPortfolio.contains(algorithmName)) {
-			return getAncestorsOfAlgorithmUntil(algorithmName, searcherTopNode);
+			return getAncestorsOfAlgorithmUntil(algorithmName, SEARCHER_TOP_NODE);
 		} else if (evaluatorPortfolio.contains(algorithmName)) {
-			return getAncestorsOfAlgorithmUntil(algorithmName, evaluatorTopNode);
+			return getAncestorsOfAlgorithmUntil(algorithmName, EVALUTATOR_TOP_NODE);
 		} else if (kernelFunctionPortfolio.contains(algorithmName)) {
-			return getAncestorsOfAlgorithmUntil(algorithmName, kernelFunctionTopNode);
+			return getAncestorsOfAlgorithmUntil(algorithmName, KERNEL_FUNCTION_TOP_NODE);
 		} else {
 			StringBuilder builder = new StringBuilder();
 			builder.append(algorithmName);
@@ -168,19 +169,17 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	protected List<String> getAncestorsOfAlgorithmUntil(String algorithm, String until) {
 		// Get the individual represented by the algorithm
 		OWLNamedIndividual algorithmAsIndividual = dataFactory.getOWLNamedIndividual(getAsOntologyElement(algorithm));
-		OWLClass algorithmClass = ontology.classAssertionAxioms(algorithmAsIndividual).findFirst().get()
-				.getClassExpression().asOWLClass();
-
+		
 		// Get ancestors
-		ArrayList<OWLClass> ancestors = new ArrayList<OWLClass>();
-		ancestors.add(algorithmClass);
+		ArrayList<OWLClass> ancestors = new ArrayList<>();
+		ontology.classAssertionAxioms(algorithmAsIndividual).findFirst().ifPresent(algorithmClass -> ancestors.add(algorithmClass.getClassExpression().asOWLClass()));
 		for (int i = 0; i < ancestors.size(); i++) {
-			
+
 			// If we have found the last element, stop
 			if (ancestors.get(ancestors.size() - 1).getIRI().getShortForm().equals(until)) {
 				break;
 			}
-			
+
 			int previousAncestorSize = ancestors.size();
 			ontology.subClassAxiomsForSubClass(ancestors.get(i))
 					.filter(axiom -> axiom.getSuperClass().getClassExpressionType() == ClassExpressionType.OWL_CLASS)
@@ -190,29 +189,24 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 					});
 			// If we have not added an element
 			if (includeEqualSuperClasses && ancestors.size() == previousAncestorSize) {
-				ontology.equivalentClassesAxioms(ancestors.get(i)).forEach(axiom -> {
+				ontology.equivalentClassesAxioms(ancestors.get(i)).forEach(axiom -> 
 					axiom.classExpressions().forEach(elem -> {
 						if (!ancestors.contains(elem.conjunctSet().findFirst().get().asOWLClass())) {
 							ancestors.add(elem.conjunctSet().findFirst().get().asOWLClass());
 						}
-					});
-				});
+					})
+				);
 			}
 
 		}
 
 		// Get names and invert order
-		List<String> ancestorNames = new ArrayList<String>();
-		boolean startAdding = true;
+		List<String> ancestorNames = new ArrayList<>();
+
 		for (int i = ancestors.size() - 1; i >= 0; i--) {
-			if (!startAdding) {
-				String ancestorName = ancestors.get(i).getIRI().getShortForm();
-				if (ancestorName.equals(until)) {
-					ancestorNames.add(ancestorName);
-					startAdding = true;
-				}
-			} else {
-				ancestorNames.add(ancestors.get(i).getIRI().getShortForm());
+			String ancestorName = ancestors.get(i).getIRI().getShortForm();
+			if (ancestorName.equals(until)) {
+				ancestorNames.add(ancestorName);
 			}
 		}
 		ancestorNames.add(algorithmAsIndividual.getIRI().getShortForm());
@@ -230,8 +224,8 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	 */
 	private String getAsOntologyElement(String name) {
 		StringBuilder builder = new StringBuilder();
-		builder.append(ontologyIRI);
-		builder.append(ontologyIRISeparator);
+		builder.append(ONTOLOGY_IRI);
+		builder.append(ONTOLOGY_IRI_SEPARATOR);
 		builder.append(name);
 
 		return builder.toString();
@@ -292,7 +286,7 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	 * @return The classifier top node
 	 */
 	public String getClassifierTopNode() {
-		return classifierTopNode;
+		return CLASSIFIER_TOP_NODE;
 	}
 
 	/**
@@ -301,7 +295,7 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	 * @return The searcher top node
 	 */
 	public String getSearcherTopNode() {
-		return searcherTopNode;
+		return SEARCHER_TOP_NODE;
 	}
 
 	/**
@@ -310,7 +304,7 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	 * @return The evaluator top node
 	 */
 	public String getEvaluatorTopNode() {
-		return evaluatorTopNode;
+		return EVALUTATOR_TOP_NODE;
 	}
 
 	/**
@@ -319,6 +313,6 @@ public class WEKAOntologyConnector implements IOntologyConnector {
 	 * @return The kernel function top node
 	 */
 	public String getKernelFunctionTopNode() {
-		return kernelFunctionTopNode;
+		return KERNEL_FUNCTION_TOP_NODE;
 	}
 }

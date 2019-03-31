@@ -35,14 +35,14 @@ import treeminer.TreeRepresentationUtils;
  */
 public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 
-	private static final Logger log = LoggerFactory.getLogger(WEKAPipelineCharacterizer.class);
+	private static final Logger logger = LoggerFactory.getLogger(WEKAPipelineCharacterizer.class);
 	
 	/** The default path for pre computed algorithm patterns. */
 	private static final String ALGORITHM_PATTERNS_SUPPORT_5_PATH = "draco/patterns_support_5.csv";
 	/**
 	 * Number of concurrent threads maximally used by the characterizer
 	 */
-	private int CPUs = 1;
+	private int cpus = 1;
 
 	/**
 	 * The ontology connector used to characterize a single pipeline element
@@ -85,8 +85,8 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 		try {
 			ontologyConnector = new WEKAOntologyConnector();
 		} catch (OWLOntologyCreationException e) {
-			System.err.println("Cannot connect to Ontology!");
-			throw new RuntimeException(e);
+			logger.error("Cannot connect to Ontology!");
+			throw new OntologyNotFoundException(e);
 		}
 	}
 
@@ -105,7 +105,7 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 				foundPatterns.add(pattern);
 			}
 		} catch (IOException e) {
-			log.error("Couldn't initialize pipeline characterizer", e);
+			logger.error("Couldn't initialize pipeline characterizer", e);
 		}
 		this.foundPipelinePatterns = foundPatterns;
 
@@ -120,20 +120,19 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 			this.buildFromFile(
 					Paths.get(getClass().getClassLoader().getResource(ALGORITHM_PATTERNS_SUPPORT_5_PATH).toURI()).toFile());
 		} catch (URISyntaxException e) {
-			log.error("Couldn't find default algorithm patterns!", e);
+			logger.error("Couldn't find default algorithm patterns!", e);
 		}
 	}
 
 	@Override
 	public void build(List<ComponentInstance> pipelines) throws InterruptedException {
 		// Convert the pipelines to String representations
-		System.out.println(
-				"WEKAPipelineCharacterizer: Converting training examples to trees. With support " + patternMinSupport);
+		logger.info("Converting training examples to trees. With support {}", patternMinSupport);
 
-		int chunkSize = Math.floorDiv(pipelines.size(), CPUs);
-		int lastchunkSize = pipelines.size() - (chunkSize * (CPUs - 1));
+		int chunkSize = Math.floorDiv(pipelines.size(), cpus);
+		int lastchunkSize = pipelines.size() - (chunkSize * (cpus - 1));
 
-		ComponentInstanceStringConverter[] threads = new ComponentInstanceStringConverter[CPUs];
+		ComponentInstanceStringConverter[] threads = new ComponentInstanceStringConverter[cpus];
 
 		for (int i = 0; i < threads.length; i++) {
 			threads[i] = new ComponentInstanceStringConverter(ontologyConnector,
@@ -143,14 +142,14 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 			threads[i].start();
 		}
 
-		List<String> pipelineRepresentations = new ArrayList<String>(pipelines.size());
+		List<String> pipelineRepresentations = new ArrayList<>(pipelines.size());
 		for (int i = 0; i < threads.length; i++) {
 			threads[i].join();
 			pipelineRepresentations.addAll(threads[i].getConvertedPipelines());
 		}
 
 		// Use the tree miner to find patterns
-		System.out.println("WEKAPipelineCharacterizer: Find frequent subtrees.");
+		logger.info("Finding frequent subtrees");
 		foundPipelinePatterns = treeMiner.findFrequentSubtrees(pipelineRepresentations, patternMinSupport);
 	}
 
@@ -234,11 +233,11 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	/**
 	 * Inform the Characterizer about resource usage.
 	 * 
-	 * @param cPUs
+	 * @param cpus
 	 *            Maximum number of threads that will be used by the characterizer
 	 */
-	public void setCPUs(int cPUs) {
-		CPUs = cPUs;
+	public void setCPUs(int cpus) {
+		this.cpus = cpus;
 	}
 
 	/**
