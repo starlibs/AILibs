@@ -70,17 +70,17 @@ import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import weka.core.Instances;
 
 /**
- * 1 Nicer Node Evaluator.
- * 
- * This Node Evaluator stole literally all its code from the
- * {@link RandomCompletionBasedNodeEvaluator}, however, i removed all the crap
- * ;)
+ * This NodeEvaluator can calculate the f-Value for nodes using dyad ranking.
+ * Thereby, a huge amount of random completion will be drawn in a node, then
+ * these pipelines will ranked using dyad ranking and finally the top k
+ * pipelines will be evaluated, using the best observed score as the f-Value of
+ * the node.
  * 
  * @param <T>
  *            the node type, typically it is {@link TFDNode}
  * @param <V>
- *            the type of the score, literally always Double...
- * @author Mirko!
+ *            the type of the score
+ * @author Mirko Juergens
  *
  */
 public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
@@ -200,13 +200,17 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 		String scalerPath = config.scalerPath();
 
-		// load the dyadranker from the config
-		try (ObjectInputStream oin = new ObjectInputStream(new FileInputStream(Paths.get(scalerPath).toFile()));) {
+		try {
 			this.dyadRanker.loadModelFromFile(Paths.get(config.getPlNetPath()).toString());
-
-			this.scaler = (DyadMinMaxScaler) oin.readObject();
 		} catch (IOException e) {
 			logger.error("Could not load model for plnet in {}", Paths.get(config.getPlNetPath()));
+		}
+
+		// load the dyadranker from the config
+		try (ObjectInputStream oin = new ObjectInputStream(new FileInputStream(Paths.get(scalerPath).toFile()));) {
+			this.scaler = (DyadMinMaxScaler) oin.readObject();
+		} catch (IOException e) {
+			logger.error("Could not load sclader for plnet in {}", Paths.get(config.scalerPath()));
 		} catch (ClassNotFoundException e) {
 			logger.error("Could not read scaler.", e);
 		}
@@ -214,7 +218,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	}
 
 	@Override
-	public V f(Node<T, ?> node) {
+	public V f(Node<T, ?> node) throws InterruptedException {
 		if (firstEvaluation == null) {
 			this.firstEvaluation = Instant.now();
 		}
@@ -223,7 +227,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			return null;
 		}
 		/* Reinitializing random search... */
-	//	initializeRandomSearch(this.graphGenerator);
+		// initializeRandomSearch(this.graphGenerator);
 		/* Time measuring */
 		Instant startOfEvaluation = Instant.now();
 
@@ -236,7 +240,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 				} catch (InterruptedException e) {
 					logger.error("Interrupted in path completion!");
 					Thread.currentThread().interrupt();
-					return null;
+					Thread.interrupted();
+					throw new InterruptedException();
 				}
 			}
 		}
@@ -247,7 +252,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		} catch (InterruptedException | TimeoutException e) {
 			logger.error("Interrupted in path completion!");
 			Thread.currentThread().interrupt();
-			return null;
+			Thread.interrupted();
+			throw new InterruptedException();
 		}
 		// order them according to dyad ranking
 		List<ComponentInstance> allRankedPaths = getDyadRankedPaths(randomPaths);
@@ -265,7 +271,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		} catch (InterruptedException | TimeoutException e) {
 			logger.error("Interrupted while predicitng next best solution");
 			Thread.currentThread().interrupt();
-			return null;
+			Thread.interrupted();
+			throw new InterruptedException();
 		} catch (ExecutionException e2) {
 			logger.error("Couldn't evaluate solution candidates- Returning null as FValue!.");
 			return null;
@@ -344,7 +351,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			} else {
 				Vector y = new DenseDoubleVector(characterizer.characterize(cI));
 				if (scaler != null) {
-					List<IDyadRankingInstance> asList = Arrays.asList(new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures), Arrays.asList(y)));
+					List<IDyadRankingInstance> asList = Arrays.asList(new SparseDyadRankingInstance(
+							new DenseDoubleVector(datasetMetaFeatures), Arrays.asList(y)));
 					DyadRankingDataset dataset = new DyadRankingDataset(asList);
 					scaler.transformAlternatives(dataset);
 				}
@@ -452,13 +460,13 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		for (int i = 0; i < topKRankedPaths.size(); i++) {
 			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(),
 					i + 1, topKRankedPaths.size());
-			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(5, TimeUnit.SECONDS);
+			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(20, TimeUnit.SECONDS);
 			if (evaluatedPipe == null) {
 				logger.info("Didn't receive any futures (expected {} futures)", topKRankedPaths.size());
 				continue;
 			}
 			try {
-				Pair<ComponentInstance, V> solution = evaluatedPipe.get(5, TimeUnit.SECONDS);
+				Pair<ComponentInstance, V> solution = evaluatedPipe.get(20, TimeUnit.SECONDS);
 				if (solution != null) {
 					logger.info("Evaluation was successful. Adding {} to solutions", solution.getY());
 					evaluatedSolutions.add(solution);
@@ -469,7 +477,6 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 			} catch (Exception e) {
 				logger.info("Got exception while evaluating {}", e.getMessage());
-				// evaluatedPipe.cancel(true);
 			}
 
 		}
@@ -492,18 +499,29 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	@Override
 	public void setGenerator(GraphGenerator<T, ?> generator) {
 		this.graphGenerator = generator;
-		initializeRandomSearch(generator);
+		initializeRandomSearch();
 	}
 
-	private void initializeRandomSearch(GraphGenerator<T, ?> generator) {
+	/**
+	 * Can be used to reinitialize the random-search at every call of the f-Value
+	 * computation.
+	 * 
+	 * @param generator
+	 */
+	private void initializeRandomSearch() {
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
-				(GraphGenerator<T, String>) generator, nodeEvaluator);
+				(GraphGenerator<T, String>) graphGenerator, nodeEvaluator);
 		randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);
 		while (!(randomPathCompleter.next() instanceof AlgorithmInitializedEvent))
 			;
 	}
 
+	/**
+	 * Sets the data set in the node evaluator and calculates its meta features.
+	 * 
+	 * @param dataset
+	 */
 	public void setDataset(Instances dataset) {
 
 		// first we split the dataset into train & testdata
@@ -548,6 +566,16 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 	}
 
+	/**
+	 * Posts the solution to the EventBus of the search.
+	 * 
+	 * @param solution
+	 *            evaluated pipeline
+	 * @param time
+	 *            time it took
+	 * @param score
+	 *            the observed score
+	 */
 	protected void postSolution(final ComponentInstance solution, long time, V score) {
 		try {
 			@SuppressWarnings("unchecked")

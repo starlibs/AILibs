@@ -204,7 +204,7 @@ public class MLPlanBuilder {
 	
 	public MLPlanBuilder withAutoWEKAConfiguration(boolean usePreferenceBasedNodeEvaluator) throws IOException {
 		if (this.searchSpaceConfigFile == null) {
-			withSearchSpaceConfigFile(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
+			withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-all-autoweka.json"));
 		}	
 		if (usePreferenceBasedNodeEvaluator) {
 			File fileOfPreferredComponents = getAlgorithmConfig().preferredComponents();
@@ -265,9 +265,6 @@ public class MLPlanBuilder {
 	}
 
 	public void prepareNodeEvaluatorInFactoryWithData(final Instances data) {
-		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
-			return;
-		}
 		if (this.factoryPreparedWithData) {
 			throw new IllegalStateException("Factory has already been prepared with data. This can only be done once!");
 		}
@@ -278,14 +275,14 @@ public class MLPlanBuilder {
 			return;
 		}
 
-		HASCOViaFDAndBestFirstFactory<Double> factory = (HASCOViaFDAndBestFirstFactory<Double>) hascoFactory;
-
+		
 		/*
 		 * now determine the real node evaluator to be used. A semantic node evaluator
 		 * has highest priority
 		 */
 		INodeEvaluator<TFDNode, Double> actualNodeEvaluator;
 		if (pipelineValidityCheckingNodeEvaluator != null) {
+			
 			pipelineValidityCheckingNodeEvaluator.setComponents(components);
 			pipelineValidityCheckingNodeEvaluator.setData(data);
 			if (preferredNodeEvaluator != null) {
@@ -383,10 +380,14 @@ public class MLPlanBuilder {
 	}
 	
 	public void setSearchBenchmarkForNodeEvaluator(IObjectEvaluator<ComponentInstance, Double> searchBenchmark) {
+
 		if (preferredNodeEvaluator instanceof DyadRankingBasedNodeEvaluator) {
 			DyadRankingBasedNodeEvaluator<TFDNode, Double> dyadRanker = (DyadRankingBasedNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator;
 			dyadRanker.setPipelineEvaluator(searchBenchmark);
 		}
-
+		if (preferredNodeEvaluator instanceof AlternativeNodeEvaluator && ((AlternativeNodeEvaluator<TFDNode, Double>)  preferredNodeEvaluator).getEvaluator() instanceof DyadRankingBasedNodeEvaluator ) {
+			DyadRankingBasedNodeEvaluator<TFDNode, Double> dyadRanker = (DyadRankingBasedNodeEvaluator<TFDNode, Double>) ((AlternativeNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator).getEvaluator();
+			dyadRanker.setPipelineEvaluator(searchBenchmark);
+		}
 	}
 }
