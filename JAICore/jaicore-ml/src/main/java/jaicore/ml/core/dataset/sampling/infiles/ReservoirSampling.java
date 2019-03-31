@@ -83,13 +83,12 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 					throw new AlgorithmException(e, "Was not able to write sampled datapoints into output files.");
 				}
 			}
-		case inactive: {
+		case inactive:
 			if (this.streamedDatapoints < this.datapointAmount) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
 			}
-		}
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}

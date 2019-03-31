@@ -27,11 +27,11 @@ import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
  */
 public class DiscretizationHelper<I extends IInstance> {
 
-	private static Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
 
 	public enum DiscretizationStrategy {
 		EQUAL_LENGTH, EQUAL_SIZE
-	};
+	}
 
 	public DiscretizationHelper() {
 		super();
@@ -81,7 +81,7 @@ public class DiscretizationHelper<I extends IInstance> {
 				discretizationPolicies.put(index, equalLengthPolicy(numericValues, numberOfCategories));
 				break;
 			default:
-				throw new RuntimeException(String.format("Invalid strategy: %s", discretizationStrategy));
+				throw new IllegalArgumentException(String.format("Invalid strategy: %s", discretizationStrategy));
 			}
 
 		}
@@ -229,7 +229,7 @@ public class DiscretizationHelper<I extends IInstance> {
 			}
 		}
 
-		throw new RuntimeException(String.format("Policy does not cover value %f", value));
+		throw new IllegalStateException(String.format("Policy does not cover value %f", value));
 	}
 
 }

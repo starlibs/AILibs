@@ -10,7 +10,6 @@ import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.ConfigurationLearningCurveExtrapolator;
-import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import weka.classifiers.Classifier;
 
 /**
@@ -26,7 +25,7 @@ import weka.classifiers.Classifier;
 
 public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassifierEvaluator {
 
-	private final static Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
+	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
@@ -40,8 +39,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 	public ConfigurationLearningCurveExtrapolationEvaluator(int[] anchorpoints,
 			ISamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
-			IDataset<IInstance> dataset, double trainSplitForAnchorpointsMeasurement,
-			LearningCurveExtrapolationMethod extrapolationMethod, long seed, String identifier,
+			IDataset<IInstance> dataset, double trainSplitForAnchorpointsMeasurement, long seed, String identifier,
 			double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -58,8 +56,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	}
 
 	@Override
-	public Double evaluate(Classifier classifier)
-			throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier,
 				dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed,

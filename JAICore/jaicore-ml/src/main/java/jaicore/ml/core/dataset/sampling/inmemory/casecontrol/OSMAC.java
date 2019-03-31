@@ -22,8 +22,8 @@ public class OSMAC<I extends IInstance> extends PilotEstimateSampling<I> {
 	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances,
 			Classifier pilotEstimator) {
 		double boundaryOfCurrentInstance = 0.0;
-		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<Pair<I, Double>>();
-		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<Pair<Instance, Double>>();
+		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<>();
+		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;
 		int vectorLength;
 		double loss;
@@ -50,8 +50,7 @@ public class OSMAC<I extends IInstance> extends PilotEstimateSampling<I> {
 				loss = 1;
 			}
 			boundaryOfCurrentInstance += loss * vectorLength / sumOfDistributionLosses;
-			instanceProbabilityBoundaries
-					.add(new Pair<Instance, Double>(instance, new Double(boundaryOfCurrentInstance)));
+			instanceProbabilityBoundaries.add(new Pair<Instance, Double>(instance, boundaryOfCurrentInstance));
 		}
 		IDataset<IInstance> dataset = WekaInstancesUtil.wekaInstancesToDataset(instances);
 		int iterator = 0;

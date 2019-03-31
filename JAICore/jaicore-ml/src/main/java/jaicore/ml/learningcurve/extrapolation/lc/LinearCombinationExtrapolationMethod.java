@@ -1,5 +1,7 @@
 package jaicore.ml.learningcurve.extrapolation.lc;
 
+import java.util.concurrent.ExecutionException;
+
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
@@ -35,7 +37,7 @@ public class LinearCombinationExtrapolationMethod implements LearningCurveExtrap
 
 	@Override
 	public LearningCurve extrapolateLearningCurveFromAnchorPoints(int[] xValues, double[] yValues, int dataSetSize)
-			throws InvalidAnchorPointsException, InterruptedException {
+			throws InvalidAnchorPointsException, InterruptedException, ExecutionException {
 		// Request model parameters to create learning curve
 		ExtrapolationServiceClient<LinearCombinationLearningCurveConfiguration> client = new ExtrapolationServiceClient<>(
 				serviceUrl, LinearCombinationLearningCurveConfiguration.class);

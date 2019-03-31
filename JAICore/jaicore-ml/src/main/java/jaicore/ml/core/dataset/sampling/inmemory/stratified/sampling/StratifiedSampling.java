@@ -4,11 +4,15 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
+import jaicore.ml.core.dataset.sampling.infiles.stratified.sampling.StratifiedFileSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.SimpleRandomSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEvent;
@@ -21,6 +25,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEvent;
  */
 public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
+	private Logger logger = LoggerFactory.getLogger(StratifiedSampling.class);
 	private IStratiAmountSelector<I> stratiAmountSelector;
 	private IStratiAssigner<I> stratiAssigner;
 	private Random random;
@@ -78,7 +83,7 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 					} else {
 						this.strati[assignedStrati].add(datapoint);
 					}
-					if (this.datasetCopy.size() == 0) {
+					if (this.datasetCopy.isEmpty()) {
 						this.allDatapointsAssigned = true;
 					}
 					return new SampleElementAddedEvent(getId());
@@ -95,23 +100,21 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 						if (this.executorService.isTerminated()) {
 							return this.terminate();
 						} else {
-							synchronized (Thread.currentThread()) {
-								Thread.currentThread().wait(100);
-								return new WaitForSamplingStepEvent(getId());
-							}
+							Thread.sleep(100);
+							return new WaitForSamplingStepEvent(getId());
+
 						}
 					}
 				}
 			} else {
 				return this.terminate();
 			}
-		case inactive: {
+		case inactive:
 			if (this.sample.size() < this.sampleSize) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
 			}
-		}
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
@@ -133,20 +136,17 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 		// Start a Simple Random Sampling thread for each stratum
 		for (int i = 0; i < this.strati.length; i++) {
 			int index = i;
-			this.executorService.execute(new Runnable() {
-				@Override
-				public void run() {
-					SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<I>(random, strati[index]);
-					simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
-					try {
-						synchronized (sample) {
-							sample.addAll(simpleRandomSampling.call());
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
+			this.executorService.execute(() -> {
+				SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<>(random, strati[index]);
+				simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
+				try {
+					synchronized (sample) {
+						sample.addAll(simpleRandomSampling.call());
 					}
-
+				} catch (Exception e) {
+					logger.error("Unexpected exception during simple random sampling!", e);
 				}
+
 			});
 		}
 		// Prevent executor service from more threads being added.

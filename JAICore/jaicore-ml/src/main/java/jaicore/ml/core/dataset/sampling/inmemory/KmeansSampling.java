@@ -5,14 +5,12 @@ import java.util.List;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**
  * Implementation of a sampling method using kmeans-clustering. This algorithm
@@ -25,13 +23,7 @@ import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  * @author jnowack
  *
  */
-public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
-
-	private List<CentroidCluster<I>> clusterResults = null;
-	private int currentCluster = 0;
-
-	private DistanceMeasure distanceMeassure = new ManhattanDistance();
-	private long seed;
+public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 	/* number of clusters, if -1 use sample size */
 	private int k;
 
@@ -44,8 +36,7 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	 *            number of clusters
 	 */
 	public KmeansSampling(long seed, int k, IDataset<I> input) {
-		super(input);
-		this.seed = seed;
+		super(seed, input);
 		this.k = k;
 	}
 
@@ -55,14 +46,13 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	 * 
 	 * @param seed
 	 *            Random Seed
-	 * @param dis
+	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(long seed, DistanceMeasure dis, IDataset<I> input) {
-		super(input);
-		this.seed = seed;
+	public KmeansSampling(long seed, DistanceMeasure dist, IDataset<I> input) {
+		super(seed, dist, input);
 		this.k = -1;
-		this.distanceMeassure = dis;
+
 	}
 
 	/**
@@ -72,18 +62,13 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 	 *            Random Seed
 	 * @param k
 	 *            number of clusters
-	 * @param dis
+	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(long seed, int k, DistanceMeasure dis, IDataset<I> input) {
-		super(input);
-		this.seed = seed;
+	public KmeansSampling(long seed, int k, DistanceMeasure dist, IDataset<I> input) {
+		super(seed, dist, input);
 		this.k = k;
-		this.distanceMeassure = dis;
-	}
 
-	public void setDistanceMeassure(DistanceMeasure distanceMeassure) {
-		this.distanceMeassure = distanceMeassure;
 	}
 
 	@Override
@@ -101,50 +86,15 @@ public class KmeansSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 				k = sampleSize;
 			}
 			if (clusterResults == null) {
-				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<I>(k, -1, distanceMeassure, r);
+				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<>(k, -1, distanceMeassure, r);
 				clusterResults = kMeansCluster.cluster(getInput());
 			}
 
 			return this.activate();
 		case active:
-			if (currentCluster < clusterResults.size()) {
-				CentroidCluster<I> cluster = clusterResults.get(currentCluster++);
-				boolean same = true;
-				for (int i = 1; i < cluster.getPoints().size(); i++) {
-					if (!cluster.getPoints().get(i - 1).getTargetValue(Double.class)
-							.equals(cluster.getPoints().get(i).getTargetValue(Double.class))) {
-						same = false;
-						break;
-					}
-				}
-				if (same) {
-					I near = cluster.getPoints().get(0);
-					double dist = Double.MAX_VALUE;
-					for (I p : cluster.getPoints()) {
-						double newDist = distanceMeassure.compute(p.getPoint(), cluster.getCenter().getPoint());
-						if (newDist < dist) {
-							near = p;
-							dist = newDist;
-						}
-					}
-					sample.add(near);
-				} else {
-					// find a solution to not sample all points here
-					for (int i = 0; i < cluster.getPoints().size(); i++) {
-						sample.add(cluster.getPoints().get(i));
-					}
-				}
-				return new SampleElementAddedEvent(getId());
-			} else {
-				return this.terminate();
-			}
-		case inactive: {
-			if (this.sample.size() < this.sampleSize) {
-				throw new AlgorithmException("Expected sample size was not reached before termination");
-			} else {
-				return this.terminate();
-			}
-		}
+			this.doAlgorithmStep();
+		case inactive:
+			this.doInactiveStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}

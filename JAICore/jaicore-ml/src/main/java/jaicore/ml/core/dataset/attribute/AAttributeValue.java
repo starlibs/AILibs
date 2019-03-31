@@ -1,7 +1,8 @@
 package jaicore.ml.core.dataset.attribute;
 
 /**
- * An abstract class for attribute values implementing basic functionality to store its value as well as getter and setters.
+ * An abstract class for attribute values implementing basic functionality to
+ * store its value as well as getter and setters.
  *
  * @author wever
  *
@@ -17,7 +18,8 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	private final IAttributeType<D> type;
 
 	/**
-	 * Constructor creating a new attribute value for a certain type. The value remains unset.
+	 * Constructor creating a new attribute value for a certain type. The value
+	 * remains unset.
 	 *
 	 * @param type
 	 *            The type of the attribute value.
@@ -28,7 +30,8 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	}
 
 	/**
-	 * Constructor creating a new attribute value for a certain type together with a value.
+	 * Constructor creating a new attribute value for a certain type together with a
+	 * value.
 	 *
 	 * @param type
 	 *            The type of the attribute value.
@@ -55,7 +58,8 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	@Override
 	public void setValue(final D value) {
 		if (!this.type.isValidValue(value)) {
-			throw new IllegalArgumentException("The attribute value does not conform the domain of the attribute type.");
+			throw new IllegalArgumentException(
+					"The attribute value does not conform the domain of the attribute type.");
 		}
 		this.value = value;
 	}
@@ -75,6 +79,28 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 
 		IAttributeValue<?> other = (IAttributeValue<?>) obj;
 		return getValue().equals(other.getValue());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AAttributeValue other = (AAttributeValue) obj;
+		if (type == null) {
+			if (other.type != null)
+				return false;
+		} else if (!type.equals(other.type))
+			return false;
+		if (value == null) {
+			if (other.value != null)
+				return false;
+		} else if (!value.equals(other.value))
+			return false;
+		return true;
 	}
 
 }

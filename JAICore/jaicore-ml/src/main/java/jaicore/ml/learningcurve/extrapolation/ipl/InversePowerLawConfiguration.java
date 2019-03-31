@@ -10,7 +10,9 @@ package jaicore.ml.learningcurve.extrapolation.ipl;
 public class InversePowerLawConfiguration {
 
 	// Inverse Power Law parameters
-	private double a, b, c;
+	private double a;
+	private double b;
+	private double c;
 
 	public double getA() {
 		return this.a;

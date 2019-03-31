@@ -9,6 +9,10 @@ package jaicore.ml.learningcurve.extrapolation.lc;
  */
 public class LinearCombinationConstants {
 
+	private LinearCombinationConstants() {
+
+	}
+
 	// Function names
 	public static final String VAPOR_PRESSURE = "vapor_pressure";
 	public static final String POW_3 = "pow_3";

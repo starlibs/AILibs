@@ -33,7 +33,9 @@ import weka.core.UnsupportedAttributeTypeException;
  */
 public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluator {
 
-	private final static Logger logger = LoggerFactory.getLogger(ExtrapolatedSaturationPointEvaluator.class);
+	private static final Logger logger = LoggerFactory.getLogger(ExtrapolatedSaturationPointEvaluator.class);
+
+	private static final double DEFAULT_EPSILON = 0.1;
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
@@ -51,31 +53,29 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 	 * Create a classifier evaluator with an accuracy measurement at the
 	 * extrapolated learning curves saturation point.
 	 * 
-	 * @param anchorpoints                         Anchorpoints for the learning
-	 *                                             curve extrapolation.
-	 * @param samplingAlgorithmFactory             Subsampling factory for a
-	 *                                             subsampler to create samples at
-	 *                                             the given anchorpoints.
-	 * @param train                                Dataset predict the learning
-	 *                                             curve with and where the
-	 *                                             subsample for the measurement is
-	 *                                             drawn from.
-	 * @param trainSplitForAnchorpointsMeasurement Ratio to split the subsamples at
-	 *                                             the anchorpoints into train and
-	 *                                             test.
-	 * @param extrapolationMethod                  Method to extrapolate a learning
-	 *                                             curve from the accuracy
-	 *                                             measurements at the anchorpoints.
-	 * @param seed                                 Random seed.
-	 * @param epsilon                              Tolerance value for calculating
-	 *                                             the saturation point.
-	 * @param test                                 Test dataset to measure the
-	 *                                             accuracy.
+	 * @param anchorpoints
+	 *            Anchorpoints for the learning curve extrapolation.
+	 * @param samplingAlgorithmFactory
+	 *            Subsampling factory for a subsampler to create samples at the
+	 *            given anchorpoints.
+	 * @param train
+	 *            Dataset predict the learning curve with and where the subsample
+	 *            for the measurement is drawn from.
+	 * @param trainSplitForAnchorpointsMeasurement
+	 *            Ratio to split the subsamples at the anchorpoints into train and
+	 *            test.
+	 * @param extrapolationMethod
+	 *            Method to extrapolate a learning curve from the accuracy
+	 *            measurements at the anchorpoints.
+	 * @param seed
+	 *            Random seed.
+	 * @param test
+	 *            Test dataset to measure the accuracy.
 	 */
 	public ExtrapolatedSaturationPointEvaluator(int[] anchorpoints,
 			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
 			IDataset<IInstance> train, double trainSplitForAnchorpointsMeasurement,
-			LearningCurveExtrapolationMethod extrapolationMethod, long seed, double epsilon, IDataset<IInstance> test) {
+			LearningCurveExtrapolationMethod extrapolationMethod, long seed, IDataset<IInstance> test) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -83,13 +83,16 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 		this.trainSplitForAnchorpointsMeasurement = trainSplitForAnchorpointsMeasurement;
 		this.extrapolationMethod = extrapolationMethod;
 		this.seed = seed;
-		this.epsilon = epsilon;
+		this.epsilon = DEFAULT_EPSILON;
 		this.test = test;
 	}
 
+	public void setEpsilon(double epsilon) {
+		this.epsilon = epsilon;
+	}
+
 	@Override
-	public Double evaluate(Classifier classifier)
-			throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier,
 				train, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed);

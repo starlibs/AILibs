@@ -63,11 +63,7 @@ public class CaseControlSampling <I extends IInstance> extends CaseControlLikeSa
 				return this.terminate();
 			}
 		case inactive:
-			if (this.sample.size() < this.sampleSize) {
-				throw new RuntimeException("Expected sample size was not reached before termination");
-			} else {
-				return this.terminate();
-			}
+			this.doInactiveStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state "+ this.getState());	
 		}	

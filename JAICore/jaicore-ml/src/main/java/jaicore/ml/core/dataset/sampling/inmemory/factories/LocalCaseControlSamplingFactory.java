@@ -32,8 +32,7 @@ public class LocalCaseControlSamplingFactory<I extends IInstance>
 	public LocalCaseControlSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
 		LocalCaseControlSampling<I> localCaseControlSampling = new LocalCaseControlSampling<>(random,
 				this.preSampleSize, inputDataset);
-		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null
-				&& this.previousRun != null) {
+		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null) {
 			localCaseControlSampling.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
 			localCaseControlSampling.setChosenInstance(previousRun.getChosenInstance());
 		}

@@ -28,11 +28,9 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	private Random random;
 	private int index;
 	private int addedDatapoints;
-	private int datapointAmount;
 	private TempFileHandler tempFileHandler;
-	private DatasetFileSorter sorter;
 	private Comparator<String> datapointComparator;
-	private File sortedDatasetFile;
+	// private File sortedDatasetFile;
 	private BufferedReader sortedDatasetFileReader;
 	private List<Integer> indicesForSelection;
 
@@ -67,15 +65,16 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 		switch (this.getState()) {
 		case created:
 			// Sort dataset and skip with reader the ARFF header.
+			File sortedDatasetFile = null;
 			try {
-				this.sorter = new DatasetFileSorter(this.getInput(), this.tempFileHandler);
+				DatasetFileSorter sorter = new DatasetFileSorter(this.getInput(), this.tempFileHandler);
 				if (this.datapointComparator != null) {
-					this.sorter.setComparator(this.datapointComparator);
+					sorter.setComparator(this.datapointComparator);
 				}
-				this.sortedDatasetFile = this.sorter.sort(
+				sortedDatasetFile = sorter.sort(
 						this.tempFileHandler.getTempFileDirPath() + File.separator + UUID.randomUUID().toString());
-				this.sortedDatasetFile.deleteOnExit();
-				this.sortedDatasetFileReader = new BufferedReader(new FileReader(this.sortedDatasetFile));
+				sortedDatasetFile.deleteOnExit();
+				this.sortedDatasetFileReader = new BufferedReader(new FileReader(sortedDatasetFile));
 				ArffUtilities.skipWithReaderToDatapoints(this.sortedDatasetFileReader);
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Was not able to create a sorted dataset file.");
@@ -84,13 +83,13 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			try {
 				this.addedDatapoints = 0;
 				this.index = 0;
-				this.datapointAmount = ArffUtilities.countDatasetEntries(this.sortedDatasetFile, true);
+				int datapointAmount = ArffUtilities.countDatasetEntries(sortedDatasetFile, true);
 				this.indicesForSelection = new LinkedList<>();
-				int k = (int) Math.floor(this.datapointAmount / this.sampleSize);
-				int startIndex = this.random.nextInt(this.datapointAmount);
+				int k = datapointAmount / this.sampleSize;
+				int startIndex = this.random.nextInt(datapointAmount);
 				int i = 0;
 				while (this.indicesForSelection.size() < this.sampleSize) {
-					int e = (startIndex + k * (i++)) % this.datapointAmount;
+					int e = (startIndex + k * (i++)) % datapointAmount;
 					this.indicesForSelection.add(e);
 				}
 				this.indicesForSelection.sort(Integer::compare);
@@ -124,15 +123,13 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				this.cleanUp();
 				return this.terminate();
 			}
-		case inactive: {
-
+		case inactive:
 			this.cleanUp();
 			if (this.addedDatapoints < this.sampleSize) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {
 				return this.terminate();
 			}
-		}
 		default:
 			this.cleanUp();
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());

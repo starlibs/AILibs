@@ -24,12 +24,12 @@ import jaicore.ml.core.dataset.ArffUtilities;
  */
 public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 
-	private static Logger LOG = LoggerFactory.getLogger(AFileSamplingAlgorithm.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AFileSamplingAlgorithm.class);
 
 	protected Integer sampleSize = null;
 	private String outputFilePath = null;
 	protected FileWriter outputFileWriter;
-	
+
 	protected AFileSamplingAlgorithm(File input) {
 		super(input);
 	}
@@ -51,7 +51,9 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			timeoutTime = Instant.MAX;
 		} else {
 			timeoutTime = Instant.now().plus(getTimeout().milliseconds(), ChronoUnit.MILLIS);
-			LOG.debug("Set timeout to {}", timeoutTime.toString());
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Set timeout to {}", timeoutTime);
+			}
 		}
 		// Check missing or invalid configuration.
 		if (outputFilePath == null || outputFilePath.length() == 0) {

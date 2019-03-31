@@ -37,10 +37,12 @@ public class AttributeDiscretizationPolicy {
 			return false;
 		AttributeDiscretizationPolicy other = (AttributeDiscretizationPolicy) obj;
 		if (intervals == null) {
-			if (other.intervals != null)
+			if (other.intervals != null) {
 				return false;
-		} else if (!intervals.equals(other.intervals))
+			}
+		} else if (!intervals.equals(other.intervals)) {
 			return false;
+		}
 		return true;
 	}
 

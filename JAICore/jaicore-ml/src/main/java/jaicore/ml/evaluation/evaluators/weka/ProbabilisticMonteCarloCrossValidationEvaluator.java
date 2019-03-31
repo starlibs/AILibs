@@ -85,7 +85,6 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 					TTest test = new TTest();
 					if(test.tTest(bestScore, stats.getValues(), 0.02)) {
 						Double result = stats.getMean();
-						//System.out.println("cut " + stats.getMean() + "-" + bestScore + "-" + stats.getN());
 						logger.info("Obtained score of {} for classifier {}. {}-MCCV was not completed because it would have been to unliky to beat best score.", result, pl, this.repeats);
 						return result;
 					}

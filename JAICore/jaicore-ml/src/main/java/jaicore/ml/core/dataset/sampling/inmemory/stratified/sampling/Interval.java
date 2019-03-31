@@ -29,11 +29,7 @@ public class Interval {
 	}
 
 	public boolean contains(double d) {
-		if (d >= lowerBound && d <= upperBound) {
-			return true;
-		} else {
-			return false;
-		}
+		return (d >= lowerBound && d <= upperBound);
 	}
 
 	@Override

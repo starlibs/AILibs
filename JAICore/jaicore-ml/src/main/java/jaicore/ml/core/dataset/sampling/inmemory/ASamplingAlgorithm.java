@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.core.dataset.IDataset;
@@ -25,11 +26,11 @@ import jaicore.ml.core.dataset.IInstance;
  */
 public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm<IDataset<I>, IDataset<I>> {
 
-	private static Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
 	protected Integer sampleSize = null;
 	protected IDataset<I> sample = null;
-	
+
 	protected ASamplingAlgorithm(IDataset<I> input) {
 		super(input);
 	}
@@ -46,7 +47,9 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 			timeoutTime = Instant.MAX;
 		} else {
 			timeoutTime = Instant.now().plus(getTimeout().milliseconds(), ChronoUnit.MILLIS);
-			LOG.debug("Set timeout to {}", timeoutTime.toString());
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Set timeout to {}", timeoutTime);
+			}
 		}
 		// Check missing or invalid configuration.
 		if (sampleSize == null) {
@@ -57,7 +60,7 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 			return getInput().createEmpty();
 		}
 		IDataset<I> dataset = this.getInput();
-		if (dataset == null || dataset.size() == 0) {
+		if (dataset == null || dataset.isEmpty()) {
 			throw new AlgorithmException("No dataset or an empty dataset was given as an input.");
 		}
 		if (dataset.size() < this.sampleSize) {
@@ -85,6 +88,15 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 				}
 			}
 			return sample;
+		}
+
+	}
+
+	protected AlgorithmEvent doInactiveStep() throws AlgorithmException {
+		if (this.sample.size() < this.sampleSize) {
+			throw new AlgorithmException("Expected sample size was not reached before termination");
+		} else {
+			return this.terminate();
 		}
 	}
 
