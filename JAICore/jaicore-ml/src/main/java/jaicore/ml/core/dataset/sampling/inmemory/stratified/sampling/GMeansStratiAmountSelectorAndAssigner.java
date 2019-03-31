@@ -4,8 +4,6 @@ import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import jaicore.ml.clustering.GMeans;
 import jaicore.ml.core.dataset.IDataset;

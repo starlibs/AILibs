@@ -30,7 +30,6 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	private int addedDatapoints;
 	private TempFileHandler tempFileHandler;
 	private Comparator<String> datapointComparator;
-	// private File sortedDatasetFile;
 	private BufferedReader sortedDatasetFileReader;
 	private List<Integer> indicesForSelection;
 

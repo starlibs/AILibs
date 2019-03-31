@@ -30,7 +30,7 @@ public class LCNetClient {
 	private Logger logger = LoggerFactory.getLogger(LCNetClient.class);
 
 	// TODO Should not be hardcoded like this
-	private static final String serverAddress = "http://localhost:5001/";
+	private static final String SERVER_ADDRESS = "http://localhost:5001/";
 
 	public void train(int[] xValues, double[] yValues, int dataSetSize, double[][] configurations, String identifier) {
 		if (xValues.length != yValues.length)
@@ -121,7 +121,7 @@ public class LCNetClient {
 	private HttpURLConnection establishHttpCon(String urlParameter, String identifier) {
 		URL url = null;
 		try {
-			url = new URL(this.serverAddress + urlParameter + "/" + identifier);
+			url = new URL(SERVER_ADDRESS + urlParameter + "/" + identifier);
 		} catch (MalformedURLException e) {
 			throw new RuntimeException("URL is malformed", e);
 		}

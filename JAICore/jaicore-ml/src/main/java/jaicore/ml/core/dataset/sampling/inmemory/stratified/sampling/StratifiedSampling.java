@@ -12,7 +12,6 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
-import jaicore.ml.core.dataset.sampling.infiles.stratified.sampling.StratifiedFileSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.SimpleRandomSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEvent;

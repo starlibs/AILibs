@@ -151,9 +151,9 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 		int[] sampleSizeForStrati = new int[strati.keySet().size()];
 		// Calculate for each stratum the sample size by StratiSize / DatasetSize
 		int i = 0;
-		for (String uuid : strati.keySet()) {
+		for (Entry<String, Integer> entry : strati.entrySet()) {
 			sampleSizeForStrati[i] = Math
-					.round((float) (this.sampleSize * ((double) strati.get(uuid) / (double) this.datapointAmount)));
+					.round((float) (this.sampleSize * ((double) strati.get(entry.getKey()) / (double) this.datapointAmount)));
 			i++;
 		}
 

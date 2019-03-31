@@ -26,6 +26,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class TempFileHandler implements Closeable {
+	
+	private static final String ERR_MSG_CANNOT_CLOSE_READER = "Cannot close reader";
 
 	private Logger logger = LoggerFactory.getLogger(TempFileHandler.class);
 
@@ -90,7 +92,7 @@ public class TempFileHandler implements Closeable {
 			try {
 				this.tempFileReaders.get(uuid).close();
 			} catch (IOException e) {
-				logger.error("Cannot close reader", e);
+				logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
 			}
 			this.tempFileReaders.remove(uuid);
 		}
@@ -140,7 +142,7 @@ public class TempFileHandler implements Closeable {
 			try {
 				this.tempFileReaders.get(uuid).close();
 			} catch (IOException e) {
-				logger.error("Cannot close reader", e);
+				logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
 			}
 			this.tempFileReaders.remove(uuid);
 		}
@@ -148,7 +150,7 @@ public class TempFileHandler implements Closeable {
 			try {
 				this.tempFileWriters.get(uuid).close();
 			} catch (IOException e) {
-				logger.error("Cannot close reader", e);
+				logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
 			}
 			this.tempFileWriters.remove(uuid);
 		}

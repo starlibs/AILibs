@@ -84,7 +84,7 @@ public class InversePowerLawLearningCurve implements AnalyticalLearningCurve {
 		int retriesLeft = 8;
 		while (retriesLeft > 0 && convergencePoint == -1) {
 			try {
-				convergencePoint = solver.solve(1000, (x) -> this.getDerivativeCurveValue(x) - 0.0000001, 1,
+				convergencePoint = solver.solve(1000, x -> this.getDerivativeCurveValue(x) - 0.0000001, 1,
 						upperIntervalBound);
 			} catch (NoBracketingException e) {
 				logger.warn(String.format("No solution could be found in interval [1,%d]", upperIntervalBound));

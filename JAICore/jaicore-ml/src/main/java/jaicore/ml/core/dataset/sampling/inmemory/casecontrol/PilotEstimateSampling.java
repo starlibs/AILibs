@@ -45,6 +45,7 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 		switch (this.getState()) {
 		case created:
 			this.doInitStep();
+			break;
 		case active:
 			if (this.sample.size() < this.sampleSize) {
 				do {
@@ -67,9 +68,11 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 			}
 		case inactive:
 			this.doInactiveStep();
+			break;
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
+		return null;
 	}
 
 	private AlgorithmEvent doInitStep() {

@@ -13,9 +13,6 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 
 /**
@@ -30,8 +27,6 @@ import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
  *
  */
 public class ExtrapolationServiceClient<C> {
-
-	private Logger logger = LoggerFactory.getLogger(ExtrapolationServiceClient.class);
 
 	private String serviceUrl;
 	private Class<C> configClass;
@@ -62,7 +57,6 @@ public class ExtrapolationServiceClient<C> {
 		try {
 			target = client.target(new URI(this.serviceUrl));
 		} catch (Exception e) {
-			logger.error("Cannot build WebTarget", e);
 			throw new IllegalStateException("No WebTarget!", e);
 		}
 

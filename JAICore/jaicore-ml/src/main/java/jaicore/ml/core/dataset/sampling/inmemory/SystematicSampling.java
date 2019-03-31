@@ -88,9 +88,11 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 			}
 		case inactive:
 			this.doInactiveStep();
+			break;
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
+		return null;
 	}
 
 	public IDataset<I> getSortedDataset() {

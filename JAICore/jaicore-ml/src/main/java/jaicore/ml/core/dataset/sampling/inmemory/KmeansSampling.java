@@ -1,8 +1,5 @@
 package jaicore.ml.core.dataset.sampling.inmemory;
 
-import java.util.List;
-
-import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
@@ -93,19 +90,14 @@ public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 			return this.activate();
 		case active:
 			this.doAlgorithmStep();
+			break;
 		case inactive:
 			this.doInactiveStep();
+			break;
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
-	}
-
-	public List<CentroidCluster<I>> getClusterResults() {
-		return clusterResults;
-	}
-
-	public void setClusterResults(List<CentroidCluster<I>> clusterResults) {
-		this.clusterResults = clusterResults;
+		return null;
 	}
 
 }

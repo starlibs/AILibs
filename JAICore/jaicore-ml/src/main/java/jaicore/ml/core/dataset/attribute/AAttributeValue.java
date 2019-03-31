@@ -65,6 +65,15 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
@@ -74,15 +83,19 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 			return false;
 		AAttributeValue other = (AAttributeValue) obj;
 		if (type == null) {
-			if (other.type != null)
+			if (other.type != null) {
 				return false;
-		} else if (!type.equals(other.type))
+			}
+		} else if (!type.equals(other.type)) {
 			return false;
+		}
 		if (value == null) {
-			if (other.value != null)
+			if (other.value != null) {
 				return false;
-		} else if (!value.equals(other.value))
+			}
+		} else if (!value.equals(other.value)) {
 			return false;
+		}
 		return true;
 	}
 

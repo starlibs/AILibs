@@ -140,7 +140,7 @@ public class GMeans<C extends Clusterable> {
 			}
 			
 			if(w == 0) {
-				throw new RuntimeException("All entries in v are NaN, cannot compute w!");
+				throw new IllegalStateException("All entries in v are NaN, cannot compute w!");
 			}
 
 			double[] y = new double[loopPoints.size()];
@@ -180,7 +180,7 @@ public class GMeans<C extends Clusterable> {
 		mergeCluster(currentPoints);
 		for (Entry<double[], List<C>> entry : currentPoints.entrySet()) {
 			List<C> pointsInCluster = currentPoints.get(entry.getKey());
-			CentroidCluster<C> c = new CentroidCluster<>(() -> entry.getKey());
+			CentroidCluster<C> c = new CentroidCluster<>(entry::getKey);
 			for (C point : pointsInCluster) {
 				c.addPoint(point);
 			}

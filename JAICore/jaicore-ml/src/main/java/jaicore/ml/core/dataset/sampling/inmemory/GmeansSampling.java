@@ -45,11 +45,14 @@ public class GmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 			return this.activate();
 		case active:
 			this.doAlgorithmStep();
+			break;
 		case inactive:
 			this.doInactiveStep();
+			break;
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
+		return null;
 	}
 
 }

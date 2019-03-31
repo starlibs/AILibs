@@ -38,9 +38,11 @@ public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorith
 			}
 		case inactive:
 			this.doInactiveStep();
+			break;
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
+		return null;
 	}
 
 }

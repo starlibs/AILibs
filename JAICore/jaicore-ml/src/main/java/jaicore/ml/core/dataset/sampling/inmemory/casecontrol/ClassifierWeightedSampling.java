@@ -74,7 +74,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 						WekaInstancesUtil.datasetToWekaInstances(sampleCopy), pilotEstimator);
 				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			} catch (UnsupportedAttributeTypeException e) {
-				e.printStackTrace();
+				logger.error("Cannot convert dataset to WEKA dataset", e);
 			}
 			return this.activate();
 		case active:
@@ -90,9 +90,11 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 			}
 		case inactive:
 			this.doInactiveStep();
+			break;
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
+		return null;
 	}
 
 	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(Instances instances,
