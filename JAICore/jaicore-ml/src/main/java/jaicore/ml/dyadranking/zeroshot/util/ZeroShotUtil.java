@@ -5,7 +5,16 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import jaicore.ml.dyadranking.util.DyadMinMaxScaler;
 import weka.core.Utils;
 
+/**
+ * A collection of utility methods used to map the results of a input optimization of {@link PLNetInputOptimizer} back to Weka options for the respective classifiers.
+ * @author Michael Braun
+ *
+ */
 public class ZeroShotUtil {
+	
+	private ZeroShotUtil() {
+		// Intentionally left blank
+	}
 
 	public static String[] mapJ48InputsToWekaOptions(double C, double M) throws Exception {
 
