@@ -42,16 +42,16 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	public DyadDatasetPoolProvider(DyadRankingDataset dataset) {
 		numberQueries = 0;
 		removeDyadsWhenQueried = false;
-		dyadsByInstances = new HashMap<Vector, Set<Dyad>>();
-		dyadsByAlternatives = new HashMap<Vector, Set<Dyad>>();
-		dyadRankingsByInstances = new HashMap<Vector, IDyadRankingInstance>();
-		dyadRankingsByAlternatives = new HashMap<Vector, IDyadRankingInstance>();
-		pool = new ArrayList<IInstance>(dataset.size());
+		dyadsByInstances = new HashMap<>();
+		dyadsByAlternatives = new HashMap<>();
+		dyadRankingsByInstances = new HashMap<>();
+		dyadRankingsByAlternatives = new HashMap<>();
+		pool = new ArrayList<>(dataset.size());
 		for (IInstance instance : dataset) {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			this.addDyadRankingInstance(drInstance);
 		}
-		this.queriedRankings = new HashSet<IDyadRankingInstance>();
+		this.queriedRankings = new HashSet<>();
 	}
 
 	@Override
@@ -66,14 +66,14 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 			throw new IllegalArgumentException("Currently only supports SparseDyadRankingInstances!");
 		}
 		SparseDyadRankingInstance drInstance = (SparseDyadRankingInstance) queryInstance;
-		List<Pair<Dyad, Integer>> dyadPositionPairs = new ArrayList<Pair<Dyad, Integer>>(drInstance.length());
+		List<Pair<Dyad, Integer>> dyadPositionPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			int position = this.getPositionInRankingByInstanceFeatures(dyad);
 			dyadPositionPairs.add(new Pair<Dyad, Integer>(dyad, position));
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadPositionPairs, Comparator.comparing(p -> p.getRight()));
-		List<Dyad> dyadList = new ArrayList<Dyad>(dyadPositionPairs.size());
+		List<Dyad> dyadList = new ArrayList<>(dyadPositionPairs.size());
 		for (Pair<Dyad, Integer> pair : dyadPositionPairs) {
 			dyadList.add(pair.getFirst());
 		}
@@ -89,14 +89,14 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	@Override
 	public Set<Dyad> getDyadsByInstance(Vector instanceFeatures) {
 		if (!dyadsByInstances.containsKey(instanceFeatures))
-			return new HashSet<Dyad>();
+			return new HashSet<>();
 		return dyadsByInstances.get(instanceFeatures);
 	}
 
 	@Override
 	public Set<Dyad> getDyadsByAlternative(Vector alternativeFeatures) {
 		if (!dyadsByAlternatives.containsKey(alternativeFeatures))
-			return new HashSet<Dyad>();
+			return new HashSet<>();
 		return dyadsByAlternatives.get(alternativeFeatures);
 	}
 

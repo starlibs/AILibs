@@ -459,7 +459,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		try {
 			json = FileUtil.readFileAsString(configFile);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		MultiLayerConfiguration config = MultiLayerConfiguration.fromJson(json);
 		MultiLayerNetwork network = new MultiLayerNetwork(config);
@@ -604,7 +604,10 @@ public class PLNetDyadRanker extends APLDyadRanker
 			for (int j = i; j < Integer.min(k, dyadUtilityPairs.size()); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
-			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			if(sumOfRemainingSkills != 0)
+				currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			else
+				currentProbability = Double.NaN;
 		}
 		return currentProbability;
 	}
@@ -728,7 +731,10 @@ public class PLNetDyadRanker extends APLDyadRanker
 			for (int j = i; j < dyadUtilityPairs.size(); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
-			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			if(sumOfRemainingSkills!=0)
+				currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			else
+				currentProbability = Double.NaN;
 		}
 		return currentProbability;
 	}
