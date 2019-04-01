@@ -700,20 +700,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.logger.debug("Start computation of successors");
 			final List<NodeExpansionDescription<N, A>> successorDescriptions;
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
-			try {
-				assert !actualNodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
-				tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
-					this.logger.trace("Invoking getSuccessors");
-					return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
-				});
-				assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
-				this.logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
-			} catch (Exception e) {
-				this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion); // make sure that we unregister from expand
-				throw new AlgorithmException(e, "Exception occured in successor generation."); // if this was a real exception, throw it.
-			}
+			assert !actualNodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
+			tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
+				this.logger.trace("Invoking getSuccessors");
+				return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
+			});
+			assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
+			this.logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
 			successorDescriptions = tmpSuccessorDescriptions;
-
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion);
 			this.post(new SuccessorComputationCompletedEvent<>(this.getId(), actualNodeSelectedForExpansion, successorDescriptions));

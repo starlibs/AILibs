@@ -2,6 +2,7 @@ package jaicore.basic.algorithm;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,6 +24,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.concurrent.TimeoutTimer;
+import jaicore.interrupt.Interrupt;
 import jaicore.interrupt.Interrupter;
 
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
@@ -403,16 +405,17 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		long remainingTime = this.getRemainingTimeToDeadline().milliseconds();
 		if (remainingTime < this.timeoutPrecautionOffset + MIN_RUNTIME_FOR_OBSERVED_TASK) {
 			this.logger.debug("Only {}ms left, which is not enough to reliably continue computation. Terminating algorithm at this point, throwing an AlgorithmTimeoutedException.", remainingTime);
-			throw new AlgorithmTimeoutedException(remainingTime * (-1));
+			this.timeOfTimeoutDetection = System.currentTimeMillis(); // artificially set the timeout detected variable
+			this.checkAndConductTermination();
 		}
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
 		long timeToInterrupt = remainingTime - this.timeoutPrecautionOffset;
-		Timer t = this.getTimerAndCreateIfNotExistent();
-		TimerTask task = new InterruptionTimerTask("Timeout triggered",
+		Timer timer = this.getTimerAndCreateIfNotExistent();
+		TimerTask task = new InterruptionTimerTask("Timeout for execution of callable " + r + " triggered",
 				() -> this.logger.debug("Timeout detected at timestamp {}. This is  {} prior to deadline, interrupting successor generation.", System.currentTimeMillis(), this.getRemainingTimeToDeadline()));
 		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt, this.getRemainingTimeToDeadline());
-		t.schedule(task, timeToInterrupt);
+		timer.schedule(task, timeToInterrupt);
 		try {
 			this.logger.debug("Starting supervised computation of {}.", r);
 			T result = r.call();
@@ -423,20 +426,25 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 			/* if the timeout has been triggered (with caution), just sleep until */
 			remainingTime = this.getRemainingTimeToDeadline().milliseconds();
-			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(t)) {
+			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
+				this.logger.info("Interrupt is internal.");
 				Thread.interrupted(); // clear the interrupted field
+				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 				if (remainingTime > 0) {
 					this.logger.debug("Artificially sleeping {}ms to trigger the correct behavior in the checker.", remainingTime);
 					Thread.sleep(remainingTime);
 				} else {
 					this.logger.debug("Gained back control from successor generation, but remaining time is now only {}ms. Algorithm should terminate now.", remainingTime);
 				}
+				assert !Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task);
 			}
 
 			/* otherwise, if the thread has been interrupted directly and not as a consequence of a shutdown, forward the interrupt */
 			else {
 				boolean interruptedDueToShutdown = this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread());
-				this.logger.info("Received interrupt. Cancel flag is {}. Thread contained in interrupted by shutdown: {}", this.isCanceled(), interruptedDueToShutdown);
+				Optional<Interrupt> latestInterrupt = Interrupter.get().getLatestUnresolvedInterruptOfCurrentThread();
+				assert latestInterrupt.isPresent() : "No interrupt present!";
+				this.logger.info("Interrupt is external (reason is {}). Cancel flag is now {}. Thread contained in interrupted by shutdown: {}", latestInterrupt.get().getReasonForInterruption(), this.isCanceled(), interruptedDueToShutdown);
 				if (!interruptedDueToShutdown) {
 					throw e;
 				}
