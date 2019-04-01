@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.nd4j.linalg.primitives.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
@@ -34,6 +36,8 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  *
  */
 public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
+	
+	private static final Logger log = LoggerFactory.getLogger(UCBPoolBasedActiveDyadRanker.class);
 
 	private HashMap<Dyad, SummaryStatistics> dyadStats;
 	private List<Vector> instanceFeatures;
@@ -98,7 +102,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 						}
 					}
 				} catch (TrainingException e) {
-					e.printStackTrace();
+					log.error(e.getMessage());
 				}
 			}
 
@@ -150,7 +154,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 						}
 					}
 				} catch (TrainingException e) {
-					e.printStackTrace();
+					log.error(e.getMessage());
 				}
 			}
 			iteration++;

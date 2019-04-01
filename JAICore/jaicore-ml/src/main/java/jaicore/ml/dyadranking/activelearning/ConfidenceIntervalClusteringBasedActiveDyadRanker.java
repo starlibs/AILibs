@@ -12,6 +12,8 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
@@ -44,6 +46,8 @@ import weka.core.Instances;
  *
  */
 public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDyadRanker {
+	
+	private static final Logger log = LoggerFactory.getLogger(ConfidenceIntervalClusteringBasedActiveDyadRanker.class);
 
 	private HashMap<Dyad, SummaryStatistics> dyadStats;
 	private List<Vector> instanceFeatures;
@@ -112,13 +116,13 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						}
 					}
 				} catch (TrainingException e) {
-					e.printStackTrace();
+					log.error(e.getMessage());
 				}
 			}
 
 			else {
 
-				PriorityQueue<List<Dyad>> clusterQueue = new PriorityQueue<List<Dyad>>(new ListComparator());
+				PriorityQueue<List<Dyad>> clusterQueue = new PriorityQueue<>(new ListComparator());
 
 				Set<IInstance> minibatch = new HashSet<>();
 
@@ -165,7 +169,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 							clusterQueue.add(instanceClusters.get(j));
 						}
 					} catch (Exception e1) {
-						e1.printStackTrace();
+						log.error(e1.getMessage());
 					}
 				}
 				for (int minibatchIndex = 0; minibatchIndex < minibatchSize; minibatchIndex++) {
@@ -202,7 +206,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 					}
 
 					// query them
-					LinkedList<Vector> alternatives = new LinkedList<Vector>();
+					LinkedList<Vector> alternatives = new LinkedList<>();
 					alternatives.add(curDyads.get(curPair[0]).getAlternative());
 					alternatives.add(curDyads.get(curPair[1]).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(
@@ -223,7 +227,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 						}
 					}
 				} catch (TrainingException e) {
-					e.printStackTrace();
+					log.error(e.getMessage());
 				}
 			}
 			iteration++;

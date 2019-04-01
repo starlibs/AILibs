@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
@@ -26,6 +29,8 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  *
  */
 public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
+	
+	private static final Logger log = LoggerFactory.getLogger(RandomPoolBasedActiveDyadRanker.class);
 
 	private Random random;
 	private int maxBatchSize;
@@ -66,7 +71,7 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			try {
 				ranker.update(minibatch);
 			} catch (TrainingException e) {
-				e.printStackTrace();
+				log.error(e.getMessage());
 			}
 		}
 	}
