@@ -65,7 +65,7 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 			}
 
 			@Override
-			public List<NodeExpansionDescription<EnhancedTTSPNode, String>> generateSuccessors(final EnhancedTTSPNode node) {
+			public List<NodeExpansionDescription<EnhancedTTSPNode, String>> generateSuccessors(final EnhancedTTSPNode node) throws InterruptedException {
 				List<NodeExpansionDescription<EnhancedTTSPNode, String>> l = new ArrayList<>();
 				if (node.getCurTour().size() >= EnhancedTTSPGraphGenerator.this.problem.getPossibleDestinations().size()) {
 					EnhancedTTSPGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos " + node.getCurLocation() + " and in which have already visited everything! " + (EnhancedTTSPGraphGenerator.this.getGoalTester().isGoal(node)
@@ -79,6 +79,9 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 				}
 				int N = possibleUntriedDestinations.size();
 				for (int i = 0; i < N; i++) {
+					if (Thread.interrupted()) {
+						throw new InterruptedException("Successor generation has been interrupted.");
+					}
 					l.add(this.generateSuccessor(node, possibleUntriedDestinations.getShort(i)));
 				}
 				return l;

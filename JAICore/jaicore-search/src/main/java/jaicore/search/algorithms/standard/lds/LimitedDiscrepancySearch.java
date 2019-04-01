@@ -135,7 +135,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	 * @throws AlgorithmTimeoutedException
 	 */
 	private AlgorithmEvent ldsProbe(final TreeNode<T> node) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
-		this.logger.info("Probing under node {} with k = {}. Exhausted: {}", node.getValue(), this.currentK, this.exhausted.contains(node));
+		this.logger.debug("Probing under node {} with k = {}. Exhausted: {}", node.getValue(), this.currentK, this.exhausted.contains(node));
 
 		/* return solution event if this is a solution node */
 		if (this.nodeGoalTester.isGoal(node.getValue())) {
