@@ -66,7 +66,7 @@ public class Interrupter {
 	}
 
 	public Optional<Interrupt> getLatestUnresolvedInterruptOfThread(final Thread thread) {
-		return this.openInterrupts.stream().filter(i -> i.getInterruptedThread() == thread).sorted((i1,i2) -> new Long(i1.getTimestampOfInterruption()).compareTo(i2.getTimestampOfInterruption())).findFirst();
+		return this.openInterrupts.stream().filter(i -> i.getInterruptedThread() == thread).sorted((i1,i2) -> Long.compare(i1.getTimestampOfInterruption(), i2.getTimestampOfInterruption())).findFirst();
 	}
 
 	public Optional<Interrupt> getLatestUnresolvedInterruptOfCurrentThread() {
