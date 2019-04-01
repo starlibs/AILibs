@@ -13,19 +13,20 @@ import com.google.common.eventbus.Subscribe;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
-import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.travesaltree.DefaultNodeComparator;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -36,8 +37,17 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
- * This is a modified version of the AWA* algorithm for problems without admissible heuristic. Important differences are: - no early termination if a best-f-valued solution is found as f is not
- * optimistic
+ * This is a modified version of the AWA* algorithm for problems without admissible heuristic.
+ * Important differences are:
+ *  - no early termination if a best-f-valued solution is found as f is not optimistic
+ *
+ * @inproceedings{
+ *   title={AWA*-A Window Constrained Anytime Heuristic Search Algorithm.},
+ *   author={Aine, Sandip and Chakrabarti, PP and Kumar, Rajeev},
+ *   booktitle={IJCAI},
+ *   pages={2250--2255},
+ *   year={2007}
+ * }
  *
  * @author lbrandt2 and fmohr
  *
@@ -70,16 +80,16 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		this.goalTester = problem.getGraphGenerator().getGoalTester();
 		this.nodeEvaluator = problem.getNodeEvaluator();
 
-		this.closedList = new PriorityQueue<>();
-		this.suspendList = new PriorityQueue<>();
-		this.openList = new PriorityQueue<>();
+		this.closedList = new PriorityQueue<>(new DefaultNodeComparator<>());
+		this.suspendList = new PriorityQueue<>(new DefaultNodeComparator<>());
+		this.openList = new PriorityQueue<>(new DefaultNodeComparator<>());
 		this.windowSize = 0;
 		if (this.nodeEvaluator instanceof IPotentiallySolutionReportingNodeEvaluator) {
 			((IPotentiallySolutionReportingNodeEvaluator) this.nodeEvaluator).registerSolutionListener(this);
 		}
 	}
 
-	private void windowAStar() throws NodeEvaluationException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException {
+	private void windowAStar() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		while (!this.openList.isEmpty()) {
 			this.checkAndConductTermination();
 			if (!this.unreturnedSolutionEvents.isEmpty()) {
@@ -111,8 +121,9 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			this.checkAndConductTermination();
 
 			/* compute successors of the expanded node */
-			Collection<NodeExpansionDescription<T, A>> successors = this.successorGenerator.generateSuccessors(n.getPoint());
-			this.logger.info("Expanding {}. Identified {} successors.", n.getPoint(), successors.size());
+			this.logger.debug("Expanding {}. Starting successor generation.", n.getPoint());
+			Collection<NodeExpansionDescription<T, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getPoint()));
+			this.logger.debug("Successor generation finished. Identified {} successors.", successors.size());
 			for (NodeExpansionDescription<T, A> expansionDescription : successors) {
 				this.checkAndConductTermination();
 				Node<T, V> nPrime = new Node<>(n, expansionDescription.getTo());
@@ -176,7 +187,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, NodeEvaluationException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.logger.debug("Next step in {}. State is {}", this.getId(), this.getState());
 		this.checkAndConductTermination();
 		switch (this.getState()) {
