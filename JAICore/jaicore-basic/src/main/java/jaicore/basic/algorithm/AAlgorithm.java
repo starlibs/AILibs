@@ -226,7 +226,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void shutdown() {
 		synchronized (this) {
 			if (this.shutdownInitialized > 0) {
-				this.logger.info("Tried to enter shudtown for {}, but the shutdown has already been initialized in the past, so exiting the shutdown block.", this);
+				this.logger.info("Tried to enter shutdown for {}, but the shutdown has already been initialized in the past, so exiting the shutdown block.", this);
 				return;
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
@@ -396,7 +396,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				this.resolveShutdownInterruptOnCurrentThread();
 				this.checkAndConductTermination();
 				throw new IllegalStateException("Received an interrupt and checked termination, thus, termination routine should have thrown an exception which it apparently did not!");
-			} catch (Exception e) {
+			} catch (AlgorithmExecutionCanceledException e) { // these exceptions should just be forwarded
+				throw e;
+			}
+			catch (Exception e) {
 				throw new AlgorithmException(e, "The algorithm has failed due to an exception of a Callable.");
 			}
 		}

@@ -8,14 +8,14 @@ import java.util.List;
 import org.junit.runners.Parameterized.Parameters;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.basic.algorithm.SolutionCandidateIteratorTester;
+import jaicore.basic.algorithm.SolutionCandidateFinderTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.testproblems.enhancedttsp.EnhancedTTSPAsGraphSearchSet;
 import jaicore.search.testproblems.knapsack.KnapsackProblemAsGraphSearchSet;
 import jaicore.search.testproblems.nqueens.NQueensProblemAsGraphSearchSet;
 
-public abstract class GraphSearchTester extends SolutionCandidateIteratorTester {
+public abstract class GraphSearchSingleSolutionTester extends SolutionCandidateFinderTester {
 
 	@Override
 	public final IAlgorithm<?, ?> getAlgorithm(final Object problem) {
