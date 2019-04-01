@@ -168,9 +168,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 				/* if the node has no sibling (parent has no other child than this node), apply parent's f. This only works if the parent is already part of the explored graph, which is not necessarily the case */
 				if (n.getParent() != null && this.completer.getExploredGraph().hasItem(n.getParent().getPoint())) {
+					boolean parentHasFValue = this.fValues.containsKey(n.getParent());
+					assert parentHasFValue || n.getParent().getParent() == null : "No f-value has been stored for the parent of node with hash code " + n.hashCode() + " (hash code of parent is " + n.getParent().hashCode() + ") whose f-value we may want to reuse. This is only allowed for top-level nodes! The path is: " + path;
 					boolean nodeHasSibling = this.completer.getExploredGraph().getSuccessors(n.getParent().getPoint()).size() > 1;
-					if (path.size() > 1 && !nodeHasSibling) {
-						assert this.fValues.containsKey(n.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: " + path;
+					if (path.size() > 1 && !nodeHasSibling && parentHasFValue) {
 						V score = this.fValues.get(n.getParent());
 						this.fValues.put(n, score);
 						this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
@@ -382,6 +383,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				n.setAnnotation("uncertainty", uncertainty);
 			}
 		}
+		assert this.fValues.containsKey(n);
 		V f = this.fValues.get(n);
 		this.logger.info("Returning f-value: {}", f);
 		return f;
