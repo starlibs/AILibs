@@ -40,16 +40,14 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	private Random random;
 	private int numberRandomQueriesAtStart;
 	private int iteration;
-	private int seed;
 	private int minibatchSize;
 
 	public UCBPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider, int seed,
 			int numberRandomQueriesAtStart, int minibatchSize) {
 		super(ranker, poolProvider);
-		this.dyadStats = new HashMap<Dyad, SummaryStatistics>();
-		this.instanceFeatures = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
+		this.dyadStats = new HashMap<>();
+		this.instanceFeatures = new ArrayList<>(poolProvider.getInstanceFeatures());
 		this.numberRandomQueriesAtStart = numberRandomQueriesAtStart;
-		this.seed = seed;
 		this.minibatchSize = minibatchSize;
 		this.iteration = 0;
 		for (Vector instance : instanceFeatures) {
@@ -68,7 +66,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			// For the first query steps, sample randomly
 			if (iteration < numberRandomQueriesAtStart) {
 
-				Set<IInstance> minibatch = new HashSet<IInstance>();
+				Set<IInstance> minibatch = new HashSet<>();
 				for (int batchIndex = 0; batchIndex < this.minibatchSize; batchIndex++) {
 					// get random instance
 					Collections.shuffle(instanceFeatures, random);
@@ -77,11 +75,11 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					Vector instance = instanceFeatures.get(0);
 
 					// get random pair of dyads
-					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instance));
+					List<Dyad> dyads = new ArrayList<>(poolProvider.getDyadsByInstance(instance));
 					Collections.shuffle(dyads, random);
 
 					// query them
-					LinkedList<Vector> alternatives = new LinkedList<Vector>();
+					LinkedList<Vector> alternatives = new LinkedList<>();
 					alternatives.add(dyads.get(0).getAlternative());
 					alternatives.add(dyads.get(1).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
@@ -106,7 +104,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 			else {
 
-				Set<IInstance> minibatch = new HashSet<IInstance>();
+				Set<IInstance> minibatch = new HashSet<>();
 				for (int minibatchIndex = 0; minibatchIndex < minibatchSize; minibatchIndex++) {
 
 					// randomly choose dataset to sample from
@@ -116,8 +114,8 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					// update empirical standard deviation and compute upper confidence bound for
 					// each dyad
 					// from this dataset
-					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(problemInstance));
-					List<Pair<Dyad, Double>> dyadsWithUCB = new ArrayList<Pair<Dyad, Double>>(dyads.size());
+					List<Dyad> dyads = new ArrayList<>(poolProvider.getDyadsByInstance(problemInstance));
+					List<Pair<Dyad, Double>> dyadsWithUCB = new ArrayList<>(dyads.size());
 					for (Dyad dyad : dyads) {
 						double skill = ranker.getSkillForDyad(dyad);
 						double std = dyadStats.get(dyad).getStandardDeviation();
@@ -129,7 +127,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					Collections.sort(dyadsWithUCB, Comparator.comparing(p -> -p.getRight()));
 					Dyad d1 = dyadsWithUCB.get(0).getFirst();
 					Dyad d2 = dyadsWithUCB.get(1).getFirst();
-					List<Vector> alts = new ArrayList<Vector>(2);
+					List<Vector> alts = new ArrayList<>(2);
 					alts.add(d1.getAlternative());
 					alts.add(d2.getAlternative());
 

@@ -50,7 +50,6 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 	private Random random;
 	private int numberRandomQueriesAtStart;
 	private int iteration;
-	private int seed;
 	private int minibatchSize;
 	private Clusterer clusterer;
 
@@ -58,10 +57,9 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 			IDyadRankingPoolProvider poolProvider, int seed, int numberRandomQueriesAtStart, int minibatchSize,
 			Clusterer clusterer) {
 		super(ranker, poolProvider);
-		this.dyadStats = new HashMap<Dyad, SummaryStatistics>();
-		this.instanceFeatures = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
+		this.dyadStats = new HashMap<>();
+		this.instanceFeatures = new ArrayList<>(poolProvider.getInstanceFeatures());
 		this.numberRandomQueriesAtStart = numberRandomQueriesAtStart;
-		this.seed = seed;
 		this.minibatchSize = minibatchSize;
 		this.iteration = 0;
 		this.clusterer = clusterer;
@@ -82,7 +80,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 			// For the first query steps, sample randomly
 			if (iteration < numberRandomQueriesAtStart) {
 
-				Set<IInstance> minibatch = new HashSet<IInstance>();
+				Set<IInstance> minibatch = new HashSet<>();
 				for (int batchIndex = 0; batchIndex < this.minibatchSize; batchIndex++) {
 					// get random instance
 					Collections.shuffle(instanceFeatures, random);
@@ -91,11 +89,11 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 					Vector instance = instanceFeatures.get(0);
 
 					// get random pair of dyads
-					List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instance));
+					List<Dyad> dyads = new ArrayList<>(poolProvider.getDyadsByInstance(instance));
 					Collections.shuffle(dyads, random);
 
 					// query them
-					LinkedList<Vector> alternatives = new LinkedList<Vector>();
+					LinkedList<Vector> alternatives = new LinkedList<>();
 					alternatives.add(dyads.get(0).getAlternative());
 					alternatives.add(dyads.get(1).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
@@ -122,13 +120,13 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 
 				PriorityQueue<List<Dyad>> clusterQueue = new PriorityQueue<List<Dyad>>(new ListComparator());
 
-				Set<IInstance> minibatch = new HashSet<IInstance>();
+				Set<IInstance> minibatch = new HashSet<>();
 
 				for (Vector inst : instanceFeatures) {
 					// Create instances for clustering
 					Attribute upperAttr = new Attribute("upper_bound");
 					Attribute lowerAttr = new Attribute("lower_bound");
-					ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+					ArrayList<Attribute> attributes = new ArrayList<>();
 					attributes.add(upperAttr);
 					attributes.add(lowerAttr);
 					Instances intervalInstances = new Instances("confidence_intervalls", attributes,
@@ -147,7 +145,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 					try {
 						clusterer.buildClusterer(intervalInstances);
 
-						List<List<Dyad>> instanceClusters = new ArrayList<List<Dyad>>();
+						List<List<Dyad>> instanceClusters = new ArrayList<>();
 						int numClusters = clusterer.numberOfClusters();
 						for (int clusterIndex = 0; clusterIndex < numClusters; clusterIndex++) {
 							instanceClusters.add(new ArrayList<Dyad>());
@@ -247,15 +245,14 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 		else {
 			double upperlower = Math.max(lower1, lower2);
 			double lowerupper = Math.min(upper1, upper2);
-			double sizeOfOverlap = Math.abs((lowerupper - upperlower));
-			return sizeOfOverlap;
+			return Math.abs((lowerupper - upperlower));
 		}
 	}
 
-	private class ListComparator implements Comparator<List> {
+	private class ListComparator implements Comparator<List<Dyad>> {
 
 		@Override
-		public int compare(List o1, List o2) {
+		public int compare(List<Dyad> o1, List<Dyad> o2) {
 			if (o1.size() > o2.size())
 				return -1;
 			if (o1.size() < o2.size())

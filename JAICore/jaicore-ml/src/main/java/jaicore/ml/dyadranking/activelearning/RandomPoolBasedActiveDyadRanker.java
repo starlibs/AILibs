@@ -28,40 +28,33 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 	private Random random;
-	private long seed;
 	private int maxBatchSize;
-
-	public RandomPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider, long seed) {
-		super(ranker, poolProvider);
-		this.seed = seed;
-	}
 
 	public RandomPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider,
 			int maxBatchSize, long seed) {
 		super(ranker, poolProvider);
 		this.maxBatchSize = maxBatchSize;
-		this.seed = seed;
 		this.random = new Random(seed);
 	}
 
 	@Override
 	public void activelyTrain(int numberOfQueries) {
 		for (int i = 0; i < numberOfQueries; i++) {
-			Set<IInstance> minibatch = new HashSet<IInstance>();
+			Set<IInstance> minibatch = new HashSet<>();
 			for (int batchIndex = 0; batchIndex < maxBatchSize; batchIndex++) {
 				// get random instance
-				List<Vector> instanceFeatures = new ArrayList<Vector>(poolProvider.getInstanceFeatures());
+				List<Vector> instanceFeatures = new ArrayList<>(poolProvider.getInstanceFeatures());
 				Collections.shuffle(instanceFeatures, random);
 				if (instanceFeatures.isEmpty())
 					break;
 				Vector instance = instanceFeatures.get(0);
 
 				// get random pair of dyads
-				List<Dyad> dyads = new ArrayList<Dyad>(poolProvider.getDyadsByInstance(instance));
+				List<Dyad> dyads = new ArrayList<>(poolProvider.getDyadsByInstance(instance));
 				Collections.shuffle(dyads, random);
 
 				// query them
-				LinkedList<Vector> alternatives = new LinkedList<Vector>();
+				LinkedList<Vector> alternatives = new LinkedList<>();
 				alternatives.add(dyads.get(0).getAlternative());
 				alternatives.add(dyads.get(1).getAlternative());
 				SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
