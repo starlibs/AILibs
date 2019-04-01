@@ -69,7 +69,7 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 			}
 
 			public NodeExpansionDescription<KnapsackConfiguration, String> generateSuccessor(final KnapsackConfiguration node, final List<String> objetcs, final int i) throws InterruptedException {
-				if (Thread.currentThread().isInterrupted()) {
+				if (Thread.interrupted()) { // reset interrupted flag prior to throwing the exception (Java convention)
 					KnapsackProblemGraphGenerator.this.logger.info("Successor generation has been interrupted.");
 					throw new InterruptedException("Successor generation interrupted");
 				}
@@ -77,6 +77,9 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 					this.expandedChildren.put(node, new HashSet<>());
 				}
 				int n = objetcs.size();
+				if (n == 0) {
+					return null;
+				}
 				int j = i % n;
 				this.expandedChildren.get(node).add(j);
 				String object = objetcs.get(j);

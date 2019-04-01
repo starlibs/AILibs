@@ -14,6 +14,7 @@ public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTS
 		super("Enhanced TTSP");
 	}
 
+	private static final int MIN_N = 6;
 	private static final int MAX_N = 6;
 
 	@Override
@@ -30,7 +31,7 @@ public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTS
 	public Map<EnhancedTTSP, Collection<List<Short>>> getProblemsWithSolutions() {
 		Map<EnhancedTTSP, Collection<List<Short>>> solutions = new HashMap<>();
 		EnhancedTTSPEnumeratingSolver solver = new EnhancedTTSPEnumeratingSolver();
-		for (int n = 3; n <= MAX_N; n++) {
+		for (int n = MIN_N; n <= MAX_N; n++) {
 			EnhancedTTSP problem = new EnhancedTTSPGenerator().generate(n, 100);
 			solutions.put(problem, solver.getSolutions(problem));
 		}

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
@@ -87,45 +88,62 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	 *
 	 * @param node
 	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws AlgorithmTimeoutedException
 	 */
-	private void expandNode(final N node) throws InterruptedException {
+	private void expandNode(final N node) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		synchronized (this.exploredGraph) {
 
 			assert this.exploredGraph.hasItem(node) : "Node that shall be expanded is not part of the graph";
 			assert !this.closed.contains(node) && !this.goalTester.isGoal(node);
 			this.logger.debug("Expanding next node {}", node);
 			boolean closeNodeAfterwards = false;
+			boolean nodeAdded = false;
 			if (this.isSingleNodeSuccessorGenerator) {
 
 				/* generate the next successor */
 				SingleSuccessorGenerator<N, A> cGen = ((SingleSuccessorGenerator<N, A>) this.gen);
-				NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
-				if (successor != null) {
+				for (int i = 0; i < 3 && !nodeAdded; i++) {
+					NodeExpansionDescription<N, A> successor = cGen.generateSuccessor(node, this.random.nextInt(Integer.MAX_VALUE));
+					if (successor == null) {
+						continue;
+					}
 					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
-					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before.";
+					if (this.exploredGraph.getSuccessors(node).contains(successor.getTo())) {
+						this.logger.trace("Single node evaluator has generated a known successor. Generating another candidate.");
+						continue;
+					}
+					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before. Predecessors of that node are: " + this.exploredGraph.getPredecessors(successor.getTo());
 					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
+					nodeAdded = true;
 				}
 
 				/* if this was the last successor, set the close node flag to 1 */
 				closeNodeAfterwards = cGen.allSuccessorsComputed(node);
-			} else {
+			}
+
+			/* if no node has been added yet (either because this is not a SingleNodeGenerator or because the SingleNodeGenerator did not produce any new successor) */
+			if (!nodeAdded){
 				long start = System.currentTimeMillis();
 				List<NodeExpansionDescription<N, A>> successors = this.gen.generateSuccessors(node); // could have been interrupted here
 				this.logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
-				boolean atLeastOneSuccessorPrioritized = false;
+				int i = 0;
+				Collection<N> knownSuccessors = this.exploredGraph.getSuccessors(node);
 				for (NodeExpansionDescription<N, A> successor : successors) {
-					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
+					if (i++ % 10000 == 0) {
+						this.checkAndConductTermination();
+					}
+					if (!knownSuccessors.contains(successor.getTo())) {
+						this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
+					}
 				}
+				this.logger.debug("{} nodes have been added to the local model. Now checking prioritization.", successors.size());
 
-				/*
-				 * if the node has successors but none of them is prioritized, remove the node
-				 * from the priority list
-				 */
-				if (!this.exploredGraph.getSuccessors(node).isEmpty() && this.prioritizedNodes.contains(node) && !atLeastOneSuccessorPrioritized) {
+				/* if the node has successors but none of them is prioritized, remove the node from the priority list */
+				if (!this.exploredGraph.getSuccessors(node).isEmpty() && this.prioritizedNodes.contains(node)) {
 					this.prioritizedNodes.remove(node);
 					this.updateExhaustedAndPrioritizedState(node);
 				}
-
 				closeNodeAfterwards = true;
 			}
 
@@ -211,7 +229,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	}
 
 	public SearchGraphPath<N, A> nextSolutionUnderNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException {
-		this.logger.info("Looking for next solution under node {}. Remaining time is {}ms.", node, this.getRemainingTimeToDeadline());
+		this.logger.info("Looking for next solution under node {}. Remaining time is {}.", node, this.getRemainingTimeToDeadline());
 		this.checkAndConductTermination();
 
 		/* if the root is exhausted, cancel */

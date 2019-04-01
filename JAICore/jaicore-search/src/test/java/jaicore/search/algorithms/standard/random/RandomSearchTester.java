@@ -7,7 +7,7 @@ import jaicore.search.probleminputs.GraphSearchInput;
 public class RandomSearchTester extends GraphSearchSolutionIteratorTester {
 
 	@Override
-	public <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem) {
-		return new RandomSearch<N, A>(problem);
+	public <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
+		return new RandomSearch<>(problem);
 	}
 }

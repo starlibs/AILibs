@@ -38,7 +38,7 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<QueenNode, Do
 
 		N ne = this.getBusyNodeEvaluator();
 		if (ne instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) ne).setLoggerName("testedalgorithm");
+			((ILoggingCustomizable) ne).setLoggerName("testednodeevaluator");
 		}
 		for (Node<QueenNode, Double> node : this.getNodesToTest(ne)) {
 

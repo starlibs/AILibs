@@ -706,7 +706,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
 			});
 			assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
-			this.logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
+			this.logger.trace("Received {} successor descriptions for node with hash code {}. These are \n\t{}", tmpSuccessorDescriptions.size(), actualNodeSelectedForExpansion.getPoint(), tmpSuccessorDescriptions.stream().map(s -> s.getTo().toString()).collect(Collectors.joining("\n\t")));
 			successorDescriptions = tmpSuccessorDescriptions;
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion);

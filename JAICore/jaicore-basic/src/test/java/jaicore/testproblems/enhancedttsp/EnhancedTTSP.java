@@ -245,4 +245,11 @@ public class EnhancedTTSP {
 	public EnhancedTTSPSolutionEvaluator getSolutionEvaluator() {
 		return this.solutionEvaluator;
 	}
+
+	@Override
+	public String toString() {
+		return "EnhancedTTSP [startLocation=" + this.startLocation + ", numberOfConsideredHours=" + this.numberOfConsideredHours + ", minTravelTimesGraph=" + this.minTravelTimesGraph + ", blockedHours=" + this.blockedHours + ", hourOfDeparture="
+				+ this.hourOfDeparture + ", durationOfShortBreak=" + this.durationOfShortBreak + ", durationOfLongBreak=" + this.durationOfLongBreak + ", maxConsecutiveDrivingTime=" + this.maxConsecutiveDrivingTime + ", maxDrivingTimeBetweenLongBreaks="
+				+ this.maxDrivingTimeBetweenLongBreaks + ", possibleDestinations=" + this.possibleDestinations + ", solutionEvaluator=" + this.solutionEvaluator + "]";
+	}
 }

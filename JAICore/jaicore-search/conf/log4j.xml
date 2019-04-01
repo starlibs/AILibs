@@ -60,7 +60,7 @@
 	</logger>
 	
 	<logger name="testedalgorithm">
-    <level value="info" />
+    <level value="trace" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -69,12 +69,20 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+  <logger name="jaicore.basic.algorithm">
+    <level value="info" />
+  </logger>
+  
   <logger name="jaicore.search.algorithms.standard.bestfirst">
-    <level value="warn" />
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm._orgraphsearch._algorithm">
-    <level value="info" />
+    <level value="trace" />
+  </logger>
+  
+  <logger name="testedalgorithm.nodeevaluator">
+    <level value="warn" />
   </logger>
   
   <logger name="testednodeevaluator">

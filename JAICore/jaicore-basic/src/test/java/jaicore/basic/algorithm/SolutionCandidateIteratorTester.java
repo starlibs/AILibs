@@ -3,6 +3,7 @@ package jaicore.basic.algorithm;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,8 +80,9 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		Map<I, Collection<O>> problemsWithSolutions = ((IAlgorithmTestProblemSetForSolutionIterators<I, O>)current).getProblemsWithSolutions();
 		for (Entry<I, Collection<O>> originalProblemWithSolutions : problemsWithSolutions.entrySet()) {
 			Object problem = originalProblemWithSolutions.getKey();
-			problem = this.reduction.encodeProblem(problem);
-			this.reducedProblemsWithOriginalSolutions.put(problem, originalProblemWithSolutions.getValue());
+			Object reducedProblem = this.reduction.encodeProblem(problem);
+			this.logger.info("Converting {} to {}", problem, reducedProblem);
+			this.reducedProblemsWithOriginalSolutions.put(reducedProblem, originalProblemWithSolutions.getValue());
 		}
 	}
 
@@ -103,7 +106,9 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 				}
 			}
 		});
-		algorithm.call();
+		while (algorithm.hasNext()) {
+			algorithm.nextWithException();
+		}
 		assertTrue("Found " + foundSolutions.get() + "/" + problem.getValue().size() + " solutions. Missing solutions: " + stillMissingSolutions, stillMissingSolutions.isEmpty());
 	}
 
@@ -114,8 +119,8 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		}
 		boolean initialized = false;
 		boolean terminated = false;
-		final Collection<?> stillMissingSolutions = problem.getValue();
-		final AtomicInteger foundSolutions = new AtomicInteger(0);
+		final Collection<?> stillMissingSolutions = new ArrayList<>(problem.getValue());
+		final Collection<Object> foundSolutions = new ArrayList<>();
 		Iterator<AlgorithmEvent> iterator = algorithm.iterator();
 		assertNotNull("The search algorithm does return NULL as an iterator for itself.", iterator);
 		while (iterator.hasNext()) {
@@ -134,19 +139,20 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 					if (!stillMissingSolutions.contains(solutionToOriginalProblem)) {
 						SolutionCandidateIteratorTester.this.logger.warn("Returned solution {} converted to original solution {} is not a solution in the original problem according to ground truth.", solution, solutionToOriginalProblem);
 					} else {
-						foundSolutions.incrementAndGet();
+						foundSolutions.add(solutionToOriginalProblem);
 						stillMissingSolutions.remove(solutionToOriginalProblem);
 					}
 				}
 			}
 		}
-		assertTrue("Found " + foundSolutions.get() + "/" + problem.getValue().size() + " solutions. Missing solutions: " + stillMissingSolutions, stillMissingSolutions.isEmpty());
+		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions. Missing solutions:\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
 	}
 
 	@Test
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
+			this.logger.info("Calling {} to solve problem: {}", algorithm.getId(), problem.getKey());
 			this.solveProblemViaCall(problem, algorithm);
 		}
 	}
@@ -155,6 +161,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
+			this.logger.info("Calling {} to solve problem: {}", algorithm.getId(), problem.getKey());
 			algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
 			this.solveProblemViaCall(problem, algorithm);
 		}
@@ -164,6 +171,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	public void testThatIteratorReturnsEachPossibleSolution() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
+			this.logger.info("Calling {} to solve problem: {}", algorithm.getId(), problem.getKey());
 			this.solveProblemViaIterator(problem, algorithm);
 		}
 	}
@@ -173,6 +181,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
+			this.logger.info("Calling {} to solve problem: {}", algorithm.getId(), problem.getKey());
 			this.solveProblemViaIterator(problem, algorithm);
 		}
 	}
