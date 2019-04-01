@@ -39,7 +39,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	private int lengthOfTopRankingToConsider;
 	private int numberRandomQueriesAtStart;
 	private int iteration;
-	private int seed;
 	private Random random;
 
 	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider,
@@ -52,7 +51,6 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 		this.lengthOfTopRankingToConsider = lengthOfTopRankingToConsider;
 		this.numberRandomQueriesAtStart = numberRandomQueriesAtStart;
 		this.iteration = 0;
-		this.seed = seed;
 		this.random = new Random(seed);
 	}
 
