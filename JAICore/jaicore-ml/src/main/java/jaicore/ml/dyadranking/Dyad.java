@@ -74,10 +74,11 @@ public class Dyad {
 		Dyad other = (Dyad) o;
 
 		if (((this.instance != null && other.instance != null && this.alternative != null && other.alternative != null)
-				&& other.instance.equals(this.instance) && other.alternative.equals(this.alternative))
-				|| (this.instance == null && other.instance == null && this.alternative == null
-						&& other.alternative == null)) {
+				&& other.instance.equals(this.instance) && other.alternative.equals(this.alternative))) {
 			return (this.instance.equals(other.instance) && this.alternative.equals(other.alternative));
+		} else if ((this.instance == null && other.instance == null && this.alternative == null
+				&& other.alternative == null)) {
+			return true;
 		}
 
 		return false;
@@ -90,7 +91,7 @@ public class Dyad {
 		result = result * 31 + alternative.hashCode();
 		return result;
 	}
-	
+
 	/**
 	 * Converts a dyad to a {@link INDArray} row vector consisting of a
 	 * concatenation of the instance and alternative features.
@@ -100,7 +101,6 @@ public class Dyad {
 	public INDArray toVector() {
 		INDArray instanceOfDyad = Nd4j.create(this.getInstance().asArray());
 		INDArray alternativeOfDyad = Nd4j.create(this.getAlternative().asArray());
-		INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
-		return dyadVector;
+		return Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 	}
 }

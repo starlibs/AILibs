@@ -289,7 +289,6 @@ public class MLPlanBuilder {
 				if (preferredNodeEvaluator instanceof DyadRankingBasedNodeEvaluator) {
 					DyadRankingBasedNodeEvaluator<TFDNode, Double> dyadRanker = (DyadRankingBasedNodeEvaluator<TFDNode, Double>) preferredNodeEvaluator;
 					dyadRanker.setDataset(data);
-					// dyadRanker.setGenerator(hascoFactory.getAlgorithm().getGraphGenerator());
 				}
 				actualNodeEvaluator = new AlternativeNodeEvaluator<>(pipelineValidityCheckingNodeEvaluator,
 						this.preferredNodeEvaluator);

@@ -18,7 +18,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * 
  * For feature x: x = x - x_min / (x_max - x_min)
  * 
- * @author Michael Braun, Mirko Jürgens
+ * @author Michael Braun, Mirko Jürgens, Helena Graf
  *
  */
 
@@ -97,10 +97,11 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param decimals number of decimal places for rounding
 	 */
 	public void untransformInstance(Dyad dyad, int decimals) {
-		String pattern = "#.";
+		StringBuilder pattern = new StringBuilder();
+		pattern.append("#.");
 		for(int i = 0; i < decimals; i++)
-			pattern += "#";
-		DecimalFormat df = new DecimalFormat(pattern);
+			pattern.append("#");
+		DecimalFormat df = new DecimalFormat(pattern.toString());
 		int lengthX = dyad.getInstance().length();
 		if (lengthX != statsX.length) {
 			throw new IllegalArgumentException("The scaler was fit to instances of length " + statsX.length
@@ -168,10 +169,11 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param dyad
 	 */
 	public void untransformAlternative(Dyad dyad, int decimals) {
-		String pattern = "#.";
+		StringBuilder pattern = new StringBuilder();
+		pattern.append("#.");
 		for(int i = 0; i < decimals; i++)
-			pattern += "#";
-		DecimalFormat df = new DecimalFormat(pattern);
+			pattern.append("#");
+		DecimalFormat df = new DecimalFormat(pattern.toString());
 		int lengthY = dyad.getAlternative().length();
 		if (lengthY != statsY.length) {
 			throw new IllegalArgumentException("The scaler was fit to alternatives of length " + statsY.length
@@ -187,39 +189,57 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	}
 
 	/**
-	 * Prints the maxima of all features this scaler has been fit to.
+	 * Returns a String the maxima of all features this scaler has been fit to.
 	 */
-	public void printMaxima() {
-		if (statsX == null || statsY == null)
+	public String getPrettyMaximaString() {
+		if (statsX == null || statsY == null) {
 			throw new IllegalStateException("The scaler must be fit before calling this method!");
-		System.out.print("Standard deviations for instances: ");
+		}
+		
+		StringBuilder builder = new StringBuilder();
+			
+		builder.append("Standard deviations for instances: ");
 		for (SummaryStatistics stats : statsX) {
-			System.out.print(stats.getMax() + ", ");
-		}
-		System.out.println();
-		System.out.print("Standard deviations for alternatives: ");
+			builder.append(stats.getMax());
+			builder.append(", ");
+		}		
+		builder.append(System.lineSeparator());
+		
+		builder.append("Standard deviations for alternatives: ");
 		for (SummaryStatistics stats : statsY) {
-			System.out.print(stats.getMax() + ", ");
+			builder.append(stats.getMax());
+			builder.append(", ");
 		}
-		System.out.println();
+		builder.append(System.lineSeparator());
+		
+		return builder.toString();
 	}
 
 	/**
-	 * Prints the minima of all features this scaler has been fit to.
+	 * Returns a String for the minima of all features this scaler has been fit to.
 	 */
-	public void printMinima() {
-		if (statsX == null || statsY == null)
+	public String getPrettyMinimaString() {
+		if (statsX == null || statsY == null) {
 			throw new IllegalStateException("The scaler must be fit before calling this method!");
-		System.out.print("Means for instances: ");
+		}
+
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append("Means for instances: ");
 		for (SummaryStatistics stats : statsX) {
-			System.out.print(stats.getMin() + ", ");
+			builder.append(stats.getMin());
+			builder.append(", ");
 		}
-		System.out.println();
-		System.out.print("Means for alternatives: ");
+		builder.append(System.lineSeparator());
+		
+		builder.append("Means for alternatives: ");
 		for (SummaryStatistics stats : statsY) {
-			System.out.print(stats.getMin() + ", ");
+			builder.append(stats.getMin());
+			builder.append(", ");
 		}
-		System.out.println();
+		builder.append(System.lineSeparator());
+		
+		return builder.toString();
 	}
 
 	@Override

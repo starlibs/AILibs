@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import de.upb.isys.linearalgebra.Vector;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -50,6 +51,6 @@ public abstract class AWEKAPerformanceDecisionTreeBasedFeatureGenerator
 	 * @param data
 	 * @throws Exception
 	 */
-	public abstract void train(Instances data) throws Exception;
+	public abstract void train(Instances data) throws AlgorithmException;
 
 }

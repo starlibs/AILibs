@@ -1,5 +1,7 @@
 package de.upb.crc901.automl.metamining.pipelinecharacterizing;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -41,13 +43,21 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 		System.out.println("Build Tree on Data:");
 		System.out.println(map);
 
-		RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
-		treeFeatureGen.disallowNonOccurence();
-		treeFeatureGen.setOccurenceValue(1);
-		treeFeatureGen.setNonOccurenceValue(-1);
-		treeFeatureGen.train(map);
+		boolean successfulTraining = false;
+		try {
+			RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
+			treeFeatureGen.disallowNonOccurence();
+			treeFeatureGen.setOccurenceValue(1);
+			treeFeatureGen.setNonOccurenceValue(-1);
+			treeFeatureGen.train(map);
+			successfulTraining = true;
 
-		System.out.println(treeFeatureGen);
+			System.out.println(treeFeatureGen);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(true, successfulTraining);
 	}
 
 	/**
@@ -68,14 +78,23 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 		System.out.println("Build Tree on Data:");
 		System.out.println(map);
 
-		RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
-		treeFeatureGen.setAllowNonOccurence(-1);
-		treeFeatureGen.setOutgoingUnsetValueValue(0);
-		treeFeatureGen.setOccurenceValue(1);
-		treeFeatureGen.setNonOccurenceValue(-1);
-		treeFeatureGen.train(map);
+		boolean successfulTraining = false;
+		try {
+			RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
+			treeFeatureGen.setAllowNonOccurence(-1);
+			treeFeatureGen.setOutgoingUnsetValueValue(0);
+			treeFeatureGen.setOccurenceValue(1);
+			treeFeatureGen.setNonOccurenceValue(-1);
+			treeFeatureGen.train(map);
 
-		System.out.println(treeFeatureGen);
+			System.out.println(treeFeatureGen);
+
+			successfulTraining = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(true, successfulTraining);
 	}
 
 	/**
@@ -102,13 +121,22 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 		System.out.println("Build Tree on Data:");
 		System.out.println(data);
 
-		RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
-		treeFeatureGen.disallowNonOccurence();
-		treeFeatureGen.setOccurenceValue(1);
-		treeFeatureGen.setNonOccurenceValue(-1);
-		treeFeatureGen.train(data);
+		boolean successfulTraining = false;
+		try {
+			RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
+			treeFeatureGen.disallowNonOccurence();
+			treeFeatureGen.setOccurenceValue(1);
+			treeFeatureGen.setNonOccurenceValue(-1);
+			treeFeatureGen.train(data);
 
-		System.out.println(treeFeatureGen);
+			System.out.println(treeFeatureGen);
+
+			successfulTraining = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(true, successfulTraining);
 	}
 
 	/**
@@ -135,14 +163,23 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 		System.out.println("Build Tree on Data:");
 		System.out.println(data);
 
-		RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
-		treeFeatureGen.setAllowNonOccurence(0);
-		treeFeatureGen.setNonOccurenceValue(0);
-		treeFeatureGen.setOccurenceValue(1);
-		treeFeatureGen.setNonOccurenceValue(-1);
-		treeFeatureGen.train(data);
+		boolean successfulTraining = false;
+		try {
+			RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
+			treeFeatureGen.setAllowNonOccurence(0);
+			treeFeatureGen.setNonOccurenceValue(0);
+			treeFeatureGen.setOccurenceValue(1);
+			treeFeatureGen.setNonOccurenceValue(-1);
+			treeFeatureGen.train(data);
 
-		System.out.println(treeFeatureGen);
+			System.out.println(treeFeatureGen);
+
+			successfulTraining = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(true, successfulTraining);
 	}
 
 	/**
@@ -164,30 +201,38 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 		System.out.println("Build Tree on Data:");
 		System.out.println(map);
 
-		RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
-		treeFeatureGen.disallowNonOccurence();
-		treeFeatureGen.setOccurenceValue(1);
-		treeFeatureGen.setNonOccurenceValue(-1);
-		treeFeatureGen.train(map);
+		boolean trainAndPredictSuccesfully = false;
+		try {
+			RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
+			treeFeatureGen.disallowNonOccurence();
+			treeFeatureGen.setOccurenceValue(1);
+			treeFeatureGen.setNonOccurenceValue(-1);
+			treeFeatureGen.train(map);
 
-		System.out.println(treeFeatureGen);
+			System.out.println(treeFeatureGen);
 
-		// Predictions for the training data
-		Vector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
-		Vector prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			// Predictions for the training data
+			Vector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
+			Vector prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
 
-		features = new DenseDoubleVector(new double[] { -1, 1, -1 });
-		prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			features = new DenseDoubleVector(new double[] { -1, 1, -1 });
+			prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
 
-		features = new DenseDoubleVector(new double[] { -1, -1, 1 });
-		prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			features = new DenseDoubleVector(new double[] { -1, -1, 1 });
+			prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
 
-		features = new DenseDoubleVector(new double[] { -1, 1, 1 });
-		prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			features = new DenseDoubleVector(new double[] { -1, 1, 1 });
+			prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
+			trainAndPredictSuccesfully = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(true, trainAndPredictSuccesfully);
 	}
 
 	/**
@@ -209,31 +254,40 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 		System.out.println("Build Tree on Data:");
 		System.out.println(map);
 
-		RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
-		treeFeatureGen.setAllowNonOccurence(0);
-		treeFeatureGen.setNonOccurenceValue(0);
-		treeFeatureGen.setOccurenceValue(1);
-		treeFeatureGen.setNonOccurenceValue(-1);
-		treeFeatureGen.train(map);
+		boolean trainAndPredictSuccesfully = false;
+		try {
+			RandomTreePerformanceBasedFeatureGenerator treeFeatureGen = new RandomTreePerformanceBasedFeatureGenerator();
+			treeFeatureGen.setAllowNonOccurence(0);
+			treeFeatureGen.setNonOccurenceValue(0);
+			treeFeatureGen.setOccurenceValue(1);
+			treeFeatureGen.setNonOccurenceValue(-1);
+			treeFeatureGen.train(map);
 
-		System.out.println(treeFeatureGen);
+			System.out.println(treeFeatureGen);
 
-		// Predictions for the training data
-		Vector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
-		Vector prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			// Predictions for the training data
+			Vector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
+			Vector prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
 
-		features = new DenseDoubleVector(new double[] { -1, 1, -1 });
-		prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			features = new DenseDoubleVector(new double[] { -1, 1, -1 });
+			prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
 
-		features = new DenseDoubleVector(new double[] { 0, 0, 1 });
-		prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			features = new DenseDoubleVector(new double[] { 0, 0, 1 });
+			prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
 
-		features = new DenseDoubleVector(new double[] { 0, 1, 1 });
-		prediction = treeFeatureGen.predict(features);
-		System.out.println(features + " --> " + prediction);
+			features = new DenseDoubleVector(new double[] { 0, 1, 1 });
+			prediction = treeFeatureGen.predict(features);
+			System.out.println(features + " --> " + prediction);
+
+			trainAndPredictSuccesfully = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(true, trainAndPredictSuccesfully);
 	}
 
 }

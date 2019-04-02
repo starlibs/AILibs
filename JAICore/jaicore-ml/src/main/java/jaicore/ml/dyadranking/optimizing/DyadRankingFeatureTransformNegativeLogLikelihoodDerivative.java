@@ -57,23 +57,26 @@ public class DyadRankingFeatureTransformNegativeLogLikelihoodDerivative
 	 */
 	private double computeDerivativeForIndex(int i, Vector vector) {
 		double secondSum = 0d;
-		int N = dataset.size();
+		int largeN = dataset.size();
 		double firstSum = 0d;
-		for (int n = 0; n < N; n++) {
-			IDyadRankingInstance instance = dataset.get(n);
-			int M_n = instance.length();
-			for (int m = 0; m < M_n - 1; m++) {
+		for (int smallN = 0; smallN < largeN; smallN++) {
+			IDyadRankingInstance instance = dataset.get(smallN);
+			int mN = instance.length();
+			for (int m = 0; m < mN - 1; m++) {
 				double innerDenumerator = 0d;
 				double innerNumerator = 0d;
 				Dyad dyad = instance.getDyadAtPosition(m);
 				firstSum = firstSum + featureTransforms.get(instance).get(dyad).getValue(i);
-				for (int l = m; l < M_n; l++) {
+				for (int l = m; l < mN; l++) {
 					Vector zNL = featureTransforms.get(instance).get(instance.getDyadAtPosition(l));
 					double dotProd = Math.exp(vector.dotProduct(zNL));
 					innerNumerator = innerNumerator + zNL.getValue(i) * dotProd;
 					innerDenumerator = innerDenumerator + dotProd;
 				}
-				secondSum = secondSum + innerNumerator / innerDenumerator;
+				
+				if (innerDenumerator != 0) {
+					secondSum = secondSum + innerNumerator / innerDenumerator;
+				}
 			}
 		}
 		return -firstSum + secondSum;

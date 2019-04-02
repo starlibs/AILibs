@@ -16,10 +16,14 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 /**
  * Class that contains utility methods for handling dyad ranking losses.
  * 
- * @author Jonas Hanselle
+ * @author Jonas Hanselle, Helena Graf
  *
  */
 public class DyadRankingLossUtil {
+	
+	private DyadRankingLossUtil() {
+		// intentionally left blank
+	}
 
 	/**
 	 * Computes the average loss over several dyad orderings.
@@ -68,7 +72,6 @@ public class DyadRankingLossUtil {
 	public static double computeAverageLoss(DyadRankingLossFunction lossFunction, DyadRankingDataset trueOrderings,
 			ADyadRanker ranker, Random random) throws PredictionException {
 		double avgLoss = 0.0d;
-		Random rng = new Random(0);
 		for (int i = 0; i < trueOrderings.size(); i++) {
 			IDyadRankingInstance actual = trueOrderings.get(i);
 

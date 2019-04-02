@@ -16,15 +16,15 @@ public class NDCGLoss implements DyadRankingLossFunction {
 	/**
 	 * The position up to which to compute the cumulative gain (zero-indexed, exclusive). 
 	 */
-	private int L;
+	private int l;
 	
 	/**
 	 * 
-	 * @param L The position up to which to compute the cumulative gain (zero-indexed, exclusive). 
+	 * @param l The position up to which to compute the cumulative gain (zero-indexed, exclusive). 
 	 */
-	public NDCGLoss(int L) {
+	public NDCGLoss(int l) {
 		super();
-		this.setL(L);
+		this.setL(l);
 	}
 
 	@Override
@@ -37,24 +37,28 @@ public class NDCGLoss implements DyadRankingLossFunction {
 			throw new IllegalArgumentException("Dyad rankings must have equal length.");
 		}
 		
-		Map<Dyad, Integer> relevance = new HashMap<Dyad, Integer>();
-		for (int i = 0; i < L; i++) {
+		Map<Dyad, Integer> relevance = new HashMap<>();
+		for (int i = 0; i < l; i++) {
 			relevance.put(actual.getDyadAtPosition(i), -(i+1));
 		}
 		
-		double DCG = computeDCG(predicted, relevance);
-		double IDCG = computeDCG(actual, relevance);
+		double dcg = computeDCG(predicted, relevance);
+		double idcg = computeDCG(actual, relevance);
 		
-		return IDCG / DCG;
+		if (dcg != 0) {
+			return idcg / dcg;
+		} else {
+			return 0;
+		}
 	}
 	
 	private double computeDCG(IDyadRankingInstance ranking, Map<Dyad, Integer> relevance) {
-		int L = ranking.length();
-		double DCG = 0;
-		for (int i = 0; i < L; i++) {
-			DCG += (Math.pow(2, relevance.get(ranking.getDyadAtPosition(i))) - 1) / log2(i + 2);
+		int length = ranking.length();
+		double dcg = 0;
+		for (int i = 0; i < length; i++) {
+			dcg += (Math.pow(2, relevance.get(ranking.getDyadAtPosition(i))) - 1) / log2(i + 2.0);
 		}
-		return DCG;
+		return dcg;
 	}
 	
 	private double log2(double x) {
@@ -62,11 +66,11 @@ public class NDCGLoss implements DyadRankingLossFunction {
 	}
 
 	public int getL() {
-		return L;
+		return l;
 	}
 
 	public void setL(int l) {
-		L = l;
+		this.l = l;
 	}
 	
 	

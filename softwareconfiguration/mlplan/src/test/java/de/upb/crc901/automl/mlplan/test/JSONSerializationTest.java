@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
 import hasco.serialization.HASCOJacksonModule;
-import junit.framework.Assert;
 
 /**
  * Tests the deserialization module for the {@link ComponentInstance} json
@@ -43,15 +42,11 @@ public class JSONSerializationTest {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new HASCOJacksonModule(loader.getComponents()));
 
-		try {
-			ComponentInstance instance = mapper.readValue(oldPlainJson, ComponentInstance.class);
-			System.out.println(instance);
-		} catch (IOException e) {
-			e.printStackTrace();
-			Assert.fail();
-		}
+		 mapper.readValue(oldPlainJson, ComponentInstance.class);
+
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testAllComponentInstances()
 			throws JsonParseException, JsonMappingException, IOException, URISyntaxException {
@@ -69,7 +64,7 @@ public class JSONSerializationTest {
 			String serializedCI = content.get("composition");
 
 			// try to deserialize
-			ComponentInstance ci = mapper.readValue(serializedCI, ComponentInstance.class);
+			mapper.readValue(serializedCI, ComponentInstance.class);
 		}
 
 	}

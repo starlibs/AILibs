@@ -2,7 +2,6 @@ package jaicore.ml.activelearning;
 
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.predictivemodel.ICertaintyProvider;
-import jaicore.ml.core.predictivemodel.IOnlineLearner;
 
 /**
  * A simple pool-based uncertainty sampling strategy, which assesses certainty
@@ -11,15 +10,16 @@ import jaicore.ml.core.predictivemodel.IOnlineLearner;
  * 
  * @author Jonas Hanselle
  *
- * @param <TARGET>
+ * @param <T>
+ *            TARGET
  */
-public class PoolBasedUncertaintySamplingStrategy<TARGET> implements ISelectiveSamplingStrategy {
+public class PoolBasedUncertaintySamplingStrategy<T> implements ISelectiveSamplingStrategy {
 
-	private ICertaintyProvider<TARGET> certaintyProvider;
+	private ICertaintyProvider<T> certaintyProvider;
 	private IActiveLearningPoolProvider poolProvider;
 
-	public PoolBasedUncertaintySamplingStrategy(ICertaintyProvider<TARGET> certaintyProivder,
-			IOnlineLearner<TARGET> onlineLearner, IActiveLearningPoolProvider poolProvider) {
+	public PoolBasedUncertaintySamplingStrategy(ICertaintyProvider<T> certaintyProivder,
+			IActiveLearningPoolProvider poolProvider) {
 		this.certaintyProvider = certaintyProivder;
 		this.poolProvider = poolProvider;
 	}

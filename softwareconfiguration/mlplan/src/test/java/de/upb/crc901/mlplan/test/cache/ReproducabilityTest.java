@@ -1,5 +1,7 @@
 package de.upb.crc901.mlplan.test.cache;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -64,10 +66,10 @@ public class ReproducabilityTest {
 			WEKAPipelineFactory factory = new WEKAPipelineFactory();
 			Classifier pipeline = factory.getComponentInstantiation(composition);
 			Double score = bridge.evaluateSplit(pipeline, trainInstances, validationInstances);
-			System.out.println(score);
-
+			
+			assertEquals(0.2909604519774011, score, 0.0001);
+			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

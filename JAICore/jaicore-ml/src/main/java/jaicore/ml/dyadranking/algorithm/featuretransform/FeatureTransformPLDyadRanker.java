@@ -17,8 +17,6 @@ import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
-import jaicore.ml.core.optimizing.IGradientBasedOptimizer;
-import jaicore.ml.core.optimizing.lbfgs.LBFGSOptimizerWrapper;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
@@ -64,9 +62,6 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 
 	/* The derivation of the above function */
 	private IDyadRankingFeatureTransformPLGradientFunction negativeLogLikelihoodDerivative = new DyadRankingFeatureTransformNegativeLogLikelihoodDerivative();
-
-	/* The optimizer used to find w */
-	private IGradientBasedOptimizer optimizer = new LBFGSOptimizerWrapper();
 
 	/**
 	 * Constructs a new feature transform Placket-Luce dyad ranker with bilinear
@@ -119,7 +114,7 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 	}
 
 	@Override
-	public void train(IDataset dataset) throws TrainingException {
+	public void train(@SuppressWarnings("rawtypes") IDataset dataset) throws TrainingException {
 		if (!(dataset instanceof DyadRankingDataset)) {
 			throw new IllegalArgumentException(
 					"Can only train the feature transform Placket-Luce dyad ranker with a dyad ranking dataset!");
@@ -135,7 +130,6 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 		w = new DenseDoubleVector(
 				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), 0.3);
 		log.debug("Likelihood of the randomly filled w is {}", likelihoodOfParameter(w, dRDataset));
-		//w =optimizer.optimize(negativeLogLikelihood, negativeLogLikelihoodDerivative, w);
 		BilinFunction fun = new BilinFunction(featureTransforms , dRDataset, featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
 		QNMinimizer minimizer = new QNMinimizer();
 		w = new DenseDoubleVector(minimizer.minimize(fun, 0.01, w.asArray()));
@@ -153,23 +147,23 @@ public class FeatureTransformPLDyadRanker extends APLDyadRanker {
 	 * @return the likelihood, measured as a probability
 	 */
 	private double likelihoodOfParameter(Vector w, DyadRankingDataset dataset) {
-		int N = dataset.size();
+		int largeN = dataset.size();
 		double outerProduct = 1.0;
-		for (int n = 0; n < N; n++) {
-			IDyadRankingInstance dyadRankingInstance = dataset.get(n);
-			int M_n = dyadRankingInstance.length();
+		for (int smallN = 0; smallN < largeN; smallN++) {
+			IDyadRankingInstance dyadRankingInstance = dataset.get(smallN);
+			int mN = dyadRankingInstance.length();
 			double innerProduct = 1.0;
-			for (int m = 0; m < M_n; m++) {
+			for (int m = 0; m < mN; m++) {
 				Dyad dyad = dyadRankingInstance.getDyadAtPosition(m);
-				Vector z_nm = featureTransform.transform(dyad);
-				double en = Math.exp(w.dotProduct(z_nm));
-				double denum_sum = 0;
-				for (int l = m; l < M_n; l++) {
-					Dyad dyad_l = dyadRankingInstance.getDyadAtPosition(l);
-					Vector z_nl = featureTransform.transform(dyad_l);
-					denum_sum += Math.exp(w.dotProduct(z_nl));
+				Vector zNM = featureTransform.transform(dyad);
+				double en = Math.exp(w.dotProduct(zNM));
+				double denumSum = 0;
+				for (int l = m; l < mN; l++) {
+					Dyad dyadL = dyadRankingInstance.getDyadAtPosition(l);
+					Vector zNL = featureTransform.transform(dyadL);
+					denumSum += Math.exp(w.dotProduct(zNL));
 				}
-				innerProduct = innerProduct * (en / denum_sum);
+				innerProduct = innerProduct * (en / denumSum);
 			}
 
 			outerProduct = outerProduct * innerProduct;

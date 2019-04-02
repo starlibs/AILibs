@@ -5,6 +5,7 @@ import java.util.Map;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import weka.classifiers.trees.RandomTree;
 import weka.classifiers.trees.RandomTree.Tree;
 import weka.core.Instances;
@@ -28,9 +29,13 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 	private double nonOccurenceValue = -1;
 
 	@Override
-	public void train(Instances data) throws Exception {
+	public void train(Instances data) throws AlgorithmException {
 		// Step 1: Train Random Tree
+		try {
 		randomTree.buildClassifier(data);
+		} catch(Exception e) {
+			throw new AlgorithmException(e, "Random Tree could not be trained!");
+		}
 
 		// Step 2: Count the nodes in the tree (DF Traversal Index Mapping)
 		addIndexToMap(0, randomTree.getM_Tree());

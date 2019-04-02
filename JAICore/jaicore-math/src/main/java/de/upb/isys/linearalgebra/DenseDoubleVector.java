@@ -199,24 +199,4 @@ public class DenseDoubleVector extends AbstractVector {
 	public Vector kroneckerProduct(double[] vectorAsArray) {
 		return new DenseDoubleVector(kroneckerProductInternal(vectorAsArray));
 	}
-
-//	@Override
-//	public int hashCode() {
-//		
-////		final int prime = 31;
-////		int result = super.hashCode();
-////		int result = 1;
-////		result = prime * result + ((internalVector == null) ? 0 : internalVector.hashCode());
-//		return internalVector.hashCode();
-//	}
-//	
-//	@Override
-//	public boolean equals(Object o)
-//	{
-//		if(! (o instanceof DenseDoubleVector))
-//			return false;
-//		DenseDoubleVector otherVec = (DenseDoubleVector) o;
-//		return this.internalVector.equals(otherVec.internalVector);
-//	}
-
 }

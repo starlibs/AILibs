@@ -19,7 +19,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  * datasets, i.e. transform the data to have a mean of 0 and a standard
  * deviation of 1 according to the data it was fit to.
  * 
- * @author Michael Braun, Jonas Hanselle, Mirko Jürgens
+ * @author Michael Braun, Jonas Hanselle, Mirko Jürgens, Helena Graf
  *
  */
 public abstract class AbstractDyadScaler implements Serializable {
@@ -245,36 +245,54 @@ public abstract class AbstractDyadScaler implements Serializable {
 	/**
 	 * Prints the standard devations of all features this scaler has been fit to.
 	 */
-	public void printStandardDeviations() {
-		if (statsX == null || statsY == null)
+	public String getPrettySTDString() {
+		if (statsX == null || statsY == null) {
 			throw new IllegalStateException("The scaler must be fit before calling this method!");
-		System.out.print("Standard deviations for instances: ");
+		}
+			
+		StringBuilder builder = new StringBuilder();
+		
+		builder.append("Standard deviations for instances: ");
 		for (SummaryStatistics stats : statsX) {
-			System.out.print(stats.getStandardDeviation() + ", ");
+			builder.append(stats.getStandardDeviation());
+			builder.append(", ");
 		}
-		System.out.println();
-		System.out.print("Standard deviations for alternatives: ");
+		builder.append(System.lineSeparator());
+		
+		builder.append("Standard deviations for alternatives: ");
 		for (SummaryStatistics stats : statsY) {
-			System.out.print(stats.getStandardDeviation() + ", ");
+			builder.append(stats.getStandardDeviation());
+			builder.append(", ");
 		}
-		System.out.println();
+		builder.append(System.lineSeparator());
+		
+		return builder.toString();
 	}
 
 	/**
-	 * Prints the means of all features this scaler has been fit to.
+	 * Returns a String for the means of all features this scaler has been fit to.
 	 */
-	public void printMeans() {
-		if (statsX == null || statsY == null)
+	public String getPrettyMeansString() {
+		if (statsX == null || statsY == null) {
 			throw new IllegalStateException("The scaler must be fit before calling this method!");
-		System.out.print("Means for instances: ");
+		}
+		
+		StringBuilder builder = new StringBuilder();
+			
+		builder.append("Means for instances: ");
 		for (SummaryStatistics stats : statsX) {
-			System.out.print(stats.getMean() + ", ");
+			builder.append(stats.getMean());
+			builder.append(", ");
 		}
-		System.out.println();
-		System.out.print("Means for alternatives: ");
+		builder.append(System.lineSeparator());
+		
+		builder.append("Means for alternatives: ");
 		for (SummaryStatistics stats : statsY) {
-			System.out.print(stats.getMean() + ", ");
+			builder.append(stats.getMean());
+			builder.append(", ");
 		}
-		System.out.println();
+		builder.append(System.lineSeparator());
+		
+		return builder.toString();
 	}
 }
