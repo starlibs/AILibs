@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -53,10 +52,10 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	 *            data already
 	 */
 	public WEKADyadRankedNodeQueue(Vector contextCharacterization, Collection<Component> components, ADyadRanker ranker,
-			AbstractDyadScaler scaler) {
+			AbstractDyadScaler scaler, IPipelineCharacterizer characterizer) {
 		super(contextCharacterization, ranker, scaler);
 		this.components = components;
-		this.characterizer = new ComponentInstanceVectorFeatureGenerator(components);
+		this.characterizer = characterizer;
 	}
 
 	@Override

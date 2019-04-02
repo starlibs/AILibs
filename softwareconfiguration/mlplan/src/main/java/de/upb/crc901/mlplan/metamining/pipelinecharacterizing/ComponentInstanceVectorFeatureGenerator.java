@@ -19,7 +19,7 @@ import hasco.model.Parameter;
  * Characterizes a pipelines by the components that occur in it and the
  * parameters that are set for it.
  * 
- * @author Mirko Jürgens, Helena Graf
+ * @author Mirko Jürgens
  *
  */
 public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharacterizer {

@@ -56,8 +56,7 @@ public class ComponentInstanceStringConverter extends Thread {
 			wekaLabels.load(fis);
 		} catch (IOException e) {
 			log.warn("Could not load weka labels.");
-			throw new RuntimeException(e);
-			
+			throw new ComponentInstanceStringConverterIntializeException(e);		
 		}
 	}
 
@@ -79,7 +78,7 @@ public class ComponentInstanceStringConverter extends Thread {
 	 * 
 	 */
 	public String makeStringTreeRepresentation(ComponentInstance pipeline) {
-		List<String> pipelineBranches = new ArrayList<String>();
+		List<String> pipelineBranches = new ArrayList<>();
 		ComponentInstance classifierCI;
 
 		// Component is pipeline
@@ -193,36 +192,7 @@ public class ComponentInstanceStringConverter extends Thread {
 
 			// Numeric parameter - needs to be refined
 			if (parameter.isNumeric()) {
-				ParameterRefinementConfiguration parameterRefinementConfiguration = componentParameters
-						.get(componentInstance.getComponent()).get(parameter);
-				NumericParameterDomain parameterDomain = ((NumericParameterDomain) parameter.getDefaultDomain());
-				Interval currentInterval = null;
-				Interval nextInterval = new Interval(parameterDomain.getMin(), parameterDomain.getMax());
-				double parameterValue = Double.parseDouble(componentInstance.getParameterValues().get(parameterName));
-				double precision = parameterValue == 0 ? 0 : Math.ulp(parameterValue);
-
-				while (nextInterval != null) {
-					currentInterval = nextInterval;
-					parameterRefinement.add(serializeInterval(currentInterval));
-
-					List<Interval> refinement = Util.getNumericParameterRefinement(nextInterval, parameterValue,
-							parameterDomain.isInteger(), parameterRefinementConfiguration);
-
-					if (refinement.size() == 0) {
-						nextInterval = null;
-						break;
-					}
-
-					for (Interval interval : refinement) {
-						if (interval.checkPoint(parameterValue, precision) == Location.INSIDE
-								|| interval.checkPoint(parameterValue, precision) == Location.BOUNDARY) {
-							nextInterval = interval;
-							break;
-						}
-					}
-				}
-
-				parameterRefinement.add(String.valueOf(parameterValue));
+				resolveNumericParameter(componentInstance, parameter, parameterName, parameterRefinement);
 
 				// Categorical parameter
 			} else {
@@ -234,6 +204,39 @@ public class ComponentInstanceStringConverter extends Thread {
 		}
 		
 		return parameters;
+	}
+
+	private void resolveNumericParameter(ComponentInstance componentInstance, Parameter parameter, String parameterName,
+			List<String> parameterRefinement) {
+		ParameterRefinementConfiguration parameterRefinementConfiguration = componentParameters
+				.get(componentInstance.getComponent()).get(parameter);
+		NumericParameterDomain parameterDomain = ((NumericParameterDomain) parameter.getDefaultDomain());
+		Interval currentInterval = null;
+		Interval nextInterval = new Interval(parameterDomain.getMin(), parameterDomain.getMax());
+		double parameterValue = Double.parseDouble(componentInstance.getParameterValues().get(parameterName));
+		double precision = parameterValue == 0 ? 0 : Math.ulp(parameterValue);
+
+		while (true) {
+			currentInterval = nextInterval;
+			parameterRefinement.add(serializeInterval(currentInterval));
+
+			List<Interval> refinement = Util.getNumericParameterRefinement(nextInterval, parameterValue,
+					parameterDomain.isInteger(), parameterRefinementConfiguration);
+
+			if (refinement.isEmpty()) {
+				break;
+			}
+
+			for (Interval interval : refinement) {
+				if (interval.checkPoint(parameterValue, precision) == Location.INSIDE
+						|| interval.checkPoint(parameterValue, precision) == Location.BOUNDARY) {
+					nextInterval = interval;
+					break;
+				}
+			}
+		}
+
+		parameterRefinement.add(String.valueOf(parameterValue));
 	}
 
 	/**

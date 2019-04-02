@@ -31,4 +31,20 @@ public abstract class ActiveDyadRanker {
 	 * @param numberOfQueries Number of queries the ranker conducts
 	 */
 	public abstract void activelyTrain(int numberOfQueries);
+
+	public PLNetDyadRanker getRanker() {
+		return ranker;
+	}
+
+	public void setRanker(PLNetDyadRanker ranker) {
+		this.ranker = ranker;
+	}
+
+	public IDyadRankingPoolProvider getPoolProvider() {
+		return poolProvider;
+	}
+
+	public void setPoolProvider(IDyadRankingPoolProvider poolProvider) {
+		this.poolProvider = poolProvider;
+	}
 }

@@ -47,7 +47,7 @@ public class WekaDyadRankingExample {
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 		openConfig.setComponents(mlplan.getComponents());
-		openConfig.setData(data);
+		openConfig.setData(split.get(0));
 
 		try {
 			long start = System.currentTimeMillis();

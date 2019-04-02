@@ -112,7 +112,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 				String row = input.next();
 			if (row.isEmpty())
 					break;
-				List<Dyad> dyads = new LinkedList<Dyad>();
+				List<Dyad> dyads = new LinkedList<>();
 				String[] dyadTokens = row.split("\\|");
 				for (String dyadString : dyadTokens) {
 					String[] values = dyadString.split(";");
@@ -170,8 +170,13 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		throw new UnsupportedOperationException("Dyad rankings have no target type.");
 	}
 	
+	/**
+	 * Converts this data set to a list of ND4j {@link INDArray}s. 
+	 * Each dyad ranking is represented by a 2D-matrix where a row is a dyad.
+	 * @return
+	 */
 	public List<INDArray> toND4j() {
-		List<INDArray> ndList = new ArrayList<INDArray>();
+		List<INDArray> ndList = new ArrayList<>();
 		for (IInstance instance : this) {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			ndList.add(dyadRankingToMatrix(drInstance));
@@ -189,8 +194,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	private INDArray dyadToVector(Dyad dyad) {
 		INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
 		INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
-		INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
-		return dyadVector;
+		return Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 	}
 	
 	public static DyadRankingDataset fromOrderedDyadList(List<Dyad> orderedDyad) {
@@ -206,7 +210,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	 * @return The dyad ranking in {@link INDArray} matrix form.
 	 */
 	private INDArray dyadRankingToMatrix(IDyadRankingInstance drInstance) {
-		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
+		List<INDArray> dyadList = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray dyadVector = dyadToVector(dyad);
 			dyadList.add(dyadVector);

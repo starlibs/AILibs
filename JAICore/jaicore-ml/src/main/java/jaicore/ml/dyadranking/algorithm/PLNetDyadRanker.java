@@ -65,8 +65,6 @@ public class PLNetDyadRanker extends APLDyadRanker
 	private IPLNetDyadRankerConfiguration configuration;
 	private int epoch;
 	private int iteration;
-	private double currentBestScore;
-	private MultiLayerNetwork currentBestModel;
 
 	/**
 	 * Constructs a new {@link PLNetDyadRanker} using the default
@@ -121,8 +119,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet.init();
 		}
 
-		currentBestScore = Double.POSITIVE_INFINITY;
-		currentBestModel = this.plNet;
+		double currentBestScore = Double.POSITIVE_INFINITY;
+		MultiLayerNetwork currentBestModel = this.plNet;
 		epoch = 0;
 		iteration = 0;
 		int patience = 0;
@@ -144,7 +142,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 				this.updateWithMinibatch(miniBatch);
 				miniBatch.clear();
 			}
-			log.debug("plNet params: {}", plNet.params().toString());
+			log.debug("plNet params: {}", plNet.params());
 			earlyStoppingCounter++;
 			// Compute validation error
 			if (earlyStoppingCounter == configuration.plNetEarlyStoppingInterval() && earlyStoppingTrainRatio < 1.0) {
@@ -205,7 +203,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 		// init weight update vector
 		INDArray dyadMatrix;
-		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
+		List<INDArray> dyadList = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray dyadVector = dyadToVector(dyad);
 			dyadList.add(dyadVector);
@@ -281,7 +279,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 	@Override
 	public void update(Set<IInstance> instances) throws TrainingException {
 
-		List<INDArray> minibatch = new ArrayList<INDArray>(instances.size());
+		List<INDArray> minibatch = new ArrayList<>(instances.size());
 		for (IInstance instance : instances) {
 			if (!(instance instanceof IDyadRankingInstance)) {
 				throw new IllegalArgumentException(
@@ -315,7 +313,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet.init();
 		}
 
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -323,7 +321,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		}
 		// sort the instance in descending order of utility values
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
-		List<Dyad> ranking = new ArrayList<Dyad>();
+		List<Dyad> ranking = new ArrayList<>();
 
 		for (Pair<Dyad, Double> pair : dyadUtilityPairs)
 			ranking.add(pair.getLeft());
@@ -337,7 +335,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 					"Can only make predictions for dyad ranking datasets using the Plackett-Luce net dyad ranker!");
 		}
 		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
-		List<IDyadRankingInstance> results = new ArrayList<IDyadRankingInstance>(dataset.size());
+		List<IDyadRankingInstance> results = new ArrayList<>(dataset.size());
 		for (IInstance instance : drDataset) {
 			results.add(this.predict(instance));
 		}
@@ -428,8 +426,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 	private INDArray dyadToVector(Dyad dyad) {
 		INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
 		INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
-		INDArray dyadVector = Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
-		return dyadVector;
+		return Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 	}
 
 	/**
@@ -440,7 +437,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * @return The dyad ranking in {@link INDArray} matrix form.
 	 */
 	private INDArray dyadRankingToMatrix(IDyadRankingInstance drInstance) {
-		List<INDArray> dyadList = new ArrayList<INDArray>(drInstance.length());
+		List<INDArray> dyadList = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray dyadVector = dyadToVector(dyad);
 			dyadList.add(dyadVector);
@@ -462,7 +459,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		try {
 			json = FileUtil.readFileAsString(configFile);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error(e.getMessage());
 		}
 		MultiLayerConfiguration config = MultiLayerConfiguration.fromJson(json);
 		MultiLayerNetwork network = new MultiLayerNetwork(config);
@@ -515,7 +512,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		if (drInstance.length() != 2) {
 			throw new IllegalArgumentException("Can only provide certainty for pairs of dyads!");
 		}
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -542,7 +539,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		if (drInstance.length() < 2) {
 			throw new IllegalArgumentException("The query instance must contain at least 2 dyads!");
 		}
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -560,11 +557,10 @@ public class PLNetDyadRanker extends APLDyadRanker
 				indexOfPairWithLeastCertainty = i;
 			}
 		}
-		List<Dyad> leastCertainDyads = new LinkedList<Dyad>();
+		List<Dyad> leastCertainDyads = new LinkedList<>();
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty + 1).getLeft());
-		DyadRankingInstance leastCertainPair = new DyadRankingInstance(leastCertainDyads);
-		return leastCertainPair;
+		return new DyadRankingInstance(leastCertainDyads);
 	}
 
 	/**
@@ -593,7 +589,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet.init();
 		}
 
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -608,7 +604,10 @@ public class PLNetDyadRanker extends APLDyadRanker
 			for (int j = i; j < Integer.min(k, dyadUtilityPairs.size()); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
-			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			if(sumOfRemainingSkills != 0)
+				currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			else
+				currentProbability = Double.NaN;
 		}
 		return currentProbability;
 	}
@@ -635,7 +634,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet.init();
 		}
 
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -678,7 +677,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet.init();
 		}
 
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -718,7 +717,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet.init();
 		}
 
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -732,7 +731,10 @@ public class PLNetDyadRanker extends APLDyadRanker
 			for (int j = i; j < dyadUtilityPairs.size(); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
-			currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			if(sumOfRemainingSkills!=0)
+				currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
+			else
+				currentProbability = Double.NaN;
 		}
 		return currentProbability;
 	}
@@ -753,7 +755,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			this.plNet.init();
 		}
 
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<Pair<Dyad, Double>>(drInstance.length());
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
 		for (Dyad dyad : drInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
@@ -783,8 +785,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		if (plNet == null)
 			return Double.NaN;
 		INDArray plNetInput = dyadToVector(dyad);
-		double plNetOutput = plNet.output(plNetInput).getDouble(0);
-		return plNetOutput;
+		return plNet.output(plNetInput).getDouble(0);
 	}
 
 }

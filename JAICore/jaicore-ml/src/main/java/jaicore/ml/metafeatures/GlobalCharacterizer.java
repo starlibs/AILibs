@@ -188,8 +188,18 @@ public class GlobalCharacterizer extends Characterizer {
 	 * @throws Exception
 	 */
 	protected void initializeCharacterizers() throws Exception {
-		Characterizer[] characterizerArray = { new SimpleMetaFeatures(), new Statistical(),
-				new NominalAttDistinctValues(), new Cardinality(), new GenericLandmarker("kNN1N", CP_IBK, 2, null),
+		characterizers = new ArrayList<>();
+		addNoProbingCharacterizers(characterizers);
+		addLandmarkerCharacterizers(characterizers);
+	}
+
+	protected void addNoProbingCharacterizers(ArrayList<Characterizer> characterizerList) {
+		characterizerList.addAll(Arrays.asList(new SimpleMetaFeatures(), new Statistical(),
+		new NominalAttDistinctValues(), new Cardinality()));
+	}
+
+	protected void addLandmarkerCharacterizers(ArrayList<Characterizer> characterizerList) throws Exception {
+		characterizerList.addAll(Arrays.asList(new GenericLandmarker("kNN1N", CP_IBK, 2, null),
 				new GenericLandmarker("NaiveBayes", CP_NB, 2, null),
 				new GenericLandmarker("DecisionStump", CP_DS, 2, null),
 				new GenericLandmarker("CfsSubsetEval_kNN1N", CP_ASC, 2,
@@ -197,8 +207,8 @@ public class GlobalCharacterizer extends Characterizer {
 				new GenericLandmarker("CfsSubsetEval_NaiveBayes", CP_ASC, 2,
 						Utils.splitOptions(PREPROCESSING_PREFIX + CP_NB)),
 				new GenericLandmarker("CfsSubsetEval_DecisionStump", CP_ASC, 2,
-						Utils.splitOptions(PREPROCESSING_PREFIX + CP_DS)) };
-		ArrayList<Characterizer> characterizerList = new ArrayList<>(Arrays.asList(characterizerArray));
+						Utils.splitOptions(PREPROCESSING_PREFIX + CP_DS))));
+		
 		StringBuilder zeroes = new StringBuilder();
 		zeroes.append("0");
 		for (int i = 1; i <= 3; ++i) {
@@ -215,10 +225,8 @@ public class GlobalCharacterizer extends Characterizer {
 			characterizerList.add(new GenericLandmarker("RandomTreeDepth" + i, "weka.classifiers.trees.RandomTree", 2,
 					randomtreeOption));
 		}
-
-		characterizers = characterizerList;
 	}
-
+	
 	/**
 	 * Initializes {@link #characterizerNames}.
 	 */

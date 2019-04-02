@@ -81,13 +81,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 				SimpleUploaderMeasureBridge bridge = (SimpleUploaderMeasureBridge) evaluationMeasurementBridge;
 				long start = System.currentTimeMillis();
 				Classifier classifier = classifierFactory.getComponentInstantiation(c);
-				double result = 0;
-				try {
-					result = searchBenchmark.evaluate(classifier);
-				} catch(ObjectEvaluationFailedException e) {
-					bridge.receiveFinalResult(classifier, 1, "Search", System.currentTimeMillis()-start);
-					throw e;
-				}
+				double result = tryEvaluationOfClassifier(bridge, start, classifier);
 				
 				bridge.receiveFinalResult(classifier, result, "Search", System.currentTimeMillis()-start);
 				return result;
@@ -112,5 +106,16 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			task.cancel();
 			this.logger.debug("Canceled timeout job {}", task);
 		}
+	}
+
+	private double tryEvaluationOfClassifier(SimpleUploaderMeasureBridge bridge, long start, Classifier classifier) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+		double result = 0;
+		try {
+			result = searchBenchmark.evaluate(classifier);
+		} catch(ObjectEvaluationFailedException e) {
+			bridge.receiveFinalResult(classifier, 1, "Search", System.currentTimeMillis()-start);
+			throw e;
+		}
+		return result;
 	}
 }

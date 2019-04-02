@@ -16,6 +16,10 @@ import org.nd4j.linalg.ops.transforms.Transforms;
 
 public class PLNetLoss {
 	
+	private PLNetLoss() {
+		//Intentionally left blank
+	}
+	
 	/**
 	 * Computes the NLL for PL networks according to equation (27) in [1].
 	 * 

@@ -44,9 +44,9 @@ public class DyadDatasetPoolProviderTest {
 		IDyadRankingInstance trueRanking3 = (IDyadRankingInstance) dataset.get(13);
 
 		// build sparse dyad ranking instances from them
-		List<Vector> alternatives1 = new ArrayList(trueRanking1.length());
-		List<Vector> alternatives2 = new ArrayList(trueRanking2.length());
-		List<Vector> alternatives3 = new ArrayList(trueRanking3.length());
+		List<Vector> alternatives1 = new ArrayList<>(trueRanking1.length());
+		List<Vector> alternatives2 = new ArrayList<>(trueRanking2.length());
+		List<Vector> alternatives3 = new ArrayList<>(trueRanking3.length());
 
 		for (Dyad dyad : trueRanking1)
 			alternatives1.add(dyad.getAlternative());

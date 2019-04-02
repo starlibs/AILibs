@@ -9,16 +9,34 @@ import org.nd4j.linalg.indexing.NDArrayIndex;
 import org.nd4j.linalg.indexing.conditions.Conditions;
 import org.nd4j.linalg.primitives.Pair;
 
-import de.upb.isys.linearalgebra.DenseDoubleVector;
-import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.zeroshot.util.InputOptListener;
 
+/**
+ * Optimizes a given loss function ({@link InputOptimizerLoss}) with respect to the input of a PLNet using gradient descent.
+ * Assumes the PLNet was trained on normalized training data (i.e. scaled to intervals of 0 to 1 using {@link DyadMinMaxScaler})
+ * and ensures that the optimized inputs will be within this range.
+ * 
+ * @author Michael Braun
+ *
+ */
 public class PLNetInputOptimizer {
 
 	private InputOptListener listener;
 
+	
+	/**
+	 * Optimizes the given loss function with respect to a given PLNet's inputs using gradient descent. Ensures the outcome will be within the range of 0 and 1.
+	 * Performs gradient descent for a given number of steps starting at a given input, using a static learning rate.
+	 * The inputs that should be optimized can be specified using an index range in the form of a {@link Pair}} of integers.
+	 * @param plNet					PLNet whose inputs to optimize.
+	 * @param input					Initial inputs to start the gradient descent procedure from.
+	 * @param loss					The loss to be minimized.
+	 * @param learningRate			The initial learning rate.
+	 * @param numSteps				The number of steps to perform gradient descent for.
+	 * @param indexRange			Pair of indices (inclusive) specifying the parts of the input that should be optimized.
+	 * @return						The input optimized with respect to the given loss.
+	 */
 	public INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double learningRate, int numSteps, Pair<Integer, Integer> indexRange) {
 		INDArray mask;
 		if (indexRange != null) {
@@ -30,32 +48,75 @@ public class PLNetInputOptimizer {
 
 		return optimizeInput(plNet, input, loss, learningRate, numSteps, mask);
 	}
+	
+	/**
+	 * Optimizes the given loss function with respect to a given PLNet's inputs using gradient descent. Ensures the outcome will be within the range of 0 and 1.
+	 * Performs gradient descent for a given number of steps starting at a given input, using a linearly decaying learning rate.
+	 * The inputs that should be optimized can be specified using an index range in the form of a {@link Pair}} of integers.
+	 * @param plNet					PLNet whose inputs to optimize.
+	 * @param input					Initial inputs to start the gradient descent procedure from.
+	 * @param loss					The loss to be minimized.
+	 * @param initialLearningRate	The initial learning rate.
+	 * @param finalLearningRate		The value the learning rate should decay to.
+	 * @param numSteps				The number of steps to perform gradient descent for.
+	 * @param indexRange			Pair of indices (inclusive) specifying the parts of the input that should be optimized.
+	 * @return						The input optimized with respect to the given loss.
+	 */
+	public INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double initialLearningRate, double finalLearningRate, int numSteps, Pair<Integer, Integer> indexRange) {
+		INDArray mask;
+		if (indexRange != null) {
+			mask = Nd4j.zeros(input.length());
+			mask.get(NDArrayIndex.interval(indexRange.getFirst(), indexRange.getSecond())).assign(1.0);
+		} else {
+			mask = Nd4j.ones(input.length());
+		}
 
+		return optimizeInput(plNet, input, loss, initialLearningRate, finalLearningRate, numSteps, mask);
+	}
+	
+	/**
+	 * Optimizes the given loss function with respect to a given PLNet's inputs using gradient descent. Ensures the outcome will be within the range of 0 and 1.
+	 * Performs gradient descent for a given number of steps starting at a given input, using a static learning rate.
+	 * The inputs that should be optimized can be specified using a 0,1-vector
+	 * @param plNet					PLNet whose inputs to optimize.
+	 * @param input					Initial inputs to start the gradient descent procedure from.
+	 * @param loss					The loss to be minimized.
+	 * @param learningRate			The initial learning rate.
+	 * @param numSteps				The number of steps to perform gradient descent for.
+	 * @param inputMask				0,1 vector specifying the inputs to optimize, i.e. should have a 1 at the index of any input that should be optimized and a 0 elsewhere.
+	 * @return						The input optimized with respect to the given loss.
+	 */
 	public INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double learningRate, int numSteps, INDArray inputMask) {
 		return optimizeInput(plNet, input, loss, learningRate, learningRate, numSteps, inputMask);
 	}
-
+	
+	/**
+	 * Optimizes the given loss function with respect to a given PLNet's inputs using gradient descent. Ensures the outcome will be within the range of 0 and 1.
+	 * Performs gradient descent for a given number of steps starting at a given input, using a linearly decaying learning rate.
+	 * The inputs that should be optimized can be specified using a 0,1-vector
+	 * @param plNet					PLNet whose inputs to optimize.
+	 * @param input					Initial inputs to start the gradient descent procedure from.
+	 * @param loss					The loss to be minimized.
+	 * @param initialLearningRate	The initial learning rate.
+	 * @param finalLearningRate		The value the learning rate should decay to.
+	 * @param numSteps				The number of steps to perform gradient descent for.
+	 * @param inputMask				0,1 vector specifying the inputs to optimize, i.e. should have a 1 at the index of any input that should be optimized and a 0 elsewhere.
+	 * @return						The input optimized with respect to the given loss.
+	 */
 	public INDArray optimizeInput(PLNetDyadRanker plNet, INDArray input, InputOptimizerLoss loss, double initialLearningRate, double finalLearningRate, int numSteps,
 			INDArray inputMask) {
 		INDArray inp = input.dup();
 		INDArray alphas = Nd4j.zeros(inp.shape());
 		INDArray betas = Nd4j.zeros(inp.shape());
 		INDArray ones = Nd4j.ones(inp.shape());
-		double lambda = 0.0;
-		// System.out.println(inp);
 		double output = plNet.getPlNet().output(inp).getDouble(0);
 		double incumbentOutput = output;
 		INDArray incumbent = inp.dup();
-		// System.out.println("PLNet output: " + output + " ");
 		for (int i = 0; i < numSteps; i++) {
 			double lrDecayTerm = (double) i / (double) numSteps;
 			double learningRate = (1 - lrDecayTerm) * initialLearningRate + lrDecayTerm * finalLearningRate;
 			// Gradient of PLNet
 			INDArray grad = computeInputDerivative(plNet, inp, loss);
-			// Gradient of L2 norm
-			INDArray l2grad = inp.dup().muli(2);
-			l2grad.muli(lambda);
-			grad.addi(l2grad);
 			// Gradient of KKT term
 			grad.subi(alphas);
 			grad.addi(betas);
@@ -69,10 +130,6 @@ public class PLNetInputOptimizer {
 			inp.subi(grad);
 
 			output = plNet.getPlNet().output(inp).getDouble(0);
-			// System.out.print("inps: " + inp.getDouble(input.length() - 2) + ", " + inp.getDouble(input.length() - 1));
-			// System.out.print(" alphas: " + alphas.getDouble(input.length() - 2) + ", " + alphas.getDouble(input.length() - 1));
-			// System.out.println(" betas: " + betas.getDouble(input.length() - 2) + ", " + betas.getDouble(input.length() - 1));
-			// System.out.println("PLNet output: " + output + " ");
 			if (listener != null) {
 				listener.reportOptimizationStep(inp, output);
 			}
@@ -81,7 +138,6 @@ public class PLNetInputOptimizer {
 			if (output > incumbentOutput && BooleanIndexing.and(incCheck, Conditions.greaterThanOrEqual(0.0d)) && BooleanIndexing.and(incCheck, Conditions.lessThanOrEqual(1.0d))) {
 				incumbent = inp.dup();
 				incumbentOutput = output;
-				System.out.println("Found new incumbent: " + incumbent.toString());
 			}
 		}
 
@@ -96,20 +152,14 @@ public class PLNetInputOptimizer {
 		net.setInput(input);
 		net.feedForward(false, false);
 		Pair<Gradient, INDArray> p = net.backpropGradient(lossGradient, null);
-		INDArray grad = p.getSecond();
 
-		return grad;
+		return p.getSecond();
 	}
-
-	private static Dyad ndArrayToDyad(INDArray arr, int instSize, int altSize) {
-		INDArray instSlice = arr.get(NDArrayIndex.interval(0, instSize));
-		INDArray altSlice = arr.get(NDArrayIndex.interval(instSize, instSize + altSize));
-		Vector instVector = new DenseDoubleVector(instSlice.toDoubleVector());
-		Vector altVector = new DenseDoubleVector(altSlice.toDoubleVector());
-
-		return new Dyad(instVector, altVector);
-	}
-
+	
+	/**
+	 * Set an {@link InputOptListener} to record the intermediate steps of the optimization procedure.
+	 * @param listener
+	 */
 	public void setListener(InputOptListener listener) {
 		this.listener = listener;
 	}

@@ -76,7 +76,7 @@ public class ActiveDyadRankingMetaminingTest {
 		ranker = new PLNetDyadRanker();
 		DyadDatasetPoolProvider poolProvider = new DyadDatasetPoolProvider(trainData);
 		poolProvider.setRemoveDyadsWhenQueried(false);
-		ActiveDyadRanker activeDyadRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed);
+		ActiveDyadRanker activeDyadRanker = new RandomPoolBasedActiveDyadRanker(ranker, poolProvider, seed, 0);
 
 
 		SummaryStatistics[] results = new SummaryStatistics[100];

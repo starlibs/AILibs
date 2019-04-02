@@ -8,6 +8,8 @@ import org.openml.webapplication.fantail.dc.Characterizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
+import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import hasco.model.Component;
 import jaicore.ml.dyadranking.search.ADyadRankedNodeQueueConfig;
@@ -33,7 +35,13 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 * the characterizer used to characterize new datasets, must produce dataset
 	 * meta data of the same format the dyad ranker is trained with
 	 */
-	private Characterizer characterizer;
+	private Characterizer datasetCharacterizer;
+
+	/**
+	 * the characterizer used to characterize new pipelines; must produce pipeline
+	 * meta features of the same format the dyad ranker is trained with
+	 */
+	private IPipelineCharacterizer pipelineCharacterizer;
 
 	/**
 	 * characterization of the dataset the WEKA classifiers are applied to
@@ -59,7 +67,7 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	public WEKADyadRankedNodeQueueConfig()
 			throws ClassNotFoundException, IOException, DatasetCharacterizerInitializationFailedException {
 		super();
-		this.characterizer = new LandmarkerCharacterizer();
+		this.datasetCharacterizer = new LandmarkerCharacterizer();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -67,7 +75,7 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	public void configureBestFirst(BestFirst bestFirst) {
 		logger.trace("Configuring OPEN list of BF");
 		bestFirst.setOpen(new WEKADyadRankedNodeQueue(new DenseDoubleVector(contextCharacterization), components,
-				ranker, scaler));
+				ranker, scaler, pipelineCharacterizer));
 	}
 
 	/**
@@ -79,8 +87,8 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 */
 	public void setData(Instances data) {
 		logger.trace("Setting data to instances of size {}", data.size());
-		contextCharacterization = characterizer.characterize(data).entrySet().stream().mapToDouble(Map.Entry::getValue)
-				.toArray();
+		contextCharacterization = datasetCharacterizer.characterize(data).entrySet().stream()
+				.mapToDouble(Map.Entry::getValue).toArray();
 	}
 
 	/**
@@ -92,5 +100,29 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 */
 	public void setComponents(Collection<Component> components) {
 		this.components = components;
+
+		if (this.pipelineCharacterizer == null) {
+			this.pipelineCharacterizer = new ComponentInstanceVectorFeatureGenerator(components);
+		}
+	}
+
+	/**
+	 * Set the dataset characterizer to be used. must produce dataset
+	 * meta data of the same format the dyad ranker is trained with.
+	 * 
+	 * @param datasetCharacterizer
+	 */
+	public void setDatasetCharacterizer(Characterizer datasetCharacterizer) {
+		this.datasetCharacterizer = datasetCharacterizer;
+	}
+
+	/**
+	 * Set the pipeline characterizer to be used, must produce pipeline
+	 * meta features of the same format the dyad ranker is trained with.
+	 * 
+	 * @param pipelineCharacterizer the pipeline characterizer to use
+	 */
+	public void setPipelineCharacterizer(IPipelineCharacterizer pipelineCharacterizer) {
+		this.pipelineCharacterizer = pipelineCharacterizer;
 	}
 }
