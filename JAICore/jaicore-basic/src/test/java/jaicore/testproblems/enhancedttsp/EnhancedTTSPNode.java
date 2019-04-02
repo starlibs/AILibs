@@ -1,6 +1,7 @@
 package jaicore.testproblems.enhancedttsp;
 
 import it.unimi.dsi.fastutil.shorts.ShortList;
+import it.unimi.dsi.fastutil.shorts.ShortLists;
 
 public class EnhancedTTSPNode {
 	private final short curLocation;
@@ -9,7 +10,7 @@ public class EnhancedTTSPNode {
 	private final double timeTraveledSinceLastShortBreak;
 	private final double timeTraveledSinceLastLongBreak;
 
-	public EnhancedTTSPNode(short curLocation, ShortList curTour, double time, double timeTraveledSinceLastShortBreak, double timeTraveledSinceLastLongBreak) {
+	public EnhancedTTSPNode(final short curLocation, final ShortList curTour, final double time, final double timeTraveledSinceLastShortBreak, final double timeTraveledSinceLastLongBreak) {
 		super();
 		this.curLocation = curLocation;
 		this.curTour = curTour;
@@ -22,69 +23,78 @@ public class EnhancedTTSPNode {
 	}
 
 	public short getCurLocation() {
-		return curLocation;
+		return this.curLocation;
 	}
 
 	public double getTime() {
-		return time;
+		return this.time;
 	}
 
 	public double getTimeTraveledSinceLastShortBreak() {
-		return timeTraveledSinceLastShortBreak;
+		return this.timeTraveledSinceLastShortBreak;
 	}
 
 	public double getTimeTraveledSinceLastLongBreak() {
-		return timeTraveledSinceLastLongBreak;
+		return this.timeTraveledSinceLastLongBreak;
 	}
 
 	public ShortList getCurTour() {
-		return curTour;
+		return ShortLists.unmodifiable(this.curTour);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + curLocation;
-		result = prime * result + ((curTour == null) ? 0 : curTour.hashCode());
+		result = prime * result + this.curLocation;
+		result = prime * result + ((this.curTour == null) ? 0 : this.curTour.hashCode());
 		long temp;
-		temp = Double.doubleToLongBits(time);
+		temp = Double.doubleToLongBits(this.time);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(timeTraveledSinceLastLongBreak);
+		temp = Double.doubleToLongBits(this.timeTraveledSinceLastLongBreak);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(timeTraveledSinceLastShortBreak);
+		temp = Double.doubleToLongBits(this.timeTraveledSinceLastShortBreak);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		EnhancedTTSPNode other = (EnhancedTTSPNode) obj;
-		if (curLocation != other.curLocation)
+		if (this.curLocation != other.curLocation) {
 			return false;
-		if (curTour == null) {
-			if (other.curTour != null)
+		}
+		if (this.curTour == null) {
+			if (other.curTour != null) {
 				return false;
-		} else if (!curTour.equals(other.curTour))
+			}
+		} else if (!this.curTour.equals(other.curTour)) {
 			return false;
-		if (Double.doubleToLongBits(time) != Double.doubleToLongBits(other.time))
+		}
+		if (Double.doubleToLongBits(this.time) != Double.doubleToLongBits(other.time)) {
 			return false;
-		if (Double.doubleToLongBits(timeTraveledSinceLastLongBreak) != Double.doubleToLongBits(other.timeTraveledSinceLastLongBreak))
+		}
+		if (Double.doubleToLongBits(this.timeTraveledSinceLastLongBreak) != Double.doubleToLongBits(other.timeTraveledSinceLastLongBreak)) {
 			return false;
-		if (Double.doubleToLongBits(timeTraveledSinceLastShortBreak) != Double.doubleToLongBits(other.timeTraveledSinceLastShortBreak))
+		}
+		if (Double.doubleToLongBits(this.timeTraveledSinceLastShortBreak) != Double.doubleToLongBits(other.timeTraveledSinceLastShortBreak)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "EnhancedTTSPNode [curLocation=" + curLocation + ", curTour=" + curTour + ", time=" + time + ", timeTraveledSinceLastShortBreak=" + timeTraveledSinceLastShortBreak
-				+ ", timeTraveledSinceLastLongBreak=" + timeTraveledSinceLastLongBreak + "]";
+		return "EnhancedTTSPNode [curLocation=" + this.curLocation + ", curTour=" + this.curTour + ", time=" + this.time + ", timeTraveledSinceLastShortBreak=" + this.timeTraveledSinceLastShortBreak + ", timeTraveledSinceLastLongBreak="
+				+ this.timeTraveledSinceLastLongBreak + "]";
 	}
 }

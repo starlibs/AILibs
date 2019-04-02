@@ -9,13 +9,13 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.testproblems.knapsack.KnapsackConfiguration;
 import jaicore.testproblems.knapsack.KnapsackProblem;
 
-public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction<KnapsackProblem, Set<String>, GraphSearchWithSubpathEvaluationsInput<KnapsackConfiguration, String, Double>, EvaluatedSearchGraphPath<KnapsackConfiguration, String, Double>> {
+public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction<KnapsackProblem, Set<String>, GraphSearchWithSubpathEvaluationsInput<KnapsackConfiguration, String, Double>, SearchGraphPath<KnapsackConfiguration, String>> {
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<KnapsackConfiguration, String, Double> encodeProblem(final KnapsackProblem problem) {
@@ -35,7 +35,7 @@ public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction
 	}
 
 	@Override
-	public Set<String> decodeSolution(final EvaluatedSearchGraphPath<KnapsackConfiguration, String, Double> solution) {
+	public Set<String> decodeSolution(final SearchGraphPath<KnapsackConfiguration, String> solution) {
 		return new HashSet<>(solution.getNodes().get(solution.getNodes().size() - 1).getPackedObjects());
 	}
 

@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.graph.LabeledGraph;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.model.travesaltree.NodeType;
@@ -99,7 +98,7 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 
 			@Override
 			public boolean allSuccessorsComputed(final EnhancedTTSPNode node) {
-				return this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node).size() == 0;
+				return this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node).isEmpty();
 			}
 		};
 	}
@@ -118,10 +117,6 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 
 	@Override
 	public void setNodeNumbering(final boolean nodenumbering) {
-	}
-
-	public LabeledGraph<Short, Double> getMinTravelTimesGraph() {
-		return this.problem.getMinTravelTimesGraph();
 	}
 
 	@Override

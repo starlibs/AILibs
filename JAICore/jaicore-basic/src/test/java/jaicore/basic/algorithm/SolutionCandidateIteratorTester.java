@@ -135,7 +135,10 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 				assertTrue(!terminated);
 				if (e instanceof SolutionCandidateFoundEvent) {
 					Object solution = ((SolutionCandidateFoundEvent<Object>)e).getSolutionCandidate();
-					Object solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction != null ? SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution) : solution;
+					Object solutionToOriginalProblem = solution;
+					if (SolutionCandidateIteratorTester.this.reduction != null) {
+						solutionToOriginalProblem = SolutionCandidateIteratorTester.this.reduction.decodeSolution(solution);
+					}
 					if (!stillMissingSolutions.contains(solutionToOriginalProblem)) {
 						SolutionCandidateIteratorTester.this.logger.warn("Returned solution {} converted to original solution {} is not a solution in the original problem according to ground truth.", solution, solutionToOriginalProblem);
 					} else {

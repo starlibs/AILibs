@@ -14,7 +14,7 @@ public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTS
 		super("Enhanced TTSP");
 	}
 
-	private static final int MIN_N = 6;
+	private static final int MIN_N = 3;
 	private static final int MAX_N = 6;
 
 	@Override
@@ -24,7 +24,7 @@ public class EnhancedTTSPProblemSet extends AAlgorithmTestProblemSet<EnhancedTTS
 
 	@Override
 	public EnhancedTTSP getDifficultProblemInputForGeneralTestPurposes() {
-		return new EnhancedTTSPGenerator().generate(200, 100);
+		return new EnhancedTTSPGenerator().generate(20000, 100);
 	}
 
 	@Override
