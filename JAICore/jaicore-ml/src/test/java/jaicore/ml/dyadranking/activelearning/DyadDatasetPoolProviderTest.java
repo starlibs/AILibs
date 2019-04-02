@@ -26,7 +26,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  */
 public class DyadDatasetPoolProviderTest {
 
-	private static final String GATSP_DATASET_FILE = "testsrc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
+	private static final String GATSP_DATASET_FILE = "testrsc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
 
 	@Test
 	public void testPoolProvider() {
