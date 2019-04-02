@@ -385,7 +385,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		}
 		V f = this.fValues.get(n);
 		this.logger.info("Returning f-value: {}", f);
-		eventBus.post(new FValueEvent<V>(f, startOfComputation - System.currentTimeMillis()));
+		eventBus.post(new FValueEvent<V>(f, (double) startOfComputation - System.currentTimeMillis()));
 		return f;
 	}
 

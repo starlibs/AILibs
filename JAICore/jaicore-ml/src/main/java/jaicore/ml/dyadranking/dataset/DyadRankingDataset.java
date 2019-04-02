@@ -14,6 +14,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
@@ -32,6 +34,8 @@ import jaicore.ml.dyadranking.Dyad;
  *
  */
 public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset<IInstance> {
+	
+	private Logger logger = LoggerFactory.getLogger(DyadRankingDataset.class);
 
 	private static final long serialVersionUID = -1102494546233523992L;
 
@@ -99,7 +103,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 				out.write("\n".getBytes());
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 	}
 
@@ -135,7 +139,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 				this.add(new DyadRankingInstance(dyads));
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.warn(e.getMessage());
 		}
 	}
 
@@ -158,6 +162,17 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 			}
 		}
 		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		int result = 17;
+		
+		for (IInstance instance : this) {
+			result = result * 31 + instance.hashCode();
+		}
+		
+		return result;
 	}
 
 	@Override
