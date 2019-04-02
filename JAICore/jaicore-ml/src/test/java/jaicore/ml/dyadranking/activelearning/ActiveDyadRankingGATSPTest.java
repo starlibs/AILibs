@@ -41,7 +41,7 @@ import weka.clusterers.SimpleKMeans;
 @RunWith(Parameterized.class)
 public class ActiveDyadRankingGATSPTest {
 
-	private static final String GATSP_DATASET_FILE = "testsrc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
+	private static final String GATSP_DATASET_FILE = "testrsc/ml/dyadranking/ga-tsp/GATSP-Data.txt";
 
 	// N = number of training instances
 	private static final int N = 120;
