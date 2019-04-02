@@ -89,13 +89,11 @@ public class DyadUnitIntervalScaler  extends AbstractDyadScaler {
 
 	@Override
 	public void transformInstances(Dyad dyad, List<Integer> ignoredIndices) {
-		//TODO implement
 		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
 	public void transformAlternatives(Dyad dyad, List<Integer> ignoredIndices) {
-		//TODO implement
 		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 

@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
@@ -127,7 +127,7 @@ public class ActiveDyadRankingGATSPTest {
 	}
 
 	@Parameters
-	public static List<APLDyadRanker> supplyDyadRankers() {
+	public static List<IPLDyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
 		// Use a simple config such that the test finishes quickly
 		return Arrays.asList(plNetRanker);

@@ -11,9 +11,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
-import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.ADyadRanker;
-import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.IDyadRanker;
+import jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -32,11 +31,11 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	
 	private static final int SEED = 7;
 
-	ADyadRanker ranker;
+	IDyadRanker ranker;
 
 	int seedTest = 60;
 
-	public AdvancedDyadDatasetDyadRankerTester(ADyadRanker ranker) {
+	public AdvancedDyadDatasetDyadRankerTester(IDyadRanker ranker) {
 		this.ranker = ranker;
 	}
 
@@ -67,7 +66,7 @@ public class AdvancedDyadDatasetDyadRankerTester {
 	}
 
 	@Parameters
-	public static List<APLDyadRanker[]> supplyDyadRankers() {
+	public static List<IPLDyadRanker[]> supplyDyadRankers() {
 		PLNetDyadRanker ranker1 = new PLNetDyadRanker();
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "0");
 		ranker1.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "8");

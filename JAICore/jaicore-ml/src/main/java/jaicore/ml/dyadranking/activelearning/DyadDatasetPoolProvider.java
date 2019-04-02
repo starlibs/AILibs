@@ -72,7 +72,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 			dyadPositionPairs.add(new Pair<Dyad, Integer>(dyad, position));
 		}
 		// sort the instance in descending order of utility values
-		Collections.sort(dyadPositionPairs, Comparator.comparing(p -> p.getRight()));
+		Collections.sort(dyadPositionPairs, Comparator.comparing(Pair<Dyad, Integer>::getRight));
 		List<Dyad> dyadList = new ArrayList<>(dyadPositionPairs.size());
 		for (Pair<Dyad, Integer> pair : dyadPositionPairs) {
 			dyadList.add(pair.getFirst());

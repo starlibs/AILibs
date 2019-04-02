@@ -1,10 +1,6 @@
 package jaicore.ml.dyadranking.dataset;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;

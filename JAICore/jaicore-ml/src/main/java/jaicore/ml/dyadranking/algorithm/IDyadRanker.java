@@ -26,6 +26,6 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * @author Helena Graf
  *
  */
-public abstract class ADyadRanker implements IBatchLearner<IDyadRankingInstance> {
+public interface IDyadRanker extends IBatchLearner<IDyadRankingInstance> {
 
 }

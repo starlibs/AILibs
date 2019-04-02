@@ -11,7 +11,7 @@ import de.upb.isys.linearalgebra.Vector;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import jaicore.ml.dyadranking.algorithm.ADyadRanker;
+import jaicore.ml.dyadranking.algorithm.IDyadRanker;
 import jaicore.ml.dyadranking.search.ADyadRankedNodeQueue;
 import jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -51,7 +51,7 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	 *            the scaler to use to scale the dataset - must have been fit to
 	 *            data already
 	 */
-	public WEKADyadRankedNodeQueue(Vector contextCharacterization, Collection<Component> components, ADyadRanker ranker,
+	public WEKADyadRankedNodeQueue(Vector contextCharacterization, Collection<Component> components, IDyadRanker ranker,
 			AbstractDyadScaler scaler, IPipelineCharacterizer characterizer) {
 		super(contextCharacterization, ranker, scaler);
 		this.components = components;

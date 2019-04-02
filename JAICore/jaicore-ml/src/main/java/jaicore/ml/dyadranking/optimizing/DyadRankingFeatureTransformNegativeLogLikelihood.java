@@ -47,15 +47,15 @@ public class DyadRankingFeatureTransformNegativeLogLikelihood
 	public double apply(Vector w) {
 		double firstSum = 0d;
 		double secondSum = 0d;
-		int N = dataset.size();
-		for (int n = 0; n < N; n++) {
-			IDyadRankingInstance instance = dataset.get(n);
-			int M_n = instance.length();
-			for (int m = 0; m < M_n; m++) {
+		int largeN = dataset.size();
+		for (int smallN = 0; smallN < largeN; smallN++) {
+			IDyadRankingInstance instance = dataset.get(smallN);
+			int mN = instance.length();
+			for (int m = 0; m < mN; m++) {
 				Dyad dyad = instance.getDyadAtPosition(m);
 				firstSum = firstSum + w.dotProduct(featureTransforms.get(instance).get(dyad));
 				double innerSum = 0d;
-				for (int l = m; l < M_n - 1; l++) {
+				for (int l = m; l < mN - 1; l++) {
 					Dyad innerDyad = instance.getDyadAtPosition(l);
 					innerSum = innerSum + Math.exp(w.dotProduct(featureTransforms.get(instance).get(innerDyad)));
 				}

@@ -8,10 +8,10 @@ import jaicore.ml.core.dataset.IInstance;
  * 
  * @author Jonas Hanselle
  * 
- * @param <TARGET> The type of the target that this {@link ICertaintyProvider}
+ * @param <T> TARGET: The type of the target that this {@link ICertaintyProvider}
  *        provides certainty for.
  */
-public interface ICertaintyProvider<TARGET> extends IPredictiveModel<TARGET> {
+public interface ICertaintyProvider<T> extends IPredictiveModel<T> {
 
 	/**
 	 * Returns the certainty for a given {@link IInstance}.

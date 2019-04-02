@@ -100,7 +100,7 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 
 	@Override
 	public INDArray toMatrix() {
-		List<INDArray> dyadList = new ArrayList<INDArray>(this.length());
+		List<INDArray> dyadList = new ArrayList<>(this.length());
 		for (Dyad dyad : this) {
 			INDArray dyadVector = dyad.toVector();
 			dyadList.add(dyadVector);

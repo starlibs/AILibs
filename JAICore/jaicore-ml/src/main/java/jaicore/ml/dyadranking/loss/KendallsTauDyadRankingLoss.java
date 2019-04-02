@@ -25,6 +25,7 @@ public class KendallsTauDyadRankingLoss implements DyadRankingLossFunction {
 		}
 		int nConc = 0;
 		int nDisc = 0;
+		
 		for (int predIndex = 0; predIndex < dyadRankingLength - 1; predIndex++) {
 			Dyad predDyad = predicted.getDyadAtPosition(predIndex);
 			int actualIndex = -1;
@@ -34,15 +35,9 @@ public class KendallsTauDyadRankingLoss implements DyadRankingLossFunction {
 					break;
 				}
 			}
+			
 			for (int i = predIndex + 1; i < dyadRankingLength; i++) {
-				Dyad predPairedDyad = predicted.getDyadAtPosition(i);
-				boolean found = false;
-				for (int j = actualIndex + 1; j < dyadRankingLength && !found; j++) {
-					if (actual.getDyadAtPosition(j).equals(predPairedDyad)) {
-						found = true;
-					}
-				}
-				if (found) {
+				if (isRankingCorrectForIndex(actual, predicted, dyadRankingLength, actualIndex, i)) {
 					nConc++;
 				} else {
 					nDisc++;
@@ -50,9 +45,20 @@ public class KendallsTauDyadRankingLoss implements DyadRankingLossFunction {
 				
 			}
 		}
-		double kendallTau = 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1) );
-	
-		return kendallTau;
+		
+		return 2.0 * (nConc - nDisc) / (dyadRankingLength * (dyadRankingLength - 1) );
+	}
+
+	private boolean isRankingCorrectForIndex(IDyadRankingInstance actual, IDyadRankingInstance predicted, int dyadRankingLength,
+			int actualIndex, int i) {
+		Dyad predPairedDyad = predicted.getDyadAtPosition(i);
+		boolean found = false;
+		for (int j = actualIndex + 1; j < dyadRankingLength && !found; j++) {
+			if (actual.getDyadAtPosition(j).equals(predPairedDyad)) {
+				found = true;
+			}
+		}
+		return found;
 	}
 
 }

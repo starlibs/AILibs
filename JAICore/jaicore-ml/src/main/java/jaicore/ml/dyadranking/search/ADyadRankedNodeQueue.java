@@ -16,7 +16,7 @@ import com.google.common.collect.HashBiMap;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.ADyadRanker;
+import jaicore.ml.dyadranking.algorithm.IDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -38,7 +38,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	/** the dyad ranker used to rank the nodes */
-	private ADyadRanker dyadRanker;
+	private IDyadRanker dyadRanker;
 
 	/** for scaling the dyads */
 	protected AbstractDyadScaler scaler;
@@ -88,7 +88,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	 * @param dyadRanker
 	 *            the dyad ranker to be used for the ranking of the nodes
 	 */
-	public ADyadRankedNodeQueue(Vector contextCharacterization, ADyadRanker dyadRanker, AbstractDyadScaler scaler) {
+	public ADyadRankedNodeQueue(Vector contextCharacterization, IDyadRanker dyadRanker, AbstractDyadScaler scaler) {
 		this(contextCharacterization);
 		this.dyadRanker = dyadRanker;
 		this.scaler = scaler;
@@ -322,7 +322,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	 * 
 	 * @return the dyad ranker
 	 */
-	public ADyadRanker getDyadRanker() {
+	public IDyadRanker getDyadRanker() {
 		return dyadRanker;
 	}
 
@@ -334,7 +334,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	 * @param dyadRanker
 	 *            the dyad ranker
 	 */
-	public void setDyadRanker(ADyadRanker dyadRanker) {
+	public void setDyadRanker(IDyadRanker dyadRanker) {
 		logger.trace("Update dyad ranker. Was {} now is {}", this.dyadRanker.getClass(), dyadRanker.getClass());
 		this.dyadRanker = dyadRanker;
 	}

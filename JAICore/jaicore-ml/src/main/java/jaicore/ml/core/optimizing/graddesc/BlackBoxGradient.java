@@ -43,18 +43,18 @@ public class BlackBoxGradient implements IGradientFunction {
 	}
 
 	@Override
-	public Vector apply(Vector x_vec) {
-		Vector gradient = new DenseDoubleVector(x_vec.length());
-		double f_x = function.apply(x_vec);
-		Vector x_prime = new DenseDoubleVector(x_vec.asArray());
-		for (int i = 0; i < x_vec.length(); i++) {
+	public Vector apply(Vector xVec) {
+		Vector gradient = new DenseDoubleVector(xVec.length());
+		double fX = function.apply(xVec);
+		Vector xPrime = new DenseDoubleVector(xVec.asArray());
+		for (int i = 0; i < xVec.length(); i++) {
 			if (i > 0) {
-				x_prime.setValue(i - 1, x_prime.getValue(i - 1) - precision);
+				xPrime.setValue(i - 1, xPrime.getValue(i - 1) - precision);
 			}
-			x_prime.setValue(i, x_prime.getValue(i) + precision);
+			xPrime.setValue(i, xPrime.getValue(i) + precision);
 			// now compute f(x') - f(x)
-			double f_x_prime = function.apply(x_prime);
-			double partial = f_x_prime - f_x;
+			double fXPrime = function.apply(xPrime);
+			double partial = fXPrime - fX;
 			gradient.setValue(i, partial);
 		}
 		return gradient;

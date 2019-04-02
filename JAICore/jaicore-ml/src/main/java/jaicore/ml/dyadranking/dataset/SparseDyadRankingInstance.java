@@ -128,10 +128,18 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 
 		return true;
 	}
+	
+	@Override
+	public int hashCode() {
+		int result = super.hashCode();
+		result = 31 * result + instance.hashCode();
+		result = 31 * result + alternatives.hashCode();
+		return result;
+	}
 
 	@Override
 	public INDArray toMatrix() {
-		List<INDArray> dyadList = new ArrayList<INDArray>(this.length());
+		List<INDArray> dyadList = new ArrayList<>(this.length());
 		for (Dyad dyad : this) {
 			INDArray dyadVector = dyad.toVector();
 			dyadList.add(dyadVector);

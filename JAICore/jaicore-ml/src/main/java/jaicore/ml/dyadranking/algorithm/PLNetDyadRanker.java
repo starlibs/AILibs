@@ -56,8 +56,8 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * @author Helena Graf, Jonas Hanselle, Michael Braun
  *
  */
-public class PLNetDyadRanker extends APLDyadRanker
-		implements IOnlineLearner<IDyadRankingInstance>, ICertaintyProvider<IDyadRankingInstance> {
+public class PLNetDyadRanker
+		implements IPLDyadRanker, IOnlineLearner<IDyadRankingInstance>, ICertaintyProvider<IDyadRankingInstance> {
 
 	private static final Logger log = LoggerFactory.getLogger(PLNetDyadRanker.class);
 
@@ -79,12 +79,14 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Constructs a new {@link PLNetDyadRanker} using the given
 	 * {@link IPLNetDyadRankerConfiguration}.
 	 * 
-	 * @param config Configuration for the {@link PLNetDyadRanker}.
+	 * @param config
+	 *            Configuration for the {@link PLNetDyadRanker}.
 	 */
 	public PLNetDyadRanker(IPLNetDyadRankerConfiguration config) {
 		this.configuration = config;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public void train(IDataset dataset) throws TrainingException {
 		if (!(dataset instanceof DyadRankingDataset)) {
@@ -95,7 +97,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		train(drDataset.toND4j());
 	}
 
-	public void train(List<INDArray> dataset) throws TrainingException {
+	public void train(List<INDArray> dataset) {
 		train(dataset, configuration.plNetMaxEpochs(), configuration.plNetEarlyStoppingTrainRatio());
 		if (configuration.plNetEarlyStoppingRetrain()) {
 			int maxEpochs = epoch;
@@ -104,12 +106,11 @@ public class PLNetDyadRanker extends APLDyadRanker
 		}
 	}
 
-	public void train(DyadRankingDataset dataset, int maxEpochs, double earlyStoppingTrainRatio)
-			throws TrainingException {
+	public void train(DyadRankingDataset dataset, int maxEpochs, double earlyStoppingTrainRatio) {
 		train(dataset.toND4j(), maxEpochs, earlyStoppingTrainRatio);
 	}
 
-	public void train(List<INDArray> dataset, int maxEpochs, double earlyStoppingTrainRatio) throws TrainingException {
+	public void train(List<INDArray> dataset, int maxEpochs, double earlyStoppingTrainRatio) {
 		List<INDArray> drTrain = dataset.subList(0, (int) (earlyStoppingTrainRatio * dataset.size()));
 		List<INDArray> drTest = dataset.subList((int) (earlyStoppingTrainRatio * dataset.size()), dataset.size());
 
@@ -129,19 +130,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 		while ((patience < configuration.plNetEarlyStoppingPatience()
 				|| configuration.plNetEarlyStoppingPatience() <= 0) && (epoch < maxEpochs || maxEpochs == 0)) {
 			// Iterate through training data
-			int miniBatchSize = configuration.plNetMiniBatchSize();
-			List<INDArray> miniBatch = new ArrayList<>(miniBatchSize);
-			for (INDArray dyadRankingInstance : drTrain) {
-				miniBatch.add(dyadRankingInstance);
-				if (miniBatch.size() == miniBatchSize) {
-					this.updateWithMinibatch(miniBatch);
-					miniBatch.clear();
-				}
-			}
-			if (!miniBatch.isEmpty()) {
-				this.updateWithMinibatch(miniBatch);
-				miniBatch.clear();
-			}
+			tryUpdatingWithMinibatch(drTrain);
+
 			log.debug("plNet params: {}", plNet.params());
 			earlyStoppingCounter++;
 			// Compute validation error
@@ -160,6 +150,22 @@ public class PLNetDyadRanker extends APLDyadRanker
 			epoch++;
 		}
 		plNet = currentBestModel;
+	}
+
+	private void tryUpdatingWithMinibatch(List<INDArray> drTrain) {
+		int miniBatchSize = configuration.plNetMiniBatchSize();
+		List<INDArray> miniBatch = new ArrayList<>(miniBatchSize);
+		for (INDArray dyadRankingInstance : drTrain) {
+			miniBatch.add(dyadRankingInstance);
+			if (miniBatch.size() == miniBatchSize) {
+				this.updateWithMinibatch(miniBatch);
+				miniBatch.clear();
+			}
+		}
+		if (!miniBatch.isEmpty()) {
+			this.updateWithMinibatch(miniBatch);
+			miniBatch.clear();
+		}
 	}
 
 	private INDArray computeScaledGradient(INDArray dyadMatrix) {
@@ -190,7 +196,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * returned gradient is already scaled by the updater. The update procedure is
 	 * based on algorithm 2 in [1].
 	 * 
-	 * @param instance The instance to compute the scaled gradient for.
+	 * @param instance
+	 *            The instance to compute the scaled gradient for.
 	 * @return The gradient for the given instance, multiplied by the updater's
 	 *         learning rate.
 	 */
@@ -234,8 +241,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Updates this {@link PLNetDyadRanker} based on a given mini batch of
 	 * {@link INDarray}s representing dyad rankings.
 	 * 
-	 * @param minibatch A mini batch consisting of a {@link List} of
-	 *                  {@link INDarray}.
+	 * @param minibatch
+	 *            A mini batch consisting of a {@link List} of {@link INDarray}.
 	 */
 	private void updateWithMinibatch(List<INDArray> minibatch) {
 		double actualMiniBatchSize = minibatch.size();
@@ -254,9 +261,11 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * based on algorithm 2 in [1].
 	 * 
 	 * 
-	 * @param instances The {@link IInstance} the update should be based on. Needs
-	 *                  to be a {@link IDyadRankingInstance}.
-	 * @throws TrainingException If something fails during the update process.
+	 * @param instances
+	 *            The {@link IInstance} the update should be based on. Needs to be a
+	 *            {@link IDyadRankingInstance}.
+	 * @throws TrainingException
+	 *             If something fails during the update process.
 	 */
 	@Override
 	public void update(IInstance instance) throws TrainingException {
@@ -328,6 +337,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 		return new DyadRankingInstance(ranking);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public List<IDyadRankingInstance> predict(IDataset dataset) throws PredictionException {
 		if (!(dataset instanceof DyadRankingDataset)) {
@@ -346,8 +356,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Computes the average error on a set of dyad rankings in terms on the negative
 	 * log likelihood (NLL).
 	 * 
-	 * @param drTest Test data on which the error should be computed given as a
-	 *               {@link List} of {@link IDyadRankingInstance}
+	 * @param drTest
+	 *            Test data on which the error should be computed given as a
+	 *            {@link List} of {@link IDyadRankingInstance}
 	 * @return Average error on the given test data
 	 */
 	private double computeAvgError(List<INDArray> drTest) {
@@ -378,8 +389,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Creates a simple feed-forward {@link MultiLayerNetwork} that can be used as a
 	 * PLNet for dyad-ranking.
 	 * 
-	 * @param numInputs The number of inputs to the network, i.e. the number of
-	 *                  features of a dyad.
+	 * @param numInputs
+	 *            The number of inputs to the network, i.e. the number of features
+	 *            of a dyad.
 	 * @return New {@link MultiLayerNetwork}
 	 */
 	private MultiLayerNetwork createNetwork(int numInputs) {
@@ -420,7 +432,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Converts a dyad to a {@link INDArray} row vector consisting of a
 	 * concatenation of the instance and alternative features.
 	 * 
-	 * @param dyad The dyad to convert.
+	 * @param dyad
+	 *            The dyad to convert.
 	 * @return The dyad in {@link INDArray} row vector form.
 	 */
 	private INDArray dyadToVector(Dyad dyad) {
@@ -433,7 +446,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Converts a dyad ranking to a {@link INDArray} matrix where each row
 	 * corresponds to a dyad.
 	 * 
-	 * @param drInstance The dyad ranking to convert to a matrix.
+	 * @param drInstance
+	 *            The dyad ranking to convert to a matrix.
 	 * @return The dyad ranking in {@link INDArray} matrix form.
 	 */
 	private INDArray dyadRankingToMatrix(IDyadRankingInstance drInstance) {
@@ -451,8 +465,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Creates a simple feed-forward {@link MultiLayerNetwork} using the json
 	 * representation of a {@link MultiLayerConfiguration} in the file .
 	 * 
-	 * @param configFile {@link File} containing the json representation of the
-	 *                   {@link MultiLayerConfiguration}
+	 * @param configFile
+	 *            {@link File} containing the json representation of the
+	 *            {@link MultiLayerConfiguration}
 	 */
 	public void createNetworkFromDl4jConfigFile(File configFile) {
 		String json = "";
@@ -470,7 +485,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Save a trained model at a given file path. Note that the produced file is a
 	 * zip file and a ".zip" ending is added.
 	 * 
-	 * @param filePath The file path to save to.
+	 * @param filePath
+	 *            The file path to save to.
 	 * @throws IOException
 	 */
 	public void saveModelToFile(String filePath) throws IOException {
@@ -486,7 +502,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * whether the loaded model is a valid PLNet or conforms to the configuration of
 	 * the object.
 	 * 
-	 * @param filePath The file to load from.
+	 * @param filePath
+	 *            The file to load from.
 	 * @throws IOException
 	 */
 	public void loadModelFromFile(String filePath) throws IOException {
@@ -524,7 +541,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	/**
 	 * Returns the pair of {@link Dyad}s for which the model is least certain.
 	 * 
-	 * @param drInstance Ranking for which certainty should be assessed.
+	 * @param drInstance
+	 *            Ranking for which certainty should be assessed.
 	 * @return The pair of {@link Dyad}s for which the model is least certain.
 	 */
 	public DyadRankingInstance getPairWithLeastCertainty(IDyadRankingInstance drInstance) {
@@ -570,8 +588,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * probability of a particular ranking diminishes drastically with increasing
 	 * length of the ranking.
 	 * 
-	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
-	 *                   computed.
+	 * @param drInstance
+	 *            {@link IDyadRankingInstance} for which the probability is
+	 *            computed.
 	 * @return Probablity of the top ranking for a given
 	 *         {@link IDyadRankingInstance} given the Plackett Luce model
 	 *         parametrized by the skill values predicted by the PLNet.
@@ -604,7 +623,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			for (int j = i; j < Integer.min(k, dyadUtilityPairs.size()); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
-			if(sumOfRemainingSkills != 0)
+			if (sumOfRemainingSkills != 0)
 				currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
 			else
 				currentProbability = Double.NaN;
@@ -619,8 +638,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * probability of a particular ranking diminishes drastically with increasing
 	 * length of the ranking.
 	 * 
-	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
-	 *                   computed.
+	 * @param drInstance
+	 *            {@link IDyadRankingInstance} for which the probability is
+	 *            computed.
 	 * @return Log of the probablity of the top ranking for a given
 	 *         {@link IDyadRankingInstance} given the Plackett Luce model
 	 *         parametrized by the skill values predicted by the PLNet.
@@ -661,9 +681,11 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * probability of a particular ranking diminishes drastically with increasing
 	 * length of the ranking.
 	 * 
-	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
-	 *                   computed.
-	 * @param k          Number of top dyads to be considered.
+	 * @param drInstance
+	 *            {@link IDyadRankingInstance} for which the probability is
+	 *            computed.
+	 * @param k
+	 *            Number of top dyads to be considered.
 	 * @return Log of the probablity of the top k of a the given
 	 *         {@link IDyadRankingInstance} given the Plackett Luce model
 	 *         parametrized by the skill values predicted by the PLNet.
@@ -702,8 +724,9 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Plackett Luce model parametrized by the latent skill values predicted by the
 	 * PLNet.
 	 * 
-	 * @param drInstance {@link IDyadRankingInstance} for which the probability is
-	 *                   computed.
+	 * @param drInstance
+	 *            {@link IDyadRankingInstance} for which the probability is
+	 *            computed.
 	 * @return Probability of the given {@link IDyadRankingInstance} given the
 	 *         Plackett Luce model parametrized by the skill values predicted by the
 	 *         PLNet.
@@ -731,7 +754,7 @@ public class PLNetDyadRanker extends APLDyadRanker
 			for (int j = i; j < dyadUtilityPairs.size(); j++) {
 				sumOfRemainingSkills += Math.exp(dyadUtilityPairs.get(j).getRight());
 			}
-			if(sumOfRemainingSkills!=0)
+			if (sumOfRemainingSkills != 0)
 				currentProbability *= (Math.exp(dyadUtilityPairs.get(i).getRight()) / sumOfRemainingSkills);
 			else
 				currentProbability = Double.NaN;
@@ -778,7 +801,8 @@ public class PLNetDyadRanker extends APLDyadRanker
 	 * Returns the latent skill value predicted by the PLNet for a given
 	 * {@link Dyad}.
 	 * 
-	 * @param dyad {@link Dyad} for which the skill is to be predicted.
+	 * @param dyad
+	 *            {@link Dyad} for which the skill is to be predicted.
 	 * @return Skill of the given {@link Dyad}.
 	 */
 	public double getSkillForDyad(Dyad dyad) {

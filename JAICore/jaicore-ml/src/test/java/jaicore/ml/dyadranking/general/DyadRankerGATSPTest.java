@@ -4,7 +4,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import org.junit.runners.Parameterized.Parameters;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -32,7 +31,6 @@ import jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
 import jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
 import jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import jaicore.ml.dyadranking.util.DyadStandardScaler;
-import jaicore.ml.dyadranking.util.DyadUnitIntervalScaler;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -253,7 +251,7 @@ public class DyadRankerGATSPTest {
 	}
 
 	@Parameters
-	public static List<APLDyadRanker> supplyDyadRankers() {
+	public static List<IPLDyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
 		// Use a simple config such that the test finishes quickly
 		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");

@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.ml.dyadranking.algorithm.ADyadRanker;
+import jaicore.ml.dyadranking.algorithm.IDyadRanker;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import jaicore.ml.dyadranking.util.DyadMinMaxScaler;
@@ -32,7 +32,7 @@ public abstract class ADyadRankedNodeQueueConfig<N>
 	 * the ranker used to rank dyads consisting of pipeline metafeatures and dataset
 	 * metafeatures
 	 */
-	protected ADyadRanker ranker;
+	protected IDyadRanker ranker;
 	
 	/** 
 	 * for scaling the dyads 
@@ -64,7 +64,7 @@ public abstract class ADyadRankedNodeQueueConfig<N>
 	 * 
 	 * @return ranker the used ranker
 	 */
-	public ADyadRanker getRanker() {
+	public IDyadRanker getRanker() {
 		return ranker;
 	}
 
@@ -73,7 +73,7 @@ public abstract class ADyadRankedNodeQueueConfig<N>
 	 * 
 	 * @param ranker the used ranker
 	 */
-	public void setRanker(ADyadRanker ranker) {
+	public void setRanker(IDyadRanker ranker) {
 		this.ranker = ranker;
 	}
 

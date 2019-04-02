@@ -19,7 +19,7 @@ import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import jaicore.ml.dyadranking.Dyad;
-import jaicore.ml.dyadranking.algorithm.APLDyadRanker;
+import jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -44,7 +44,7 @@ import jaicore.ml.dyadranking.optimizing.IDyadRankingFeatureTransformPLGradientF
  * @author Helena Graf, Mirko Jürgens
  *
  */
-public class FeatureTransformPLDyadRanker extends APLDyadRanker {
+public class FeatureTransformPLDyadRanker implements IPLDyadRanker {
 
 	private static final Logger log = LoggerFactory.getLogger(FeatureTransformPLDyadRanker.class);
 

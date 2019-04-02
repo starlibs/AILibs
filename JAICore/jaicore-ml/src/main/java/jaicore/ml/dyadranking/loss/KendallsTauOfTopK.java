@@ -54,24 +54,11 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 
 				boolean iAndJAreBothInPredictedTopK = predictedI < k && predictedJ < k;
 				boolean iAndJAreBothInActualTopK = actualI < k && actualJ < k;
+				
 				// case 1: i,j are both in the top k list of the predicted and actual ranking
-				if (iAndJAreBothInActualTopK && iAndJAreBothInPredictedTopK) {
-					// case 1.1: if they are ranked the same in both topk lists: 0 penalty
-					boolean iIsBetterThanJInPredictedAndActualRanking = predictedI < predictedJ && actualI < actualJ;
-					boolean jIsBetterThanIInPredictedAndActualRanking = predictedI > predictedJ && actualI > actualJ;
-					if (iIsBetterThanJInPredictedAndActualRanking || jIsBetterThanIInPredictedAndActualRanking) {
-						penalty = 0;
-					}
-					// case 1.2 ranking mismatch in one of them
-					boolean iIsBetterThanJInPredictedButNotInActualRanking = predictedI < predictedJ
-							&& actualI > actualJ;
-					boolean jIsBetterThanIInPredictedButNotInActualRanking = predictedI > predictedJ
-							&& actualI < actualJ;
-					if (iIsBetterThanJInPredictedButNotInActualRanking
-							|| jIsBetterThanIInPredictedButNotInActualRanking) {
-						penalty = 1;
-					}
-				}
+				penalty = checkCase1(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
+						iAndJAreBothInActualTopK);
+				
 				boolean justIIsInPredictedTopK = predictedI < k && predictedJ >= k;
 				boolean justJIsInPredictedTopK = predictedJ < k && predictedI >= k;
 
@@ -80,73 +67,119 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 
 				// case 2: i,j are both in one top k ranking but for the other ranking just one
 				// is in the top k
-				boolean bothPredictedAreInTopKButJustOneActual = (iAndJAreBothInPredictedTopK && justIIsInActualTopK)
-						|| (iAndJAreBothInPredictedTopK && justJIsInPredictedTopK);
-				boolean bothActualAreInTopKButJustOnePredicted = (iAndJAreBothInActualTopK && justIIsInPredictedTopK)
-						|| (iAndJAreBothInActualTopK && justJIsInPredictedTopK);
-
-				if (bothActualAreInTopKButJustOnePredicted) {
-					if (actualI < actualJ) {
-						// we know that actualI < actualJ < k
-						// if just i is in the predicted top k then we know that predictedI < predictedJ
-						if (justIIsInPredictedTopK) {
-							penalty = 0;
-						} else {
-							// predictedJ > predictedI
-							penalty = 1;
-						}
-					} else {
-						// actualJ < actualI
-						// if just j is in the predicted top k the predictedJ < predictedI
-						if (justJIsInPredictedTopK) {
-							penalty = 0;
-						} else {
-							penalty = 1;
-						}
-					}
-				}
-				if (bothPredictedAreInTopKButJustOneActual) {
-					if (predictedI < predictedJ) {
-						// again, we know that predictedI < predictedJ < k
-						// likewise, if the i of the actual ranking is in top k we are fine
-						if (justIIsInActualTopK) {
-							penalty = 0;
-						} else {
-							penalty = 1;
-						}
-					} else {
-						// predictedJ < predictedI < k
-						if (justJIsInActualTopK) {
-							penalty = 0;
-						} else {
-							penalty = 1;
-						}
-					}
-				}
+				penalty = checkCase2(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
+						iAndJAreBothInActualTopK, justIIsInPredictedTopK, justJIsInPredictedTopK, justIIsInActualTopK,
+						justJIsInActualTopK);
+				
 				// case 3: i, but not j, appears in one top k list , and j, but not i, appears
 				// in the other top k list
-				if (justIIsInActualTopK && justJIsInPredictedTopK) {
-					penalty = 1;
-				}
-				if (justJIsInActualTopK && justIIsInPredictedTopK) {
-					penalty = 1;
-				}
+				penalty = checkCase3(penalty, justIIsInPredictedTopK, justJIsInPredictedTopK, justIIsInActualTopK,
+						justJIsInActualTopK);
 
 				// case 4:
-				boolean neitherIOrJAreInPredictedTopK = predictedI >= k && predictedJ >= k;
-				boolean neitherIOrJAreInActualTopK = actualI >= k && actualJ >= k;
-
-				if (iAndJAreBothInActualTopK && neitherIOrJAreInPredictedTopK) {
-					penalty = p;
-				}
-				if (iAndJAreBothInPredictedTopK && neitherIOrJAreInActualTopK) {
-					penalty = p;
-				}
+				penalty = checkCase4(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
+						iAndJAreBothInActualTopK);
 
 				kendallsDistance += penalty;
 			}
 		}
 
 		return kendallsDistance;
+	}
+
+	private double checkCase1(int actualI, int predictedI, int actualJ, int predictedJ, double penalty,
+			boolean iAndJAreBothInPredictedTopK, boolean iAndJAreBothInActualTopK) {
+		if (iAndJAreBothInActualTopK && iAndJAreBothInPredictedTopK) {
+			// case 1.1: if they are ranked the same in both topk lists: 0 penalty
+			boolean iIsBetterThanJInPredictedAndActualRanking = predictedI < predictedJ && actualI < actualJ;
+			boolean jIsBetterThanIInPredictedAndActualRanking = predictedI > predictedJ && actualI > actualJ;
+			if (iIsBetterThanJInPredictedAndActualRanking || jIsBetterThanIInPredictedAndActualRanking) {
+				penalty = 0;
+			}
+			// case 1.2 ranking mismatch in one of them
+			boolean iIsBetterThanJInPredictedButNotInActualRanking = predictedI < predictedJ
+					&& actualI > actualJ;
+			boolean jIsBetterThanIInPredictedButNotInActualRanking = predictedI > predictedJ
+					&& actualI < actualJ;
+			if (iIsBetterThanJInPredictedButNotInActualRanking
+					|| jIsBetterThanIInPredictedButNotInActualRanking) {
+				penalty = 1;
+			}
+		}
+		return penalty;
+	}
+
+	private double checkCase2(int actualI, int predictedI, int actualJ, int predictedJ, double penalty,
+			boolean iAndJAreBothInPredictedTopK, boolean iAndJAreBothInActualTopK, boolean justIIsInPredictedTopK,
+			boolean justJIsInPredictedTopK, boolean justIIsInActualTopK, boolean justJIsInActualTopK) {
+		boolean bothPredictedAreInTopKButJustOneActual = (iAndJAreBothInPredictedTopK && justIIsInActualTopK)
+				|| (iAndJAreBothInPredictedTopK && justJIsInPredictedTopK);
+		boolean bothActualAreInTopKButJustOnePredicted = (iAndJAreBothInActualTopK && justIIsInPredictedTopK)
+				|| (iAndJAreBothInActualTopK && justJIsInPredictedTopK);
+
+		if (bothActualAreInTopKButJustOnePredicted) {
+			if (actualI < actualJ) {
+				// we know that actualI < actualJ < k
+				// if just i is in the predicted top k then we know that predictedI < predictedJ
+				if (justIIsInPredictedTopK) {
+					penalty = 0;
+				} else {
+					// predictedJ > predictedI
+					penalty = 1;
+				}
+			} else {
+				// actualJ < actualI
+				// if just j is in the predicted top k the predictedJ < predictedI
+				if (justJIsInPredictedTopK) {
+					penalty = 0;
+				} else {
+					penalty = 1;
+				}
+			}
+		}
+		if (bothPredictedAreInTopKButJustOneActual) {
+			if (predictedI < predictedJ) {
+				// again, we know that predictedI < predictedJ < k
+				// likewise, if the i of the actual ranking is in top k we are fine
+				if (justIIsInActualTopK) {
+					penalty = 0;
+				} else {
+					penalty = 1;
+				}
+			} else {
+				// predictedJ < predictedI < k
+				if (justJIsInActualTopK) {
+					penalty = 0;
+				} else {
+					penalty = 1;
+				}
+			}
+		}
+		return penalty;
+	}
+
+	private double checkCase3(double penalty, boolean justIIsInPredictedTopK, boolean justJIsInPredictedTopK,
+			boolean justIIsInActualTopK, boolean justJIsInActualTopK) {
+		if (justIIsInActualTopK && justJIsInPredictedTopK) {
+			penalty = 1;
+		}
+		if (justJIsInActualTopK && justIIsInPredictedTopK) {
+			penalty = 1;
+		}
+		return penalty;
+	}
+
+	private double checkCase4(int actualI, int predictedI, int actualJ, int predictedJ, double penalty,
+			boolean iAndJAreBothInPredictedTopK, boolean iAndJAreBothInActualTopK) {
+		boolean neitherIOrJAreInPredictedTopK = predictedI >= k && predictedJ >= k;
+		boolean neitherIOrJAreInActualTopK = actualI >= k && actualJ >= k;
+
+		if (iAndJAreBothInActualTopK && neitherIOrJAreInPredictedTopK) {
+			penalty = p;
+		}
+		if (iAndJAreBothInPredictedTopK && neitherIOrJAreInActualTopK) {
+			penalty = p;
+		}
+		return penalty;
 	}
 }

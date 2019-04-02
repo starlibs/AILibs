@@ -1,5 +1,7 @@
 package de.upb.crc901.automl.mlplan.test;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,7 +44,16 @@ public class JSONSerializationTest {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new HASCOJacksonModule(loader.getComponents()));
 
-		 mapper.readValue(oldPlainJson, ComponentInstance.class);
+		// try to deserialize
+		boolean serializationWithoutError = false;
+		try {
+			mapper.readValue(oldPlainJson, ComponentInstance.class);
+			serializationWithoutError = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		assertEquals(true, serializationWithoutError);
 
 	}
 
@@ -64,7 +75,15 @@ public class JSONSerializationTest {
 			String serializedCI = content.get("composition");
 
 			// try to deserialize
-			mapper.readValue(serializedCI, ComponentInstance.class);
+			boolean serializationWithoutError = false;
+			try {
+				mapper.readValue(serializedCI, ComponentInstance.class);
+				serializationWithoutError = true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			assertEquals(true, serializationWithoutError);
 		}
 
 	}

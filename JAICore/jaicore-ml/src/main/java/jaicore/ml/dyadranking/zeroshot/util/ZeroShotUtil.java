@@ -16,48 +16,39 @@ public class ZeroShotUtil {
 		// Intentionally left blank
 	}
 
-	public static String[] mapJ48InputsToWekaOptions(double C, double M) throws Exception {
+	public static String[] mapJ48InputsToWekaOptions(double c, double m) throws Exception {
+		long roundedM = Math.round(m);
 
-		long roundedM = Math.round(M);
-
-		String[] options = Utils.splitOptions("-C " + C + " -M " + roundedM);
-
-		return options;
+		return Utils.splitOptions("-C " + c + " -M " + roundedM);
 	}
 
-	public static String[] mapSMORBFInputsToWekaOptions(double CExp, double RBFGammaExp) throws Exception {
-		double C = Math.pow(10, CExp);
-		double G = Math.pow(10, RBFGammaExp);
+	public static String[] mapSMORBFInputsToWekaOptions(double cExp, double rbfGammaExp) throws Exception {
+		double c = Math.pow(10, cExp);
+		double g = Math.pow(10, rbfGammaExp);
 
-		String C_complexity_const_option = "-C " + C;
-		String RBF_gamma_option = " -K \"weka.classifiers.functions.supportVector.RBFKernel -C 250007 -G " + G + "\"";
+		String cComplexityConstOption = "-C " + c;
+		String rbfGammaOption = " -K \"weka.classifiers.functions.supportVector.RBFKernel -C 250007 -G " + g + "\"";
 
-		String options = C_complexity_const_option + RBF_gamma_option;
+		String options = cComplexityConstOption + rbfGammaOption;
 
-		String[] optionsSplit = Utils.splitOptions(options);
-
-		return optionsSplit;
+		return Utils.splitOptions(options);
 	}
 
-	public static String[] mapMLPInputsToWekaOptions(double LExp, double MExp, double N) throws Exception {
-		double L = Math.pow(10, LExp);
-		double M = Math.pow(10, MExp);
-		long roundedN = Math.round(N);
+	public static String[] mapMLPInputsToWekaOptions(double lExp, double mExp, double n) throws Exception {
+		double l = Math.pow(10, lExp);
+		double m = Math.pow(10, mExp);
+		long roundedN = Math.round(n);
 
-		String[] options = Utils.splitOptions("-L " + L + " -M " + M + " -N " + roundedN);
-
-		return options;
+		return Utils.splitOptions("-L " + l + " -M " + m + " -N " + roundedN);
 	}
 
-	public static String[] mapRFInputsToWekaOptions(double I, double KFraction, double M, double depth, double KNumAttributes) throws Exception {
-		int I_rounded = (int) Math.round(I);
-		int K = (int) Math.ceil(KNumAttributes * KFraction);
-		int M_rounded = (int) Math.round(M);
-		int depth_rounded = (int) Math.round(depth);
+	public static String[] mapRFInputsToWekaOptions(double i, double kFraction, double m, double depth, double kNumAttributes) throws Exception {
+		int iRounded = (int) Math.round(i);
+		int k = (int) Math.ceil(kNumAttributes * kFraction);
+		int mRounded = (int) Math.round(m);
+		int depthRounded = (int) Math.round(depth);
 
-		String[] options = Utils.splitOptions(" -I " + I_rounded + " -K " + K + " -M " + M_rounded + " -depth " + depth_rounded);
-
-		return options;
+		return Utils.splitOptions(" -I " + iRounded + " -K " + k + " -M " + mRounded + " -depth " + depthRounded);
 	}
 
 	public static INDArray unscaleParameters(INDArray parameters, DyadMinMaxScaler scaler, int numHyperPars) {
