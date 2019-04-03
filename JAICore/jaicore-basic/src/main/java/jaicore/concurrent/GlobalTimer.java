@@ -10,17 +10,17 @@ import java.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TimeoutTimer extends Timer {
-	private static final Logger logger = LoggerFactory.getLogger(TimeoutTimer.class);
-	private static final TimeoutTimer instance = new TimeoutTimer();
+public class GlobalTimer extends Timer {
+	private static final Logger logger = LoggerFactory.getLogger(GlobalTimer.class);
+	private static final GlobalTimer instance = new GlobalTimer();
 	private final List<TimeoutSubmitter> emittedSubmitters = new ArrayList<>();
 	private final Set<TimerTask> tasks = new HashSet<>();
 
-	private TimeoutTimer() {
+	private GlobalTimer() {
 		super("Global TimeoutTimer", true);
 	}
 
-	public static TimeoutTimer getInstance() {
+	public static GlobalTimer getInstance() {
 		return instance;
 	}
 
@@ -41,40 +41,40 @@ public class TimeoutTimer extends Timer {
 	public class TimeoutSubmitter {
 		private TimeoutSubmitter() {
 			synchronized (instance) {
-				TimeoutTimer.this.emittedSubmitters.add(this);
+				GlobalTimer.this.emittedSubmitters.add(this);
 			}
 		}
 
-		public synchronized TimerTask interruptMeAfterMS(final int delay, String reason) {
+		public synchronized TimerTask interruptMeAfterMS(final int delay, final String reason) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay, reason);
 		}
 
-		public synchronized TimerTask interruptMeAfterMS(final int delay, String reason, final Runnable preInterruptionHook) {
+		public synchronized TimerTask interruptMeAfterMS(final int delay, final String reason, final Runnable preInterruptionHook) {
 			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
 			return this.interruptThreadAfterMS(Thread.currentThread(), delay, reason, preInterruptionHook);
 		}
 
-		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, String reason) {
+		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, final String reason) {
 			return this.interruptThreadAfterMS(thread, delay, reason, null);
 		}
 
-		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, String reason, final Runnable preInterruptionHook) {
+		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, final String reason, final Runnable preInterruptionHook) {
 			TimerTask task = new InterruptionTimerTask(reason, thread, preInterruptionHook);
-			if (!TimeoutTimer.this.emittedSubmitters.contains(this)) {
+			if (!GlobalTimer.this.emittedSubmitters.contains(this)) {
 				throw new IllegalStateException("Cannot submit interrupt job to submitter " + this + " since it has already been closed!");
 			}
-			TimeoutTimer.this.schedule(task, delay);
+			GlobalTimer.this.schedule(task, delay);
 
 			/* create id for job and return it */
-			TimeoutTimer.this.tasks.add(task);
+			GlobalTimer.this.tasks.add(task);
 			logger.info("Job {} scheduled for in {}ms.", task, delay);
 			return task;
 		}
 
 		public void close() {
 			synchronized (instance) {
-				TimeoutTimer.this.emittedSubmitters.remove(this);
+				GlobalTimer.this.emittedSubmitters.remove(this);
 				logger.info("Canceled timer");
 			}
 		}

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicClockModelPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
@@ -29,6 +30,14 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> exte
 
 		/* let the best first factory configure general aspects of the best first search */
 		BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> search = super.getAlgorithm();
+
+		/* check that node evaluator supports uncertainty */
+		if (!(search.getNodeEvaluator() instanceof IPotentiallyUncertaintyAnnotatingNodeEvaluator)) {
+			throw new UnsupportedOperationException("Cannot create uncertainty based search with node evaluator " + search.getNodeEvaluator().getClass().getName() + ", which does not implement " + IPotentiallyUncertaintyAnnotatingNodeEvaluator.class.getName());
+		}
+		if (!((IPotentiallyUncertaintyAnnotatingNodeEvaluator<?,?>)search.getNodeEvaluator()).annotatesUncertainty()) {
+			throw new UnsupportedOperationException("The given node evaluator supports uncertainty annotation, but it declares that it will not annotate uncertainty. Maybe no uncertainty source has been defined.");
+		}
 
 		/* now set uncertainty-specific behavior */
 		switch (this.oversearchAvoidanceConfig.getOversearchAvoidanceMode()) {

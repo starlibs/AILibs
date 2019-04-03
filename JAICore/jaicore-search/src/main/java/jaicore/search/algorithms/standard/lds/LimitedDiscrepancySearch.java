@@ -87,7 +87,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 
 			case active:
 				this.currentK = this.maxK;
-				AlgorithmEvent event = this.computeTimeoutAware(() -> this.ldsProbe(this.traversalTree));
+				AlgorithmEvent event = this.ldsProbe(this.traversalTree);
 				if (event instanceof NoMoreNodesOnLevelEvent) {
 					if (this.currentK == 0) { // if all deviations have been used, increase number of maximum deviations
 						this.logger.info("Probe process has no more nodes to be considered, restarting with augmented k {}", this.maxK + 1);
@@ -133,8 +133,9 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	 * @throws InterruptedException
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws AlgorithmTimeoutedException
+	 * @throws AlgorithmException
 	 */
-	private AlgorithmEvent ldsProbe(final TreeNode<T> node) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+	private AlgorithmEvent ldsProbe(final TreeNode<T> node) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		this.logger.debug("Probing under node {} with k = {}. Exhausted: {}", node.getValue(), this.currentK, this.exhausted.contains(node));
 
 		/* return solution event if this is a solution node */
@@ -150,12 +151,14 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		/* if this node has not been expanded, compute successors and the priorities among them and attach them to search graph */
 		if (!this.expanded.contains(node)) {
 			this.expanded.add(node);
-			Collection<NodeExpansionDescription<T, A>> succ = this.successorGenerator.generateSuccessors(node.getValue());
+			this.logger.debug("Starting successor generation of {}", node.getValue());
+			long start = System.currentTimeMillis();
+			Collection<NodeExpansionDescription<T, A>> succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()));
 			if (succ == null || succ.isEmpty()) {
 				this.logger.debug("No successors were generated.");
 				return new NoMoreNodesOnLevelEvent(this.getId());
 			}
-			this.logger.debug("Generated {} successors.", succ.size());
+			this.logger.debug("Computed {} successors in {}ms. Attaching the nodes to the local model.", succ.size(), System.currentTimeMillis() - start);
 			List<NodeExpansionDescription<T, A>> prioSucc = succ.stream().sorted((d1, d2) -> this.heuristic.compare(d1.getTo(), d2.getTo())).collect(Collectors.toList());
 			this.checkAndConductTermination();
 			List<TreeNode<T>> generatedNodes = new ArrayList<>();
@@ -163,6 +166,8 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 				TreeNode<T> newNode = this.newNode(node, successorDescription.getTo());
 				generatedNodes.add(newNode);
 			}
+			this.logger.debug("Local model updated.");
+			this.checkAndConductTermination();
 		} else {
 			this.logger.info("Not expanding node {} again.", node.getValue());
 		}

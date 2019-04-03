@@ -48,6 +48,12 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 */
 	@SuppressWarnings("unchecked")
 	private boolean dominates(final Node<T, V> p, final Node<T, V> q) {
+		if (!p.getAnnotations().containsKey("uncertainty")) {
+			throw new IllegalArgumentException("Node " + p + " has no uncertainty information.");
+		}
+		if (!q.getAnnotations().containsKey("uncertainty")) {
+			throw new IllegalArgumentException("Node " + q + " has no uncertainty information.");
+		}
 		// Get f and u values of nodes
 		V pF = (V) p.getAnnotation("f");
 		double pU = (double) p.getAnnotation("uncertainty");

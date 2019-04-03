@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
@@ -32,7 +31,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.concurrent.TimeoutTimer;
+import jaicore.concurrent.GlobalTimer;
 import jaicore.interrupt.Interrupter;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
@@ -51,7 +50,7 @@ import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
-implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IPotentiallyUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
 	private static final String ALGORITHM_ID = "RandomCompletion";
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
@@ -80,7 +79,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	private final Predicate<T> priorityPredicateForRDFS;
 
 	/* sub-tools for conducting and analyzing random completions */
-	private Timer timeoutTimer;
+	private GlobalTimer timeoutTimer;
 	private Map<Node<T, ?>, TimerTask> activeTasks = new ConcurrentHashMap<>();
 
 	private RandomSearch<T, ?> completer;
@@ -128,10 +127,11 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	private boolean logAssertionActivation() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("--------------------------------------------------------");
-		sb.append("Attention: assertions are activated.");
-		sb.append("This causes significant performance loss using RandomCompleter.");
-		sb.append("If you are not in debugging mode, we strongly suggest to deactive assertions.");
+		sb.append("Assertion remark:\n--------------------------------------------------------\n");
+		sb.append("Assertions are activated.\n");
+		sb.append("This may cause significant performance loss using ");
+		sb.append(RandomCompletionBasedNodeEvaluator.class.getName());
+		sb.append(".\nIf you are not in debugging mode, we strongly suggest to disable assertions.\n");
 		sb.append("--------------------------------------------------------");
 		this.logger.info("{}", sb);
 		return true;
@@ -182,10 +182,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					}
 				}
 
-				/*
-				 * make sure that the completer has the path from the root to the node in
-				 * question
-				 */
+				/* make sure that the completer has the path from the root to the node in question */
 				if (!this.completer.knowsNode(n.getPoint())) {
 					synchronized (this.completer) {
 						this.completer.appendPathToNode(n.externalPath());
@@ -278,7 +275,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							}
 						};
 						if (this.timeoutTimer == null) {
-							this.timeoutTimer = TimeoutTimer.getInstance();
+							this.timeoutTimer = GlobalTimer.getInstance();
 						}
 						this.timeoutTimer.schedule(abortionTask, timeoutForJob);
 						this.activeTasks.put(n, abortionTask);
@@ -355,11 +352,15 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				/* if we are still interrupted, throw an exception */
 				this.logger.debug("Checking interruption.");
 				this.checkInterruption();
+				this.logger.debug("Not interrupted.");
 
 				/* add number of samples to node */
 				n.setAnnotation("fRPSamples", successfulSamples);
 				if (this.uncertaintySource != null) {
 					uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths, evaluations);
+					this.logger.debug("Setting uncertainty to {}", uncertainty);
+				} else {
+					this.logger.debug("Not setting uncertainty, because no uncertainty source has been defined.");
 				}
 				this.fValues.put(n, best);
 			}
@@ -385,7 +386,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		}
 		assert this.fValues.containsKey(n);
 		V f = this.fValues.get(n);
-		this.logger.info("Returning f-value: {}", f);
+		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation("uncertainty"));
 		return f;
 	}
 
@@ -576,5 +577,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	@Override
 	public boolean reportsSolutions() {
 		return true;
+	}
+
+	@Override
+	public boolean annotatesUncertainty() {
+		return this.uncertaintySource != null;
 	}
 }

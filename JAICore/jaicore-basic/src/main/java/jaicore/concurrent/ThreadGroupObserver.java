@@ -14,7 +14,7 @@ public class ThreadGroupObserver extends Thread {
 	private Thread[] threadsAtPointOfViolation;
 
 	public ThreadGroupObserver(final ThreadGroup group, final int maxAllowedThreads, final Runnable hookOnConstraintViolation) {
-		super();
+		super("ThreadGroupObserver-" + hookOnConstraintViolation);
 		this.group = group;
 		this.maxAllowedThreads = maxAllowedThreads;
 		this.hookOnConstraintViolation = hookOnConstraintViolation;

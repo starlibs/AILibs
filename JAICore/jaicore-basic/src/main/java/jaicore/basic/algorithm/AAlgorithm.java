@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +21,8 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.concurrent.GlobalTimer;
 import jaicore.concurrent.InterruptionTimerTask;
-import jaicore.concurrent.TimeoutTimer;
 import jaicore.interrupt.Interrupt;
 import jaicore.interrupt.Interrupter;
 
@@ -40,7 +39,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final I input;
 
 	/* State and event bus for sending algorithm events. */
-	private Timer timer;
+	private GlobalTimer timer;
 	private long shutdownInitialized = -1; // timestamp for when the shutdown has been initialized
 	private long activationTime = -1; // timestamp of algorithm activation
 
@@ -52,7 +51,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private AlgorithmState state = AlgorithmState.created;
 	private final EventBus eventBus = new EventBus();
 
-	private int timeoutPrecautionOffset = 2000; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
+	private int timeoutPrecautionOffset = 10000; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
 	private static final int MIN_RUNTIME_FOR_OBSERVED_TASK = 50;
 
 	private static final String INTERRUPT_NAME_SUFFIX = "-shutdown";
@@ -164,9 +163,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.isCanceled() || this.isTimeouted() || Thread.currentThread().isInterrupted();
 	}
 
-	protected Timer getTimerAndCreateIfNotExistent() {
+	protected GlobalTimer getTimerAndCreateIfNotExistent() {
 		if (this.timer == null) {
-			this.timer = TimeoutTimer.getInstance();
+			this.timer = GlobalTimer.getInstance();
 		}
 		return this.timer;
 	}
@@ -414,7 +413,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
 		long timeToInterrupt = remainingTime - this.timeoutPrecautionOffset;
-		Timer timer = this.getTimerAndCreateIfNotExistent();
+		GlobalTimer timer = this.getTimerAndCreateIfNotExistent();
 		TimerTask task = new InterruptionTimerTask("Timeout for execution of callable " + r + " triggered",
 				() -> this.logger.debug("Timeout detected at timestamp {}. This is  {} prior to deadline, interrupting successor generation.", System.currentTimeMillis(), this.getRemainingTimeToDeadline()));
 		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt, this.getRemainingTimeToDeadline());
@@ -427,7 +426,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		} catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
 			this.logger.info("Received interrupt. Cancel flag is {}", this.isCanceled());
 
-			/* if the timeout has been triggered (with caution), just sleep until */
+			/* if the timeout has been triggered (with caution) */
 			remainingTime = this.getRemainingTimeToDeadline().milliseconds();
 			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
 				this.logger.info("Interrupt is internal.");
@@ -435,7 +434,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 				if (remainingTime > 0) {
 					this.logger.debug("Artificially sleeping {}ms to trigger the correct behavior in the checker.", remainingTime);
-					Thread.sleep(remainingTime);
+					this.timeOfTimeoutDetection = System.currentTimeMillis();
+					this.checkAndConductTermination();
 				} else {
 					this.logger.debug("Gained back control from successor generation, but remaining time is now only {}ms. Algorithm should terminate now.", remainingTime);
 				}

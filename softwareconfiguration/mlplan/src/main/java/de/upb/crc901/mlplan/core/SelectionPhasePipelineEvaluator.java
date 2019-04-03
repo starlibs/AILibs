@@ -14,8 +14,8 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
@@ -67,7 +67,7 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
+		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
 		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
 		try {
 			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);

@@ -59,6 +59,7 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNo
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -540,6 +541,9 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			}
 			return;
 		}
+
+		/* check whether an uncertainty-value is present if the node evaluator is an uncertainty-measuring evaluator */
+		assert !(this.nodeEvaluator instanceof IPotentiallyUncertaintyAnnotatingNodeEvaluator) || !((IPotentiallyUncertaintyAnnotatingNodeEvaluator<?,?>) this.nodeEvaluator).annotatesUncertainty() || node.getAnnotation("uncertainty") != null : "Uncertainty-based node evaluator claims to annotate uncertainty but has not assigned any uncertainty to " + node.getPoint();
 
 		/* eventually set the label */
 		node.setInternalLabel(label);

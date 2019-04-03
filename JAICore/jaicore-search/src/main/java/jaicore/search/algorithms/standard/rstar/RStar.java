@@ -56,7 +56,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> {
 
 	/* Open list. */
-	protected PriorityQueue<GammaNode<T>> open = new PriorityQueue<>();
+	protected PriorityQueue<GammaNode<T>> open = new PriorityQueue<>((n1,n2) -> (n1.getInternalLabel().compareTo(n2.getInternalLabel())));
 
 	/* Closed list of already expanded states. */
 	protected ArrayList<GammaNode<T>> closed = new ArrayList<>();

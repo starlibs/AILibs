@@ -39,8 +39,8 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.sets.SetUtil;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -345,7 +345,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 		/* evaluate each candiate */
 		List<Double> stats = new ArrayList<>();
-		final TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
+		final TimeoutSubmitter ts = GlobalTimer.getInstance().getSubmitter();
 		ensembleToSelectFrom.forEach(c -> stats.add(Double.MAX_VALUE));
 
 		int n = ensembleToSelectFrom.size();

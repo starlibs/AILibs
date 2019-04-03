@@ -47,13 +47,21 @@ public class InterruptionTimerTask extends NamedTimerTask {
 
 	@Override
 	public void run() {
+		long delay = System.currentTimeMillis() - this.scheduledExecutionTime();
+		logger.info("Executing interruption task with descriptor \"{}\". Interrupting thread {}. This interrupt has been triggered with a delay of {}ms", this.getDescriptor(), this.threadToBeInterrupted, delay);
+		if (delay > 50) {
+			logger.warn("Interrupt is executed with a delay of {}ms", delay);
+		}
 		if (this.hookToExecutePriorToInterruption != null) {
+			logger.debug("Running pre-interruption hook");
 			logger.info("Executing pre-interruption hook.");
 			this.hookToExecutePriorToInterruption.run();
+		} else {
+			logger.debug("No pre-interruption hook has been defined.");
 		}
-		logger.info("Executing interruption task with descriptor \"{}\". Interrupting thread {}", this.getDescriptor(), this.threadToBeInterrupted);
+		logger.debug("Interrupting the thread.");
 		Interrupter.get().interruptThread(this.threadToBeInterrupted, this.reason);
 	}
-	
-	
+
+
 }

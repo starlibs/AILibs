@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,8 +31,8 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.concurrent.GlobalTimer;
 import jaicore.concurrent.ThreadGroupObserver;
-import jaicore.concurrent.TimeoutTimer;
 import jaicore.interrupt.Interrupter;
 
 /**
@@ -49,9 +50,11 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(GeneralAlgorithmTester.class);
 	private static final String TESTEDALGORITHM_LOGGERNAME = "testedalgorithm";
+	private static final int TIMEOUT_DELAY = 12000;
+	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
 	private static final int INTERRUPTION_DELAY = 5000;
-	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000;
-	private static final int THREAD_SHUTDOWN_TOLERANCE = 10000;
+	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 5000;
+	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000;
 
 	// fields used together with @Parameter must be public
 	@Parameter(0)
@@ -60,8 +63,13 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	public abstract IAlgorithm<?, ?> getAlgorithm(Object problem);
 
 	@BeforeClass
-	public static void init() {
-		TimeoutTimer.getInstance(); // this is to avoid that the timeout timer is spawned as a thread of a specific group
+	public static void initClass() {
+		GlobalTimer.getInstance(); // this is to avoid that the timeout timer is spawned as a thread of a specific group
+	}
+
+	@Before
+	public void initTest() {
+		System.gc(); // run garbage collection
 	}
 
 	@Test
@@ -122,12 +130,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		FutureTask<?> task = new FutureTask<>(algorithm);
 
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
-		long start = System.currentTimeMillis();
+		AtomicLong start = new AtomicLong();
 		boolean controlledInterruptedExceptionSeen = false;
-		boolean timeoutTriggered = false;
 		ThreadGroup algorithmThreadGroup = new ThreadGroup("TimeoutTestGroup");
 		Thread algorithmThread = new Thread(algorithmThreadGroup, task, "InterruptTest Algorithm runner for " + algorithm.getId());
 		AtomicBoolean threadNumberViolated = new AtomicBoolean();
+		AtomicLong interruptEvent = new AtomicLong();
 		ThreadGroupObserver threadCountObserverThread = new ThreadGroupObserver(algorithmThreadGroup, algorithm.getConfig().threads(), () -> {
 			threadNumberViolated.set(true);
 			algorithm.cancel();
@@ -136,18 +144,21 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* set up timer for interruption */
 		String interruptReason = "testing interrupt from the outside";
-		algorithmThread.start();
+		start.set(System.currentTimeMillis());
 		new Timer("InterruptTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
-				GeneralAlgorithmTester.this.logger.info("Interrupting thread {}", algorithmThread);
+				long now = System.currentTimeMillis();
+				GeneralAlgorithmTester.this.logger.info("Interrupting thread {} after {}ms", algorithmThread, now - start.get());
+				interruptEvent.set(now);
 				Interrupter.get().interruptThread(algorithmThread, interruptReason);
 			}
 		}, INTERRUPTION_DELAY);
 
 		/* launch algorithm */
+		algorithmThread.start();
 		try {
-			task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
+			task.get(TOTAL_EXPERIMENT_TIMEOUT, TimeUnit.MILLISECONDS);
 			assert false : ("Algorithm terminated without exception but with regular output.");
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof InterruptedException && Interrupter.get().hasThreadBeenInterruptedWithReason(algorithmThread, interruptReason)) {
@@ -156,13 +167,18 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			else {
 				throw e;
 			}
-		} catch (TimeoutException e) {
-			timeoutTriggered = true;
 		}
-		int runtime = (int) (System.currentTimeMillis() - start);
-		this.logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
+		catch (TimeoutException e) {
+			this.logger.warn("Time limit for test has been reached.");
+		}
+		finally {
+			threadCountObserverThread.cancel();
+		}
+		int runtime = (int) (System.currentTimeMillis() - start.get());
+		int reactionTime = interruptEvent.get() > 0 ? (int) (System.currentTimeMillis() - interruptEvent.get()) : Integer.MAX_VALUE;
+		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
-		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", timeoutTriggered);
+		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an interrupted exception.", controlledInterruptedExceptionSeen);
 
 		/*
@@ -188,22 +204,22 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		algorithm.setNumCPUs(availableCPUs);
 		algorithm.setMaxNumThreads(availableCPUs);
 		FutureTask<?> task = new FutureTask<>(algorithm);
+		AtomicLong start = new AtomicLong();
 
 		/* set up timer for interruption */
 		AtomicLong cancelEvent = new AtomicLong();
 		new Timer("CancelTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
-				GeneralAlgorithmTester.this.logger.info("Triggering cancel on {}", algorithm.getId());
+				long now = System.currentTimeMillis();
+				GeneralAlgorithmTester.this.logger.info("Triggering cancel on {} after {}ms", algorithm.getId(), now - start.get());
+				cancelEvent.set(now);
 				algorithm.cancel();
-				cancelEvent.set(System.currentTimeMillis());
 			}
 		}, INTERRUPTION_DELAY);
 
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
-		long start = System.currentTimeMillis();
 		boolean cancellationExceptionSeen = false;
-		boolean timeoutTriggered = false;
 		ThreadGroup algorithmThreadGroup = new ThreadGroup("TimeoutTestGroup");
 		Thread algorithmThread = new Thread(algorithmThreadGroup, task, "CancelTest Algorithm runner for " + algorithm.getId());
 		AtomicBoolean threadNumberViolated = new AtomicBoolean();
@@ -214,9 +230,10 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		threadCountObserverThread.start();
 
 		/* launch algorithm */
+		start.set(System.currentTimeMillis());
 		algorithmThread.start();
 		try {
-			Object output = task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
+			Object output = task.get(TOTAL_EXPERIMENT_TIMEOUT, TimeUnit.MILLISECONDS);
 			assert false : ("Algorithm terminated without exception but with regular output: " + output);
 		} catch (ExecutionException e) {
 
@@ -231,24 +248,28 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 				if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
 					AlgorithmExecutionCanceledException ex = (AlgorithmExecutionCanceledException) e.getCause();
 					cancellationExceptionSeen = true;
-					assertTrue ("The algorithm has sent an AlgorithmExceutionCanceledException, which is correct, but the cancel was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of 2000ms.", ex.getDelay() <= 2000);
+					assertTrue ("The algorithm has sent an AlgorithmExceutionCanceledException, which is correct, but the cancel was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of " + INTERRUPTION_CLEANUP_TOLERANCE + "ms.", ex.getDelay() <= INTERRUPTION_CLEANUP_TOLERANCE);
 				}
 				else {
 					throw e;
 				}
 			}
-		} catch (TimeoutException e) {
-			timeoutTriggered = true;
 		}
-		int runtime = (int) (System.currentTimeMillis() - start);
+		catch (TimeoutException e) {
+			this.logger.warn("Time limit for test has been reached.");
+		}
+		finally {
+			threadCountObserverThread.cancel();
+		}
+		int runtime = (int) (System.currentTimeMillis() - start.get());
+		int reactionTime = cancelEvent.get() > 0 ? (int) (System.currentTimeMillis() - cancelEvent.get()) : Integer.MAX_VALUE;
 		assertFalse("Thread must not be interrupted after cancel!", Thread.currentThread().isInterrupted());
-		threadCountObserverThread.cancel();
-		this.logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
+		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
 		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + availableCPUs + ". Observed threads: \n\t- " + Arrays
 				.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
 				!threadCountObserverThread.isThreadConstraintViolated());
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
-		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", timeoutTriggered);
+		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
 		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
 		this.checkNotInterrupted();
@@ -256,7 +277,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	}
 
 	@Test
-	public void testQuickTimeout() throws Exception {
+	public void testTimeout() throws Exception {
 
 		/* set up algorithm */
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
@@ -269,12 +290,11 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		algorithm.setMaxNumThreads(availableCPUs);
 		assert algorithm.getConfig().threads() == availableCPUs;
 		FutureTask<?> task = new FutureTask<>(algorithm);
-		TimeOut to = new TimeOut(INTERRUPTION_DELAY, TimeUnit.MILLISECONDS);
+		TimeOut to = new TimeOut(TIMEOUT_DELAY, TimeUnit.MILLISECONDS);
 		algorithm.setTimeout(to.milliseconds(), TimeUnit.MILLISECONDS);
 		assert algorithm.getTimeout().equals(to) : "Algorithm timeout is " + algorithm.getTimeout() + " but " + to + " has been specified!";
 
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
-		long start = System.currentTimeMillis();
 		boolean timeoutTriggered = false;
 		ThreadGroup tg = new ThreadGroup("TimeoutTestGroup");
 		Thread algorithmThread = new Thread(tg, task, "TimeoutTest Algorithm runner for " + algorithm.getId());
@@ -287,13 +307,14 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* launch algorithm */
 		algorithmThread.start();
+		long start = System.currentTimeMillis();
 		try {
-			task.get(INTERRUPTION_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS);
+			task.get(TIMEOUT_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS); // here we cancel earlier than in the other two tests, because it is the job of the algorithm to make sure that the timeout is respected
 			this.logger.warn("Algorithm terminated without exception but with regular output. In general, this is allowed, but if the algorithm is not specialized on safe termination under timeouts, the tested problem might just have been too easy.");
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AlgorithmTimeoutedException) {
 				AlgorithmTimeoutedException ex = (AlgorithmTimeoutedException) e.getCause();
-				assertTrue ("The algorithm has sent a TimeoutException, which is correct, but the timeout was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of 2000ms.", ex.getDelay() <= 2000);
+				assertTrue ("The algorithm has sent a TimeoutException, which is correct, but the timeout was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of " + INTERRUPTION_CLEANUP_TOLERANCE + "ms.", ex.getDelay() <= INTERRUPTION_CLEANUP_TOLERANCE);
 			} else if (e.getCause() instanceof AlgorithmExecutionCanceledException && threadNumberViolated.get()) {
 				Thread.interrupted(); // this was a controlled interrupt, reset the flag
 			} else {
@@ -302,15 +323,17 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		} catch (TimeoutException e) {
 			timeoutTriggered = true;
 		}
+		finally {
+			threadCountObserverThread.cancel();
+		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
 		assertFalse("Thread must not be interrupted after timeout!", Thread.currentThread().isInterrupted());
-		threadCountObserverThread.cancel();
 		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + availableCPUs + ". Observed threads: \n\t- " + Arrays
 				.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
 				!threadCountObserverThread.isThreadConstraintViolated());
 		this.logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
-		if (runtime < INTERRUPTION_DELAY) {
+		if (runtime < TIMEOUT_DELAY) {
 			this.logger.warn("Runtime was only {} seconds but should be at least {}. There might be a problem with the difficulty of the problem. If the algorithm is designed to exit smoothly on a timeout, you can safely ignore this warning.", runtime, INTERRUPTION_DELAY);
 		}
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.", timeoutTriggered);

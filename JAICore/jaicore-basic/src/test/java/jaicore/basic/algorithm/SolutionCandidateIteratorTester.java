@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
@@ -81,14 +80,14 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		for (Entry<I, Collection<O>> originalProblemWithSolutions : problemsWithSolutions.entrySet()) {
 			Object problem = originalProblemWithSolutions.getKey();
 			Object reducedProblem = this.reduction.encodeProblem(problem);
-			this.logger.info("Converting {} to {}", problem, reducedProblem);
+			this.logger.debug("Converting {} to {}", problem, reducedProblem);
 			this.reducedProblemsWithOriginalSolutions.put(reducedProblem, originalProblemWithSolutions.getValue());
 		}
 	}
 
 	private void solveProblemViaCall(final Entry<Object, Collection<?>> problem, final ISolutionCandidateIterator<Object, Object> algorithm) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		final Collection<?> stillMissingSolutions = problem.getValue();
-		final AtomicInteger foundSolutions = new AtomicInteger(0);
+		final Collection<?> stillMissingSolutions = new ArrayList<>(problem.getValue());
+		final Collection<Object> foundSolutions = new ArrayList<>();
 		assertNotNull(algorithm);
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
@@ -101,7 +100,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 				if (!stillMissingSolutions.contains(solutionToOriginalProblem)) {
 					SolutionCandidateIteratorTester.this.logger.warn("Returned solution {} converted to original solution {} is not a solution in the original problem according to ground truth.", solution, solutionToOriginalProblem);
 				} else {
-					foundSolutions.incrementAndGet();
+					foundSolutions.add(solutionToOriginalProblem);
 					stillMissingSolutions.remove(solutionToOriginalProblem);
 				}
 			}
@@ -109,7 +108,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 		while (algorithm.hasNext()) {
 			algorithm.nextWithException();
 		}
-		assertTrue("Found " + foundSolutions.get() + "/" + problem.getValue().size() + " solutions. Missing solutions: " + stillMissingSolutions, stillMissingSolutions.isEmpty());
+		assertTrue("Found " + foundSolutions.size() + "/" + problem.getValue().size() + " solutions.\n\t" + stillMissingSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")) + "\nFound solutions: \n\t" + foundSolutions.stream().map(Object::toString).collect(Collectors.joining("\n\t")), stillMissingSolutions.isEmpty());
 	}
 
 	private void solveProblemViaIterator(final Entry<Object, Collection<?>> problem, final ISolutionCandidateIterator<Object, Object> algorithm) throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {

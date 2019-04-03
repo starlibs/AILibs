@@ -84,7 +84,7 @@ public class ForwardChainingTest extends GeneralAlgorithmTester {
 	}
 
 	@Override
-	public void testQuickTimeout() throws Exception {
+	public void testTimeout() throws Exception {
 		// can't produce difficult enough problems
 	}
 
