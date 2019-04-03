@@ -122,7 +122,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 			/* compute successors of the expanded node */
 			this.logger.debug("Expanding {}. Starting successor generation.", n.getPoint());
-			Collection<NodeExpansionDescription<T, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getPoint()));
+			Collection<NodeExpansionDescription<T, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getPoint()), true);
 			this.logger.debug("Successor generation finished. Identified {} successors.", successors.size());
 			for (NodeExpansionDescription<T, A> expansionDescription : successors) {
 				this.checkAndConductTermination();

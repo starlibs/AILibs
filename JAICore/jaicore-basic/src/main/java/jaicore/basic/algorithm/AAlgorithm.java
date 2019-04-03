@@ -185,32 +185,58 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.id;
 	}
 
-	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	protected void checkTermination(final boolean shutdownOnStoppingCriterion) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Checking Termination");
 		if (this.isTimeouted()) {
-			this.logger.info("Timeout detected for {}, shutting down the algorithm and stopping execution with TimeoutException", this.getId());
-			this.logger.debug("Invoking shutdown");
-			this.unregisterThreadAndShutdown();
+			this.logger.info("Timeout detected for {}", this.getId());
+			if (shutdownOnStoppingCriterion) {
+				this.logger.debug("Invoking shutdown");
+				this.unregisterThreadAndShutdown();
+			} else {
+				this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
+			}
 			this.logger.debug("Throwing TimeoutException");
 			throw new AlgorithmTimeoutedException(this.timeOfTimeoutDetection - this.deadline);
 		}
 		if (this.isCanceled()) {
-			this.logger.info("Cancel detected for {}, stopping execution with AlgorithmExceptionCanceledException", this.getId());
-			this.unregisterThreadAndShutdown(); // calling cancel() usually already shutdowns, but this behavior may have been overwritten
-			if (this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
-				Thread t = Thread.currentThread();
-				this.logger.debug("Reset interrupt flag of thread {} since thread has been interrupted during shutdown but not from the outside. Current interrupt flag is {}", t, t.isInterrupted());
-				Thread.interrupted(); // reset interrupted flag
+			this.logger.info("Cancel detected for {}.", this.getId());
+			if (shutdownOnStoppingCriterion) {
+				this.logger.debug("Invoking shutdown");
+				if (this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
+					this.logger.debug("Thread has been interrupted during shutdown. Resetting the flag and not invoking shutdown again.");
+					Thread.interrupted(); // reset interrupted flag
+				}
+				else {
+					this.unregisterThreadAndShutdown(); // calling cancel() usually already shutdowns, but this behavior may have been overwritten
+					if (this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
+						Thread t = Thread.currentThread();
+						this.logger.debug("Reset interrupt flag of thread {} since thread has been interrupted during shutdown but not from the outside. Current interrupt flag is {}", t, t.isInterrupted());
+						Thread.interrupted(); // reset interrupted flag
+					}
+				}
+			} else {
+				this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
 			}
+			this.logger.debug("Throwing AlgorithmExecutionCanceledException.");
 			throw new AlgorithmExecutionCanceledException(System.currentTimeMillis() - this.canceled);
 		}
 		if (Thread.currentThread().isInterrupted()) {
-			this.logger.info("Interruption detected for {}, stopping execution with InterruptedException. Resetting interrupted-flag.", this.getId());
+			this.logger.info("Interruption detected for {}. Resetting interrupted-flag.", this.getId());
 			Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
-			this.unregisterThreadAndShutdown();
+			if (shutdownOnStoppingCriterion) {
+				this.logger.debug("Invoking shutdown");
+				this.unregisterThreadAndShutdown();
+			} else {
+				this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
+			}
+			this.logger.debug("Throwing InterruptedException to communicate the interrupt to the invoker.");
 			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
 		this.logger.debug("No termination condition observed.");
+	}
+
+	protected void checkAndConductTermination() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+		this.checkTermination(true);
 	}
 
 	/**
@@ -379,7 +405,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		return this.loggerName;
 	}
 
-	protected <T> T computeTimeoutAware(final Callable<T> r) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	protected <T> T computeTimeoutAware(final Callable<T> r, final boolean shutdownOnStoppingCriterionSatisfied) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Received request to execute {} with awareness of timeout {}.", r, this.getTimeout());
 
 		/* if no timeout is sharp, just execute the task */
@@ -393,12 +419,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 					throw e;
 				}
 				this.resolveShutdownInterruptOnCurrentThread();
-				this.checkAndConductTermination();
+				this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 				throw new IllegalStateException("Received an interrupt and checked termination, thus, termination routine should have thrown an exception which it apparently did not!");
 			} catch (AlgorithmExecutionCanceledException e) { // these exceptions should just be forwarded
 				throw e;
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new AlgorithmException(e, "The algorithm has failed due to an exception of a Callable.");
 			}
 		}
@@ -408,7 +433,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		if (remainingTime < this.timeoutPrecautionOffset + MIN_RUNTIME_FOR_OBSERVED_TASK) {
 			this.logger.debug("Only {}ms left, which is not enough to reliably continue computation. Terminating algorithm at this point, throwing an AlgorithmTimeoutedException.", remainingTime);
 			this.timeOfTimeoutDetection = System.currentTimeMillis(); // artificially set the timeout detected variable
-			this.checkAndConductTermination();
+			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 		}
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
@@ -424,7 +449,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			task.cancel();
 			return result;
 		} catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
-			this.logger.info("Received interrupt. Cancel flag is {}", this.isCanceled());
+			this.logger.info("Received interrupt for {}. Cancel flag is {}", this.getId(), this.isCanceled());
 
 			/* if the timeout has been triggered (with caution) */
 			remainingTime = this.getRemainingTimeToDeadline().milliseconds();
@@ -435,7 +460,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				if (remainingTime > 0) {
 					this.logger.debug("Artificially sleeping {}ms to trigger the correct behavior in the checker.", remainingTime);
 					this.timeOfTimeoutDetection = System.currentTimeMillis();
-					this.checkAndConductTermination();
+					this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 				} else {
 					this.logger.debug("Gained back control from successor generation, but remaining time is now only {}ms. Algorithm should terminate now.", remainingTime);
 				}
@@ -453,7 +478,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				}
 				this.resolveShutdownInterruptOnCurrentThread();
 			}
-			this.checkAndConductTermination();
+			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 			throw new IllegalStateException("termination routine should have thrown an exception!");
 		} catch (Exception e) {
 			throw new AlgorithmException(e, "The algorithm has failed due to an exception of a Callable.");
