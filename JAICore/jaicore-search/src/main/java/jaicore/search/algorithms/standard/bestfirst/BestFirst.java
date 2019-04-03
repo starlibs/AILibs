@@ -477,6 +477,10 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* define timeouter for label computation */
 		this.logger.trace("Computing node label for {}", node);
+		if (this.isStopCriterionSatisfied()) {
+			this.logger.debug("Found stop criterion to be true. Returning control.");
+			return;
+		}
 		InterruptionTimerTask interruptionTask = null;
 		AtomicBoolean timedout = new AtomicBoolean(false);
 		if (BestFirst.this.timeoutForComputationOfF > 0) {

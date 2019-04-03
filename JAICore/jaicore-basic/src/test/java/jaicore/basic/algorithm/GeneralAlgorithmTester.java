@@ -53,7 +53,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
 	private static final int INTERRUPTION_DELAY = 5000;
-	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 5000;
+	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000;
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000;
 
 	// fields used together with @Parameter must be public
