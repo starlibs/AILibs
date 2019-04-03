@@ -18,7 +18,6 @@ import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.OptimizingFactory;
 import hasco.optimizingfactory.OptimizingFactoryProblem;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;

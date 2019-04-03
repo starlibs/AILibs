@@ -27,7 +27,6 @@ import hasco.core.HASCOFactory;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;

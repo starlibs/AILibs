@@ -3,8 +3,8 @@ package jaicore.ml.core.optimizing.lbfgs;
 import jaicore.ml.core.optimizing.lbfgs.LBFGS.LinesearchAlgorithm;
 /**
  * Parameters to control the optimizer. To control convergence/runtime, see:
- * {@link #max_iterations} and {@link #epsilon} To get L1 penalization, see:
- * {@link #orthantwise_c}, {@link #orthantwise_start}, {@link #orthantwise_end}
+ * {@link #maxIterations} and {@link #epsilon} To get L1 penalization, see:
+ * {@link #orthantwiseC}, {@link #orthantwiseStart}, {@link #orthantwiseEnd}
  */
 
 public class LBFGSParameters {
@@ -16,7 +16,7 @@ public class LBFGSParameters {
 		 * default value is \c 6. Values less than \c 3 are not recommended. Large
 		 * values will result in excessive computing time.
 		 */
-		public int m = 12;
+		private int m = 12;
 
 		/**
 		 * Epsilon for convergence test. This parameter determines the accuracy with
@@ -24,7 +24,7 @@ public class LBFGSParameters {
 		 * \ref epsilon * max(1, ||x||), where ||.|| denotes the Euclidean (L2) norm.
 		 * The default value is \c 1e-5.
 		 */
-		public double epsilon = 1e-20;
+		private double epsilon = 1e-20;
 
 		/**
 		 * Distance for delta-based convergence test. This parameter determines the
@@ -32,7 +32,7 @@ public class LBFGSParameters {
 		 * function. If the value of this parameter is zero, the library does not
 		 * perform the delta-based convergence test.
 		 */
-		public int past = 0; // BTO: changed from '0'
+		private int past = 0; // BTO: changed from '0'
 
 		/**
 		 * Delta for convergence test. This parameter determines the minimum rate of
@@ -43,7 +43,7 @@ public class LBFGSParameters {
 		 * 
 		 * REQUIRES 'past' TO BE SET
 		 */
-		public double delta = 1e-5;
+		private double delta = 1e-5;
 
 		/**
 		 * The maximum number of iterations. The lbfgs() function terminates an
@@ -52,7 +52,7 @@ public class LBFGSParameters {
 		 * continues an optimization process until a convergence or error. The default
 		 * value is \c 0.
 		 */
-		public int max_iterations = 0;
+		private int maxIterations = 0;
 
 		/**
 		 * The line search algorithm. This parameter specifies a line search algorithm
@@ -66,7 +66,7 @@ public class LBFGSParameters {
 		 * number of function and gradients evaluations per iteration for the line
 		 * search routine. The default value is \c 40.
 		 */
-		public int max_linesearch = 40;
+		private int maxLinesearch = 40;
 
 		/**
 		 * The minimum step of the line search routine. The default value is \c 1e-20.
@@ -74,7 +74,7 @@ public class LBFGSParameters {
 		 * machine being used, or unless the problem is extremely badly scaled (in which
 		 * case the exponents should be increased).
 		 */
-		public double min_step = 1e-20;
+		private double minStep = 1e-20;
 
 		/**
 		 * The maximum step of the line search. The default value is \c 1e+20. This
@@ -82,14 +82,14 @@ public class LBFGSParameters {
 		 * being used, or unless the problem is extremely badly scaled (in which case
 		 * the exponents should be increased).
 		 */
-		public double max_step = 1e20;
+		private double maxStep = 1e20;
 
 		/**
 		 * A parameter to control the accuracy of the line search routine. The default
 		 * value is \c 1e-4. This parameter should be greater than zero and smaller than
 		 * \c 0.5.
 		 */
-		public double ftol = 1e-4;
+		private double ftol = 1e-4;
 
 		/**
 		 * A coefficient for the Wolfe condition. This parameter is valid only when the
@@ -98,7 +98,7 @@ public class LBFGSParameters {
 		 * ::LBFGS_LINESEARCH_BACKTRACKING_WOLFE . The default value is \c 0.9. This
 		 * parameter should be greater the \ref ftol parameter and smaller than \c 1.0.
 		 */
-		public double wolfe = 0.9;
+		private double wolfe = 0.9;
 
 		/**
 		 * A parameter to control the accuracy of the line search routine. The default
@@ -108,7 +108,7 @@ public class LBFGSParameters {
 		 * a small value. A typical small value is \c 0.1. This parameter shuold be
 		 * greater than the \ref ftol parameter (\c 1e-4) and smaller than \c 1.0.
 		 */
-		public double gtol = 0.9;
+		private double gtol = 0.9;
 
 		/**
 		 * The machine precision for floating-point values. This parameter must be a
@@ -117,7 +117,7 @@ public class LBFGSParameters {
 		 * (::LBFGSERR_ROUNDING_ERROR) if the relative width of the interval of
 		 * uncertainty is less than this parameter.
 		 */
-		public double xtol = 1e-16;
+		private double xtol = 1e-16;
 
 		/**
 		 * Coeefficient for the L1 norm of variables. This parameter should be set to
@@ -130,7 +130,7 @@ public class LBFGSParameters {
 		 * client program thus have only to return the function value F(x) and gradients
 		 * G(x) as usual. The default value is zero.
 		 */
-		public double orthantwise_c = 0;
+		private double orthantwiseC = 0;
 
 		/**
 		 * Start index for computing L1 norm of the variables. This parameter is valid
@@ -142,7 +142,7 @@ public class LBFGSParameters {
 		 * (e.g., a bias term of logistic regression) from being regularized. The
 		 * default value is zero.
 		 */
-		public int orthantwise_start = 0;
+		private int orthantwiseStart = 0;
 
 		/**
 		 * End index for computing L1 norm of the variables. This parameter is valid
@@ -150,5 +150,133 @@ public class LBFGSParameters {
 		 * e <= N) specifies the index number at which the library stops computing the
 		 * L1 norm of the variables x,
 		 */
-		public int orthantwise_end = -1;
+		private int orthantwiseEnd = -1;
+
+		public int getM() {
+			return m;
+		}
+
+		public void setM(int m) {
+			this.m = m;
+		}
+
+		public double getEpsilon() {
+			return epsilon;
+		}
+
+		public void setEpsilon(double epsilon) {
+			this.epsilon = epsilon;
+		}
+
+		public int getPast() {
+			return past;
+		}
+
+		public void setPast(int past) {
+			this.past = past;
+		}
+
+		public double getDelta() {
+			return delta;
+		}
+
+		public void setDelta(double delta) {
+			this.delta = delta;
+		}
+
+		public int getMaxIterations() {
+			return maxIterations;
+		}
+
+		public void setMaxIterations(int maxIterations) {
+			this.maxIterations = maxIterations;
+		}
+
+		public LinesearchAlgorithm getLinesearch() {
+			return linesearch;
+		}
+
+		public void setLinesearch(LinesearchAlgorithm linesearch) {
+			this.linesearch = linesearch;
+		}
+
+		public int getMaxLinesearch() {
+			return maxLinesearch;
+		}
+
+		public void setMaxLinesearch(int maxLinesearch) {
+			this.maxLinesearch = maxLinesearch;
+		}
+
+		public double getMinStep() {
+			return minStep;
+		}
+
+		public void setMinStep(double minStep) {
+			this.minStep = minStep;
+		}
+
+		public double getMaxStep() {
+			return maxStep;
+		}
+
+		public void setMaxStep(double maxStep) {
+			this.maxStep = maxStep;
+		}
+
+		public double getFtol() {
+			return ftol;
+		}
+
+		public void setFtol(double ftol) {
+			this.ftol = ftol;
+		}
+
+		public double getWolfe() {
+			return wolfe;
+		}
+
+		public void setWolfe(double wolfe) {
+			this.wolfe = wolfe;
+		}
+
+		public double getGtol() {
+			return gtol;
+		}
+
+		public void setGtol(double gtol) {
+			this.gtol = gtol;
+		}
+
+		public double getXtol() {
+			return xtol;
+		}
+
+		public void setXtol(double xtol) {
+			this.xtol = xtol;
+		}
+
+		public double getOrthantwiseC() {
+			return orthantwiseC;
+		}
+
+		public void setOrthantwiseC(double orthantwiseC) {
+			this.orthantwiseC = orthantwiseC;
+		}
+
+		public int getOrthantwiseStart() {
+			return orthantwiseStart;
+		}
+
+		public void setOrthantwiseStart(int orthantwiseStart) {
+			this.orthantwiseStart = orthantwiseStart;
+		}
+
+		public int getOrthantwiseEnd() {
+			return orthantwiseEnd;
+		}
+
+		public void setOrthantwiseEnd(int orthantwiseEnd) {
+			this.orthantwiseEnd = orthantwiseEnd;
+		}
 }

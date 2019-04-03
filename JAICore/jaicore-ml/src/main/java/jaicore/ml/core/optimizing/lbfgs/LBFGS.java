@@ -1,6 +1,5 @@
 package jaicore.ml.core.optimizing.lbfgs;
 
-
 /**
  * a port of liblbfgs to java http://www.chokkan.org/software/liblbfgs/
  *
@@ -309,7 +308,7 @@ public class LBFGS {
 		public boolean isError() {
 			return this != LBFGS_SUCCESS && this != LBFGS_STOP && this != LBFGS_ALREADY_MINIMIZED;
 		}
-	};
+	}
 
 	/**
 	 * Line search algorithms.
@@ -350,11 +349,11 @@ public class LBFGS {
 		 * step length.
 		 */
 		LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE,
-	};
+	}
 
-	static interface line_search_proc {
+	static interface LineSearchProc {
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, final double[] xp,
-				final double[] gp, double[] wa, callback_data_t cd, LBFGSParameters param);
+				final double[] gp, double[] wa, CallbackDataT cd, LBFGSParameters param);
 	}
 
 	/**
@@ -406,9 +405,9 @@ public class LBFGS {
 	 */
 
 	public static class Result {
-		public Status status;
-		public int additionalStatus;
-		public double objective = Double.MAX_VALUE;
+		private Status status;
+		private int additionalStatus;
+		private double objective = Double.MAX_VALUE;
 
 		public Result(Status s) {
 			status = s;
@@ -417,18 +416,42 @@ public class LBFGS {
 		public String toString() {
 			return String.format("status=%s obj=%g", status, objective);
 		}
+
+		public Status getStatus() {
+			return status;
+		}
+
+		public void setStatus(Status status) {
+			this.status = status;
+		}
+
+		public int getAdditionalStatus() {
+			return additionalStatus;
+		}
+
+		public void setAdditionalStatus(int additionalStatus) {
+			this.additionalStatus = additionalStatus;
+		}
+
+		public double getObjective() {
+			return objective;
+		}
+
+		public void setObjective(double objective) {
+			this.objective = objective;
+		}
 	}
 
 	static double max3(double a, double b, double c) {
 		return Math.max(Math.max(a, b), c);
 	}
 
-	static class callback_data_t {
+	static class CallbackDataT {
 		int n;
-		Function proc_evaluate;
+		Function procEvaluate;
 	}
 
-	static class iteration_data_t {
+	static class IterationDataT {
 		double alpha;
 		// BTO tricky, i think these were aliased pointers or something?
 		double[] s; /* [n] */
@@ -440,18 +463,18 @@ public class LBFGS {
 	 * Use default parameters. See
 	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LBFGSParameters)}
 	 */
-	public static Result lbfgs(double[] init, Function proc_evaluate) {
-		return lbfgs(init, proc_evaluate, new LBFGSParameters());
+	public static Result lbfgs(double[] init, Function procEvaluate) {
+		return lbfgs(init, procEvaluate, new LBFGSParameters());
 	}
 
 	/**
 	 * Use debug-friendly parameters & callback. See
 	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LBFGSParameters)}
 	 */
-	public static Result lbfgs(double[] init, int maxIter, Function proc_evaluate) {
+	public static Result lbfgs(double[] init, int maxIter, Function procEvaluate) {
 		LBFGSParameters p = new LBFGSParameters();
-		p.max_iterations = maxIter;
-		return lbfgs(init, proc_evaluate, p);
+		p.setMaxIterations(maxIter);
+		return lbfgs(init, procEvaluate, p);
 	}
 
 	/**
@@ -463,7 +486,7 @@ public class LBFGS {
 	 *            The array of variables. A client program can set default values
 	 *            for the optimization and receive the optimization result through
 	 *            this array.
-	 * @param proc_evaluate
+	 * @param procEvaluate
 	 *            The callback function to provide function and gradient evaluations
 	 *            given a current values of variables. A client program must
 	 *            implement a callback function compatible with \ref
@@ -479,94 +502,104 @@ public class LBFGS {
 	 *            use the default parameters.
 	 * @retval Result The status code and final objective.
 	 */
-	public static Result lbfgs(double[] x, Function proc_evaluate, LBFGSParameters param) {
+	public static Result lbfgs(double[] x, Function procEvaluate, LBFGSParameters param) {
 		int n = x.length;
 
 		Result ret = new Result(null);
-		int i, j, k, end, bound;
+		int i;
+		int j;
+		int k;
+		int end;
+		int bound;
 		Status ls;
 		double[] step = new double[] { 0 };
 
 		/* Constant parameters and their default values. */
-		final int m = param.m;
+		final int m = param.getM();
 
 		double[] xp;
-		double g[], gp[], pg[];
-		double d[], w[], pf[] = null;
-		iteration_data_t[] lm;
-		iteration_data_t it;
-		double ys, yy;
-		double xnorm, gnorm, beta;
+		double[] g;
+		double[] gp;
+		double[] pg;
+		double[] d;
+		double[] w;
+		double[] pf = null;
+		IterationDataT[] lm;
+		IterationDataT it;
+		double ys;
+		double yy;
+		double xnorm;
+		double gnorm;
+		double beta;
 		double[] fx = new double[] { 0 }; // singleton passing to linesearch
 		double rate = 0;
-		line_search_proc linesearch = new line_search_backtracking(); // BTO added for testing
+		LineSearchProc linesearch;
 
 		/* Construct a callback data. */
-		callback_data_t cd = new callback_data_t();
+		CallbackDataT cd = new CallbackDataT();
 		cd.n = n;
-		cd.proc_evaluate = proc_evaluate;
+		cd.procEvaluate = procEvaluate;
 
 		/* Check the input parameters for errors. */
 		if (n <= 0) {
 			return new Result(Status.LBFGSERR_INVALID_N);
 		}
-		if (param.epsilon < 0.) {
+		if (param.getEpsilon() < 0.) {
 			return new Result(Status.LBFGSERR_INVALID_EPSILON);
 		}
-		if (param.past < 0) {
+		if (param.getPast() < 0) {
 			return new Result(Status.LBFGSERR_INVALID_TESTPERIOD);
 		}
-		if (param.delta < 0.) {
+		if (param.getDelta() < 0.) {
 			return new Result(Status.LBFGSERR_INVALID_DELTA);
 		}
-		if (param.min_step < 0.) {
+		if (param.getMinStep() < 0.) {
 			return new Result(Status.LBFGSERR_INVALID_MINSTEP);
 		}
-		if (param.max_step < param.min_step) {
+		if (param.getMaxStep() < param.getMinStep()) {
 			return new Result(Status.LBFGSERR_INVALID_MAXSTEP);
 		}
-		if (param.ftol < 0.) {
+		if (param.getFtol() < 0.) {
 			return new Result(Status.LBFGSERR_INVALID_FTOL);
 		}
-		if (param.linesearch == LinesearchAlgorithm.LBFGS_LINESEARCH_BACKTRACKING_WOLFE
-				|| param.linesearch == LinesearchAlgorithm.LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE) {
-			if (param.wolfe <= param.ftol || 1. <= param.wolfe) {
-				return new Result(Status.LBFGSERR_INVALID_WOLFE);
-			}
+		if ((param.linesearch == LinesearchAlgorithm.LBFGS_LINESEARCH_BACKTRACKING_WOLFE
+				|| param.linesearch == LinesearchAlgorithm.LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE)
+				&& (param.getWolfe() <= param.getFtol() || 1. <= param.getWolfe())) {
+			return new Result(Status.LBFGSERR_INVALID_WOLFE);
 		}
-		if (param.gtol < 0.) {
+		if (param.getGtol() < 0.) {
 			return new Result(Status.LBFGSERR_INVALID_GTOL);
 		}
-		if (param.xtol < 0.) {
+		if (param.getXtol() < 0.) {
 			return new Result(Status.LBFGSERR_INVALID_XTOL);
 		}
-		if (param.max_linesearch <= 0) {
+		if (param.getMaxLinesearch() <= 0) {
 			return new Result(Status.LBFGSERR_INVALID_MAXLINESEARCH);
 		}
-		if (param.orthantwise_c < 0.) {
+		if (param.getOrthantwiseC() < 0.) {
 			return new Result(Status.LBFGSERR_INVALID_ORTHANTWISE);
 		}
-		if (param.orthantwise_start < 0 || n < param.orthantwise_start) {
+		if (param.getOrthantwiseStart() < 0 || n < param.getOrthantwiseStart()) {
 			return new Result(Status.LBFGSERR_INVALID_ORTHANTWISE_START);
 		}
-		if (param.orthantwise_end < 0) {
-			param.orthantwise_end = n;
+		if (param.getOrthantwiseEnd() < 0) {
+			param.setOrthantwiseEnd(n);
 		}
-		if (n < param.orthantwise_end) {
+		if (n < param.getOrthantwiseEnd()) {
 			return new Result(Status.LBFGSERR_INVALID_ORTHANTWISE_END);
 		}
-		if (param.orthantwise_c != 0.) {
+		if (param.getOrthantwiseC() != 0.) {
 			/* Only the backtracking method is available. */
-			linesearch = new line_search_backtracking_owlqn();
+			linesearch = new LineSearchBacktrackingOwlqn();
 		} else {
 			switch (param.linesearch) {
 			case LBFGS_LINESEARCH_MORETHUENTE:
-				linesearch = new line_search_morethuente();
+				linesearch = new LineSearchMorethuente();
 				break;
 			case LBFGS_LINESEARCH_BACKTRACKING_ARMIJO:
 			case LBFGS_LINESEARCH_BACKTRACKING_WOLFE:
 			case LBFGS_LINESEARCH_BACKTRACKING_STRONG_WOLFE:
-				linesearch = new line_search_backtracking();
+				linesearch = new LineSearchBacktracking();
 				break;
 			default:
 				return new Result(Status.LBFGSERR_INVALID_LINESEARCH);
@@ -580,7 +613,7 @@ public class LBFGS {
 		d = new double[n];
 		w = new double[n];
 
-		if (param.orthantwise_c != 0) {
+		if (param.getOrthantwiseC() != 0) {
 			/* Allocate working space for OW-LQN. */
 			pg = new double[n];
 		} else {
@@ -588,34 +621,30 @@ public class LBFGS {
 		}
 
 		/* Allocate limited memory storage. */
-		lm = new iteration_data_t[m];
+		lm = new IterationDataT[m];
 
 		/* Initialize the limited memory. */
 		for (i = 0; i < m; ++i) {
-			lm[i] = new iteration_data_t();
+			lm[i] = new IterationDataT();
 			it = lm[i];
 			it.alpha = 0;
 			it.ys = 0;
-			it.s = new double[n]; // (lbfgsfloatval_t*)vecalloc(n * sizeof(lbfgsfloatval_t));
-			it.y = new double[n]; // (lbfgsfloatval_t*)vecalloc(n * sizeof(lbfgsfloatval_t));
-			// if (it->s == NULL || it->y == NULL) {
-			// ret = LBFGSERR_OUTOFMEMORY;
-			// goto lbfgs_exit;
-			// }
+			it.s = new double[n];
+			it.y = new double[n];
 		}
 
 		/* Allocate an array for storing previous values of the objective function. */
-		if (0 < param.past) {
-			pf = new double[param.past]; // (lbfgsfloatval_t*)vecalloc(param.past * sizeof(lbfgsfloatval_t));
+		if (0 < param.getPast()) {
+			pf = new double[param.getPast()];
 		}
 
 		/* Evaluate the function value and its gradient. */
-		fx[0] = cd.proc_evaluate.evaluate(x, g, cd.n, 0);
-		if (0. != param.orthantwise_c) {
+		fx[0] = cd.procEvaluate.evaluate(x, g, cd.n, 0);
+		if (0. != param.getOrthantwiseC()) {
 			/* Compute the L1 norm of the variable and add it to the object value. */
-			xnorm = owlqn_x1norm(x, param.orthantwise_start, param.orthantwise_end);
-			fx[0] += xnorm * param.orthantwise_c;
-			owlqn_pseudo_gradient(pg, x, g, n, param.orthantwise_c, param.orthantwise_start, param.orthantwise_end);
+			xnorm = owlqnX1norm(x, param.getOrthantwiseStart(), param.getOrthantwiseEnd());
+			fx[0] += xnorm * param.getOrthantwiseC();
+			owlqnPseudoGradient(pg, x, g, n, param.getOrthantwiseC(), param.getOrthantwiseStart(), param.getOrthantwiseEnd());
 		}
 
 		/* Store the initial value of the objective function. */
@@ -627,7 +656,7 @@ public class LBFGS {
 		 * Compute the direction; we assume the initial hessian matrix H_0 as the
 		 * identity matrix.
 		 */
-		if (param.orthantwise_c == 0.) {
+		if (param.getOrthantwiseC() == 0.) {
 			LBFGSArrayUtils.vecncpy(d, g, n);
 		} else {
 			LBFGSArrayUtils.vecncpy(d, pg, n);
@@ -636,22 +665,22 @@ public class LBFGS {
 		/*
 		 * Make sure that the initial variables are not a minimizer.
 		 */
-		xnorm = LBFGSArrayUtils.vec2norm(x, n);
-		if (param.orthantwise_c == 0.) {
-			gnorm = LBFGSArrayUtils.vec2norm(g, n);
+		xnorm = LBFGSArrayUtils.vec2norm(x);
+		if (param.getOrthantwiseC() == 0.) {
+			gnorm = LBFGSArrayUtils.vec2norm(g);
 		} else {
-			gnorm = LBFGSArrayUtils.vec2norm(pg, n);
+			gnorm = LBFGSArrayUtils.vec2norm(pg);
 		}
 		if (xnorm < 1.0)
 			xnorm = 1.0;
-		if (gnorm / xnorm <= param.epsilon) {
+		if (gnorm / xnorm <= param.getEpsilon()) {
 			return new Result(Status.LBFGS_ALREADY_MINIMIZED);
 		}
 
 		/*
 		 * Compute the initial step: step = 1.0 / sqrt(LFBGSArrayUtils.vecdot(d, d, n))
 		 */
-		step[0] = LBFGSArrayUtils.vec2norminv(d, n);
+		step[0] = LBFGSArrayUtils.vec2norminv(d);
 
 		k = 1;
 		end = 0;
@@ -661,11 +690,11 @@ public class LBFGS {
 			LBFGSArrayUtils.veccpy(gp, g, n);
 
 			/* Search for an optimal step. */
-			if (param.orthantwise_c == 0.) {
+			if (param.getOrthantwiseC() == 0.) {
 				ls = linesearch.go(n, x, fx, g, d, step, xp, gp, w, cd, param);
 			} else {
 				ls = linesearch.go(n, x, fx, g, d, step, xp, pg, w, cd, param);
-				owlqn_pseudo_gradient(pg, x, g, n, param.orthantwise_c, param.orthantwise_start, param.orthantwise_end);
+				owlqnPseudoGradient(pg, x, g, n, param.getOrthantwiseC(), param.getOrthantwiseStart(), param.getOrthantwiseEnd());
 			}
 			if (ls != null && ls.isError()) {
 				/* Revert to the previous point. */
@@ -677,11 +706,11 @@ public class LBFGS {
 			}
 
 			/* Compute x and g norms. */
-			xnorm = LBFGSArrayUtils.vec2norm(x, n);
-			if (param.orthantwise_c == 0.) {
-				gnorm = LBFGSArrayUtils.vec2norm(g, n);
+			xnorm = LBFGSArrayUtils.vec2norm(x);
+			if (param.getOrthantwiseC() == 0.) {
+				gnorm = LBFGSArrayUtils.vec2norm(g);
 			} else {
-				gnorm = LBFGSArrayUtils.vec2norm(pg, n);
+				gnorm = LBFGSArrayUtils.vec2norm(pg);
 			}
 
 			/*
@@ -690,7 +719,7 @@ public class LBFGS {
 			 */
 			if (xnorm < 1.0)
 				xnorm = 1.0;
-			if (gnorm / xnorm <= param.epsilon) {
+			if (gnorm / xnorm <= param.getEpsilon()) {
 				/* Convergence. */
 				ret.status = Status.LBFGS_SUCCESS;
 				break;
@@ -702,22 +731,22 @@ public class LBFGS {
 			 */
 			if (pf != null) {
 				/* We don't test the stopping criterion while k < past. */
-				if (param.past <= k) {
+				if (param.getPast() <= k) {
 					/* Compute the relative improvement from the past. */
-					rate = (pf[k % param.past] - fx[0]) / fx[0];
+					rate = (pf[k % param.getPast()] - fx[0]) / fx[0];
 
 					/* The stopping criterion. */
-					if (rate < param.delta) {
+					if (rate < param.getDelta()) {
 						ret.status = Status.LBFGS_STOP;
 						break;
 					}
 				}
 
 				/* Store the current value of the objective function. */
-				pf[k % param.past] = fx[0];
+				pf[k % param.getPast()] = fx[0];
 			}
 
-			if (param.max_iterations != 0 && param.max_iterations < k + 1) {
+			if (param.getMaxIterations() != 0 && param.getMaxIterations() < k + 1) {
 				/* Maximum number of iterations. */
 				ret.status = Status.LBFGSERR_MAXIMUMITERATION;
 				break;
@@ -735,8 +764,8 @@ public class LBFGS {
 			 * Compute scalars ys and yy: ys = y^t \cdot s = 1 / \rho. yy = y^t \cdot y.
 			 * Notice that yy is used for scaling the hessian matrix H_0 (Cholesky factor).
 			 */
-			ys = LBFGSArrayUtils.vecdot(it.y, it.s, n);
-			yy = LBFGSArrayUtils.vecdot(it.y, it.y, n);
+			ys = LBFGSArrayUtils.vecdot(it.y, it.s);
+			yy = LBFGSArrayUtils.vecdot(it.y, it.y);
 			it.ys = ys;
 
 			/*
@@ -749,7 +778,7 @@ public class LBFGS {
 			end = (end + 1) % m;
 
 			/* Compute the steepest direction. */
-			if (param.orthantwise_c == 0.) {
+			if (param.getOrthantwiseC() == 0.) {
 				/* Compute the negative of gradients. */
 				LBFGSArrayUtils.vecncpy(d, g, n);
 			} else {
@@ -758,10 +787,10 @@ public class LBFGS {
 
 			j = end;
 			for (i = 0; i < bound; ++i) {
-				j = (j + m - 1) % m; /* if (--j == -1) j = m-1; */
+				j = (j + m - 1) % m;
 				it = lm[j];
 				/* \alpha_{j} = \rho_{j} s^{t}_{j} \cdot q_{k+1}. */
-				it.alpha = LBFGSArrayUtils.vecdot(it.s, d, n);
+				it.alpha = LBFGSArrayUtils.vecdot(it.s, d);
 				it.alpha /= it.ys;
 				/* q_{i} = q_{i+1} - \alpha_{i} y_{i}. */
 				LBFGSArrayUtils.vecadd(d, it.y, -it.alpha, n);
@@ -772,18 +801,18 @@ public class LBFGS {
 			for (i = 0; i < bound; ++i) {
 				it = lm[j];
 				/* \beta_{j} = \rho_{j} y^t_{j} \cdot \gamma_{i}. */
-				beta = LBFGSArrayUtils.vecdot(it.y, d, n);
+				beta = LBFGSArrayUtils.vecdot(it.y, d);
 				beta /= it.ys;
 				/* \gamma_{i+1} = \gamma_{i} + (\alpha_{j} - \beta_{j}) s_{j}. */
 				LBFGSArrayUtils.vecadd(d, it.s, it.alpha - beta, n);
-				j = (j + 1) % m; /* if (++j == m) j = 0; */
+				j = (j + 1) % m;
 			}
 
 			/*
 			 * Constrain the search direction for orthant-wise updates.
 			 */
-			if (param.orthantwise_c != 0.) {
-				for (i = param.orthantwise_start; i < param.orthantwise_end; ++i) {
+			if (param.getOrthantwiseC() != 0.) {
+				for (i = param.getOrthantwiseStart(); i < param.getOrthantwiseEnd(); ++i) {
 					if (d[i] * pg[i] >= 0) {
 						d[i] = 0;
 					}
@@ -800,16 +829,20 @@ public class LBFGS {
 		return ret;
 	}
 
-	static class line_search_backtracking implements line_search_proc {
+	static class LineSearchBacktracking implements LineSearchProc {
 
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, // BTO: um i think this is
 																								// supposed to be a
 																								// singleton
-				final double[] xp, final double[] gp, double[] wp, callback_data_t cd, LBFGSParameters param) {
+				final double[] xp, final double[] gp, double[] wp, CallbackDataT cd, LBFGSParameters param) {
 			int count = 0;
-			double width, dg;
-			double finit, dginit = 0., dgtest;
-			final double dec = 0.5, inc = 2.1;
+			double width;
+			double dg;
+			double finit = 0;
+			double dginit;
+			double dgtest;
+			final double dec = 0.5;
+			final double inc = 2.1;
 
 			/* Check the input parameters for errors. */
 			if (stp[0] <= 0.) {
@@ -817,7 +850,7 @@ public class LBFGS {
 			}
 
 			/* Compute the initial gradient in the search direction. */
-			dginit = LBFGSArrayUtils.vecdot(g, s, n);
+			dginit = LBFGSArrayUtils.vecdot(g, s);
 
 			/* Make sure that s points to a descent direction. */
 			if (0 < dginit) {
@@ -826,14 +859,14 @@ public class LBFGS {
 
 			/* The initial value of the objective function. */
 			finit = f[0];
-			dgtest = param.ftol * dginit;
+			dgtest = param.getFtol() * dginit;
 
 			for (;;) {
 				LBFGSArrayUtils.veccpy(x, xp, n);
 				LBFGSArrayUtils.vecadd(x, s, stp[0], n);
 
 				/* Evaluate the function and gradient values. */
-				f[0] = cd.proc_evaluate.evaluate(x, g, n, stp[0]);
+				f[0] = cd.procEvaluate.evaluate(x, g, n, stp[0]);
 
 				++count;
 
@@ -848,8 +881,8 @@ public class LBFGS {
 					}
 
 					/* Check the Wolfe condition. */
-					dg = LBFGSArrayUtils.vecdot(g, s, n);
-					if (dg < param.wolfe * dginit) {
+					dg = LBFGSArrayUtils.vecdot(g, s);
+					if (dg < param.getWolfe() * dginit) {
 						width = inc;
 					} else {
 						if (param.linesearch == LinesearchAlgorithm.LBFGS_LINESEARCH_BACKTRACKING_WOLFE) {
@@ -858,7 +891,7 @@ public class LBFGS {
 						}
 
 						/* Check the strong Wolfe condition. */
-						if (dg > -param.wolfe * dginit) {
+						if (dg > -param.getWolfe() * dginit) {
 							width = dec;
 						} else {
 							/* Exit with the strong Wolfe condition. */
@@ -867,15 +900,15 @@ public class LBFGS {
 					}
 				}
 
-				if (stp[0] < param.min_step) {
+				if (stp[0] < param.getMinStep()) {
 					/* The step is the minimum value. */
 					return Status.LBFGSERR_MINIMUMSTEP;
 				}
-				if (stp[0] > param.max_step) {
+				if (stp[0] > param.getMaxStep()) {
 					/* The step is the maximum value. */
 					return Status.LBFGSERR_MAXIMUMSTEP;
 				}
-				if (param.max_linesearch <= count) {
+				if (param.getMaxLinesearch() <= count) {
 					/* Maximum number of iteration. */
 					return Status.LBFGSERR_MAXIMUMLINESEARCH;
 				}
@@ -885,13 +918,16 @@ public class LBFGS {
 		}
 	}
 
-	static class line_search_backtracking_owlqn implements line_search_proc {
+	static class LineSearchBacktrackingOwlqn implements LineSearchProc {
 
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, final double[] xp,
-				final double[] gp, double[] wp, callback_data_t cd, LBFGSParameters param) {
-			int i, count = 0;
-			double width = 0.5, norm = 0.;
-			double finit = f[0], dgtest;
+				final double[] gp, double[] wp, CallbackDataT cd, LBFGSParameters param) {
+			int i = 0;
+			int count = 0;
+			double width = 0.5;
+			double norm;
+			double finit = f[0];
+			double dgtest;
 
 			/* Check the input parameters for errors. */
 			if (stp[0] <= 0.) {
@@ -909,14 +945,14 @@ public class LBFGS {
 				LBFGSArrayUtils.vecadd(x, s, stp[0], n);
 
 				/* The current point is projected onto the orthant. */
-				owlqn_project(x, wp, param.orthantwise_start, param.orthantwise_end);
+				owlqnProject(x, wp, param.getOrthantwiseStart(), param.getOrthantwiseEnd());
 
 				/* Evaluate the function and gradient values. */
-				f[0] = cd.proc_evaluate.evaluate(x, g, cd.n, stp[0]);
+				f[0] = cd.procEvaluate.evaluate(x, g, cd.n, stp[0]);
 
 				/* Compute the L1 norm of the variables and add it to the object value. */
-				norm = owlqn_x1norm(x, param.orthantwise_start, param.orthantwise_end);
-				f[0] += norm * param.orthantwise_c;
+				norm = owlqnX1norm(x, param.getOrthantwiseStart(), param.getOrthantwiseEnd());
+				f[0] += norm * param.getOrthantwiseC();
 
 				++count;
 
@@ -925,20 +961,20 @@ public class LBFGS {
 					dgtest += (x[i] - xp[i]) * gp[i];
 				}
 
-				if (f[0] <= finit + param.ftol * dgtest) {
+				if (f[0] <= finit + param.getFtol() * dgtest) {
 					/* The sufficient decrease condition. */
 					return Status.LBFGS_SUCCESS; // BTO changed
 				}
 
-				if (stp[0] < param.min_step) {
+				if (stp[0] < param.getMinStep()) {
 					/* The step is the minimum value. */
 					return Status.LBFGSERR_MINIMUMSTEP;
 				}
-				if (stp[0] > param.max_step) {
+				if (stp[0] > param.getMaxStep()) {
 					/* The step is the maximum value. */
 					return Status.LBFGSERR_MAXIMUMSTEP;
 				}
-				if (param.max_linesearch <= count) {
+				if (param.getMaxLinesearch() <= count) {
 					/* Maximum number of iteration. */
 					return Status.LBFGSERR_MAXIMUMLINESEARCH;
 				}
@@ -948,21 +984,15 @@ public class LBFGS {
 		}
 	}
 
-	static class line_search_morethuente implements line_search_proc {
+	static class LineSearchMorethuente implements LineSearchProc {
 
 		@Override
 		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, double[] xp, double[] gp,
-				double[] wa, callback_data_t cd, LBFGSParameters param) {
+				double[] wa, CallbackDataT cd, LBFGSParameters param) {
 			assert false : "unimplemented";
 			return null;
 		}
 	}
-
-	/**
-	 * Define the local variables for computing minimizers.
-	 */
-	// #define USES_MINIMIZER \
-	// lbfgsfloatval_t a, d, gamma, theta, p, q, r, s;
 
 	/**
 	 * Find a minimizer of an interpolated cubic function.
@@ -983,7 +1013,7 @@ public class LBFGS {
 	 * @param du
 	 *            The value of f'(v).
 	 */
-	static double CUBIC_MINIMIZER(double u, double fu, double du, double v, double fv, double dv) {
+	static double cubicMinimizer(double u, double fu, double du, double v, double fv, double dv) {
 		// #define CUBIC_MINIMIZER(cm, u, fu, du, v, fv, dv) \
 		double d = (v) - (u);
 		double theta = ((fu) - (fv)) * 3 / d + (du) + (dv);
@@ -999,8 +1029,7 @@ public class LBFGS {
 		p = gamma - (du) + theta;
 		q = gamma - (du) + gamma + (dv);
 		r = p / q;
-		double cm = (u) + r * d;
-		return cm;
+		return (u) + r * d;
 	}
 
 	/**
@@ -1026,7 +1055,7 @@ public class LBFGS {
 	 *            The minimum value.
 	 */
 	// #define CUBIC_MINIMIZER2(cm, u, fu, du, v, fv, dv, xmin, xmax) \
-	static double CUBIC_MINIMIZER2(double u, double fu, double du, double v, double fv, double dv, double xmin,
+	static double cubicMinimizer2(double u, double fu, double du, double v, double fv, double dv, double xmin,
 			double xmax) {
 		double d = (v) - (u);
 		double theta = ((fu) - (fv)) * 3 / d + (du) + (dv);
@@ -1068,11 +1097,10 @@ public class LBFGS {
 	 * @param fv
 	 *            The value of f(v).
 	 */
-	static double QUARD_MINIMIZER(double u, double fu, double du, double v, double fv) {
+	static double quardMinimizer(double u, double fu, double du, double v, double fv) {
 		// #define QUARD_MINIMIZER(qm, u, fu, du, v, fv) \
 		double a = (v) - (u);
-		double qm = (u) + (du) / (((fu) - (fv)) / a + (du)) / 2 * a;
-		return qm;
+		return (u) + (du) / (((fu) - (fv)) / a + (du)) / 2 * a;
 	}
 
 	/**
@@ -1090,13 +1118,12 @@ public class LBFGS {
 	 *            The value of f'(v).
 	 */
 	// #define QUARD_MINIMIZER2(qm, u, du, v, dv) \
-	static double QUARD_MINIMIZER2(double u, double du, double v, double dv) {
+	static double quardMinimizer2(double u, double du, double v, double dv) {
 		double a = (u) - (v);
-		double qm = (v) + (dv) / ((dv) - (du)) * a;
-		return qm;
+		return (v) + (dv) / ((dv) - (du)) * a;
 	}
 
-	static double owlqn_x1norm(final double[] x, final int start, final int n) {
+	static double owlqnX1norm(final double[] x, final int start, final int n) {
 		int i;
 		double norm = 0.;
 
@@ -1107,7 +1134,7 @@ public class LBFGS {
 		return norm;
 	}
 
-	static void owlqn_pseudo_gradient(double[] pg, final double[] x, final double[] g, final int n, final double c,
+	static void owlqnPseudoGradient(double[] pg, final double[] x, final double[] g, final int n, final double c,
 			final int start, final int end) {
 		int i;
 
@@ -1142,7 +1169,7 @@ public class LBFGS {
 		}
 	}
 
-	static void owlqn_project(double[] d, final double[] sign, final int start, final int end) {
+	static void owlqnProject(double[] d, final double[] sign, final int start, final int end) {
 		int i;
 
 		for (i = start; i < end; ++i) {

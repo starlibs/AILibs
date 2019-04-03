@@ -190,8 +190,6 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		logger.debug("Initialized DyadRankingBasedNodeEvaluator with evalNum: {} and completionNum: {}",
 				randomlyCompletedPaths, evaluatedPaths);
 
-		// this.characterizer = new WEKAPipelineCharacterizer(loader.getParamConfigs());
-		// characterizer.buildFromFile();
 		this.characterizer = new ComponentInstanceVectorFeatureGenerator(loader.getComponents());
 
 		this.landmarkers = config.getLandmarkers();
@@ -217,6 +215,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public V f(Node<T, ?> node) throws InterruptedException {
 		if (firstEvaluation == null) {
@@ -226,8 +225,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		if (node.isGoal()) {
 			return null;
 		}
-		/* Reinitializing random search... */
-		// initializeRandomSearch(this.graphGenerator);
+
 		/* Time measuring */
 		Instant startOfEvaluation = Instant.now();
 
@@ -260,7 +258,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 		// random search failed to find anything here
 		if (allRankedPaths.isEmpty())
-			return (V) new Double(9000.0d);
+			return (V) ((Double) 9000.0d);
 		// get the top k paths
 		List<ComponentInstance> topKRankedPaths = allRankedPaths.subList(0,
 				Math.min(evaluatedPaths, allRankedPaths.size()));
@@ -283,7 +281,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		logger.info("Best solution is {}, {}", bestSoultion,
 				allEvaluatedPaths.stream().map(Pair::getY).collect(Collectors.toList()));
 		if (bestSoultion == null)
-			return (V) new Double(9000.0d);
+			return (V) ((Double) 9000.0d);
 		eventBus.post(new FValueEvent<V>(bestSoultion, evaluationTime.toMillis()));
 		return bestSoultion;
 	}
@@ -346,8 +344,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			pathToPipelines.put(randomPath, cI);
 			// fill the y with landmarkers
 			if (useLandmarkers) {
-				Vector y_prime = evaluateLandmarkersForAlgorithm(cI);
-				pipelineToCharacterization.put(y_prime, cI);
+				Vector yPrime = evaluateLandmarkersForAlgorithm(cI);
+				pipelineToCharacterization.put(yPrime, cI);
 			} else {
 				Vector y = new DenseDoubleVector(characterizer.characterize(cI));
 				if (scaler != null) {
@@ -378,8 +376,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		double[] y = characterizer.characterize(cI);
 
 		int sizeOfYPrime = characterizer.getLengthOfCharacterization() + landmarkers.length;
-		double[] y_prime = new double[sizeOfYPrime];
-		System.arraycopy(y, 0, y_prime, 0, y.length);
+		double[] yPrime = new double[sizeOfYPrime];
+		System.arraycopy(y, 0, yPrime, 0, y.length);
 		for (int i = 0; i < landmarkers.length; i++) {
 			Instances[] subsets = landmarkerSets[i];
 			double score = 0d;
@@ -395,9 +393,9 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			if (score != 0) {
 				score = score / (double) subsets.length;
 			}
-			y_prime[y.length + i] = score;
+			yPrime[y.length + i] = score;
 		}
-		return new DenseDoubleVector(y_prime);
+		return new DenseDoubleVector(yPrime);
 	}
 
 	private List<ComponentInstance> rankRandomPipelines(Map<Vector, ComponentInstance> randomPipelines) {
@@ -495,7 +493,6 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		return allEvaluatedPaths.stream().map(Pair::getY).min(V::compareTo).orElse(null);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void setGenerator(GraphGenerator<T, ?> generator) {
 		this.graphGenerator = generator;
@@ -510,6 +507,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 */
 	private void initializeRandomSearch() {
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
+		@SuppressWarnings("unchecked")
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
 				(GraphGenerator<T, String>) graphGenerator, nodeEvaluator);
 		randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);

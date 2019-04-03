@@ -10,6 +10,10 @@ import de.upb.isys.linearalgebra.Vector;
  *
  */
 public class LBFGSArrayUtils {
+	
+	private LBFGSArrayUtils() {
+		// Intentionally left blank
+	}
 
 	public static double trimmedDotProduct(double[] a, double[] b) {
 		int minLength = Math.min(a.length, b.length);
@@ -25,7 +29,7 @@ public class LBFGSArrayUtils {
 		return wrappedVector.dotProduct(b);
 	}
 
-	static double vecdot(double[] a, double[] b, int n) {
+	static double vecdot(double[] a, double[] b) {
 		DenseDoubleVector vec = new DenseDoubleVector(a);
 		return vec.dotProduct(b);
 	}
@@ -48,7 +52,7 @@ public class LBFGSArrayUtils {
 		}
 	}
 
-	static void vecset(double[] x, final double c, final int n) {
+	static void vecset(double[] x, final double c) {
 		for (int i = 0; i < x.length; i++) {
 			x[i] = c;
 		}
@@ -72,13 +76,13 @@ public class LBFGSArrayUtils {
 		}
 	}
 
-	static double vec2norm(final double[] x, final int n) {
-		double s = vecdot(x, x, n);
+	static double vec2norm(final double[] x) {
+		double s = vecdot(x, x);
 		return Math.sqrt(s);
 	}
 
-	static double vec2norminv(final double[] x, final int n) {
-		double s = vec2norm(x, n);
+	static double vec2norminv(final double[] x) {
+		double s = vec2norm(x);
 		return 1.0 / s;
 	}
 

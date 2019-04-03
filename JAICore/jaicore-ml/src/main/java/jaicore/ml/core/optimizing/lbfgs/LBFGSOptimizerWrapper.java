@@ -48,11 +48,15 @@ public class LBFGSOptimizerWrapper implements IGradientBasedOptimizer {
 					//return f(x)
 					return result;
 				});
-		log.debug("Optimization finished. The wrapped optimizer returned status {}", optimizedResult.status);
-		if (optimizedResult.status != LBFGS.Status.LBFGS_SUCCESS && optimizedResult.status != LBFGS.Status.LBFGS_STOP) {
+		log.debug("Optimization finished. The wrapped optimizer returned status {}", optimizedResult.getStatus());
+		if (optimizedResult.getStatus() != LBFGS.Status.LBFGS_SUCCESS && optimizedResult.getStatus() != LBFGS.Status.LBFGS_STOP) {
 			log.warn("LBFGS returned no success, the result may not be the optimial result!");
 		}
-		log.debug("LBFGS returned {}", Arrays.toString(coeffs));
+		
+		if (log.isDebugEnabled()) {
+			log.debug("LBFGS returned {}", Arrays.toString(coeffs));
+		}
+
 		return new DenseDoubleVector(coeffs);
 	}
 
