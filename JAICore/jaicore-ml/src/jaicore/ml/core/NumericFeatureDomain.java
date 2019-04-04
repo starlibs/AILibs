@@ -27,6 +27,7 @@ public class NumericFeatureDomain extends FeatureDomain {
 		this.max = domain.max;
 	}
 
+	
 	public boolean isInteger() {
 		return this.isInteger;
 	}

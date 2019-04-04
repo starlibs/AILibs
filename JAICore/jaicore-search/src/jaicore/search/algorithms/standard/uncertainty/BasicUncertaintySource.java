@@ -1,12 +1,13 @@
 package jaicore.search.algorithms.standard.uncertainty;
 
 import java.util.List;
-import jaicore.search.structure.core.Node;
 
-public class BasicUncertaintySource<T> implements IUncertaintySource<T, Double> {
+import jaicore.search.model.travesaltree.Node;
+
+public class BasicUncertaintySource<T, V extends Comparable<V>> implements IUncertaintySource<T, V> {
 
 	@Override
-	public double calculateUncertainty(Node<T, ?> n, List<List<T>> simulationPaths, List<Double> simulationEvaluations) {
+	public double calculateUncertainty(Node<T, V> n, List<List<T>> simulationPaths, List<V> simulationEvaluations) {
 		
 		double uncertainty = 1.0d;
 		
@@ -34,20 +35,21 @@ public class BasicUncertaintySource<T> implements IUncertaintySource<T, Double> 
 			}
 		}
 		
-		if (simulationEvaluations != null && !simulationEvaluations.isEmpty()) {
+		if (simulationEvaluations != null && !simulationEvaluations.isEmpty() && simulationEvaluations.get(0) instanceof Double) {
 			double mean = 0.0d;
 			double sampleVariance = 0.0d;
-			for (Double f : simulationEvaluations) {
-				mean += f;
+			for (V f : simulationEvaluations) {
+				mean += (Double)f;
 			}
 			mean /= simulationEvaluations.size();
-			for (Double f : simulationEvaluations) {
-				sampleVariance += (f - mean) * (f - mean);
+			for (V f : simulationEvaluations) {
+				sampleVariance += ((Double)f - mean) * ((Double)f - mean);
 			}
-			sampleVariance *= 1.0d / (simulationEvaluations.size() - 1); 
-			
+			sampleVariance = Math.sqrt(sampleVariance / (simulationEvaluations.size() - 1));
 			if (mean != 0.0d) {
-				uncertainty *= 1 - (sampleVariance / mean);
+				double coefficientOfVariation = sampleVariance / mean;
+				coefficientOfVariation = Math.max(Math.abs(coefficientOfVariation), 1.0d);
+				uncertainty *= coefficientOfVariation;
 			}
 		}
 		return uncertainty;

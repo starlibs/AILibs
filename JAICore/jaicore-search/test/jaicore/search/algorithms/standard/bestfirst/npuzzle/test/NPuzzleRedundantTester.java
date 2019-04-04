@@ -1,28 +1,16 @@
 package jaicore.search.algorithms.standard.bestfirst.npuzzle.test;
 
-import static org.junit.Assert.assertNotNull;
-
-import java.util.List;
-
-import org.junit.Test;
-
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.graphgenerators.npuzzle.redundant.NPuzzleRedundantGenerator;
-import jaicore.search.graphgenerators.npuzzle.standard.NPuzzleNode;
-
 public class NPuzzleRedundantTester {
-
-	@Test
-	public void test() {
-		NPuzzleRedundantGenerator gen = new NPuzzleRedundantGenerator(3,4);
-		BestFirst<NPuzzleNode,String> search = new BestFirst<>(gen, n-> (double)n.getPoint().getNumberOfWrongTiles());
-		
-//		SimpleGraphVisualizationWindow<Node<NPuzzleNode,Double>> win = new SimpleGraphVisualizationWindow<>(search.getEventBus());
-//		win.getPanel().setTooltipGenerator(n->n.getPoint().toString());
-		
-		/*search for solution*/
-		List<NPuzzleNode> solutionPath = search.nextSolution();
-		assertNotNull(solutionPath);
-	}
+//		extends NPuzzleStandardTester<GeneralEvaluatedTraversalTree<NPuzzleNode, String, Double>, SearchAlgorithmSolution<NPuzzleNode, String, Double>, Node<NPuzzleNode, Double>, String> {
+//
+//	@Override
+//	public IORGraphSearchFactory<GeneralEvaluatedTraversalTree<NPuzzleNode, String, Double>, SearchAlgorithmSolution<NPuzzleNode, String, Double>, NPuzzleNode, String, Double, Node<NPuzzleNode, Double>, String, IGraphAlgorithmListener<Node<NPuzzleNode, Double>, String>> getFactory() {
+//		return new BestFirstFactory<>();
+//	}
+//
+//	@Override
+//	public AlgorithmProblemReducer<NPuzzleProblem, GeneralEvaluatedTraversalTree<NPuzzleNode, String, Double>> getProblemReducer() {
+//		return new NPuzzleToGeneralTraversalTreeReducer();
+//	}
 
 }

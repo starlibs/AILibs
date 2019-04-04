@@ -6,7 +6,9 @@ import jaicore.experiments.ExperimentRunner;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
-import jaicore.ml.evaluation.MulticlassEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.SingleRandomSplitClassifierEvaluator;
+import jaicore.ml.evaluation.measures.multiclass.ZeroOneLoss;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -43,8 +45,9 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 
     System.out.println(c.getClass().getName());
     Map<String, Object> results = new HashMap<>();
-    MulticlassEvaluator eval = new MulticlassEvaluator(new Random(seed));
-    double loss = eval.getErrorRateForRandomSplit(c, data, .7f);
+    SingleRandomSplitClassifierEvaluator eval = new SingleRandomSplitClassifierEvaluator(data);
+    eval.setSeed(seed);
+    double loss = eval.evaluate(c);
 
     results.put("loss", loss);
     processor.processResults(results);

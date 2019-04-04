@@ -11,15 +11,18 @@ import jaicore.logic.fol.structure.Literal;
 import jaicore.logic.fol.structure.LiteralParam;
 import jaicore.logic.fol.structure.Monom;
 import jaicore.logic.fol.structure.VariableParam;
+import jaicore.planning.model.ceoc.CEOCAction;
 import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.conditional.CEOperation;
+import jaicore.planning.model.core.Action;
+import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.strips.StripsPlanningDomain;
 import jaicore.planning.model.task.ceocstn.CEOCSTNPlanningProblem;
 import jaicore.planning.model.task.ceocstn.OCMethod;
 
 public class StandardProblemFactory {
 
-	public static STNPlanningProblem getDockworkerProblem() {
+	public static STNPlanningProblem<Operation, Method, Action> getDockworkerProblem() {
 
 		/* retrieve STRIPS operations of the planning problem */
 		StripsPlanningDomain dwrStripsDomain = (StripsPlanningDomain) jaicore.planning.model.strips.StandardProblemFactory.getDockworkerProblem().getDomain();
@@ -40,7 +43,7 @@ public class StandardProblemFactory {
 				new TaskNetwork(), false));
 
 		/* create STN domain */
-		STNPlanningDomain domain = new STNPlanningDomain(dwrStripsDomain.getOperations(), methods);
+		STNPlanningDomain<Operation, Method> domain = new STNPlanningDomain<>(dwrStripsDomain.getOperations(), methods);
 
 		/* define init situation, w.r.t. example in Ghallab, Nau, Traverso; p. 230 */
 		Monom init = new Monom(""
@@ -49,11 +52,11 @@ public class StandardProblemFactory {
 				+ "attached('p3a','l3') & attached('p3b','l3') & attached('p3c','l3') & belong('crane3','l3') & empty('crane3') & in('c31','p3a') & in('c32','p3a') & in('c33','p3a') & in('c34','p3a') & top('c31','p3a') & top('pallet','p3b') & top('pallet','p3c') & on('c31','c32') & on('c32','c33') & on('c33', 'c34') & on('c34','pallet')"
 				);
 		TaskNetwork network = new TaskNetwork("move-stack('p1a', 'p1c') -> move-stack('p1c','p1b') -> move-stack('p2a','p2c') -> move-stack('p2c','p2b') -> move-stack('p3a','p3c') -> move-stack('p3c','p3b')");
-		return new STNPlanningProblem(domain, null, init, network);
+		return new STNPlanningProblem<>(domain, null, init, network);
 	}
 
-	public static STNPlanningProblem getNestedDichotomyCreationProblem(String rootClusterName, List<String> classes) {
-		CEOCSTNPlanningProblem problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
+	public static STNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> getNestedDichotomyCreationProblem(String rootClusterName, List<String> classes) {
+		CEOCSTNPlanningProblem<CEOCOperation, OCMethod, CEOCAction> problem = jaicore.planning.model.task.ceocstn.StandardProblemFactory.getNestedDichotomyCreationProblem(rootClusterName, classes, true, 1, 1);
 		
 		List<CEOperation> operations = new ArrayList<>();
 		for (CEOCOperation op : problem.getDomain().getOperations()) {

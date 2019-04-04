@@ -4,8 +4,8 @@ import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import de.upb.crc901.automl.metamining.similaritymeasures.F3Optimizer;
-import de.upb.crc901.automl.metamining.similaritymeasures.IHeterogenousSimilarityMeasureComputer;
+import de.upb.crc901.mlplan.metamining.similaritymeasures.F3Optimizer;
+import de.upb.crc901.mlplan.metamining.similaritymeasures.IHeterogenousSimilarityMeasureComputer;
 
 public class F3OptimizerTest {
 

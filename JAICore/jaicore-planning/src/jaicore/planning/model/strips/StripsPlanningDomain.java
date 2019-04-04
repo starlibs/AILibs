@@ -11,5 +11,4 @@ public class StripsPlanningDomain extends PlanningDomain {
 	public StripsPlanningDomain(Collection<StripsOperation> operations) {
 		super(new ArrayList<Operation>(operations));
 	}
-
 }

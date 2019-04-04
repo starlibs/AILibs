@@ -14,7 +14,7 @@ import jaicore.graphvisualizer.events.graphEvents.NodeTypeSwitchEvent;
 import jaicore.graphvisualizer.events.graphEvents.GraphEvent;
 import jaicore.graphvisualizer.events.misc.HTMLEvent;
 import jaicore.graphvisualizer.gui.dataSupplier.ISupplier;
-import jaicore.search.structure.core.Node;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,10 +26,10 @@ import java.util.Map;
  * @author jkoepe
  *
  */
-public class TooltipSupplier implements ISupplier {
+public class TooltipSupplier<V> implements ISupplier {
 
     private EventBus dataBus;
-    private TooltipGenerator generator;
+    private TooltipGenerator<V> generator;
 //    private String visualizer;
     private String title;
 
@@ -91,19 +91,19 @@ public class TooltipSupplier implements ISupplier {
         switch(event.getClass().getSimpleName()){
             case "GraphInitializedEvent":
                 GraphInitializedEvent initializedEvent = (GraphInitializedEvent) event;
-                String tooltip = generator.getTooltip((Node)initializedEvent.getRoot());
+                String tooltip = generator.getTooltip((V) initializedEvent.getRoot());
                 tooltipMap.put(initializedEvent.getRoot().hashCode(), tooltip);
                 break;
 
             case "NodeTypeSwitchEvent":
                 NodeTypeSwitchEvent switchEvent = (NodeTypeSwitchEvent) event;
                 if(tooltipMap.containsKey(switchEvent.getNode().hashCode()))
-                    tooltipMap.put(switchEvent.getNode().hashCode(), generator.getTooltip(switchEvent.getNode()));
+                    tooltipMap.put(switchEvent.getNode().hashCode(), generator.getTooltip((V) switchEvent.getNode()));
                 break;
 
             case "NodeReachedEvent":
                 NodeReachedEvent nodeReachedEvent = (NodeReachedEvent) event;
-                tooltipMap.put(nodeReachedEvent.getNode().hashCode(), generator.getTooltip(nodeReachedEvent.getNode()));
+                tooltipMap.put(nodeReachedEvent.getNode().hashCode(), generator.getTooltip((V) nodeReachedEvent.getNode()));
                 break;
 
             default:

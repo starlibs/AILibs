@@ -1,17 +1,37 @@
 package jaicore.planning.model.core;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class Plan {
-	private final List<Action> actions;
+public class Plan<A extends Action> {
+	private final List<A> actions;
+	private final Map<String,Object> annotations;
 
-	public Plan(List<Action> actions) {
+	public Plan(List<A> actions) {
+		this(actions, new HashMap<>());
+	}
+	
+	public Plan(List<A> actions, Map<String, Object> annotations) {
 		super();
 		this.actions = actions;
+		this.annotations = annotations;
 	}
 
-	public List<Action> getActions() {
+	public List<A> getActions() {
 		return actions;
+	}
+	
+	public void setAnnotation(String key, Object value) {
+		annotations.put(key, value);
+	}
+	
+	public void setAnnotation(Map<String, Object> annotations) {
+		annotations.putAll(annotations);
+	}
+
+	public Map<String, Object> getAnnotations() {
+		return annotations;
 	}
 
 	@Override

@@ -23,11 +23,12 @@ import jaicore.planning.model.ceoc.CEOCOperation;
 import jaicore.planning.model.core.Action;
 import jaicore.planning.model.core.Operation;
 import jaicore.planning.model.core.PlannerUtil;
+import jaicore.planning.model.task.rtn.RTNMethod;
 import jaicore.planning.model.task.rtn.RTNPlanningProblem;
 import jaicore.planning.model.task.stn.Method;
 import jaicore.planning.model.task.stn.MethodInstance;
-import jaicore.search.structure.core.GraphGenerator;
-import jaicore.search.structure.core.NodeExpansionDescription;
+import jaicore.search.core.interfaces.GraphGenerator;
+import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -36,11 +37,11 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RTNGraphGenerator.class);
 
-	private final RTNPlanningProblem problem;
+	private final RTNPlanningProblem<CEOCOperation,RTNMethod,CEOCAction> problem;
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
 	private final TaskPlannerUtil util = new TaskPlannerUtil(null);
 
-	public RTNGraphGenerator(RTNPlanningProblem problem) {
+	public RTNGraphGenerator(RTNPlanningProblem<CEOCOperation,RTNMethod,CEOCAction> problem) {
 		this.problem = problem;
 		for (Operation op : problem.getDomain().getOperations())
 			primitiveTasks.put(op.getName(), op);

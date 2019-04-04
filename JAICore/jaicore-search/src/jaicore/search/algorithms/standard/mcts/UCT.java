@@ -2,16 +2,15 @@ package jaicore.search.algorithms.standard.mcts;
 
 import java.util.Random;
 
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.GraphGenerator;
+import jaicore.search.model.probleminputs.GraphSearchProblemInput;
 
 public class UCT<T,A> extends MCTS<T,A,Double> {
 
-	public UCT(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> playoutSimulator, boolean maximization, int seed) {
-		super(graphGenerator, new UCBPolicy<>(maximization), new UniformRandomPolicy<>(new Random(seed)), playoutSimulator);
+	public UCT(GraphSearchProblemInput<T, A, Double> problem, boolean maximization, int seed) {
+		super(problem, new UCBPolicy<>(maximization), new UniformRandomPolicy<>(new Random(seed)));
 	}
 	
-	public UCT(GraphGenerator<T, A> graphGenerator, INodeEvaluator<T, Double> playoutSimulator, int seed) {
-		this(graphGenerator, playoutSimulator, false, seed);
+	public UCT(GraphSearchProblemInput<T, A, Double> problem, int seed) {
+		this(problem, false, seed);
 	}
 }

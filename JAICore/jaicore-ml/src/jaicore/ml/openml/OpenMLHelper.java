@@ -66,10 +66,12 @@ public class OpenMLHelper {
 	public static Instances getInstancesById(int dataId) throws IOException {
 		Instances dataset = null;
 
-		try (BufferedReader reader = Files.newBufferedReader(Paths.get(API_KEY), StandardCharsets.UTF_8)) {
-			apiKey = reader.readLine();
-		} catch (IOException e) {
-			logger.error("Failed to read api_key", e);
+		if (API_KEY == null) {
+			try (BufferedReader reader = Files.newBufferedReader(Paths.get(API_KEY), StandardCharsets.UTF_8)) {
+				apiKey = reader.readLine();
+			} catch (IOException e) {
+				logger.error("Failed to read api_key", e);
+			}
 		}
 
 		// Get dataset from OpenML
@@ -204,6 +206,10 @@ public class OpenMLHelper {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public static void setApiKey(String apiKey) {
+		OpenMLHelper.apiKey = apiKey;
 	}
 
 }

@@ -35,7 +35,7 @@ public class ExtendedRandomForestTest {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
 			data.setClassIndex(data.numAttributes() - 1);
-			ExtendedRandomForest forest = new ExtendedRandomForest(0.25d, 32, new FeatureSpace(data));
+			ExtendedRandomForest forest = new ExtendedRandomForest();
 			// forest.setFeatureSpace(new FeatureSpace(data));
 			// forest.setNumIterations(16);
 			forest.buildClassifier(data);

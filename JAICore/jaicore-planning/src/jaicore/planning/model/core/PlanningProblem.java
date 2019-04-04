@@ -1,17 +1,28 @@
 package jaicore.planning.model.core;
 
 import jaicore.logic.fol.structure.Monom;
+import jaicore.planning.model.strips.GoalStateFunction;
 
 public class PlanningProblem {
 
 	private final PlanningDomain domain;
-	private final Monom initState, goalState;
+	private final Monom initState;
+	private final Monom goalState;
+	private final GoalStateFunction goalStateFunction;
 
 	public PlanningProblem(PlanningDomain domain, Monom initState, Monom goalState) {
-		super();
 		this.domain = domain;
 		this.initState = initState;
 		this.goalState = goalState;
+		this.goalStateFunction = s -> s.equals(goalState);
+	}
+	
+	public PlanningProblem(PlanningDomain domain, Monom initState, GoalStateFunction goalStateFunction) {
+		super();
+		this.domain = domain;
+		this.initState = initState;
+		this.goalStateFunction = goalStateFunction;
+		this.goalState = null;
 	}
 
 	public PlanningDomain getDomain() {
@@ -20,6 +31,10 @@ public class PlanningProblem {
 
 	public Monom getInitState() {
 		return initState;
+	}
+
+	public GoalStateFunction getGoalStateFunction() {
+		return goalStateFunction;
 	}
 
 	public Monom getGoalState() {
@@ -31,7 +46,7 @@ public class PlanningProblem {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((domain == null) ? 0 : domain.hashCode());
-		result = prime * result + ((goalState == null) ? 0 : goalState.hashCode());
+		result = prime * result + ((goalStateFunction == null) ? 0 : goalStateFunction.hashCode());
 		result = prime * result + ((initState == null) ? 0 : initState.hashCode());
 		return result;
 	}
@@ -50,10 +65,10 @@ public class PlanningProblem {
 				return false;
 		} else if (!domain.equals(other.domain))
 			return false;
-		if (goalState == null) {
-			if (other.goalState != null)
+		if (goalStateFunction == null) {
+			if (other.goalStateFunction != null)
 				return false;
-		} else if (!goalState.equals(other.goalState))
+		} else if (!goalStateFunction.equals(other.goalStateFunction))
 			return false;
 		if (initState == null) {
 			if (other.initState != null)
@@ -65,6 +80,7 @@ public class PlanningProblem {
 
 	@Override
 	public String toString() {
-		return "PlanningProblem [domain=" + domain + ", initState=" + initState + ", goalState=" + goalState + "]";
+		return "PlanningProblem [domain=" + domain + ", initState=" + initState + ", goalStateFunction="
+				+ goalStateFunction + "]";
 	}
 }

@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.reduction.ensemble.simple.EnsembleOfSimpleOneStepReductionsExperiment;
 import de.upb.crc901.reduction.single.ReductionExperiment;
-import hasco.core.HASCOFD;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
@@ -40,7 +39,7 @@ public class Util {
 		Classifier leftClassifier = AbstractClassifier.forName(experiment.getNameOfLeftClassifier(), null);
 		Classifier innerClassifier = AbstractClassifier.forName(experiment.getNameOfInnerClassifier(), null);
 		Classifier rightClassifier = AbstractClassifier.forName(experiment.getNameOfRightClassifier(), null);
-		Random splitRandomSource = new Random(seed);
+
 		RPNDSplitter splitter = new RPNDSplitter(new Random(seed), classifierForRPNDSplit);
 		
 		/* conduct experiments */
@@ -55,7 +54,7 @@ public class Util {
 			MCTreeNodeReD classifier = new MCTreeNodeReD(innerClassifier, classSplit.get(0), leftClassifier, classSplit.get(1), rightClassifier);
 			long start = System.currentTimeMillis();
 			Map<String, Object> result = new HashMap<>();
-			List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, splitRandomSource, .7f);
+			List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, seed + k, .7);
 			classifier.buildClassifier(dataSplit.get(0));
 			long time = System.currentTimeMillis() - start;
 			Evaluation eval = new Evaluation(dataSplit.get(0));
@@ -78,7 +77,6 @@ public class Util {
 		/* prepare basis for experiments */
 		int seed = experiment.getSeed();
 		String classifier = experiment.getNameOfClassifier();
-		Random splitRandomSource = new Random(seed);
 		RPNDSplitter splitter = new RPNDSplitter(new Random(seed), AbstractClassifier.forName(classifier, null));
 
 		/* conduct experiments */
@@ -88,7 +86,7 @@ public class Util {
 			Vote ensemble = new Vote();
 			ensemble.setOptions(new String[] {"-R", "MAJ"});
 			long start = System.currentTimeMillis();
-			List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, splitRandomSource, .7f);
+			List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, seed + k, .7);
 			for (int i = 0; i < experiment.getNumberOfStumps(); i++) {
 			
 				List<Collection<String>> classSplit;

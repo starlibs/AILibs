@@ -20,7 +20,7 @@ import jaicore.basic.sets.SetUtil;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.events.NodePassedToCoworkerEvent;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributedSearchCommunicationLayer;
 import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.DistributionSearchAdapter;
-import jaicore.search.structure.core.Node;
+import jaicore.search.model.travesaltree.Node;
 
 public class DistributedSearchManager<T, A, V extends Comparable<V>> {
 	private static final Logger logger = LoggerFactory.getLogger(DistributedSearchManager.class);
