@@ -55,6 +55,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	private static final int INTERRUPTION_DELAY = 5000;
 	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000;
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000;
+	private static final int EARLY_TERMINATION_TOLERANCE = 50;
 
 	// fields used together with @Parameter must be public
 	@Parameter(0)
@@ -177,7 +178,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		int runtime = (int) (System.currentTimeMillis() - start.get());
 		int reactionTime = interruptEvent.get() > 0 ? (int) (System.currentTimeMillis() - interruptEvent.get()) : Integer.MAX_VALUE;
 		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
-		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
+		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an interrupted exception.", controlledInterruptedExceptionSeen);
 
@@ -268,7 +269,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + availableCPUs + ". Observed threads: \n\t- " + Arrays
 				.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
 				!threadCountObserverThread.isThreadConstraintViolated());
-		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY);
+		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
 		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);

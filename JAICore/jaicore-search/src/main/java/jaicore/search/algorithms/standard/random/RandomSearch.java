@@ -185,34 +185,40 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException  {
-		this.logger.debug("Starting next algorithm step.");
-		assert this.exploredGraph.isGraphSane();
-		switch (this.getState()) {
-		case created:
-			this.post(new GraphInitializedEvent<>(this.getId(), this.root));
-			this.logger.info("Starting random search ...");
+		try {
+			this.registerActiveThread();
+			this.logger.debug("Starting next algorithm step.");
 			assert this.exploredGraph.isGraphSane();
-			return this.activate();
+			switch (this.getState()) {
+			case created:
+				this.post(new GraphInitializedEvent<>(this.getId(), this.root));
+				this.logger.info("Starting random search ...");
+				assert this.exploredGraph.isGraphSane();
+				return this.activate();
 
-		case active:
+			case active:
 
-			/* if the root is exhausted, cancel */
-			SearchGraphPath<N, A> drawnPath = null;
-			drawnPath = this.nextSolutionUnderNode(this.root);
-			if (drawnPath == null) {
-				this.logger.info("Drew NULL path, terminating");
-				return this.terminate();
+				/* if the root is exhausted, cancel */
+				SearchGraphPath<N, A> drawnPath = null;
+				drawnPath = this.nextSolutionUnderNode(this.root);
+				if (drawnPath == null) {
+					this.logger.info("Drew NULL path, terminating");
+					return this.terminate();
+				}
+				this.logger.info("Drew path of length {}. Posting this event. For more details on the path, enable TRACE", drawnPath.getNodes().size());
+				this.logger.trace("The drawn path is {}", drawnPath);
+				AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), drawnPath);
+				this.logger.info("Identified new solution. Event is {}", event);
+				this.post(event);
+				assert this.exploredGraph.isGraphSane();
+				return event;
+
+			default:
+				throw new IllegalStateException("Cannot do anything in state " + this.getState());
 			}
-			this.logger.info("Drew path of length {}. Posting this event. For more details on the path, enable TRACE", drawnPath.getNodes().size());
-			this.logger.trace("The drawn path is {}", drawnPath);
-			AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), drawnPath);
-			this.logger.info("Identified new solution. Event is {}", event);
-			this.post(event);
-			assert this.exploredGraph.isGraphSane();
-			return event;
-
-		default:
-			throw new IllegalStateException("Cannot do anything in state " + this.getState());
+		}
+		finally {
+			this.unregisterActiveThread();
 		}
 	}
 

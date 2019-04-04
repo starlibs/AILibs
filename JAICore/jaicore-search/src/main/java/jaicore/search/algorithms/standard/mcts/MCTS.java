@@ -410,6 +410,9 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 			catch (ActionPredictionFailedException e) {
 				throw new AlgorithmException(e, "Step failed due to an exception in predicting an action when computing the playout.");
 			}
+			finally {
+				this.unregisterActiveThread();
+			}
 
 			/* the algorithm should never come here */
 			throw new IllegalStateException("The algorithm has reached the end of the active-block, which shall never happen.");

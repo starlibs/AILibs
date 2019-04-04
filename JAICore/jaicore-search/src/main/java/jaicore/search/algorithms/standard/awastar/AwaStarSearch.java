@@ -188,53 +188,59 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		this.logger.debug("Next step in {}. State is {}", this.getId(), this.getState());
-		this.checkAndConductTermination();
-		switch (this.getState()) {
-		case created:
-			T externalRootNode = this.rootNodeGenerator.getRoot();
-			Node<T, V> rootNode = new Node<>(null, externalRootNode);
-			this.logger.info("Initializing graph and OPEN with {}.", rootNode);
-			this.openList.add(rootNode);
-			this.post(new GraphInitializedEvent<>(this.getId(), rootNode));
-			rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
-			return this.activate();
+		try {
+			this.registerActiveThread();
+			this.logger.debug("Next step in {}. State is {}", this.getId(), this.getState());
+			this.checkAndConductTermination();
+			switch (this.getState()) {
+			case created:
+				T externalRootNode = this.rootNodeGenerator.getRoot();
+				Node<T, V> rootNode = new Node<>(null, externalRootNode);
+				this.logger.info("Initializing graph and OPEN with {}.", rootNode);
+				this.openList.add(rootNode);
+				this.post(new GraphInitializedEvent<>(this.getId(), rootNode));
+				rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
+				return this.activate();
 
-		case active:
-			AlgorithmEvent event;
-			this.logger.info("Searching for next solution.");
+			case active:
+				AlgorithmEvent event;
+				this.logger.info("Searching for next solution.");
 
-			/* return pending solutions if there are any */
-			while (this.unreturnedSolutionEvents.isEmpty()) {
-				this.checkAndConductTermination();
+				/* return pending solutions if there are any */
+				while (this.unreturnedSolutionEvents.isEmpty()) {
+					this.checkAndConductTermination();
 
-				/* if the current graph has been exhausted, add all suspended nodes to OPEN and increase window size */
-				if (this.openList.isEmpty()) {
-					if (this.suspendList.isEmpty()) {
-						this.logger.info("The whole graph has been exhausted. No more solutions can be found!");
-						return this.terminate();
-					} else {
-						this.logger.info("Search with window size {} is exhausted. Reactivating {} suspended nodes and incrementing window size.", this.windowSize, this.suspendList.size());
-						this.openList.addAll(this.suspendList);
-						this.suspendList.clear();
-						this.windowSize++;
-						this.currentLevel = -1;
+					/* if the current graph has been exhausted, add all suspended nodes to OPEN and increase window size */
+					if (this.openList.isEmpty()) {
+						if (this.suspendList.isEmpty()) {
+							this.logger.info("The whole graph has been exhausted. No more solutions can be found!");
+							return this.terminate();
+						} else {
+							this.logger.info("Search with window size {} is exhausted. Reactivating {} suspended nodes and incrementing window size.", this.windowSize, this.suspendList.size());
+							this.openList.addAll(this.suspendList);
+							this.suspendList.clear();
+							this.windowSize++;
+							this.currentLevel = -1;
+						}
 					}
+					this.logger.info("Running core algorithm with window size {} and current level {}. {} items are in OPEN", this.windowSize, this.currentLevel, this.openList.size());
+					this.windowAStar();
 				}
-				this.logger.info("Running core algorithm with window size {} and current level {}. {} items are in OPEN", this.windowSize, this.currentLevel, this.openList.size());
-				this.windowAStar();
-			}
 
-			/* if we reached this point, there is at least one item in the result list. We return it */
-			event = this.unreturnedSolutionEvents.get(0);
-			this.unreturnedSolutionEvents.remove(0);
-			if (!(event instanceof GraphSearchSolutionCandidateFoundEvent)) { // solution events are sent directly over the event bus
-				this.post(event);
-			}
-			return event;
+				/* if we reached this point, there is at least one item in the result list. We return it */
+				event = this.unreturnedSolutionEvents.get(0);
+				this.unreturnedSolutionEvents.remove(0);
+				if (!(event instanceof GraphSearchSolutionCandidateFoundEvent)) { // solution events are sent directly over the event bus
+					this.post(event);
+				}
+				return event;
 
-		default:
-			throw new IllegalStateException("Cannot do anything in state " + this.getState());
+			default:
+				throw new IllegalStateException("Cannot do anything in state " + this.getState());
+			}
+		}
+		finally {
+			this.unregisterActiveThread();
 		}
 	}
 
