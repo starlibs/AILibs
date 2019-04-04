@@ -8,7 +8,7 @@ import de.upb.crc901.mlplan.metamining.similaritymeasures.F1Optimizer;
 
 public class F1OptimizerTest {
 
-	@Test
+//	@Test
 	public void test() {
 
 		/* invent some R and X matrices */

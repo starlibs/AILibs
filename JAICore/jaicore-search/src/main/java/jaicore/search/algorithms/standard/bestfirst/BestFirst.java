@@ -730,6 +730,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			 * and how to integrate the successors into the search
 			 */
 			List<N> todoList = successorDescriptions.stream().map(d -> d.getTo()).collect(Collectors.toList());
+			long lastTerminationCheck = System.currentTimeMillis();
 			for (NodeExpansionDescription<N, A> successorDescription : successorDescriptions) {
 				NodeBuilder nb = new NodeBuilder(todoList, actualNodeSelectedForExpansion, successorDescription);
 				this.logger.trace("Number of additional threads for node attachment is {}", this.additionalThreadsForNodeAttachment);
@@ -749,6 +750,10 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						break;
 					}
 					this.pool.submit(nb);
+				}
+				if (System.currentTimeMillis() - lastTerminationCheck > 50) {
+					checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
+					lastTerminationCheck = System.currentTimeMillis();
 				}
 			}
 			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, this.open.size(), this.activeJobs.get());

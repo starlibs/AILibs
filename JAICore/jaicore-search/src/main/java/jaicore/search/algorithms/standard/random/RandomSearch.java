@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.graph.Graph;
@@ -184,7 +185,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException  {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException  {
 		try {
 			this.registerActiveThread();
 			this.logger.debug("Starting next algorithm step.");
@@ -216,6 +217,15 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			default:
 				throw new IllegalStateException("Cannot do anything in state " + this.getState());
 			}
+		}
+		catch (InterruptedException e) {
+			if (hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
+				checkTermination(false);
+				assert false : "The thread has been interrupted due to shutdown but apparently no stopping criterion is satisfied!";
+				throw new AlgorithmException("This part should never be reached!");
+			}
+			else
+				throw e;
 		}
 		finally {
 			this.unregisterActiveThread();

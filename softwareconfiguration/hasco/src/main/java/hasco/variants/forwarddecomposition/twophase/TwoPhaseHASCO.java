@@ -1,5 +1,7 @@
 package hasco.variants.forwarddecomposition.twophase;
 
+import java.sql.Date;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -62,8 +64,6 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 	/* statistics */
 	private long timeOfStart = -1;
 	private int secondsSpentInPhase1;
-
-	private Thread timeoutControl = null;
 
 	@Override
 	public String toString() {
@@ -142,26 +142,23 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 		case active:
 
 			/* phase 1: gather solutions */
-			this.timeoutControl = new Thread(() -> {
-				try {
-					while (!Thread.currentThread().isInterrupted()) {
-						Thread.sleep(1000);
-						int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
-						int timeRemaining = (int) TwoPhaseHASCO.this.getTimeout().milliseconds() - timeElapsed;
-						if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
-							TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
-							TwoPhaseHASCO.this.hasco.cancel();
-							return;
-						}
+			GlobalTimer timer = GlobalTimer.getInstance();
+			TimerTask task = new TimerTask() {
+				
+				@Override
+				public void run() {
+					int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
+					int timeRemaining = (int) TwoPhaseHASCO.this.getTimeout().milliseconds() - timeElapsed;
+					if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
+						TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
+						TwoPhaseHASCO.this.hasco.cancel();
+						this.cancel();
 					}
-				} catch (Exception e) {
-					TwoPhaseHASCO.this.logger.error("Timeouter died away. This must NEVER happen. The exception responsible for this is: {} ({}). Stack trace: \n\t{}", e.getClass().getName(), e.getMessage(),
-							Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t")));
 				}
-			}, "Phase 1 time bound observer");
-			this.timeoutControl.start();
+			};
 			this.logger.info("Entering phase 1. Calling HASCO with timeout {}.", this.hasco.getTimeout());
 			try {
+				timer.scheduleAtFixedRate(task, 1000, 1000);
 				this.hasco.call();
 			}
 			catch (AlgorithmExecutionCanceledException e) {
@@ -467,7 +464,6 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 		if (this.hasco != null) {
 			this.hasco.cancel();
 		}
-		this.timeoutControl.interrupt(); // no controlled interrupt necessary, because there is no controlled interruption handling in the body of the timeoutControl
 		assert this.isCanceled() : "Cancel-flag is not true at the end of the cancel procedure!";
 	}
 
