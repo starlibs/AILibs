@@ -187,6 +187,22 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	protected void checkTermination(final boolean shutdownOnStoppingCriterion) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Checking Termination");
+		Thread t = Thread.currentThread();
+		
+		/* check whether the thread has been interrupted for another reason than during shutdown */
+		if (t.isInterrupted() && !hasThreadBeenInterruptedDuringShutdown(t)) {
+			this.logger.info("Interruption detected for {}. Resetting interrupted-flag.", this.getId());
+			Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
+			if (shutdownOnStoppingCriterion) {
+				this.logger.debug("Invoking shutdown");
+				this.unregisterThreadAndShutdown();
+			} else {
+				this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
+			}
+			this.logger.debug("Throwing InterruptedException to communicate the interrupt to the invoker.");
+			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
+		}
+		
 		if (this.isTimeouted()) {
 			this.logger.info("Timeout detected for {}", this.getId());
 			if (shutdownOnStoppingCriterion) {
@@ -198,39 +214,14 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.logger.debug("Throwing TimeoutException");
 			throw new AlgorithmTimeoutedException(this.timeOfTimeoutDetection - this.deadline);
 		}
-		if (this.isCanceled()) {
+		
+		if (this.isCanceled()) { // for a cancel, we assume that the shutdown has already been triggered by the canceler
 			this.logger.info("Cancel detected for {}.", this.getId());
-			if (shutdownOnStoppingCriterion) {
-				this.logger.debug("Invoking shutdown");
-				if (this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
-					this.logger.debug("Thread has been interrupted during shutdown. Resetting the flag and not invoking shutdown again.");
-					Thread.interrupted(); // reset interrupted flag
-				}
-				else {
-					this.unregisterThreadAndShutdown(); // calling cancel() usually already shutdowns, but this behavior may have been overwritten
-					if (this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
-						Thread t = Thread.currentThread();
-						this.logger.debug("Reset interrupt flag of thread {} since thread has been interrupted during shutdown but not from the outside. Current interrupt flag is {}", t, t.isInterrupted());
-						Thread.interrupted(); // reset interrupted flag
-					}
-				}
-			} else {
-				this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
+			if (Thread.interrupted()) { // reset the flag
+				this.logger.debug("Thread has been interrupted during shutdown. Resetting the flag and not invoking shutdown again.");
 			}
 			this.logger.debug("Throwing AlgorithmExecutionCanceledException.");
 			throw new AlgorithmExecutionCanceledException(System.currentTimeMillis() - this.canceled);
-		}
-		if (Thread.currentThread().isInterrupted()) {
-			this.logger.info("Interruption detected for {}. Resetting interrupted-flag.", this.getId());
-			Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
-			if (shutdownOnStoppingCriterion) {
-				this.logger.debug("Invoking shutdown");
-				this.unregisterThreadAndShutdown();
-			} else {
-				this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
-			}
-			this.logger.debug("Throwing InterruptedException to communicate the interrupt to the invoker.");
-			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
 		this.logger.debug("No termination condition observed.");
 	}
@@ -318,7 +309,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public void cancel() {
+	public synchronized void cancel() {
 		this.logger.info("Received cancel for algorithm {}.", this.getId());
 		if (this.isCanceled()) {
 			this.logger.debug("Ignoring cancel command since the algorithm has been canceled before.");

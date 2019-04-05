@@ -38,10 +38,8 @@ import jaicore.interrupt.Interrupter;
 /**
  * A class to test any type of algorithm.
  *
- * Note that it is on purpose that this class is not generic in the input/output classes of the tested algorithm.
- * The reason is that the algorithm is tested for different input instances, and these may also have different types.
- * Of course, the main type of the different inputs is usually the same, but since the type itself may be generic,
- * the concrete type may depend on the input itself.
+ * Note that it is on purpose that this class is not generic in the input/output classes of the tested algorithm. The reason is that the algorithm is tested for different input instances, and these may also have different types. Of course,
+ * the main type of the different inputs is usually the same, but since the type itself may be generic, the concrete type may depend on the input itself.
  */
 
 @RunWith(Parameterized.class)
@@ -56,6 +54,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000;
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000;
 	private static final int EARLY_TERMINATION_TOLERANCE = 50;
+	private static final int MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER = 200;
 
 	// fields used together with @Parameter must be public
 	@Parameter(0)
@@ -75,7 +74,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	@Test
 	public void testStartAndFinishEventEmissionSequentially() throws Exception {
-		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		IAlgorithm<?, ?> algorithm = getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
@@ -84,12 +83,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		algorithm.registerListener(listener);
 		algorithm.call();
 		listener.checkState();
-		this.checkNotInterrupted();
+		checkNotInterrupted();
 	}
 
 	@Test
 	public void testStartAndFinishEventEmissionProtocolParallelly() throws Exception {
-		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		IAlgorithm<?, ?> algorithm = getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
@@ -99,12 +98,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		algorithm.registerListener(listener);
 		algorithm.call();
 		listener.checkState();
-		this.checkNotInterrupted();
+		checkNotInterrupted();
 	}
 
 	@Test
 	public void testStartAndFinishEventEmissionByIteration() throws Exception {
-		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
+		IAlgorithm<?, ?> algorithm = getAlgorithm(problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
@@ -114,20 +113,52 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			listener.receiveEvent(e);
 		}
 		listener.checkState();
-		this.checkNotInterrupted();
+		checkNotInterrupted();
 	}
 
 	@Test
-	public void testInterrupt() throws Exception {
+	public void testInterrupt() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
+		runInterruptTest(false);
+	}
+
+	@Test
+	public void testInterruptWhenParallelized() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
+		runInterruptTest(true);
+	}
+
+	@Test
+	public void testCancel() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
+		runCancelTest(false);
+	}
+
+	@Test
+	public void testCancelWhenParallelized() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
+		runCancelTest(true);
+	}
+
+	@Test
+	public void testTimeout() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
+		runTimeoutTest(false);
+	}
+
+	@Test
+	public void testTimeoutWhenParallelized() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
+		runTimeoutTest(true);
+	}
+
+	public void runInterruptTest(final boolean parallelized) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
 
 		/* set up algorithm */
-		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		IAlgorithm<?, ?> algorithm = getAlgorithm(problemSet.getDifficultProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
+		logger.info("Testing interruptibility of algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), algorithm.getInput());
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
-		algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
-		algorithm.setMaxNumThreads(Runtime.getRuntime().availableProcessors());
+		if (parallelized) {
+			algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());
+			algorithm.setMaxNumThreads(Runtime.getRuntime().availableProcessors());
+		}
 		FutureTask<?> task = new FutureTask<>(algorithm);
 
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
@@ -150,7 +181,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			@Override
 			public void run() {
 				long now = System.currentTimeMillis();
-				GeneralAlgorithmTester.this.logger.info("Interrupting thread {} after {}ms", algorithmThread, now - start.get());
+				logger.info("Interrupting thread {} after {}ms", algorithmThread, now - start.get());
 				interruptEvent.set(now);
 				Interrupter.get().interruptThread(algorithmThread, interruptReason);
 			}
@@ -164,20 +195,17 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof InterruptedException && Interrupter.get().hasThreadBeenInterruptedWithReason(algorithmThread, interruptReason)) {
 				controlledInterruptedExceptionSeen = true;
-			}
-			else {
+			} else {
 				throw e;
 			}
-		}
-		catch (TimeoutException e) {
-			this.logger.warn("Time limit for test has been reached.");
-		}
-		finally {
+		} catch (TimeoutException e) {
+			logger.warn("Time limit for test has been reached.");
+		} finally {
 			threadCountObserverThread.cancel();
 		}
 		int runtime = (int) (System.currentTimeMillis() - start.get());
 		int reactionTime = interruptEvent.get() > 0 ? (int) (System.currentTimeMillis() - interruptEvent.get()) : Integer.MAX_VALUE;
-		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
+		logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after the interrupt.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an interrupted exception.", controlledInterruptedExceptionSeen);
@@ -188,22 +216,24 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		 * but not that the algorithm is shutdown
 		 */
 		algorithm.cancel();
-		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
-		this.logger.info("Interrupt-Test finished.");
+		waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
+		logger.info("Interrupt-Test finished.");
 	}
 
-	@Test
-	public void testCancel() throws Exception {
+	public void runCancelTest(final boolean parallelized) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
 
 		/* set up algorithm */
-		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		IAlgorithm<?, ?> algorithm = getAlgorithm(problemSet.getDifficultProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
+		logger.info("Testing cancel of algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), algorithm.getInput());
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
-		int availableCPUs = Runtime.getRuntime().availableProcessors();
-		algorithm.setNumCPUs(availableCPUs);
-		algorithm.setMaxNumThreads(availableCPUs);
+		int allowedCPUs = parallelized ? Runtime.getRuntime().availableProcessors() : 1;
+		if (parallelized) {
+			algorithm.setNumCPUs(allowedCPUs);
+			algorithm.setMaxNumThreads(allowedCPUs);
+		}
 		FutureTask<?> task = new FutureTask<>(algorithm);
 		AtomicLong start = new AtomicLong();
 
@@ -213,9 +243,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			@Override
 			public void run() {
 				long now = System.currentTimeMillis();
-				GeneralAlgorithmTester.this.logger.info("Triggering cancel on {} after {}ms", algorithm.getId(), now - start.get());
+				logger.info("Triggering cancel on {} after {}ms", algorithm.getId(), now - start.get());
 				cancelEvent.set(now);
 				algorithm.cancel();
+				long timeRequiredToProcessCancel = System.currentTimeMillis() - now;
+				logger.info("Cancel fully processed after {}ms", timeRequiredToProcessCancel);
+				assertTrue("The cancel command blocked the thread for " + timeRequiredToProcessCancel + "ms, but only " + MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER + " are allowed.", timeRequiredToProcessCancel <= MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER);
 			}
 		}, INTERRUPTION_DELAY);
 
@@ -238,7 +271,6 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			assert false : ("Algorithm terminated without exception but with regular output: " + output);
 		} catch (ExecutionException e) {
 
-
 			/* if the max number of threads has been violated, reset interrupted flag */
 			if (threadNumberViolated.get()) {
 				Thread.interrupted(); // this was a controlled interrupt, reset the flag
@@ -249,47 +281,47 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 				if (e.getCause() instanceof AlgorithmExecutionCanceledException) {
 					AlgorithmExecutionCanceledException ex = (AlgorithmExecutionCanceledException) e.getCause();
 					cancellationExceptionSeen = true;
-					assertTrue ("The algorithm has sent an AlgorithmExceutionCanceledException, which is correct, but the cancel was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of " + INTERRUPTION_CLEANUP_TOLERANCE + "ms.", ex.getDelay() <= INTERRUPTION_CLEANUP_TOLERANCE);
-				}
-				else {
+					assertTrue("The algorithm has sent an AlgorithmExceutionCanceledException, which is correct, but the cancel was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of "
+							+ INTERRUPTION_CLEANUP_TOLERANCE + "ms.", ex.getDelay() <= INTERRUPTION_CLEANUP_TOLERANCE);
+				} else {
 					throw e;
 				}
 			}
-		}
-		catch (TimeoutException e) {
-			this.logger.warn("Time limit for test has been reached.");
-		}
-		finally {
+		} catch (TimeoutException e) {
+			logger.warn("Time limit for test has been reached.");
+		} finally {
 			threadCountObserverThread.cancel();
 		}
 		int runtime = (int) (System.currentTimeMillis() - start.get());
 		int reactionTime = cancelEvent.get() > 0 ? (int) (System.currentTimeMillis() - cancelEvent.get()) : Integer.MAX_VALUE;
 		assertFalse("Thread must not be interrupted after cancel!", Thread.currentThread().isInterrupted());
-		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
-		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + availableCPUs + ". Observed threads: \n\t- " + Arrays
+		logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
+		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + allowedCPUs + ". Observed threads: \n\t- " + Arrays
 				.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
 				!threadCountObserverThread.isThreadConstraintViolated());
 		assertTrue("Runtime must be at least 5 seconds, actually should be at least 10 seconds.", runtime >= INTERRUPTION_DELAY - EARLY_TERMINATION_TOLERANCE);
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
-		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
-		this.checkNotInterrupted();
-		this.logger.info("Cancel-Test finished.");
+		waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
+		checkNotInterrupted();
+		logger.info("Cancel-Test finished.");
 	}
 
-	@Test
-	public void testTimeout() throws Exception {
+	public void runTimeoutTest(final boolean parallelized) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException {
 
 		/* set up algorithm */
-		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
+		IAlgorithm<?, ?> algorithm = getAlgorithm(problemSet.getDifficultProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
+		logger.info("Testing timeoutof algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), algorithm.getInput());
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
-		int availableCPUs = Runtime.getRuntime().availableProcessors();
-		algorithm.setNumCPUs(availableCPUs);
-		algorithm.setMaxNumThreads(availableCPUs);
-		assert algorithm.getConfig().threads() == availableCPUs;
+		int allowedCPUs = parallelized ? Runtime.getRuntime().availableProcessors() : 1;
+		if (parallelized) {
+			algorithm.setNumCPUs(allowedCPUs);
+			algorithm.setMaxNumThreads(allowedCPUs);
+			assert algorithm.getConfig().threads() == allowedCPUs;
+		};
 		FutureTask<?> task = new FutureTask<>(algorithm);
 		TimeOut to = new TimeOut(TIMEOUT_DELAY, TimeUnit.MILLISECONDS);
 		algorithm.setTimeout(to.milliseconds(), TimeUnit.MILLISECONDS);
@@ -311,11 +343,13 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		long start = System.currentTimeMillis();
 		try {
 			task.get(TIMEOUT_DELAY + INTERRUPTION_CLEANUP_TOLERANCE, TimeUnit.MILLISECONDS); // here we cancel earlier than in the other two tests, because it is the job of the algorithm to make sure that the timeout is respected
-			this.logger.warn("Algorithm terminated without exception but with regular output. In general, this is allowed, but if the algorithm is not specialized on safe termination under timeouts, the tested problem might just have been too easy.");
+			logger.warn(
+					"Algorithm terminated without exception but with regular output. In general, this is allowed, but if the algorithm is not specialized on safe termination under timeouts, the tested problem might just have been too easy.");
 		} catch (ExecutionException e) {
 			if (e.getCause() instanceof AlgorithmTimeoutedException) {
 				AlgorithmTimeoutedException ex = (AlgorithmTimeoutedException) e.getCause();
-				assertTrue ("The algorithm has sent a TimeoutException, which is correct, but the timeout was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of " + INTERRUPTION_CLEANUP_TOLERANCE + "ms.", ex.getDelay() <= INTERRUPTION_CLEANUP_TOLERANCE);
+				assertTrue("The algorithm has sent a TimeoutException, which is correct, but the timeout was triggered with a delay of " + ex.getDelay() + "ms, which exceeds the allowed time of " + INTERRUPTION_CLEANUP_TOLERANCE + "ms.",
+						ex.getDelay() <= INTERRUPTION_CLEANUP_TOLERANCE);
 			} else if (e.getCause() instanceof AlgorithmExecutionCanceledException && threadNumberViolated.get()) {
 				Thread.interrupted(); // this was a controlled interrupt, reset the flag
 			} else {
@@ -323,24 +357,25 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			}
 		} catch (TimeoutException e) {
 			timeoutTriggered = true;
-		}
-		finally {
+		} finally {
 			threadCountObserverThread.cancel();
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);
 		assertFalse("Thread must not be interrupted after timeout!", Thread.currentThread().isInterrupted());
-		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + availableCPUs + ". Observed threads: \n\t- " + Arrays
+		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + allowedCPUs + ". Observed threads: \n\t- " + Arrays
 				.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
 				!threadCountObserverThread.isThreadConstraintViolated());
-		this.logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
+		logger.info("Executing thread has returned control after {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime);
 		if (runtime < TIMEOUT_DELAY) {
-			this.logger.warn("Runtime was only {} seconds but should be at least {}. There might be a problem with the difficulty of the problem. If the algorithm is designed to exit smoothly on a timeout, you can safely ignore this warning.", runtime, INTERRUPTION_DELAY);
+			logger.warn(
+					"Runtime was only {} seconds but should be at least {}. There might be a problem with the difficulty of the problem. If the algorithm is designed to exit smoothly on a timeout, you can safely ignore this warning.",
+					runtime, INTERRUPTION_DELAY);
 		}
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.", timeoutTriggered);
-		this.waitForThreadGroupToBecomeEmpty(tg);
-		this.checkNotInterrupted();
-		this.logger.info("Timeout-Test finished.");
+		waitForThreadGroupToBecomeEmpty(tg);
+		checkNotInterrupted();
+		logger.info("Timeout-Test finished.");
 	}
 
 	private void checkNotInterrupted() {
@@ -348,12 +383,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	}
 
 	private void waitForThreadGroupToBecomeEmpty(final ThreadGroup group) throws InterruptedException {
-		this.logger.info("Waiting for thread group {} to become empty.", group);
+		logger.info("Waiting for thread group {} to become empty.", group);
 		int sleepTime = 100;
 		int n = THREAD_SHUTDOWN_TOLERANCE / sleepTime;
 		int numberOfThreadsAfter = group.activeCount();
 		for (int i = 0; i < n && numberOfThreadsAfter > 0; i++) {
-			this.logger.info("Thread wait {}/{}: There are still {} threads active. Waiting {}ms for another check.", i + 1, n, numberOfThreadsAfter, sleepTime);
+			logger.info("Thread wait {}/{}: There are still {} threads active. Waiting {}ms for another check.", i + 1, n, numberOfThreadsAfter, sleepTime);
 			Thread.sleep(sleepTime);
 			numberOfThreadsAfter = group.activeCount();
 		}
@@ -386,57 +421,55 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		@Subscribe
 		public void receiveEvent(final AlgorithmInitializedEvent e) {
-			if (!this.observedInit) {
-				this.observedInit = true;
-				this.observedInitExactlyOnce = true;
-				if (!this.observedFinish) {
-					this.observedInitBeforeFinish = true;
+			if (!observedInit) {
+				observedInit = true;
+				observedInitExactlyOnce = true;
+				if (!observedFinish) {
+					observedInitBeforeFinish = true;
 				}
 			} else {
-				this.observedInitExactlyOnce = false;
+				observedInitExactlyOnce = false;
 			}
 		}
 
 		@Subscribe
 		public void receiveEvent(final AlgorithmFinishedEvent e) {
-			if (!this.observedFinish) {
-				this.observedFinish = true;
-				this.observedFinishExactlyOnce = true;
+			if (!observedFinish) {
+				observedFinish = true;
+				observedFinishExactlyOnce = true;
 			} else {
-				this.observedFinishExactlyOnce = false;
+				observedFinishExactlyOnce = false;
 			}
 		}
 
 		void checkState() {
-			assertTrue("No init event was observed", this.observedInit);
-			assertTrue("More than one init event was observed", this.observedInitExactlyOnce);
-			assertTrue("A finish event was observed prior to an init event", this.observedInitBeforeFinish);
-			assertTrue("No finish event was observed", this.observedFinish);
-			assertTrue("More than one finish event was observed", this.observedFinishExactlyOnce);
+			assertTrue("No init event was observed", observedInit);
+			assertTrue("More than one init event was observed", observedInitExactlyOnce);
+			assertTrue("A finish event was observed prior to an init event", observedInitBeforeFinish);
+			assertTrue("No finish event was observed", observedFinish);
+			assertTrue("More than one finish event was observed", observedFinishExactlyOnce);
 		}
 	}
 
-
-
 	public IAlgorithmTestProblemSet<?> getProblemSet() {
-		return this.problemSet;
+		return problemSet;
 	}
 
 	@Override
 	public String getLoggerName() {
-		return this.loggerName;
+		return loggerName;
 	}
 
 	protected Logger getLogger() {
-		return this.logger;
+		return logger;
 	}
 
 	@Override
 	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger name from {} to {}.", this.loggerName, name);
-		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(this.loggerName);
-		this.logger.info("Switched logger name to {}.", this.loggerName);
+		logger.info("Switching logger name from {} to {}.", loggerName, name);
+		loggerName = name;
+		logger = LoggerFactory.getLogger(loggerName);
+		logger.info("Switched logger name to {}.", loggerName);
 	}
 
 }
