@@ -32,7 +32,7 @@ import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
-import jaicore.ml.core.evaluation.measure.multilabel.OverviewMeasureLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassMeasureBuilder;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
@@ -231,7 +231,7 @@ public class MLPlanBuilder {
 
 	public MLPlanBuilder withMekaDefaultConfiguration() throws IOException {
 		this.withDefaultConfiguration(EDefaultConfig.MEKA);
-		this.evaluatorMeasureBridge = new SimpleMLCEvaluatorMeasureBridge(new OverviewMeasureLoss());
+		this.evaluatorMeasureBridge = new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss());
 		this.classifierFactory = new MekaPipelineFactory();
 		this.requestedHASCOInterface = MLC_REQUESTED_HASCO_INTERFACE;
 		this.withDatasetSplitterForSearchSelectionSplit(new ArbitrarySplitter());
