@@ -68,6 +68,13 @@
    <level value="trace" />
   </logger>
   
+  
+  <logger name="de.upb.crc901.automl.AutoMLAlgorithmTester">
+    <level value="info" />
+  </logger>
+  
+  
+  
   <logger name="jaicore.graphvisualizer">
     <level value="warn" />
   </logger>
@@ -154,12 +161,16 @@
   </logger>
   
   <logger name="testedalgorithm">
-    <level value="warn" />
+    <level value="trace" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory">
+    <level value="trace" />
   </logger>
 </log4j:configuration>

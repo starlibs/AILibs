@@ -151,7 +151,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	}
 
 	@Test
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInSimpleCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			this.logger.info("Calling {} to solve problem: {}", algorithm.getId(), problem.getKey());
@@ -160,7 +160,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	}
 
 	@Test
-	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException {
+	public void testThatAnEventForEachPossibleSolutionIsEmittedInParallelizedCall() throws InterruptedException, AlgorithmExecutionCanceledException, TimeoutException, AlgorithmException, AlgorithmCreationException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			this.logger.info("Calling {} to solve problem: {}", algorithm.getId(), problem.getKey());
@@ -170,7 +170,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	}
 
 	@Test
-	public void testThatIteratorReturnsEachPossibleSolution() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatIteratorReturnsEachPossibleSolution() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			this.logger.info("Calling {} to solve problem: {}", algorithm.getId(), problem.getKey());
@@ -179,7 +179,7 @@ public abstract class SolutionCandidateIteratorTester extends GeneralAlgorithmTe
 	}
 
 	@Test
-	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatIteratorReturnsEachPossibleSolutionWithParallelization() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException {
 		for (Entry<Object, Collection<?>> problem : this.reducedProblemsWithOriginalSolutions.entrySet()) {
 			ISolutionCandidateIterator<Object, Object> algorithm = (ISolutionCandidateIterator<Object, Object>) this.getAlgorithm(problem.getKey());
 			algorithm.setNumCPUs(Runtime.getRuntime().availableProcessors());

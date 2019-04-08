@@ -12,11 +12,12 @@ import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsea
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.UncertaintyExplorationOpenSelection;
-import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
+import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
-public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
+public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
+		extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
 
@@ -28,7 +29,9 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> exte
 			throw new IllegalStateException("Uncertainty Config has not been set yet.");
 		}
 
-		/* let the best first factory configure general aspects of the best first search */
+		/*
+		 * let the best first factory configure general aspects of the best first search
+		 */
 		BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> search = super.getAlgorithm();
 
 		/* check that node evaluator supports uncertainty */
@@ -80,7 +83,7 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> exte
 			}
 			break;
 		case PARETO_FRONT_SELECTION:
-			PriorityQueue<ParetoNode<N, V>> pareto = new PriorityQueue<>(this.oversearchAvoidanceConfig.getParetoComperator());
+			PriorityQueue<Node<N, V>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
 			search.setOpen(new ParetoSelection<>(pareto));
 			break;
 		default:

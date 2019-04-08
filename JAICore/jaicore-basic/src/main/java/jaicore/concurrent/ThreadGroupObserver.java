@@ -18,6 +18,9 @@ public class ThreadGroupObserver extends Thread {
 		this.group = group;
 		this.maxAllowedThreads = maxAllowedThreads;
 		this.hookOnConstraintViolation = hookOnConstraintViolation;
+		if (maxAllowedThreads <= 0) {
+			this.active = false;
+		}
 	}
 
 	public void cancel() {

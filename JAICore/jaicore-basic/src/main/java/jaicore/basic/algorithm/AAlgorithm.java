@@ -51,7 +51,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private AlgorithmState state = AlgorithmState.created;
 	private final EventBus eventBus = new EventBus();
 
-	private int timeoutPrecautionOffset = 10000; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
+	private int timeoutPrecautionOffset = 100; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
 	private static final int MIN_RUNTIME_FOR_OBSERVED_TASK = 50;
 
 	private static final String INTERRUPT_NAME_SUFFIX = "-shutdown";
@@ -96,7 +96,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			return this.nextWithException();
 		} catch (Exception e) {
 			this.unregisterThreadAndShutdown();
-			throw new RuntimeException(e);
+			throw new ExceptionInAlgorithmIterationException(e);
 		}
 	}
 
@@ -134,6 +134,14 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public void setTimeout(final TimeOut timeout) {
 		this.logger.info("Setting timeout to {}ms", timeout.milliseconds());
 		this.getConfig().setProperty(IAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
+	}
+
+	public int getTimeoutPrecautionOffset() {
+		return this.timeoutPrecautionOffset;
+	}
+
+	public void setTimeoutPrecautionOffset(final int timeoutPrecautionOffset) {
+		this.timeoutPrecautionOffset = timeoutPrecautionOffset;
 	}
 
 	@Override
@@ -188,9 +196,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void checkTermination(final boolean shutdownOnStoppingCriterion) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Checking Termination");
 		Thread t = Thread.currentThread();
-		
+
 		/* check whether the thread has been interrupted for another reason than during shutdown */
-		if (t.isInterrupted() && !hasThreadBeenInterruptedDuringShutdown(t)) {
+		if (t.isInterrupted() && !this.hasThreadBeenInterruptedDuringShutdown(t)) {
 			this.logger.info("Interruption detected for {}. Resetting interrupted-flag.", this.getId());
 			Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
 			if (shutdownOnStoppingCriterion) {
@@ -202,7 +210,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.logger.debug("Throwing InterruptedException to communicate the interrupt to the invoker.");
 			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
-		
+
 		if (this.isTimeouted()) {
 			this.logger.info("Timeout detected for {}", this.getId());
 			if (shutdownOnStoppingCriterion) {
@@ -214,7 +222,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.logger.debug("Throwing TimeoutException");
 			throw new AlgorithmTimeoutedException(this.timeOfTimeoutDetection - this.deadline);
 		}
-		
+
 		if (this.isCanceled()) { // for a cancel, we assume that the shutdown has already been triggered by the canceler
 			this.logger.info("Cancel detected for {}.", this.getId());
 			if (Thread.interrupted()) { // reset the flag
@@ -340,7 +348,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.state = AlgorithmState.active;
 		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(this.getId());
 		this.eventBus.post(event);
-		this.logger.info("Starting algorithm {} with problem {} and config {}", this.getId(), this.input, this.config);
+		this.logger.trace("Starting algorithm {} with problem {} and config {}", this.getId(), this.input, this.config);
 		return event;
 	}
 

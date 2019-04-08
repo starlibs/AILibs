@@ -753,8 +753,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					}
 					this.pool.submit(nb);
 				}
+
+				/* frequently check termination conditions */
 				if (System.currentTimeMillis() - lastTerminationCheck > 50) {
-					this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
+					if (this.expanding.containsKey(actualNodeSelectedForExpansion)) {
+						this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
+					} else { // maybe the node has been removed from the expansion list during a timeout or a cancel
+						this.checkAndConductTermination();
+					}
 					lastTerminationCheck = System.currentTimeMillis();
 				}
 			}

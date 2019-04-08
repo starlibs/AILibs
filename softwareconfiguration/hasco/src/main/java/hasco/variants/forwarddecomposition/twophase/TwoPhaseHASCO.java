@@ -1,9 +1,6 @@
 package hasco.variants.forwarddecomposition.twophase;
 
-import java.sql.Date;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -144,7 +141,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			/* phase 1: gather solutions */
 			GlobalTimer timer = GlobalTimer.getInstance();
 			TimerTask task = new TimerTask() {
-				
+
 				@Override
 				public void run() {
 					int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
@@ -169,6 +166,8 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			/* if there is no candidate, and the remaining time is very small, throw an AlgorithmTimeoutedException */
 			this.logger.info("HASCO has finished. {} solutions were found.", this.phase1ResultQueue.size());
 			if (this.phase1ResultQueue.isEmpty() && this.getRemainingTimeToDeadline().seconds() < 10) {
+				this.logger.info("No solution found within phase 1. Throwing an AlgorithmTimeoutedException (This is conventional behavior for when an algorithm has not identified its solution when the timeout bound is hit.)");
+				this.terminate(); // this sends the AlgorithmFinishedEvent
 				throw new AlgorithmTimeoutedException(this.getRemainingTimeToDeadline().milliseconds() * -1);
 			}
 
@@ -330,8 +329,9 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 		AtomicInteger evaluatorCounter = new AtomicInteger(0);
 
-		this.logger.info("Create a thread pool for phase 2 of size {}.", this.getConfig().cpus());
-		ExecutorService pool = Executors.newFixedThreadPool(this.getConfig().cpus(), r -> {
+		int threadsForPool = this.getConfig().threads() < 1 ? this.getConfig().cpus() : this.getConfig().threads() - 1; // subtract one thread for the one that is currently active
+		this.logger.info("Create a thread pool for phase 2 of size {}.", threadsForPool);
+		ExecutorService pool = Executors.newFixedThreadPool(threadsForPool, r -> {
 			Thread t = new Thread(r);
 			t.setName("final-evaluator-" + evaluatorCounter.incrementAndGet());
 			return t;
