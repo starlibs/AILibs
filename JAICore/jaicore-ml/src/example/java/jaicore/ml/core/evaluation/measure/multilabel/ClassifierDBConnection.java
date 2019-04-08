@@ -1,4 +1,4 @@
-package jaicore.ml.core.evaluation.measure;
+package jaicore.ml.core.evaluation.measure.multilabel;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.SQLAdapter;
+import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 import meka.core.Result;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

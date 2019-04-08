@@ -1,4 +1,4 @@
-package jaicore.ml.core.evaluation.measure;
+package jaicore.ml.core.evaluation.measure.multilabel;
 
 import java.io.Serializable;
 

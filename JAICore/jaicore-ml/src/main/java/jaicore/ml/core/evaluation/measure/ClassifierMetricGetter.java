@@ -10,7 +10,8 @@ import weka.classifiers.Evaluation;
 
 /**
 * Class for getting metrics by their name for single- and multilabel
-* classifiers.
+* classifiers. This class allows for convenient access of individual
+* metrics by name and can be used to list available metrics.
 *
 * @author helegraf, mwever
 *
