@@ -25,7 +25,7 @@ import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
-import jaicore.ml.core.evaluation.measure.multilabel.OverviewMeasureLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
 import jaicore.ml.wekautil.dataset.splitter.MultilabelDatasetSplitter;
@@ -106,7 +106,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			break;
 		case 73: // fitness
 		default:
-			builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new OverviewMeasureLoss()));
+			builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss()));
 			break;
 		}
 
