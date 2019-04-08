@@ -1,8 +1,10 @@
 package jaicore.basic.kvstore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +35,7 @@ public class KVStoreStatisticsUtil {
 
 	/* default key name of the best annotation */
 	private static final String DEFAULT_OUTPUT_BEST = "best";
+	private static final String DEFAULT_OUTPUT_RANK = "rank";
 
 	private KVStoreStatisticsUtil() {
 		/* Private c'tor to prevent instanstantiation of this class. */
@@ -48,6 +51,34 @@ public class KVStoreStatisticsUtil {
 	 */
 	public static void best(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues) {
 		best(collection, setting, sampleID, sampledValues, DEFAULT_OUTPUT_BEST);
+	}
+
+	public static void rank(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues) {
+		rank(collection, setting, sampleID, sampledValues, DEFAULT_OUTPUT_RANK);
+	}
+
+	public static void rank(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final String output) {
+		rank(collection, setting, sampleID, sampledValues, output, true);
+	}
+
+	public static void rank(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final String output, final boolean minimize) {
+		KVStoreCollection grouped = new KVStoreCollection(collection);
+		grouped.group(setting, sampleID);
+
+		TwoLayerKVStoreCollectionPartition partition = new TwoLayerKVStoreCollectionPartition(setting, sampleID, grouped);
+
+		for (Entry<String, Map<String, KVStoreCollection>> partitionEntry : partition) {
+			List<KVStore> competitorList = new LinkedList<>();
+			partitionEntry.getValue().values().stream().map(x -> x.get(0)).forEach(competitorList::add);
+			Collections.sort(competitorList, (o1, o2) -> (minimize) ? Double.compare(StatisticsUtil.mean(o1.getAsDoubleList(sampledValues)), StatisticsUtil.mean(o2.getAsDoubleList(sampledValues)))
+					: Double.compare(StatisticsUtil.mean(o2.getAsDoubleList(sampledValues)), StatisticsUtil.mean(o1.getAsDoubleList(sampledValues))));
+
+			for (int i = 0; i < competitorList.size(); i++) {
+				competitorList.get(i).put(output, (i + 1));
+			}
+
+		}
+
 	}
 
 	/**

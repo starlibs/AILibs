@@ -8,7 +8,7 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
-import jaicore.basic.ListHelper;
+import jaicore.basic.sets.SetUtil;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;
@@ -71,7 +71,7 @@ public class WEKAPipelineFactory implements IClassifierFactory {
 
 		for (String paramName : ci.getSatisfactionOfRequiredInterfaces().keySet()) {
 			List<String> subParams = this.getParameterList(ci.getSatisfactionOfRequiredInterfaces().get(paramName));
-			String paramValue = ci.getSatisfactionOfRequiredInterfaces().get(paramName).getComponent().getName() + " " + ListHelper.implode(subParams, " ");
+			String paramValue = ci.getSatisfactionOfRequiredInterfaces().get(paramName).getComponent().getName() + " " + SetUtil.implode(subParams, " ");
 			parameters.add("-" + paramName);
 			parameters.add(paramValue);
 		}

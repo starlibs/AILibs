@@ -129,7 +129,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 */
 	public Integer getAsInt(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Boolean) {
+		if (value instanceof Integer) {
 			return (Integer) value;
 		} else if (value instanceof String) {
 			return Integer.valueOf((String) value);
@@ -163,7 +163,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 */
 	public Long getAsLong(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Boolean) {
+		if (value instanceof Long) {
 			return (Long) value;
 		} else if (value instanceof String) {
 			return Long.valueOf((String) value);
@@ -180,7 +180,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 */
 	public Short getAsShort(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Boolean) {
+		if (value instanceof Short) {
 			return (Short) value;
 		} else if (value instanceof String) {
 			return Short.valueOf((String) value);
@@ -197,7 +197,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 */
 	public Byte getAsByte(final String key) {
 		Object value = this.get(key);
-		if (value instanceof Boolean) {
+		if (value instanceof Byte) {
 			return (Byte) value;
 		} else if (value instanceof String) {
 			return Byte.valueOf((String) value);

@@ -17,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.FileUtil;
-import jaicore.basic.ListHelper;
 import jaicore.basic.Maps;
 import jaicore.basic.StatisticsUtil;
+import jaicore.basic.sets.SetUtil;
 
 public class KVStoreCollection extends LinkedList<KVStore> {
 
@@ -306,7 +306,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 					break;
 				default:
 				case LIST:
-					value = ListHelper.implode(valueEntry.getValue(), ",");
+					value = SetUtil.implode(valueEntry.getValue(), ",");
 					break;
 				}
 
@@ -366,6 +366,12 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 		}
 	}
 
+	public void applyFilter(final String keyName, final IKVFilter filter) {
+		Map<String, IKVFilter> filterMap = new HashMap<>();
+		filterMap.put(keyName, filter);
+		this.applyFilter(filterMap);
+	}
+
 	public void mergeTasks(final KVStore other, final Map<String, String> combineMap) {
 		for (KVStore t : this) {
 			boolean equals = true;
@@ -403,4 +409,5 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	public void group(final String... groupingKeys) {
 		this.group(groupingKeys, new HashMap<>());
 	}
+
 }
