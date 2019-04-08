@@ -32,11 +32,18 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.WekaUtil;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassMeasureBuilder;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassPerformanceMeasure;
 import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
@@ -97,11 +104,35 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 
 		/* create 2-phase software configuration problem */
-		IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(builder.getClassifierFactory(), evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
-				this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed(), this.getConfig().timeoutForCandidateEvaluation());
-		IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(builder.getClassifierFactory(), evaluationMeasurementBridge, this.getConfig().numberOfMCIterationsDuringSelection(),
-				MLPlan.this.getInput(), this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed(), this.getConfig().timeoutForCandidateEvaluation());
-		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
+		IClassifierEvaluator classifierEvaluator;
+		if (builder.getClassifierEvaluatorFactory() != null) {
+			IClassifierEvaluatorFactory classifierEvaluatorFactory = builder.getClassifierEvaluatorFactory();
+			@SuppressWarnings("unchecked")
+			IDataset<IInstance> datasetSearch = WekaInstancesUtil.wekaInstancesToDataset(dataShownToSearch);
+			classifierEvaluator = classifierEvaluatorFactory.getIClassifierEvaluator(datasetSearch,
+					this.getConfig().randomSeed());
+			if (classifierEvaluator instanceof LearningCurveExtrapolationEvaluator) {
+				((LearningCurveExtrapolationEvaluator) classifierEvaluator)
+						.setFullDatasetSize(MLPlan.this.getInput().size());
+			}
+		} else {
+			classifierEvaluator = new ProbabilisticMonteCarloCrossValidationEvaluator(evaluationMeasurementBridge,
+					this.getConfig().numberOfMCIterationsDuringSearch(), 1.0, dataShownToSearch,
+					this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
+		}
+
+		IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(
+				builder.getClassifierFactory(), evaluationMeasurementBridge,
+				this.getConfig().numberOfMCIterationsDuringSearch(), this.dataShownToSearch,
+				this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed(),
+				this.getConfig().timeoutForCandidateEvaluation(), classifierEvaluator);
+		IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(
+				builder.getClassifierFactory(), evaluationMeasurementBridge,
+				this.getConfig().numberOfMCIterationsDuringSelection(), MLPlan.this.getInput(),
+				this.getConfig().getMCCVTrainFoldSizeDuringSelection(), this.getConfig().randomSeed(),
+				this.getConfig().timeoutForCandidateEvaluation());
+		TwoPhaseSoftwareConfigurationProblem problem = new TwoPhaseSoftwareConfigurationProblem(
+				builder.getSearchSpaceConfigFile(), "AbstractClassifier", searchBenchmark, selectionBenchmark);
 
 		/* create 2-phase HASCO */
 		this.logger.info("Creating the twoPhaseHASCOFactory.");
