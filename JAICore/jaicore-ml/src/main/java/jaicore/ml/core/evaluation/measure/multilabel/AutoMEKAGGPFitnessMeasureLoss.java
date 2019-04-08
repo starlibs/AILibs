@@ -1,13 +1,16 @@
 package jaicore.ml.core.evaluation.measure.multilabel;
 
 /**
-* Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
-* implemented in inverse.
-*
-* @author helegraf, mwever
-*
-*/
-public class OverviewMeasureLoss extends ADecomposableMultilabelMeasure {
+ * Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
+ * implemented in inverse.
+ *
+ * de Sá, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
+ * classification algorithms." Proceedings of the Genetic and Evolutionary Computation Conference Companion. ACM, 2017.
+ *
+ * @author helegraf, mwever
+ *
+ */
+public class AutoMEKAGGPFitnessMeasureLoss extends ADecomposableMultilabelMeasure {
 
 	private static final ExactMatchLoss EXACT_MATCH = new ExactMatchLoss();
 	private static final HammingLoss HAMMING = new HammingLoss();
