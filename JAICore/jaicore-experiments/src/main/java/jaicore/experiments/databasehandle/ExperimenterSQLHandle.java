@@ -1,4 +1,4 @@
-package jaicore.experiments;
+package jaicore.experiments.databasehandle;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -16,6 +16,11 @@ import java.util.Optional;
 
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.sets.SetUtil;
+import jaicore.experiments.Experiment;
+import jaicore.experiments.ExperimentDBEntry;
+import jaicore.experiments.IDatabaseConfig;
+import jaicore.experiments.IExperimentDatabaseHandle;
+import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 
