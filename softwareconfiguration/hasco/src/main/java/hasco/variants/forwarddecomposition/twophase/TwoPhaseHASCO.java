@@ -30,6 +30,7 @@ import hasco.events.HASCOSolutionEvent;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithm;
 import hasco.variants.forwarddecomposition.DefaultPathPriorizingPredicate;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -172,7 +173,12 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			}
 
 			/* phase 2: select model */
-			this.logger.info("Entering phase 2");
+			IObjectEvaluator<?, Double> selectionBenchmark = this.getInput().getSelectionBenchmark();
+			this.logger.info("Entering phase 2.");
+			if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
+				this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
+				((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).updateBestScore(this.phase1ResultQueue.peek().getScore());
+			}
 			this.checkAndConductTermination();
 			this.selectedHASCOSolution = this.selectModel();
 			this.updateBestSeenSolution(this.selectedHASCOSolution);

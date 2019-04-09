@@ -76,6 +76,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	@Test
 	public void testStartAndFinishEventEmissionSequentially() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmCreationException, AlgorithmTestProblemSetCreationException {
+		this.checkPreconditionForTest();
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
@@ -88,11 +89,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		} catch (AlgorithmTimeoutedException e) { // it may happen, that no solution has been found within the specified timeout. Then algorithm must, however, have emitted an event
 		}
 		listener.checkState();
-		this.checkNotInterrupted();
+		this.checkPreconditionForTest();
 	}
 
 	@Test
-	public void testStartAndFinishEventEmissionProtocolParallelly() throws Exception {
+	public void testStartAndFinishEventEmissionProtocolParallelly() throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		this.checkPreconditionForTest();
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
@@ -106,11 +108,13 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		} catch (AlgorithmTimeoutedException e) { // it may happen, that no solution has been found within the specified timeout. Then algorithm must, however, have emitted an event
 		}
 		listener.checkState();
-		this.checkNotInterrupted();
+		this.checkPreconditionForTest();
 	}
 
 	@Test
-	public void testStartAndFinishEventEmissionByIteration() throws Exception {
+	public void testStartAndFinishEventEmissionByIteration() throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException  {
+		this.checkPreconditionForTest();
+
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (algorithm instanceof ILoggingCustomizable) {
@@ -131,7 +135,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			}
 		}
 		listener.checkState();
-		this.checkNotInterrupted();
+		this.checkPreconditionForTest();
 	}
 
 	@Test
@@ -165,6 +169,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	}
 
 	public void runInterruptTest(final boolean parallelized) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.checkPreconditionForTest();
 
 		/* set up algorithm */
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
@@ -238,10 +243,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		 */
 		algorithm.cancel();
 		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
+		this.checkPreconditionForTest();
 		this.logger.info("Interrupt-Test finished.");
 	}
 
 	public void runCancelTest(final boolean parallelized) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.checkPreconditionForTest();
 
 		/* set up algorithm */
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
@@ -327,11 +334,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		assertTrue("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + "ms after it has been canceled.", reactionTime <= INTERRUPTION_CLEANUP_TOLERANCE);
 		assertTrue("The algorithm has not emitted an AlgorithmExecutionCanceledException.", cancellationExceptionSeen);
 		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
-		this.checkNotInterrupted();
+		this.checkPreconditionForTest();
 		this.logger.info("Cancel-Test finished.");
 	}
 
 	public void runTimeoutTest(final boolean parallelized) throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
+		this.checkPreconditionForTest();
 
 		/* set up algorithm */
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
@@ -396,12 +404,17 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		if (runtime < TIMEOUT_DELAY) {
 			this.logger.warn(
 					"Runtime was only {} seconds but should be at least {}. There might be a problem with the difficulty of the problem. If the algorithm is designed to exit smoothly on a timeout, you can safely ignore this warning.",
-					runtime, INTERRUPTION_DELAY);
+					runtime, TIMEOUT_DELAY);
 		}
 		assertFalse("The algorithm has not terminated within " + INTERRUPTION_CLEANUP_TOLERANCE + " ms after the specified timeout.", timeoutTriggered);
 		this.waitForThreadGroupToBecomeEmpty(tg);
-		this.checkNotInterrupted();
+		this.checkPreconditionForTest();
 		this.logger.info("Timeout-Test finished.");
+	}
+
+	protected void checkPreconditionForTest() {
+		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted at start of test!";
+		assert GlobalTimer.getInstance().getNumberOfActiveTasks() == 0 : "Global Timer has still " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs: " + GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
 	}
 
 	private void checkNotInterrupted() {

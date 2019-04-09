@@ -21,8 +21,8 @@ import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
@@ -52,7 +52,7 @@ import jaicore.search.core.interfaces.GraphGenerator;
  *
  */
 public class HASCOReduction<V extends Comparable<V>>
-		implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
+implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
 
 	private static final boolean CONFIGURE_PARAMS = true; // this could be determined automatically later
 
@@ -75,11 +75,11 @@ public class HASCOReduction<V extends Comparable<V>>
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 
 	private Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier;
-	
-	public HASCOReduction(Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier) {
+
+	public HASCOReduction(final Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier) {
 		this.bestSolutionSupplier = bestSolutionSupplier;
 	}
-	
+
 	public Monom getInitState() {
 		if (this.originalProblem == null) {
 			throw new IllegalStateException("Cannot compute init state before transformation has been invoked.");
@@ -89,7 +89,7 @@ public class HASCOReduction<V extends Comparable<V>>
 		init.add(new Literal("component('request')"));
 		return init;
 	}
-	
+
 	public Collection<String> getExistingInterfaces() {
 		if (this.originalProblem == null) {
 			throw new IllegalStateException("Cannot compute existing interfaces before transformation has been invoked.");
@@ -301,8 +301,8 @@ public class HASCOReduction<V extends Comparable<V>>
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
 				}
 				IObjectEvaluator<ComponentInstance, V> evaluator = problem.getCompositionEvaluator();
-				if(evaluator instanceof IInformedObjectEvaluatorExtension && bestSolutionSupplier.get() != null) {
-					((IInformedObjectEvaluatorExtension<V>) evaluator).updateBestScore(bestSolutionSupplier.get().getScore());
+				if (evaluator instanceof IInformedObjectEvaluatorExtension && HASCOReduction.this.bestSolutionSupplier.get() != null) {
+					((IInformedObjectEvaluatorExtension<V>) evaluator).updateBestScore(HASCOReduction.this.bestSolutionSupplier.get().getScore());
 				}
 				return evaluator.evaluate(solution);
 			}

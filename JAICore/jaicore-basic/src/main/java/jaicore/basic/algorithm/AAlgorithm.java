@@ -39,7 +39,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private final I input;
 
 	/* State and event bus for sending algorithm events. */
-	private GlobalTimer timer;
 	private long shutdownInitialized = -1; // timestamp for when the shutdown has been initialized
 	private long activationTime = -1; // timestamp of algorithm activation
 
@@ -169,13 +168,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	public boolean isStopCriterionSatisfied() {
 		return this.isCanceled() || this.isTimeouted() || Thread.currentThread().isInterrupted();
-	}
-
-	protected GlobalTimer getTimerAndCreateIfNotExistent() {
-		if (this.timer == null) {
-			this.timer = GlobalTimer.getInstance();
-		}
-		return this.timer;
 	}
 
 	/**
@@ -437,8 +429,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
 		long timeToInterrupt = remainingTime - this.timeoutPrecautionOffset;
-		GlobalTimer timer = this.getTimerAndCreateIfNotExistent();
-		TimerTask task = new InterruptionTimerTask("Timeout for execution of callable " + r + " triggered",
+		GlobalTimer timer = GlobalTimer.getInstance();
+		TimerTask task = new InterruptionTimerTask("Timeout for timed execution of callable " + r,
 				() -> this.logger.debug("Timeout detected at timestamp {}. This is  {} prior to deadline, interrupting successor generation.", System.currentTimeMillis(), this.getRemainingTimeToDeadline()));
 		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt, this.getRemainingTimeToDeadline());
 		timer.schedule(task, timeToInterrupt);

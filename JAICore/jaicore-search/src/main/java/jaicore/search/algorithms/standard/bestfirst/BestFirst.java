@@ -38,6 +38,7 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.concurrent.GlobalTimer;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
@@ -488,7 +489,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (BestFirst.this.timeoutForComputationOfF > 0) {
 			interruptionTask = new InterruptionTimerTask("Timeout for Node-Labeling in " + BestFirst.this, Thread.currentThread(), () -> timedout.set(true));
 			this.logger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", this.timeoutForComputationOfF);
-			this.getTimerAndCreateIfNotExistent().schedule(interruptionTask, this.timeoutForComputationOfF);
+			GlobalTimer.getInstance().schedule(interruptionTask, this.timeoutForComputationOfF);
 		}
 
 		/* compute f */

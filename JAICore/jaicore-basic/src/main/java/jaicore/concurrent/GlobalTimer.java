@@ -1,9 +1,8 @@
 package jaicore.concurrent;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,7 +13,6 @@ public class GlobalTimer extends Timer {
 	private static final Logger logger = LoggerFactory.getLogger(GlobalTimer.class);
 	private static final GlobalTimer instance = new GlobalTimer();
 	private final List<TimeoutSubmitter> emittedSubmitters = new ArrayList<>();
-	private final Set<TimerTask> tasks = new HashSet<>();
 
 	private GlobalTimer() {
 		super("Global TimeoutTimer", true);
@@ -33,10 +31,37 @@ public class GlobalTimer extends Timer {
 		throw new UnsupportedOperationException("The TimeoutTimer must not be canceled manually!");
 	}
 
-	@Override
-	public String toString() {
-		return this.tasks.toString();
+	public boolean isTaskScheduled(final TimerTask task) {
+		return this.getActiveTasks().contains(task);
 	}
+
+	public List<TimerTask> getActiveTasks() {
+		try {
+			Field outerQueueField = Timer.class.getDeclaredField("queue");
+			outerQueueField.setAccessible(true);
+			Object outerQueueObject = outerQueueField.get(this);
+			Field innerQueueField = outerQueueObject.getClass().getDeclaredField("queue");
+			Field innerScheduledFieldField = TimerTask.class.getClass().getDeclaredField("scheduled");
+			innerQueueField.setAccessible(true);
+			innerScheduledFieldField.setAccessible(true);
+			TimerTask[] tasksAsArray = (TimerTask[])innerQueueField.get(outerQueueObject);
+			List<TimerTask> tasks = new ArrayList<>();
+			for (TimerTask task : tasksAsArray) {
+				if (task != null && innerScheduledFieldField.getInt(task) >= 0) {
+					tasks.add(task);
+				}
+			}
+			return tasks;
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			return new ArrayList<>();
+		}
+	}
+
+	public int getNumberOfActiveTasks() {
+		return this.getActiveTasks().size();
+	}
+
+
 
 	public class TimeoutSubmitter {
 		private TimeoutSubmitter() {
@@ -67,7 +92,6 @@ public class GlobalTimer extends Timer {
 			GlobalTimer.this.schedule(task, delay);
 
 			/* create id for job and return it */
-			GlobalTimer.this.tasks.add(task);
 			logger.info("Job {} scheduled for in {}ms.", task, delay);
 			return task;
 		}

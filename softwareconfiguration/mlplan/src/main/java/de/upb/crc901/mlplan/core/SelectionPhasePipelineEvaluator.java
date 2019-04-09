@@ -10,9 +10,9 @@ import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.GlobalTimer;
@@ -24,7 +24,7 @@ import weka.core.Instances;
 
 /**
  * Evaluator used in the selection phase of mlplan. Uses MCCV by default, but can be configured to use other Benchmarks.
- * 
+ *
  * @author fmohr
  * @author jnowack
  */
@@ -42,9 +42,9 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	private final int timeoutForSolutionEvaluation;
 
 	private Double bestScore;
-	
-	public SelectionPhasePipelineEvaluator(ClassifierFactory classifierFactory, AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, int numMCIterations, Instances dataShownToSearch, double trainFoldSize, int seed,
-			int timeoutForSolutionEvaluation) {
+
+	public SelectionPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch, final double trainFoldSize, final int seed,
+			final int timeoutForSolutionEvaluation) {
 		super();
 		this.classifierFactory = classifierFactory;
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
@@ -68,12 +68,17 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 
+		if (this.bestScore == null) {
+			throw new UnsupportedOperationException("Cannot evaluated in selection phase if no best solution has been propagated.");
+		}
+
 		AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
 		if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 		}
 
-		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, numMCIterations, bestScore, dataShownToSelectionPhase, trainFoldSize, seed);
+		this.logger.debug("Running probabilistic MCCV with {} iterations and best score {}", this.numMCIterations, this.bestScore);
+		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.bestScore, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
@@ -98,9 +103,12 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		this.logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
 		return percentile;
 	}
-	
+
 	@Override
-	public void updateBestScore(Double bestScore) {
+	public void updateBestScore(final Double bestScore) {
+		if (bestScore == null) {
+			throw new IllegalArgumentException("Best known score must not be updated with NULL");
+		}
 		this.bestScore = bestScore;
 	}
 
