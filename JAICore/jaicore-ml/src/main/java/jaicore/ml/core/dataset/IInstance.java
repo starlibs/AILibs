@@ -1,5 +1,7 @@
 package jaicore.ml.core.dataset;
 
+import org.apache.commons.math3.ml.clustering.Clusterable;
+
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 /**
@@ -7,7 +9,7 @@ import jaicore.ml.core.dataset.attribute.IAttributeValue;
  *
  * @author wever
  */
-public interface IInstance {
+public interface IInstance extends Clusterable{
 
 	/**
 	 * Getter for the value of an attribute for the given position.
@@ -39,4 +41,13 @@ public interface IInstance {
 	 */
 	public double[] getAsDoubleVector() throws ContainsNonNumericAttributesException;
 
+	@Override
+	default double[] getPoint() {
+		try {
+			return getAsDoubleVector();
+		} catch (ContainsNonNumericAttributesException e) {
+			throw new UnsupportedOperationException(e);
+		}
+	}
+	
 }

@@ -1,6 +1,7 @@
 package de.upb.crc901.mlplan.core;
 
 import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import weka.core.Instances;
@@ -15,6 +16,7 @@ public class PipelineEvaluatorBuilder {
 	private Instances data;
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
+	private IClassifierEvaluator classifierEvaluator;
 
 	public PipelineEvaluatorBuilder() {
 		super();
@@ -90,6 +92,14 @@ public class PipelineEvaluatorBuilder {
 	public PipelineEvaluatorBuilder withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
 		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
 		return this;
+	}
+
+	public void withClassifierEvaluator(final IClassifierEvaluator classifierEvaluator) {
+		this.classifierEvaluator = classifierEvaluator;
+	}
+
+	public IClassifierEvaluator getClassifierEvaluator() {
+		return this.classifierEvaluator;
 	}
 
 }

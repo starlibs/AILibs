@@ -31,13 +31,20 @@ import jaicore.basic.FileUtil;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
+import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
+import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassMeasureBuilder;
+import jaicore.ml.evaluation.evaluators.weka.factory.ExtrapolatedSaturationPointEvaluatorFactory;
+import jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
+import jaicore.ml.evaluation.evaluators.weka.factory.LearningCurveExtrapolationEvaluatorFactory;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleSLCEvaluatorMeasureBridge;
+import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import jaicore.ml.wekautil.dataset.splitter.ArbitrarySplitter;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import jaicore.ml.wekautil.dataset.splitter.MulticlassClassStratifiedSplitter;
@@ -140,6 +147,8 @@ public class MLPlanBuilder {
 	private IEvaluatorMeasureBridge<Double> evaluatorMeasureBridge;
 
 	private Predicate<TFDNode> priorizingPredicate = null;
+
+	private IClassifierEvaluatorFactory classifierEvaluatorFactory = null;
 
 	public MLPlanBuilder() {
 		super();
@@ -416,6 +425,17 @@ public class MLPlanBuilder {
 		return this.requestedHASCOInterface;
 	}
 
+	public void withExtrapolatedSaturationPointEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
+			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+		this.classifierEvaluatorFactory = new ExtrapolatedSaturationPointEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
+
+	}
+
+	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
+			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+		this.classifierEvaluatorFactory = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
+	}
+
 	public boolean getUseCache() {
 		return this.useCache;
 	}
@@ -480,4 +500,9 @@ public class MLPlanBuilder {
 		fields.put("classifierFactory", this.classifierFactory);
 		return ToJSONStringUtil.toJSONString(fields);
 	}
+
+	public IClassifierEvaluatorFactory getClassifierEvaluatorFactory() {
+		return this.classifierEvaluatorFactory;
+	}
+
 }

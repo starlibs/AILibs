@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -18,14 +19,22 @@ import jaicore.concurrent.TimeoutTimer;
 import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import weka.classifiers.Classifier;
 
-public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, ILoggingCustomizable {
+/**
+ * Evaluator used in the search phase of mlplan. Uses MCCV by default, but can be configured to use other Benchmarks.
+ *
+ * @author fmohr
+ * @author jnowack
+ */
+public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SearchPhasePipelineEvaluator.class);
 
 	private final PipelineEvaluatorBuilder config;
 	private IObjectEvaluator<Classifier, Double> searchBenchmark;
+	private Double bestScore = 1.0;
 
 	public SearchPhasePipelineEvaluator(final PipelineEvaluatorBuilder config) {
 		super();
@@ -51,6 +60,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
@@ -59,9 +69,12 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			if (this.config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.config.getEvaluationMeasurementBridge()).getShallowCopy(c);
 				int subSeed = this.config.getSeed() + c.hashCode();
-				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new MonteCarloCrossValidationEvaluator(bridge, this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.config.getData(),
-						this.config.getTrainFoldSize(), subSeed);
+				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.bestScore,
+						this.config.getData(), this.config.getTrainFoldSize(), subSeed);
 				return copiedSearchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
+			}
+			if (this.searchBenchmark instanceof IInformedObjectEvaluatorExtension) {
+				((IInformedObjectEvaluatorExtension<Double>) this.searchBenchmark).updateBestScore(this.bestScore);
 			}
 			return this.searchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
 		} catch (InterruptedException e) {
@@ -85,4 +98,10 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			this.logger.debug("Canceled timeout job {}", task);
 		}
 	}
+
+	@Override
+	public void updateBestScore(final Double bestScore) {
+		this.bestScore = bestScore;
+	}
+
 }

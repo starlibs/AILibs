@@ -250,3 +250,4 @@ gradle-app.setting
 # Generated files by running skikitwrapper
 JAICore/jaicore-ml/tmp/
 JAICore/jaicore-ml/model_dumps/
+JAICore/jaicore-ml/testsrc/ml/scikitwrapper/importfolder_test/__pycache__/

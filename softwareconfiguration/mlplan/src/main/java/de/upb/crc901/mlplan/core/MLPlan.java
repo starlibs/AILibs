@@ -29,7 +29,14 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
+import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -85,11 +92,25 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		/* set evaluation measure bridge */
 		IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge = builder.getEvaluationMeasurementBridge();
 
+		IClassifierEvaluator classifierEvaluator;
+		if (builder.getClassifierEvaluatorFactory() != null) {
+			IClassifierEvaluatorFactory classifierEvaluatorFactory = builder.getClassifierEvaluatorFactory();
+			@SuppressWarnings("unchecked")
+			IDataset<IInstance> datasetSearch = WekaInstancesUtil.wekaInstancesToDataset(this.dataShownToSearch);
+			classifierEvaluator = classifierEvaluatorFactory.getIClassifierEvaluator(datasetSearch, this.getConfig().randomSeed());
+			if (classifierEvaluator instanceof LearningCurveExtrapolationEvaluator) {
+				((LearningCurveExtrapolationEvaluator) classifierEvaluator).setFullDatasetSize(MLPlan.this.getInput().size());
+			}
+		} else {
+			classifierEvaluator = new ProbabilisticMonteCarloCrossValidationEvaluator(evaluationMeasurementBridge, builder.getSearchPhaseDatasetSplitter(), this.getConfig().numberOfMCIterationsDuringSearch(), 1.0, this.dataShownToSearch,
+					this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
+		}
+
 		/* create 2-phase software configuration problem */
 		PipelineEvaluatorBuilder searchEvaluatorBuilder = new PipelineEvaluatorBuilder();
-		searchEvaluatorBuilder.withClassifierFactory(builder.getClassifierFactory()).withDatasetSplitter(builder.getSearchPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge)
-				.withData(this.dataShownToSearch).withSeed(this.getConfig().randomSeed()).withTimeoutForSolutionEvaluation(this.getConfig().timeoutForCandidateEvaluation())
-				.withNumMCIterations(this.getConfig().numberOfMCIterationsDuringSearch()).withTrainFoldSize(this.getConfig().getMCCVTrainFoldSizeDuringSearch());
+		searchEvaluatorBuilder.withClassifierFactory(builder.getClassifierFactory()).withDatasetSplitter(builder.getSearchPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge).withData(this.dataShownToSearch)
+				.withSeed(this.getConfig().randomSeed()).withTimeoutForSolutionEvaluation(this.getConfig().timeoutForCandidateEvaluation()).withNumMCIterations(this.getConfig().numberOfMCIterationsDuringSearch())
+				.withTrainFoldSize(this.getConfig().getMCCVTrainFoldSizeDuringSearch()).withClassifierEvaluator(classifierEvaluator);
 		IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(searchEvaluatorBuilder);
 
 		PipelineEvaluatorBuilder selectionEvaluatorBuilder = new PipelineEvaluatorBuilder();
