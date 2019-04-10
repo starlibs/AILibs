@@ -15,7 +15,7 @@ import jaicore.ml.classification.multiclass.reduction.splitters.ISplitterFactory
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.FixedSplitClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleSLCEvaluatorMeasureBridge;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
@@ -46,7 +46,7 @@ public class ExperimentRunner<T extends ISplitter> {
 		Classifier innerClassifier = AbstractClassifier.forName(experiment.getNameOfInnerClassifier(), null);
 		Classifier rightClassifier = AbstractClassifier.forName(experiment.getNameOfRightClassifier(), null);
 		List<Instances> outerSplit = WekaUtil.getStratifiedSplit(data, experiment.getSeed(), .7);
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(new SimpleEvaluatorMeasureBridge(new ZeroOneLoss()), mccvRepeats, outerSplit.get(0), .7, seed);
+		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(new SimpleSLCEvaluatorMeasureBridge(new ZeroOneLoss()), mccvRepeats, outerSplit.get(0), .7, seed);
 		ISplitter splitter = splitterFactory.getSplitter(seed);
 		
 		/* compute best of k splits */

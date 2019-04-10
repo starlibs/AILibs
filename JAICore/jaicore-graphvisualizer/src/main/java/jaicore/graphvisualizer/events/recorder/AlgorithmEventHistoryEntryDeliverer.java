@@ -21,13 +21,13 @@ import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 /**
  * The {@link AlgorithmEventHistoryEntryDeliverer} is {@link Thread} constantly pulling events from a given {@link AlgorithmEventHistory} and sending these to all registered
  * {@link AlgorithmEventListener}s.
- * 
+ *
  * @author ahetzer
  *
  */
 public class AlgorithmEventHistoryEntryDeliverer extends Thread implements AlgorithmEventSource, GUIEventListener {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AlgorithmEventHistoryEntryDeliverer.class);
+	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistoryEntryDeliverer.class);
 
 	private Set<AlgorithmEventListener> algorithmEventListeners;
 	private AlgorithmEventHistory eventHistory;
@@ -37,7 +37,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 	private boolean paused;
 	private double sleepTimeMultiplier;
 
-	public AlgorithmEventHistoryEntryDeliverer(AlgorithmEventHistory eventHistory, int maximumSleepTimeInMilliseconds) {
+	public AlgorithmEventHistoryEntryDeliverer(final AlgorithmEventHistory eventHistory, final int maximumSleepTimeInMilliseconds) {
 		this.eventHistory = eventHistory;
 		this.maximumSleepTimeInMilliseconds = maximumSleepTimeInMilliseconds;
 
@@ -45,122 +45,122 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 		this.paused = true;
 		this.algorithmEventListeners = ConcurrentHashMap.newKeySet();
 		this.sleepTimeMultiplier = 1;
-
-		LOGGER.info(getClass().getSimpleName() + " started with thread " + this.getName());
+		this.setDaemon(true);
+		this.logger.info("{} started with thread {}", this.getClass().getSimpleName(), this.getName());
 	}
 
-	public AlgorithmEventHistoryEntryDeliverer(AlgorithmEventHistory eventHistory) {
+	public AlgorithmEventHistoryEntryDeliverer(final AlgorithmEventHistory eventHistory) {
 		this(eventHistory, 30);
 	}
 
 	@Override
-	public void registerListener(AlgorithmEventListener algorithmEventListener) {
-		algorithmEventListeners.add(algorithmEventListener);
+	public void registerListener(final AlgorithmEventListener algorithmEventListener) {
+		this.algorithmEventListeners.add(algorithmEventListener);
 	}
 
 	@Override
-	public void unregisterListener(AlgorithmEventListener algorithmEventListener) {
-		algorithmEventListeners.remove(algorithmEventListener);
+	public void unregisterListener(final AlgorithmEventListener algorithmEventListener) {
+		this.algorithmEventListeners.remove(algorithmEventListener);
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			if (!paused && timestep < eventHistory.getLength()) {
-				AlgorithmEventHistoryEntry historyEntry = eventHistory.getEntryAtTimeStep(timestep);
+			if (!this.paused && this.timestep < this.eventHistory.getLength()) {
+				AlgorithmEventHistoryEntry historyEntry = this.eventHistory.getEntryAtTimeStep(this.timestep);
 				AlgorithmEvent algorithmEvent = historyEntry.getAlgorithmEvent();
-				LOGGER.debug("Pulled event entry {} associated with event {} at position {}.", historyEntry, algorithmEvent, timestep);
+				this.logger.debug("Pulled event entry {} associated with event {} at position {}.", historyEntry, algorithmEvent, this.timestep);
 
-				sendAlgorithmEventToListeners(algorithmEvent);
-				timestep++;
-			} else if (paused) {
-				LOGGER.debug("Not processing events since visualization is paused.");
-			} else if (timestep >= eventHistory.getLength()) {
-				LOGGER.debug("Not processing events since no unpublished events are known.");
+				this.sendAlgorithmEventToListeners(algorithmEvent);
+				this.timestep++;
+			} else if (this.paused) {
+				this.logger.debug("Not processing events since visualization is paused.");
+			} else if (this.timestep >= this.eventHistory.getLength()) {
+				this.logger.debug("Not processing events since no unpublished events are known.");
 			}
 
-			goToSleep();
+			this.goToSleep();
 		}
 	}
 
 	private void goToSleep() {
 		try {
-			int sleepTime = (int) (sleepTimeMultiplier * maximumSleepTimeInMilliseconds);
-			LOGGER.trace("Sleeping {}ms.", sleepTime);
+			int sleepTime = (int) (this.sleepTimeMultiplier * this.maximumSleepTimeInMilliseconds);
+			this.logger.trace("Sleeping {}ms.", sleepTime);
 			sleep(sleepTime);
 		} catch (InterruptedException e) {
-			LOGGER.info(getClass().getSimpleName() + " was interrupted due to exception: {}.", e);
+			this.logger.info("{} was interrupted due to exception: {}.", this.getClass().getSimpleName(), e);
 		}
 	}
 
-	private void sendAlgorithmEventToListeners(AlgorithmEvent algorithmEvent) {
-		for (AlgorithmEventListener eventListener : algorithmEventListeners) {
+	private void sendAlgorithmEventToListeners(final AlgorithmEvent algorithmEvent) {
+		for (AlgorithmEventListener eventListener : this.algorithmEventListeners) {
 			try {
-				sendAlgorithmEventToListener(algorithmEvent, eventListener);
+				this.sendAlgorithmEventToListener(algorithmEvent, eventListener);
 			} catch (Throwable e) {
-				LOGGER.error("Error in dispatching event {} due to error.", algorithmEvent, e.toString());
+				this.logger.error("Error in dispatching event {} due to error.", algorithmEvent, e);
 			}
 		}
-		LOGGER.info("Pulled and sent event {} as entry at time step {}.", algorithmEvent, timestep);
+		this.logger.info("Pulled and sent event {} as entry at time step {}.", algorithmEvent, this.timestep);
 	}
 
-	private void sendAlgorithmEventToListener(AlgorithmEvent algorithmEvent, AlgorithmEventListener eventListener) throws HandleAlgorithmEventException {
-		LOGGER.debug("Sending event {} to listener {}.", algorithmEvent, eventListener);
+	private void sendAlgorithmEventToListener(final AlgorithmEvent algorithmEvent, final AlgorithmEventListener eventListener) throws HandleAlgorithmEventException {
+		this.logger.debug("Sending event {} to listener {}.", algorithmEvent, eventListener);
 
 		long startTime = System.currentTimeMillis();
 		eventListener.handleAlgorithmEvent(algorithmEvent);
 		long dispatchTime = System.currentTimeMillis() - startTime;
 
 		if (dispatchTime > 10) {
-			LOGGER.warn("Dispatch time for event {} to listener {} took {}ms!", algorithmEvent, eventListener, dispatchTime);
+			this.logger.warn("Dispatch time for event {} to listener {} took {}ms!", algorithmEvent, eventListener, dispatchTime);
 		}
 	}
 
 	@Override
-	public void handleGUIEvent(GUIEvent guiEvent) {
+	public void handleGUIEvent(final GUIEvent guiEvent) {
 		if (guiEvent instanceof PauseEvent) {
-			pause();
+			this.pause();
 		} else if (guiEvent instanceof PlayEvent) {
-			unpause();
+			this.unpause();
 		} else if (guiEvent instanceof ResetEvent) {
-			handleResetEvent();
+			this.handleResetEvent();
 		} else if (guiEvent instanceof GoToTimeStepEvent) {
-			handleGoToTimeStepEvent(guiEvent);
+			this.handleGoToTimeStepEvent(guiEvent);
 		} else if (guiEvent instanceof ChangeSpeedEvent) {
-			handleChangeSpeedEvent(guiEvent);
+			this.handleChangeSpeedEvent(guiEvent);
 		}
 	}
 
 	private void pause() {
-		paused = true;
+		this.paused = true;
 	}
 
 	private void unpause() {
-		paused = false;
+		this.paused = false;
 	}
 
 	private void handleResetEvent() {
-		resetTimeStep();
-		pause();
+		this.resetTimeStep();
+		this.pause();
 	}
 
 	private void resetTimeStep() {
-		timestep = 0;
+		this.timestep = 0;
 	}
 
-	private void handleGoToTimeStepEvent(GUIEvent guiEvent) {
-		resetTimeStep();
+	private void handleGoToTimeStepEvent(final GUIEvent guiEvent) {
+		this.resetTimeStep();
 		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
-		while (timestep < goToTimeStepEvent.getNewTimeStep() && timestep < eventHistory.getLength()) {
-			AlgorithmEvent algorithmEvent = eventHistory.getEntryAtTimeStep(timestep).getAlgorithmEvent();
-			sendAlgorithmEventToListeners(algorithmEvent);
-			timestep++;
+		while (this.timestep < goToTimeStepEvent.getNewTimeStep() && this.timestep < this.eventHistory.getLength()) {
+			AlgorithmEvent algorithmEvent = this.eventHistory.getEntryAtTimeStep(this.timestep).getAlgorithmEvent();
+			this.sendAlgorithmEventToListeners(algorithmEvent);
+			this.timestep++;
 		}
 	}
 
-	private void handleChangeSpeedEvent(GUIEvent guiEvent) {
+	private void handleChangeSpeedEvent(final GUIEvent guiEvent) {
 		ChangeSpeedEvent changeSpeedEvent = (ChangeSpeedEvent) guiEvent;
-		sleepTimeMultiplier = 1 - changeSpeedEvent.getNewSpeedPercentage() / 100.0;
+		this.sleepTimeMultiplier = 1 - changeSpeedEvent.getNewSpeedPercentage() / 100.0;
 	}
 
 }

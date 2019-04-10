@@ -3,7 +3,7 @@ package jaicore.ml.core.evaluation.measure.singlelabel;
 import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
 
 public class MultiClassMeasureBuilder {
-	public ADecomposableDoubleMeasure<Double> getEvaluator(MultiClassPerformanceMeasure pm) {
+	public ADecomposableDoubleMeasure<Double> getEvaluator(EMultiClassPerformanceMeasure pm) {
 		switch (pm) {
 		case ERRORRATE:
 			return new ZeroOneLoss();
