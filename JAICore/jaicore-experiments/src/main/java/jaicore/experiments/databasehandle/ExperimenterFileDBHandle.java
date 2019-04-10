@@ -39,6 +39,21 @@ public class ExperimenterFileDBHandle implements IExperimentDatabaseHandle {
 		keyFields.addAll(config.getKeyFields());
 	}
 
+	//	public List<String> getKeyFieldsDefinedInFile() throws ExperimentDBInteractionFailedException {
+	//		try {
+	//			String prefixRegExp = "^[^#]*#[ ]*fields:(.*)";
+	//			Pattern p = Pattern.compile(prefixRegExp);
+	//			for (String line : FileUtil.readFileAsList(file)) {
+	//
+	//			}
+	//						Matcher m = p.matcher(firstLine);
+	//
+	//						return Arrays.asList(firstLine.split(",")).stream().map(s -> s.tri)
+	//		} catch (IOException e) {
+	//			throw new ExperimentDBInteractionFailedException(e);
+	//		}
+	//	}
+
 	@Override
 	public Collection<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException {
 		List<ExperimentDBEntry> experiments = new ArrayList<>();
@@ -52,7 +67,6 @@ public class ExperimenterFileDBHandle implements IExperimentDatabaseHandle {
 				int memory = Integer.parseInt(values.remove(0));
 				int cpus = Integer.parseInt(values.remove(0));
 				Map<String, String> keyValues = new HashMap<>();
-				assert values.isEmpty() || keyFields.size() == values.size();
 				for (int i = 0; i < keyFields.size(); i++) {
 					keyValues.put(keyFields.get(i), values.isEmpty() ? null : values.get(i));
 				}
@@ -77,7 +91,7 @@ public class ExperimenterFileDBHandle implements IExperimentDatabaseHandle {
 
 		try (FileWriter fw = new FileWriter(file, true)) {
 			int id = (keyFields.size() + 1);
-			fw.write(id + ", " + experiment.getMemoryInMB() + ", " + experiment.getNumCPUs() + "\n");
+			fw.write(id + ", " + experiment.getMemoryInMB() + ", " + experiment.getNumCPUs() + ", " + System.currentTimeMillis() + "\n");
 			ExperimentDBEntry entry = new ExperimentDBEntry(id, experiment);
 			knownExperiments.add(entry);
 			return entry;

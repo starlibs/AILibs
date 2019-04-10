@@ -1,12 +1,11 @@
 package jaicore.experiments;
 
-import java.io.File;
-
 import org.aeonbits.owner.ConfigCache;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import jaicore.experiments.databasehandle.ExperimenterFileDBHandle;
+import jaicore.basic.SQLAdapter;
+import jaicore.experiments.databasehandle.ExperimenterSQLHandle;
 import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 
 public class ExperimentRunnerTester implements IExperimentSetEvaluator {
@@ -27,7 +26,8 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 
 
 	public static void main(final String[] args) {
-		IExperimentDatabaseHandle handle = new ExperimenterFileDBHandle(new File("testrsc/experiments.db"));
+		//		IExperimentDatabaseHandle handle = new ExperimenterFileDBHandle(new File("testrsc/experiments.db"));
+		IExperimentDatabaseHandle handle = new ExperimenterSQLHandle(new SQLAdapter("localhost", "testuser", "", "experiments", false), "resulttable");
 		IExperimentSetConfig config = ConfigCache.getOrCreate(IExperimentTesterConfig.class);
 		System.out.println(config);
 		IExperimentSetEvaluator evaluator = new ExperimentRunnerTester();
