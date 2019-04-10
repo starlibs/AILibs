@@ -24,9 +24,9 @@ dependencies {
 
 	// end dependencies for meka
 	
-	compile ('de.upb.isys:interruptable-weka:0.0.9') {
-	  	exclude group: 'log4j'
-    	exclude group: 'org.slf4j'
+	compile ('de.upb.isys:interruptable-weka:0.0.12') {
+		  	exclude group: 'log4j'
+	    	exclude group: 'org.slf4j'
 	}
 	
 	//JTwig template engine
