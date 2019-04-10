@@ -50,7 +50,6 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 		//		IExperimentDatabaseHandle handle = new ExperimenterFileDBHandle(new File("testrsc/experiments.db"));
 		IExperimentDatabaseHandle handle = new ExperimenterSQLHandle(new SQLAdapter("isys-db.cs.upb.de", "results", "Hallo333!", "test", false), "resulttable");
 		IExperimentSetConfig config = ConfigCache.getOrCreate(IExperimentTesterConfig.class);
-		System.out.println(config);
 		IExperimentSetEvaluator evaluator = new ExperimentRunnerTester();
 
 		ExperimentRunner runner = new ExperimentRunner(config, evaluator, handle);

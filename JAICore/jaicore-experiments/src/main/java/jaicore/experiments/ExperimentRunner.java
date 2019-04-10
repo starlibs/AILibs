@@ -25,6 +25,8 @@ public class ExperimentRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
 
+	private static final int MAX_MEM_DEVIATION = 50;
+
 	private final IExperimentSetConfig config;
 	private final IExperimentSetEvaluator conductor;
 	private final IExperimentDatabaseHandle handle;
@@ -62,9 +64,8 @@ public class ExperimentRunner {
 
 	private void updateExperimentSetupAccordingToConfig() throws IllegalKeyDescriptorException {
 		if (this.condMemoryLimitCheck) {
-			this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
-			if (this.memoryLimit != this.config.getMemoryLimitInMB()) {
-				System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitInMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
+			if (Math.abs((int) (Runtime.getRuntime().maxMemory() / 1024 / 1024) - this.config.getMemoryLimitInMB()) > MAX_MEM_DEVIATION) {
+				logger.error("The true memory limit is {}, which differs from the {} specified in the config by more than the allowed {}MB!", this.memoryLimit, this.config.getMemoryLimitInMB(), MAX_MEM_DEVIATION);
 			}
 		} else {
 			this.memoryLimit = this.config.getMemoryLimitInMB();
@@ -122,6 +123,7 @@ public class ExperimentRunner {
 	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Map<String, String> values) throws ExperimentDBInteractionFailedException {
 		return this.handle.createAndGetExperimentIfNotConducted(new Experiment(this.memoryLimit, this.cpuLimit, values));
 	}
+
 
 	public Experiment getExperimentForNumber(final int id) throws IllegalExperimentSetupException {
 		logger.debug("Computing experiment for id {}", id);
@@ -238,7 +240,7 @@ public class ExperimentRunner {
 		this.updateExperimentSetupAccordingToConfig();
 
 		if (this.totalNumberOfExperiments <= 0) {
-			System.out.println("Number of total experiments is 0");
+			logger.info("Number of total experiments is 0");
 			return;
 		}
 
@@ -294,7 +296,7 @@ public class ExperimentRunner {
 
 			} catch (Exception e) {
 				error = e;
-				System.err.println("Experiment failed due to exception, which has been logged");
+				logger.error("Experiment failed due to exception, which has been logged");
 			}
 			this.handle.finishExperiment(expEntry, error);
 			return true;
