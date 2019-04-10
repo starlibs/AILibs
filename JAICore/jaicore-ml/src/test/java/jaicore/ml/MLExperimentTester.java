@@ -18,7 +18,9 @@ import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetConfig;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
+import jaicore.experiments.exceptions.IllegalExperimentSetupException;
 import jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 import jaicore.ml.evaluation.evaluators.weka.SingleRandomSplitClassifierEvaluator;
 import weka.classifiers.AbstractClassifier;
@@ -65,7 +67,7 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 	}
 
 	@Test
-	public void testExperimentRunnerForMLExperiment() throws IllegalKeyDescriptorException {
+	public void testExperimentRunnerForMLExperiment() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTester(), new ExperimenterSQLHandle(config));
 		runner.randomlyConductExperiments(true);
 		assertTrue(this.conductedExperiment);
