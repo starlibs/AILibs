@@ -5,4 +5,6 @@ public interface IExperimentKeyGenerator<T> {
 	public int getNumberOfValues();
 
 	public T getValue(int i);
+
+	public boolean isValueValid(String value);
 }
