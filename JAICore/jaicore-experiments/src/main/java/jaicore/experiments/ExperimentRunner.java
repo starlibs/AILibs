@@ -17,10 +17,17 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.StringUtil;
 import jaicore.basic.sets.SetUtil;
+import jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import jaicore.experiments.exceptions.IllegalExperimentSetupException;
 import jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 
+/**
+ * This class is used to run experiments.
+ * 
+ * @author fmohr
+ *
+ */
 public class ExperimentRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
@@ -38,7 +45,8 @@ public class ExperimentRunner {
 	private int totalNumberOfExperiments;
 
 	/**
-	 * This flag indicates whether the given memory limit deviates from the actually available memory.
+	 * This flag indicates whether the given memory limit deviates from the actually
+	 * available memory.
 	 */
 	private boolean condMemoryLimitCheck = false;
 
@@ -50,7 +58,7 @@ public class ExperimentRunner {
 			throw new IllegalArgumentException("Memory field (" + IExperimentSetConfig.MEM_MAX + ") must be set in configuration");
 		}
 		if (config.getNumberOfCPUs() == null) {
-			throw new IllegalArgumentException("Max CPU field (" + IExperimentSetConfig.CPU_MAX+ ") must be set in configuration");
+			throw new IllegalArgumentException("Max CPU field (" + IExperimentSetConfig.CPU_MAX + ") must be set in configuration");
 		}
 		if (config.getKeyFields() == null) {
 			throw new IllegalArgumentException("Key fields (" + IExperimentSetConfig.KEYFIELDS + ") entry must be set in configuration!");
@@ -92,9 +100,9 @@ public class ExperimentRunner {
 			for (ExperimentDBEntry experiment : this.handle.getConductedExperiments()) {
 				if (this.isExperimentInLineWithSetup(experiment.getExperiment())) {
 					this.knownExperimentEntries.add(experiment);
-				}
-				else {
-					logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(), experiment.getExperiment().getValuesOfKeyFields());
+				} else {
+					logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(),
+							experiment.getExperiment().getValuesOfKeyFields());
 				}
 			}
 
@@ -105,7 +113,7 @@ public class ExperimentRunner {
 		this.totalNumberOfExperiments = numExperiments;
 	}
 
-	public boolean isExperimentInLineWithSetup(final Experiment experiment) {
+	private boolean isExperimentInLineWithSetup(final Experiment experiment) {
 		for (Entry<String, String> keyEntry : experiment.getValuesOfKeyFields().entrySet()) {
 			try {
 				if (!this.isValueForKeyValid(keyEntry.getKey(), keyEntry.getValue())) {
@@ -120,12 +128,7 @@ public class ExperimentRunner {
 		return true;
 	}
 
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Map<String, String> values) throws ExperimentDBInteractionFailedException {
-		return this.handle.createAndGetExperimentIfNotConducted(new Experiment(this.memoryLimit, this.cpuLimit, values));
-	}
-
-
-	public Experiment getExperimentForNumber(final int id) throws IllegalExperimentSetupException {
+	private Experiment getExperimentForNumber(final int id) throws IllegalExperimentSetupException {
 		logger.debug("Computing experiment for id {}", id);
 		if (id < 0) {
 			throw new IllegalArgumentException("Experiment ID must be positive!");
@@ -181,9 +184,8 @@ public class ExperimentRunner {
 				throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
 			}
 			logger.trace("Create a new instance of {} and ask it for the number of possible values.", c.getName());
-			return ((IExperimentKeyGenerator<?>)c.newInstance()).getNumberOfValues();
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			return ((IExperimentKeyGenerator<?>) c.newInstance()).getNumberOfValues();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalKeyDescriptorException(e);
 		}
 	}
@@ -203,13 +205,12 @@ public class ExperimentRunner {
 				throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
 			}
 			logger.trace("Create a new instance of {} and ask it for the number of possible values.", c.getName());
-			Object value = ((IExperimentKeyGenerator<?>)c.newInstance()).getValue(indexOfValue);
+			Object value = ((IExperimentKeyGenerator<?>) c.newInstance()).getValue(indexOfValue);
 			if (value == null) {
 				throw new NoSuchElementException("No value could be found for index " + indexOfValue + " in keyfield " + key);
 			}
 			return value.toString();
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalKeyDescriptorException(e);
 		}
 	}
@@ -229,13 +230,23 @@ public class ExperimentRunner {
 				throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
 			}
 			logger.trace("Create a new instance of {} and ask it for the number of possible values.", c.getName());
-			return ((IExperimentKeyGenerator<?>)c.newInstance()).isValueValid(value);
-		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			return ((IExperimentKeyGenerator<?>) c.newInstance()).isValueValid(value);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalKeyDescriptorException(e);
 		}
 	}
 
+	/**
+	 * Conducts a limited number of not yet conducted experiments randomly chosen
+	 * from the grid.
+	 * 
+	 * @param maxNumberOfExperiments
+	 *            Limit for the number of experiments
+	 * @param reload
+	 *            Whether or not the experiment setup should be reloaded between two
+	 *            experiment runs.
+	 * @throws IllegalKeyDescriptorException
+	 */
 	public void randomlyConductExperiments(final int maxNumberOfExperiments, final boolean reload) throws IllegalKeyDescriptorException {
 		this.updateExperimentSetupAccordingToConfig();
 
@@ -268,6 +279,14 @@ public class ExperimentRunner {
 
 	}
 
+	/**
+	 * Conducts an unbound number of randomly chosen experiments from the grid.
+	 * 
+	 * @param reload
+	 *            Whether or not the experiment setup should be reloaded between two
+	 *            experiment runs.
+	 * @throws IllegalKeyDescriptorException
+	 */
 	public void randomlyConductExperiments(final boolean reload) throws IllegalKeyDescriptorException {
 		this.randomlyConductExperiments(-1, reload);
 	}
@@ -276,41 +295,55 @@ public class ExperimentRunner {
 	 * Conducts a single experiment
 	 *
 	 * @param exp
+	 * @throws ExperimentAlreadyExistsInDatabaseException
+	 * @throws ExperimentDBInteractionFailedException
 	 * @throws Exception.
-	 *             These are not the exceptions thrown by the experiment itself, because these are logged into the database. Exceptions thrown here are technical exceptions that occur when arranging the experiment
+	 *             These are not the exceptions thrown by the experiment itself,
+	 *             because these are logged into the database. Exceptions thrown
+	 *             here are technical exceptions that occur when arranging the
+	 *             experiment
 	 */
-	public boolean conductExperimentIfNotAlreadyConducted(final Experiment exp) throws Exception {
+	public boolean conductExperimentIfNotAlreadyConducted(final Experiment exp) throws ExperimentDBInteractionFailedException {
 
-		ExperimentDBEntry expEntry = this.handle.createAndGetExperimentIfNotConducted(exp);
-		if (expEntry != null) {
-			Exception error = null;
-			this.knownExperimentEntries.add(expEntry);
-			try {
-				this.conductor.evaluate(expEntry, m -> {
-					try {
-						this.handle.updateExperiment(expEntry, m);
-					} catch (ExperimentDBInteractionFailedException  e) {
-						e.printStackTrace();
-					}
-				});
+		try {
+			ExperimentDBEntry expEntry = this.handle.createAndGetExperiment(exp);
+			if (expEntry != null) {
+				Exception error = null;
+				this.knownExperimentEntries.add(expEntry);
+				try {
+					this.conductor.evaluate(expEntry, m -> {
+						try {
+							this.handle.updateExperiment(expEntry, m);
+						} catch (ExperimentDBInteractionFailedException e) {
+							e.printStackTrace();
+						}
+					});
 
-			} catch (Exception e) {
-				error = e;
-				logger.error("Experiment failed due to exception, which has been logged");
+				} catch (Exception e) {
+					error = e;
+					logger.error("Experiment failed due to exception, which has been logged");
+				}
+				this.handle.finishExperiment(expEntry, error);
+				return true;
+			} else {
+				return false;
 			}
-			this.handle.finishExperiment(expEntry, error);
-			return true;
-		} else {
+		} catch (ExperimentAlreadyExistsInDatabaseException e) {
 			return false;
 		}
 	}
 
 	/**
-	 * This method can be used to toggle the check of the memory limit. If the check is active (default or doCheck == true), the memory actually available in this runtime will be taken as an entry for the memory limit.
+	 * This method can be used to toggle the check of the memory limit. If the check
+	 * is active (default or doCheck == true), the memory actually available in this
+	 * runtime will be taken as an entry for the memory limit.
 	 *
 	 * @param doCheck
-	 *            A flag whether the check shall be performed or not. If doCheck is true, the check will be performed and the actually available memory in this runtime environment will be written to the database. Otherwise, the memory limit
-	 *            specified in the configuration file will be written to the database.
+	 *            A flag whether the check shall be performed or not. If doCheck is
+	 *            true, the check will be performed and the actually available
+	 *            memory in this runtime environment will be written to the
+	 *            database. Otherwise, the memory limit specified in the
+	 *            configuration file will be written to the database.
 	 */
 	public void setConditionMemoryLimitCheck(final boolean doCheck) {
 		this.condMemoryLimitCheck = doCheck;

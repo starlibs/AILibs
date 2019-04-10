@@ -168,12 +168,12 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		}
 	}
 
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Map<String, String> values) throws ExperimentDBInteractionFailedException{
-		return this.createAndGetExperimentIfNotConducted(new Experiment(this.config.getMemoryLimitInMB(), this.config.getNumberOfCPUs(), values));
+	public ExperimentDBEntry createAndGetExperiment(final Map<String, String> values) throws ExperimentDBInteractionFailedException{
+		return this.createAndGetExperiment(new Experiment(this.config.getMemoryLimitInMB(), this.config.getNumberOfCPUs(), values));
 	}
 
 	@Override
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Experiment experiment) throws ExperimentDBInteractionFailedException {
+	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException {
 		try {
 
 			/* first check whether exactly the same experiment (with the same seed) has been conducted previously */

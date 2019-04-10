@@ -81,7 +81,7 @@ public class ExperimenterFileDBHandle implements IExperimentDatabaseHandle {
 	}
 
 	@Override
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Experiment experiment) throws ExperimentDBInteractionFailedException {
+	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException {
 
 		/* check if the experiment exists */
 		Optional<ExperimentDBEntry> knownEntry = getConductedExperiments().stream().filter(e -> e.getExperiment().equals(experiment)).findFirst();

@@ -1,5 +1,12 @@
 package jaicore.experiments;
 
+/**
+ * This class describes concrete experiment entities contained in the database.
+ * Each ExperimentDBEntry has a unique id (for the context of the experiment setup) and is bound to a conceptual experiment description in form of an Experiment object.
+ * 
+ * @author fmohr
+ *
+ */
 public class ExperimentDBEntry {
 	private final int id;
 	private final Experiment experiment;

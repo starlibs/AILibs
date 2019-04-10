@@ -3,6 +3,12 @@ package jaicore.experiments;
 import org.aeonbits.owner.Mutable;
 import org.aeonbits.owner.Reloadable;
 
+/**
+ * Configuration interface to defined the access properties for a database connection
+ * 
+ * @author fmohr
+ *
+ */
 public interface IDatabaseConfig extends Mutable, Reloadable {
 
 	/* The table is the one where the experiments will be maintained */
