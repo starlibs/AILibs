@@ -14,6 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.sets.SetUtil;
 import jaicore.experiments.Experiment;
@@ -26,6 +29,8 @@ import jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 
 public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
+	private static final Logger logger = LoggerFactory.getLogger(ExperimenterSQLHandle.class);
+	
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_HOST = "host";
@@ -113,7 +118,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		try {
 			this.adapter.update(sql.toString(), new String[] {});
 		} catch (SQLException e) {
-			System.err.println(sql.toString());
+			logger.error("An SQL exception occured with the following query: {}", sql);
 			throw new ExperimentDBInteractionFailedException(e);
 		}
 	}
@@ -121,37 +126,9 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	@Override
 	public Collection<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException {
 		Collection<ExperimentDBEntry> experimentEntries = new HashSet<>();
-
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM ");
 		queryStringSB.append(this.tablename);
-		//		queryStringSB.append(" WHERE ");
-		//		boolean firstKeyField = true;
-		//		for (String fieldName : this.valuesForKeyFields.keySet()) {
-		//			if (firstKeyField) {
-		//				firstKeyField = false;
-		//			} else {
-		//				queryStringSB.append(" AND ");
-		//			}
-		//			String keyName = this.getDatabaseFieldnameForConfigEntry(fieldName);
-		//
-		//			queryStringSB.append(keyName);
-		//			queryStringSB.append(" IN (");
-		//
-		//			boolean firstValue = true;
-		//			for (String value : this.valuesForKeyFields.get(fieldName)) {
-		//				if (firstValue) {
-		//					firstValue = false;
-		//				} else {
-		//					queryStringSB.append(",");
-		//				}
-		//				queryStringSB.append("'");
-		//				queryStringSB.append(value);
-		//				queryStringSB.append("'");
-		//			}
-		//			queryStringSB.append(")");
-		//		}
-
 		try (ResultSet rs = this.adapter.getPreparedStatement(queryStringSB.toString()).executeQuery()) {
 			while (rs.next()) {
 				Map<String, String> keyValues = new HashMap<>();
@@ -186,7 +163,6 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 			valuesToInsert.put(FIELD_MEMORY + "_max", experiment.getMemoryInMB());
 			valuesToInsert.put(FIELD_NUMCPUS, experiment.getNumCPUs());
 			valuesToInsert.put(FIELD_HOST, InetAddress.getLocalHost().getHostName());
-			System.out.println(valuesToInsert);
 			int id = this.adapter.insert(this.tablename, valuesToInsert);
 			return new ExperimentDBEntry(id, experiment);
 		} catch (UnknownHostException | SQLException e) {

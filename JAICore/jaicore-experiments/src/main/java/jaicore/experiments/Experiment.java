@@ -58,12 +58,11 @@ public class Experiment {
 		if (valuesOfKeyFields == null) {
 			if (other.valuesOfKeyFields != null)
 				return false;
-		} else if (!valuesOfKeyFields.equals(other.valuesOfKeyFields))
+		} else if (!valuesOfKeyFields.equals(other.valuesOfKeyFields)) {
 			return false;
+		}
 		if (memoryInMB != other.memoryInMB)
 			return false;
-		if (numCPUs != other.numCPUs)
-			return false;
-		return true;
+		return numCPUs == other.numCPUs;
 	}
 }

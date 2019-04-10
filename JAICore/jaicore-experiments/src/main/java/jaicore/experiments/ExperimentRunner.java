@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -19,6 +20,8 @@ import jaicore.basic.StringUtil;
 import jaicore.basic.sets.SetUtil;
 import jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
+import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
+import jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 import jaicore.experiments.exceptions.IllegalExperimentSetupException;
 import jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 
@@ -43,6 +46,7 @@ public class ExperimentRunner {
 	private int memoryLimit;
 	private int cpuLimit;
 	private int totalNumberOfExperiments;
+	private final Random random = new Random(System.currentTimeMillis());
 
 	/**
 	 * This flag indicates whether the given memory limit deviates from the actually
@@ -70,7 +74,7 @@ public class ExperimentRunner {
 		this.handle = databaseHandle;
 	}
 
-	private void updateExperimentSetupAccordingToConfig() throws IllegalKeyDescriptorException {
+	private void updateExperimentSetupAccordingToConfig() throws IllegalKeyDescriptorException, ExperimentDBInteractionFailedException {
 		if (this.condMemoryLimitCheck) {
 			if (Math.abs((int) (Runtime.getRuntime().maxMemory() / 1024 / 1024) - this.config.getMemoryLimitInMB()) > MAX_MEM_DEVIATION) {
 				logger.error("The true memory limit is {}, which differs from the {} specified in the config by more than the allowed {}MB!", this.memoryLimit, this.config.getMemoryLimitInMB(), MAX_MEM_DEVIATION);
@@ -81,34 +85,28 @@ public class ExperimentRunner {
 
 		this.cpuLimit = this.config.getNumberOfCPUs();
 		int numExperiments = 1;
-		try {
 
-			/* create map of possible values for each key field */
-			for (String key : this.config.getKeyFields()) {
-				/* this is a hack needed because one cannot retrieve generic configs */
-				String propertyVals = this.config.removeProperty(key);
-				if (propertyVals == null) {
-					throw new IllegalArgumentException("No property values defined for key field \"" + key + "\"");
-				}
-				List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(s -> s.trim()).collect(Collectors.toList());
-				this.config.setProperty(key, propertyVals);
-				this.valuesForKeyFields.put(key, vals);
-				numExperiments *= this.getNumberOfValuesForKey(key);
+		/* create map of possible values for each key field */
+		for (String key : this.config.getKeyFields()) {
+			/* this is a hack needed because one cannot retrieve generic configs */
+			String propertyVals = this.config.removeProperty(key);
+			if (propertyVals == null) {
+				throw new IllegalArgumentException("No property values defined for key field \"" + key + "\"");
 			}
+			List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(String::trim).collect(Collectors.toList());
+			this.config.setProperty(key, propertyVals);
+			this.valuesForKeyFields.put(key, vals);
+			numExperiments *= this.getNumberOfValuesForKey(key);
+		}
 
-			this.handle.setup(this.config);
-			for (ExperimentDBEntry experiment : this.handle.getConductedExperiments()) {
-				if (this.isExperimentInLineWithSetup(experiment.getExperiment())) {
-					this.knownExperimentEntries.add(experiment);
-				} else {
-					logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(),
-							experiment.getExperiment().getValuesOfKeyFields());
-				}
+		this.handle.setup(this.config);
+		for (ExperimentDBEntry experiment : this.handle.getConductedExperiments()) {
+			if (this.isExperimentInLineWithSetup(experiment.getExperiment())) {
+				this.knownExperimentEntries.add(experiment);
+			} else {
+				logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(),
+						experiment.getExperiment().getValuesOfKeyFields());
 			}
-
-		} catch (ExperimentDBInteractionFailedException e) {
-			e.printStackTrace();
-			numExperiments = -1;
 		}
 		this.totalNumberOfExperiments = numExperiments;
 	}
@@ -245,9 +243,10 @@ public class ExperimentRunner {
 	 * @param reload
 	 *            Whether or not the experiment setup should be reloaded between two
 	 *            experiment runs.
-	 * @throws IllegalKeyDescriptorException
+	 * @throws ExperimentDBInteractionFailedException
+	 * @throws IllegalExperimentSetupException
 	 */
-	public void randomlyConductExperiments(final int maxNumberOfExperiments, final boolean reload) throws IllegalKeyDescriptorException {
+	public void randomlyConductExperiments(final int maxNumberOfExperiments, final boolean reload) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 		this.updateExperimentSetupAccordingToConfig();
 
 		if (this.totalNumberOfExperiments <= 0) {
@@ -258,22 +257,18 @@ public class ExperimentRunner {
 		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
-		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && ((maxNumberOfExperiments > 0) ? numberOfConductedExperiments < maxNumberOfExperiments : true)) {
+		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && numberOfConductedExperiments < maxNumberOfExperiments) {
 			if (reload) {
 				this.config.reload();
 			}
 			this.updateExperimentSetupAccordingToConfig();
-			int k = (int) Math.floor(Math.random() * this.totalNumberOfExperiments);
+			int k = random.nextInt(this.totalNumberOfExperiments);
 			logger.info("Now conducting {}/{}", k, this.totalNumberOfExperiments);
-			try {
-				Experiment exp = this.getExperimentForNumber(k);
-				this.checkExperimentValidity(exp);
-				logger.info("Conduct experiment with key values: {}", exp.getValuesOfKeyFields());
-				if (this.conductExperimentIfNotAlreadyConducted(exp)) {
-					numberOfConductedExperiments++;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			Experiment exp = this.getExperimentForNumber(k);
+			this.checkExperimentValidity(exp);
+			logger.info("Conduct experiment with key values: {}", exp.getValuesOfKeyFields());
+			if (this.conductExperimentIfNotAlreadyConducted(exp)) {
+				numberOfConductedExperiments++;
 			}
 		}
 
@@ -285,9 +280,10 @@ public class ExperimentRunner {
 	 * @param reload
 	 *            Whether or not the experiment setup should be reloaded between two
 	 *            experiment runs.
-	 * @throws IllegalKeyDescriptorException
+	 * @throws IllegalExperimentSetupException
+	 * @throws ExperimentDBInteractionFailedException
 	 */
-	public void randomlyConductExperiments(final boolean reload) throws IllegalKeyDescriptorException {
+	public void randomlyConductExperiments(final boolean reload) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 		this.randomlyConductExperiments(-1, reload);
 	}
 
@@ -305,32 +301,33 @@ public class ExperimentRunner {
 	 */
 	public boolean conductExperimentIfNotAlreadyConducted(final Experiment exp) throws ExperimentDBInteractionFailedException {
 
+		/* create experiment entry */
+		ExperimentDBEntry expEntry;
 		try {
-			ExperimentDBEntry expEntry = this.handle.createAndGetExperiment(exp);
-			if (expEntry != null) {
-				Exception error = null;
-				this.knownExperimentEntries.add(expEntry);
-				try {
-					this.conductor.evaluate(expEntry, m -> {
-						try {
-							this.handle.updateExperiment(expEntry, m);
-						} catch (ExperimentDBInteractionFailedException e) {
-							e.printStackTrace();
-						}
-					});
-
-				} catch (Exception e) {
-					error = e;
-					logger.error("Experiment failed due to exception, which has been logged");
-				}
-				this.handle.finishExperiment(expEntry, error);
-				return true;
-			} else {
-				return false;
-			}
+			expEntry = this.handle.createAndGetExperiment(exp);
 		} catch (ExperimentAlreadyExistsInDatabaseException e) {
 			return false;
 		}
+
+		/* run experiment */
+		assert expEntry != null;
+		Throwable error = null;
+		this.knownExperimentEntries.add(expEntry);
+		try {
+			this.conductor.evaluate(expEntry, m -> {
+				try {
+					this.handle.updateExperiment(expEntry, m);
+				} catch (ExperimentUpdateFailedException e) {
+					logger.error("Error in updating experiment data. Message of {}: {}", e.getClass().getName(), e.getMessage());
+				}
+			});
+
+		} catch (ExperimentEvaluationFailedException e) {
+			error = e.getCause();
+			logger.error("Experiment failed due to exception, which has been logged");
+		}
+		this.handle.finishExperiment(expEntry, error);
+		return true;
 	}
 
 	/**

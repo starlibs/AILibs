@@ -48,11 +48,10 @@ public class ExperimentDBEntry {
 		if (experiment == null) {
 			if (other.experiment != null)
 				return false;
-		} else if (!experiment.equals(other.experiment))
+		} else if (!experiment.equals(other.experiment)) {
 			return false;
-		if (id != other.id)
-			return false;
-		return true;
+		}
+		return id == other.id;
 	}
 
 }
