@@ -32,7 +32,6 @@ public class KnapsackProblemGenerator {
 		bonusCombination.add("0");
 		bonusCombination.add("2");
 		bonusPoints.put(bonusCombination, 25.0d);
-		KnapsackProblem kp = new KnapsackProblem(objects, values, weights, bonusPoints, numObjects * 20);
-		return kp;
+		return new KnapsackProblem(objects, values, weights, bonusPoints, numObjects * 20.0);
 	}
 }
