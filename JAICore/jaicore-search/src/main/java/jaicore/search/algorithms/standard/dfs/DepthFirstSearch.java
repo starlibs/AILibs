@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.events.AAlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -35,7 +34,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
  * @param <N>
  * @param <A>
  */
-public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
+public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AAnyPathInORGraphSearch<I, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
@@ -45,7 +44,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 	private boolean lastNodeWasTrueLeaf = false;
 	private Map<N, List<N>> successors = new HashMap<>();
 
-	public DepthFirstSearch(final GraphSearchInput<N, A> problem) {
+	public DepthFirstSearch(final I problem) {
 		super(problem);
 	}
 

@@ -39,7 +39,7 @@ implements IOptimalPathInORGraphSearch<I, N, A, V> {
 		super(problem);
 	}
 
-	protected AOptimalPathInORGraphSearch( final IAlgorithmConfig config,final I problem) {
+	protected AOptimalPathInORGraphSearch(final IAlgorithmConfig config,final I problem) {
 		super(config,problem);
 	}
 

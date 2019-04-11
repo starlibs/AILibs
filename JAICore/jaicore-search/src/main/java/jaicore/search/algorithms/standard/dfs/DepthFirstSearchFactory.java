@@ -4,7 +4,7 @@ import jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 
-public class DepthFirstSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double> {
+public class DepthFirstSearchFactory<I extends GraphSearchInput<N, A>, N, A> extends StandardORGraphSearchFactory<I, SearchGraphPath<N, A>,N, A, Double> {
 
 	private String loggerName;
 
@@ -13,7 +13,7 @@ public class DepthFirstSearchFactory<N, A> extends StandardORGraphSearchFactory<
 	}
 
 	@Override
-	public DepthFirstSearch<N, A> getAlgorithm() {
+	public DepthFirstSearch<I, N, A> getAlgorithm() {
 		if (this.getInput().getGraphGenerator() == null) {
 			throw new IllegalStateException("Cannot produce RandomSearch searches before the graph generator is set in the problem.");
 		}
@@ -21,7 +21,7 @@ public class DepthFirstSearchFactory<N, A> extends StandardORGraphSearchFactory<
 	}
 
 	@Override
-	public DepthFirstSearch<N, A> getAlgorithm(final GraphSearchInput<N, A> input) {
+	public DepthFirstSearch<I, N, A> getAlgorithm(final I input) {
 		return new DepthFirstSearch<>(input);
 	}
 
