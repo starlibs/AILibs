@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * Instruction class that can be converted into json. Used by {@link ReproducibleInstances}. The instructions are used to store information about the dataset origin and the splits done.
- * Supported are {@link LoadDataSetInstruction} and {@link SplitInstruction} at the moment. <br>
+ * Supported are {@link LoadDataSetInstruction} and {@link FoldBasedSubsetInstruction} at the moment. <br>
  * 
  * An instruction is identified by a command name, that specifies the type of instruction and a list if input parameters.
  * 
@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "command", visible = true)
 @JsonSubTypes({ 
 	  @Type(value = LoadDataSetInstruction.class, name = "loadDataset"),
-	  @Type(value = SplitInstruction.class, name = "split")
+	  @Type(value = FoldBasedSubsetInstruction.class, name = "split")
 	})
 public abstract class Instruction {
 

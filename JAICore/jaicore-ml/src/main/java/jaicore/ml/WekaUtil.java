@@ -33,17 +33,14 @@ import com.google.common.collect.Range;
 
 import jaicore.basic.sets.CartesianProductComputationProblem;
 import jaicore.basic.sets.LDSRelationComputer;
+import jaicore.ml.cache.FoldBasedSubsetInstruction;
 import jaicore.ml.cache.ReproducibleInstances;
-import jaicore.ml.cache.SplitInstruction;
 import jaicore.ml.core.SimpleInstanceImpl;
 import jaicore.ml.core.SimpleInstancesImpl;
 import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import jaicore.ml.interfaces.LabeledInstances;
-import weka.attributeSelection.ASEvaluation;
-import weka.attributeSelection.ASSearch;
-import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -167,17 +164,17 @@ public class WekaUtil {
 		return classifiers;
 	}
 
-	public static boolean isValidPreprocessorCombination(String searcher, String evaluator) {
+	public static boolean isValidPreprocessorCombination(final String searcher, final String evaluator) {
 		boolean isSetEvaluator = evaluator.toLowerCase().matches(
 				".*(relief|gainratio|principalcomponents|onerattributeeval|infogainattributeeval|correlationattributeeval|symmetricaluncertattributeeval).*");
 		boolean isRanker = searcher.toLowerCase().contains("ranker");
 		boolean isNonRankerEvaluator = evaluator.toLowerCase().matches(".*(cfssubseteval).*");
 		return !(isSetEvaluator && !isRanker || isNonRankerEvaluator && isRanker);
 	}
-	
+
 	/**
-	 * Determines all attribute selection variants (search/evaluator combinations with default parametrization) 
-	 * 
+	 * Determines all attribute selection variants (search/evaluator combinations with default parametrization)
+	 *
 	 * @return
 	 */
 	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() {
@@ -189,8 +186,9 @@ public class WekaUtil {
 			CartesianProductComputationProblem<String> problem = new CartesianProductComputationProblem<>(sets);
 			List<List<String>> combinations = new LDSRelationComputer<>(problem).call();
 			for (List<String> combo : combinations) {
-				if (isValidPreprocessorCombination(combo.get(0), combo.get(1)))
+				if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
 					preprocessors.add(combo);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -311,7 +309,7 @@ public class WekaUtil {
 
 	public static Instances fromJAICoreInstances(final LabeledInstances<String> labeledInstances) {
 		int attributeCount = labeledInstances.getNumberOfColumns() + 1; // the amount of attributes including the class
-																		// label.
+		// label.
 		int dataSize = labeledInstances.getNumberOfRows();
 
 		/* create basic attribute entries */
@@ -606,7 +604,7 @@ public class WekaUtil {
 		}
 		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data
 				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
-		return folds;
+				return folds;
 	}
 
 	public static List<Instances> realizeSplit(final Instances data, final Collection<Integer>[] split) {
@@ -712,7 +710,7 @@ public class WekaUtil {
 
 		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data
 				.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
-		return folds;
+				return folds;
 	}
 
 	public static List<List<Integer>> getStratifiedSplitIndicesAsList(final Instances data, final Random rand,
@@ -778,7 +776,7 @@ public class WekaUtil {
 		}
 		assert instances.stream().mapToInt(l -> l.size()).sum() == data
 				.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
-		return instances;
+				return instances;
 	}
 
 	public static ArrayNode splitToJsonArray(final Collection<Integer>[] splitDecision) {
@@ -852,13 +850,13 @@ public class WekaUtil {
 		}
 		assert instances.stream().mapToInt(l -> l.size()).sum() == data
 				.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
-		return instances;
+				return instances;
 	}
 
 	/**
 	 * Creates a stratified split for a given {@link ReproducibleInstances} Object.
 	 * The history will be updated to track the split.
-	 * 
+	 *
 	 * @param data
 	 *            - Input data
 	 * @param rand
@@ -876,7 +874,7 @@ public class WekaUtil {
 	/**
 	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object.
 	 * THe History will be updated to track the split.
-	 * 
+	 *
 	 * @param data
 	 *            - Input data
 	 * @param seed
@@ -915,8 +913,8 @@ public class WekaUtil {
 		/* first assign one item of each class to each fold */
 		for (int i = 0; i <= portions.length; i++) {
 			ReproducibleInstances instancesForSplit = new ReproducibleInstances(emptyInstances); // Will have the same
-																									// history as data
-																									// but is empty
+			// history as data
+			// but is empty
 
 			for (String c : classWiseSeparation.keySet()) {
 				Instances availableInstances = classWiseSeparation.get(c);
@@ -945,19 +943,19 @@ public class WekaUtil {
 		assert instances.stream().mapToInt(l -> l.size()).sum() == data
 				.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
 
-		/* update ReproducibleInstanes history */
-		String ratiosAsString = Arrays.toString(portions);
-		for (int i = 0; i < instances.size(); i++) {
-			instances.get(i).addInstruction(new SplitInstruction(ratiosAsString, seed, i));
-		}
-		return instances;
+				/* update ReproducibleInstanes history */
+				String ratiosAsString = Arrays.toString(portions);
+				for (int i = 0; i < instances.size(); i++) {
+					instances.get(i).addInstruction(new FoldBasedSubsetInstruction(WekaUtil.class.getName() + ".getStratifiedSplit(" + seed+ ", " + ratiosAsString + ")", i));
+				}
+				return instances;
 	}
 
 	public static List<File> getDatasetsInFolder(final File folder) throws IOException {
 		List<File> files = new ArrayList<>();
 		try (Stream<Path> paths = Files.walk(folder.toPath())) {
 			paths.filter(f -> f.getParent().toFile().equals(folder) && f.toFile().getAbsolutePath().endsWith(".arff"))
-					.forEach(f -> files.add(f.toFile()));
+			.forEach(f -> files.add(f.toFile()));
 		}
 		return files.stream().sorted().collect(Collectors.toList());
 	}
@@ -1055,7 +1053,7 @@ public class WekaUtil {
 		return attributes;
 	}
 
-	public static boolean hasOnlyNumericAttributes(Instances instances) {
+	public static boolean hasOnlyNumericAttributes(final Instances instances) {
 		for (Attribute a : getAttributes(instances, false)) {
 			if (!a.isNumeric()) {
 				return false;
@@ -1141,7 +1139,7 @@ public class WekaUtil {
 		return counter.keySet().stream().filter(k -> counter.get(k) != 0).collect(Collectors.toList());
 	}
 
-	public static double[] getClassesAsArray(Instances inst) {
+	public static double[] getClassesAsArray(final Instances inst) {
 		int n = inst.size();
 		double[] vec = new double[n];
 		for (int i = 0; i < n; i++) {
@@ -1150,7 +1148,7 @@ public class WekaUtil {
 		return vec;
 	}
 
-	public static List<Double> getClassesAsList(Instances inst) {
+	public static List<Double> getClassesAsList(final Instances inst) {
 		return inst.stream().map(Instance::classValue).collect(Collectors.toList());
 	}
 
