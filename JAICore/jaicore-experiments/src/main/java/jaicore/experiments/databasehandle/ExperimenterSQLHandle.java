@@ -70,7 +70,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		if (config.getDBTableName() == null) {
 			throw new IllegalArgumentException("DB table must not be null in experiment config.");
 		}
-		this.adapter = new SQLAdapter(config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName(), config.getDBSSL() != null ? config.getDBSSL() : true);
+		this.adapter = new SQLAdapter(config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName(), config.getDBSSL() == null || config.getDBSSL());
 		this.tablename = config.getDBTableName();
 	}
 
