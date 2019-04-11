@@ -1,6 +1,6 @@
 {
 	"repository": "MEKA",
-	"include": ["../mlplan/autoweka.json"],
+	"include": ["../weka/autoweka-for-mlc.json"],
 	"parameters": [
 		{
 			"name": "_P",
@@ -55,7 +55,7 @@
 		{
 			"name": "meka.classifiers.multilabel.BCC",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"} ],
 			"parameter": [
 				{
 					"name": "_X",
@@ -69,7 +69,7 @@
 		{
 			"name": "meka.classifiers.multilabel.BPNN",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [ { "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_H",
@@ -116,13 +116,13 @@
 		{
 			"name": "meka.classifiers.multilabel.BR",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [ { "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [ ]
 		},
 		{
 			"name": "meka.classifiers.multilabel.BRq",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [ { "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_P"
@@ -132,13 +132,13 @@
 		{
 			"name": "meka.classifiers.multilabel.CC",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [ { "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [ ]
 		},
 		{
 			"name": "meka.classifiers.multilabel.CCq",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_P"
@@ -148,7 +148,7 @@
 		{
 			"name": "meka.classifiers.multilabel.CDN",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_I"
@@ -161,7 +161,7 @@
 		{
 			"name": "meka.classifiers.multilabel.CDT",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_H"
@@ -183,7 +183,7 @@
 		{
 			"name": "meka.classifiers.multilabel.CT",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_H"
@@ -212,7 +212,7 @@
 		{
 			"name": "meka.classifiers.multilabel.DBPNN",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_N",
@@ -265,7 +265,7 @@
 		{
 			"name": "meka.classifiers.multilabel.FW",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				
 			]
@@ -273,7 +273,7 @@
 		{
 			"name": "meka.classifiers.multilabel.HASEL",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"comment": "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels. LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
 			"parameter": [
 				{
@@ -291,7 +291,7 @@
 		{
 			"name": "meka.classifiers.multilabel.LC",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": []
 		},
 		{
@@ -303,7 +303,7 @@
 		{
 			"name": "meka.classifiers.multilabel.Maniac",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_compression",
@@ -336,7 +336,7 @@
 		{
 			"name": "meka.classifiers.multilabel.MCC",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_Is",
@@ -369,8 +369,8 @@
 		},
 		{
 			"name": "meka.classifiers.multilabel.MULAN",
-			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"providedInterface": ["MulanMLClassifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_S",
@@ -384,7 +384,7 @@
 		{
 			"name": "meka.classifiers.multilabel.PCC",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				
 			]
@@ -392,7 +392,7 @@
 		{
 			"name": "meka.classifiers.multilabel.PMCC",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				{
 					"name": "_M",
@@ -456,7 +456,7 @@
 		{
 			"name": "meka.classifiers.multilabel.PS",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"comment": "LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).",
 			"parameter": [
 				{
@@ -474,7 +474,7 @@
 		{
 			"name": "meka.classifiers.multilabel.PSt",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"comment": "LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
 			"parameter": [
 				{
@@ -492,7 +492,7 @@
 		{
 			"name": "meka.classifiers.multilabel.RAkEL",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"comment": "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels\nLEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).",
 			"parameter": [
 				{
@@ -520,7 +520,7 @@
 		{
 			"name": "meka.classifiers.multilabel.RAkELd",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"comment": "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels.\nLEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).",
 			"parameter": [
 				{
@@ -529,16 +529,16 @@
 					"type": "int",
 					"default": 0,
 					"min": 0,
-					"max": 10,
-					"minInterval": 1,
-					"refineSplits": 2
+					"max": 0,
+					"minInterval": 0.05,
+					"refineSplits": 1
 				}
 			]
 		},
 		{
 			"name": "meka.classifiers.multilabel.RT",
 			"providedInterface": ["MLClassifier", "BasicMLClassifier"],
-			"requiredInterface": ["Classifier"],
+			"requiredInterface": [{ "id": "W", "name": "AbstractClassifier"}],
 			"parameter": [
 				
 			]

@@ -33,7 +33,7 @@ public class PartiallyFailingObjectEvaluator<T, V extends Comparable<V>> impleme
 		if (this.successfullInvocations.contains(this.numCalls.incrementAndGet())) {
 			return this.valueToReturn;
 		}
-		throw new ObjectEvaluationFailedException(null, "Exception for test purposes.");
+		throw new ObjectEvaluationFailedException("Exception for test purposes.", null);
 	}
 
 }
