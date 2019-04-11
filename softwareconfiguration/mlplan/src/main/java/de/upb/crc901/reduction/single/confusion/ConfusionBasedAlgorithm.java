@@ -5,8 +5,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.basic.sets.SetUtil;
 import jaicore.ml.WekaUtil;
@@ -18,54 +21,51 @@ import weka.core.Instances;
 
 public class ConfusionBasedAlgorithm {
 
-	public MCTreeNodeReD buildClassifier(Instances data, final Collection<String> pClassifierNames) throws Exception {
+	private Logger logger = LoggerFactory.getLogger(ConfusionBasedAlgorithm.class);
 
-		System.out.println("START: " + data.relationName());
+	public MCTreeNodeReD buildClassifier(final Instances data, final Collection<String> pClassifierNames) throws Exception {
+
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("START: {}", data.relationName());
+		}
 		int seed = 0;
-		
+
 		Map<String, double[][]> confusionMatrices = new HashMap<>();
 		int numClasses = data.numClasses();
-		System.out.println("Computing confusion matrices ...");
+		this.logger.info("Computing confusion matrices ...");
 		for (int i = 0; i < 10; i++) {
 			List<Instances> split = WekaUtil.getStratifiedSplit(data, seed, .7f);
-			// MulticlassEvaluator eval = new MulticlassEvaluator(new Random(seed));
 
 			/* compute confusion matrices for each classifier */
-//			System.out.println("Iteration " + i);
 			for (String classifier : pClassifierNames) {
-				// System.out.println("\t" + classifier + " ...");
 				try {
 					Classifier c = AbstractClassifier.forName(classifier, null);
 					c.buildClassifier(split.get(0));
 					Evaluation eval = new Evaluation(split.get(0));
 					eval.evaluateModel(c, split.get(1));
-					if (!confusionMatrices.containsKey(classifier))
+					if (!confusionMatrices.containsKey(classifier)) {
 						confusionMatrices.put(classifier, new double[numClasses][numClasses]);
-						
+					}
+
 					double[][] currentCM = confusionMatrices.get(classifier);
 					double[][] addedCM = eval.confusionMatrix();
-					
+
 					for (int j = 0; j < numClasses; j++) {
 						for (int k = 0; k < numClasses; k++) {
 							currentCM[j][k] += addedCM[j][k];
 						}
 					}
-				} catch (Throwable e) {
-//					System.err.println(e.getClass().getName() + ": " + e.getMessage());
+				} catch (Exception e) {
+					this.logger.error("Unexpected exception has been thrown", e);
 				}
 			}
 		}
-//		confusionMatrices.keySet().forEach(k -> {
-//			System.out.println(k);
-//			for (int i = 0; i < confusionMatrices.get(k).length; i++)
-//				System.out.println(Arrays.toString(confusionMatrices.get(k)[i]));
-//		});
-		System.out.println("done");
+		this.logger.info("done");
 
 		/* compute zero-conflict sets for each classifier */
 		Map<String, Collection<Collection<Integer>>> zeroConflictSets = new HashMap<>();
-		for (String classifier : confusionMatrices.keySet()) {
-			zeroConflictSets.put(classifier, getZeroConflictSets(confusionMatrices.get(classifier)));
+		for (Entry<String, double[][]> entry : confusionMatrices.entrySet()) {
+			zeroConflictSets.put(entry.getKey(), this.getZeroConflictSets(entry.getValue()));
 		}
 
 		/* greedily identify the best left and right pair (that make least mistakes) */
@@ -75,14 +75,10 @@ public class ConfusionBasedAlgorithm {
 		String bestInner = null;
 		Collection<Integer> bestLeftClasses = null;
 		Collection<Integer> bestRightClasses = null;
-//		int numPair = 0;
 		for (List<String> classifierPair : classifierPairs) {
-//			numPair++;
 			String c1 = classifierPair.get(0);
 			String c2 = classifierPair.get(1);
-//			 System.out.println("\tConsidering " + c1 + "/" + c2 + "(" + numPair + "/" + classifierPairs.size() + ")");
-//			double[][] cm1 = confusionMatrices.get(c1);
-//			double[][] cm2 = confusionMatrices.get(c2);
+
 			Collection<Collection<Integer>> z1 = zeroConflictSets.get(c1);
 			Collection<Collection<Integer>> z2 = zeroConflictSets.get(c2);
 
@@ -111,19 +107,20 @@ public class ConfusionBasedAlgorithm {
 				/* compute effect of adding this class to the respective clusters */
 				Collection<Integer> newBestZ1 = new ArrayList<>(bestLeftClasses);
 				newBestZ1.add(cId);
-				int p1 = getPenaltyOfCluster(newBestZ1, cm1);
+				int p1 = this.getPenaltyOfCluster(newBestZ1, cm1);
 				Collection<Integer> newBestZ2 = new ArrayList<>(bestRightClasses);
 				newBestZ2.add(cId);
-				int p2 = getPenaltyOfCluster(newBestZ2, cm2);
+				int p2 = this.getPenaltyOfCluster(newBestZ2, cm2);
 
 				if (p1 < p2) {
 					bestLeftClasses = newBestZ1;
-				} else
+				} else {
 					bestRightClasses = newBestZ2;
+				}
 			}
 		}
-		int p1 = getPenaltyOfCluster(bestLeftClasses, cm1);
-		int p2 = getPenaltyOfCluster(bestRightClasses, cm2);
+		int p1 = this.getPenaltyOfCluster(bestLeftClasses, cm1);
+		int p2 = this.getPenaltyOfCluster(bestRightClasses, cm2);
 
 		/* create the split problem */
 		Map<String, String> classMap = new HashMap<>();
@@ -140,7 +137,6 @@ public class ConfusionBasedAlgorithm {
 		int leastSeenMistakes = Integer.MAX_VALUE;
 		for (String classifier : pClassifierNames) {
 			try {
-//				 System.out.println("\t\tConsidering " + bestLeft + "/" + bestRight + "/" + classifier);
 				Classifier c = AbstractClassifier.forName(classifier, null);
 
 				c.buildClassifier(binaryInnerSplit.get(0));
@@ -148,19 +144,18 @@ public class ConfusionBasedAlgorithm {
 				eval.evaluateModel(c, binaryInnerSplit.get(1));
 				int mistakes = (int) eval.incorrect();
 				int overallMistakes = p1 + p2 + mistakes;
-//				System.out.println(overallMistakes);
 				if (overallMistakes < leastSeenMistakes) {
 					leastSeenMistakes = overallMistakes;
-					 System.out.println("New best system: " + bestLeft + "/" + bestRight + "/" + classifier + " with " + leastSeenMistakes);
+					this.logger.info("New best system: {}/{}/{} with {}", bestLeft, bestRight, classifier, leastSeenMistakes);
 					bestInner = classifier;
 				}
 			} catch (Exception e) {
-				System.err.println(e.getClass() + ": " + e.getMessage());
+				this.logger.error("Exception has been thrown unexpectedly.", e);
 			}
 		}
-		if (bestInner == null)
+		if (bestInner == null) {
 			throw new IllegalStateException("No best inner has been chosen!");
-
+		}
 
 		/* now create MCTreeNode with choices */
 		MCTreeNodeReD tree = new MCTreeNodeReD(bestInner, bestLeftClasses.stream().map(i -> data.classAttribute().value(i)).collect(Collectors.toList()), bestLeft,
@@ -169,19 +164,19 @@ public class ConfusionBasedAlgorithm {
 		return tree;
 	}
 
-
-	private int getLeastConflictingClass(double[][] confusionMatrix, Collection<Integer> blackList) {
-
+	private int getLeastConflictingClass(final double[][] confusionMatrix, final Collection<Integer> blackList) {
 		/* compute least conflicting class */
 		int leastConflictingClass = -1;
 		int leastKnownScore = Integer.MAX_VALUE;
 		for (int i = 0; i < confusionMatrix.length; i++) {
-			if (blackList.contains(i))
+			if (blackList.contains(i)) {
 				continue;
+			}
 			int sum = 0;
 			for (int j = 0; j < confusionMatrix.length; j++) {
-				if (i != j)
+				if (i != j) {
 					sum += confusionMatrix[i][j];
+				}
 			}
 			if (sum < leastKnownScore) {
 				leastKnownScore = sum;
@@ -191,24 +186,26 @@ public class ConfusionBasedAlgorithm {
 		return leastConflictingClass;
 	}
 
-	private Collection<Collection<Integer>> getZeroConflictSets(double[][] confusionMatrix) {
+	private Collection<Collection<Integer>> getZeroConflictSets(final double[][] confusionMatrix) {
 		Collection<Integer> blackList = new ArrayList<>();
 		Collection<Collection<Integer>> partitions = new ArrayList<>();
 
 		int leastConflictingClass = -1;
 		do {
-			leastConflictingClass = getLeastConflictingClass(confusionMatrix, blackList);
+			leastConflictingClass = this.getLeastConflictingClass(confusionMatrix, blackList);
 			if (leastConflictingClass >= 0) {
 				Collection<Integer> cluster = new ArrayList<>();
 				cluster.add(leastConflictingClass);
 				do {
-					Collection<Integer> newCluster = incrementCluster(cluster, confusionMatrix, blackList);
-					if (newCluster.size() == cluster.size())
+					Collection<Integer> newCluster = this.incrementCluster(cluster, confusionMatrix, blackList);
+					if (newCluster.size() == cluster.size()) {
 						break;
+					}
 					cluster = newCluster;
-					if (cluster.contains(-1))
+					if (cluster.contains(-1)) {
 						throw new IllegalStateException("Computed illegal cluster: " + cluster);
-				} while (getPenaltyOfCluster(cluster, confusionMatrix) == 0 && cluster.size() < confusionMatrix.length);
+					}
+				} while (this.getPenaltyOfCluster(cluster, confusionMatrix) == 0 && cluster.size() < confusionMatrix.length);
 				blackList.addAll(cluster);
 				partitions.add(cluster);
 			}
@@ -217,12 +214,13 @@ public class ConfusionBasedAlgorithm {
 		return partitions;
 	}
 
-	private Collection<Integer> incrementCluster(Collection<Integer> cluster, double[][] confusionMatrix, Collection<Integer> blackList) {
+	private Collection<Integer> incrementCluster(final Collection<Integer> cluster, final double[][] confusionMatrix, final Collection<Integer> blackList) {
 		int leastSeenPenalty = Integer.MAX_VALUE;
 		int choice = -1;
 		for (int cId = 0; cId < confusionMatrix.length; cId++) {
-			if (cluster.contains(cId) || blackList.contains(cId))
+			if (cluster.contains(cId) || blackList.contains(cId)) {
 				continue;
+			}
 			int addedPenalty = 0;
 			for (int i = 0; i < confusionMatrix.length; i++) {
 				addedPenalty += confusionMatrix[i][cId];
@@ -234,18 +232,20 @@ public class ConfusionBasedAlgorithm {
 			}
 		}
 		Collection<Integer> newCluster = new ArrayList<>(cluster);
-		if (choice < 0)
+		if (choice < 0) {
 			return newCluster;
+		}
 		newCluster.add(choice);
 		return newCluster;
 	}
 
-	private int getPenaltyOfCluster(Collection<Integer> cluster, double[][] confusionMatrix) {
+	private int getPenaltyOfCluster(final Collection<Integer> cluster, final double[][] confusionMatrix) {
 		int sum = 0;
 		for (int i : cluster) {
 			for (int j : cluster) {
-				if (i != j)
+				if (i != j) {
 					sum += confusionMatrix[i][j];
+				}
 			}
 		}
 		return sum;

@@ -13,7 +13,7 @@ import weka.classifiers.trees.RandomForest;
 
 /**
  * An integration test for pipeline evaluations.
- * 
+ *
  * @author Helena Graf
  * @author Lukas
  * @author Joshua
@@ -21,7 +21,7 @@ import weka.classifiers.trees.RandomForest;
  */
 public class CacheTest {
 
-	public static void main (String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 		String datasetId = "40677";
 		DatasetOrigin datasetOrigin = DatasetOrigin.OPENML_DATASET_ID;
 		String testEvaluationTechnique = "single";
@@ -31,12 +31,18 @@ public class CacheTest {
 		String valSplitTechnique = "";
 		int valSeed = 0;
 		SQLAdapter adapter = new SQLAdapter("host", "user", "password", "db");
-		PipelineEvaluationCache cache = new PipelineEvaluationCache(datasetId, datasetOrigin, testEvaluationTechnique, testSplitTechnique, testSeed, valSplitTechnique, valEvaluationTechnique, valSeed, adapter);
+
+		PipelineEvaluationCacheConfigBuilder configBuilder = new PipelineEvaluationCacheConfigBuilder();
+
+		configBuilder.withDatasetID(datasetId).withDatasetOrigin(datasetOrigin).withTestEvaluationTechnique(testEvaluationTechnique).withtestSplitTechnique(testSplitTechnique).withTestSeed(testSeed);
+		configBuilder.withValEvaluationTechnique(valEvaluationTechnique).withValSplitTechnique(valSplitTechnique).withValSeed(valSeed).withSQLAdapter(adapter);
+
+		PipelineEvaluationCache cache = new PipelineEvaluationCache(configBuilder);
 		ComponentLoader loader = new ComponentLoader(new File("conf/automl/searchmodels/weka/weka-all-autoweka.json"));
 		MLPipelineComponentInstanceFactory factory = new MLPipelineComponentInstanceFactory(loader.getComponents());
 		ComponentInstance cI = factory.convertToComponentInstance(new MLPipeline(new Ranker(), new OneRAttributeEval(), new RandomForest()));
 		cache.configureValidation("3MCCV_0.8", "multi", 12);
 		System.out.println("Cache result: " + cache.getResultOrExecuteEvaluation(cI));
 	}
-	
+
 }
