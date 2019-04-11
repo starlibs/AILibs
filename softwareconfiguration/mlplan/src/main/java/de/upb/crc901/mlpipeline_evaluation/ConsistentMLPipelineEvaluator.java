@@ -10,14 +10,14 @@ import jaicore.ml.WekaUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.SimpleEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleSLCEvaluatorMeasureBridge;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
 /**
  * For consistent evaluations of MLPipelines.
- * 
+ *
  * @author Helena Graf
  * @author Lukas
  * @author Joshua
@@ -25,10 +25,14 @@ import weka.core.Instances;
  */
 public class ConsistentMLPipelineEvaluator {
 
+	private ConsistentMLPipelineEvaluator() {
+		/* Private c'tor to prevent instantiation. */
+	}
+
 	/**
 	 * Get the error rate of the classifier according to the given info about the
 	 * split and evaluation technique.
-	 * 
+	 *
 	 * @param testSplitTechnique
 	 * @param testEvaluationTechnique
 	 * @param testSeed
@@ -40,13 +44,11 @@ public class ConsistentMLPipelineEvaluator {
 	 * @return
 	 * @throws Exception
 	 */
-	public static double evaluateClassifier(String testSplitTechnique, String testEvaluationTechnique, int testSeed,
-			String valSplitTechnique, String valEvaluationTechnique, int valSeed, Instances data, Classifier classifier)
-			throws Exception {
+	public static double evaluateClassifier(final String testSplitTechnique, final String testEvaluationTechnique, final int testSeed, final String valSplitTechnique, final String valEvaluationTechnique, final int valSeed,
+			final Instances data, final Classifier classifier) throws Exception {
 		switch (testEvaluationTechnique) {
 		case "single":
-			return evaluateClassifier(valSplitTechnique, valEvaluationTechnique, valSeed,
-					getTrainSplit(testSplitTechnique, data, testSeed), classifier);
+			return evaluateClassifier(valSplitTechnique, valEvaluationTechnique, valSeed, getTrainSplit(testSplitTechnique, data, testSeed), classifier);
 		case "multi":
 			throw new NotImplementedException("\"multi\" not yet supported!");
 		default:
@@ -57,48 +59,49 @@ public class ConsistentMLPipelineEvaluator {
 	/**
 	 * Get the error rate of the classifier according to the given info about the
 	 * split and evaluation technique.
-	 * 
-	 * @param split_technique
-	 * @param evaluation_technique
+	 *
+	 * @param splitTechnique
+	 * @param evaluationTechnique
 	 * @param seed
 	 * @param data
 	 * @param classifier
 	 * @return
 	 * @throws Exception
 	 */
-	public static double evaluateClassifier(String split_technique, String evaluation_technique, int seed,
-			Instances data, Classifier classifier) throws Exception {
-		switch (evaluation_technique) {
+	public static double evaluateClassifier(final String splitTechnique, final String evaluationTechnique, final int seed, final Instances data, final Classifier classifier) throws Exception {
+		switch (evaluationTechnique) {
 		case "single":
-			Instances train_split = ConsistentMLPipelineEvaluator.getTrainSplit(split_technique, data, seed);
-			Evaluation eval = new Evaluation(train_split);
-			classifier.buildClassifier(train_split);
-			eval.evaluateModel(classifier, ConsistentMLPipelineEvaluator.getTestSplit(split_technique, data, seed));
+			Instances trainSplit = ConsistentMLPipelineEvaluator.getTrainSplit(splitTechnique, data, seed);
+			Evaluation eval = new Evaluation(trainSplit);
+			classifier.buildClassifier(trainSplit);
+			eval.evaluateModel(classifier, ConsistentMLPipelineEvaluator.getTestSplit(splitTechnique, data, seed));
 			return (1 - eval.pctCorrect() / 100.0d);
 		case "multi":
-			return ConsistentMLPipelineEvaluator.getEvaluatorForSplitTechnique(split_technique, data, seed)
-					.evaluate(classifier);
+			IClassifierEvaluator evaluator = ConsistentMLPipelineEvaluator.getEvaluatorForSplitTechnique(splitTechnique, data, seed);
+			if (evaluator != null) {
+				return evaluator.evaluate(classifier);
+			} else {
+				throw new IllegalArgumentException("Could not find classifier evaluator.");
+			}
 		default:
-			throw new IllegalArgumentException("Invalid split technique: " + evaluation_technique);
+			throw new IllegalArgumentException("Invalid split technique: " + evaluationTechnique);
 		}
 	}
 
 	/**
 	 * Get an evaluator object for the given split configuration for the datasets,
 	 * which can then be used to evaluate a classifier.
-	 * 
+	 *
 	 * @param split_technique
 	 * @param data
 	 * @param seed
 	 * @return
 	 */
-	public static IClassifierEvaluator getEvaluatorForSplitTechnique(String split_technique, Instances data, int seed) {
+	public static IClassifierEvaluator getEvaluatorForSplitTechnique(final String split_technique, final Instances data, final int seed) {
 		String[] techniqueAndDescription = split_technique.split("_");
 
-		switch (techniqueAndDescription[0]) {
-		case "3MCCV":
-			return new MonteCarloCrossValidationEvaluator(new SimpleEvaluatorMeasureBridge(new ZeroOneLoss()), 3, data,
-					Float.parseFloat(techniqueAndDescription[1]), seed);
+		if (techniqueAndDescription[0].equals("3MCCV")) {
+			return new MonteCarloCrossValidationEvaluator(new SimpleSLCEvaluatorMeasureBridge(new ZeroOneLoss()), 3, data, Float.parseFloat(techniqueAndDescription[1]), seed);
 		}
 
 		return null;
@@ -107,19 +110,17 @@ public class ConsistentMLPipelineEvaluator {
 	/**
 	 * Split the dataset according to the given parameters and return the train
 	 * portion of the split.
-	 * 
+	 *
 	 * @param split_technique
 	 * @param data
 	 * @param seed
 	 * @return
 	 */
-	public static Instances getTrainSplit(String split_technique, Instances data, int seed) {
+	public static Instances getTrainSplit(final String split_technique, final Instances data, final int seed) {
 		String[] techniquAndDescription = split_technique.split("_");
 
-		switch (techniquAndDescription[0]) {
-		case "MCCV":
-			Collection<Integer>[] instancesInFolds = WekaUtil.getArbitrarySplit(data, new Random(seed),
-					Double.parseDouble(techniquAndDescription[1]));
+		if (techniquAndDescription[0].equals("MCCV")) {
+			Collection<Integer>[] instancesInFolds = WekaUtil.getArbitrarySplit(data, new Random(seed), Double.parseDouble(techniquAndDescription[1]));
 			List<Instances> folds = WekaUtil.realizeSplit(data, instancesInFolds);
 			return folds.get(0);
 		}
@@ -130,19 +131,17 @@ public class ConsistentMLPipelineEvaluator {
 	/**
 	 * Split the dataset according to the given parameters and return the test
 	 * portion of the split.
-	 * 
+	 *
 	 * @param split_technique
 	 * @param data
 	 * @param seed
 	 * @return
 	 */
-	public static Instances getTestSplit(String split_technique, Instances data, int seed) {
+	public static Instances getTestSplit(final String split_technique, final Instances data, final int seed) {
 		String[] techniquAndDescription = split_technique.split("_");
 
-		switch (techniquAndDescription[0]) {
-		case "MCCV":
-			Collection<Integer>[] instancesInFolds = WekaUtil.getArbitrarySplit(data, new Random(seed),
-					Double.parseDouble(techniquAndDescription[1]));
+		if (techniquAndDescription[0].equals("MCCV")) {
+			Collection<Integer>[] instancesInFolds = WekaUtil.getArbitrarySplit(data, new Random(seed), Double.parseDouble(techniquAndDescription[1]));
 			List<Instances> folds = WekaUtil.realizeSplit(data, instancesInFolds);
 			return folds.get(1);
 		}

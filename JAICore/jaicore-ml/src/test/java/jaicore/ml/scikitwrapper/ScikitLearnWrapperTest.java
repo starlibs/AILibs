@@ -1,8 +1,8 @@
 package jaicore.ml.scikitwrapper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,14 +17,22 @@ import jaicore.ml.scikitwrapper.ScikitLearnWrapper.ProblemType;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
+/**
+ * REQUIREMENTS: python 3.6.4 + scikit-learn 0.20.0 need to be installed in order to run these tests.
+ *
+ * @author Marcel
+ *
+ */
 public class ScikitLearnWrapperTest {
+
+	private static final String MSG_MODELPATH_NOT_NULL = "Model path must not be null.";
 
 	private static final String BASE_TESTRSC_PATH = "testrsc/ml/scikitwrapper/";
 	private static final String REGRESSION_ARFF = BASE_TESTRSC_PATH + "0532052678.arff";
 	private static final String CLASSIFICATION_ARFF = BASE_TESTRSC_PATH + "dataset_31_credit-g.arff";
 	private static final String BAYESNET_TRAIN_ARFF = BASE_TESTRSC_PATH + "Bayesnet_Train.arff";
 	private static final String MLP_REGRESSOR_DUMP = BASE_TESTRSC_PATH + "01673183575_MLPRegressor.pcl";
-	private static final String CLASSIFIER_DUMP = BASE_TESTRSC_PATH + "02055055033_Pipeline.pcl";
+	private static final String CLASSIFIER_DUMP = BASE_TESTRSC_PATH + "0800955787_Pipeline.pcl";
 	private static final String OWN_CLASSIFIER_DUMP = BASE_TESTRSC_PATH + "0532052678.arff";
 	private static final String IMPORT_FOLDER = BASE_TESTRSC_PATH + "importfolder_test";
 
@@ -34,7 +42,7 @@ public class ScikitLearnWrapperTest {
 		Instances dataset = this.loadARFF(REGRESSION_ARFF);
 		slw.setProblemType(ProblemType.REGRESSION);
 		slw.buildClassifier(dataset);
-		assertNotEquals(null, slw.getModelPath());
+		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
 
@@ -46,7 +54,7 @@ public class ScikitLearnWrapperTest {
 		int s = dataset.numAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(dataset);
-		assertNotEquals(null, slw.getModelPath());
+		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
 
@@ -57,10 +65,11 @@ public class ScikitLearnWrapperTest {
 		Instances datasetTest = datasetTrain;
 		slw.setProblemType(ProblemType.REGRESSION);
 		int s = datasetTrain.numAttributes();
-		slw.setTargets(s - 1, s - 2, s - 3);
+		int[] targetColumns = { s - 1, s - 2, s - 3 };
+		slw.setTargets(targetColumns);
 		slw.buildClassifier(datasetTrain);
 		double[] result = slw.classifyInstances(datasetTest);
-		assertEquals("Unequal length of predictions and number of test instances", result.length, datasetTest.size());
+		assertEquals("Unequal length of predictions and number of test instances", result.length, targetColumns.length * datasetTest.size());
 	}
 
 	@Test
@@ -80,7 +89,8 @@ public class ScikitLearnWrapperTest {
 		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction, ScikitLearnWrapper.getImportString(imports));
 		Instances dataset = this.loadARFF(CLASSIFICATION_ARFF);
 		slw.buildClassifier(dataset);
-		assertNotEquals(null, slw.getModelPath());
+		System.out.println(slw.getModelPath());
+		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
 
@@ -117,7 +127,7 @@ public class ScikitLearnWrapperTest {
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(datasetTrain);
 		slw.classifyInstances(datasetTest);
-		assertNotEquals(null, slw.getModelPath());
+		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
 
@@ -126,12 +136,12 @@ public class ScikitLearnWrapperTest {
 		File importfolder = new File(IMPORT_FOLDER);
 		String importStatement = ScikitLearnWrapper.createImportStatementFromImportFolder(importfolder, true);
 		ScikitLearnWrapper slw = new ScikitLearnWrapper("test_module_1.My_MLPRegressor()", importStatement);
-		Instances dataset = this.loadARFF(CLASSIFIER_DUMP);
+		Instances dataset = this.loadARFF(REGRESSION_ARFF);
 		slw.setProblemType(ProblemType.REGRESSION);
 		int s = dataset.numAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(dataset);
-		assertNotEquals(null, slw.getModelPath());
+		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
 
@@ -145,20 +155,30 @@ public class ScikitLearnWrapperTest {
 		int s = dataset.numAttributes();
 		slw.setTargets(s - 1, s - 2, s - 3);
 		slw.buildClassifier(dataset);
-		assertNotEquals(null, slw.getModelPath());
+		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
 	}
 
 	@Test
 	public void invalidConstructorNoConstructionCall() throws IOException {
-		new ScikitLearnWrapper(null, "");
-		assertTrue(true);
+		boolean errorTriggeredFlag = false;
+		try {
+			new ScikitLearnWrapper(null, "");
+		} catch (AssertionError e) {
+			errorTriggeredFlag = true;
+		}
+		assertTrue(errorTriggeredFlag);
 	}
 
 	@Test
 	public void invalidConstructorEmptyConstructionCall() throws IOException {
-		new ScikitLearnWrapper("", "");
-		assertTrue(true);
+		boolean errorTriggeredFlag = false;
+		try {
+			new ScikitLearnWrapper("", "");
+		} catch (AssertionError e) {
+			errorTriggeredFlag = true;
+		}
+		assertTrue(errorTriggeredFlag);
 	}
 
 	private Instances loadARFF(final String arffPath) throws IOException {

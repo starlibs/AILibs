@@ -34,6 +34,7 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 			myModel = modelClass.newInstance();
 			myView = viewClass.getDeclaredConstructor(modelClass).newInstance(myModel);
 			myController = controllerClass.getDeclaredConstructor(modelClass, viewClass).newInstance(myModel, myView);
+			myController.setDaemon(true);
 			myController.start();
 		} catch (Exception e) {
 			this.logger.error("Could not initialize {} due to exception in building MVC.", this, e);

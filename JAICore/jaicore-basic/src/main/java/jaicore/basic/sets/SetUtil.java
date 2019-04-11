@@ -25,9 +25,10 @@ import jaicore.basic.MathExt;
 /**
  * Utility class for sets.
  *
- * @author fmohr, mbunse
+ * @author fmohr, mbunse, mwever
  */
 public class SetUtil {
+	private static final String DEFAULT_LIST_ITEM_SEPARATOR = ",";
 
 	public static class Pair<X, Y> {
 		private X x;
@@ -1074,5 +1075,53 @@ public class SetUtil {
 			groupedCollection.get(val).add(i);
 		});
 		return groupedCollection;
+	}
+
+	/**
+	 * Splits a string into multiple strings using "," as a separator and returns the result as a list.
+	 *
+	 * @param stringList The list in the form of a string.
+	 * @return
+	 */
+	public static List<String> explode(final String stringList) {
+		return explode(stringList, DEFAULT_LIST_ITEM_SEPARATOR);
+	}
+
+	/**
+	 * Splits a string into multiple strings by the given separator and returns the result as a list.
+	 *
+	 * @param stringList The list in the form of a string.
+	 * @param separator The separator to be used for splitting.
+	 * @return The list representing the split string.
+	 */
+	public static List<String> explode(final String stringList, final String separator) {
+		List<String> values = new LinkedList<>();
+		String[] split = stringList.split(separator);
+		for (String splitElement : split) {
+			values.add(splitElement);
+		}
+		return values;
+	}
+
+	/**
+	 * Concatenates toString representations of objects separated by the given separator to a single string.
+	 * @param collection The collection of objects to be concatenated.
+	 * @param separator The separator for separating elements.
+	 * @return The collection of objects concatenated to a string.
+	 */
+	public static String implode(final Collection<? extends Object> collection, final String separator) {
+		StringBuilder sb = new StringBuilder();
+
+		boolean first = true;
+		for (Object o : collection) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(separator);
+			}
+			sb.append(o + "");
+		}
+
+		return sb.toString();
 	}
 }
