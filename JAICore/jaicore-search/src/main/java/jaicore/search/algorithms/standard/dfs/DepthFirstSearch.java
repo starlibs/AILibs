@@ -27,6 +27,7 @@ import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
  *
@@ -35,17 +36,18 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
  * @param <N>
  * @param <A>
  */
-public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AAnyPathInORGraphSearch<I, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
+public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomSearch.class);
-
+	
+	/* state of the algorithm */
 	private final List<N> currentPath = new ArrayList<>();
 	private boolean lastNodeWasTrueLeaf = false;
 	private Map<N, List<N>> successors = new HashMap<>();
 
-	public DepthFirstSearch(final I problem) {
+	public DepthFirstSearch(final GraphSearchInput<N, A> problem) {
 		super(problem);
 	}
 
@@ -58,8 +60,34 @@ public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AA
 			switch (getState()) {
 			case created:
 				N root = ((SingleRootGenerator<N>) getInput().getGraphGenerator().getRootGenerator()).getRoot();
-				currentPath.add(root);
 				post(new GraphInitializedEvent<>(getId(), root));
+
+				/* check whether a path has already been set externally */
+				if (currentPath.isEmpty()) {
+					currentPath.add(root);
+				} else {
+					if (!currentPath.get(0).equals(root))
+						throw new IllegalArgumentException("The root of the given path is not the root of the tree provided by the graph generator.");
+
+					/* post an event of all the nodes that have been added */
+					int n = currentPath.size();
+					for (int i = 0; i < n - 1; i++) {
+						N node = currentPath.get(i);
+						for (N successor : successors.get(node)) {
+							post(new NodeAddedEvent<>(getId(), node, successor, "or_open"));
+							post(new NodeTypeSwitchEvent<>(getId(), node, "or_closed"));
+						}
+					}
+					N leaf = currentPath.get(n - 1);
+					if (((NodeGoalTester<N>) getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
+						post(new NodeTypeSwitchEvent<>(getId(), currentPath.get(n - 1), "or_solution"));
+						lastNodeWasTrueLeaf = true;
+					}
+					else if (getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(leaf).isEmpty()) {
+						lastNodeWasTrueLeaf = true;
+					}
+				}
+
 				logger.info("Algorithm activated.");
 				return activate();
 			case active:
@@ -115,8 +143,7 @@ public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AA
 					lastNodeWasTrueLeaf = successorsOfThis.isEmpty();
 					if (lastNodeWasTrueLeaf) {
 						logger.debug("Detected that {} is a dead-end (has no successors and is not a goal node).", leaf);
-					}
-					else {
+					} else {
 						currentPath.add(successorsOfThis.get(0));
 						assert checkPathConsistency(currentPath);
 						logger.debug("Computed {} successors for {}, and selected {} as the next successor. Current path is now {}.", successorsOfThis.size(), leaf, successorsOfThis.get(0), currentPath);
@@ -132,14 +159,77 @@ public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AA
 		}
 	}
 
-
 	public List<N> getCurrentPath() {
 		return Collections.unmodifiableList(currentPath);
 	}
 
+	public int[] getDecisionIndicesForCurrentPath() {
+		int n = currentPath.size();
+		int[] decisions = new int[n - 1];
+		for (int i = 1; i < n; i++) {
+			N parent = currentPath.get(i - 1);
+			decisions[i - 1] = successors.get(parent).indexOf(currentPath.get(i));
+			assert decisions[i - 1] != -1;
+		}
+		return decisions;
+	}
+
 	public void setCurrentPath(final List<N> path) {
-		this.currentPath.clear();
-		this.currentPath.addAll(path);
+		try {
+
+			/* check that the root of the path is consistent with the true root */
+			Object root = currentPath.isEmpty() ? ((SingleRootGenerator<?>) getGraphGenerator().getRootGenerator()).getRoot() : currentPath.get(0);
+			if (!root.equals(path.get(0)))
+				throw new IllegalArgumentException();
+
+			/* now check that all other nodes are also valid successors in the original graph */
+			Map<N, List<N>> tentativeSuccessors = new HashMap<>();
+			SuccessorGenerator<N, A> successorGenerator = getGraphGenerator().getSuccessorGenerator();
+			int n = path.size();
+			for (int i = 0; i < n; i++) {
+				N node = path.get(i);
+				if (i > 0 && !tentativeSuccessors.get(path.get(i - 1)).contains(node))
+					throw new IllegalArgumentException("Node " + node + " is not a successor of " + path.get(i - 1) + " in the original graph.");
+				if (i < n - 1) {
+					tentativeSuccessors.put(node, successorGenerator.generateSuccessors(node).stream().map(NodeExpansionDescription::getTo).collect(Collectors.toList()));
+				}
+			}
+
+			/* replace successor map and current path variable */
+			this.currentPath.clear();
+			this.currentPath.addAll(path);
+			successors.clear();
+			successors.putAll(tentativeSuccessors);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		}
+	}
+
+	public void setCurrentPath(int... decisions) {
+		try {
+			N root = currentPath.isEmpty() ? ((SingleRootGenerator<N>) getGraphGenerator().getRootGenerator()).getRoot() : currentPath.get(0);
+			List<N> tentativePath = new ArrayList<>();
+			tentativePath.add(root);
+			Map<N, List<N>> tentativeSuccessors = new HashMap<>();
+			SuccessorGenerator<N, A> successorGenerator = getGraphGenerator().getSuccessorGenerator();
+			int n = decisions.length;
+			for (int i = 0; i < n; i++) {
+				N node = tentativePath.get(i);
+				tentativeSuccessors.put(node, successorGenerator.generateSuccessors(node).stream().map(NodeExpansionDescription::getTo).collect(Collectors.toList()));
+				tentativePath.add(tentativeSuccessors.get(node).get(decisions[i]));
+			}
+
+			/* replace successor map and current path variable */
+			this.currentPath.clear();
+			this.currentPath.addAll(tentativePath);
+			successors.clear();
+			successors.putAll(tentativeSuccessors);
+			checkPathConsistency(currentPath);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		}
 	}
 
 	private boolean checkPathConsistency(final List<N> path) {

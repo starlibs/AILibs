@@ -67,4 +67,10 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 			return parentEvent;
 		}
 	}
+
+	public IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> getBaseAlgorithm() {
+		return baseAlgorithm;
+	}
+	
+	
 }
