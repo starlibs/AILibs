@@ -1,6 +1,7 @@
 package jaicore.search.algorithms.standard.dfs;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -92,7 +93,7 @@ public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AA
 
 				if (((NodeGoalTester<N>) getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
 					lastNodeWasTrueLeaf = true;
-					AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), new SearchGraphPath<>(currentPath));
+					AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(getId(), new SearchGraphPath<>(currentPath));
 					post(event);
 					post(new NodeTypeSwitchEvent<>(getId(), leaf, "or_solution"));
 					logger.debug("The leaf node is a goal node. Returning goal path {}", currentPath);
@@ -131,7 +132,17 @@ public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AA
 		}
 	}
 
-	private boolean checkPathConsistency(List<N> path) {
+
+	public List<N> getCurrentPath() {
+		return Collections.unmodifiableList(currentPath);
+	}
+
+	public void setCurrentPath(final List<N> path) {
+		this.currentPath.clear();
+		this.currentPath.addAll(path);
+	}
+
+	private boolean checkPathConsistency(final List<N> path) {
 		N last = null;
 		for (N node : path) {
 			if (last != null) {
@@ -155,8 +166,8 @@ public class DepthFirstSearch<I extends GraphSearchInput<N, A>, N, A> extends AA
 		this.logger.info("Switch logger name from {} to {}", this.loggerName, name);
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(this.loggerName);
-		if (this.getGraphGenerator() instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.getGraphGenerator()).setLoggerName(name + ".graphgen");
+		if (getGraphGenerator() instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) getGraphGenerator()).setLoggerName(name + ".graphgen");
 		}
 		this.logger.info("Switched logger name to {}", this.loggerName);
 		super.setLoggerName(this.loggerName + "._algorithm");

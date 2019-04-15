@@ -11,18 +11,18 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import hasco.core.HASCOSolutionCandidate;
+import hasco.core.IsRefinementCompletedPredicate;
+import hasco.core.IsValidParameterRangeRefinementPredicate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
 import hasco.core.isNotRefinable;
-import hasco.core.IsRefinementCompletedPredicate;
-import hasco.core.IsValidParameterRangeRefinementPredicate;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
+import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
@@ -52,7 +52,7 @@ import jaicore.search.core.interfaces.GraphGenerator;
  *
  */
 public class HASCOReduction<V extends Comparable<V>>
-		implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
+implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
 
 	private static final boolean CONFIGURE_PARAMS = true; // this could be determined automatically later
 
@@ -75,11 +75,11 @@ public class HASCOReduction<V extends Comparable<V>>
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 
 	private Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier;
-	
-	public HASCOReduction(Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier) {
+
+	public HASCOReduction(final Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier) {
 		this.bestSolutionSupplier = bestSolutionSupplier;
 	}
-	
+
 	public Monom getInitState() {
 		if (this.originalProblem == null) {
 			throw new IllegalStateException("Cannot compute init state before transformation has been invoked.");
@@ -89,7 +89,7 @@ public class HASCOReduction<V extends Comparable<V>>
 		init.add(new Literal("component('request')"));
 		return init;
 	}
-	
+
 	public Collection<String> getExistingInterfaces() {
 		if (this.originalProblem == null) {
 			throw new IllegalStateException("Cannot compute existing interfaces before transformation has been invoked.");
@@ -131,7 +131,7 @@ public class HASCOReduction<V extends Comparable<V>>
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
 					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
+						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
