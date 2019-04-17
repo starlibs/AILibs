@@ -271,7 +271,8 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		/* set up timer for interruption */
 		AtomicLong cancelEvent = new AtomicLong();
 		AtomicLong timeRequiredToProcessCancel = new AtomicLong();
-		new Timer("CancelTest Timer").schedule(new TimerTask() {
+		Timer timer = new Timer("CancelTest Timer");
+		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
 				long now = System.currentTimeMillis();
@@ -322,6 +323,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			this.logger.warn("Time limit for test has been reached.");
 		} finally {
 			threadCountObserverThread.cancel();
+			timer.cancel();
 		}
 		int runtime = (int) (System.currentTimeMillis() - start.get());
 		int reactionTime = cancelEvent.get() > 0 ? (int) (System.currentTimeMillis() - cancelEvent.get()) : Integer.MAX_VALUE;

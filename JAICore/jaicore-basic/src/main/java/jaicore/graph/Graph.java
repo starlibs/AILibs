@@ -248,7 +248,7 @@ public class Graph<T> {
 		}
 
 		/* check that all successors are contained */
-		boolean allSuccessorsContained = !this.nodes.keySet().stream().noneMatch(n -> this.getSuccessors(n).stream().anyMatch(this::hasItem));
+		boolean allSuccessorsContained = this.nodes.keySet().stream().allMatch(n -> this.getSuccessors(n).stream().allMatch(this::hasItem));
 		if (!allSuccessorsContained) {
 			assert allSuccessorsContained : "There is a node in the graph such that not every successor n of it has a positive response for a call of hasItem(n)";
 			return false;
