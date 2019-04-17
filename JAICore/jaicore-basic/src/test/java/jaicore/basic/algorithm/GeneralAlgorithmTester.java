@@ -270,6 +270,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* set up timer for interruption */
 		AtomicLong cancelEvent = new AtomicLong();
+		AtomicLong timeRequiredToProcessCancel = new AtomicLong();
 		new Timer("CancelTest Timer").schedule(new TimerTask() {
 			@Override
 			public void run() {
@@ -277,9 +278,8 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 				GeneralAlgorithmTester.this.logger.info("Triggering cancel on {} after {}ms", algorithm.getId(), now - start.get());
 				cancelEvent.set(now);
 				algorithm.cancel();
-				long timeRequiredToProcessCancel = System.currentTimeMillis() - now;
-				GeneralAlgorithmTester.this.logger.info("Cancel fully processed after {}ms", timeRequiredToProcessCancel);
-				assertTrue("The cancel command blocked the thread for " + timeRequiredToProcessCancel + "ms, but only " + MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER + " are allowed.", timeRequiredToProcessCancel <= MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER);
+				timeRequiredToProcessCancel.set(System.currentTimeMillis() - now);
+				GeneralAlgorithmTester.this.logger.info("Cancel fully processed after {}ms", timeRequiredToProcessCancel.get());
 			}
 		}, INTERRUPTION_DELAY);
 
@@ -326,6 +326,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		int runtime = (int) (System.currentTimeMillis() - start.get());
 		int reactionTime = cancelEvent.get() > 0 ? (int) (System.currentTimeMillis() - cancelEvent.get()) : Integer.MAX_VALUE;
 		assertFalse("Thread must not be interrupted after cancel!", Thread.currentThread().isInterrupted());
+		assertTrue("The cancel command blocked the thread for " + timeRequiredToProcessCancel + "ms, but only " + MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER + " are allowed.", timeRequiredToProcessCancel.get() <= MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER);
 		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
 		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + allowedCPUs + ". Observed threads: \n\t- " + Arrays
 				.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
@@ -355,7 +356,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			algorithm.setNumCPUs(allowedCPUs);
 			algorithm.setMaxNumThreads(allowedCPUs);
 			assert algorithm.getConfig().threads() == allowedCPUs;
-		};
+		}
 		FutureTask<?> task = new FutureTask<>(algorithm);
 		TimeOut to = new TimeOut(TIMEOUT_DELAY, TimeUnit.MILLISECONDS);
 		algorithm.setTimeout(to.milliseconds(), TimeUnit.MILLISECONDS);
@@ -415,10 +416,6 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	protected void checkPreconditionForTest() {
 		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted at start of test!";
 		assert GlobalTimer.getInstance().getNumberOfActiveTasks() == 0 : "Global Timer has still " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs: " + GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
-	}
-
-	private void checkNotInterrupted() {
-		assertTrue("Executing thread is interrupted, which must not be the case!", !Thread.currentThread().isInterrupted());
 	}
 
 	private void waitForThreadGroupToBecomeEmpty(final ThreadGroup group) throws InterruptedException {

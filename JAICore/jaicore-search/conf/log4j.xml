@@ -60,7 +60,7 @@
 	</logger>
 	
 	<logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -70,7 +70,7 @@
   </logger>
   
   <logger name="testedalgorithm._orgraphsearch._algorithm">
-    <level value="trace" />
+    <level value="warn" />
   </logger>
   
   <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
