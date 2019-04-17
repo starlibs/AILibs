@@ -57,7 +57,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testSampleSizeSmallProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet =  (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
 		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
@@ -73,7 +73,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testSampleSizeLargeProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet =  (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
 		IDataset<I> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
@@ -99,7 +99,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testNoDuplicatesSmallProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet =  (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
 		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
@@ -115,7 +115,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testNoDuplicatesLargeProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet =  (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
 		IDataset<I> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
@@ -141,7 +141,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void checkOriginalDataSetNotModified() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet =  (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
 		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")
@@ -164,7 +164,4 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 		}
 		return sample;
 	}
-
-
-
 }

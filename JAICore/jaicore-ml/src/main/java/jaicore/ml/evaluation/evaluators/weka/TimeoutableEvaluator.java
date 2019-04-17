@@ -40,7 +40,7 @@ public class TimeoutableEvaluator implements IClassifierEvaluator {
 			Interrupter.get().markInterruptOnCurrentThreadAsResolved(timeoutTask);
 		} catch (Throwable e) {
 			if (!e.getMessage().contains("Killed WEKA") && !e.getMessage().contains("Bag size needs")) {
-				throw new ObjectEvaluationFailedException(e, "Error");
+				throw new ObjectEvaluationFailedException("Error", e);
 			}
 		} finally {
 			timeoutTask.cancel();

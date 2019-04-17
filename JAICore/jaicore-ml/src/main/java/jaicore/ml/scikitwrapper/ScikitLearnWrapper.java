@@ -254,7 +254,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		String absoluteFolderPath = importsFolder.getAbsolutePath();
 		/* Add the folder to the environment of the python script */
 		result.append("\n");
-		result.append("sys.path.append('" + absoluteFolderPath + "')\n");
+		result.append("sys.path.append(r'" + absoluteFolderPath + "')\n");
 		for (File module : importsFolder.listFiles()) {
 			if (!module.getName().startsWith("__")) {
 				/* Either import the module by its name. Then the classes of it have to be referenced by the fully qualified name. */

@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
@@ -18,9 +17,8 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.GlobalTimer;
 import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
-import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
-import weka.core.Instances;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
 
 /**
  * Evaluator used in the selection phase of mlplan. Uses MCCV by default, but can be configured to use other Benchmarks.
@@ -32,27 +30,13 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 
 	private Logger logger = LoggerFactory.getLogger(SelectionPhasePipelineEvaluator.class);
 
-	private final ClassifierFactory classifierFactory;
-	private final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
-
-	private final int seed;
-	private final int numMCIterations;
-	private final Instances dataShownToSelectionPhase;
-	private final double trainFoldSize;
-	private final int timeoutForSolutionEvaluation;
+	private final PipelineEvaluatorBuilder config;
 
 	private Double bestScore;
 
-	public SelectionPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch, final double trainFoldSize, final int seed,
-			final int timeoutForSolutionEvaluation) {
+	public SelectionPhasePipelineEvaluator(final PipelineEvaluatorBuilder config) {
 		super();
-		this.classifierFactory = classifierFactory;
-		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
-		this.seed = seed;
-		this.numMCIterations = numMCIterations;
-		this.dataShownToSelectionPhase = dataShownToSearch;
-		this.trainFoldSize = trainFoldSize;
-		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
+		this.config = config;
 	}
 
 	@Override
@@ -71,27 +55,27 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		if (this.bestScore == null) {
 			throw new UnsupportedOperationException("Cannot evaluated in selection phase if no best solution has been propagated.");
 		}
-
-		AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
-		if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
+		IEvaluatorMeasureBridge<Double> bridge = this.config.getEvaluationMeasurementBridge();
+		if (this.config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 		}
 
-		this.logger.debug("Running probabilistic MCCV with {} iterations and best score {}", this.numMCIterations, this.bestScore);
-		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.bestScore, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
+		this.logger.debug("Running probabilistic MCCV with {} iterations and best score {}", this.config.getNumMCIterations(), this.bestScore);
+		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.bestScore, this.config.getData(),
+				this.config.getTrainFoldSize(), this.config.getSeed());
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
-		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
+		TimerTask task = sub.interruptMeAfterMS(this.config.getTimeoutForSolutionEvaluation() - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
 		try {
-			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
+			mccv.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {
 			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
-				throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed since the timeout was hit.");
+				throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.", e);
 			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
-			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
+			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
 		} finally {
 			task.cancel();
 			this.logger.debug("Canceled timeout job {}", task);

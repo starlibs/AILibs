@@ -116,6 +116,23 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
+  <logger name="ml2plan">
+    <level value="info" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="hasco.core.Util">
+  	 <level value="warn" />
+  </logger>
+  
+  <logger name="hasco.core.IsRefinementCompletedPredicate">
+  	 <level value="warn" />
+  </logger>
+  
   <logger name="jaicore.search.algorithms.standard.mcts.MCTS">
   	 <level value="info" />
   </logger>
@@ -158,6 +175,10 @@
   
   <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
   	<level value="warn" />
+  </logger>
+  
+  <logger name="de.upb.crc901.mlplan.examples.multilabel.meka.ML2PlanAutoMLCExperimenter">
+  	<level value="info" />
   </logger>
   
   <logger name="testedalgorithm">

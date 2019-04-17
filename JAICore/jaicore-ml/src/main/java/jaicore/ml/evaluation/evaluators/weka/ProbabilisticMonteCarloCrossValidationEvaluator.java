@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.WekaUtil;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.AbstractEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
+import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -38,14 +40,16 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 	private double bestScore = 1.0;
 
 	/* Can either compute the loss or cache it */
-	private final AbstractEvaluatorMeasureBridge<Double, Double> bridge;
+	private final IEvaluatorMeasureBridge<Double> bridge;
+	private final IDatasetSplitter datasetSplitter;
 
 	@Override
 	public void updateBestScore(final Double bestScore) {
 		this.bestScore = bestScore;
 	}
 
-	public ProbabilisticMonteCarloCrossValidationEvaluator(final AbstractEvaluatorMeasureBridge<Double, Double> bridge, final int repeats, final double bestscore, final Instances data, final double trainingPortion, final long seed) {
+	public ProbabilisticMonteCarloCrossValidationEvaluator(final IEvaluatorMeasureBridge<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final double bestscore, final Instances data, final double trainingPortion,
+			final long seed) {
 		super();
 		this.repeats = repeats;
 		this.bridge = bridge;
@@ -53,6 +57,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		this.trainingPortion = trainingPortion;
 		this.seed = seed;
 		this.bestScore = bestscore;
+		this.datasetSplitter = datasetSplitter;
 	}
 
 	public void cancel() {
@@ -74,16 +79,16 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		this.logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
 			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
-			List<Instances> split = WekaUtil.getStratifiedSplit(this.data, this.seed + i, this.trainingPortion);
+			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 			try {
 				double score = this.bridge.evaluateSplit(pl, split.get(0), split.get(1));
 				this.logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
 				stats.addValue(score);
 
 				/* t-test */
-				if(stats.getMean() > this.bestScore && stats.getN() >= 2) {
+				if (stats.getMean() > this.bestScore && stats.getN() >= 2) {
 					TTest test = new TTest();
-					if(test.tTest(this.bestScore, stats.getValues(), 0.02)) {
+					if (test.tTest(this.bestScore, stats.getValues(), 0.02)) {
 						Double result = stats.getMean();
 						this.logger.info("Obtained score of {} for classifier {}. {}-MCCV was not completed because it would have been to unliky to beat best score.", result, pl, this.repeats);
 						return result;
@@ -93,9 +98,8 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 
 			catch (InterruptedException e) {
 				throw e;
-			}
-			catch (Exception e) {
-				throw new ObjectEvaluationFailedException(e, "Could not evaluate classifier!");
+			} catch (Exception e) {
+				throw new ObjectEvaluationFailedException("Could not evaluate classifier!", e);
 
 			}
 		}
@@ -107,7 +111,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		return score;
 	}
 
-	public AbstractEvaluatorMeasureBridge<Double, Double> getBridge() {
+	public IEvaluatorMeasureBridge<Double> getBridge() {
 		return this.bridge;
 	}
 
