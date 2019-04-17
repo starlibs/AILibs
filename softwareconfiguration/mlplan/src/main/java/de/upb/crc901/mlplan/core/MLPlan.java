@@ -281,7 +281,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	}
 
 	@Override
-	public void cancel() {
+	public synchronized void cancel() {
 		this.logger.info("Received cancel. First canceling optimizer, then invoking general shutdown.");
 		this.optimizingFactory.cancel();
 		this.logger.debug("Now canceling main ML-Plan routine");

@@ -18,6 +18,7 @@ import jaicore.search.model.travesaltree.Node;
  */
 public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T, V>> {
 
+	private static final String UNCERTAINTY = "uncertainty";
 	private static final String DOMINATES = "dominates";
 	private static final String DOMINATED_BY = "dominatedBy";
 
@@ -50,17 +51,17 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 */
 	@SuppressWarnings("unchecked")
 	private boolean dominates(final Node<T, V> p, final Node<T, V> q) {
-		if (!p.getAnnotations().containsKey("uncertainty")) {
+		if (!p.getAnnotations().containsKey(UNCERTAINTY)) {
 			throw new IllegalArgumentException("Node " + p + " has no uncertainty information.");
 		}
-		if (!q.getAnnotations().containsKey("uncertainty")) {
+		if (!q.getAnnotations().containsKey(UNCERTAINTY)) {
 			throw new IllegalArgumentException("Node " + q + " has no uncertainty information.");
 		}
 		// Get f and u values of nodes
 		V p_f = (V) p.getAnnotation("f");
-		double p_u = (double) p.getAnnotation("uncertainty");
+		double p_u = (double) p.getAnnotation(UNCERTAINTY);
 		V q_f = (V) q.getAnnotation("f");
-		double q_u = (double) q.getAnnotation("uncertainty");
+		double q_u = (double) q.getAnnotation(UNCERTAINTY);
 
 		// p dominates q <=> (q.f < p.f AND q.u <= p.u) OR (q.f <= p.f AND q.u < p.u)
 		return ((p_f.compareTo(q_f) < 0) && (p_u <= q_u)) || ((p_f.compareTo(q_f) <= 0) && (p_u < q_u));
@@ -72,7 +73,8 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 	 * @param n
 	 * @return
 	 */
-	private boolean isMaximal(final Node n) {
+	@SuppressWarnings("unchecked")
+	private boolean isMaximal(final Node<T, V> n) {
 		return ((HashSet<Node<T, V>>) n.getAnnotation(DOMINATED_BY)).size() == 0;
 	}
 
