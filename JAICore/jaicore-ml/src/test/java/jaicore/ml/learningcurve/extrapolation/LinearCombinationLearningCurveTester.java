@@ -1,7 +1,7 @@
 package jaicore.ml.learningcurve.extrapolation;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,98 +24,98 @@ public class LinearCombinationLearningCurveTester {
 	public void testSaturationPointPow3() {
 		AnalyticalLearningCurve lc = generateTestLearningCurvePow3();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(652.077, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 652.077, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointVapor() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveVapor();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(1210.469, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 1210.469, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointLogLogLinear() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveLogLogLinear();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(1382.754, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 1382.754, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointHill3() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveHill3();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(1214.202, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 1214.202, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointLogPower() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveLogPower();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(719.621, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 719.621, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointPow4() {
 		AnalyticalLearningCurve lc = generateTestLearningCurvePow4();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(555.803, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 555.803, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointMMF() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveMMF();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(631.508, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 631.508, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointExp4() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveExp4();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(906.084, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 906.084, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointJanoschek() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveJanoschek();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(526.875, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 526.875, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointWeibull() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveWeibull();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(395.219, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 395.219, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointIlog2() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveIlog2();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(305.460, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 305.460, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPointCombination() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveCombination();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(907.201, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 907.201, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testSaturationPoint2ParameterSets() {
 		AnalyticalLearningCurve lc = generateTestLearningCurve2ParameterSets();
 		double saturationPoint = lc.getSaturationPoint(0.1);
-		assertEquals(462.934, saturationPoint, 0.1, "The computed saturation point is not correct!");
+		assertEquals("The computed saturation point is not correct!", 462.934, saturationPoint, 0.1);
 	}
 
 	@Test
 	public void testConvergenceValuePow3() {
 		AnalyticalLearningCurve lc = generateTestLearningCurvePow3();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.919, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.919, convergenceValue, 0.01);
 
 	}
 
@@ -123,84 +123,84 @@ public class LinearCombinationLearningCurveTester {
 	public void testConvergenceValueVapor() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveVapor();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(4.842, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 4.842, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueLogLogLinear() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveLogLogLinear();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(1.22, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 1.22, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueHill3() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveHill3();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.996, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.996, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueLogPower() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveLogPower();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.83, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.83, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValuePow4() {
 		AnalyticalLearningCurve lc = generateTestLearningCurvePow4();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.981, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.981, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueMMF() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveMMF();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.986, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.986, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueExp4() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveExp4();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.949, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.949, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueJanoschek() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveJanoschek();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.99, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.99, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueWeibull() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveWeibull();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.949, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.949, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueIlog2() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveIlog2();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.861, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.861, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValueCombination() {
 		AnalyticalLearningCurve lc = generateTestLearningCurveCombination();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.972, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.972, convergenceValue, 0.01);
 	}
 
 	@Test
 	public void testConvergenceValue2ParameterSets() {
 		AnalyticalLearningCurve lc = generateTestLearningCurve2ParameterSets();
 		double convergenceValue = lc.getConvergenceValue();
-		assertEquals(0.9562, convergenceValue, 0.01, "The computed convergence value is not correct!");
+		assertEquals("The computed convergence value is not correct!", 0.9562, convergenceValue, 0.01);
 	}
 
 	private LinearCombinationLearningCurve generateTestLearningCurvePow3() {
@@ -490,8 +490,7 @@ public class LinearCombinationLearningCurveTester {
 		double[] yValues = { 0.1672, 0.2513, 0.4161, 0.5485, 0.7381, 0.7961, 0.8471 };
 		LinearCombinationExtrapolationMethod method = new LinearCombinationExtrapolationMethod();
 
-		AnalyticalLearningCurve lc = (AnalyticalLearningCurve) method.extrapolateLearningCurveFromAnchorPoints(xValues,
-				yValues, 2000);
+		AnalyticalLearningCurve lc = (AnalyticalLearningCurve) method.extrapolateLearningCurveFromAnchorPoints(xValues, yValues, 2000);
 
 		checkValuesBetween0And1(lc);
 
@@ -513,8 +512,7 @@ public class LinearCombinationLearningCurveTester {
 	private void checkMonotoneIncreasing(AnalyticalLearningCurve lc) {
 		// We tolerate unexpected behavior near 0
 		for (int x = 11; x < 2000; x++) {
-			assertTrue(String.format("Curve value is not monotonic increasing between x=%d and x=%d", x, x - 1),
-					lc.getCurveValue(x) >= lc.getCurveValue(x - 1));
+			assertTrue(String.format("Curve value is not monotonic increasing between x=%d and x=%d", x, x - 1), lc.getCurveValue(x) >= lc.getCurveValue(x - 1.0));
 		}
 	}
 

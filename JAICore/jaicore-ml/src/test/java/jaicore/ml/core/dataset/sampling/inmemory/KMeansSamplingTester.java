@@ -1,6 +1,6 @@
 package jaicore.ml.core.dataset.sampling.inmemory;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
