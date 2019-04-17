@@ -324,7 +324,7 @@ public class ExperimentRunner {
 
 		} catch (ExperimentEvaluationFailedException e) {
 			error = e.getCause();
-			logger.error("Experiment failed due to exception, which has been logged");
+			logger.error("Experiment failed due to {}. Message: {}. Stack trace: {}", error.getClass().getName(), error.getMessage(), Arrays.asList(error.getStackTrace()).stream().map(s -> "\n\t" + s).collect(Collectors.toList()));
 		}
 		this.handle.finishExperiment(expEntry, error);
 		return true;

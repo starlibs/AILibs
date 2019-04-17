@@ -163,6 +163,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 			valuesToInsert.put(FIELD_MEMORY + "_max", experiment.getMemoryInMB());
 			valuesToInsert.put(FIELD_NUMCPUS, experiment.getNumCPUs());
 			valuesToInsert.put(FIELD_HOST, InetAddress.getLocalHost().getHostName());
+			logger.debug("Inserting mem: {}, cpus: {}, host: {}, and key fields: {}", experiment.getMemoryInMB(), experiment.getNumCPUs(), valuesToInsert.get(FIELD_HOST), experiment.getValuesOfKeyFields());
 			int id = this.adapter.insert(this.tablename, valuesToInsert);
 			return new ExperimentDBEntry(id, experiment);
 		} catch (UnknownHostException | SQLException e) {
