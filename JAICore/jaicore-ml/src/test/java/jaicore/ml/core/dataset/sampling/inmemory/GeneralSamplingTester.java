@@ -13,6 +13,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 
+import jaicore.basic.algorithm.AlgorithmCreationException;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
@@ -77,7 +78,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
-	private void testSampleSize(final IDataset<I> dataset, final double sampleFraction) {
+	private void testSampleSize(final IDataset<I> dataset, final double sampleFraction) throws AlgorithmCreationException {
 		@SuppressWarnings("unchecked")
 		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * sampleFraction);
@@ -119,7 +120,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 		this.testNoDuplicates(dataset);
 	}
 
-	private void testNoDuplicates(final IDataset<I> dataset) {
+	private void testNoDuplicates(final IDataset<I> dataset) throws AlgorithmCreationException {
 		@SuppressWarnings("unchecked")
 		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
@@ -163,5 +164,4 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 		}
 		return sample;
 	}
-
 }

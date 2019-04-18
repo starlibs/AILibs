@@ -200,7 +200,12 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		case active: {
 			/* train the classifier returned by the optimizing factory */
 			long startOptimizationTime = System.currentTimeMillis();
-			this.selectedClassifier = this.optimizingFactory.call();
+			try {
+				this.selectedClassifier = this.optimizingFactory.call();
+			} catch (AlgorithmException | InterruptedException | AlgorithmExecutionCanceledException | AlgorithmTimeoutedException e) {
+				this.terminate(); // send the termination event
+				throw e;
+			}
 			this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
 			this.componentInstanceOfSelectedClassifier = this.optimizingFactory.getComponentInstanceOfObject();
 			long startBuildTime = System.currentTimeMillis();
@@ -210,7 +215,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				throw new AlgorithmException(e, "Training the classifier failed!");
 			}
 			long endBuildTime = System.currentTimeMillis();
-			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
+			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
+					endBuildTime - startOptimizationTime, this.selectedClassifier);
 			return this.terminate();
 		}
 		default:
@@ -275,7 +281,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	}
 
 	@Override
-	public void cancel() {
+	public synchronized void cancel() {
 		this.logger.info("Received cancel. First canceling optimizer, then invoking general shutdown.");
 		this.optimizingFactory.cancel();
 		this.logger.debug("Now canceling main ML-Plan routine");

@@ -15,8 +15,8 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
@@ -63,7 +63,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	@SuppressWarnings("unchecked")
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
-		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
+		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
 		TimerTask task = sub.interruptMeAfterMS(this.config.getTimeoutForSolutionEvaluation(), "Timeout for pipeline in search phase.");
 		try {
 			if (this.config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {

@@ -195,4 +195,8 @@ dependencies{
 	compile project(":JAICore:jaicore-search")
 }
 
+test{
+     maxHeapSize = "4g"
+}
+
 publish.dependsOn shadowJar

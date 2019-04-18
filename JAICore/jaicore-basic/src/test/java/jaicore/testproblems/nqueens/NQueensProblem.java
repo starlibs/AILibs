@@ -11,4 +11,9 @@ public class NQueensProblem {
 	public int getN() {
 		return n;
 	}
+
+	@Override
+	public String toString() {
+		return "NQueensProblem [n=" + n + "]";
+	}
 }

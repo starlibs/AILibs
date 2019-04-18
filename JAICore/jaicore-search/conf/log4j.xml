@@ -56,11 +56,11 @@
 	</logger>
 	
 	<logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
-	 <level value="info" />
+	 <level value="warn" />
 	</logger>
 	
 	<logger name="testedalgorithm">
-    <level value="info" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -69,12 +69,24 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="jaicore.search.algorithms.standard.bestfirst">
+  <logger name="testedalgorithm._orgraphsearch._algorithm">
     <level value="warn" />
   </logger>
   
-  <logger name="testedalgorithm._orgraphsearch._algorithm">
+  <logger name="testedalgorithm.nodeevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
     <level value="info" />
+  </logger>
+  
+  <logger name="jaicore.basic.algorithm.SolutionCandidateIteratorTester">
+    <level value="info" />
+  </logger>
+  
+  <logger name="jaicore.concurrent">
+    <level value="warn" />
   </logger>
   
   <logger name="testednodeevaluator">

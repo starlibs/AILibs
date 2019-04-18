@@ -2,7 +2,7 @@ package jaicore.search.algorithms.standard.bestfirst;
 
 import java.util.Random;
 
-import jaicore.search.algorithms.GraphSearchTester;
+import jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import jaicore.search.core.interfaces.IGraphSearch;
@@ -10,7 +10,7 @@ import jaicore.search.model.other.AgnosticPathEvaluator;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class RolloutBasedBestFirstTester extends GraphSearchTester {
+public class RolloutBasedBestFirstTester extends GraphSearchSolutionIteratorTester {
 
 	@Override
 	public <N,A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {

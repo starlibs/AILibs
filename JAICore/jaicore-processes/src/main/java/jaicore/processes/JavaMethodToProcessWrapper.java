@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.FileUtil;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 
 /**
  * This class outsources the call to an arbitrary method into a separate process. This is specifically relevant if you work with libraries that do no respect the interrupt-functionality.
@@ -80,7 +80,7 @@ public class JavaMethodToProcessWrapper {
 	 *             This is only thrown if the executing thread is interrupted from *outside* but not when it is canceled due to the timeout
 	 */
 	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final int timeout, final Object... inputs) throws IOException, InvocationTargetException, InterruptedException {
-		TimeoutSubmitter submitter = TimeoutTimer.getInstance().getSubmitter();
+		TimeoutSubmitter submitter = GlobalTimer.getInstance().getSubmitter();
 		TimerTask timerTask = submitter.interruptMeAfterMS(timeout, "Process has timed out!");
 		Object c;
 		try {
