@@ -1,7 +1,7 @@
 package jaicore.ml.core.dataset.sampling.infile;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.junit.internal.runners.JUnit4ClassRunner;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.openml.apiconnector.io.OpenmlConnector;
@@ -34,8 +33,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
 	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 	protected static final double DEFAULT_SAMPLE_FRACTION = 0.1;
-	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator
-			+ UUID.randomUUID().toString() + ".arff";
+	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator + UUID.randomUUID().toString() + ".arff";
 
 	/**
 	 * This test verifies that the produced sample file has the specified amount of

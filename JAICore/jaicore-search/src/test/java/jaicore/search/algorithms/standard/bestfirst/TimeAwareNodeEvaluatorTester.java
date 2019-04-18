@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.interrupt.Interrupt;
 import jaicore.interrupt.Interrupter;
@@ -29,12 +30,15 @@ public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvalua
 	public void testTimeoutAdherence() throws InterruptedException, NodeEvaluationException {
 
 		T ne = this.getTimedNodeEvaluator(TIMEOUT);
+		if (ne instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) ne).setLoggerName("testednodeevaluator");
+		}
 		for (Node<QueenNode, Double> node : this.getNodesToTest(ne)) {
 			Timer t = new Timer();
 			TimerTask task = new InterruptionTimerTask("Interruptor", () -> logger.info("Interrupting busy evaluator"));
 			t.schedule(task, (long)TIMEOUT + TOLERANCE);
 			long start = System.currentTimeMillis();
-			logger.info("Starting computation with timeout {}", TIMEOUT);
+			logger.info("Starting computation of score for node with hash code {} with timeout {}", node.hashCode(), TIMEOUT);
 			try {
 				ne.f(node);
 				logger.info("Finished computation. Runtime was {}ms", System.currentTimeMillis() - start);

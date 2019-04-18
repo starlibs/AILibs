@@ -103,7 +103,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 
 			}
 		}
-		if (Thread.currentThread().isInterrupted()) {
+		if (Thread.interrupted()) {
 			throw new InterruptedException("MCCV has been interrupted");
 		}
 		Double score = stats.getMean();

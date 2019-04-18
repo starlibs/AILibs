@@ -1,11 +1,11 @@
 package jaicore.search.algorithms.standard.astar;
 
-import jaicore.search.algorithms.GraphSearchTester;
+import jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 
-public class AStarTester extends GraphSearchTester {
+public class AStarTester extends GraphSearchSolutionIteratorTester {
 
 	@Override
 	public <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem) {
