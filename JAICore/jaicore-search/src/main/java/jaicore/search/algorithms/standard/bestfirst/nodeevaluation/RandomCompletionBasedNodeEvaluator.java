@@ -48,6 +48,8 @@ import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
 implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IPotentiallyUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
@@ -459,6 +461,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	protected void postSolution(final List<T> solution) {
 		assert !this.postedSolutions.contains(solution) : "Solution " + solution.toString() + " already posted!";
+		assert ((NodeGoalTester<T>)this.generator.getGoalTester()).isGoal(solution.get(solution.size() - 1)) : "Last node is not a goal node!";
 		this.postedSolutions.add(solution);
 		try {
 

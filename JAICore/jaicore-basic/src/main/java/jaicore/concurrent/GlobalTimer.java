@@ -31,7 +31,7 @@ public class GlobalTimer extends Timer {
 		};
 		this.schedule(refresher, 0);
 	}
-
+	
 	public static GlobalTimer getInstance() {
 		return instance;
 	}

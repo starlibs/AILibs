@@ -14,6 +14,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode, String> {
 
 	private final int dimension;
+	private int countSinceLastSleep = 0;
 
 	public NQueensGraphGenerator(final int dimension) {
 		this.dimension = dimension;
@@ -29,7 +30,9 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 		return n -> {
 			List<NodeExpansionDescription<QueenNode, String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();
-			for (int i = 0; i < this.dimension; i++) {
+			for (int i = 0; i < this.dimension; i++, countSinceLastSleep ++) {
+				if (countSinceLastSleep % 100 == 0)
+					Thread.sleep(5);
 				if (Thread.interrupted()) {
 					throw new InterruptedException("Successor generation has been interrupted.");
 				}

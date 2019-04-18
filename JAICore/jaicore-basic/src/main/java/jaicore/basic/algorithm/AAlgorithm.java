@@ -395,10 +395,14 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public String getLoggerName() {
 		return this.loggerName;
 	}
+	
+	protected void announceTimeoutDetected() {
+		this.timeOfTimeoutDetection = System.currentTimeMillis(); // artificially set the timeout detected variable
+	}
 
 	protected <T> T computeTimeoutAware(final Callable<T> r, final boolean shutdownOnStoppingCriterionSatisfied) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}. Currently active tasks in global timer: {}", r, this.getTimeout(), activeThreads, GlobalTimer.getInstance().getActiveTasks());
-
+		
 		/* if no timeout is sharp, just execute the task */
 		if (this.getTimeout().milliseconds() < 0) {
 			try {
@@ -423,7 +427,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		long remainingTime = this.getRemainingTimeToDeadline().milliseconds();
 		if (remainingTime < this.timeoutPrecautionOffset + MIN_RUNTIME_FOR_OBSERVED_TASK) {
 			this.logger.debug("Only {}ms left, which is not enough to reliably continue computation. Terminating algorithm at this point, throwing an AlgorithmTimeoutedException.", remainingTime);
-			this.timeOfTimeoutDetection = System.currentTimeMillis(); // artificially set the timeout detected variable
+			announceTimeoutDetected();
 			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 		}
 

@@ -7,18 +7,18 @@ import java.util.Set;
 
 public class KnapsackConfiguration {
 
-	private final String[] packedObjects;
-	private final String[] remainingObjects;
+	private final Set<String> packedObjects;
+	private final Set<String> remainingObjects;
 	private final double usedCapacity;
 
-	public KnapsackConfiguration(final String[] packedObjects, final String[] remainingObjects, final double usedCapacity) {
+	public KnapsackConfiguration(final Set<String> packedObjects, final Set<String> remainingObjects, final double usedCapacity) {
 		super();
 		this.packedObjects = packedObjects;
 		this.remainingObjects = remainingObjects;
 		this.usedCapacity = usedCapacity;
 	}
 
-	public String[] getPackedObjects() {
+	public Set<String> getPackedObjects() {
 		return this.packedObjects;
 	}
 
@@ -26,7 +26,7 @@ public class KnapsackConfiguration {
 		return this.usedCapacity;
 	}
 
-	public String[] getRemainingObjects() {
+	public Set<String> getRemainingObjects() {
 		return this.remainingObjects;
 	}
 
@@ -74,7 +74,7 @@ public class KnapsackConfiguration {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append(Arrays.toString(packedObjects));
+		sb.append(packedObjects);
 		sb.append("-<" + this.usedCapacity + ">");
 		return sb.toString();
 	}

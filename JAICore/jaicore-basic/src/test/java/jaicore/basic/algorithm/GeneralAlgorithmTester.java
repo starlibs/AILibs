@@ -53,7 +53,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
 	private static final int INTERRUPTION_DELAY = 5000;
-	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 2000; // this is the time the thread has to react upon an interrupt
+	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000; // this is the time the thread has to react upon an interrupt
 	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000; // this is the time until which all threads must have been shutdown after the experiment
 	private static final int EARLY_TERMINATION_TOLERANCE = 50;
 	private static final int MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER = 200;
@@ -70,7 +70,8 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	}
 
 	@Before
-	public void initTest() {
+	public void initTest() throws InterruptedException {
+		Thread.sleep(500);
 		System.gc(); // run garbage collection
 	}
 

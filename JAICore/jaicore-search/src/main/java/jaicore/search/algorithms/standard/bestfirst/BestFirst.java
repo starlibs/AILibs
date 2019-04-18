@@ -255,12 +255,13 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		@Override
 		public void run() {
+			BestFirst.this.logger.debug("Start node creation.");
+			long start = System.currentTimeMillis();
 			try {
 				if (BestFirst.this.isStopCriterionSatisfied()) {
 					this.communicateJobFinished();
 					return;
 				}
-				BestFirst.this.logger.debug("Start node creation.");
 				BestFirst.this.lastExpansion.add(this.successorDescription);
 
 				Node<N, V> newNode = BestFirst.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo());
@@ -427,7 +428,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					BestFirst.this.logger.trace("Released activeJobsCounterLock after decrement.");
 				}
 				this.communicateJobFinished();
-				BestFirst.this.logger.debug("Builder exits. Interrupt-flag is {}", Thread.currentThread().isInterrupted());
+				BestFirst.this.logger.debug("Builder exits. Build process took {}ms. Interrupt-flag is {}", System.currentTimeMillis() - start, Thread.currentThread().isInterrupted());
 			}
 		}
 	}
@@ -651,6 +652,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 * Step 1: determine node that will be expanded next. Either it already has been set
 		 * or it will be the first of OPEN. If necessary, we wait for potential incoming nodes
 		 */
+		long startTimeOfExpansion = System.currentTimeMillis();
 		final Node<N, V> actualNodeSelectedForExpansion;
 		{
 			Node<N, V> tmpNodeSelectedForExpansion = null; // necessary workaround as setting final variables in a try-block is not reasonably possible
@@ -765,7 +767,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					lastTerminationCheck = System.currentTimeMillis();
 				}
 			}
-			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, this.open.size(), this.activeJobs.get());
+			this.logger.debug("Finished expansion of node {} after {}ms. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, System.currentTimeMillis() - startTimeOfExpansion, this.open.size(), this.activeJobs.get());
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			expansionEvent = new NodeExpansionJobSubmittedEvent<>(this.getId(), actualNodeSelectedForExpansion, successorDescriptions);
 		} else {

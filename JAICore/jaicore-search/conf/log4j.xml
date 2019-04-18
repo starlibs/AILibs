@@ -56,7 +56,7 @@
 	</logger>
 	
 	<logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
-	 <level value="info" />
+	 <level value="warn" />
 	</logger>
 	
 	<logger name="testedalgorithm">
@@ -73,20 +73,20 @@
     <level value="warn" />
   </logger>
   
+  <logger name="testedalgorithm.nodeevaluator">
+    <level value="warn" />
+  </logger>
+  
   <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
     <level value="info" />
   </logger>
   
-  <logger name="jaicore.concurrent">
-    <level value="trace" />
-  </logger>
-  
-  <logger name="jaicore.search.algorithms.standard.bestfirst">
+  <logger name="jaicore.basic.algorithm.SolutionCandidateIteratorTester">
     <level value="info" />
   </logger>
   
-  <logger name="testedalgorithm.nodeevaluator">
-    <level value="trace" />
+  <logger name="jaicore.concurrent">
+    <level value="warn" />
   </logger>
   
   <logger name="testednodeevaluator">

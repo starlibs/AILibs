@@ -1,9 +1,7 @@
 package jaicore.search.testproblems.knapsack;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
@@ -37,7 +35,7 @@ public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction
 
 	@Override
 	public Set<String> decodeSolution(final SearchGraphPath<KnapsackConfiguration, String> solution) {
-		return Arrays.stream(solution.getNodes().get(solution.getNodes().size() - 1).getPackedObjects()).collect(Collectors.toSet());
+		return solution.getNodes().get(solution.getNodes().size() - 1).getPackedObjects();
 	}
 
 }

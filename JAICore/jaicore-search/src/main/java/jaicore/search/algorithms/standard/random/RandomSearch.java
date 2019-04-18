@@ -178,9 +178,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		}
 		this.exploredGraph.addEdge(from, to);
 		boolean isGoalNode = this.goalTester.isGoal(to);
-		if (isGoalNode) {
-			this.logger.debug("Found goal node {}!", to);
-		}
+		if (isGoalNode) { }
 		this.post(new NodeAddedEvent<>(this.getId(), from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 	}
 
@@ -206,6 +204,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 					this.logger.info("Drew NULL path, terminating");
 					return this.terminate();
 				}
+				assert !drawnPath.getNodes().isEmpty() && goalTester.isGoal(drawnPath.getNodes().get(drawnPath.getNodes().size() - 1)) : "The drawn path is empty or its leaf node is not a goal!";
 				this.logger.info("Drew path of length {}. Posting this event. For more details on the path, enable TRACE", drawnPath.getNodes().size());
 				this.logger.trace("The drawn path is {}", drawnPath);
 				AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), drawnPath);
@@ -309,13 +308,13 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				path.add(head);
 			}
 		}
-
+		
 		/* propagate exhausted state */
 		this.logger.trace("Head node {} has been exhausted.", head);
 		this.exhausted.add(head);
 		this.prioritizedNodes.remove(head);
 		this.updateExhaustedAndPrioritizedState(head);
-		return new SearchGraphPath<>(path, null);
+		return head == root ? null : new SearchGraphPath<>(path, null);
 	}
 
 	private boolean checkThatNodeExistsInExploredGraph(final N node) {
