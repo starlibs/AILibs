@@ -1,23 +1,24 @@
 package jaicore.testproblems.knapsack;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class KnapsackConfiguration {
 
-	private final List<String> packedObjects;
-	private final Set<String> remainingObjects;
+	private final String[] packedObjects;
+	private final String[] remainingObjects;
 	private final double usedCapacity;
 
-	public KnapsackConfiguration(final List<String> packedObjects, final Set<String> remainingObjects, final double usedCapacity) {
+	public KnapsackConfiguration(final String[] packedObjects, final String[] remainingObjects, final double usedCapacity) {
 		super();
 		this.packedObjects = packedObjects;
 		this.remainingObjects = remainingObjects;
 		this.usedCapacity = usedCapacity;
 	}
 
-	public List<String> getPackedObjects() {
+	public String[] getPackedObjects() {
 		return this.packedObjects;
 	}
 
@@ -25,7 +26,7 @@ public class KnapsackConfiguration {
 		return this.usedCapacity;
 	}
 
-	public Set<String> getRemainingObjects() {
+	public String[] getRemainingObjects() {
 		return this.remainingObjects;
 	}
 
@@ -73,15 +74,8 @@ public class KnapsackConfiguration {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		Iterator<String> it = this.packedObjects.iterator();
-		while (it.hasNext()) {
-			sb.append(it.next());
-			if (it.hasNext()) {
-				sb.append(", ");
-			}
-		}
-		sb.append("]-<" + this.usedCapacity + ">");
+		sb.append(Arrays.toString(packedObjects));
+		sb.append("-<" + this.usedCapacity + ">");
 		return sb.toString();
 	}
 }

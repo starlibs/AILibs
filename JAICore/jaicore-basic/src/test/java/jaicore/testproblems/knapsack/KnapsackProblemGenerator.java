@@ -15,12 +15,12 @@ public class KnapsackProblemGenerator {
 		
 		/* create knapsack problem */
 		Random r = new Random(seed);
-		Set<String> objects = new HashSet<String>();
+		String[] objects = new String[numObjects];
 		Map<String, Double> weights = new HashMap<>();
 		Map<String, Double> values = new HashMap<>();
 		Map<Set<String>, Double> bonusPoints;
 		for (int i = 0; i < numObjects; i++) {
-			objects.add(String.valueOf(i));
+			objects[i] = String.valueOf(i);
 		}
 		for (int i = 0; i < numObjects; i++)
 			weights.put("" + i, r.nextInt(100) * 1.0);
@@ -32,7 +32,6 @@ public class KnapsackProblemGenerator {
 		bonusCombination.add("0");
 		bonusCombination.add("2");
 		bonusPoints.put(bonusCombination, 25.0d);
-		KnapsackProblem kp = new KnapsackProblem(objects, values, weights, bonusPoints, numObjects * 20);
-		return kp;
+		return new KnapsackProblem(objects, values, weights, bonusPoints, numObjects * 20);
 	}
 }

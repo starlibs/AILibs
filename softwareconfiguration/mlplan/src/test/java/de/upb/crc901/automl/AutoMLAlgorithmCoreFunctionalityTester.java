@@ -26,9 +26,9 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
-public abstract class AutoMLAlgorithmTester extends GeneralAlgorithmTester {
+public abstract class AutoMLAlgorithmCoreFunctionalityTester extends GeneralAlgorithmTester {
 
-	private static final Logger logger = LoggerFactory.getLogger(AutoMLAlgorithmTester.class);
+	private static final Logger logger = LoggerFactory.getLogger(AutoMLAlgorithmCoreFunctionalityTester.class);
 
 	// creates the test data
 	@Parameters(name = "{0}")
@@ -64,29 +64,4 @@ public abstract class AutoMLAlgorithmTester extends GeneralAlgorithmTester {
 	}
 
 	public abstract IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(Instances data);
-
-	@Test
-	public void testThatModelIsTrained() throws Exception {
-		MLProblemSet problemset = (MLProblemSet) this.getProblemSet();
-
-		IAlgorithm<Instances, Classifier> algorithm = (IAlgorithm<Instances, Classifier>) this.getAlgorithm(problemset.getDatasetSource()); // AutoML-tools should deliver a classifier
-		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
-		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
-		}
-		algorithm.setTimeout(new TimeOut(30, TimeUnit.SECONDS));
-
-		/* find classifier */
-		Instances data = algorithm.getInput();
-		logger.info("Checking that {} delivers a model on dataset {}", algorithm.getId(), algorithm.getInput().relationName());
-		Classifier c = algorithm.call();
-		logger.info("Identified classifier {} as solution to the problem.", WekaUtil.getClassifierDescriptor(c));
-		assertNotNull("The algorithm as not returned any classifier.", c);
-
-		/* check that some predictions can be made with the classifier */
-		int n = data.size();
-		for (int i = 0; i < Math.min(10, n); i++) {
-			c.classifyInstance(data.get(i));
-		}
-	}
 }

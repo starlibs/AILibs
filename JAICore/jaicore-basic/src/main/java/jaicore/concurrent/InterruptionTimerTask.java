@@ -47,8 +47,11 @@ public class InterruptionTimerTask extends NamedTimerTask {
 
 	@Override
 	public void run() {
+		long a  = System.currentTimeMillis();
 		long delay = System.currentTimeMillis() - this.scheduledExecutionTime();
+		long b = System.currentTimeMillis();
 		logger.info("Executing interruption task with descriptor \"{}\". Interrupting thread {}. This interrupt has been triggered with a delay of {}ms", this.getDescriptor(), this.threadToBeInterrupted, delay);
+		System.out.println("Time to print: " + (System.currentTimeMillis() - b) + ". Time to compute delay: " + (b - a));
 		if (delay > 50) {
 			logger.warn("Interrupt is executed with a delay of {}ms", delay);
 		}

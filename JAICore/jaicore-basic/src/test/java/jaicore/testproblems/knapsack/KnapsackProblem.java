@@ -1,6 +1,7 @@
 package jaicore.testproblems.knapsack;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -8,13 +9,13 @@ import jaicore.basic.IObjectEvaluator;
 
 @SuppressWarnings("serial")
 public class KnapsackProblem implements Serializable {
-	private final Set<String> objects;
+	private final String[] objects;
 	private final Map<String, Double> values;
 	private final Map<String, Double> weights;
 	private final Map<Set<String>, Double> bonusPoints;
 	private final double knapsackCapacity;
 
-	public KnapsackProblem(final Set<String> objects, final Map<String, Double> values, final Map<String, Double> weights, final Map<Set<String>, Double> bonusPoints, final double knapsackCapacity) {
+	public KnapsackProblem(final String[] objects, final Map<String, Double> values, final Map<String, Double> weights, final Map<Set<String>, Double> bonusPoints, final double knapsackCapacity) {
 		this.objects = objects;
 		this.values = values;
 		this.weights = weights;
@@ -38,7 +39,7 @@ public class KnapsackProblem implements Serializable {
 				for (Set<String> bonusCombination : KnapsackProblem.this.bonusPoints.keySet()) {
 					boolean allContained = true;
 					for (String object : bonusCombination) {
-						if (!packedKnapsack.getPackedObjects().contains(object)) {
+						if (Arrays.stream(packedKnapsack.getPackedObjects()).noneMatch(object::equals)) {
 							allContained = false;
 							break;
 						}
@@ -52,7 +53,7 @@ public class KnapsackProblem implements Serializable {
 		};
 	}
 
-	public Set<String> getObjects() {
+	public String[] getObjects() {
 		return this.objects;
 	}
 

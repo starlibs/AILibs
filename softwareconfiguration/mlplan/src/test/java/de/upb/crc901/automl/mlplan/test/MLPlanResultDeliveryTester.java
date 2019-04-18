@@ -3,7 +3,7 @@ package de.upb.crc901.automl.mlplan.test;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import de.upb.crc901.automl.AutoMLAlgorithmTester;
+import de.upb.crc901.automl.AutoMLAlgorithmResultProductionTester;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.TimeOut;
@@ -11,7 +11,7 @@ import jaicore.basic.algorithm.IAlgorithm;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
-public class MLPlanTester extends AutoMLAlgorithmTester {
+public class MLPlanResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
 
 	@Override
 	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(final Instances data) {
@@ -22,8 +22,7 @@ public class MLPlanTester extends AutoMLAlgorithmTester {
 			MLPlan mlplan = new MLPlan(builder, data);
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(0f);
-			mlplan.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
-			mlplan.setTimeout(5, TimeUnit.SECONDS);
+			mlplan.setTimeout(30, TimeUnit.SECONDS);
 			mlplan.setNumCPUs(1);
 			return mlplan;
 		} catch (IOException e) {

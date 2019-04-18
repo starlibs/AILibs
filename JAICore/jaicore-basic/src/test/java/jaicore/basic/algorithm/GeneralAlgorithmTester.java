@@ -53,8 +53,8 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	private static final int TIMEOUT_DELAY = 12000;
 	private static final int TOTAL_EXPERIMENT_TIMEOUT = 20000;
 	private static final int INTERRUPTION_DELAY = 5000;
-	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 10000;
-	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000;
+	private static final int INTERRUPTION_CLEANUP_TOLERANCE = 2000; // this is the time the thread has to react upon an interrupt
+	private static final int THREAD_SHUTDOWN_TOLERANCE = 2000; // this is the time until which all threads must have been shutdown after the experiment
 	private static final int EARLY_TERMINATION_TOLERANCE = 50;
 	private static final int MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER = 200;
 
@@ -112,7 +112,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	}
 
 	@Test
-	public void testStartAndFinishEventEmissionByIteration() throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException  {
+	public void testStartAndFinishEventEmissionByIteration() throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException {
 		this.checkPreconditionForTest();
 
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
@@ -125,8 +125,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			for (AlgorithmEvent e : algorithm) {
 				listener.receiveEvent(e);
 			}
-		}
-		catch (ExceptionInAlgorithmIterationException e) {
+		} catch (ExceptionInAlgorithmIterationException e) {
 			if (e.getCause() instanceof AlgorithmTimeoutedException) {
 				this.logger.warn("Algorithm has been timeouted. Cannot safely check that a finished event would have been returned.");
 				listener.receiveEvent(new AlgorithmFinishedEvent(algorithm.getId())); // pretend that the algorithm would have send an AlgorithmFinishedEvent
@@ -328,7 +327,8 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		int runtime = (int) (System.currentTimeMillis() - start.get());
 		int reactionTime = cancelEvent.get() > 0 ? (int) (System.currentTimeMillis() - cancelEvent.get()) : Integer.MAX_VALUE;
 		assertFalse("Thread must not be interrupted after cancel!", Thread.currentThread().isInterrupted());
-		assertTrue("The cancel command blocked the thread for " + timeRequiredToProcessCancel + "ms, but only " + MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER + " are allowed.", timeRequiredToProcessCancel.get() <= MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER);
+		assertTrue("The cancel command blocked the thread for " + timeRequiredToProcessCancel + "ms, but only " + MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER + " are allowed.",
+				timeRequiredToProcessCancel.get() <= MAX_TIME_TO_RETURN_CONTROL_TO_CANCELER);
 		this.logger.info("Executing thread has returned control after {}ms. Reaction time was {}ms. Now observing metrics and waiting for possibly active sub-threads to shutdown.", runtime, reactionTime);
 		assertTrue("The number of threads used during execution reached " + threadCountObserverThread.getMaxObservedThreads() + " while allowed maximum is " + allowedCPUs + ". Observed threads: \n\t- " + Arrays
 				.asList(threadCountObserverThread.getThreadsAtPointOfViolation() != null ? threadCountObserverThread.getThreadsAtPointOfViolation() : new Thread[0]).stream().map(Thread::getName).collect(Collectors.joining("\n\t- ")),
@@ -352,6 +352,10 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		}
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		}
+		if (algorithm instanceof AAlgorithm) {
+			logger.info("Setting timeout precaution offset to 5000");
+			((AAlgorithm<?, ?>) algorithm).setTimeoutPrecautionOffset(5000);
 		}
 		int allowedCPUs = parallelized ? Runtime.getRuntime().availableProcessors() : 1;
 		if (parallelized) {
@@ -417,7 +421,8 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	protected void checkPreconditionForTest() {
 		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted at start of test!";
-		assert GlobalTimer.getInstance().getNumberOfActiveTasks() == 0 : "Global Timer has still " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs: " + GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
+		assert GlobalTimer.getInstance().getNumberOfActiveTasks() == 0 : "Global Timer has still " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs: "
+				+ GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
 	}
 
 	private void waitForThreadGroupToBecomeEmpty(final ThreadGroup group) throws InterruptedException {

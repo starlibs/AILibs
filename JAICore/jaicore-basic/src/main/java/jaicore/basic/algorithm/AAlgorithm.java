@@ -397,7 +397,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	protected <T> T computeTimeoutAware(final Callable<T> r, final boolean shutdownOnStoppingCriterionSatisfied) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
-		this.logger.debug("Received request to execute {} with awareness of timeout {}.", r, this.getTimeout());
+		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}. Currently active tasks in global timer: {}", r, this.getTimeout(), activeThreads, GlobalTimer.getInstance().getActiveTasks());
 
 		/* if no timeout is sharp, just execute the task */
 		if (this.getTimeout().milliseconds() < 0) {
@@ -432,7 +432,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		GlobalTimer timer = GlobalTimer.getInstance();
 		TimerTask task = new InterruptionTimerTask("Timeout for timed execution of callable " + r,
 				() -> this.logger.debug("Timeout detected at timestamp {}. This is  {} prior to deadline, interrupting successor generation.", System.currentTimeMillis(), this.getRemainingTimeToDeadline()));
-		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt, this.getRemainingTimeToDeadline());
+		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}. List of active tasks is now: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt, this.getRemainingTimeToDeadline(), timer.getActiveTasks());
 		timer.schedule(task, timeToInterrupt);
 		try {
 			this.logger.debug("Starting supervised computation of {}.", r);

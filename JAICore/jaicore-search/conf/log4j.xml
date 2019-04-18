@@ -77,11 +77,7 @@
     <level value="info" />
   </logger>
   
-  <logger name="jaicore.basic.algorithm.SolutionCandidateIteratorTester">
-    <level value="info" />
-  </logger>
-  
-  <logger name="jaicore.interrupt">
+  <logger name="jaicore.concurrent">
     <level value="trace" />
   </logger>
   

@@ -162,7 +162,12 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 			List<NodeExpansionDescription<T, A>> prioSucc = succ.stream().sorted((d1, d2) -> this.heuristic.compare(d1.getTo(), d2.getTo())).collect(Collectors.toList());
 			this.checkAndConductTermination();
 			List<TreeNode<T>> generatedNodes = new ArrayList<>();
+			long lastCheck = System.currentTimeMillis();
 			for (NodeExpansionDescription<T, A> successorDescription : prioSucc) {
+				if (System.currentTimeMillis() - lastCheck > 10) {
+					this.checkAndConductTermination();
+					lastCheck = System.currentTimeMillis();
+				}
 				TreeNode<T> newNode = this.newNode(node, successorDescription.getTo());
 				generatedNodes.add(newNode);
 			}
