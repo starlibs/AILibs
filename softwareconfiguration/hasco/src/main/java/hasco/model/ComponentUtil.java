@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.kvstore.KVStore;
 import jaicore.basic.sets.SetUtil;
 
 /**
@@ -107,10 +108,8 @@ public class ComponentUtil {
 			Collection<Component> possiblePlugins = ComponentUtil.getComponentsProvidingInterface(components, requiredInterface.getValue());
 			for (ComponentInstance ci : instanceList) {
 				for (Component possiblePlugin : possiblePlugins) {
-					Collection<ComponentInstance> allReqIComponentInstances = getAllAlgorithmSelectionInstances(possiblePlugin, components);
-
-					for (ComponentInstance reqICI : allReqIComponentInstances) {
-						ComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), ci.getParameterValues(), ci.getSatisfactionOfRequiredInterfaces());
+					for (ComponentInstance reqICI : getAllAlgorithmSelectionInstances(possiblePlugin, components)) {
+						ComponentInstance copyOfCI = new ComponentInstance(ci.getComponent(), new HashMap<>(ci.getParameterValues()), new HashMap<>(ci.getSatisfactionOfRequiredInterfaces()));
 						copyOfCI.getSatisfactionOfRequiredInterfaces().put(requiredInterface.getKey(), reqICI);
 						tempList.add(copyOfCI);
 					}
@@ -171,5 +170,48 @@ public class ComponentUtil {
 			}
 		}
 		return true;
+	}
+
+	public static KVStore getStatsForComponents(final Collection<Component> components) {
+		KVStore stats = new KVStore();
+		int numComponents = 0;
+		int numNumericParams = 0;
+		int numIntParams = 0;
+		int numDoubleParams = 0;
+		int numCatParams = 0;
+		int numBoolParams = 0;
+		int otherParams = 0;
+
+		for (Component c : components) {
+			numComponents++;
+
+			for (Parameter p : c.getParameters()) {
+				if (p.getDefaultDomain() instanceof CategoricalParameterDomain) {
+					numCatParams++;
+					if (p.getDefaultDomain() instanceof BooleanParameterDomain) {
+						numBoolParams++;
+					}
+				} else if (p.getDefaultDomain() instanceof NumericParameterDomain) {
+					numNumericParams++;
+					if (((NumericParameterDomain) p.getDefaultDomain()).isInteger()) {
+						numIntParams++;
+					} else {
+						numDoubleParams++;
+					}
+				} else {
+					otherParams++;
+				}
+			}
+		}
+
+		stats.put("nComponents", numComponents);
+		stats.put("nNumericParameters", numNumericParams);
+		stats.put("nIntegerParameters", numIntParams);
+		stats.put("nContinuousParameters", numDoubleParams);
+		stats.put("nCategoricalParameters", numCatParams);
+		stats.put("nBooleanParameters", numBoolParams);
+		stats.put("nOtherParameters", otherParams);
+
+		return stats;
 	}
 }
