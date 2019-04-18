@@ -77,6 +77,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected AAlgorithm(final IAlgorithmConfig config, final I input) {
 		this.config = config;
 		this.input = input;
+		if (this.config == null)
+			throw new IllegalArgumentException("Algorithm configuration must not be null!");
 	}
 
 	@Override
