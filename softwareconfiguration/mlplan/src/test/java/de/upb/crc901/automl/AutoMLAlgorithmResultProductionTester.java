@@ -8,7 +8,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,13 +52,13 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-//		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
-//		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
-//		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
-//		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
-//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
+		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
+		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
+		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		problemSets.add(new OpenMLProblemSet(1457)); // amazon
-//		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
+		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
 		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
 		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
@@ -109,7 +108,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
 			}
-			algorithm.setTimeout(new TimeOut(120, TimeUnit.SECONDS));
+			algorithm.setTimeout(new TimeOut(600, TimeUnit.SECONDS));
 	
 			/* find classifier */
 			Instances data = algorithm.getInput();
