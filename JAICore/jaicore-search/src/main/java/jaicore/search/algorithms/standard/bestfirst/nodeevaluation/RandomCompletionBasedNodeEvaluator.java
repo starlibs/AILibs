@@ -11,7 +11,6 @@ import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
@@ -32,7 +31,7 @@ import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.concurrent.TimeoutTimer;
+import jaicore.concurrent.GlobalTimer;
 import jaicore.interrupt.Interrupter;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
@@ -49,9 +48,11 @@ import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import jaicore.search.structure.graphgenerator.GoalTester;
+import jaicore.search.structure.graphgenerator.NodeGoalTester;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
-implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IPotentiallyUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
 	private static final String ALGORITHM_ID = "RandomCompletion";
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;
@@ -80,7 +81,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	private final Predicate<T> priorityPredicateForRDFS;
 
 	/* sub-tools for conducting and analyzing random completions */
-	private Timer timeoutTimer;
+	private GlobalTimer timeoutTimer;
 	private Map<Node<T, ?>, TimerTask> activeTasks = new ConcurrentHashMap<>();
 
 	private RandomSearch<T, ?> completer;
@@ -128,10 +129,11 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	private boolean logAssertionActivation() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("--------------------------------------------------------");
-		sb.append("Attention: assertions are activated.");
-		sb.append("This causes significant performance loss using RandomCompleter.");
-		sb.append("If you are not in debugging mode, we strongly suggest to deactive assertions.");
+		sb.append("Assertion remark:\n--------------------------------------------------------\n");
+		sb.append("Assertions are activated.\n");
+		sb.append("This may cause significant performance loss using ");
+		sb.append(RandomCompletionBasedNodeEvaluator.class.getName());
+		sb.append(".\nIf you are not in debugging mode, we strongly suggest to disable assertions.\n");
 		sb.append("--------------------------------------------------------");
 		this.logger.info("{}", sb);
 		return true;
@@ -142,8 +144,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	protected V fTimeouted(final Node<T, ?> n, final int timeout) throws InterruptedException, NodeEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
-		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Node details: {}", n.hashCode(), this.samples,
-				this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS, n);
+		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Enable DEBUG for node details.", n.hashCode(), this.samples,
+				this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
+		this.logger.debug("Node details: {}", n);
+		
 		long startOfComputation = System.currentTimeMillis();
 		long deadline = timeout > 0 ? startOfComputation + timeout : -1;
 		if (this.timestampOfFirstEvaluation == 0) {
@@ -168,9 +172,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 				/* if the node has no sibling (parent has no other child than this node), apply parent's f. This only works if the parent is already part of the explored graph, which is not necessarily the case */
 				if (n.getParent() != null && this.completer.getExploredGraph().hasItem(n.getParent().getPoint())) {
+					boolean parentHasFValue = this.fValues.containsKey(n.getParent());
+					assert parentHasFValue || n.getParent().getParent() == null : "No f-value has been stored for the parent of node with hash code " + n.hashCode() + " (hash code of parent is " + n.getParent().hashCode() + ") whose f-value we may want to reuse. This is only allowed for top-level nodes! The path is: " + path;
 					boolean nodeHasSibling = this.completer.getExploredGraph().getSuccessors(n.getParent().getPoint()).size() > 1;
-					if (path.size() > 1 && !nodeHasSibling) {
-						assert this.fValues.containsKey(n.getParent()) : "The solution evaluator tells that the solution on the path has not significantly changed, but no f-value has been stored before for the parent. The path is: " + path;
+					if (path.size() > 1 && !nodeHasSibling && parentHasFValue) {
 						V score = this.fValues.get(n.getParent());
 						this.fValues.put(n, score);
 						this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
@@ -181,10 +186,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					}
 				}
 
-				/*
-				 * make sure that the completer has the path from the root to the node in
-				 * question
-				 */
+				/* make sure that the completer has the path from the root to the node in question */
 				if (!this.completer.knowsNode(n.getPoint())) {
 					synchronized (this.completer) {
 						this.completer.appendPathToNode(n.externalPath());
@@ -277,7 +279,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							}
 						};
 						if (this.timeoutTimer == null) {
-							this.timeoutTimer = TimeoutTimer.getInstance();
+							this.timeoutTimer = GlobalTimer.getInstance();
 						}
 						this.timeoutTimer.schedule(abortionTask, timeoutForJob);
 						this.activeTasks.put(n, abortionTask);
@@ -354,11 +356,15 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				/* if we are still interrupted, throw an exception */
 				this.logger.debug("Checking interruption.");
 				this.checkInterruption();
+				this.logger.debug("Not interrupted.");
 
 				/* add number of samples to node */
 				n.setAnnotation("fRPSamples", successfulSamples);
 				if (this.uncertaintySource != null) {
 					uncertainty = this.uncertaintySource.calculateUncertainty((Node<T, V>) n, completedPaths, evaluations);
+					this.logger.debug("Setting uncertainty to {}", uncertainty);
+				} else {
+					this.logger.debug("Not setting uncertainty, because no uncertainty source has been defined.");
 				}
 				this.fValues.put(n, best);
 			}
@@ -382,8 +388,9 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				n.setAnnotation("uncertainty", uncertainty);
 			}
 		}
+		assert this.fValues.containsKey(n);
 		V f = this.fValues.get(n);
-		this.logger.info("Returning f-value: {}", f);
+		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation("uncertainty"));
 		return f;
 	}
 
@@ -421,7 +428,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				throw new NodeEvaluationException(e, "Error in evaluating node!");
 			}
 			long duration = System.currentTimeMillis() - start;
-			assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
+			if (duration >= this.timeoutForSingleCompletionEvaluationInMS) {
+				logger.warn("Evaluation took {}ms, but timeout is {}", duration, this.timeoutForSingleCompletionEvaluationInMS);
+				assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
+			}
 
 			/* at this point, the value should not be NULL */
 			this.logger.info("Result: {}, Size: {}", val, this.scoresOfSolutionPaths.size());
@@ -456,6 +466,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	protected void postSolution(final List<T> solution) {
 		assert !this.postedSolutions.contains(solution) : "Solution " + solution.toString() + " already posted!";
+		assert ((NodeGoalTester<T>)this.generator.getGoalTester()).isGoal(solution.get(solution.size() - 1)) : "Last node is not a goal node!";
 		this.postedSolutions.add(solution);
 		try {
 
@@ -514,12 +525,13 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	@Override
 	public void cancelActiveTasks() {
-		this.logger.info("Receive cancel signal. Canceling myself (aborting all timers) and canceling the completer.");
+		this.logger.info("Receive cancel signal. Canceling myself (aborting all tasks) and canceling the completer.");
 		super.cancelActiveTasks();
 		this.completer.cancel();
 		if (!this.activeTasks.isEmpty()) {
 			for (Entry<Node<T, ?>, TimerTask> entry : new HashSet<>(this.activeTasks.entrySet())) {
 				entry.getValue().cancel();
+				logger.debug("Canceled task {}", entry.getValue());
 				this.activeTasks.remove(entry.getKey());
 			}
 		}
@@ -551,6 +563,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 			this.completer.setLoggerName(name + ".randomsearch");
 		}
 		this.logger.info("Switched logger (name) of {} to {}", this, name);
+		this.logger.info("Reprinting RandomCompletionEvaluator configuration after logger switch: timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, getTimeoutForNodeEvaluationInMS());
 	}
 
 	@Override
@@ -574,5 +587,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	@Override
 	public boolean reportsSolutions() {
 		return true;
+	}
+
+	@Override
+	public boolean annotatesUncertainty() {
+		return this.uncertaintySource != null;
 	}
 }

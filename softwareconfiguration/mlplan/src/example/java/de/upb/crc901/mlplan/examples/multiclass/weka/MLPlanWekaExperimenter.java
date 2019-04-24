@@ -24,7 +24,7 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
-import jaicore.concurrent.TimeoutTimer;
+import jaicore.concurrent.GlobalTimer;
 import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.ExperimentRunner;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
@@ -110,7 +110,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 		L.info("Build mlplan classifier");
 		Classifier optimizedClassifier = mlplan.call();
 
-		L.info("Open timeout tasks: {}", TimeoutTimer.getInstance());
+		L.info("Open timeout tasks: {}", GlobalTimer.getInstance());
 
 		Evaluation eval = new Evaluation(data);
 		L.info("Assess test performance...");

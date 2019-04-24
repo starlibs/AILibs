@@ -7,18 +7,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
 import hasco.core.isNotRefinable;
-import hasco.core.isRefinementCompletedPredicate;
-import hasco.core.isValidParameterRangeRefinementPredicate;
+import hasco.core.IsRefinementCompletedPredicate;
+import hasco.core.IsValidParameterRangeRefinementPredicate;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
@@ -49,7 +52,7 @@ import jaicore.search.core.interfaces.GraphGenerator;
  *
  */
 public class HASCOReduction<V extends Comparable<V>>
-		implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
+implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
 
 	private static final boolean CONFIGURE_PARAMS = true; // this could be determined automatically later
 
@@ -70,6 +73,12 @@ public class HASCOReduction<V extends Comparable<V>>
 	/* working variables */
 	private Collection<Component> components;
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
+
+	private Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier;
+
+	public HASCOReduction(final Supplier<HASCOSolutionCandidate<V>> bestSolutionSupplier) {
+		this.bestSolutionSupplier = bestSolutionSupplier;
+	}
 
 	public Monom getInitState() {
 		if (this.originalProblem == null) {
@@ -250,9 +259,9 @@ public class HASCOReduction<V extends Comparable<V>>
 
 	public CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
-		evaluablePredicates.put("isValidParameterRangeRefinement", new isValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("isValidParameterRangeRefinement", new IsValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
-		evaluablePredicates.put("refinementCompleted", new isRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("refinementCompleted", new IsRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
 	}
 
@@ -284,13 +293,18 @@ public class HASCOReduction<V extends Comparable<V>>
 		/* derive a plan evaluator from the configuration evaluator */
 		IObjectEvaluator<Plan, V> planEvaluator = new IObjectEvaluator<Plan, V>() {
 
+			@SuppressWarnings("unchecked")
 			@Override
 			public V evaluate(final Plan plan) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 				ComponentInstance solution = HASCOReduction.this.decodeSolution(plan);
 				if (solution == null) {
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
 				}
-				return problem.getCompositionEvaluator().evaluate(solution);
+				IObjectEvaluator<ComponentInstance, V> evaluator = problem.getCompositionEvaluator();
+				if (evaluator instanceof IInformedObjectEvaluatorExtension && HASCOReduction.this.bestSolutionSupplier.get() != null) {
+					((IInformedObjectEvaluatorExtension<V>) evaluator).updateBestScore(HASCOReduction.this.bestSolutionSupplier.get().getScore());
+				}
+				return evaluator.evaluate(solution);
 			}
 
 			@Override

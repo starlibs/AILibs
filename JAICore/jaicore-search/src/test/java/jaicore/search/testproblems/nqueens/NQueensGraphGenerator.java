@@ -11,26 +11,32 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
-public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode,String> {
+public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode, String> {
 
 	private final int dimension;
+	private int countSinceLastSleep = 0;
 
 	public NQueensGraphGenerator(final int dimension) {
 		this.dimension = dimension;
 	}
 
 	@Override
-	public SingleRootGenerator<QueenNode> getRootGenerator(){
-		return () ->  new QueenNode(this.dimension);
+	public SingleRootGenerator<QueenNode> getRootGenerator() {
+		return () -> new QueenNode(this.dimension);
 	}
 
 	@Override
 	public SuccessorGenerator<QueenNode, String> getSuccessorGenerator() {
-		return n ->{
-			List<NodeExpansionDescription<QueenNode,String>> l = new ArrayList<>();
+		return n -> {
+			List<NodeExpansionDescription<QueenNode, String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();
-			for(int i = 0; i < this.dimension; i++) {
-				if(! n.attack(currentRow, i)){
+			for (int i = 0; i < this.dimension; i++, countSinceLastSleep ++) {
+				if (countSinceLastSleep % 100 == 0)
+					Thread.sleep(5);
+				if (Thread.interrupted()) {
+					throw new InterruptedException("Successor generation has been interrupted.");
+				}
+				if (!n.attack(currentRow, i)) {
 					l.add(new NodeExpansionDescription<>(n, new QueenNode(n, i), "" + i, NodeType.OR));
 				}
 			}

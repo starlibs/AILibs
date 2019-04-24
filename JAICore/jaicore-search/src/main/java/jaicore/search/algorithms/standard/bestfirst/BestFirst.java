@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -37,12 +38,13 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import jaicore.concurrent.InterruptionTimerTask;
+import jaicore.concurrent.GlobalTimer;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.graphvisualizer.events.graph.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
+import jaicore.interrupt.InterruptionTimerTask;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
@@ -59,6 +61,7 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNo
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -129,6 +132,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	/* parallelization */
 	protected int additionalThreadsForNodeAttachment = 0;
 	private ExecutorService pool;
+	private Collection<Thread> threadsOfPool = new ArrayList<>(); // the worker threads of the pool
 	protected final AtomicInteger activeJobs = new AtomicInteger(0); // this is the number of jobs for which a worker is currently running in the pool
 	private final Lock activeJobsCounterLock = new ReentrantLock(); // lock that has to be locked before accessing the open queue
 	private final Lock openLock = new ReentrantLock(); // lock that has to be locked before accessing the open queue
@@ -251,12 +255,13 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		@Override
 		public void run() {
+			BestFirst.this.logger.debug("Start node creation.");
+			long start = System.currentTimeMillis();
 			try {
 				if (BestFirst.this.isStopCriterionSatisfied()) {
 					this.communicateJobFinished();
 					return;
 				}
-				BestFirst.this.logger.debug("Start node creation.");
 				BestFirst.this.lastExpansion.add(this.successorDescription);
 
 				Node<N, V> newNode = BestFirst.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo());
@@ -409,7 +414,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				 */
 				assert !Thread.holdsLock(BestFirst.this.openLock) : "Node Builder must not hold a lock on OPEN when locking the active jobs counter";
 				BestFirst.this.logger.debug("Trying to decrement active jobs by one.");
-				BestFirst.this.logger.trace("Waiting for lock to become free.");
+				BestFirst.this.logger.trace("Waiting for activeJobsCounterlock to become free.");
 				BestFirst.this.activeJobsCounterLock.lock(); // cannot be interruptible without opening more cases
 				BestFirst.this.logger.trace("Acquired activeJobsCounterLock for decrement.");
 				try {
@@ -423,7 +428,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					BestFirst.this.logger.trace("Released activeJobsCounterLock after decrement.");
 				}
 				this.communicateJobFinished();
-				BestFirst.this.logger.debug("Builder exits. Interrupt-flag is {}", Thread.currentThread().isInterrupted());
+				BestFirst.this.logger.debug("Builder exits. Build process took {}ms. Interrupt-flag is {}", System.currentTimeMillis() - start, Thread.currentThread().isInterrupted());
 			}
 		}
 	}
@@ -452,7 +457,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* currently, we only support tree search */
 		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n + "").reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
-		+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
+				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
@@ -476,12 +481,16 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 		/* define timeouter for label computation */
 		this.logger.trace("Computing node label for {}", node);
+		if (this.isStopCriterionSatisfied()) {
+			this.logger.debug("Found stop criterion to be true. Returning control.");
+			return;
+		}
 		InterruptionTimerTask interruptionTask = null;
 		AtomicBoolean timedout = new AtomicBoolean(false);
 		if (BestFirst.this.timeoutForComputationOfF > 0) {
 			interruptionTask = new InterruptionTimerTask("Timeout for Node-Labeling in " + BestFirst.this, Thread.currentThread(), () -> timedout.set(true));
 			this.logger.debug("Scheduling timeout for f-value computation. Allowed time: {}ms", this.timeoutForComputationOfF);
-			this.getTimerAndCreateIfNotExistent().schedule(interruptionTask, this.timeoutForComputationOfF);
+			GlobalTimer.getInstance().schedule(interruptionTask, this.timeoutForComputationOfF);
 		}
 
 		/* compute f */
@@ -490,7 +499,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		long startComputation = System.currentTimeMillis();
 		try {
 			this.logger.trace("Calling f-function of node evaluator for {}", node);
-			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.f(node));
+			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.f(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not a worker thread
 			this.logger.trace("Determined f-value of {}", label);
 			if (this.isStopCriterionSatisfied()) {
 				return;
@@ -540,6 +549,10 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			}
 			return;
 		}
+
+		/* check whether an uncertainty-value is present if the node evaluator is an uncertainty-measuring evaluator */
+		assert !(this.nodeEvaluator instanceof IPotentiallyUncertaintyAnnotatingNodeEvaluator) || !((IPotentiallyUncertaintyAnnotatingNodeEvaluator<?, ?>) this.nodeEvaluator).annotatesUncertainty()
+		|| node.getAnnotation("uncertainty") != null : "Uncertainty-based node evaluator claims to annotate uncertainty but has not assigned any uncertainty to " + node.getPoint();
 
 		/* eventually set the label */
 		node.setInternalLabel(label);
@@ -607,7 +620,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				assert this.nodeSelectedForExpansion == null : "Node selected for expansion must be NULL when setting it!";
 				this.nodeSelectedForExpansion = node;
 				assert this.open.contains(node) : "OPEN must contain the node to be expanded.\n\tOPEN size: " + this.open.size() + "\n\tNode to be expanded: " + node + ".\n\tOPEN: "
-				+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
+						+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
 				this.open.remove(this.nodeSelectedForExpansion);
 				int openSizeAfter = this.open.size();
 				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getPoint()) : "A node chosen for expansion has no entry in the ext2int map!";
@@ -631,17 +644,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	 */
 	protected AlgorithmEvent expandNextNode() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 
-		/*
-		 * Preliminarily check that the active jobs are less than the additional threads
-		 */
+		/* Preliminarily check that the active jobs are less than the additional threads */
 		assert this.additionalThreadsForNodeAttachment == 0 || this.activeJobs.get() < this.additionalThreadsForNodeAttachment : "Cannot expand nodes if number of active jobs (" + this.activeJobs.get()
-		+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
+				+ " is at least as high as the threads available for node attachment (" + this.additionalThreadsForNodeAttachment + ")";
 
 		/*
-		 * Step 1: determine node that will be expanded next. Either it already has been
-		 * set or it will be the first of OPEN. If necessary, we wait for potential
-		 * incoming nodes
+		 * Step 1: determine node that will be expanded next. Either it already has been set
+		 * or it will be the first of OPEN. If necessary, we wait for potential incoming nodes
 		 */
+		long startTimeOfExpansion = System.currentTimeMillis();
 		final Node<N, V> actualNodeSelectedForExpansion;
 		{
 			Node<N, V> tmpNodeSelectedForExpansion = null; // necessary workaround as setting final variables in a try-block is not reasonably possible
@@ -649,27 +660,31 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			try {
 				if (this.nodeSelectedForExpansion == null) {
 					this.activeJobsCounterLock.lockInterruptibly();
-					this.logger.trace("Acquired activeJobsCounterLock for read");
+					this.logger.trace("Acquired activeJobsCounterLock for read.");
+					boolean stopCriterionSatisfied = this.isStopCriterionSatisfied();
 					try {
 						this.logger.debug("No next node has been selected. Choosing the first from OPEN.");
-						while (this.open.isEmpty() && this.activeJobs.get() > 0) {
+						while (this.open.isEmpty() && this.activeJobs.get() > 0 && !stopCriterionSatisfied) {
 							this.logger.trace("Await condition as open queue is empty and active jobs is {} ...", this.activeJobs.get());
 							this.numberOfActiveJobsHasChanged.await();
 							this.logger.trace("Got signaled");
-							this.checkAndConductTermination();
+							stopCriterionSatisfied = this.isStopCriterionSatisfied();
 						}
-						this.openLock.lock();
-						try {
-							if (this.open.isEmpty()) {
-								return null;
+						if (!stopCriterionSatisfied) {
+							this.openLock.lock();
+							try {
+								if (this.open.isEmpty()) {
+									return null;
+								}
+								this.selectNodeForNextExpansion(this.open.peek());
+							} finally {
+								this.openLock.unlock();
 							}
-							this.selectNodeForNextExpansion(this.open.peek());
-						} finally {
-							this.openLock.unlock();
 						}
 					} finally {
 						this.activeJobsCounterLock.unlock();
-						this.logger.trace("Released activeJobsCounterLock after read");
+						this.logger.trace("Released activeJobsCounterLock after read. Now checking termination.");
+						this.checkAndConductTermination();
 					}
 				}
 				assert this.nodeSelectedForExpansion != null : "We have not selected any node for expansion, but this must be the case at this point.";
@@ -700,20 +715,17 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.logger.debug("Start computation of successors");
 			final List<NodeExpansionDescription<N, A>> successorDescriptions;
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
-			try {
-				assert !actualNodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
-				tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
-					this.logger.trace("Invoking getSuccessors");
-					return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
-				});
-				assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
-				this.logger.trace("Received {} successor descriptions", tmpSuccessorDescriptions.size());
-			} catch (Exception e) {
-				this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion); // make sure that we unregister from expand
-				throw new AlgorithmException(e, "Exception occured in successor generation."); // if this was a real exception, throw it.
+			assert !actualNodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
+			tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
+				this.logger.trace("Invoking getSuccessors");
+				return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
+			}, "Successor generation" , !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not one of the worker threads
+			assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
+			if (this.logger.isTraceEnabled()) {
+				this.logger.trace("Received {} successor descriptions for node with hash code {}. The first 1000 of these are \n\t{}", tmpSuccessorDescriptions.size(), actualNodeSelectedForExpansion.getPoint(),
+						tmpSuccessorDescriptions.stream().limit(1000).map(s -> s.getTo().toString()).collect(Collectors.joining("\n\t")));
 			}
 			successorDescriptions = tmpSuccessorDescriptions;
-
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion);
 			this.post(new SuccessorComputationCompletedEvent<>(this.getId(), actualNodeSelectedForExpansion, successorDescriptions));
@@ -723,6 +735,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			 * and how to integrate the successors into the search
 			 */
 			List<N> todoList = successorDescriptions.stream().map(d -> d.getTo()).collect(Collectors.toList());
+			long lastTerminationCheck = System.currentTimeMillis();
 			for (NodeExpansionDescription<N, A> successorDescription : successorDescriptions) {
 				NodeBuilder nb = new NodeBuilder(todoList, actualNodeSelectedForExpansion, successorDescription);
 				this.logger.trace("Number of additional threads for node attachment is {}", this.additionalThreadsForNodeAttachment);
@@ -743,8 +756,18 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					}
 					this.pool.submit(nb);
 				}
+
+				/* frequently check termination conditions */
+				if (System.currentTimeMillis() - lastTerminationCheck > 50) {
+					if (this.expanding.containsKey(actualNodeSelectedForExpansion)) {
+						this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
+					} else { // maybe the node has been removed from the expansion list during a timeout or a cancel
+						this.checkAndConductTermination();
+					}
+					lastTerminationCheck = System.currentTimeMillis();
+				}
 			}
-			this.logger.debug("Finished expansion of node {}. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, this.open.size(), this.activeJobs.get());
+			this.logger.debug("Finished expansion of node {} after {}ms. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, System.currentTimeMillis() - startTimeOfExpansion, this.open.size(), this.activeJobs.get());
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			expansionEvent = new NodeExpansionJobSubmittedEvent<>(this.getId(), actualNodeSelectedForExpansion, successorDescriptions);
 		} else {
@@ -820,6 +843,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	@Override
 	protected void shutdown() {
 
+		/* check that the shutdown is not invoked by one of the workers or an interrupted thread */
+		if (this.threadsOfPool.contains(Thread.currentThread())) {
+			this.logger.error("Worker thread {} must not shutdown the algorithm!", Thread.currentThread());
+		}
+		assert !Thread.currentThread().isInterrupted() : "The thread should not be interrupted when shutdown is called.";
+
 		if (this.isShutdownInitialized()) {
 			return;
 		}
@@ -831,11 +860,23 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.logger.debug("General algorithm shutdown routine completed. Now conducting BestFirst-specific shutdown activities.");
 
 		/* interrupt the expanding threads */
-		this.logger.debug("Interrupting {} active expansion threads.", this.expanding.size());
 		synchronized (this.expanding) {
-			for (Thread t : this.expanding.values()) {
-				this.interruptThreadAsPartOfShutdown(t);
+			int interruptedThreads = 0;
+			for (Entry<N, Thread> entry : this.expanding.entrySet()) {
+				Thread t = entry.getValue();
+				if (t.equals(Thread.currentThread())) {
+					this.expanding.remove(entry.getKey());
+					this.logger.debug("Removing node {} with thread {} from expansion map, since this thread is realizing the shutdown.", entry.getKey(), t);
+				} else {
+					if (!this.hasThreadBeenInterruptedDuringShutdown(t)) {
+						this.interruptThreadAsPartOfShutdown(t);
+						interruptedThreads++;
+					} else {
+						this.logger.debug("Not interrupting thread {} again, since it already has been interrupted during shutdown.", t);
+					}
+				}
 			}
+			this.logger.debug("Interrupted {} active expansion threads.", interruptedThreads);
 		}
 
 		/* cancel ongoing work */
@@ -846,7 +887,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				this.pool.shutdownNow();
 			}
 			try {
-				this.logger.debug("Waiting 3 seconds for pool shutdown.");
+				this.logger.debug("Waiting 3 days for pool shutdown.");
 				if (this.pool != null) {
 					this.pool.awaitTermination(3, TimeUnit.DAYS);
 				} else {
@@ -864,6 +905,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				}
 			}
 			this.logger.info("Setting number of active jobs to 0.");
+			this.logger.trace("Waiting for activeJobsCounterLock.");
 			this.activeJobsCounterLock.lock();
 			try {
 				this.logger.trace("Acquired activeJobsCounterLock for setting it to 0");
@@ -1003,98 +1045,100 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		switch (this.getState()) {
-		case created: {
-			AlgorithmInitializedEvent event = this.activate();
-			this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this.getId(), this.getConfig().cpus(), this.getConfig().timeout());
-			int additionalCPUs = this.getConfig().cpus() - 1;
-			if (additionalCPUs > 0) {
-				this.parallelizeNodeExpansion(additionalCPUs);
-			}
-			this.initGraph();
-			this.logger.info("Search initialized, returning activation event.");
-			return event;
-		}
-		case active: {
-			synchronized (this.pendingSolutionFoundEvents) {
-				if (!this.pendingSolutionFoundEvents.isEmpty()) {
-					return this.pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the controller for respective handling
+		try {
+			this.registerActiveThread();
+			switch (this.getState()) {
+			case created: {
+				AlgorithmInitializedEvent event = this.activate();
+				this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this.getId(), this.getConfig().cpus(), this.getConfig().timeout());
+				int additionalCPUs = this.getConfig().cpus() - 1;
+				if (additionalCPUs > 0) {
+					this.parallelizeNodeExpansion(additionalCPUs);
 				}
+				this.initGraph();
+				this.logger.info("Search initialized, returning activation event.");
+				return event;
 			}
-			AlgorithmEvent event;
-
-			/* if worker threads are used for expansion, make sure that there is at least one that is not busy */
-			if (this.additionalThreadsForNodeAttachment > 0) {
-				boolean poolSlotFree = false;
-				boolean haveLock = false;
-				do {
-					this.checkAndConductTermination();
-					try {
-						this.activeJobsCounterLock.lockInterruptibly();
-						haveLock = true;
-						this.logger.trace("Acquired activeJobsCounterLock for read");
-						this.logger.debug("The pool is currently busy with {}/{} jobs.", this.activeJobs.get(), this.additionalThreadsForNodeAttachment);
-						if (this.additionalThreadsForNodeAttachment > this.activeJobs.get()) {
-							poolSlotFree = true;
-						}
-						this.logger.trace("Number of active jobs is now {}", this.activeJobs.get());
-						if (!poolSlotFree) {
-							this.logger.trace("Releasing activeJobsCounterLock for a wait.");
-							try {
-								haveLock = false;
-								this.numberOfActiveJobsHasChanged.await();
-								haveLock = true;
-							} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
-								this.logger.debug("Received an interrupt while waiting for number of active jobs to change.");
-								if (!this.isShutdownInitialized()) { // if the algorithm has not been shutdown yet, we do this now by interrupting ourselves explicitly and invoking the check
-									this.activeJobsCounterLock.unlock(); // we can (and MUST) unlock now to avoid deadlocks
-									Thread.currentThread().interrupt();
-									this.checkAndConductTermination();
-								} else {
-									throw e; // if the algorithm has already been shut down, just throw the exception
-								}
-							}
-							this.logger.trace("Re-acquired activeJobsCounterLock after a wait.");
-							this.logger.debug("Number of active jobs has changed. Let's see whether we can enter now ...");
-						}
-					} finally {
-						if (haveLock) {
-							this.logger.trace("Trying to unlock activeJobsCounterLock");
-							this.activeJobsCounterLock.unlock();
-							haveLock = false;
-							this.logger.trace("Released activeJobsCounterLock after read.");
-						} else {
-							this.logger.trace("Don't need to give lock free, because we came to the finally-block via an exception.");
-						}
-					}
-				} while (!poolSlotFree);
-			}
-
-			/* expand next node */
-			this.checkAndConductTermination();
-			event = this.expandNextNode();
-
-			/* if no event has occurred, still check whether a solution has arrived in the meantime prior to setting the algorithm state to inactive */
-			if (event == null) {
+			case active: {
 				synchronized (this.pendingSolutionFoundEvents) {
 					if (!this.pendingSolutionFoundEvents.isEmpty()) {
-						event = this.pendingSolutionFoundEvents.poll();
-					} else {
-						this.logger.info("No event was returned and there are no pending solutions. Number of active jobs: {}. Setting state to inactive.", this.activeJobs.get());
-						return this.terminate();
+						return this.pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the controller for respective handling
 					}
 				}
-			}
+				AlgorithmEvent event;
 
-			if (!(event instanceof SolutionCandidateFoundEvent)) {
-				this.post(event);
-			}
-			return event;
-		}
-		default:
-			throw new IllegalStateException("BestFirst search is in state " + this.getState() + " in which next must not be called!");
-		}
+				/* if worker threads are used for expansion, make sure that there is at least one that is not busy */
+				if (this.additionalThreadsForNodeAttachment > 0) {
+					boolean poolSlotFree = false;
+					boolean haveLock = false;
+					do {
+						this.checkAndConductTermination();
+						try {
+							this.activeJobsCounterLock.lockInterruptibly();
+							haveLock = true;
+							this.logger.trace("Acquired activeJobsCounterLock for read");
+							this.logger.debug("The pool is currently busy with {}/{} jobs.", this.activeJobs.get(), this.additionalThreadsForNodeAttachment);
+							if (this.additionalThreadsForNodeAttachment > this.activeJobs.get()) {
+								poolSlotFree = true;
+							}
+							this.logger.trace("Number of active jobs is now {}", this.activeJobs.get());
+							if (!poolSlotFree) {
+								this.logger.trace("Releasing activeJobsCounterLock for a wait.");
+								try {
+									haveLock = false;
+									this.numberOfActiveJobsHasChanged.await();
+									haveLock = true;
+								} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
+									this.logger.debug("Received an interrupt while waiting for number of active jobs to change.");
+									this.activeJobsCounterLock.unlock();
+									Thread.currentThread().interrupt();
+									this.checkAndConductTermination();
+								}
+								this.logger.trace("Re-acquired activeJobsCounterLock after a wait.");
+								this.logger.debug("Number of active jobs has changed. Let's see whether we can enter now ...");
+							}
+						} finally {
+							if (haveLock) {
+								this.logger.trace("Trying to unlock activeJobsCounterLock");
+								this.activeJobsCounterLock.unlock();
+								haveLock = false;
+								this.logger.trace("Released activeJobsCounterLock after read.");
+							} else {
+								this.logger.trace("Don't need to give lock free, because we came to the finally-block via an exception.");
+							}
+						}
+					} while (!poolSlotFree);
+				}
 
+				/* expand next node */
+				this.checkAndConductTermination();
+				event = this.expandNextNode();
+
+				/* if no event has occurred, still check whether a solution has arrived in the meantime prior to setting the algorithm state to inactive */
+				if (event == null) {
+					synchronized (this.pendingSolutionFoundEvents) {
+						if (!this.pendingSolutionFoundEvents.isEmpty()) {
+							event = this.pendingSolutionFoundEvents.poll();
+						} else {
+							this.logger.info("No event was returned and there are no pending solutions. Number of active jobs: {}. Setting state to inactive.", this.activeJobs.get());
+							return this.terminate();
+						}
+					}
+				}
+
+				if (!(event instanceof SolutionCandidateFoundEvent)) {
+					this.post(event);
+				}
+				return event;
+			}
+			default:
+				throw new IllegalStateException("BestFirst search is in state " + this.getState() + " in which next must not be called!");
+			}
+		} finally
+
+		{
+			this.unregisterActiveThread();
+		}
 	}
 
 	public void selectNodeForNextExpansion(final N node) throws InterruptedException {
@@ -1177,13 +1221,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		if (threadsForExpansion < 1) {
 			throw new IllegalArgumentException("Number of threads should be at least 1 for " + this.getClass().getName());
 		}
+
+		int threadsForAlgorithm = (this.getConfig().threads() >= 0) ? this.getConfig().threads() : this.getConfig().cpus();
+
 		this.additionalThreadsForNodeAttachment = threadsForExpansion;
-		int maxThreads = this.getConfig().threads() > 0 ? this.getConfig().threads() : -1;
-		if (maxThreads > 0 && this.additionalThreadsForNodeAttachment > maxThreads - 2) { // timer and main thread must not add up here
-			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, maxThreads - 2);
+		if (this.additionalThreadsForNodeAttachment > threadsForAlgorithm - 2) { // timer and main thread must not add up here
+			this.additionalThreadsForNodeAttachment = Math.min(this.additionalThreadsForNodeAttachment, threadsForAlgorithm - 2);
 		}
 		if (this.additionalThreadsForNodeAttachment < 1) {
-			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", this.getConfig().threads());
+			this.logger.info("Effectively not parallelizing, since only {} threads are allowed by configuration, and 2 are needed for control and maintenance.", threadsForAlgorithm);
 			this.additionalThreadsForNodeAttachment = 0;
 			return;
 		}
@@ -1191,6 +1237,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.pool = Executors.newFixedThreadPool(this.additionalThreadsForNodeAttachment, r -> {
 			Thread t = new Thread(r);
 			t.setName("ORGraphSearch-worker-" + counter.incrementAndGet());
+			this.threadsOfPool.add(t);
 			return t;
 		});
 	}

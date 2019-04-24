@@ -6,9 +6,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import it.unimi.dsi.fastutil.shorts.Short2DoubleArrayMap;
+import it.unimi.dsi.fastutil.shorts.Short2DoubleMap;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
-import jaicore.graph.LabeledGraph;
 
 /**
  * This class provides a search graph generator for an augmented version of the timed TSP (TTSP) problem. In TTSP, the original route graph has not only one cost per edge (u,v) but a list of costs where each position in the list represents an hour of departure from u. That is,
@@ -31,7 +32,9 @@ public class EnhancedTTSP {
 
 	private final short startLocation;
 	private final int numberOfConsideredHours;
-	private final LabeledGraph<Short, Double> minTravelTimesGraph;
+	private final List<Location> locations;
+	private final Short2DoubleMap xCoords = new Short2DoubleArrayMap();
+	private final Short2DoubleMap yCoords = new Short2DoubleArrayMap();
 	private final List<Boolean> blockedHours;
 	private final double hourOfDeparture;
 	private final double durationOfShortBreak;
@@ -44,20 +47,28 @@ public class EnhancedTTSP {
 
 	private Logger logger = LoggerFactory.getLogger(EnhancedTTSP.class);
 
-	public EnhancedTTSP(final LabeledGraph<Short, Double> minTravelTimesGraph, final short startLocation, final List<Boolean> blockedHours, final double hourOfDeparture, final double maxConsecutiveDrivingTime,
+	public EnhancedTTSP(final List<Location> locations, final short startLocation, final List<Boolean> blockedHours, final double hourOfDeparture, final double maxConsecutiveDrivingTime,
 			final double durationOfShortBreak, final double durationOfLongBreak) {
 		super();
 		this.startLocation = startLocation;
 		this.numberOfConsideredHours = blockedHours.size();
-		this.minTravelTimesGraph = minTravelTimesGraph;
+		this.locations = locations;
+		for (Location l : locations) {
+			this.xCoords.put(l.getId(), l.getX());
+			this.yCoords.put(l.getId(), l.getY());
+		}
 		this.blockedHours = blockedHours;
 		this.hourOfDeparture = hourOfDeparture;
 		this.durationOfShortBreak = durationOfShortBreak;
 		this.durationOfLongBreak = durationOfLongBreak;
 		this.maxConsecutiveDrivingTime = maxConsecutiveDrivingTime;
 		this.maxDrivingTimeBetweenLongBreaks = 24 - durationOfLongBreak;
-		this.possibleDestinations = new ShortArrayList(minTravelTimesGraph.getItems().stream().sorted().collect(Collectors.toList()));
+		this.possibleDestinations = new ShortArrayList(locations.stream().map(Location::getId).sorted().collect(Collectors.toList()));
 		this.solutionEvaluator = new EnhancedTTSPSolutionEvaluator(this);
+	}
+
+	public List<Location> getLocations() {
+		return this.locations;
 	}
 
 	public short getStartLocation() {
@@ -66,10 +77,6 @@ public class EnhancedTTSP {
 
 	public int getNumberOfConsideredHours() {
 		return this.numberOfConsideredHours;
-	}
-
-	public LabeledGraph<Short, Double> getMinTravelTimesGraph() {
-		return this.minTravelTimesGraph;
 	}
 
 	public List<Boolean> getBlockedHours() {
@@ -122,7 +129,7 @@ public class EnhancedTTSP {
 		double timeSinceLastShortBreak = n.getTimeTraveledSinceLastShortBreak();
 		double timeSinceLastLongBreak = n.getTimeTraveledSinceLastLongBreak();
 
-		double minTravelTime = this.minTravelTimesGraph.getEdgeLabel(curLocation, destination);
+		double minTravelTime = Math.sqrt(Math.pow(this.xCoords.get(curLocation) - this.xCoords.get(destination), 2) + Math.pow(this.yCoords.get(curLocation)- this.yCoords.get(destination), 2)); // use Euclidean distance as min travel time
 		this.logger.info("Simulating the ride from {} to " + destination + ", which minimally takes " + minTravelTime + ". We are departing at {}", curLocation, curTime);
 
 		double timeToNextShortBreak = this.getTimeToNextShortBreak(curTime, Math.min(timeSinceLastShortBreak, timeSinceLastLongBreak));
@@ -244,5 +251,12 @@ public class EnhancedTTSP {
 
 	public EnhancedTTSPSolutionEvaluator getSolutionEvaluator() {
 		return this.solutionEvaluator;
+	}
+
+	@Override
+	public String toString() {
+		return "EnhancedTTSP [startLocation=" + this.startLocation + ", numberOfConsideredHours=" + this.numberOfConsideredHours + ", blockedHours=" + this.blockedHours + ", hourOfDeparture="
+				+ this.hourOfDeparture + ", durationOfShortBreak=" + this.durationOfShortBreak + ", durationOfLongBreak=" + this.durationOfLongBreak + ", maxConsecutiveDrivingTime=" + this.maxConsecutiveDrivingTime + ", maxDrivingTimeBetweenLongBreaks="
+				+ this.maxDrivingTimeBetweenLongBreaks + ", possibleDestinations=" + this.possibleDestinations + ", solutionEvaluator=" + this.solutionEvaluator + "]";
 	}
 }

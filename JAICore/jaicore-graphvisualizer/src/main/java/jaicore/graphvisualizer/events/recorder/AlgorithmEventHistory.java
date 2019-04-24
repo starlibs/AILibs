@@ -13,32 +13,32 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 
 public class AlgorithmEventHistory implements ILoggingCustomizable {
 
-	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistory.class);
+	private String loggerName;
 
 	private List<AlgorithmEventHistoryEntry> events;
 
 	public AlgorithmEventHistory() {
-		events = Collections.synchronizedList(new ArrayList<>());
+		this.events = Collections.synchronizedList(new ArrayList<>());
 	}
 
-	public void addEvent(AlgorithmEvent algorithmEvent) {
-		AlgorithmEventHistoryEntry entry = generateHistoryEntry(algorithmEvent);
-		events.add(entry);
-		logger.debug("Added entry {} for algorithm event {} to history at position {}.", entry, algorithmEvent, events.size() - 1);
+	public void addEvent(final AlgorithmEvent algorithmEvent) {
+		AlgorithmEventHistoryEntry entry = this.generateHistoryEntry(algorithmEvent);
+		this.events.add(entry);
+		this.logger.debug("Added entry {} for algorithm event {} to history at position {}.", entry, algorithmEvent, this.events.size() - 1);
 	}
 
-	private AlgorithmEventHistoryEntry generateHistoryEntry(AlgorithmEvent algorithmEvent) {
-		return new AlgorithmEventHistoryEntry(algorithmEvent, getCurrentReceptionTime());
+	private AlgorithmEventHistoryEntry generateHistoryEntry(final AlgorithmEvent algorithmEvent) {
+		return new AlgorithmEventHistoryEntry(algorithmEvent, this.getCurrentReceptionTime());
 	}
 
 	private long getCurrentReceptionTime() {
 		long currentTime = System.currentTimeMillis();
-		return Math.max(0, currentTime - getReceptionTimeOfFirstEvent());
+		return Math.max(0, currentTime - this.getReceptionTimeOfFirstEvent());
 	}
 
 	private long getReceptionTimeOfFirstEvent() {
-		Optional<AlgorithmEventHistoryEntry> firstHistoryEntryOptional = events.stream().findFirst();
+		Optional<AlgorithmEventHistoryEntry> firstHistoryEntryOptional = this.events.stream().findFirst();
 		if (!firstHistoryEntryOptional.isPresent()) {
 			return -1;
 		}
@@ -46,21 +46,21 @@ public class AlgorithmEventHistory implements ILoggingCustomizable {
 		return firstHistoryEntryOptional.get().getTimeEventWasReceived();
 	}
 
-	public AlgorithmEventHistoryEntry getEntryAtTimeStep(int timestep) {
-		return events.get(timestep);
+	public AlgorithmEventHistoryEntry getEntryAtTimeStep(final int timestep) {
+		return this.events.get(timestep);
 	}
 
 	public long getLength() {
-		return events.size();
+		return this.events.size();
 	}
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
 	@Override
-	public void setLoggerName(String name) {
+	public void setLoggerName(final String name) {
 		this.loggerName = name;
 		this.logger.info("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);

@@ -4,7 +4,7 @@ import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public abstract class GraphSearchWithSubPathEvaluationUninformedTester extends GraphSearchTester {
+public abstract class GraphSearchWithSubPathEvaluationUninformedTester extends GraphSearchSolutionIteratorTester {
 
 	@SuppressWarnings("unchecked")
 	@Override

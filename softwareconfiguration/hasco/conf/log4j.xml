@@ -81,13 +81,17 @@
   </logger>
 	
 	<logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="warn" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="jaicore.interrupt">
+    <level value="trace" />
   </logger>
   
   <logger name="testedalgorithm.search">

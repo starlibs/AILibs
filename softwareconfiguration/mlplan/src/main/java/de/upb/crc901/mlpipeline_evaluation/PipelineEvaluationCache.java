@@ -6,18 +6,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.model.ComponentInstance;
 import hasco.serialization.CompositionSerializer;
-import jaicore.basic.SQLAdapter;
 import jaicore.ml.openml.OpenMLHelper;
-import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 /**
  * For caching and evaluation MLPipelines.
- * 
+ *
  * @author Helena Graf
  * @author Joshua
  * @author Lukas
@@ -25,189 +26,161 @@ import weka.core.converters.ConverterUtils.DataSource;
  */
 public class PipelineEvaluationCache {
 
-	// Evaluation configuration
-	private String datasetId;
-	private DatasetOrigin datasetOrigin;
-	private String testEvaluationTechnique;
-	private String testSplitTechnique;
-	private int testSeed = 0;
-	private String valSplitTechnique;
-	private String valEvaluationTechnique;
-	private int valSeed = 0;
+	private Logger logger = LoggerFactory.getLogger(PipelineEvaluationCache.class);
+	private static final String LOG_CANT_CONNECT_TO_CACHE = "Cannot connect to cache. Switching to offline mode.";
 
-	private Instances data;
-	private SQLAdapter adapter;
-	private final String intermediateResultsTableName = "pgotfml_hgraf.intermediate_results";
+	private static final String INTERMEDIATE_RESULTS_TABLENAME = "pgotfml_hgraf.intermediate_results";
+
+	// Evaluation configuration
 	private boolean useCache = true;
+
+	private final PipelineEvaluationCacheConfigBuilder config;
 
 	/**
 	 * Construct a new cache for evaluations. The valid split and evaluation
 	 * techniques can be looked up in {@link ConsistentMLPipelineEvaluator}. The
 	 * dataset origin can be looked up in {@link DatasetOrigin}.
-	 * 
-	 * @param datasetId
-	 * @param datasetOrigin
-	 * @param testEvaluationTechnique
-	 * @param testSplitTechnique
-	 * @param testSeed
-	 * @param valSplitTechnique
-	 * @param valEvaluationTechnique
-	 * @param valSeed
-	 *            Seed for the validation split. Can be null or an empty String
-	 * @param adapter
-	 *            For the connection to the results table
+	 *
+	 * @param configBuilder
+	 * @throws NumberFormatException
 	 * @throws Exception
 	 *             If the dataset cannot be loaded
 	 */
-	public PipelineEvaluationCache(String datasetId, DatasetOrigin datasetOrigin, String testEvaluationTechnique,
-			String testSplitTechnique, int testSeed, String valSplitTechnique, String valEvaluationTechnique,
-			int valSeed, SQLAdapter adapter) throws Exception {
+	public PipelineEvaluationCache(final PipelineEvaluationCacheConfigBuilder configBuilder) throws Exception {
 		super();
-		this.datasetId = datasetId;
-		this.datasetOrigin = datasetOrigin;
-		this.testEvaluationTechnique = testEvaluationTechnique;
-		this.testSplitTechnique = testSplitTechnique;
-		this.testSeed = testSeed;
-		this.valSplitTechnique = valSplitTechnique;
-		this.valEvaluationTechnique = valEvaluationTechnique;
-		this.valSeed = valSeed;
-		this.adapter = adapter;
+		this.config = configBuilder;
 
-		switch (datasetOrigin) {
+		switch (this.config.getDatasetOrigin()) {
 		case LOCAL:
 		case CLUSTER_LOCATION_NEW:
-			data = new DataSource(datasetId).getDataSet();
+			this.config.withDataset(new DataSource(this.config.getDatasetId()).getDataSet());
 			break;
 		case OPENML_DATASET_ID:
 			OpenMLHelper.setApiKey("4350e421cdc16404033ef1812ea38c01");
-			data = OpenMLHelper.getInstancesById(Integer.parseInt(datasetId));
+			this.config.withDataset(OpenMLHelper.getInstancesById(Integer.parseInt(this.config.getDatasetId())));
 			break;
 		default:
-			throw new Exception("Invalid dataset origin.");
+			throw new InvalidDatasetOriginException("Invalid dataset origin.");
 		}
 	}
 
 	/**
 	 * Get an evaluation results for the given pipeline represented by the component
 	 * instance in the setting this cache is configured.
-	 * 
+	 *
 	 * @param cI
 	 * @return Either the looked-up value for the pipeline or the newly evaluated
 	 *         result
 	 * @throws Exception
 	 *             If the pipeline cannot be evaluated
 	 */
-	public double getResultOrExecuteEvaluation(ComponentInstance cI) throws Exception {
+	public double getResultOrExecuteEvaluation(final ComponentInstance cI) throws Exception {
 		// Lookup
 		String serializedCI = null;
-		if (useCache && datasetOrigin != DatasetOrigin.LOCAL) {
-			System.out.println("DB Lookup");
+		if (this.useCache && this.config.getDatasetOrigin() != DatasetOrigin.LOCAL) {
+			this.logger.debug("DB Lookup");
 			serializedCI = CompositionSerializer.serializeComponentInstance(cI).toString();
-			System.out.println("Pipeline: " + serializedCI);
-			Double result = doDBLookUp(cI, serializedCI);
+			this.logger.debug("Pipeline: {}", serializedCI);
+			Double result = this.doDBLookUp(serializedCI);
 			if (result != null) {
-				System.out.println("Return DB result");
+				this.logger.debug("Return DB result");
 				return result;
 			}
 		}
 
 		// Execute
-		System.out.println("Execute new evaluation");
-		double result = evaluate(cI);
-		System.out.println("Score: " + result);
+		this.logger.debug("Execute new evaluation");
+		double result = this.evaluate(cI);
+		this.logger.debug("Score: {}", result);
 
 		// Write back
-		if (useCache && datasetOrigin != DatasetOrigin.LOCAL) {
-			System.out.println("Write new evaluation back into DB");
-			uploadResultToDB(cI, serializedCI, result);
+		if (this.useCache && this.config.getDatasetOrigin() != DatasetOrigin.LOCAL) {
+			this.logger.debug("Write new evaluation back into DB");
+			this.uploadResultToDB(serializedCI, result);
 		}
 
 		// Return result
 		return result;
 	}
 
-	private Double doDBLookUp(ComponentInstance cI, String serializedCI) {
+	private Double doDBLookUp(final String serializedCI) {
 		String query;
 		List<String> values;
-		if (doNotValidate()) {
-			query = "SELECT error_rate FROM " + intermediateResultsTableName
+		if (this.doNotValidate()) {
+			query = "SELECT error_rate FROM " + INTERMEDIATE_RESULTS_TABLENAME
 					+ " WHERE pipeline=? AND dataset_id=? AND dataset_origin=? AND test_evaluation_technique=? AND test_split_technique=? AND test_seed=? AND val_evaluation_technique IS NULL AND val_split_technique IS NULL AND val_seed IS NULL";
-			values = Arrays.asList(serializedCI, datasetId, DatasetOrigin.mapOriginToColumnIdentifier(datasetOrigin),
-					testEvaluationTechnique, testSplitTechnique, String.valueOf(testSeed));
+			values = Arrays.asList(serializedCI, this.config.getDatasetId(), DatasetOrigin.mapOriginToColumnIdentifier(this.config.getDatasetOrigin()), this.config.getTestEvaluationTechnique(), this.config.getTestSplitTechnique(),
+					String.valueOf(this.config.getTestSeed()));
 		} else {
-			query = "SELECT error_rate FROM " + intermediateResultsTableName
+			query = "SELECT error_rate FROM " + INTERMEDIATE_RESULTS_TABLENAME
 					+ " WHERE pipeline=? AND dataset_id=? AND dataset_origin=? AND test_evaluation_technique=? AND test_split_technique=? AND test_seed=? AND val_evaluation_technique=? AND val_split_technique=? AND val_seed=?";
-			values = Arrays.asList(serializedCI, datasetId, DatasetOrigin.mapOriginToColumnIdentifier(datasetOrigin),
-					testEvaluationTechnique, testSplitTechnique, String.valueOf(testSeed), valEvaluationTechnique,
-					valSplitTechnique, String.valueOf(valSeed));
+			values = Arrays.asList(serializedCI, this.config.getDatasetId(), DatasetOrigin.mapOriginToColumnIdentifier(this.config.getDatasetOrigin()), this.config.getTestEvaluationTechnique(), this.config.getTestSplitTechnique(),
+					String.valueOf(this.config.getTestSeed()), this.config.getValEvaluationTechnique(), this.config.getValSplitTechnique(), String.valueOf(this.config.getValSeed()));
 		}
 
 		try {
-			ResultSet resultSet = adapter.getResultsOfQuery(query, values);
+			ResultSet resultSet = this.config.getAdapter().getResultsOfQuery(query, values);
 			if (resultSet.next()) {
 				return resultSet.getDouble("error_rate");
 			} else {
 				return null;
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
-			System.out.println("Cannot connect to Cache. Switching to offline mode.");
+			this.logger.warn(LOG_CANT_CONNECT_TO_CACHE, e);
 			this.useCache = false;
 			return null;
 		}
 	}
 
-	private double evaluate(ComponentInstance cI) throws Exception {
+	private double evaluate(final ComponentInstance cI) throws Exception {
 		// Get dataset
 		MLPipeline classifier = new WEKAPipelineFactory().getComponentInstantiation(cI);
-		if (doNotValidate()) {
-			return ConsistentMLPipelineEvaluator.evaluateClassifier(testSplitTechnique, testEvaluationTechnique,
-					testSeed, data, classifier);
+		if (this.doNotValidate()) {
+			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.config.getTestSplitTechnique(), this.config.getTestEvaluationTechnique(), this.config.getTestSeed(), this.config.getData(), classifier);
 		} else {
-			return ConsistentMLPipelineEvaluator.evaluateClassifier(testSplitTechnique, testEvaluationTechnique,
-					testSeed, valSplitTechnique, valEvaluationTechnique, valSeed, data, classifier);
+			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.config.getTestSplitTechnique(), this.config.getTestEvaluationTechnique(), this.config.getTestSeed(), this.config.getValSplitTechnique(),
+					this.config.getValEvaluationTechnique(), this.config.getValSeed(), this.config.getData(), classifier);
 		}
 	}
 
-	private void uploadResultToDB(ComponentInstance cI, String serializedCI, double result) {
+	private void uploadResultToDB(final String serializedCI, final double result) {
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("pipeline", serializedCI);
-		map.put("dataset_id", datasetId);
-		map.put("dataset_origin", DatasetOrigin.mapOriginToColumnIdentifier(datasetOrigin));
-		map.put("test_evaluation_technique", testEvaluationTechnique);
-		map.put("test_split_technique", testSplitTechnique);
-		map.put("test_seed", testSeed);
+		map.put("dataset_id", this.config.getDatasetId());
+		map.put("dataset_origin", DatasetOrigin.mapOriginToColumnIdentifier(this.config.getDatasetOrigin()));
+		map.put("test_evaluation_technique", this.config.getTestEvaluationTechnique());
+		map.put("test_split_technique", this.config.getTestSplitTechnique());
+		map.put("test_seed", this.config.getTestSeed());
 		map.put("error_rate", result);
-		if (!doNotValidate()) {
-			map.put("val_split_technique", valSplitTechnique);
-			map.put("val_evaluation_technique", valEvaluationTechnique);
-			map.put("val_seed", valSeed);
+		if (!this.doNotValidate()) {
+			map.put("val_split_technique", this.config.getValSplitTechnique());
+			map.put("val_evaluation_technique", this.config.getValEvaluationTechnique());
+			map.put("val_seed", this.config.getValSeed());
 		}
 
 		try {
-			adapter.insert(intermediateResultsTableName, map);
+			this.config.getAdapter().insert(INTERMEDIATE_RESULTS_TABLENAME, map);
 		} catch (SQLException e) {
-			e.printStackTrace();
-			System.out.println("Cannot connect to Cache. Switching to offline mode.");
+			this.logger.warn(LOG_CANT_CONNECT_TO_CACHE, e);
 			this.useCache = false;
 		}
 	}
 
 	private boolean doNotValidate() {
-		return valSplitTechnique == null || valSplitTechnique.trim().equals("");
+		return this.config.getValSplitTechnique() == null || this.config.getValSplitTechnique().trim().equals("");
 	}
 
-	public void configureValidation(String valSplitTechnique, String valEvaluationTechnique, int valSeed) {
-		this.valEvaluationTechnique = valEvaluationTechnique;
-		this.valSplitTechnique = valSplitTechnique;
-		this.valSeed = valSeed;
+	public void configureValidation(final String valSplitTechnique, final String valEvaluationTechnique, final int valSeed) {
+		this.config.withValEvaluationTechnique(valEvaluationTechnique);
+		this.config.withValSplitTechnique(valSplitTechnique);
+		this.config.withValSeed(valSeed);
 	}
 
 	public boolean usesCache() {
-		return useCache;
+		return this.useCache;
 	}
 
-	public void setUseCache(boolean useCache) {
+	public void setUseCache(final boolean useCache) {
 		this.useCache = useCache;
 	}
 }

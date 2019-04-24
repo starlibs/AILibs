@@ -7,43 +7,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
-import jaicore.ml.evaluation.evaluators.weka.AbstractEvaluatorMeasureBridge;
-import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
-import weka.core.Instances;
+import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
 
-public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, ILoggingCustomizable {
+/**
+ * Evaluator used in the selection phase of mlplan. Uses MCCV by default, but can be configured to use other Benchmarks.
+ *
+ * @author fmohr
+ * @author jnowack
+ */
+public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SelectionPhasePipelineEvaluator.class);
 
-	private final ClassifierFactory classifierFactory;
-	private final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge;
+	private final PipelineEvaluatorBuilder config;
 
-	private final int seed;
-	private final int numMCIterations;
-	private final Instances dataShownToSelectionPhase;
-	private final double trainFoldSize;
-	private final int timeoutForSolutionEvaluation;
+	private Double bestScore;
 
-	public SelectionPhasePipelineEvaluator(final ClassifierFactory classifierFactory, final AbstractEvaluatorMeasureBridge<Double, Double> evaluationMeasurementBridge, final int numMCIterations, final Instances dataShownToSearch,
-			final double trainFoldSize, final int seed, final int timeoutForSolutionEvaluation) {
+	public SelectionPhasePipelineEvaluator(final PipelineEvaluatorBuilder config) {
 		super();
-		this.classifierFactory = classifierFactory;
-		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
-		this.seed = seed;
-		this.numMCIterations = numMCIterations;
-		this.dataShownToSelectionPhase = dataShownToSearch;
-		this.trainFoldSize = trainFoldSize;
-		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
+		this.config = config;
 	}
 
 	@Override
@@ -59,25 +52,30 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
 
-		AbstractEvaluatorMeasureBridge<Double, Double> bridge = this.evaluationMeasurementBridge;
-		if (this.evaluationMeasurementBridge instanceof CacheEvaluatorMeasureBridge) {
+		if (this.bestScore == null) {
+			throw new UnsupportedOperationException("Cannot evaluated in selection phase if no best solution has been propagated.");
+		}
+		IEvaluatorMeasureBridge<Double> bridge = this.config.getEvaluationMeasurementBridge();
+		if (this.config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 		}
 
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(bridge, this.numMCIterations, this.dataShownToSelectionPhase, this.trainFoldSize, this.seed);
+		this.logger.debug("Running probabilistic MCCV with {} iterations and best score {}", this.config.getNumMCIterations(), this.bestScore);
+		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.bestScore, this.config.getData(),
+				this.config.getTrainFoldSize(), this.config.getSeed());
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask task = sub.interruptMeAfterMS(this.timeoutForSolutionEvaluation - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
+		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
+		TimerTask task = sub.interruptMeAfterMS(this.config.getTimeoutForSolutionEvaluation() - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
 		try {
-			mccv.evaluate(this.classifierFactory.getComponentInstantiation(c), stats);
+			mccv.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {
 			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
-				throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed since the timeout was hit.");
+				throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.", e);
 			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
-			throw new ObjectEvaluationFailedException(e, "Evaluation of composition failed as the component instantiation could not be built.");
+			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
 		} finally {
 			task.cancel();
 			this.logger.debug("Canceled timeout job {}", task);
@@ -88,6 +86,14 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		double percentile = stats.getPercentile(75f);
 		this.logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
 		return percentile;
+	}
+
+	@Override
+	public void updateBestScore(final Double bestScore) {
+		if (bestScore == null) {
+			throw new IllegalArgumentException("Best known score must not be updated with NULL");
+		}
+		this.bestScore = bestScore;
 	}
 
 }
