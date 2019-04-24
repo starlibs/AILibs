@@ -144,8 +144,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	protected V fTimeouted(final Node<T, ?> n, final int timeout) throws InterruptedException, NodeEvaluationException {
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
-		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Node details: {}", n.hashCode(), this.samples,
-				this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS, n);
+		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Enable DEBUG for node details.", n.hashCode(), this.samples,
+				this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
+		this.logger.debug("Node details: {}", n);
+		
 		long startOfComputation = System.currentTimeMillis();
 		long deadline = timeout > 0 ? startOfComputation + timeout : -1;
 		if (this.timestampOfFirstEvaluation == 0) {
@@ -426,7 +428,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				throw new NodeEvaluationException(e, "Error in evaluating node!");
 			}
 			long duration = System.currentTimeMillis() - start;
-			assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
+			if (duration >= this.timeoutForSingleCompletionEvaluationInMS) {
+				logger.warn("Evaluation took {}ms, but timeout is {}", duration, this.timeoutForSingleCompletionEvaluationInMS);
+				assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
+			}
 
 			/* at this point, the value should not be NULL */
 			this.logger.info("Result: {}, Size: {}", val, this.scoresOfSolutionPaths.size());
@@ -520,12 +525,13 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	@Override
 	public void cancelActiveTasks() {
-		this.logger.info("Receive cancel signal. Canceling myself (aborting all timers) and canceling the completer.");
+		this.logger.info("Receive cancel signal. Canceling myself (aborting all tasks) and canceling the completer.");
 		super.cancelActiveTasks();
 		this.completer.cancel();
 		if (!this.activeTasks.isEmpty()) {
 			for (Entry<Node<T, ?>, TimerTask> entry : new HashSet<>(this.activeTasks.entrySet())) {
 				entry.getValue().cancel();
+				logger.debug("Canceled task {}", entry.getValue());
 				this.activeTasks.remove(entry.getKey());
 			}
 		}
@@ -557,6 +563,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 			this.completer.setLoggerName(name + ".randomsearch");
 		}
 		this.logger.info("Switched logger (name) of {} to {}", this, name);
+		this.logger.info("Reprinting RandomCompletionEvaluator configuration after logger switch: timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, getTimeoutForNodeEvaluationInMS());
 	}
 
 	@Override

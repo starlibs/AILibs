@@ -1,9 +1,9 @@
-package jaicore.concurrent;
+package jaicore.interrupt;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.interrupt.Interrupter;
+import jaicore.concurrent.NamedTimerTask;
 
 public class InterruptionTimerTask extends NamedTimerTask {
 	private static final Logger logger = LoggerFactory.getLogger(InterruptionTimerTask.class);
@@ -48,13 +48,12 @@ public class InterruptionTimerTask extends NamedTimerTask {
 	@Override
 	public void run() {
 		long delay = System.currentTimeMillis() - this.scheduledExecutionTime();
-		logger.info("Executing interruption task with descriptor \"{}\". Interrupting thread {}. This interrupt has been triggered with a delay of {}ms", this.getDescriptor(), this.threadToBeInterrupted, delay);
+		logger.info("Executing interruption task {} with descriptor \"{}\". Interrupting thread {}. This interrupt has been triggered with a delay of {}ms", Math.abs(this.hashCode()), this.getDescriptor(), this.threadToBeInterrupted, delay);
 		if (delay > 50) {
 			logger.warn("Interrupt is executed with a delay of {}ms", delay);
 		}
 		if (this.hookToExecutePriorToInterruption != null) {
 			logger.debug("Running pre-interruption hook");
-			logger.info("Executing pre-interruption hook.");
 			this.hookToExecutePriorToInterruption.run();
 		} else {
 			logger.debug("No pre-interruption hook has been defined.");

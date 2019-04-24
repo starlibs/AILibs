@@ -17,7 +17,7 @@
     <param name="Threshold" value="INFO" />
     <param name="Append" value="false" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -25,7 +25,7 @@
     <param name="File" value="logs/error.log" />
     <param name="Threshold" value="ERROR" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
   
@@ -33,7 +33,7 @@
     <param name="File" value="logs/warn.log" />
     <param name="Threshold" value="WARN" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -42,7 +42,7 @@
     <param name="Threshold" value="TRACE" />
     <param name="Append" value="false" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -67,12 +67,18 @@
   <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
    <level value="trace" />
   </logger>
-  
-  
+    
   <logger name="de.upb.crc901.automl.AutoMLAlgorithmTester">
     <level value="info" />
   </logger>
   
+  <logger name="de.upb.crc901.automl.AutoMLAlgorithmResultProductionTester">
+    <level value="info" />
+  </logger>
+    
+  <logger name="de.upb.crc901.mlplan.core">
+  	 <level value="debug" />
+  </logger>
   
   
   <logger name="jaicore.graphvisualizer">
@@ -80,7 +86,7 @@
   </logger>
   
   <logger name="jaicore.interrupt">
-    <level value="info" />
+    <level value="debug" />
   </logger>
   
   <logger name="hasco">
@@ -133,10 +139,6 @@
   	 <level value="warn" />
   </logger>
   
-  <logger name="jaicore.search.algorithms.standard.mcts.MCTS">
-  	 <level value="info" />
-  </logger>
-  
   <logger name="mlplan.optimizingfactory.optAlgo">
     <level value="info" />
   </logger>
@@ -182,7 +184,7 @@
   </logger>
   
   <logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -192,6 +194,14 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory">
-    <level value="trace" />
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+    <level value="debug" />
+  </logger>
+  
+  <logger name="testedalgorithm._algorithm">
+    <level value="info" />
   </logger>
 </log4j:configuration>

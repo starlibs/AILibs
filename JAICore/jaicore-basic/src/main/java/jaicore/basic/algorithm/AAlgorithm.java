@@ -1,7 +1,9 @@
 package jaicore.basic.algorithm;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimerTask;
@@ -22,9 +24,9 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.GlobalTimer;
-import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.interrupt.Interrupt;
 import jaicore.interrupt.Interrupter;
+import jaicore.interrupt.InterruptionTimerTask;
 
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
@@ -46,6 +48,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private long deadline = -1; // timestamp when algorithm must terminate due to timeout
 	private long timeOfTimeoutDetection = -1; // timestamp for when timeout has been triggered
 	private long canceled = -1; // timestamp for when the algorithm has been canceled
+	private final List<TimerTask> activeTasks = new ArrayList<>();
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private AlgorithmState state = AlgorithmState.created;
 	private final EventBus eventBus = new EventBus();
@@ -248,9 +251,17 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				return;
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
+		
+		this.logger.info("Entering shutdown procedure for {}. Canceling {} active tasks and interrupting {} active threads.", this.getId(), activeTasks.size(), this.activeThreads.size());
+		for (TimerTask t : new ArrayList<>(activeTasks)) {
+				logger.debug("Canceling TimerTask {} as part of shutdown of {}", t, getId());
+				this.cancelAndUnregisterTimerTask(t);
+			}
 		}
-		this.logger.info("Entering shutdown procedure for {}. Setting algorithm state from {} to inactive and interrupting {} active threads.", this.getId(), this.getState(), this.activeThreads.size());
+		if (!activeTasks.isEmpty())
+			throw new IllegalStateException();
 		for (Thread t : this.activeThreads) {
+			logger.debug("Triggering interrupt on {} as part of shutdown of {}", t, getId());
 			this.interruptThreadAsPartOfShutdown(t);
 		}
 		this.logger.info("Shutdown of {} completed.", this.getId());
@@ -277,13 +288,30 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.shutdown();
 	}
 
-	protected void registerActiveThread() {
+	protected synchronized void registerActiveThread() {
+		if (shutdownInitialized > 0) {
+			logger.warn("Ignoring registration of thread, because the algorithm has been shutdown already");
+			return;
+		}
 		this.activeThreads.add(Thread.currentThread());
 	}
 
 	protected void unregisterActiveThread() {
 		this.logger.trace("Unregistering current thread {}", Thread.currentThread());
 		this.activeThreads.remove(Thread.currentThread());
+	}
+
+	protected synchronized void registerTimerTask(TimerTask task) {
+		if (shutdownInitialized > 0) {
+			logger.warn("Ignoring registration of timer, because the algorithm has been shutdown already");
+			return;
+		}
+		activeTasks.add(task);
+	}
+
+	protected void cancelAndUnregisterTimerTask(TimerTask task) {
+		task.cancel();
+		activeTasks.remove(task);
 	}
 
 	public long getActivationTime() {
@@ -397,14 +425,16 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public String getLoggerName() {
 		return this.loggerName;
 	}
-	
+
 	protected void announceTimeoutDetected() {
 		this.timeOfTimeoutDetection = System.currentTimeMillis(); // artificially set the timeout detected variable
 	}
 
-	protected <T> T computeTimeoutAware(final Callable<T> r, final boolean shutdownOnStoppingCriterionSatisfied) throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
-		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}. Currently active tasks in global timer: {}", r, this.getTimeout(), activeThreads, GlobalTimer.getInstance().getActiveTasks());
-		
+	protected <T> T computeTimeoutAware(final Callable<T> r, final String reasonToLogOnTimeout, final boolean shutdownOnStoppingCriterionSatisfied)
+			throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}. Currently active tasks in global timer: {}", r, this.getTimeout(), activeThreads,
+				GlobalTimer.getInstance().getActiveTasks());
+
 		/* if no timeout is sharp, just execute the task */
 		if (this.getTimeout().milliseconds() < 0) {
 			try {
@@ -436,9 +466,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		/* schedule a timer that will interrupt the current thread and execute the task */
 		long timeToInterrupt = remainingTime - this.timeoutPrecautionOffset;
 		GlobalTimer timer = GlobalTimer.getInstance();
-		TimerTask task = new InterruptionTimerTask("Timeout for timed execution of callable " + r,
+		TimerTask task = new InterruptionTimerTask("Timeout for timed execution of callable in algorithm " + getId() + ": " + reasonToLogOnTimeout,
 				() -> this.logger.debug("Timeout detected at timestamp {}. This is  {} prior to deadline, interrupting successor generation.", System.currentTimeMillis(), this.getRemainingTimeToDeadline()));
-		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}. List of active tasks is now: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt, this.getRemainingTimeToDeadline(), timer.getActiveTasks());
+		registerTimerTask(task);
+		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}. List of active tasks is now: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt,
+				this.getRemainingTimeToDeadline(), timer.getActiveTasks());
 		timer.schedule(task, timeToInterrupt);
 		try {
 			this.logger.debug("Starting supervised computation of {}.", r);
@@ -480,7 +512,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		} catch (Exception e) {
 			throw new AlgorithmException(e, "The algorithm has failed due to an exception of a Callable.");
 		} finally {
-			task.cancel();
+			cancelAndUnregisterTimerTask(task);
 		}
 	}
 }

@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.interrupt.InterruptionTimerTask;
+
 public class GlobalTimer extends Timer {
 	private static final Logger logger = LoggerFactory.getLogger(GlobalTimer.class);
 	private static final GlobalTimer instance = new GlobalTimer();

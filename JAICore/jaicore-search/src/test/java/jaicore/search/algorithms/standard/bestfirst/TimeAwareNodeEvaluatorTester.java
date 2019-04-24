@@ -9,9 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.interrupt.Interrupt;
 import jaicore.interrupt.Interrupter;
+import jaicore.interrupt.InterruptionTimerTask;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.TimeAwareNodeEvaluator;
 import jaicore.search.model.travesaltree.Node;

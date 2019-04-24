@@ -83,10 +83,11 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 					+ Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
 			this.logger.info("Checking whether interrupt is triggered by task {}", task);
 			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
-				this.logger.debug("This is a controlled interrupt of ourselves for task {}.", task);
 				Thread.interrupted(); // reset thread interruption flag, because the thread is not really interrupted but should only stop the evaluation
+				this.logger.info("This is a controlled interrupt of ourselves for task {}. Resetted thread interruption flag. Interrupt flag is now {}", task, Thread.currentThread().isInterrupted());
 				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 				assert !Interrupter.get().hasCurrentThreadOpenInterrupts() : "There are still open interrupts!";
+				this.logger.info("Throwing ObjectEvaluationFailedException. Interrupt flag is {}", Thread.currentThread().isInterrupted());
 				throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.");
 			}
 			this.logger.info("Recognized uncontrolled interrupt. Forwarding this exception.");

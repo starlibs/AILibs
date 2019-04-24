@@ -1,13 +1,21 @@
 package de.upb.crc901.automl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,16 +27,16 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
-import jaicore.basic.algorithm.AlgorithmCreationException;
-import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.basic.algorithm.IAlgorithmTestProblemSet;
-import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.interrupt.Interrupter;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
+import weka.classifiers.evaluation.Evaluation;
 import weka.core.Attribute;
 import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.converters.ConverterUtils.DataSink;
 
 /**
  * This test tests whether or not the algorithm delivers a solution on each given dataset within 30 seconds.
@@ -45,13 +53,13 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
-		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
-		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
-		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
-		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+//		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+//		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
+//		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
+//		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
+//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		problemSets.add(new OpenMLProblemSet(1457)); // amazon
-		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
+//		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
 		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
 		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
@@ -69,30 +77,73 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Test
 	public void testThatModelIsTrained() throws Exception {
 		
-		/* create instances and set attribute */
-		Instances dataset = problemSet.getDatasetSource().getX().getDataSet();
-		Attribute targetAttribute = dataset.attribute(problemSet.getDatasetSource().getY());
-		dataset.setClassIndex(targetAttribute.index());
-		
-		/* get algorithm */
-		IAlgorithm<Instances, Classifier> algorithm = (IAlgorithm<Instances, Classifier>) this.getAutoMLAlgorithm(dataset); // AutoML-tools should deliver a classifier
-		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
-		if (algorithm instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
+		try {
+			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
+			System.gc();
+			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
+			
+			/* create instances and set attribute */
+			logger.info("Loading dataset {} from {} for test.", problemSet.getName(), problemSet.getDatasetSource().getX());
+			File cacheFile = new File("testrsc/openml/" + problemSet.getId() + ".arff");
+			if (!cacheFile.exists()) {
+				logger.info("Cache file does not exist, creating it.");
+				cacheFile.getParentFile().mkdirs();
+				Instances dataset = problemSet.getDatasetSource().getX().getDataSet();
+				DataSink.write(cacheFile.getAbsolutePath(), dataset);
+			}
+			logger.info("Loading ARFF file from cache.");
+			Instances dataset = new Instances(new FileReader(cacheFile));
+			Attribute targetAttribute = dataset.attribute(problemSet.getDatasetSource().getY());
+			dataset.setClassIndex(targetAttribute.index());
+			logger.info("Creating a 70/30 (non-stratified) split over the data");
+			int splitIndex = (int)Math.floor(dataset.size() * 0.7);
+			Instances train = new Instances(dataset, 0, splitIndex);
+			Instances test = new Instances(dataset, splitIndex, dataset.size() - train.size());
+			assertEquals(dataset.size(), train.size() + test.size());
+			dataset = null;
+			
+			/* get algorithm */
+			logger.info("Loading the algorithm");
+			IAlgorithm<Instances, Classifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
+			if (algorithm instanceof ILoggingCustomizable) {
+				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
+			}
+			algorithm.setTimeout(new TimeOut(120, TimeUnit.SECONDS));
+	
+			/* find classifier */
+			Instances data = algorithm.getInput();
+			logger.info("Checking that {} delivers a model on dataset {}", algorithm.getId(), algorithm.getInput().relationName());
+			Classifier c = algorithm.call();
+			assertFalse("The thread should not be interrupted after calling the AutoML-tool!", Thread.currentThread().isInterrupted());
+			logger.info("Identified classifier {} as solution to the problem.", WekaUtil.getClassifierDescriptor(c));
+			assertNotNull("The algorithm as not returned any classifier.", c);
+			
+			/* compute error rate */
+			Evaluation eval = new Evaluation(data);
+			eval.evaluateModel(c, test);
+			assertTrue("At least 10 instances must be classified!", test.size() >= 10);
+			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
+			logger.info("Error rate of solution {} on {} is: {}", c.getClass().getName(), data.relationName(), eval.errorRate());
 		}
-		algorithm.setTimeout(new TimeOut(30, TimeUnit.SECONDS));
-
-		/* find classifier */
-		Instances data = algorithm.getInput();
-		logger.info("Checking that {} delivers a model on dataset {}", algorithm.getId(), algorithm.getInput().relationName());
-		Classifier c = algorithm.call();
-		logger.info("Identified classifier {} as solution to the problem.", WekaUtil.getClassifierDescriptor(c));
-		assertNotNull("The algorithm as not returned any classifier.", c);
-
-		/* check that some predictions can be made with the classifier */
-		int n = data.size();
-		for (int i = 0; i < Math.min(10, n); i++) {
-			c.classifyInstance(data.get(i));
+		catch (AlgorithmTimeoutedException e) {
+			fail("No solution was found in the given timeout. Stack trace: " + Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));
+		}
+		finally {
+			logger.info("Cleaning up everything ...");
+			GlobalTimer.getInstance().getActiveTasks().forEach(t -> {
+				logger.info("Canceling task {}", t);
+				t.cancel();
+				Thread.interrupted(); // reset interrupted flag
+			});
+			Interrupter.get().getAllUnresolvedInterrupts().forEach(i -> {
+				logger.warn("Interrupt reason {} for thread {} has not been resolved cleanly. Clearing it up.", i.getReasonForInterruption(), i.getInterruptedThread());
+				Interrupter.get().markInterruptAsResolved(i.getInterruptedThread(), i.getReasonForInterruption());
+			});
+			assert Interrupter.get().getAllUnresolvedInterrupts().isEmpty() : "Interrupter still has list of unresolved interrupts!";
+			if (Thread.currentThread().isInterrupted())
+				logger.error("Interrupt-flag of executing thread {} is set to TRUE!", Thread.currentThread());
+			assert !Thread.currentThread().isInterrupted() : "Thread is interrupted, which must not be the case!";
 		}
 	}
 }

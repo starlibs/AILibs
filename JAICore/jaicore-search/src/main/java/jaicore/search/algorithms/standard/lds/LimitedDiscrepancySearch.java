@@ -153,7 +153,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 			this.expanded.add(node);
 			this.logger.debug("Starting successor generation of {}", node.getValue());
 			long start = System.currentTimeMillis();
-			Collection<NodeExpansionDescription<T, A>> succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()), true);
+			Collection<NodeExpansionDescription<T, A>> succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()), "Successor generation" , true);
 			if (succ == null || succ.isEmpty()) {
 				this.logger.debug("No successors were generated.");
 				return new NoMoreNodesOnLevelEvent(this.getId());

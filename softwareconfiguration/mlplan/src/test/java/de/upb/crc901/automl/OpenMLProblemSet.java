@@ -28,6 +28,10 @@ public class OpenMLProblemSet extends MLProblemSet {
 		OpenmlConnector connector = new OpenmlConnector();
 		this.problemPair = new Pair<>(OpenMLHelper.getDataSourceById(id), connector.dataGet(id).getDefault_target_attribute());
 	}
+	
+	public int getId() {
+		return id;
+	}
 
 	@Override
 	public Pair<DataSource, String> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {

@@ -1,6 +1,7 @@
 package hasco.variants.forwarddecomposition.twophase;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -125,9 +126,9 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.timeOfStart = System.currentTimeMillis();
 			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info(
-					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).",
+					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).\nThe search factory is: {}",
 					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().numberOfRandomCompletions(),
-					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing(), hasco.getSearchFactory());
 			DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
 
 			/* set HASCO objects within the default path prioritizing node evaluator */
@@ -150,6 +151,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 					if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
 						TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
 						TwoPhaseHASCO.this.hasco.cancel();
+						TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - timeOfStart) - timeElapsed);
 						this.cancel();
 					}
 				}
@@ -161,6 +163,9 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			}
 			catch (AlgorithmExecutionCanceledException e) {
 				this.logger.info("HASCO has terminated due to a cancel.");
+			}
+			catch (AlgorithmTimeoutedException e) {
+				this.logger.warn("HASCO has timeouted. In fact, time to deadline is {}ms", getTimeout().milliseconds() - (System.currentTimeMillis() - timeOfStart));
 			}
 			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
 
@@ -377,10 +382,6 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 								+ "This yields a total time of {}ms.",
 								c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection);
 
-				/* Schedule a timeout for this evaluation, which is 10% over the estimated time */
-				int timeoutForEvaluation = (int) (estimatedInSelectionSingleIterationEvaluationTime * (1 + TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance()));
-				TimerTask timerTask = ts.interruptMeAfterMS(timeoutForEvaluation, "Timeout for evaluation of ensemble candidate " + c.getComponentInstance());
-
 				/* If we have a global timeout, check whether considering this model is feasible. */
 				if (TwoPhaseHASCO.this.getTimeout().seconds() > 0) {
 					int remainingTime = (int) (timestampOfDeadline - System.currentTimeMillis());
@@ -392,6 +393,10 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 						return;
 					}
 				}
+				
+				/* Schedule a timeout for this evaluation, which is 10% over the estimated time */
+				int timeoutForEvaluation = (int) (estimatedInSelectionSingleIterationEvaluationTime * (1 + TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance()));
+				TimerTask timerTask = ts.interruptMeAfterMS(timeoutForEvaluation, "Timeout for evaluation of ensemble candidate " + c.getComponentInstance());
 				try {
 					double selectionScore = evaluator.evaluate(c.getComponentInstance());
 					evaluatedModels.incrementAndGet();

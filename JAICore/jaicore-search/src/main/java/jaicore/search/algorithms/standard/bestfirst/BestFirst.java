@@ -39,12 +39,12 @@ import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.GlobalTimer;
-import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import jaicore.graphvisualizer.events.graph.NodeParentSwitchEvent;
 import jaicore.graphvisualizer.events.graph.NodeRemovedEvent;
 import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
+import jaicore.interrupt.InterruptionTimerTask;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
@@ -499,7 +499,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		long startComputation = System.currentTimeMillis();
 		try {
 			this.logger.trace("Calling f-function of node evaluator for {}", node);
-			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.f(node), !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not a worker thread
+			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.f(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not a worker thread
 			this.logger.trace("Determined f-value of {}", label);
 			if (this.isStopCriterionSatisfied()) {
 				return;
@@ -719,7 +719,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
 				this.logger.trace("Invoking getSuccessors");
 				return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
-			}, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not one of the worker threads
+			}, "Successor generation" , !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not one of the worker threads
 			assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
 			if (this.logger.isTraceEnabled()) {
 				this.logger.trace("Received {} successor descriptions for node with hash code {}. The first 1000 of these are \n\t{}", tmpSuccessorDescriptions.size(), actualNodeSelectedForExpansion.getPoint(),
