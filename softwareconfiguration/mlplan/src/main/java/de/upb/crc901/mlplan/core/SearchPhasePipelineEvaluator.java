@@ -111,4 +111,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		this.bestScore = bestScore;
 	}
 
+	public PipelineEvaluatorBuilder getConfig() {
+		return config;
+	}
 }

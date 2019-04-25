@@ -306,4 +306,12 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		assert this.isCanceled() : "Canceled-flag is not positive at the end of the cancel routine!";
 		this.logger.info("Completed cancellation of ML-Plan. Cancel status is {}", this.isCanceled());
 	}
+
+	public OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> getOptimizingFactory() {
+		return optimizingFactory;
+	}
+
+	public TwoPhaseHASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String> getTwoPhaseHASCOFactory() {
+		return twoPhaseHASCOFactory;
+	}
 }
