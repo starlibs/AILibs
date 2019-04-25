@@ -3,10 +3,14 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.concurrent.GlobalTimer;
 import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
+import jaicore.interrupt.Interrupter;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
 
@@ -21,8 +25,9 @@ import jaicore.search.model.travesaltree.Node;
  * @param <T>
  * @param <V>
  */
-public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V> {
+public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V>, ILoggingCustomizable {
 
+	private Logger logger = LoggerFactory.getLogger(TimeAwareNodeEvaluator.class);
 	private final int timeoutForNodeEvaluationInMS;
 	private long totalDeadline = -1; // this deadline can be set to guarantee that there will be no activity after this timestamp
 	private final INodeEvaluator<T, V> fallbackNodeEvaluator;
@@ -58,25 +63,33 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 		int interruptionTime = remainingTime + 150;
 
 		/* execute evaluation */
-		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
 		TimeoutSubmitter ts = GlobalTimer.getInstance().getSubmitter();
-		TimerTask timerTask = ts.interruptMeAfterMS(interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + ")", () -> controlledInterrupt.set(true));
+		String reason = "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")";
+		TimerTask timerTask = ts.interruptMeAfterMS(interruptionTime, reason);
+		Interrupter interrupter = Interrupter.get();
 		this.activeTimerTasks.add(timerTask);
 		try {
 			V result = this.fTimeouted(node, grantedTime);
-			timerTask.cancel();
-			this.activeTimerTasks.remove(timerTask);
 			ts.close();
 			return result;
 		} catch (InterruptedException e) {
-			timerTask.cancel();
-			this.activeTimerTasks.remove(timerTask);
-			Thread.interrupted(); // clear interrupted field
-			if (controlledInterrupt.get()) {
-				return this.fallbackNodeEvaluator.f(node);
-			} else {
-				throw e;
+			synchronized (interrupter) {
+				logger.info("Caught InterruptedException with message {}. Checking whether the scheduled task {} has been among the reasons.", e.getMessage(), reason);
+				assert !Thread.currentThread().isInterrupted() : "Thread should not be interrupted when InterruptedException is thrown.";
+				Thread.interrupted(); // clear interrupted field, just to be sure
+				if (interrupter.hasCurrentThreadBeenInterruptedWithReason(reason)) {
+					logger.debug("This is a controlled interrupt. Resolving the interrupt as marked and using the fallback (unless another interrupt exists)");
+					interrupter.markInterruptOnCurrentThreadAsResolved(reason);
+					return this.fallbackNodeEvaluator.f(node);
+				} else {
+					logger.debug("This is an uncontrolled (external) interrupt. Black-Listing my own reason {}.", reason);
+					interrupter.avoidInterrupt(Thread.currentThread(), reason);
+					throw e;
+				}
 			}
+		} finally {
+			this.activeTimerTasks.remove(timerTask);
+			timerTask.cancel();
 		}
 	}
 
@@ -108,5 +121,14 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 			Thread.interrupted(); // reset flag
 			throw new InterruptedException("Node evaluation of " + this.getClass().getName() + " has been interrupted.");
 		}
+	}
+
+	public void setLoggerName(String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Switched logger name to {}", name);
+	}
+
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }

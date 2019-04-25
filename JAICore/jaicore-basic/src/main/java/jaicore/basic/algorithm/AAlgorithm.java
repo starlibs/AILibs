@@ -193,19 +193,34 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void checkTermination(final boolean shutdownOnStoppingCriterion) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Checking Termination");
 		Thread t = Thread.currentThread();
-
-		/* check whether the thread has been interrupted for another reason than during shutdown */
-		if (t.isInterrupted() && !this.hasThreadBeenInterruptedDuringShutdown(t)) {
-			this.logger.info("Interruption detected for {}. Resetting interrupted-flag.", this.getId());
-			Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
-			if (shutdownOnStoppingCriterion) {
-				this.logger.debug("Invoking shutdown");
-				this.unregisterThreadAndShutdown();
-			} else {
-				this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
+		
+		/* if the thread is interrupted, handle it appropriately.
+		 *  - Interrupts caused by a shutdown will be resolved and ignored. They will be handled in the timeout or cancel block
+		 *  - Interrupts not caused by a shutdown will be merged into an InterruptedException
+		 **/
+		Interrupter interrupter = Interrupter.get();
+		synchronized (interrupter) {
+			if (t.isInterrupted()) {
+				this.logger.info("Interruption detected for {}. Resetting interrupted-flag. Now checking whether this was due to a shutdown.", this.getId());
+				Thread.interrupted(); // clear the interrupt-field. This is necessary, because otherwise some shutdown-activities (like waiting for pool shutdown) might fail
+				if (this.hasThreadBeenInterruptedDuringShutdown(t)) {
+					logger.debug("Thread has been interrupted during shutdown (so we will not throw an InterruptedException). Resolving this interruption cause now.");
+					this.resolveShutdownInterruptOnCurrentThread();
+					logger.debug("Interrupt reason resolved. Now proceeding with termination check, which should end with a timeout or cancellation.");
+					assert this.isTimeouted() || this.isCanceled() : "If a thread is interrupted during the shutdown, this should be caused by a timeout or a cancel!";
+				}
+				else {
+					logger.debug("The interrupt has not been caused by a shutdown. Will throw an InterruptedException (and maybe previously shutdown if configured so).");
+					if (shutdownOnStoppingCriterion) {
+						this.logger.debug("Invoking shutdown");
+						this.unregisterThreadAndShutdown();
+					} else {
+						this.logger.debug("Not shutting down, because shutdown-on-stop-criterion has been set to false");
+					}
+					this.logger.debug("Throwing InterruptedException to communicate the interrupt to the invoker.");
+					throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
+				}
 			}
-			this.logger.debug("Throwing InterruptedException to communicate the interrupt to the invoker.");
-			throw new InterruptedException(); // if the thread itself was actively interrupted by somebody
 		}
 
 		if (this.isTimeouted()) {
@@ -445,7 +460,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				if (!interruptedDueToShutdown) {
 					throw e;
 				}
-				this.resolveShutdownInterruptOnCurrentThread();
 				this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 				throw new IllegalStateException("Received an interrupt and checked termination, thus, termination routine should have thrown an exception which it apparently did not!");
 			} catch (AlgorithmExecutionCanceledException e) { // these exceptions should just be forwarded
