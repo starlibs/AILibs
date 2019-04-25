@@ -48,7 +48,6 @@ import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
@@ -145,9 +144,9 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
 		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Enable DEBUG for node details.", n.hashCode(), this.samples,
-				this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
+				getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
 		this.logger.debug("Node details: {}", n);
-		
+
 		long startOfComputation = System.currentTimeMillis();
 		long deadline = timeout > 0 ? startOfComputation + timeout : -1;
 		if (this.timestampOfFirstEvaluation == 0) {
@@ -206,7 +205,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					if (this.activeTasks.containsKey(n)) {
 						throw new IllegalStateException("There must be no active timer job for the considered node at the beginning of a sampling loop.");
 					}
-					this.checkInterruption();
+					checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {
 						this.logger.info("Deadline for random completions hit! Finishing node evaluation.");
 						break;
@@ -345,7 +344,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				V best = this.bestKnownScoreUnderNodeInCompleterGraph.get(n.externalPath());
 				this.logger.debug("Finished sampling. {} samples were drawn, {} were successful. Best seen score is {}", drawnSamples, successfulSamples, best);
 				if (best == null) {
-					this.checkInterruption();
+					checkInterruption();
 					if (countedExceptions > 0) {
 						throw new NoSuchElementException("Among " + drawnSamples + " evaluated candidates, we could not identify any candidate that did not throw an exception.");
 					} else {
@@ -355,7 +354,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 				/* if we are still interrupted, throw an exception */
 				this.logger.debug("Checking interruption.");
-				this.checkInterruption();
+				checkInterruption();
 				this.logger.debug("Not interrupted.");
 
 				/* add number of samples to node */
@@ -502,8 +501,8 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, ?, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.generator, nodeEvaluator);
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
-		if (this.getTotalDeadline() >= 0) {
-			this.completer.setTimeout(new TimeOut(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+		if (getTotalDeadline() >= 0) {
+			this.completer.setTimeout(new TimeOut(getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 		}
 		if (this.loggerName != null) {
 			this.completer.setLoggerName(this.loggerName + ".completer");
