@@ -135,11 +135,14 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 				t.cancel();
 				Thread.interrupted(); // reset interrupted flag
 			});
-			Interrupter.get().getAllUnresolvedInterrupts().forEach(i -> {
-				logger.warn("Interrupt reason {} for thread {} has not been resolved cleanly. Clearing it up.", i.getReasonForInterruption(), i.getInterruptedThread());
-				Interrupter.get().markInterruptAsResolved(i.getInterruptedThread(), i.getReasonForInterruption());
-			});
-			assert Interrupter.get().getAllUnresolvedInterrupts().isEmpty() : "Interrupter still has list of unresolved interrupts!";
+			Interrupter interrupter = Interrupter.get();
+			synchronized (interrupter) {
+				new ArrayList<>(interrupter.getAllUnresolvedInterrupts()).forEach(i -> {
+					logger.warn("Interrupt reason {} for thread {} has not been resolved cleanly. Clearing it up.", i.getReasonForInterruption(), i.getInterruptedThread());
+					interrupter.markInterruptAsResolved(i.getInterruptedThread(), i.getReasonForInterruption());
+				});
+				assert interrupter.getAllUnresolvedInterrupts().isEmpty() : "Interrupter still has list of unresolved interrupts!";
+			}
 			if (Thread.currentThread().isInterrupted())
 				logger.error("Interrupt-flag of executing thread {} is set to TRUE!", Thread.currentThread());
 			assert !Thread.currentThread().isInterrupted() : "Thread is interrupted, which must not be the case!";
