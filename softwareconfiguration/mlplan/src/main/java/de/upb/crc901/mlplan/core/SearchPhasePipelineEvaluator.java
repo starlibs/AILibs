@@ -63,6 +63,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	@SuppressWarnings("unchecked")
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+		Thread currentThread = Thread.currentThread();
 		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
 		String reason = "Timeout for pipeline in search phase for component instance with hash code " + c.hashCode();
 		TimerTask task = sub.interruptMeAfterMS(config.getTimeoutForSolutionEvaluation(), reason);
@@ -80,20 +81,21 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			return searchBenchmark.evaluate(config.getClassifierFactory().getComponentInstantiation(c));
 		} catch (InterruptedException e) {
 			logger.info("Received InterruptedException!");
-			assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t"
+			assert !currentThread.isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t"
 			+ Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
 			logger.info("Checking whether interrupt is triggered by task {}", task);
 			Interrupter interrupter = Interrupter.get();
 			synchronized (interrupter) {
 				if (interrupter.hasCurrentThreadBeenInterruptedWithReason(task)) {
 					Thread.interrupted(); // reset thread interruption flag, because the thread is not really interrupted but should only stop the evaluation
-					logger.info("This is a controlled interrupt of ourselves for task {}. Resetted thread interruption flag. Interrupt flag is now {}", task, Thread.currentThread().isInterrupted());
+					logger.info("This is a controlled interrupt of ourselves for task {}. Resetted thread interruption flag. Interrupt flag is now {}", task, currentThread.isInterrupted());
 					Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 					assert !Interrupter.get().hasCurrentThreadOpenInterrupts() : "There are still open interrupts!";
-					logger.info("Throwing ObjectEvaluationFailedException. Interrupt flag is {}", Thread.currentThread().isInterrupted());
+					logger.info("Throwing ObjectEvaluationFailedException. Interrupt flag is {}", currentThread.isInterrupted());
 					throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.");
 				}
-				logger.info("Recognized uncontrolled interrupt. Black-Listing interrupt-reason {} and canceling task Forwarding this exception.", task);
+				logger.info("Recognized uncontrolled interrupt. Black-Listing the own interrupt-reason {} (because we will not handle it later on), canceling task, and forwarding the InterruptException.", task);
+				interrupter.avoidInterrupt(currentThread, task);
 			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
