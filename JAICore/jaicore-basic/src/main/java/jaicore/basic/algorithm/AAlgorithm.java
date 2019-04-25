@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TimerTask;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
@@ -193,7 +194,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void checkTermination(final boolean shutdownOnStoppingCriterion) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Checking Termination");
 		Thread t = Thread.currentThread();
-		
+
 		/* if the thread is interrupted, handle it appropriately.
 		 *  - Interrupts caused by a shutdown will be resolved and ignored. They will be handled in the timeout or cancel block
 		 *  - Interrupts not caused by a shutdown will be merged into an InterruptedException
@@ -208,8 +209,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 					this.resolveShutdownInterruptOnCurrentThread();
 					logger.debug("Interrupt reason resolved. Now proceeding with termination check, which should end with a timeout or cancellation.");
 					assert this.isTimeouted() || this.isCanceled() : "If a thread is interrupted during the shutdown, this should be caused by a timeout or a cancel!";
-				}
-				else {
+				} else {
 					logger.debug("The interrupt has not been caused by a shutdown. Will throw an InterruptedException (and maybe previously shutdown if configured so).");
 					if (shutdownOnStoppingCriterion) {
 						this.logger.debug("Invoking shutdown");
@@ -266,9 +266,13 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				return;
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
-		
-		this.logger.info("Entering shutdown procedure for {}. Canceling {} active tasks and interrupting {} active threads.", this.getId(), activeTasks.size(), this.activeThreads.size());
-		for (TimerTask t : new ArrayList<>(activeTasks)) {
+			this.logger.info("Entering shutdown procedure for {}. Canceling {} active tasks and interrupting {} active threads.", this.getId(), activeTasks.size(), this.activeThreads.size());
+			List<TimerTask> copyOfTasks = new ArrayList<>(activeTasks);
+			assert copyOfTasks.equals(activeTasks);
+			if (logger.isDebugEnabled()) {
+				logger.debug("List of active tasks: {}", activeTasks.stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining()));
+			}
+			for (TimerTask t : copyOfTasks) {
 				logger.debug("Canceling TimerTask {} as part of shutdown of {}", t, getId());
 				this.cancelAndUnregisterTimerTask(t);
 			}
@@ -303,12 +307,22 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.shutdown();
 	}
 
-	protected synchronized void registerActiveThread() {
+	protected void registerActiveThread() {
+
+		/* check this already prior to synchronizing to not run into a dead-lock if the shutdown is currently in progress. */
 		if (shutdownInitialized > 0) {
 			logger.warn("Ignoring registration of thread, because the algorithm has been shutdown already");
 			return;
 		}
-		this.activeThreads.add(Thread.currentThread());
+
+		/* now conduct the synchronized check */
+		synchronized (this) {
+			if (shutdownInitialized > 0) {
+				logger.warn("Ignoring registration of thread, because the algorithm has been shutdown already");
+				return;
+			}
+			this.activeThreads.add(Thread.currentThread());
+		}
 	}
 
 	protected void unregisterActiveThread() {
@@ -316,15 +330,29 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		this.activeThreads.remove(Thread.currentThread());
 	}
 
-	protected synchronized void registerTimerTask(TimerTask task) {
+	protected void registerTimerTask(TimerTask task) {
+
+		/* check this already prior to synchronizing to not run into a dead-lock if the shutdown is currently in progress. */
 		if (shutdownInitialized > 0) {
-			logger.warn("Ignoring registration of timer, because the algorithm has been shutdown already");
+			logger.warn("Ignoring registration of TimerTask, because the algorithm has been shutdown already");
 			return;
 		}
-		activeTasks.add(task);
+
+		/* now conduct the synchronized check */
+		synchronized (this) {
+			if (shutdownInitialized > 0) {
+				logger.warn("Ignoring registration of TimerTask, because the algorithm has been shutdown already");
+				return;
+			}
+			if (task == null)
+				throw new IllegalArgumentException("Cannot add TimerTask NULL");
+			activeTasks.add(task);
+		}
 	}
 
 	protected void cancelAndUnregisterTimerTask(TimerTask task) {
+		if (task == null)
+			throw new IllegalArgumentException("Cannot cancel TimerTask NULL");
 		task.cancel();
 		activeTasks.remove(task);
 	}
@@ -354,18 +382,14 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public synchronized void cancel() {
+	public void cancel() {
 		this.logger.info("Received cancel for algorithm {}.", this.getId());
 		if (this.isCanceled()) {
 			this.logger.debug("Ignoring cancel command since the algorithm has been canceled before.");
 			return;
 		}
 		this.canceled = System.currentTimeMillis();
-		if (this.isShutdownInitialized()) {
-			this.logger.debug("Ignoring cancel command since the algorithm has already been shutdown before.");
-			return;
-		}
-		this.logger.info("Executing cancel on {}. Have set the cancel flag and will now invoke shutdown procedure.", this.getId());
+		this.logger.info("Cancel flag for {} is set to {}. Now invoke shutdown procedure.", getId(), canceled);
 		this.shutdown();
 	}
 
