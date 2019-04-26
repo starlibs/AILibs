@@ -1,12 +1,12 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.timing.TimedComputation;
@@ -61,11 +61,14 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 		/* execute evaluation */
 		try {
 			return TimedComputation.compute(() -> this.fTimeouted(node, grantedTime), interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")");
-		} catch (TimeoutException e) {
+		} catch (AlgorithmTimeoutedException e) {
+			logger.warn("Computation of f-value for {} failed due to exception {} with message {}", node, e.getClass().getName(), e.getMessage());
 			return this.fallbackNodeEvaluator.f(node);
 		}
 		catch (ExecutionException e) {
-			throw (NodeEvaluationException)e.getCause();
+			if (e.getCause() instanceof NodeEvaluationException)
+				throw (NodeEvaluationException)e.getCause();
+			else throw new NodeEvaluationException(e.getCause(), "Could not evaluate path.");
 		}
 	}
 

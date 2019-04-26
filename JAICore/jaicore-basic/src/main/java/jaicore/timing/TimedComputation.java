@@ -55,7 +55,8 @@ public abstract class TimedComputation {
 					throw e;
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new ExecutionException(e);
 		} finally {
 			task.cancel();
