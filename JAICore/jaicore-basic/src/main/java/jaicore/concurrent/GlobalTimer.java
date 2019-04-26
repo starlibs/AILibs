@@ -11,12 +11,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.interrupt.InterruptionTimerTask;
-
 public class GlobalTimer extends Timer {
 	private static final Logger logger = LoggerFactory.getLogger(GlobalTimer.class);
 	private static final GlobalTimer instance = new GlobalTimer();
-	private final List<TimeoutSubmitter> emittedSubmitters = new ArrayList<>();
 	private final TimerTask refresher;
 
 	private GlobalTimer() {
@@ -36,10 +33,6 @@ public class GlobalTimer extends Timer {
 	
 	public static GlobalTimer getInstance() {
 		return instance;
-	}
-
-	public TimeoutSubmitter getSubmitter() {
-		return new TimeoutSubmitter();
 	}
 	
 	@Override
@@ -83,46 +76,5 @@ public class GlobalTimer extends Timer {
 
 	public int getNumberOfActiveTasks() {
 		return this.getActiveTasks().size();
-	}
-
-	public class TimeoutSubmitter {
-		private TimeoutSubmitter() {
-			synchronized (instance) {
-				GlobalTimer.this.emittedSubmitters.add(this);
-			}
-		}
-
-		public synchronized TimerTask interruptMeAfterMS(final int delay, final String reason) {
-			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
-			return this.interruptThreadAfterMS(Thread.currentThread(), delay, reason);
-		}
-
-		public synchronized TimerTask interruptMeAfterMS(final int delay, final String reason, final Runnable preInterruptionHook) {
-			logger.info("Scheduling interrupt for thread {} in {}ms", Thread.currentThread(), delay);
-			return this.interruptThreadAfterMS(Thread.currentThread(), delay, reason, preInterruptionHook);
-		}
-
-		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, final String reason) {
-			return this.interruptThreadAfterMS(thread, delay, reason, null);
-		}
-
-		public synchronized TimerTask interruptThreadAfterMS(final Thread thread, final long delay, final String reason, final Runnable preInterruptionHook) {
-			TimerTask task = new InterruptionTimerTask(reason, thread, preInterruptionHook);
-			if (!GlobalTimer.this.emittedSubmitters.contains(this)) {
-				throw new IllegalStateException("Cannot submit interrupt job to submitter " + this + " since it has already been closed!");
-			}
-			GlobalTimer.this.schedule(task, delay);
-
-			/* create id for job and return it */
-			logger.info("Job {} scheduled for in {}ms.", task, delay);
-			return task;
-		}
-
-		public void close() {
-			synchronized (instance) {
-				GlobalTimer.this.emittedSubmitters.remove(this);
-				logger.info("Canceled timer");
-			}
-		}
 	}
 }

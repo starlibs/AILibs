@@ -1,15 +1,11 @@
 package jaicore.basic.algorithm;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.util.TimerTask;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
@@ -25,9 +21,8 @@ import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.GlobalTimer;
-import jaicore.interrupt.Interrupt;
 import jaicore.interrupt.Interrupter;
-import jaicore.interrupt.InterruptionTimerTask;
+import jaicore.timing.TimedComputation;
 
 public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCustomizable {
 
@@ -49,7 +44,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private long deadline = -1; // timestamp when algorithm must terminate due to timeout
 	private long timeOfTimeoutDetection = -1; // timestamp for when timeout has been triggered
 	private long canceled = -1; // timestamp for when the algorithm has been canceled
-	private final List<TimerTask> activeTasks = new ArrayList<>();
 	private final Set<Thread> activeThreads = new HashSet<>();
 	private AlgorithmState state = AlgorithmState.created;
 	private final EventBus eventBus = new EventBus();
@@ -266,19 +260,19 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 				return;
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
-			this.logger.info("Entering shutdown procedure for {}. Canceling {} active tasks and interrupting {} active threads.", this.getId(), activeTasks.size(), this.activeThreads.size());
-			List<TimerTask> copyOfTasks = new ArrayList<>(activeTasks);
-			assert copyOfTasks.equals(activeTasks);
-			if (logger.isDebugEnabled()) {
-				logger.debug("List of active tasks: {}", activeTasks.stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining()));
-			}
-			for (TimerTask t : copyOfTasks) {
-				logger.debug("Canceling TimerTask {} as part of shutdown of {}", t, getId());
-				this.cancelAndUnregisterTimerTask(t);
-			}
+			this.logger.info("Entering shutdown procedure for {}. Interrupting {} active threads.", this.getId(), this.activeThreads.size());
+			// List<TimerTask> copyOfTasks = new ArrayList<>(activeTasks);
+			// assert copyOfTasks.equals(activeTasks);
+			// if (logger.isDebugEnabled()) {
+			// logger.debug("List of active tasks: {}", activeTasks.stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining()));
+			// }
+			// for (TimerTask t : copyOfTasks) {
+			// logger.debug("Canceling TimerTask {} as part of shutdown of {}", t, getId());
+			// this.cancelAndUnregisterTimerTask(t);
+			// }
 		}
-		if (!activeTasks.isEmpty())
-			throw new IllegalStateException();
+		// if (!activeTasks.isEmpty())
+		// throw new IllegalStateException();
 		for (Thread t : this.activeThreads) {
 			logger.debug("Triggering interrupt on {} as part of shutdown of {}", t, getId());
 			this.interruptThreadAsPartOfShutdown(t);
@@ -328,33 +322,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected void unregisterActiveThread() {
 		this.logger.trace("Unregistering current thread {}", Thread.currentThread());
 		this.activeThreads.remove(Thread.currentThread());
-	}
-
-	protected void registerTimerTask(TimerTask task) {
-
-		/* check this already prior to synchronizing to not run into a dead-lock if the shutdown is currently in progress. */
-		if (shutdownInitialized > 0) {
-			logger.warn("Ignoring registration of TimerTask, because the algorithm has been shutdown already");
-			return;
-		}
-
-		/* now conduct the synchronized check */
-		synchronized (this) {
-			if (shutdownInitialized > 0) {
-				logger.warn("Ignoring registration of TimerTask, because the algorithm has been shutdown already");
-				return;
-			}
-			if (task == null)
-				throw new IllegalArgumentException("Cannot add TimerTask NULL");
-			activeTasks.add(task);
-		}
-	}
-
-	protected void cancelAndUnregisterTimerTask(TimerTask task) {
-		if (task == null)
-			throw new IllegalArgumentException("Cannot cancel TimerTask NULL");
-		task.cancel();
-		activeTasks.remove(task);
 	}
 
 	public long getActivationTime() {
@@ -500,57 +467,28 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			announceTimeoutDetected();
 			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 		}
-
-		/* schedule a timer that will interrupt the current thread and execute the task */
-		long timeToInterrupt = remainingTime - this.timeoutPrecautionOffset;
-		GlobalTimer timer = GlobalTimer.getInstance();
-		TimerTask task = new InterruptionTimerTask("Timeout for timed execution of callable in algorithm " + getId() + ": " + reasonToLogOnTimeout,
-				() -> this.logger.debug("Timeout detected at timestamp {}. This is  {} prior to deadline, interrupting successor generation.", System.currentTimeMillis(), this.getRemainingTimeToDeadline()));
-		registerTimerTask(task);
-		this.logger.debug("Scheduling timer for interruption in {}ms, i.e. timestamp {}. Remaining time to deadline: {}. List of active tasks is now: {}", timeToInterrupt, System.currentTimeMillis() + timeToInterrupt,
-				this.getRemainingTimeToDeadline(), timer.getActiveTasks());
-		timer.schedule(task, timeToInterrupt);
+		
+		/* conduct timed computation */
 		try {
-			this.logger.debug("Starting supervised computation of {}.", r);
-			T result = r.call();
-			task.cancel();
-			return result;
-		} catch (InterruptedException e) { // the fact that we are interrupted here can have several reasons. Could be an interrupt from the outside, a cancel, or a timeout by the above timer
-			this.logger.info("Received interrupt for {}. Cancel flag is {}", this.getId(), this.isCanceled());
-
-			/* if the timeout has been triggered (with caution) */
-			remainingTime = this.getRemainingTimeToDeadline().milliseconds();
-			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
-				this.logger.info("Interrupt is internal.");
-				Thread.interrupted(); // clear the interrupted field
-				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
-				if (remainingTime > 0) {
-					this.logger.debug("Artificially sleeping {}ms to trigger the correct behavior in the checker.", remainingTime);
-					this.timeOfTimeoutDetection = System.currentTimeMillis();
-					this.checkTermination(shutdownOnStoppingCriterionSatisfied);
-				} else {
-					this.logger.debug("Gained back control from successor generation, but remaining time is now only {}ms. Algorithm should terminate now.", remainingTime);
-				}
-				assert !Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task);
-			}
-
-			/* otherwise, if the thread has been interrupted directly and not as a consequence of a shutdown, forward the interrupt */
-			else {
-				boolean interruptedDueToShutdown = this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread());
-				Optional<Interrupt> latestInterrupt = Interrupter.get().getLatestUnresolvedInterruptOfCurrentThread();
-				assert latestInterrupt.isPresent() : "No interrupt present!";
-				this.logger.info("Interrupt is external (reason is {}). Cancel flag is now {}. Thread contained in interrupted by shutdown: {}", latestInterrupt.get().getReasonForInterruption(), this.isCanceled(), interruptedDueToShutdown);
-				if (!interruptedDueToShutdown) {
-					throw e;
-				}
-				this.resolveShutdownInterruptOnCurrentThread();
-			}
+			return TimedComputation.compute(r, remainingTime - this.timeoutPrecautionOffset, reasonToLogOnTimeout);
+		} catch (AlgorithmTimeoutedException e) {
+			this.logger.debug("TimedComputation has been timeouted. Setting the TimeoutDetection flag to now. Remaining time is {}ms.", this.getRemainingTimeToDeadline().milliseconds());
+			this.timeOfTimeoutDetection = System.currentTimeMillis();
 			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
-			throw new IllegalStateException("termination routine should have thrown an exception!");
-		} catch (Exception e) {
-			throw new AlgorithmException(e, "The algorithm has failed due to an exception of a Callable.");
-		} finally {
-			cancelAndUnregisterTimerTask(task);
+			throw new IllegalStateException("The flag for timeout detection has been set, but checkTermination did not throw an exception!"); // this line should never be reached
+		} catch (InterruptedException e) {
+			logger.info("Received interrupt for {} during timed computation. Cancel flag is {}", this.getId(), this.isCanceled());
+			assert !Thread.currentThread().isInterrupted() : "By java convention, the thread should not be interrupted when an InterruptedException is thrown.";
+			boolean interruptedDueToShutdown = this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread());
+			if (!interruptedDueToShutdown) {
+				throw e;
+			}
+			this.resolveShutdownInterruptOnCurrentThread();
+			checkTermination(shutdownOnStoppingCriterionSatisfied);
+			throw new IllegalStateException("A stopping criterion must have been true (probably cancel), but checkTermination did not throw an exception!"); // this line should never be reached
+		}
+		catch (ExecutionException e) {
+			throw new AlgorithmException(e, "The algorithm has failed due to an exception of Callable " + r + " with timeout log message " + reasonToLogOnTimeout);
 		}
 	}
 }

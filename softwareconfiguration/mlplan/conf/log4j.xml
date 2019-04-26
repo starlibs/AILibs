@@ -198,7 +198,7 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
-    <level value="debug" />
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm._algorithm">

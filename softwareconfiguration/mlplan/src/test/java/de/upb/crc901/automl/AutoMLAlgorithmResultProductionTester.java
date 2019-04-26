@@ -52,9 +52,9 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-//		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
-//		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
-//		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
+		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
+		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
 		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		problemSets.add(new OpenMLProblemSet(1457)); // amazon
@@ -108,7 +108,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
 			}
-			algorithm.setTimeout(new TimeOut(600, TimeUnit.SECONDS));
+			algorithm.setTimeout(new TimeOut(1800, TimeUnit.SECONDS));
 	
 			/* find classifier */
 			Instances data = algorithm.getInput();

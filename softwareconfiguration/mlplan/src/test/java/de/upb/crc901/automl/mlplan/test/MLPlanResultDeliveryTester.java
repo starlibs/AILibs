@@ -17,8 +17,8 @@ public class MLPlanResultDeliveryTester extends AutoMLAlgorithmResultProductionT
 	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(final Instances data) {
 		try {
 			MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
-			builder.withTimeoutForNodeEvaluation(new TimeOut(180, TimeUnit.SECONDS));
-			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(60, TimeUnit.SECONDS));
+			builder.withTimeoutForNodeEvaluation(new TimeOut(15, TimeUnit.MINUTES));
+			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.MINUTES));
 			MLPlan mlplan = new MLPlan(builder, data);
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(.0f);

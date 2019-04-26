@@ -121,7 +121,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> se = new IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double>() {
 
 			@Override
-			public Double evaluate(final SearchGraphPath<QueenNode, String> solutionPath) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+			public Double evaluate(final SearchGraphPath<QueenNode, String> solutionPath) throws InterruptedException, ObjectEvaluationFailedException {
 				return oe.evaluate(solutionPath);
 			}
 		};
