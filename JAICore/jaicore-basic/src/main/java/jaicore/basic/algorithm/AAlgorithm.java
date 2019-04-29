@@ -261,18 +261,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 			this.shutdownInitialized = System.currentTimeMillis();
 			this.logger.info("Entering shutdown procedure for {}. Interrupting {} active threads.", this.getId(), this.activeThreads.size());
-			// List<TimerTask> copyOfTasks = new ArrayList<>(activeTasks);
-			// assert copyOfTasks.equals(activeTasks);
-			// if (logger.isDebugEnabled()) {
-			// logger.debug("List of active tasks: {}", activeTasks.stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining()));
-			// }
-			// for (TimerTask t : copyOfTasks) {
-			// logger.debug("Canceling TimerTask {} as part of shutdown of {}", t, getId());
-			// this.cancelAndUnregisterTimerTask(t);
-			// }
 		}
-		// if (!activeTasks.isEmpty())
-		// throw new IllegalStateException();
 		for (Thread t : this.activeThreads) {
 			logger.debug("Triggering interrupt on {} as part of shutdown of {}", t, getId());
 			this.interruptThreadAsPartOfShutdown(t);
