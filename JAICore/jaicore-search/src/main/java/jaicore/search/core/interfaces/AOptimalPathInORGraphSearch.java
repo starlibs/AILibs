@@ -52,7 +52,7 @@ implements IOptimalPathInORGraphSearch<I, N, A, V> {
 	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> path) {
 		this.updateBestSeenSolution(path);
 		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), path);
-		this.logger.info("Identified solution with score {}. Actions: {}", path.getScore(), path.getEdges());
+		this.logger.info("Identified solution with score {}. Nodes: {}, Actions: {}", path.getScore(), path.getNodes(), path.getEdges());
 		this.post(event);
 		return event;
 	}

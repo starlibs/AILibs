@@ -130,7 +130,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 					logger.debug("The leaf node is not a goal node. Creating successors and diving into the first one.");
 					post(new NodeTypeSwitchEvent<>(getId(), leaf, "or_closed"));
 					final N expandedLeaf = leaf;
-					List<N> successorsOfThis = computeTimeoutAware(() -> getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(expandedLeaf).stream().map(NodeExpansionDescription::getTo).collect(Collectors.toList()));
+					List<N> successorsOfThis = computeTimeoutAware(() -> getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(expandedLeaf).stream().map(NodeExpansionDescription::getTo).collect(Collectors.toList()), true);
 					long lastTerminationCheck = 0;
 					for (N child : successorsOfThis) {
 						post(new NodeAddedEvent<>(getId(), expandedLeaf, child, "or_open"));

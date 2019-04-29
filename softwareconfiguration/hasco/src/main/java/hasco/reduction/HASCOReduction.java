@@ -301,8 +301,8 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
 				}
 				IObjectEvaluator<ComponentInstance, V> evaluator = problem.getCompositionEvaluator();
-				if(evaluator instanceof IInformedObjectEvaluatorExtension && bestSolutionSupplier.get() != null) {
-					((IInformedObjectEvaluatorExtension<V>) evaluator).updateBestScore(bestSolutionSupplier.get().getScore());
+				if (evaluator instanceof IInformedObjectEvaluatorExtension && HASCOReduction.this.bestSolutionSupplier.get() != null) {
+					((IInformedObjectEvaluatorExtension<V>) evaluator).updateBestScore(HASCOReduction.this.bestSolutionSupplier.get().getScore());
 				}
 				return evaluator.evaluate(solution);
 			}

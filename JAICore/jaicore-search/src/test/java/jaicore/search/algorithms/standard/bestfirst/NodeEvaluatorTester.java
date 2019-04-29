@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.interrupt.Interrupter;
@@ -36,6 +37,9 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<QueenNode, Do
 			throws InterruptedException, AlgorithmException {
 
 		N ne = this.getBusyNodeEvaluator();
+		if (ne instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) ne).setLoggerName("testednodeevaluator");
+		}
 		for (Node<QueenNode, Double> node : this.getNodesToTest(ne)) {
 
 			Timer t = new Timer();

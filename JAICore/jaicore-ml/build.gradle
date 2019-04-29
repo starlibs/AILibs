@@ -36,10 +36,6 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
 	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 	
-	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
-	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.3.1'
-	
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
 	
 	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.28'

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
 
@@ -27,7 +27,7 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 	private long totalDeadline = -1; // this deadline can be set to guarantee that there will be no activity after this timestamp
 	private final INodeEvaluator<T, V> fallbackNodeEvaluator;
 	private final List<TimerTask> activeTimerTasks = new ArrayList<>();
-	
+
 	public TimeAwareNodeEvaluator(final int pTimeoutInMS) {
 		this(pTimeoutInMS, n -> null);
 	}
@@ -59,18 +59,18 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 
 		/* execute evaluation */
 		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
-		TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
+		TimeoutSubmitter ts = GlobalTimer.getInstance().getSubmitter();
 		TimerTask timerTask = ts.interruptMeAfterMS(interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + ")", () -> controlledInterrupt.set(true));
-		activeTimerTasks.add(timerTask);
+		this.activeTimerTasks.add(timerTask);
 		try {
 			V result = this.fTimeouted(node, grantedTime);
 			timerTask.cancel();
-			activeTimerTasks.remove(timerTask);
+			this.activeTimerTasks.remove(timerTask);
 			ts.close();
 			return result;
 		} catch (InterruptedException e) {
 			timerTask.cancel();
-			activeTimerTasks.remove(timerTask);
+			this.activeTimerTasks.remove(timerTask);
 			Thread.interrupted(); // clear interrupted field
 			if (controlledInterrupt.get()) {
 				return this.fallbackNodeEvaluator.f(node);
@@ -79,10 +79,10 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 			}
 		}
 	}
-	
+
 	public void cancelActiveTasks() {
-		while (!activeTimerTasks.isEmpty()) {
-			TimerTask tt = activeTimerTasks.remove(0);
+		while (!this.activeTimerTasks.isEmpty()) {
+			TimerTask tt = this.activeTimerTasks.remove(0);
 			tt.cancel();
 		}
 	}

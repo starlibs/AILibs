@@ -14,8 +14,8 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
@@ -51,16 +51,21 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 
 	@Override
 	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+
+		if (this.bestScore == null) {
+			throw new UnsupportedOperationException("Cannot evaluated in selection phase if no best solution has been propagated.");
+		}
 		IEvaluatorMeasureBridge<Double> bridge = this.config.getEvaluationMeasurementBridge();
 		if (this.config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {
 			bridge = ((CacheEvaluatorMeasureBridge) bridge).getShallowCopy(c);
 		}
 
+		this.logger.debug("Running probabilistic MCCV with {} iterations and best score {}", this.config.getNumMCIterations(), this.bestScore);
 		ProbabilisticMonteCarloCrossValidationEvaluator mccv = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.bestScore, this.config.getData(),
 				this.config.getTrainFoldSize(), this.config.getSeed());
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		TimeoutSubmitter sub = TimeoutTimer.getInstance().getSubmitter();
+		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
 		TimerTask task = sub.interruptMeAfterMS(this.config.getTimeoutForSolutionEvaluation() - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
 		try {
 			mccv.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c), stats);
@@ -85,6 +90,9 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 
 	@Override
 	public void updateBestScore(final Double bestScore) {
+		if (bestScore == null) {
+			throw new IllegalArgumentException("Best known score must not be updated with NULL");
+		}
 		this.bestScore = bestScore;
 	}
 

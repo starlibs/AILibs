@@ -10,7 +10,7 @@ import jaicore.search.model.travesaltree.Node;
 
 /**
  * Open collection pareto front implementation.
- * 
+ *
  * @param <T>
  *            internal label of node
  * @param <V>
@@ -18,6 +18,7 @@ import jaicore.search.model.travesaltree.Node;
  */
 public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T, V>> {
 
+	private static final String UNCERTAINTY = "uncertainty";
 	private static final String DOMINATES = "dominates";
 	private static final String DOMINATED_BY = "dominatedBy";
 
@@ -32,28 +33,35 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 
 	/**
 	 * Constructor.
-	 * 
+	 *
 	 * @param pareto
 	 *            Pareto set implementation.
 	 */
-	public ParetoSelection(Queue<Node<T, V>> pareto) {
-		open = new LinkedList<>();
+	public ParetoSelection(final Queue<Node<T, V>> pareto) {
+		this.open = new LinkedList<>();
 		this.pareto = pareto;
 	}
 
 	/**
 	 * Tests if p dominates q.
-	 * 
+	 *
 	 * @param p
 	 * @param q
 	 * @return true if p dominates q. False, otherwise.
 	 */
-	private boolean dominates(Node<T, V> p, Node<T, V> q) {
+	@SuppressWarnings("unchecked")
+	private boolean dominates(final Node<T, V> p, final Node<T, V> q) {
+		if (!p.getAnnotations().containsKey(UNCERTAINTY)) {
+			throw new IllegalArgumentException("Node " + p + " has no uncertainty information.");
+		}
+		if (!q.getAnnotations().containsKey(UNCERTAINTY)) {
+			throw new IllegalArgumentException("Node " + q + " has no uncertainty information.");
+		}
 		// Get f and u values of nodes
 		V p_f = (V) p.getAnnotation("f");
-		double p_u = (double) p.getAnnotation("uncertainty");
+		double p_u = (double) p.getAnnotation(UNCERTAINTY);
 		V q_f = (V) q.getAnnotation("f");
-		double q_u = (double) q.getAnnotation("uncertainty");
+		double q_u = (double) q.getAnnotation(UNCERTAINTY);
 
 		// p dominates q <=> (q.f < p.f AND q.u <= p.u) OR (q.f <= p.f AND q.u < p.u)
 		return ((p_f.compareTo(q_f) < 0) && (p_u <= q_u)) || ((p_f.compareTo(q_f) <= 0) && (p_u < q_u));
@@ -61,23 +69,24 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 
 	/**
 	 * Tests if p is maximal.
-	 * 
+	 *
 	 * @param n
 	 * @return
 	 */
-	private boolean isMaximal(Node n) {
+	@SuppressWarnings("unchecked")
+	private boolean isMaximal(final Node<T, V> n) {
 		return ((HashSet<Node<T, V>>) n.getAnnotation(DOMINATED_BY)).size() == 0;
 	}
 
 	/**
 	 * Adds a node to the open list and, if its not dominated by any other point
 	 * also to the pareto front.
-	 * 
+	 *
 	 * @param n
 	 * @return
 	 */
 	@Override
-	public boolean add(Node<T, V> n) {
+	public boolean add(final Node<T, V> n) {
 		if (n.getInternalLabel() == null) {
 			throw new IllegalArgumentException("Cannot add nodes with value NULL to OPEN!");
 		}
@@ -106,15 +115,15 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 		}
 
 		// If n is not dominated by any other point, add it to pareto front.
-		if (isMaximal(n)) {
+		if (this.isMaximal(n)) {
 			this.pareto.add(n);
 		}
 
-		return open.add(n);
+		return this.open.add(n);
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends Node<T, V>> c) {
+	public boolean addAll(final Collection<? extends Node<T, V>> c) {
 		boolean changed = false;
 		for (Node<T, V> p : c) {
 			changed |= this.add(p);
@@ -124,52 +133,52 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 
 	@Override
 	public void clear() {
-		open.clear();
+		this.open.clear();
 	}
 
 	@Override
-	public boolean contains(Object o) {
-		return open.contains(o);
+	public boolean contains(final Object o) {
+		return this.open.contains(o);
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
-		return open.containsAll(c);
+	public boolean containsAll(final Collection<?> c) {
+		return this.open.containsAll(c);
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return open.isEmpty();
+		return this.open.isEmpty();
 	}
 
 	@Override
 	public Iterator<Node<T, V>> iterator() {
-		return pareto.iterator();
+		return this.pareto.iterator();
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
-		return open.removeAll(c);
+	public boolean removeAll(final Collection<?> c) {
+		return this.open.removeAll(c);
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
-		return open.retainAll(c);
+	public boolean retainAll(final Collection<?> c) {
+		return this.open.retainAll(c);
 	}
 
 	@Override
 	public int size() {
-		return open.size();
+		return this.open.size();
 	}
 
 	@Override
 	public Object[] toArray() {
-		return open.toArray();
+		return this.open.toArray();
 	}
 
 	@Override
-	public <X> X[] toArray(X[] a) {
-		return open.toArray(a);
+	public <X> X[] toArray(final X[] a) {
+		return this.open.toArray(a);
 	}
 
 	/**
@@ -182,12 +191,12 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 
 	/**
 	 * Removes an Node from
-	 * 
+	 *
 	 * @param o
 	 * @return
 	 */
 	@Override
-	public boolean remove(Object o) {
+	public boolean remove(final Object o) {
 		if (o instanceof Node) {
 			Node<T, V> node = (Node<T, V>) o;
 			// Remove all associations of n.
@@ -202,13 +211,14 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 				((HashSet<Node<T, V>>) q.getAnnotation(DOMINATES)).remove(node); // TODO: Is this even necessary?
 			}
 			// Remove n from Pareto set and Open list.
-			pareto.remove(node);
-			return open.remove(node);
+			this.pareto.remove(node);
+			return this.open.remove(node);
 		} else {
 			return false;
 		}
 	}
 
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("OPEN LIST: \n");
@@ -227,23 +237,23 @@ public class ParetoSelection<T, V extends Comparable<V>> implements Queue<Node<T
 
 	@Override
 	public Node<T, V> element() {
-		return peek();
+		return this.peek();
 	}
 
 	@Override
-	public boolean offer(Node<T, V> arg0) {
-		return add(arg0);
+	public boolean offer(final Node<T, V> arg0) {
+		return this.add(arg0);
 	}
 
 	@Override
 	public Node<T, V> poll() {
-		Node<T, V> node = peek();
-		remove(node);
+		Node<T, V> node = this.peek();
+		this.remove(node);
 		return node;
 	}
 
 	@Override
 	public Node<T, V> remove() {
-		return poll();
+		return this.poll();
 	}
 }
