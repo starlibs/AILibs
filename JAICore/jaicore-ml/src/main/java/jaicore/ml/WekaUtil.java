@@ -33,8 +33,8 @@ import com.google.common.collect.Range;
 
 import jaicore.basic.sets.CartesianProductComputationProblem;
 import jaicore.basic.sets.LDSRelationComputer;
+import jaicore.ml.cache.FoldBasedSubsetInstruction;
 import jaicore.ml.cache.ReproducibleInstances;
-import jaicore.ml.cache.SplitInstruction;
 import jaicore.ml.core.SimpleInstanceImpl;
 import jaicore.ml.core.SimpleInstancesImpl;
 import jaicore.ml.core.SimpleLabeledInstanceImpl;
@@ -946,7 +946,7 @@ public class WekaUtil {
 				/* update ReproducibleInstanes history */
 				String ratiosAsString = Arrays.toString(portions);
 				for (int i = 0; i < instances.size(); i++) {
-					instances.get(i).addInstruction(new SplitInstruction(ratiosAsString, seed, i));
+					instances.get(i).addInstruction(new FoldBasedSubsetInstruction(WekaUtil.class.getName() + ".getStratifiedSplit(" + seed+ ", " + ratiosAsString + ")", i));
 				}
 				return instances;
 	}

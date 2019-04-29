@@ -11,19 +11,7 @@ public interface IExperimentSetConfig extends Mutable, Reloadable {
 	public static final String MEM_OPP = "mem.opp";
 	public static final String CPU_MAX = "cpu.max";
 
-	/*
-	 * experiment results must be stored in a database. The table is the one where
-	 * the experiments will be maintained
-	 */
-	public static final String DB_DRIVER = "db.driver";
-	public static final String DB_HOST = "db.host";
-	public static final String DB_USER = "db.username";
-	public static final String DB_PASS = "db.password";
-	public static final String DB_NAME = "db.database";
-	public static final String DB_TABLE = "db.table";
-	public static final String DB_SSL = "db.ssl";
-
-	/* the key fields define the semantics of a single experiment */
+		/* the key fields define the semantics of a single experiment */
 	public static final String KEYFIELDS = "keyfields";
 
 	/* the result fields define fields for results of each run */
@@ -41,24 +29,6 @@ public interface IExperimentSetConfig extends Mutable, Reloadable {
 
 	@Key(CPU_MAX)
 	public Integer getNumberOfCPUs();
-
-	@Key(DB_HOST)
-	public String getDBHost();
-
-	@Key(DB_USER)
-	public String getDBUsername();
-
-	@Key(DB_PASS)
-	public String getDBPassword();
-
-	@Key(DB_NAME)
-	public String getDBDatabaseName();
-
-	@Key(DB_TABLE)
-	public String getDBTableName();
-
-	@Key(DB_SSL)
-	public Boolean getDBSSL();
 
 	@Key(KEYFIELDS)
 	public List<String> getKeyFields();

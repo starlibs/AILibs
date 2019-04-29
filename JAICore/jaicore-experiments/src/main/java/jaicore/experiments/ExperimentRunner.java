@@ -1,95 +1,86 @@
 package jaicore.experiments;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.SQLAdapter;
 import jaicore.basic.StringUtil;
 import jaicore.basic.sets.SetUtil;
+import jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
+import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
+import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
+import jaicore.experiments.exceptions.ExperimentUpdateFailedException;
+import jaicore.experiments.exceptions.IllegalExperimentSetupException;
+import jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 
+/**
+ * This class is used to run experiments.
+ * 
+ * @author fmohr
+ *
+ */
 public class ExperimentRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
 
+	private static final String PROTOCOL_JAVA = "java:";
+	private static final int MAX_MEM_DEVIATION = 50;
+	
+	private static final String LOGMESSAGE_CREATEINSTANCE = "Create a new instance of {} and ask it for the number of possible values.";
+
 	private final IExperimentSetConfig config;
 	private final IExperimentSetEvaluator conductor;
-	private final SQLAdapter adapter;
+	private final IExperimentDatabaseHandle handle;
 	private final Collection<ExperimentDBEntry> knownExperimentEntries = new HashSet<>();
-
-	private final List<String> fieldsForWhichToIgnoreTime;
-	private final List<String> fieldsForWhichToIgnoreMemory;
-
-	private static final String FIELD_ID = "experiment_id";
-	private static final String FIELD_MEMORY = "memory";
-	private static final String FIELD_HOST = "host";
-	private static final String FIELD_NUMCPUS = "cpus";
-	private static final String FIELD_TIME = "time";
 
 	private Map<String, List<String>> valuesForKeyFields = new HashMap<>();
 	private int memoryLimit;
 	private int cpuLimit;
 	private int totalNumberOfExperiments;
+	private final Random random = new Random(System.currentTimeMillis());
 
 	/**
-	 * This flag indicates whether the given memory limit deviates from the actually available memory.
+	 * This flag indicates whether the given memory limit deviates from the actually
+	 * available memory.
 	 */
-	private boolean cond_memoryLimitCheck = false;
+	private boolean condMemoryLimitCheck = false;
 
-	public ExperimentRunner(final IExperimentSetEvaluator conductor) {
+	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator conductor, final IExperimentDatabaseHandle databaseHandle) {
+
 		/* check data base configuration */
-		this.config = conductor.getConfig();
-		if (this.config.getDBHost() == null) {
-			throw new IllegalArgumentException("DB host must not be null in experiment config.");
+		this.config = config;
+		if (config.getMemoryLimitInMB() == null) {
+			throw new IllegalArgumentException("Memory field (" + IExperimentSetConfig.MEM_MAX + ") must be set in configuration");
 		}
-		if (this.config.getDBUsername() == null) {
-			throw new IllegalArgumentException("DB user must not be null in experiment config.");
+		if (config.getNumberOfCPUs() == null) {
+			throw new IllegalArgumentException("Max CPU field (" + IExperimentSetConfig.CPU_MAX + ") must be set in configuration");
 		}
-		if (this.config.getDBPassword() == null) {
-			throw new IllegalArgumentException("DB password must not be null in experiment config.");
+		if (config.getKeyFields() == null) {
+			throw new IllegalArgumentException("Key fields (" + IExperimentSetConfig.KEYFIELDS + ") entry must be set in configuration!");
 		}
-		if (this.config.getDBDatabaseName() == null) {
-			throw new IllegalArgumentException("DB database name must not be null in experiment config.");
+		if (config.getResultFields() == null) {
+			throw new IllegalArgumentException("Result fields (" + IExperimentSetConfig.RESULTFIELDS + ") entry must be set in configuration!");
 		}
-		if (this.config.getDBTableName() == null) {
-			throw new IllegalArgumentException("DB table must not be null in experiment config.");
-		}
-		if (this.config.getKeyFields() == null) {
-			throw new IllegalArgumentException("Key fields (keyfields) entry must be set in configuration!");
-		}
-		if (this.config.getResultFields() == null) {
-			throw new IllegalArgumentException("Result fields (resultfields) entry must be set in configuration!");
-		}
-
-		this.fieldsForWhichToIgnoreMemory = (this.config.getFieldsForWhichToIgnoreMemory() != null) ? this.config.getFieldsForWhichToIgnoreMemory() : new ArrayList<>();
-		this.fieldsForWhichToIgnoreTime = (this.config.getFieldsForWhichToIgnoreTime() != null) ? this.config.getFieldsForWhichToIgnoreTime() : new ArrayList<>();
-
 		this.conductor = conductor;
-		this.adapter = new SQLAdapter(this.config.getDBHost(), this.config.getDBUsername(), this.config.getDBPassword(), this.config.getDBDatabaseName(), this.config.getDBSSL());
+		this.handle = databaseHandle;
 	}
 
-	private void updateExperimentSetupAccordingToConfig() {
-		if (this.cond_memoryLimitCheck) {
-			this.memoryLimit = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
-			if (this.memoryLimit != this.config.getMemoryLimitInMB()) {
-				System.err.println("The true memory limit is " + this.memoryLimit + ", which differs from the " + this.config.getMemoryLimitInMB() + " specified in the config! We will write " + this.memoryLimit + " into the database.");
+	private void updateExperimentSetupAccordingToConfig() throws IllegalKeyDescriptorException, ExperimentDBInteractionFailedException {
+		if (this.condMemoryLimitCheck) {
+			if (Math.abs((int) (Runtime.getRuntime().maxMemory() / 1024 / 1024) - this.config.getMemoryLimitInMB()) > MAX_MEM_DEVIATION) {
+				logger.error("The true memory limit is {}, which differs from the {} specified in the config by more than the allowed {}MB!", this.memoryLimit, this.config.getMemoryLimitInMB(), MAX_MEM_DEVIATION);
 			}
 		} else {
 			this.memoryLimit = this.config.getMemoryLimitInMB();
@@ -97,131 +88,49 @@ public class ExperimentRunner {
 
 		this.cpuLimit = this.config.getNumberOfCPUs();
 		int numExperiments = 1;
-		try {
 
-			/* create map of possible values for each key field */
-			for (String key : this.config.getKeyFields()) {
-				/* this is a hack needed because one cannot retrieve generic configs */
-				String propertyVals = this.config.removeProperty(key);
-				if (propertyVals == null) {
-					throw new IllegalArgumentException("No property values defined for key field \"" + key + "\"");
-				}
-				List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(s -> s.trim()).collect(Collectors.toList());
-				this.config.setProperty(key, propertyVals);
-				this.valuesForKeyFields.put(key, vals);
-				numExperiments *= vals.size();
+		/* create map of possible values for each key field */
+		for (String key : this.config.getKeyFields()) {
+			/* this is a hack needed because one cannot retrieve generic configs */
+			String propertyVals = this.config.removeProperty(key);
+			if (propertyVals == null) {
+				throw new IllegalArgumentException("No property values defined for key field \"" + key + "\"");
 			}
+			List<String> vals = Arrays.asList(StringUtil.explode(propertyVals, ",")).stream().map(String::trim).collect(Collectors.toList());
+			this.config.setProperty(key, propertyVals);
+			this.valuesForKeyFields.put(key, vals);
+			numExperiments *= this.getNumberOfValuesForKey(key);
+		}
 
-			this.createTableIfNotExists();
-			this.knownExperimentEntries.addAll(this.getConductedExperiments());
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			numExperiments = -1;
+		this.handle.setup(this.config);
+		for (ExperimentDBEntry experiment : this.handle.getConductedExperiments()) {
+			if (this.isExperimentInLineWithSetup(experiment.getExperiment())) {
+				this.knownExperimentEntries.add(experiment);
+			} else {
+				logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(),
+						experiment.getExperiment().getValuesOfKeyFields());
+			}
 		}
 		this.totalNumberOfExperiments = numExperiments;
 	}
 
-	private String getDatabaseFieldnameForConfigEntry(final String configKey) {
-		return configKey.substring(0, configKey.length() - 1).replace(".", "_");
-	}
-
-	public Collection<ExperimentDBEntry> getConductedExperiments() throws SQLException {
-		Collection<ExperimentDBEntry> experimentEntries = new HashSet<>();
-
-		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM ");
-		queryStringSB.append(this.config.getDBTableName());
-		queryStringSB.append(" WHERE ");
-		boolean firstKeyField = true;
-		for (String fieldName : this.valuesForKeyFields.keySet()) {
-			if (firstKeyField) {
-				firstKeyField = false;
-			} else {
-				queryStringSB.append(" AND ");
-			}
-			String keyName = this.getDatabaseFieldnameForConfigEntry(fieldName);
-
-			queryStringSB.append(keyName);
-			queryStringSB.append(" IN (");
-
-			boolean firstValue = true;
-			for (String value : this.valuesForKeyFields.get(fieldName)) {
-				if (firstValue) {
-					firstValue = false;
-				} else {
-					queryStringSB.append(",");
+	private boolean isExperimentInLineWithSetup(final Experiment experiment) {
+		for (Entry<String, String> keyEntry : experiment.getValuesOfKeyFields().entrySet()) {
+			try {
+				if (!this.isValueForKeyValid(keyEntry.getKey(), keyEntry.getValue())) {
+					logger.debug("Experiment {} seems outdated. The value {} for key {} is not admissible anymore. Consider removing it.", experiment, keyEntry.getKey(), keyEntry.getValue());
+					return false;
 				}
-				queryStringSB.append("'");
-				queryStringSB.append(value);
-				queryStringSB.append("'");
-			}
-			queryStringSB.append(")");
-		}
-
-		try (ResultSet rs = this.adapter.getPreparedStatement(queryStringSB.toString()).executeQuery()) {
-			while (rs.next()) {
-				Map<String, String> keyValues = new HashMap<>();
-				for (String key : this.config.getKeyFields()) {
-					String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
-					keyValues.put(dbKey, rs.getString(dbKey));
-				}
-				experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues)));
+			} catch (IllegalKeyDescriptorException e) {
+				logger.debug("Experiment {} seems outdated. The key {} is not defined in the current setup.", experiment, keyEntry.getKey());
+				return false;
 			}
 		}
-		return experimentEntries;
+		return true;
 	}
 
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Map<String, String> values) throws FileNotFoundException, IOException, SQLException {
-		return this.createAndGetExperimentIfNotConducted(new Experiment(this.memoryLimit, this.cpuLimit, values));
-	}
-
-	public ExperimentDBEntry createAndGetExperimentIfNotConducted(final Experiment experiment) throws FileNotFoundException, IOException, SQLException {
-		/*
-		 * first check whether exactly the same experiment (with the same seed) has been
-		 * conducted previously
-		 */
-		Optional<?> existingExperiment = this.knownExperimentEntries.stream().filter(e -> e.getExperiment().equals(experiment)).findAny();
-		if (existingExperiment.isPresent()) {
-			return null;
-		}
-
-		Map<String, Object> valuesToInsert = new HashMap<>(experiment.getValuesOfKeyFields());
-		valuesToInsert.put(FIELD_MEMORY + "_max", this.memoryLimit);
-		valuesToInsert.put(FIELD_NUMCPUS, this.cpuLimit);
-		valuesToInsert.put(FIELD_HOST, InetAddress.getLocalHost().getHostName());
-
-		int id = this.adapter.insert(this.config.getDBTableName(), valuesToInsert);
-		return new ExperimentDBEntry(id, experiment);
-	}
-
-	public void updateExperiment(final ExperimentDBEntry exp, final Map<String, ? extends Object> values) throws SQLException {
-		Collection<String> writableFields = this.config.getResultFields();
-		writableFields.add("exception");
-		writableFields.add(FIELD_TIME + "_end");
-		if (!writableFields.containsAll(values.keySet())) {
-			throw new IllegalArgumentException("The value set contains non-result fields: " + SetUtil.difference(values.keySet(), writableFields));
-		}
-		String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
-		String memoryUsageInMB = String.valueOf((int) Runtime.getRuntime().totalMemory() / 1024 / 1024);
-		Map<String, String> valuesToWrite = new HashMap<>();
-		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
-		for (String result : values.keySet()) {
-			if (this.config.getResultFields().contains(result)) {
-				if (!this.fieldsForWhichToIgnoreTime.contains(result)) {
-					valuesToWrite.put(result + "_" + FIELD_TIME, now);
-				}
-				if (!this.fieldsForWhichToIgnoreMemory.contains(result)) {
-					valuesToWrite.put(result + "_" + FIELD_MEMORY, memoryUsageInMB);
-				}
-			}
-		}
-		Map<String, String> where = new HashMap<>();
-		where.put(FIELD_ID, String.valueOf(exp.getId()));
-		this.adapter.update(this.config.getDBTableName(), valuesToWrite, where);
-	}
-
-	public Experiment getExperimentForNumber(final int id) {
+	private Experiment getExperimentForNumber(final int id) throws IllegalExperimentSetupException {
+		logger.debug("Computing experiment for id {}", id);
 		if (id < 0) {
 			throw new IllegalArgumentException("Experiment ID must be positive!");
 		}
@@ -236,7 +145,12 @@ public class ExperimentRunner {
 		Collections.reverse(keyOrder);
 		for (String key : keyOrder) {
 			blockSizes.put(key, size);
-			size *= this.valuesForKeyFields.get(key).size();
+			int numValuesForKey = this.getNumberOfValuesForKey(key);
+			if (numValuesForKey < 1) {
+				throw new IllegalExperimentSetupException("Key \"" + key + "\" has no valid values.");
+			}
+			logger.trace("Identified {} possible values for key {}", numValuesForKey, key);
+			size *= numValuesForKey;
 		}
 
 		/* find the correct experiment */
@@ -244,45 +158,135 @@ public class ExperimentRunner {
 		int k = id;
 		for (String key : this.config.getKeyFields()) {
 			int s = blockSizes.get(key);
-			int index = (int) Math.floor(k / s * 1f);
-			keyFieldValues.put(this.getDatabaseFieldnameForConfigEntry(key), this.valuesForKeyFields.get(key).get(index));
+			int index = (int) Math.floor(k / (s * 1f));
+			String value = this.getValueForKey(key, index);
+			logger.trace("Determined value {} for key {}", value, key);
+			keyFieldValues.put(key, value);
 			k = k % s;
 		}
+		assert SetUtil.differenceEmpty(this.config.getKeyFields(), keyFieldValues.keySet());
 		return new Experiment(this.memoryLimit, this.cpuLimit, keyFieldValues);
 	}
+	
+	private void checkUniquenessOfKey(String key) {
+		if (this.valuesForKeyFields.get(key).size() > 1) {
+			throw new UnsupportedOperationException("The value for key " + key + " seems to be a java class, but there are multiple values defined.");
+		}
+	}
+	
+	private void checkKeyGenerator(Class<?> c) throws IllegalKeyDescriptorException {
+		if (!IExperimentKeyGenerator.class.isAssignableFrom(c)) {
+			throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
+		}
+	}
 
-	public void randomlyConductExperiments(final int maxNumberOfExperiments, final boolean reload) {
+	private int getNumberOfValuesForKey(final String key) throws IllegalKeyDescriptorException {
+		List<String> possibleValues = this.valuesForKeyFields.get(key);
+		if (possibleValues.isEmpty()) {
+			return 0;
+		}
+		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
+			return possibleValues.size();
+		}
+		checkUniquenessOfKey(key);
+		
+		try {
+			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+			checkKeyGenerator(c);
+			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
+			return ((IExperimentKeyGenerator<?>) c.newInstance()).getNumberOfValues();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			throw new IllegalKeyDescriptorException(e);
+		}
+	}
+
+	private String getValueForKey(final String key, final int indexOfValue) throws IllegalKeyDescriptorException {
+		List<String> possibleValues = this.valuesForKeyFields.get(key);
+		assert !possibleValues.isEmpty() : "No values specified for key " + key;
+		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
+			return possibleValues.get(indexOfValue);
+		}
+		checkUniquenessOfKey(key);
+		try {
+			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+			checkKeyGenerator(c);
+			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
+			Object value = ((IExperimentKeyGenerator<?>) c.newInstance()).getValue(indexOfValue);
+			if (value == null) {
+				throw new NoSuchElementException("No value could be found for index " + indexOfValue + " in keyfield " + key);
+			}
+			return value.toString();
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			throw new IllegalKeyDescriptorException(e);
+		}
+	}
+
+	private boolean isValueForKeyValid(final String key, final String value) throws IllegalKeyDescriptorException {
+		List<String> possibleValues = this.valuesForKeyFields.get(key);
+		assert !possibleValues.isEmpty() : "No values specified for key " + key;
+		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
+			return possibleValues.contains(value);
+		}
+		checkUniquenessOfKey(key);
+		try {
+			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+			checkKeyGenerator(c);
+			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
+			return ((IExperimentKeyGenerator<?>) c.newInstance()).isValueValid(value);
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			throw new IllegalKeyDescriptorException(e);
+		}
+	}
+
+	/**
+	 * Conducts a limited number of not yet conducted experiments randomly chosen
+	 * from the grid.
+	 * 
+	 * @param maxNumberOfExperiments
+	 *            Limit for the number of experiments
+	 * @param reload
+	 *            Whether or not the experiment setup should be reloaded between two
+	 *            experiment runs.
+	 * @throws ExperimentDBInteractionFailedException
+	 * @throws IllegalExperimentSetupException
+	 */
+	public void randomlyConductExperiments(final int maxNumberOfExperiments, final boolean reload) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 		this.updateExperimentSetupAccordingToConfig();
 
 		if (this.totalNumberOfExperiments <= 0) {
-			System.out.println("Number of total experiments is 0");
+			logger.info("Number of total experiments is 0");
 			return;
 		}
-
 		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
-		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && ((maxNumberOfExperiments > 0) ? numberOfConductedExperiments < maxNumberOfExperiments : true)) {
+		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && numberOfConductedExperiments < maxNumberOfExperiments) {
 			if (reload) {
 				this.config.reload();
 			}
 			this.updateExperimentSetupAccordingToConfig();
-			int k = (int) Math.floor(Math.random() * this.totalNumberOfExperiments);
+			int k = random.nextInt(this.totalNumberOfExperiments);
 			logger.info("Now conducting {}/{}", k, this.totalNumberOfExperiments);
-			try {
-				Experiment exp = this.getExperimentForNumber(k);
-				logger.info("Conduct experiment with key values: {}", exp.getValuesOfKeyFields());
-				if (this.conductExperimentIfNotAlreadyConducted(exp)) {
-					numberOfConductedExperiments++;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			Experiment exp = this.getExperimentForNumber(k);
+			this.checkExperimentValidity(exp);
+			logger.info("Conduct experiment with key values: {}", exp.getValuesOfKeyFields());
+			if (this.conductExperimentIfNotAlreadyConducted(exp)) {
+				numberOfConductedExperiments++;
 			}
 		}
 
 	}
 
-	public void randomlyConductExperiments(final boolean reload) {
+	/**
+	 * Conducts an unbound number of randomly chosen experiments from the grid.
+	 * 
+	 * @param reload
+	 *            Whether or not the experiment setup should be reloaded between two
+	 *            experiment runs.
+	 * @throws IllegalExperimentSetupException
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public void randomlyConductExperiments(final boolean reload) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 		this.randomlyConductExperiments(-1, reload);
 	}
 
@@ -290,84 +294,64 @@ public class ExperimentRunner {
 	 * Conducts a single experiment
 	 *
 	 * @param exp
+	 * @throws ExperimentAlreadyExistsInDatabaseException
+	 * @throws ExperimentDBInteractionFailedException
 	 * @throws Exception.
-	 *             These are not the exceptions thrown by the experiment itself, because these are logged into the database. Exceptions thrown here are technical exceptions that occur when arranging the experiment
+	 *             These are not the exceptions thrown by the experiment itself,
+	 *             because these are logged into the database. Exceptions thrown
+	 *             here are technical exceptions that occur when arranging the
+	 *             experiment
 	 */
-	public boolean conductExperimentIfNotAlreadyConducted(final Experiment exp) throws Exception {
+	public boolean conductExperimentIfNotAlreadyConducted(final Experiment exp) throws ExperimentDBInteractionFailedException {
 
-		ExperimentDBEntry expEntry = this.createAndGetExperimentIfNotConducted(exp);
-		if (expEntry != null) {
-			Map<String, Object> valuesToAddAfterRun = new HashMap<>();
-
-			this.knownExperimentEntries.add(expEntry);
-			try {
-				System.gc();
-				this.conductor.evaluate(expEntry, this.adapter, m -> {
-					try {
-						this.updateExperiment(expEntry, m);
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
-				});
-
-			} catch (Throwable e) {
-				StringBuilder exceptionEntry = new StringBuilder();
-				exceptionEntry.append(e.getClass().getName() + "\n" + e.getMessage());
-				for (StackTraceElement se : e.getStackTrace()) {
-					exceptionEntry.append("\n\t" + se);
-				}
-				valuesToAddAfterRun.put("exception", exceptionEntry.toString());
-				e.printStackTrace();
-				System.err.println("Experiment failed due to exception, which has been logged");
-			}
-			valuesToAddAfterRun.put(FIELD_TIME + "_end", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-			this.updateExperiment(expEntry, valuesToAddAfterRun);
-			return true;
-		} else {
+		/* create experiment entry */
+		ExperimentDBEntry expEntry;
+		try {
+			expEntry = this.handle.createAndGetExperiment(exp);
+		} catch (ExperimentAlreadyExistsInDatabaseException e) {
 			return false;
 		}
-	}
 
-	public void createTableIfNotExists() throws SQLException {
-		StringBuilder sql = new StringBuilder();
-		StringBuilder keyFields = new StringBuilder();
-		sql.append("CREATE TABLE IF NOT EXISTS `" + this.config.getDBTableName() + "` (");
-		sql.append("`" + FIELD_ID + "` int(10) NOT NULL AUTO_INCREMENT,");
-		for (String key : this.config.getKeyFields()) {
-			String shortKey = this.getDatabaseFieldnameForConfigEntry(key);
-			sql.append("`" + shortKey + "` VARCHAR(100) NOT NULL,");
-			keyFields.append("`" + shortKey + "`,");
-		}
-		sql.append("`" + FIELD_NUMCPUS + "` int(2) NOT NULL,");
-		sql.append("`" + FIELD_HOST + "` varchar(255) NOT NULL,");
-		sql.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
-		sql.append("`" + FIELD_TIME + "_start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
+		/* run experiment */
+		assert expEntry != null;
+		Throwable error = null;
+		this.knownExperimentEntries.add(expEntry);
+		try {
+			this.conductor.evaluate(expEntry, m -> {
+				try {
+					this.handle.updateExperiment(expEntry, m);
+				} catch (ExperimentUpdateFailedException e) {
+					logger.error("Error in updating experiment data. Message of {}: {}", e.getClass().getName(), e.getMessage());
+				}
+			});
 
-		for (String result : this.config.getResultFields()) {
-			sql.append("`" + result + "` VARCHAR(500) NULL,");
-			if (!this.fieldsForWhichToIgnoreTime.contains(result)) {
-				sql.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
-			}
-			if (!this.fieldsForWhichToIgnoreMemory.contains(result)) {
-				sql.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
-			}
+		} catch (ExperimentEvaluationFailedException e) {
+			error = e.getCause();
+			logger.error("Experiment failed due to {}. Message: {}. Stack trace: {}", error.getClass().getName(), error.getMessage(), Arrays.asList(error.getStackTrace()).stream().map(s -> "\n\t" + s).collect(Collectors.toList()));
 		}
-		sql.append("`exception` TEXT NULL,");
-		sql.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
-		sql.append("PRIMARY KEY (`" + FIELD_ID + "`)");
-		sql.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
-		sql.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
-		this.adapter.update(sql.toString(), new String[] {});
+		this.handle.finishExperiment(expEntry, error);
+		return true;
 	}
 
 	/**
-	 * This method can be used to toggle the check of the memory limit. If the check is active (default or doCheck == true), the memory actually available in this runtime will be taken as an entry for the memory limit.
+	 * This method can be used to toggle the check of the memory limit. If the check
+	 * is active (default or doCheck == true), the memory actually available in this
+	 * runtime will be taken as an entry for the memory limit.
 	 *
 	 * @param doCheck
-	 *            A flag whether the check shall be performed or not. If doCheck is true, the check will be performed and the actually available memory in this runtime environment will be written to the database. Otherwise, the memory limit
-	 *            specified in the configuration file will be written to the database.
+	 *            A flag whether the check shall be performed or not. If doCheck is
+	 *            true, the check will be performed and the actually available
+	 *            memory in this runtime environment will be written to the
+	 *            database. Otherwise, the memory limit specified in the
+	 *            configuration file will be written to the database.
 	 */
 	public void setConditionMemoryLimitCheck(final boolean doCheck) {
-		this.cond_memoryLimitCheck = doCheck;
+		this.condMemoryLimitCheck = doCheck;
+	}
+
+	private void checkExperimentValidity(final Experiment experiment) {
+		if (SetUtil.differenceNotEmpty(this.config.getKeyFields(), experiment.getValuesOfKeyFields().keySet())) {
+			throw new IllegalArgumentException("The experiment " + experiment + " is invalid, because key fields have not been defined: " + SetUtil.difference(this.config.getKeyFields(), experiment.getValuesOfKeyFields().keySet()));
+		}
 	}
 }

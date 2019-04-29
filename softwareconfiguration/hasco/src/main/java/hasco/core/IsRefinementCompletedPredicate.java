@@ -53,7 +53,7 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 		/* initialize routine */
 		if (params.length != 2) {
 			throw new IllegalArgumentException("There should be exactly two parameters additional to the state but " + params.length + " were provided: " + Arrays.toString(params)
-					+ ". This parameters refer to the component name that is being configured and the object itself.");
+			+ ". This parameters refer to the component name that is being configured and the object itself.");
 		}
 		if (params[0] == null) {
 			throw new IllegalArgumentException("The component name must not be null.");
@@ -64,7 +64,7 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 		final String objectContainer = params[1].getName();
 
 		/* determine current values for the params */
-		ComponentInstance groundComponent = Util.getGroundComponentsFromState(state, this.components, false).get(objectContainer);
+		ComponentInstance groundComponent = Util.getGroundComponentsFromState(state, components, false).get(objectContainer);
 		Component component = groundComponent.getComponent();
 		Map<String, String> componentParamContainers = Util.getParameterContainerMap(state, objectContainer);
 		for (Parameter param : component.getParameters()) {
@@ -75,6 +75,8 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 
 			assert variableHasBeenSet == groundComponent.getParametersThatHaveBeenSetExplicitly().contains(param);
 			assert !variableHasBeenClosed || variableHasBeenSet : "Parameter " + param.getName() + " of component " + component.getName() + " with default domain " + param.getDefaultDomain() + " has been closed but no value has been set.";
+
+			ParameterRefinementConfiguration refinementConfig = refinementConfiguration.get(component).get(param);
 
 			if (param.isNumeric()) {
 				double min = 0;
@@ -87,23 +89,25 @@ public class IsRefinementCompletedPredicate implements EvaluablePredicate {
 					min = ((NumericParameterDomain) param.getDefaultDomain()).getMin();
 					max = ((NumericParameterDomain) param.getDefaultDomain()).getMax();
 				}
+				double lengthStopCriterion = refinementConfig.getIntervalLength();
 				double length = max - min;
-				if (length > this.refinementConfiguration.get(component).get(param).getIntervalLength()) {
-					this.logger.info("Test for isRefinementCompletedPredicate({},{}) is negative. Interval length of [{},{}] is {}. Required length to consider an interval atomic is {}", params[0].getName(), objectContainer, min, max,
-							length, this.refinementConfiguration.get(component).get(param).getIntervalLength());
+
+				if (refinementConfig.isInitRefinementOnLogScale() && (max / min - 1) > lengthStopCriterion || ! refinementConfig.isInitRefinementOnLogScale() && length > lengthStopCriterion) {
+					logger.info("Test for isRefinementCompletedPredicate({},{}) is negative. Interval length of [{},{}] is {}. Required length to consider an interval atomic is {}", params[0].getName(), objectContainer, min, max,
+							length, refinementConfiguration.get(component).get(param).getIntervalLength());
 					return false;
 				}
 			} else if (param.getDefaultDomain() instanceof CategoricalParameterDomain) { // categorical params can be refined iff the have not been set and closed before
 				assert param.getDefaultValue() != null : "Param " + param.getName() + " has no default value!";
 				if (!variableHasBeenSet && !variableHasBeenClosed) {
-					this.logger.info("Test for isRefinementCompletedPredicate({},{}) is negative", params[0].getName(), objectContainer);
+					logger.info("Test for isRefinementCompletedPredicate({},{}) is negative", params[0].getName(), objectContainer);
 					return false;
 				}
 			} else {
 				throw new UnsupportedOperationException("Currently no support for testing parameters of type " + param.getClass().getName());
 			}
 		}
-		this.logger.info("Test for isRefinementCompletedPredicate({},{}) is positive", params[0].getName(), objectContainer);
+		logger.info("Test for isRefinementCompletedPredicate({},{}) is positive", params[0].getName(), objectContainer);
 		return true;
 	}
 }

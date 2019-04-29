@@ -290,7 +290,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					Thread.currentThread().interrupt();
 					return;
 				} catch (TimeoutException e) {
-					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode);
+					BestFirst.this.logger.debug("Node evaluation of {} has timed out.", newNode.hashCode());
 					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
 					post(new NodeAnnotationEvent<>(getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					post(new NodeTypeSwitchEvent<>(getId(), newNode, ENodeType.OR_TIMEDOUT.toString()));
@@ -379,7 +379,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 								if (newNode.getInternalLabel() == null) {
 									throw new IllegalArgumentException("Cannot insert nodes with value NULL into OPEN!");
 								}
-								BestFirst.this.logger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode, this.expandedNodeInternal, newNode.getInternalLabel());
+								BestFirst.this.logger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode.hashCode(), this.expandedNodeInternal, newNode.getInternalLabel());
 								BestFirst.this.open.add(newNode);
 							} finally {
 								BestFirst.this.openLock.unlock();
@@ -472,7 +472,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			post(new GraphInitializedEvent<Node<N, V>>(getId(), newNode));
 		} else {
 			post(new NodeAddedEvent<Node<N, V>>(getId(), parent, newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_CREATED.toString())));
-			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode, parent);
+			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode.hashCode(), parent.hashCode());
 		}
 		return newNode;
 	}
@@ -480,7 +480,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	protected void labelNode(final Node<N, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 
 		/* define timeouter for label computation */
-		this.logger.debug("Computing node label for {}", node);
+		this.logger.debug("Computing node label for node with hash code {}", node.hashCode());
 		if (isStopCriterionSatisfied()) {
 			this.logger.debug("Found stop criterion to be true. Returning control.");
 			return;
@@ -498,7 +498,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		boolean computationTimedout = false;
 		long startComputation = System.currentTimeMillis();
 		try {
-			this.logger.trace("Calling f-function of node evaluator for {}", node);
+			this.logger.trace("Calling f-function of node evaluator for {}", node.hashCode());
 			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.f(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not a worker thread
 			this.logger.trace("Determined f-value of {}", label);
 			if (isStopCriterionSatisfied()) {
@@ -535,14 +535,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		/* register time required to compute this node label */
 		long fTime = System.currentTimeMillis() - startComputation;
 		node.setAnnotation(ENodeAnnotation.F_TIME.toString(), fTime);
-		this.logger.debug("Computed label {} for {} in {}ms", label, node, fTime);
+		this.logger.debug("Computed label {} for {} in {}ms", label, node.hashCode(), fTime);
 
 		/* if no label was computed, prune the node and cancel the computation */
 		if (label == null) {
 			if (!computationTimedout) {
-				BestFirst.this.logger.debug("Not inserting node {} since its label is missing!", node);
+				BestFirst.this.logger.debug("Not inserting node {} since its label is missing!", node.hashCode());
 			} else {
-				BestFirst.this.logger.debug("Not inserting node {} because computation of f-value timed out.", node);
+				BestFirst.this.logger.debug("Not inserting node {} because computation of f-value timed out.", node.hashCode());
 			}
 			if (!node.getAnnotations().containsKey(ENodeAnnotation.F_ERROR.toString())) {
 				node.setAnnotation(ENodeAnnotation.F_ERROR.toString(), "f-computer returned NULL");
@@ -711,7 +711,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			/* Step 2: compute the successors in the underlying graph */
 			this.beforeExpansion(actualNodeSelectedForExpansion);
 			post(new NodeTypeSwitchEvent<Node<N, V>>(getId(), actualNodeSelectedForExpansion, "or_expanding"));
-			this.logger.debug("Expanding node {} with f-value {}", actualNodeSelectedForExpansion, actualNodeSelectedForExpansion.getInternalLabel());
+			this.logger.debug("Expanding node {} with f-value {}", actualNodeSelectedForExpansion.hashCode(), actualNodeSelectedForExpansion.getInternalLabel());
 			this.logger.debug("Start computation of successors");
 			final List<NodeExpansionDescription<N, A>> successorDescriptions;
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
@@ -727,7 +727,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			}
 			successorDescriptions = tmpSuccessorDescriptions;
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
-			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion);
+			this.logger.debug("Finished computation of successors. Sending SuccessorComputationCompletedEvent with {} successors for {}", successorDescriptions.size(), actualNodeSelectedForExpansion.hashCode());
 			post(new SuccessorComputationCompletedEvent<>(getId(), actualNodeSelectedForExpansion, successorDescriptions));
 
 			/*
@@ -767,7 +767,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					lastTerminationCheck = System.currentTimeMillis();
 				}
 			}
-			this.logger.debug("Finished expansion of node {} after {}ms. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion, System.currentTimeMillis() - startTimeOfExpansion, this.open.size(), this.activeJobs.get());
+			this.logger.debug("Finished expansion of node {} after {}ms. Size of OPEN is now {}. Number of active jobs is {}", actualNodeSelectedForExpansion.hashCode(), System.currentTimeMillis() - startTimeOfExpansion, this.open.size(), this.activeJobs.get());
 			this.checkTerminationAndUnregisterFromExpand(actualNodeSelectedForExpansion);
 			expansionEvent = new NodeExpansionJobSubmittedEvent<>(getId(), actualNodeSelectedForExpansion, successorDescriptions);
 		} else {
@@ -821,7 +821,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	private void unregisterFromExpand(final Node<N, V> node) {
 		assert this.expanding.containsKey(node.getPoint()) : "Cannot unregister a node that is not being expanded currently";
 		assert this.expanding.get(node.getPoint()) == Thread.currentThread() : "Thread " + Thread.currentThread() + " cannot unregister other thread " + this.expanding.get(node.getPoint()) + " from expansion map!";
-		this.logger.debug("Removing {} from EXPANDING.", node.getPoint());
+		this.logger.debug("Removing {} from EXPANDING.", node.hashCode());
 		this.expanding.remove(node.getPoint());
 	}
 
