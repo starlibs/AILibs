@@ -11,8 +11,8 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.interfaces.AnalyticalLearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
@@ -31,7 +31,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * 
  * @author Lukas Brandt
  */
-public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluator {
+public class ExtrapolatedSaturationPointEvaluator<I extends IInstance> implements IClassifierEvaluator {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExtrapolatedSaturationPointEvaluator.class);
 
@@ -39,15 +39,15 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
-	private IDataset<IInstance> train;
+	private ISamplingAlgorithmFactory<I, ? extends ASamplingAlgorithm<I>> samplingAlgorithmFactory;
+	private IDataset<I> train;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
 
 	// Configuration for the measurement at the saturation point.
 	private double epsilon;
-	private IDataset<IInstance> test;
+	private IDataset<I> test;
 
 	/**
 	 * Create a classifier evaluator with an accuracy measurement at the
@@ -73,9 +73,9 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 	 *            Test dataset to measure the accuracy.
 	 */
 	public ExtrapolatedSaturationPointEvaluator(int[] anchorpoints,
-			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
-			IDataset<IInstance> train, double trainSplitForAnchorpointsMeasurement,
-			LearningCurveExtrapolationMethod extrapolationMethod, long seed, IDataset<IInstance> test) {
+			ISamplingAlgorithmFactory<I, ? extends ASamplingAlgorithm<I>> samplingAlgorithmFactory,
+			IDataset<I> train, double trainSplitForAnchorpointsMeasurement,
+			LearningCurveExtrapolationMethod extrapolationMethod, long seed, IDataset<I> test) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -104,9 +104,9 @@ public class ExtrapolatedSaturationPointEvaluator implements IClassifierEvaluato
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
-			ASamplingAlgorithm<IInstance> samplingAlgorithm = this.samplingAlgorithmFactory
+			ASamplingAlgorithm<I> samplingAlgorithm = this.samplingAlgorithmFactory
 					.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
-			IDataset<IInstance> saturationPointTrainSet = samplingAlgorithm.call();
+			IDataset<I> saturationPointTrainSet = samplingAlgorithm.call();
 			Instances saturationPointInstances = WekaInstancesUtil.datasetToWekaInstances(saturationPointTrainSet);
 
 			// Measure the accuracy with this subsample

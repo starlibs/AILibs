@@ -32,7 +32,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
 	private ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
-	private IDataset<IInstance> dataset;
+	private IDataset<? extends IInstance> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
@@ -58,7 +58,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	 */
 	public LearningCurveExtrapolationEvaluator(int[] anchorpoints,
 			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
-			IDataset<IInstance> dataset, double trainSplitForAnchorpointsMeasurement,
+			IDataset<? extends IInstance> dataset, double trainSplitForAnchorpointsMeasurement,
 			LearningCurveExtrapolationMethod extrapolationMethod, long seed) {
 		super();
 		this.anchorpoints = anchorpoints;

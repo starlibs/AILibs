@@ -11,6 +11,7 @@ import jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
