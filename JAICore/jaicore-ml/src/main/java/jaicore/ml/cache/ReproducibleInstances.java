@@ -93,7 +93,7 @@ public class ReproducibleInstances extends Instances {
 	 * @return new {@link ReproducibleInstances} object
 	 * @throws IOException if something goes wrong while loading Instances from openml
 	 */
-	public static ReproducibleInstances fromOpenML(final String id, final String apiKey) throws NumberFormatException, IOException {
+	public static ReproducibleInstances fromOpenML(final String id, final String apiKey) throws IOException {
 		OpenMLHelper.setApiKey(apiKey);
 		ReproducibleInstances result = new ReproducibleInstances(OpenMLHelper.getInstancesById(Integer.parseInt(id)));
 		result.history.add(new LoadDataSetInstruction(DataProvider.OPENML, id));

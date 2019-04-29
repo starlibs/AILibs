@@ -35,7 +35,10 @@ public class ExperimentRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
 
+	private static final String PROTOCOL_JAVA = "java:";
 	private static final int MAX_MEM_DEVIATION = 50;
+	
+	private static final String LOGMESSAGE_CREATEINSTANCE = "Create a new instance of {} and ask it for the number of possible values.";
 
 	private final IExperimentSetConfig config;
 	private final IExperimentSetEvaluator conductor;
@@ -164,24 +167,33 @@ public class ExperimentRunner {
 		assert SetUtil.differenceEmpty(this.config.getKeyFields(), keyFieldValues.keySet());
 		return new Experiment(this.memoryLimit, this.cpuLimit, keyFieldValues);
 	}
+	
+	private void checkUniquenessOfKey(String key) {
+		if (this.valuesForKeyFields.get(key).size() > 1) {
+			throw new UnsupportedOperationException("The value for key " + key + " seems to be a java class, but there are multiple values defined.");
+		}
+	}
+	
+	private void checkKeyGenerator(Class<?> c) throws IllegalKeyDescriptorException {
+		if (!IExperimentKeyGenerator.class.isAssignableFrom(c)) {
+			throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
+		}
+	}
 
 	private int getNumberOfValuesForKey(final String key) throws IllegalKeyDescriptorException {
 		List<String> possibleValues = this.valuesForKeyFields.get(key);
 		if (possibleValues.isEmpty()) {
 			return 0;
 		}
-		if (!possibleValues.get(0).startsWith("java:")) {
+		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.size();
 		}
-		if (possibleValues.size() > 1) {
-			throw new UnsupportedOperationException("The value for key " + key + " seems to be a java class, but there are multiple values defined.");
-		}
+		checkUniquenessOfKey(key);
+		
 		try {
 			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
-			if (!IExperimentKeyGenerator.class.isAssignableFrom(c)) {
-				throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
-			}
-			logger.trace("Create a new instance of {} and ask it for the number of possible values.", c.getName());
+			checkKeyGenerator(c);
+			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.newInstance()).getNumberOfValues();
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalKeyDescriptorException(e);
@@ -191,18 +203,14 @@ public class ExperimentRunner {
 	private String getValueForKey(final String key, final int indexOfValue) throws IllegalKeyDescriptorException {
 		List<String> possibleValues = this.valuesForKeyFields.get(key);
 		assert !possibleValues.isEmpty() : "No values specified for key " + key;
-		if (!possibleValues.get(0).startsWith("java:")) {
+		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.get(indexOfValue);
 		}
-		if (possibleValues.size() > 1) {
-			throw new UnsupportedOperationException("The value for key " + key + " seems to be a java class, but there are multiple values defined.");
-		}
+		checkUniquenessOfKey(key);
 		try {
 			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
-			if (!IExperimentKeyGenerator.class.isAssignableFrom(c)) {
-				throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
-			}
-			logger.trace("Create a new instance of {} and ask it for the number of possible values.", c.getName());
+			checkKeyGenerator(c);
+			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			Object value = ((IExperimentKeyGenerator<?>) c.newInstance()).getValue(indexOfValue);
 			if (value == null) {
 				throw new NoSuchElementException("No value could be found for index " + indexOfValue + " in keyfield " + key);
@@ -216,18 +224,14 @@ public class ExperimentRunner {
 	private boolean isValueForKeyValid(final String key, final String value) throws IllegalKeyDescriptorException {
 		List<String> possibleValues = this.valuesForKeyFields.get(key);
 		assert !possibleValues.isEmpty() : "No values specified for key " + key;
-		if (!possibleValues.get(0).startsWith("java:")) {
+		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.contains(value);
 		}
-		if (possibleValues.size() > 1) {
-			throw new UnsupportedOperationException("The value for key " + key + " seems to be a java class, but there are multiple values defined.");
-		}
+		checkUniquenessOfKey(key);
 		try {
 			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
-			if (!IExperimentKeyGenerator.class.isAssignableFrom(c)) {
-				throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
-			}
-			logger.trace("Create a new instance of {} and ask it for the number of possible values.", c.getName());
+			checkKeyGenerator(c);
+			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.newInstance()).isValueValid(value);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			throw new IllegalKeyDescriptorException(e);
@@ -253,7 +257,6 @@ public class ExperimentRunner {
 			logger.info("Number of total experiments is 0");
 			return;
 		}
-
 		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;

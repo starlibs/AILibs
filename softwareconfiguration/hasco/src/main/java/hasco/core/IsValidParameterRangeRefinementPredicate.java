@@ -283,7 +283,8 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 					assert start >= min;
 					endOfLast = start + Math.pow(basis, i) * lengthOfShortestInterval;
 					assert endOfLast <= max : "Sub-Interval must not assume values greater than a vaule of the original interval.";
-					assert endOfLast > start : "Interval size for [" + start + ", " + (start + Math.pow(basis, i) * lengthOfShortestInterval) + "] is not positive.";
+					if (endOfLast <= start) 
+						throw new IllegalArgumentException("Interval size for [" + start + ", " + (start + Math.pow(basis, i) * lengthOfShortestInterval) + "] is not positive.");
 					list.add(new Interval(start, endOfLast));
 					logger.trace("Added interval [{}, {}]", start, endOfLast);
 				}
@@ -311,7 +312,8 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 		}
 		int segmentsForRight = numSubIntervals - segmentsForLeft;
 		assert segmentsForRight >= 1;
-		assert createPointIntervalsForExtremalValues && segmentsForRight >= 3;
+		if (!createPointIntervalsForExtremalValues || segmentsForRight < 3)
+			throw new IllegalArgumentException("No refinement possible if interval points are not included or segments for the right are less than 3");
 		logger.debug("Focus {} is inside the given interval. Create two partitions, one on the left ({} segments), and one on the right ({} segments).", pointOfConcentration, segmentsForLeft, segmentsForRight);
 		list.addAll(refineOnLogScale(new Interval(min, pointOfConcentration), segmentsForLeft, basis, pointOfConcentration, createPointIntervalsForExtremalValues));
 		list.addAll(refineOnLogScale(new Interval(pointOfConcentration, max), segmentsForRight, basis, pointOfConcentration, createPointIntervalsForExtremalValues));

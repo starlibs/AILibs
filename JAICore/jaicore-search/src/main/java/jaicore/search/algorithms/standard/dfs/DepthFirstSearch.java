@@ -202,7 +202,6 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 			successors.putAll(tentativeSuccessors);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new RuntimeException(e);
 		}
 	}
 
@@ -228,7 +227,6 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 			checkPathConsistency(currentPath);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new RuntimeException(e);
 		}
 	}
 
@@ -240,10 +238,8 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 				if (!successors.containsKey(last)) {
 					return false;
 				}
-				boolean validEdge = successors.get(last).contains(node);
-				assert validEdge : "The path has an edge from " + last + " to " + node + " that is not reflected in the successors.";
-				if (!validEdge) {
-					return false;
+				if (!successors.get(last).contains(node)) {
+					throw new IllegalStateException("The path has an edge from " + last + " to " + node + " that is not reflected in the successors.");
 				}
 			}
 			last = node;
