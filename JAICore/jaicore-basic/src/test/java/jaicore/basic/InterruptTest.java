@@ -7,10 +7,13 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.awaitility.Awaitility;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.GlobalTimer;
@@ -24,6 +27,8 @@ public class InterruptTest {
 	private static final int NUMBER_ITERATIONS_SIMPLE = 5;
 	private static final int NUMBER_ITERATIONS_SHIFTED = 15;
 	private static final int NUMBER_ITERATIONS_OVERLAPPING = 100;
+	
+	private static final Logger logger = LoggerFactory.getLogger(InterruptTest.class);
 
 	private class BusyBeaver implements Callable<Object> {
 
@@ -71,7 +76,7 @@ public class InterruptTest {
 			/* test that InterruptException is thrown  */
 			TimedComputation.compute(new BusyBeaver(100), 1000, "bb interrupt");
 			assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
-			Thread.sleep(2000);
+			Awaitility.await().atLeast(2, TimeUnit.SECONDS);
 			assertTrue(!Thread.interrupted());
 		}
 	}
@@ -95,7 +100,7 @@ public class InterruptTest {
 				/* this is expected behavior */
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts());
-				Thread.sleep(2000);
+				Awaitility.await().atLeast(2, TimeUnit.SECONDS);
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts());
 				continue;
@@ -127,7 +132,7 @@ public class InterruptTest {
 				/* this is expected behavior */
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts());
-				Thread.sleep(2000);
+				Awaitility.await().atLeast(2, TimeUnit.SECONDS);
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts());
 				continue;
@@ -138,34 +143,41 @@ public class InterruptTest {
 
 	/**
 	 * Two timed computations are nested. The outer is canceled significantly (1s) later than the inner.
+	 * @throws  
 	 *
 	 * @throws ExecutionException
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 */
 	@Test
-	public void testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws InterruptedException, AlgorithmTimeoutedException, ExecutionException {
+	public void testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime() throws ExecutionException {
 
 		for (int i = 0; i < NUMBER_ITERATIONS_OVERLAPPING; i++) {
-			System.out.println(i);
+			logger.info("Starting iteration {}/{} of testNestedInterruptDuringExecutionWithOuterAndInnerAtSameTime", i + 1, NUMBER_ITERATIONS_OVERLAPPING);
 
 			/* test that InterruptException is thrown and that no interrupts are open */
+			Exception caughtException = null;
 			try {
 				TimedComputation.compute(() -> TimedComputation.compute(new BusyBeaver(Long.MAX_VALUE), 1000, "inner interrupt"), 1000, "outer interrupt");
-			} catch (ExecutionException | AlgorithmTimeoutedException e) {
+			} catch (Exception e) {
+				caughtException = e;
+			}
+			
+			/* check exception */
+			if (caughtException instanceof ExecutionException && !(caughtException.getCause() instanceof AlgorithmTimeoutedException)) {
+				throw (ExecutionException)caughtException;
+			}
 
-				if (e instanceof ExecutionException && !(e.getCause() instanceof AlgorithmTimeoutedException)) {
-					throw e;
-				}
-
+			if (caughtException != null) {
 				/* this is expected behavior */
 				assertFalse("The executing thread is interrupted after a computation block!", Thread.interrupted());
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse("There are open interrupts: " + Interrupter.get().getAllUnresolvedInterruptsOfThread(Thread.currentThread()).stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()),
 						Interrupter.get().hasCurrentThreadOpenInterrupts());
-				continue;
 			}
-			fail("No exception was thrown, but an AlgorithmTimedoutedException should have been thrown!");
+			else {
+				fail("No exception was thrown, but an AlgorithmTimedoutedException should have been thrown!");
+			}
 		}
 	}
 
@@ -184,13 +196,19 @@ public class InterruptTest {
 
 				/* this is expected behavior */
 				while (!task.isFinished()) {
-					Thread.sleep(100);
+					Awaitility.await().atLeast(100, TimeUnit.MILLISECONDS);
 				}
+				
 				boolean interrupted = Thread.interrupted();
-				System.out.println("Now resolving the interrupt. Current interrupted flag state: " + interrupted);
+				logger.debug("Now resolving the interrupt. Current interrupted flag state: {}", interrupted);
 				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts());
+				
+				/* this is just to make sonarqube happy */
+				Thread.currentThread().interrupt();
+				if (!interrupted)
+					Thread.interrupted();
 			}
 		}
 	}
@@ -212,14 +230,10 @@ public class InterruptTest {
 
 				/* this is expected behavior */
 				while (!task.isFinished()) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException ie) {
-						System.out.println("Interrupt received.");
-					}
+					Awaitility.await().atLeast(100, TimeUnit.MILLISECONDS);
 				}
 				boolean interrupted = Thread.interrupted();
-				System.out.println("Now resolving the interrupt. Current interrupted flag state: " + interrupted);
+				logger.debug("Now resolving the interrupt. Current interrupted flag state: {}", interrupted);
 				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 				assertTrue(GlobalTimer.getInstance().getActiveTasks().isEmpty());
 				assertFalse(Interrupter.get().hasCurrentThreadOpenInterrupts());
@@ -234,14 +248,11 @@ public class InterruptTest {
 		int innerEarlier = 0;
 		int outerEarlier = 0;
 		for (int i = 0; i < NUMBER_ITERATIONS_OVERLAPPING; i++) {
-			System.out.println(i);
+			logger.info("Starting iteration {}/{} of testTwistedTrackedInterruptDuringExecutionWithOuterAndInnerAtSameTime", i + 1, NUMBER_ITERATIONS_OVERLAPPING);
 			assertTrue("There are still active tasks!", GlobalTimer.getInstance().getActiveTasks().isEmpty());
 
 			/* test that InterruptException is thrown and that no interrupts are open */
-			AtomicBoolean fired = new AtomicBoolean();
-			InterruptionTimerTask task = new InterruptionTimerTask("outer interrupt", () -> {
-				fired.set(true);
-			});
+			InterruptionTimerTask task = new InterruptionTimerTask("outer interrupt");
 			int timeout = 1000;
 			GlobalTimer.getInstance().schedule(task, timeout + Math.round(Math.random())); // increase timeout by 1 ms in the first 10 runs to balance scheduling disadvanates of the outer one
 			try {
@@ -250,21 +261,26 @@ public class InterruptTest {
 			} catch (InterruptedException e) {
 				outerEarlier++;
 				Interrupter.get().markInterruptAsResolved(Thread.currentThread(), task);
-				assertTrue("There has been an interrupted exception, but the task has not fired! Stack trace: " + Arrays.stream(e.getStackTrace()).map(s -> "\n\t" + s).collect(Collectors.toList()), fired.get());
+				assertTrue("There has been an interrupted exception, but the task has not fired! Stack trace: " + Arrays.stream(e.getStackTrace()).map(s -> "\n\t" + s).collect(Collectors.toList()), task.isTriggered());
 				assertTrue(task.isFinished());
+				
+				/* this is just to make sonarqube happy */
+				boolean interrupted = Thread.interrupted();
+				Thread.currentThread().interrupt();
+				if (!interrupted)
+					Thread.interrupted();
 			} catch (AlgorithmTimeoutedException e) {
 				innerEarlier++;
 
 				/* wait for outer interrupt to occur */
 				while (!task.isFinished()) {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException ie) {
-						System.out.println("Interrupt received.");
+					Awaitility.await().atLeast(100, TimeUnit.MILLISECONDS);
+					if (Thread.interrupted()) {
+						logger.debug("Interrupt received.");
 					}
 				}
 				boolean interrupted = Thread.interrupted();
-				System.out.println("Now resolving the interrupt. Current interrupted flag state: " + interrupted);
+				logger.debug("Now resolving the interrupt. Current interrupted flag state: {}", interrupted);
 				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
 			}
 
@@ -273,7 +289,7 @@ public class InterruptTest {
 			assertTrue("Interrupter has still unresolved interrupts: " + Interrupter.get().getAllUnresolvedInterrupts().stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()),
 					Interrupter.get().getAllUnresolvedInterrupts().isEmpty());
 			assertTrue("There are still active tasks!", GlobalTimer.getInstance().getActiveTasks().isEmpty());
-			System.out.println("Finished. Inner earlier: " + innerEarlier + ". Outer earlier: " + outerEarlier);
+			logger.debug("Finished. Inner earlier: {}. Outer earlier: {}", innerEarlier, outerEarlier);
 		}
 	}
 }

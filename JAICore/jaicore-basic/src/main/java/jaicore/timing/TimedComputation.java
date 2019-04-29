@@ -21,6 +21,11 @@ public abstract class TimedComputation {
 
 	private static final Logger logger = LoggerFactory.getLogger(TimedComputation.class);
 
+	private TimedComputation() {
+		
+		/* no explicit instantiation allowed */
+	}
+	
 	public static <T> T compute(final Callable<T> callable, final long timeoutInMs, final String reasonToLogOnTimeout) throws ExecutionException, AlgorithmTimeoutedException, InterruptedException {
 
 		/* schedule a timer that will interrupt the current thread and execute the task */

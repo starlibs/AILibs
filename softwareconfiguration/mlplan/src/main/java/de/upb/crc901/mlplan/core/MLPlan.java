@@ -56,10 +56,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	private final MLPlanBuilder builder;
 	private final Instances data;
-	private TwoPhaseHASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String> twoPhaseHASCOFactory;
+	private TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
-
-	private Instances dataShownToSearch = null;
 
 	public MLPlan(final MLPlanBuilder builder, final Instances data) {
 		super(builder.getAlgorithmConfig(), data);
@@ -81,7 +79,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case created: {
+		case created:
 			this.logger.info("Starting an ML-Plan instance.");
 			AlgorithmInitializedEvent event = this.activate();
 
@@ -103,12 +101,13 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			/* set up exact splits */
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", data.size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
+			Instances dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
-				this.dataShownToSearch = builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).get(1);
+				dataShownToSearch = builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).get(1);
 			} else {
-				this.dataShownToSearch = this.getInput();
+				dataShownToSearch = this.getInput();
 			}
-			if (this.dataShownToSearch.isEmpty()) {
+			if (dataShownToSearch.isEmpty()) {
 				throw new IllegalStateException("Cannot search on no data.");
 			}
 
@@ -125,20 +124,20 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			if (builder.getClassifierEvaluatorFactory() != null) {
 				IClassifierEvaluatorFactory classifierEvaluatorFactory = builder.getClassifierEvaluatorFactory();
 				@SuppressWarnings("unchecked")
-				IDataset<IInstance> datasetSearch = WekaInstancesUtil.wekaInstancesToDataset(this.dataShownToSearch);
+				IDataset<IInstance> datasetSearch = WekaInstancesUtil.wekaInstancesToDataset(dataShownToSearch);
 				classifierEvaluator = classifierEvaluatorFactory.getIClassifierEvaluator(datasetSearch, this.getConfig().randomSeed());
 				if (classifierEvaluator instanceof LearningCurveExtrapolationEvaluator) {
 					((LearningCurveExtrapolationEvaluator) classifierEvaluator).setFullDatasetSize(MLPlan.this.getInput().size());
 				}
 			} else {
-				classifierEvaluator = new ProbabilisticMonteCarloCrossValidationEvaluator(evaluationMeasurementBridge, builder.getSearchPhaseDatasetSplitter(), this.getConfig().numberOfMCIterationsDuringSearch(), 1.0, this.dataShownToSearch,
+				classifierEvaluator = new ProbabilisticMonteCarloCrossValidationEvaluator(evaluationMeasurementBridge, builder.getSearchPhaseDatasetSplitter(), this.getConfig().numberOfMCIterationsDuringSearch(), 1.0, dataShownToSearch,
 						this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
 			}
 
 			/* create 2-phase software configuration problem */
 			logger.debug("Creating 2-phase software configuration problem.");
 			PipelineEvaluatorBuilder searchEvaluatorBuilder = new PipelineEvaluatorBuilder();
-			searchEvaluatorBuilder.withClassifierFactory(builder.getClassifierFactory()).withDatasetSplitter(builder.getSearchPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge).withData(this.dataShownToSearch)
+			searchEvaluatorBuilder.withClassifierFactory(builder.getClassifierFactory()).withDatasetSplitter(builder.getSearchPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge).withData(dataShownToSearch)
 					.withSeed(this.getConfig().randomSeed()).withTimeoutForSolutionEvaluation(this.getConfig().timeoutForCandidateEvaluation()).withNumMCIterations(this.getConfig().numberOfMCIterationsDuringSearch())
 					.withTrainFoldSize(this.getConfig().getMCCVTrainFoldSizeDuringSearch()).withClassifierEvaluator(classifierEvaluator);
 			IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(searchEvaluatorBuilder);
@@ -159,7 +158,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			this.logger.info("Creating the twoPhaseHASCOFactory.");
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(builder.getClassifierFactory(), problem);
 			@SuppressWarnings("unchecked")
-			HASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = builder.getHASCOFactory();
+			HASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = builder.getHASCOFactory();
 			this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 
 			this.twoPhaseHASCOFactory.setConfig(this.getConfig());
@@ -207,9 +206,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			this.optimizingFactory.init();
 			this.logger.info("Started and activated ML-Plan.");
 			return event;
-
-		}
-		case active: {
+			
+		case active:
 			
 			/* train the classifier returned by the optimizing factory */
 			long startOptimizationTime = System.currentTimeMillis();
@@ -231,7 +229,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
 					endBuildTime - startOptimizationTime, this.selectedClassifier);
 			return this.terminate();
-		}
+			
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());
 		}
@@ -311,7 +309,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		return optimizingFactory;
 	}
 
-	public TwoPhaseHASCOFactory<? extends GraphSearchInput<TFDNode, String>, TFDNode, String> getTwoPhaseHASCOFactory() {
+	public TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> getTwoPhaseHASCOFactory() {
 		return twoPhaseHASCOFactory;
 	}
 }
