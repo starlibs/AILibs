@@ -68,8 +68,12 @@
     <appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	 <logger name="hasco.core.HASCO">
-    <level value="info" />
+  <logger name="hasco.core.HASCO">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="hasco.core.IsValidParameterRangeRefinementPredicate">
+    <level value="trace" />
   </logger>
   
   <logger name="jaicore.graphvisualizer">

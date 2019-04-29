@@ -57,7 +57,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testSampleSizeSmallProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
 		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
@@ -73,14 +73,14 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testSampleSizeLargeProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
 		IDataset<I> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
 	private void testSampleSize(final IDataset<I> dataset, final double sampleFraction) throws AlgorithmCreationException {
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		IDataset<I> sample = this.getSample(samplingAlgorithm);
@@ -99,7 +99,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testNoDuplicatesSmallProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
 		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
@@ -115,14 +115,14 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void testNoDuplicatesLargeProblem() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
 		IDataset<I> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
 
 	private void testNoDuplicates(final IDataset<I> dataset) throws AlgorithmCreationException {
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		IDataset<I> sample = this.getSample(samplingAlgorithm);
@@ -141,11 +141,11 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	@Test
 	public void checkOriginalDataSetNotModified() throws Exception {
 		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) this.getProblemSet();
+		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
 		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) this.getAlgorithm(dataset);
+		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		this.getSample(samplingAlgorithm);
