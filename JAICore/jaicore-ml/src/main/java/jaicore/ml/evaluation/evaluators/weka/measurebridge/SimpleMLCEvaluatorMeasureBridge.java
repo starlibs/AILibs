@@ -43,7 +43,14 @@ public class SimpleMLCEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBri
 			throw new ObjectEvaluationFailedException("Could not validate trained classifier", e);
 		}
 
-		Double error = this.getBasicEvaluator().calculateAvgMeasure(actual, expected);
+		Double error = null;
+		try {
+			error = this.getBasicEvaluator().calculateAvgMeasure(actual, expected);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+		System.out.println(pl.getClass().getName() + " | Error: " + error);
 
 		if ((error + "").equals("NaN")) {
 			throw new ObjectEvaluationFailedException("Classifier " + pl.getClass().getName() + " could not be evalauted. Please refer to the previous logs for more detailed information.");

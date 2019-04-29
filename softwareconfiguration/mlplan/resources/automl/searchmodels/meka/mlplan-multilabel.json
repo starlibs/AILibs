@@ -1,6 +1,12 @@
 {
 	"repository": "MLPlan-Multilabel",
-	"include": ["./meka-multilabel.json","./meka-multilabel-meta.json"],
-	"parameters": [	],
-	"components": [	]
+	"include": [
+		"./meka-multilabel-meta.json",
+		"./meka-multilabel-base.json",
+		"../weka/weka-classifiers-autoweka.json"
+	],
+	"parameters": [
+	],
+	"components": [
+	]
 }

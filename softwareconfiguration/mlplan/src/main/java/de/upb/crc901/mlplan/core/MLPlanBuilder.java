@@ -79,7 +79,7 @@ public class MLPlanBuilder {
 	private static final File SPC_AUTO_WEKA = new File("resources/automl/searchmodels/weka/weka-all-autoweka.json");
 	private static final File SPC_SKLEARN = new File("resources/automl/searchmodels/sklearn/sklearn-mlplan.json");
 	private static final File SPC_SKLEARN_UL = new File("resources/automl/searchmodels/sklearn/ml-plan-ul.json");
-	private static final File SPC_MEKA = new File("resources/automl/searchmodels/meka/meka-multilabel.json");
+	private static final File SPC_MEKA = new File("resources/automl/searchmodels/meka/mlplan-multilabel.json");
 
 	/* Preferred classifier lists to define an order for the classifiers to be evaluated. */
 	private static final File PREFC_AUTO_WEKA = new File("resources/mlplan/weka-precedenceList.txt");
@@ -150,6 +150,14 @@ public class MLPlanBuilder {
 
 	private IClassifierEvaluatorFactory classifierEvaluatorFactory = null;
 
+	public MLPlanBuilder(final MLPlanBuilder builderToCopy) {
+		super();
+	}
+
+	public ML2PlanMekaBuilder forMekaMultiLabel() {
+		return new ML2PlanMekaBuilder(this);
+	}
+
 	public MLPlanBuilder() {
 		super();
 
@@ -158,20 +166,6 @@ public class MLPlanBuilder {
 		this.useCache = DEFAULT_USE_CACHE;
 		this.priorizingPredicate = DEFAULT_PRIORIZING_PREDICATE;
 		this.requestedHASCOInterface = DEFAULT_REQUESTED_HASCO_INTERFACE;
-	}
-
-	public MLPlanBuilder(final File searchSpaceConfigFile, final File algorithmConfigFile, final EMultiClassPerformanceMeasure performanceMeasure) {
-		this();
-		this.withAlgorithmConfigFile(algorithmConfigFile);
-		this.searchSpaceConfigFile = searchSpaceConfigFile;
-		this.performanceMeasure = performanceMeasure;
-		this.useCache = false;
-	}
-
-	public MLPlanBuilder(final File searchSpaceConfigFile, final File algorithmConfigFile, final EMultiClassPerformanceMeasure performanceMeasure, final PerformanceDBAdapter dbAdapter) {
-		this(searchSpaceConfigFile, algorithmConfigFile, performanceMeasure);
-		this.useCache = true;
-		this.dbAdapter = dbAdapter;
 	}
 
 	/**
@@ -246,6 +240,8 @@ public class MLPlanBuilder {
 		this.withDatasetSplitterForSearchSelectionSplit(new ArbitrarySplitter());
 		this.withSearchPhaseDatasetSplitter(new ArbitrarySplitter());
 		this.withSelectionPhaseDatasetSplitter(new ArbitrarySplitter());
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_NUM, "3");
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.SEARCH_MCCV_ITERATIONS, "1");
 		return this;
 	}
 
@@ -253,7 +249,7 @@ public class MLPlanBuilder {
 		if (this.searchSpaceConfigFile == null) {
 			this.withSearchSpaceConfigFile(defConfig.getSearchSpaceConfigFile());
 		}
-		this.withPreferredComponentsFile(defConfig.preferredComponentsFile);
+		this.withPreferredComponentsFile(defConfig.getPreferredComponentsFile());
 		this.withRandomCompletionBasedBestFirstSearch();
 		this.withSingleLabelClassificationMeasure(EMultiClassPerformanceMeasure.ERRORRATE);
 		return this;
@@ -467,10 +463,11 @@ public class MLPlanBuilder {
 	public IEvaluatorMeasureBridge<Double> getEvaluationMeasurementBridge(final IMeasure<Double, Double> measure) {
 		if (this.evaluatorMeasureBridge == null) {
 			if (this.getUseCache()) {
-				return new CacheEvaluatorMeasureBridge(measure, this.getDBAdapter());
+				this.evaluatorMeasureBridge = new CacheEvaluatorMeasureBridge(measure, this.getDBAdapter());
 			} else {
-				return new SimpleSLCEvaluatorMeasureBridge(measure);
+				this.evaluatorMeasureBridge = new SimpleSLCEvaluatorMeasureBridge(measure);
 			}
+			return this.evaluatorMeasureBridge;
 		} else {
 			return this.evaluatorMeasureBridge;
 		}

@@ -24,13 +24,14 @@ import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.IDatabaseConfig;
 import jaicore.experiments.IExperimentDatabaseHandle;
 import jaicore.experiments.IExperimentSetConfig;
+import jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 
 public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExperimenterSQLHandle.class);
-	
+
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_HOST = "host";
@@ -145,18 +146,18 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		}
 	}
 
-	public ExperimentDBEntry createAndGetExperiment(final Map<String, String> values) throws ExperimentDBInteractionFailedException{
+	public ExperimentDBEntry createAndGetExperiment(final Map<String, String> values) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
 		return this.createAndGetExperiment(new Experiment(this.config.getMemoryLimitInMB(), this.config.getNumberOfCPUs(), values));
 	}
 
 	@Override
-	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException {
+	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
 		try {
 
 			/* first check whether exactly the same experiment (with the same seed) has been conducted previously */
 			Optional<?> existingExperiment = this.knownExperimentEntries.stream().filter(e -> e.getExperiment().equals(experiment)).findAny();
 			if (existingExperiment.isPresent()) {
-				return null;
+				throw new ExperimentAlreadyExistsInDatabaseException();
 			}
 
 			Map<String, Object> valuesToInsert = new HashMap<>(experiment.getValuesOfKeyFields());
@@ -196,8 +197,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		where.put(FIELD_ID, String.valueOf(exp.getId()));
 		try {
 			this.adapter.update(this.tablename, valuesToWrite, where);
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new ExperimentUpdateFailedException(e);
 		}
 	}

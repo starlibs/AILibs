@@ -1,5 +1,9 @@
 package jaicore.ml.core.evaluation.measure.multilabel;
 
+import java.util.Arrays;
+
+import meka.core.Metrics;
+
 /**
  * Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
  * implemented in inverse.
@@ -19,7 +23,15 @@ public class AutoMEKAGGPFitnessMeasureLoss extends ADecomposableMultilabelMeasur
 
 	@Override
 	public Double calculateMeasure(final double[] actual, final double[] expected) {
-		return (EXACT_MATCH.calculateMeasure(actual, expected) + HAMMING.calculateMeasure(actual, expected) + F1_MACRO_AVG_L.calculateMeasure(actual, expected) + RANK.calculateMeasure(actual, expected)) / 4.0;
+		double exactMatchLoss = EXACT_MATCH.calculateMeasure(actual, expected);
+		double hammingLoss = HAMMING.calculateMeasure(actual, expected);
+		double f1MacroLoss = F1_MACRO_AVG_L.calculateMeasure(actual, expected);
+		double rankLoss = Metrics.L_RankLoss(Arrays.stream(expected).mapToInt(x -> (int) x).toArray(), actual);
+		System.out.println(Arrays.toString(actual) + " " + Arrays.toString(expected));
+
+		System.out.println("ExactMatch: " + exactMatchLoss + " hamming: " + hammingLoss + " f1: " + f1MacroLoss + " rank: " + rankLoss);
+
+		return (exactMatchLoss + hammingLoss + f1MacroLoss + rankLoss) / 4.0;
 	}
 
 }

@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.examples.multilabel.meka;
 
+import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,8 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
+import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
 import jaicore.ml.wekautil.dataset.splitter.ArbitrarySplitter;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
@@ -49,6 +52,11 @@ public class ML2PlanARFFExample {
 
 		MLPlanBuilder builder = new MLPlanBuilder();
 		builder.withMekaDefaultConfiguration();
+		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/meka/mlplan-multilabel-small.json"));
+
+		SimpleMLCEvaluatorMeasureBridge bridge = new SimpleMLCEvaluatorMeasureBridge(new InstanceWiseF1AsLoss());
+		builder.withEvaluatorMeasureBridge(bridge);
+
 		builder.withAlgorithmConfig(algoConfig);
 		builder.withTimeoutForNodeEvaluation(new TimeOut(60, TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(60, TimeUnit.SECONDS));
@@ -56,7 +64,7 @@ public class ML2PlanARFFExample {
 		MLPlan ml2plan = new MLPlan(builder, split.get(0));
 		ml2plan.setLoggerName("ml2plan");
 		ml2plan.setTimeout(new TimeOut(150, TimeUnit.SECONDS));
-		ml2plan.setNumCPUs(8);
+		ml2plan.setNumCPUs(1);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();

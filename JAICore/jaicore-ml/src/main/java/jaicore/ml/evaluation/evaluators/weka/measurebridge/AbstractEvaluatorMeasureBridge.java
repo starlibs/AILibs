@@ -1,5 +1,9 @@
 package jaicore.ml.evaluation.evaluators.weka.measurebridge;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import jaicore.logging.ToJSONStringUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 
 /**
@@ -31,6 +35,13 @@ public abstract class AbstractEvaluatorMeasureBridge<I, O> implements IEvaluator
 	 */
 	public void setBasicEvaluator(final IMeasure<I, O> basicEvaluator) {
 		this.basicEvaluator = basicEvaluator;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("basicEvaluator", this.basicEvaluator);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 
 }

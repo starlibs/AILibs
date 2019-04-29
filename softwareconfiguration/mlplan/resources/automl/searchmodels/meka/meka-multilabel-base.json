@@ -1,73 +1,8 @@
 {
 	"repository": "MEKA",
 	"include": [
-		"../weka/autoweka-for-mlc.json"
 	],
 	"parameters": [
-		{
-			"name": "P",
-			"comment": "Sets the downsampling ratio default: 0.75 (of original)",
-			"type": "double",
-			"default": 0.75,
-			"min": 0.1,
-			"max": 0.99,
-			"refineSplits": 2,
-			"minInterval": 0.05
-		},
-		{
-			"name": "H",
-			"comment": "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)).",
-			"type": "cat",
-			"default": 0,
-			"values": [
-				0,
-				-1
-			]
-		},
-		{
-			"name": "L",
-			"comment": "Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values",
-			"type": "int",
-			"default": 1,
-			"min": 1,
-			"max": 5,
-			"minInterval": 1,
-			"refineSplits": 2
-		},
-		{
-			"name": "X",
-			"comment": "The dependency heuristic to use in rearranging the trellis (None by default).",
-			"type": "cat",
-			"default": "None",
-			"values": [
-				"None"
-			]
-		},
-		{
-			"name": "I",
-			"comment": "The total number of iterations. default: 1000",
-			"type": "cat",
-			"default": 1000,
-			"values": [
-				100,
-				1000,
-				10000,
-				20000
-			]
-		},
-		{
-			"name": "Ic",
-			"comment": "The number of collection iterations. default: 100",
-			"type": "cat",
-			"default": 100,
-			"values": [
-				50,
-				100,
-				200,
-				500,
-				1000
-			]
-		}
 	],
 	"components": [
 		{
@@ -129,7 +64,7 @@
 				},
 				{
 					"name": "r",
-					"comment": "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+					"comment": "Sets the learning rate (typically somewhere between 'very small' and 0.1) default: 0.1",
 					"type": "double",
 					"default": 0.1,
 					"min": 1E-5,
@@ -178,7 +113,14 @@
 			],
 			"parameter": [
 				{
-					"name": "P"
+					"comment": "Sets the downsampling ratio default: 0.75 (of original)",
+					"name": "P",
+					"type": "double",
+					"default": 0.75,
+					"min": 0.1,
+					"max": 0.99,
+					"refineSplits": 2,
+					"minInterval": 0.05
 				}
 			]
 		},
@@ -211,7 +153,14 @@
 			],
 			"parameter": [
 				{
-					"name": "P"
+					"comment": "Sets the downsampling ratio default: 0.75 (of original)",
+					"name": "P",
+					"type": "double",
+					"default": 0.75,
+					"min": 0.1,
+					"max": 0.99,
+					"refineSplits": 2,
+					"minInterval": 0.05
 				}
 			]
 		},
@@ -229,10 +178,29 @@
 			],
 			"parameter": [
 				{
-					"name": "I"
+					"comment": "The total number of iterations. default: 1000 ",
+					"name": "I",
+					"type": "cat",
+					"default": 1000,
+					"values": [
+						100,
+						1000,
+						10000,
+						20000
+					]
 				},
 				{
-					"name": "Ic"
+					"comment": "The number of collection iterations. default: 100 ",
+					"name": "Ic",
+					"type": "cat",
+					"default": 100,
+					"values": [
+						50,
+						100,
+						200,
+						500,
+						1000
+					]
 				}
 			]
 		},
@@ -250,19 +218,58 @@
 			],
 			"parameter": [
 				{
-					"name": "H"
+					"comment": "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). ",
+					"name": "H",
+					"type": "cat",
+					"default": 0,
+					"values": [
+						0,
+						-1
+					]
 				},
 				{
-					"name": "L"
+					"comment": "Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values ",
+					"name": "L",
+					"type": "int",
+					"default": 1,
+					"min": 1,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 2
 				},
 				{
-					"name": "X"
+					"comment": "The dependency heuristic to use in rearranging the trellis (None by default). ",
+					"name": "X",
+					"type": "cat",
+					"default": "None",
+					"values": [
+						"None"
+					]
 				},
 				{
-					"name": "I"
+					"comment": "The total number of iterations. default: 1000 ",
+					"name": "I",
+					"type": "cat",
+					"default": 1000,
+					"values": [
+						100,
+						1000,
+						10000,
+						20000
+					]
 				},
 				{
-					"name": "Ic"
+					"comment": "The number of collection iterations. default: 100 ",
+					"name": "Ic",
+					"type": "cat",
+					"default": 100,
+					"values": [
+						50,
+						100,
+						200,
+						500,
+						1000
+					]
 				}
 			]
 		},
@@ -280,19 +287,58 @@
 			],
 			"parameter": [
 				{
-					"name": "H"
+					"comment": "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). ",
+					"name": "H",
+					"type": "cat",
+					"default": 0,
+					"values": [
+						0,
+						-1
+					]
 				},
 				{
-					"name": "L"
+					"comment": "Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values ",
+					"name": "L",
+					"type": "int",
+					"default": 1,
+					"min": 1,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 2
 				},
 				{
-					"name": "X"
+					"comment": "The dependency heuristic to use in rearranging the trellis (None by default). ",
+					"name": "X",
+					"type": "cat",
+					"default": "None",
+					"values": [
+						"None"
+					]
 				},
 				{
-					"name": "I"
+					"comment": "The total number of iterations. default: 1000 ",
+					"name": "I",
+					"type": "cat",
+					"default": 1000,
+					"values": [
+						100,
+						1000,
+						10000,
+						20000
+					]
 				},
 				{
-					"name": "Ic"
+					"comment": "The number of collection iterations. default: 100 ",
+					"name": "Ic",
+					"type": "cat",
+					"default": 100,
+					"values": [
+						50,
+						100,
+						200,
+						500,
+						1000
+					]
 				},
 				{
 					"name": "P",
@@ -524,36 +570,6 @@
 			]
 		},
 		{
-			"name": "meka.classifiers.multilabel.MULAN",
-			"providedInterface": [
-				"MulanMLClassifier"
-			],
-			"requiredInterface": [
-				{
-					"id": "W",
-					"name": "AbstractClassifier"
-				}
-			],
-			"parameter": [
-				{
-					"name": "S",
-					"comment": "Method Name default: RAkEL1; HOMER is discarded in the set of values",
-					"type": "cat",
-					"default": "RAkEL1",
-					"values": [
-						"RAkEL1",
-						"BR",
-						"LP",
-						"CLR",
-						"RAkELn",
-						"MLkNN",
-						"IBLR_ML",
-						"BPMLL"
-					]
-				}
-			]
-		},
-		{
 			"name": "meka.classifiers.multilabel.PCC",
 			"providedInterface": [
 				"MLClassifier",
@@ -750,9 +766,9 @@
 					"type": "int",
 					"default": 0,
 					"min": 0,
-					"max": 0,
-					"minInterval": 0.05,
-					"refineSplits": 1
+					"max": 10,
+					"minInterval": 1,
+					"refineSplits": 2
 				}
 			]
 		},

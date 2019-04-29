@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ import jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 
 /**
  * This class is used to run experiments.
- * 
+ *
  * @author fmohr
  *
  */
@@ -35,6 +37,7 @@ public class ExperimentRunner {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
 
+	private static final String INTERVAL_PATTERN = "\\[[0-9]+:[0-9]+\\]";
 	private static final int MAX_MEM_DEVIATION = 50;
 
 	private final IExperimentSetConfig config;
@@ -170,9 +173,24 @@ public class ExperimentRunner {
 		if (possibleValues.isEmpty()) {
 			return 0;
 		}
+
+		if (possibleValues.get(0).matches(INTERVAL_PATTERN)) {
+			Matcher matcher = Pattern.compile(INTERVAL_PATTERN).matcher(possibleValues.get(0));
+			if (matcher.find()) {
+				String[] interval = matcher.group(0).substring(1, matcher.group(0).length() - 1).split(":");
+				int lowerBound = Integer.parseInt(interval[0]);
+				int upperBound = Integer.parseInt(interval[1]);
+				if (lowerBound > upperBound) {
+					throw new IllegalArgumentException("The lower bound of an interval may not be larger than the upper bound.");
+				}
+				return upperBound - lowerBound + 1;
+			}
+		}
+
 		if (!possibleValues.get(0).startsWith("java:")) {
 			return possibleValues.size();
 		}
+
 		if (possibleValues.size() > 1) {
 			throw new UnsupportedOperationException("The value for key " + key + " seems to be a java class, but there are multiple values defined.");
 		}
@@ -191,6 +209,11 @@ public class ExperimentRunner {
 	private String getValueForKey(final String key, final int indexOfValue) throws IllegalKeyDescriptorException {
 		List<String> possibleValues = this.valuesForKeyFields.get(key);
 		assert !possibleValues.isEmpty() : "No values specified for key " + key;
+		if (possibleValues.get(0).matches(INTERVAL_PATTERN)) {
+			String[] interval = possibleValues.get(0).substring(1, possibleValues.get(0).length() - 1).split(":");
+			return (Integer.parseInt(interval[0]) + indexOfValue) + "";
+		}
+
 		if (!possibleValues.get(0).startsWith("java:")) {
 			return possibleValues.get(indexOfValue);
 		}
@@ -237,7 +260,7 @@ public class ExperimentRunner {
 	/**
 	 * Conducts a limited number of not yet conducted experiments randomly chosen
 	 * from the grid.
-	 * 
+	 *
 	 * @param maxNumberOfExperiments
 	 *            Limit for the number of experiments
 	 * @param reload
@@ -257,12 +280,12 @@ public class ExperimentRunner {
 		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
-		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && numberOfConductedExperiments < maxNumberOfExperiments) {
+		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && numberOfConductedExperiments < ((maxNumberOfExperiments > 0) ? maxNumberOfExperiments : numberOfConductedExperiments + 1)) {
 			if (reload) {
 				this.config.reload();
 			}
 			this.updateExperimentSetupAccordingToConfig();
-			int k = random.nextInt(this.totalNumberOfExperiments);
+			int k = this.random.nextInt(this.totalNumberOfExperiments);
 			logger.info("Now conducting {}/{}", k, this.totalNumberOfExperiments);
 			Experiment exp = this.getExperimentForNumber(k);
 			this.checkExperimentValidity(exp);
@@ -276,7 +299,7 @@ public class ExperimentRunner {
 
 	/**
 	 * Conducts an unbound number of randomly chosen experiments from the grid.
-	 * 
+	 *
 	 * @param reload
 	 *            Whether or not the experiment setup should be reloaded between two
 	 *            experiment runs.

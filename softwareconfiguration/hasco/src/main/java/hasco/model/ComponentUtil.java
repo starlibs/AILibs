@@ -63,13 +63,16 @@ public class ComponentUtil {
 				} else {
 					NumericParameterDomain numDomain = (NumericParameterDomain) p.getDefaultDomain();
 					if (numDomain.isInteger()) {
-						parameterValues.put(p.getName(), (rand.nextInt((int) (numDomain.getMax() - numDomain.getMin())) + numDomain.getMin()) + "");
+						if ((int) (numDomain.getMax() - numDomain.getMin()) > 0) {
+							parameterValues.put(p.getName(), (rand.nextInt((int) (numDomain.getMax() - numDomain.getMin())) + numDomain.getMin()) + "");
+						} else {
+							parameterValues.put(p.getName(), p.getDefaultValue() + "");
+						}
 					} else {
 						parameterValues.put(p.getName(), (rand.nextDouble() * (numDomain.getMax() - numDomain.getMin()) + numDomain.getMin()) + "");
 					}
 				}
 			}
-
 			ci = componentInstanceWithNoRequiredInterfaces(component, parameterValues);
 		} while (!ComponentInstanceUtil.isValidComponentInstantiation(ci));
 		return ci;

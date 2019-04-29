@@ -1,19 +1,22 @@
 package jaicore.experiments;
 
+import java.util.HashMap;
 import java.util.Map;
+
+import jaicore.logging.ToJSONStringUtil;
 
 /**
  * Basic experiment class that describes an experiment conceptually in terms of hardware information and semantic keys.
- * 
+ *
  * @author fmohr
  *
  */
 public class Experiment {
 	private final int memoryInMB;
 	private final int numCPUs;
-	private Map<String,String> valuesOfKeyFields;
+	private Map<String, String> valuesOfKeyFields;
 
-	public Experiment(int memoryInMB, int numCPUs, Map<String, String> valuesOfKeyFields) {
+	public Experiment(final int memoryInMB, final int numCPUs, final Map<String, String> valuesOfKeyFields) {
 		super();
 		this.memoryInMB = memoryInMB;
 		this.numCPUs = numCPUs;
@@ -21,48 +24,62 @@ public class Experiment {
 	}
 
 	public Map<String, String> getValuesOfKeyFields() {
-		return valuesOfKeyFields;
+		return this.valuesOfKeyFields;
 	}
 
-	public void setKeys(Map<String, String> keys) {
+	public void setKeys(final Map<String, String> keys) {
 		this.valuesOfKeyFields = keys;
 	}
 
 	public int getMemoryInMB() {
-		return memoryInMB;
+		return this.memoryInMB;
 	}
 
 	public int getNumCPUs() {
-		return numCPUs;
+		return this.numCPUs;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((valuesOfKeyFields == null) ? 0 : valuesOfKeyFields.hashCode());
-		result = prime * result + memoryInMB;
-		result = prime * result + numCPUs;
+		result = prime * result + ((this.valuesOfKeyFields == null) ? 0 : this.valuesOfKeyFields.hashCode());
+		result = prime * result + this.memoryInMB;
+		result = prime * result + this.numCPUs;
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Experiment other = (Experiment) obj;
-		if (valuesOfKeyFields == null) {
-			if (other.valuesOfKeyFields != null)
-				return false;
-		} else if (!valuesOfKeyFields.equals(other.valuesOfKeyFields)) {
+		}
+		if (obj == null) {
 			return false;
 		}
-		if (memoryInMB != other.memoryInMB)
+		if (this.getClass() != obj.getClass()) {
 			return false;
-		return numCPUs == other.numCPUs;
+		}
+		Experiment other = (Experiment) obj;
+		if (this.valuesOfKeyFields == null) {
+			if (other.valuesOfKeyFields != null) {
+				return false;
+			}
+		} else if (!this.valuesOfKeyFields.equals(other.valuesOfKeyFields)) {
+			return false;
+		}
+		if (this.memoryInMB != other.memoryInMB) {
+			return false;
+		}
+		return this.numCPUs == other.numCPUs;
+	}
+
+	@Override
+	public String toString() {
+		Map<String, Object> fields = new HashMap<>();
+		fields.put("memoryInMB", this.memoryInMB);
+		fields.put("numCPUs", this.numCPUs);
+		fields.put("valueOfKeyFields", this.valuesOfKeyFields);
+		return ToJSONStringUtil.toJSONString(fields);
 	}
 }
