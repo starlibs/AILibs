@@ -6,6 +6,6 @@ import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 
 public interface IClassifierEvaluatorFactory {
 
-	public IClassifierEvaluator getIClassifierEvaluator(IDataset<IInstance> dataset, long seed);
+	public IClassifierEvaluator getIClassifierEvaluator(IDataset<? extends IInstance> dataset, long seed);
 
 }

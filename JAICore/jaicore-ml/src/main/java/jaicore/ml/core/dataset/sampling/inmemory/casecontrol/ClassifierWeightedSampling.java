@@ -13,7 +13,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Instance;
