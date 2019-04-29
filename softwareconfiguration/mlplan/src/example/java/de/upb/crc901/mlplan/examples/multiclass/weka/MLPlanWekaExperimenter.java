@@ -160,8 +160,13 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			L.info("Test error was {}. Internally estimated error for this model was {}", eval.errorRate(), mlplan.getInternalValidationErrorOfSelectedClassifier());
 			Map<String, Object> results = new HashMap<>();
 			results.put("loss", eval.errorRate());
-			results.put(CLASSIFIER_FIELD, WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
-			results.put(PREPROCESSOR_FIELD, ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors().toString());
+			if (mlplan.getSelectedClassifier() instanceof MLPipeline) {
+				results.put(CLASSIFIER_FIELD, WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
+				results.put(PREPROCESSOR_FIELD, ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors().toString());
+			} else {
+				results.put(CLASSIFIER_FIELD, WekaUtil.getClassifierDescriptor(mlplan.getSelectedClassifier()));
+				results.put(PREPROCESSOR_FIELD, "");
+			}
 
 			writeFile("chosenModel." + this.experimentID + ".txt", results.get(PREPROCESSOR_FIELD) + "\n\n\n" + results.get(CLASSIFIER_FIELD));
 			writeFile("result." + this.experimentID + ".txt", "intern: " + mlplan.getInternalValidationErrorOfSelectedClassifier() + "\ntest:" + results.get("loss") + "");

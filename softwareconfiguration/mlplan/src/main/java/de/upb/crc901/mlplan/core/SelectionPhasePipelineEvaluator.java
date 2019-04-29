@@ -84,6 +84,7 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 		/* now retrieve .75-percentile from stats */
 		double mean = stats.getMean();
 		double percentile = stats.getPercentile(75f);
+
 		this.logger.info("Select {} as .75-percentile where {} would have been the mean. Samples size of MCCV was {}", percentile, mean, stats.getN());
 		return percentile;
 	}

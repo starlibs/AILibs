@@ -3,7 +3,8 @@
 	"include": [
 		"./meka-multilabel-meta.json",
 		"./meka-multilabel-base.json",
-		"../weka/weka-classifiers-autoweka.json"
+		"./weka-classifiers-base.json",
+		"./weka-classifiers-meta.json"
 	],
 	"parameters": [
 	],

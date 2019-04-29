@@ -257,4 +257,11 @@ public class ComponentInstance {
 		return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(this);
 	}
 
+	public String getNestedComponentDescription() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getComponent().getName());
+		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.getNestedComponentDescription()).forEach(sb::append);
+		return sb.toString();
+	}
+
 }

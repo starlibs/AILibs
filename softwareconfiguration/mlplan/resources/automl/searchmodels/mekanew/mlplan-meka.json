@@ -1,0 +1,6 @@
+{
+	"repository": "ML2-Plan for MEKA",
+	"include": ["./meka-multilabel-base.json", "./meka-multilabel-meta.json", "./weka-singlelabel-base.json", "./weka-singlelabel-meta.json"],
+	"parameters": [	],
+	"components": [	]
+}

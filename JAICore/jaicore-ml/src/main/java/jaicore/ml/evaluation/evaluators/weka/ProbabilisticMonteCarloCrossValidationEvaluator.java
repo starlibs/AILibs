@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.ml.WekaUtil;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.AbstractEvaluatorMeasureBridge;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
@@ -76,13 +77,13 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		}
 
 		/* perform random stratified split */
-		this.logger.info("Starting evaluation of {}", pl);
+		this.logger.info("Starting evaluation of {}", (pl.getClass().getSimpleName().equals("MLPipeline")) ? pl : WekaUtil.printNestedWekaClassifier(pl));
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
-			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
+			this.logger.debug("Obtaining predictions of {} for split #{}/{}", (pl.getClass().getSimpleName().equals("MLPipeline")) ? pl : WekaUtil.printNestedWekaClassifier(pl), i + 1, this.repeats);
 			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 			try {
 				double score = this.bridge.evaluateSplit(pl, split.get(0), split.get(1));
-				this.logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
+				this.logger.info("Score for evaluation of {} with split #{}/{}: {}", (pl.getClass().getSimpleName().equals("MLPipeline")) ? pl : WekaUtil.printNestedWekaClassifier(pl), i + 1, this.repeats, score);
 				stats.addValue(score);
 
 				/* t-test */
@@ -90,7 +91,8 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 					TTest test = new TTest();
 					if (test.tTest(this.bestScore, stats.getValues(), 0.02)) {
 						Double result = stats.getMean();
-						this.logger.info("Obtained score of {} for classifier {}. {}-MCCV was not completed because it would have been to unliky to beat best score.", result, pl, this.repeats);
+						this.logger.info("Obtained score of {} for classifier {}. {}-MCCV was not completed because it would have been to unliky to beat best score.", result,
+								(pl.getClass().getSimpleName().equals("MLPipeline")) ? pl : WekaUtil.printNestedWekaClassifier(pl), this.repeats);
 						return result;
 					}
 				}
@@ -107,7 +109,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 			throw new InterruptedException("MCCV has been interrupted");
 		}
 		Double score = stats.getMean();
-		this.logger.info("Obtained score of {} for classifier {}.", score, pl);
+		this.logger.info("Obtained score of {} for classifier {}.", score, (pl.getClass().getSimpleName().equals("MLPipeline")) ? pl : WekaUtil.printNestedWekaClassifier(pl));
 		return score;
 	}
 

@@ -140,8 +140,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 					@SuppressWarnings("unchecked")
 					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 					try {
-						MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore(),
-								solution.getTimeToEvaluateCandidate());
+						MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms via event with id {}", solution.getComponentInstance().getNestedComponentDescription(), solution.getScore(),
+								solution.getTimeToEvaluateCandidate(), ((HASCOSolutionEvent) event).getGID());
 					} catch (Exception e) {
 						MLPlan.this.logger.warn("Could not print log due to exception while preparing the log message.", e);
 					}

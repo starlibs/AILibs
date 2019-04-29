@@ -18,7 +18,6 @@ import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.concurrent.GlobalTimer;
 import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
 import jaicore.interrupt.Interrupter;
-import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import weka.classifiers.Classifier;
 
@@ -39,8 +38,11 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 	public SearchPhasePipelineEvaluator(final PipelineEvaluatorBuilder config) {
 		super();
 		this.config = config;
-		this.searchBenchmark = new MonteCarloCrossValidationEvaluator(this.config.getEvaluationMeasurementBridge(), this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.config.getData(), this.config.getTrainFoldSize(),
-				this.config.getSeed());
+		// this.searchBenchmark = new MonteCarloCrossValidationEvaluator(this.config.getEvaluationMeasurementBridge(), this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.config.getData(),
+		// this.config.getTrainFoldSize(),
+		// this.config.getSeed());
+		this.searchBenchmark = new ProbabilisticMonteCarloCrossValidationEvaluator(this.config.getEvaluationMeasurementBridge(), this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.bestScore, this.config.getData(),
+				this.config.getTrainFoldSize(), this.config.getSeed());
 	}
 
 	@Override
@@ -76,7 +78,10 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			if (this.searchBenchmark instanceof IInformedObjectEvaluatorExtension) {
 				((IInformedObjectEvaluatorExtension<Double>) this.searchBenchmark).updateBestScore(this.bestScore);
 			}
-			return this.searchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
+			double evaluationScore = this.searchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
+			System.out.println(Thread.currentThread().getName() + ": Evaluation score of " + c.getNestedComponentDescription() + ": " + evaluationScore);
+
+			return evaluationScore;
 		} catch (InterruptedException e) {
 			this.logger.info("Received InterruptedException!");
 			assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t"

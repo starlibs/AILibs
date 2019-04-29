@@ -79,7 +79,7 @@ public class MLPlanBuilder {
 	private static final File SPC_AUTO_WEKA = new File("resources/automl/searchmodels/weka/weka-all-autoweka.json");
 	private static final File SPC_SKLEARN = new File("resources/automl/searchmodels/sklearn/sklearn-mlplan.json");
 	private static final File SPC_SKLEARN_UL = new File("resources/automl/searchmodels/sklearn/ml-plan-ul.json");
-	private static final File SPC_MEKA = new File("resources/automl/searchmodels/meka/mlplan-multilabel.json");
+	private static final File SPC_MEKA = new File("resources/automl/searchmodels/mekanew/mlplan-meka.json");
 
 	/* Preferred classifier lists to define an order for the classifiers to be evaluated. */
 	private static final File PREFC_AUTO_WEKA = new File("resources/mlplan/weka-precedenceList.txt");
@@ -152,10 +152,6 @@ public class MLPlanBuilder {
 
 	public MLPlanBuilder(final MLPlanBuilder builderToCopy) {
 		super();
-	}
-
-	public ML2PlanMekaBuilder forMekaMultiLabel() {
-		return new ML2PlanMekaBuilder(this);
 	}
 
 	public MLPlanBuilder() {
