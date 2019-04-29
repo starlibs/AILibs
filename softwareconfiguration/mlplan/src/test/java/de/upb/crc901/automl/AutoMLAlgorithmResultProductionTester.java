@@ -1,9 +1,6 @@
 package de.upb.crc901.automl;
 
-<<<<<<< HEAD
-=======
 import static org.junit.Assert.assertEquals;
->>>>>>> refs/remotes/origin/dev
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -35,11 +32,7 @@ import jaicore.concurrent.GlobalTimer;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
-<<<<<<< HEAD
 import weka.classifiers.Evaluation;
-=======
-import weka.classifiers.evaluation.Evaluation;
->>>>>>> refs/remotes/origin/dev
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSink;
