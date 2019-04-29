@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
+import org.junit.runners.Parameterized.Parameters;
 
 import jaicore.basic.algorithm.AlgorithmCreationException;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
@@ -29,7 +30,7 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
-	//	@Parameters(name = "problemset = {0}")
+	@Parameters(name = "problemset = {0}")
 	public static Collection<Object[]> data() {
 		List<Object> problemSets = new ArrayList<>();
 
