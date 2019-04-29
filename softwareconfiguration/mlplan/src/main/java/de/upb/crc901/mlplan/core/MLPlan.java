@@ -31,7 +31,8 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
+import jaicore.ml.core.dataset.standard.SimpleDataset;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
@@ -124,7 +125,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			if (builder.getClassifierEvaluatorFactory() != null) {
 				IClassifierEvaluatorFactory classifierEvaluatorFactory = builder.getClassifierEvaluatorFactory();
 				@SuppressWarnings("unchecked")
-				IDataset<IInstance> datasetSearch = WekaInstancesUtil.wekaInstancesToDataset(dataShownToSearch);
+				SimpleDataset datasetSearch = WekaInstancesUtil.wekaInstancesToDataset(dataShownToSearch);
 				classifierEvaluator = classifierEvaluatorFactory.getIClassifierEvaluator(datasetSearch, this.getConfig().randomSeed());
 				if (classifierEvaluator instanceof LearningCurveExtrapolationEvaluator) {
 					((LearningCurveExtrapolationEvaluator) classifierEvaluator).setFullDatasetSize(MLPlan.this.getInput().size());
