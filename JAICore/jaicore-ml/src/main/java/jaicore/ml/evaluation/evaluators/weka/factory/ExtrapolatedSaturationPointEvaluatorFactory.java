@@ -28,7 +28,7 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierE
 	}
 
 	@Override
-	public IClassifierEvaluator getIClassifierEvaluator(IDataset<IInstance> dataset, long seed) {
+	public IClassifierEvaluator getIClassifierEvaluator(IDataset<? extends IInstance> dataset, long seed) {
 		StratifiedSplit split = new StratifiedSplit(dataset, seed);
 		try {
 			split.doSplit(0.7);

@@ -74,9 +74,13 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 
 		long startTimestamp = System.currentTimeMillis();
 		/* perform random stratified split */
-		this.logger.info("Starting evaluation of {} (Description: {})", pl.getClass().getName(), pl);
-		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
+		this.logger.info("Starting MMCV evaluation of {} (Description: {})", pl.getClass().getName(), pl);
+		for (int i = 0; i < this.repeats && !this.canceled; i++) {
 			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
+			if (Thread.interrupted()) { // clear the interrupted field. This is Java a general convention when an InterruptedException is thrown (see Java documentation for details)
+				this.logger.info("MCCV has been interrupted, leaving MCCV.");
+				throw new InterruptedException("MCCV has been interrupted.");
+			}
 			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 			try {
 				double score = this.bridge.evaluateSplit(pl, split.get(0), split.get(1));
@@ -88,12 +92,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 				throw new ObjectEvaluationFailedException("Could not evaluate classifier!", e);
 			}
 		}
-		if (Thread.currentThread().isInterrupted()) {
-			Thread.interrupted(); // clear the interrupted field. This is Java a general convention when an InterruptedException is thrown (see Java documentation for details)
-			throw new InterruptedException("MCCV has been interrupted");
-		}
 		Double score = stats.getMean();
-
 		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl, (System.currentTimeMillis() - startTimestamp));
 		return score;
 	}

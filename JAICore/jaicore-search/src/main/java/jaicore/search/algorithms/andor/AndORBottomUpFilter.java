@@ -222,7 +222,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				}
 				try {
 					extendedSolutionBase.value = this.evaluator.evaluate(extendedSolutionBase.graph);
-				} catch (TimeoutException | ObjectEvaluationFailedException e) {
+				} catch (ObjectEvaluationFailedException e) {
 					this.logger.warn("Received exception {}.", e);
 				}
 				catch (InterruptedException e) {
