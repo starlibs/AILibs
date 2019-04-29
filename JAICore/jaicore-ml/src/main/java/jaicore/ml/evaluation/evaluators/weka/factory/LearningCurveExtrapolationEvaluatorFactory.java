@@ -26,7 +26,7 @@ public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEv
 	}
 
 	@Override
-	public IClassifierEvaluator getIClassifierEvaluator(IDataset<IInstance> dataset, long seed) {
+	public IClassifierEvaluator getIClassifierEvaluator(IDataset<? extends IInstance> dataset, long seed) {
 		return new LearningCurveExtrapolationEvaluator(anchorpoints, subsamplingAlgorithmFactory, dataset,
 				trainSplitForAnchorpointsMeasurement, extrapolationMethod, seed);
 	}

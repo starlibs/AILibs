@@ -285,8 +285,7 @@ public class MLPlanBuilder {
 	public MLPlanBuilder withAlgorithmConfig(final MLPlanClassifierConfig config) {
 		this.algorithmConfig = config;
 		this.hascoFactory.withAlgorithmConfig(this.algorithmConfig);
-		this.updateSearchProblemTransformer();
-		this.updateAlgorithmConfigOfHASCO();
+		this.updateEverything();
 		return this;
 	}
 
@@ -313,7 +312,7 @@ public class MLPlanBuilder {
 		} else {
 			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, this.preferredNodeEvaluator);
 		}
-		this.updateSearchProblemTransformer();
+		this.updateEverything();
 		return this;
 	}
 
@@ -337,19 +336,19 @@ public class MLPlanBuilder {
 	@SuppressWarnings("unchecked")
 	public MLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
 		this.hascoFactory.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
-		this.updateSearchProblemTransformer();
+		this.updateEverything();
 		return this;
 	}
 
 	public MLPlanBuilder withTimeoutForSingleSolutionEvaluation(final TimeOut timeout) {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, String.valueOf(timeout.milliseconds()));
-		this.updateAlgorithmConfigOfHASCO();
+		this.updateEverything();
 		return this;
 	}
 
 	public MLPlanBuilder withTimeoutForNodeEvaluation(final TimeOut timeout) {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeout.milliseconds()));
-		this.updateAlgorithmConfigOfHASCO();
+		this.updateEverything();
 		return this;
 	}
 
@@ -383,7 +382,7 @@ public class MLPlanBuilder {
 
 		/* update the preferred node evaluator in the HascoFactory */
 		this.preferredNodeEvaluator = actualNodeEvaluator;
-		this.updateSearchProblemTransformer();
+		this.updateEverything();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -395,6 +394,11 @@ public class MLPlanBuilder {
 
 	private void updateAlgorithmConfigOfHASCO() {
 		this.hascoFactory.withAlgorithmConfig(this.getAlgorithmConfig());
+	}
+
+	private void updateEverything() {
+		updateSearchProblemTransformer();
+		updateAlgorithmConfigOfHASCO();
 	}
 
 	/**

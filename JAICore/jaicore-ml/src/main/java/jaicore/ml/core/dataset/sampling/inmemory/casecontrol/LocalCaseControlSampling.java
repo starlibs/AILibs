@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.standard.SimpleDataset;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
-import jaicore.ml.core.dataset.*;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 
 public class LocalCaseControlSampling<I extends IInstance> extends PilotEstimateSampling<I> {
 
@@ -41,7 +43,7 @@ public class LocalCaseControlSampling<I extends IInstance> extends PilotEstimate
 			boundaryOfCurrentInstance += loss / sumOfDistributionLosses;
 			instanceProbabilityBoundaries.add(new Pair<Instance, Double>(instance, boundaryOfCurrentInstance));
 		}
-		IDataset<IInstance> dataset = WekaInstancesUtil.wekaInstancesToDataset(instances);
+		SimpleDataset dataset = WekaInstancesUtil.wekaInstancesToDataset(instances);
 		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<>();
 		int iterator = 0;
 		for (IInstance instance : dataset) {
