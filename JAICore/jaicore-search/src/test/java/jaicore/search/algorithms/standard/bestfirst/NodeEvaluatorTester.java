@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.concurrent.InterruptionTimerTask;
 import jaicore.interrupt.Interrupter;
+import jaicore.interrupt.InterruptionTimerTask;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;

@@ -190,7 +190,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
 		AtomicLong start = new AtomicLong();
 		boolean controlledInterruptedExceptionSeen = false;
-		ThreadGroup algorithmThreadGroup = new ThreadGroup("TimeoutTestGroup");
+		ThreadGroup algorithmThreadGroup = new ThreadGroup("InterruptTestGroup");
 		Thread algorithmThread = new Thread(algorithmThreadGroup, task, "InterruptTest Algorithm runner for " + algorithm.getId());
 		AtomicBoolean threadNumberViolated = new AtomicBoolean();
 		AtomicLong interruptEvent = new AtomicLong();
@@ -286,7 +286,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 		/* prepare algorithm thread with a new thread group so that the algorithm can be monitored more easily */
 		boolean cancellationExceptionSeen = false;
-		ThreadGroup algorithmThreadGroup = new ThreadGroup("TimeoutTestGroup");
+		ThreadGroup algorithmThreadGroup = new ThreadGroup("CancelTestGroup");
 		Thread algorithmThread = new Thread(algorithmThreadGroup, task, "CancelTest Algorithm runner for " + algorithm.getId());
 		AtomicBoolean threadNumberViolated = new AtomicBoolean();
 		ThreadGroupObserver threadCountObserverThread = new ThreadGroupObserver(algorithmThreadGroup, algorithm.getConfig().threads(), () -> {
@@ -349,7 +349,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getDifficultProblemInputForGeneralTestPurposes());
 		assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Testing timeoutof algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), StringUtil.toStringLimited(algorithm.getInput(), 100));
+			this.logger.info("Testing timeout of algorithm {} ({}) with problem input {}", algorithm.getId(), algorithm.getClass().getName(), StringUtil.toStringLimited(algorithm.getInput(), 100));
 		}
 		if (algorithm instanceof ILoggingCustomizable) {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);

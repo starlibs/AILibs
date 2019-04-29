@@ -1,9 +1,5 @@
 package de.upb.crc901.mlplan.core;
 
-import java.util.Arrays;
-import java.util.TimerTask;
-import java.util.stream.Collectors;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,12 +9,9 @@ import hasco.model.ComponentInstance;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.concurrent.GlobalTimer;
-import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
-import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
+import jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
 
 /**
@@ -27,7 +20,7 @@ import weka.classifiers.Classifier;
  * @author fmohr
  * @author jnowack
  */
-public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
+public class SearchPhasePipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SearchPhasePipelineEvaluator.class);
 
@@ -39,8 +32,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		super();
 		this.config = config;
 		// this.searchBenchmark = new MonteCarloCrossValidationEvaluator(this.config.getEvaluationMeasurementBridge(), this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.config.getData(),
-		// this.config.getTrainFoldSize(),
-		// this.config.getSeed());
+		// this.config.getTrainFoldSize(), this.config.getSeed());
 		this.searchBenchmark = new ProbabilisticMonteCarloCrossValidationEvaluator(this.config.getEvaluationMeasurementBridge(), this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.bestScore, this.config.getData(),
 				this.config.getTrainFoldSize(), this.config.getSeed());
 	}
@@ -64,9 +56,7 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
-		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
-		TimerTask task = sub.interruptMeAfterMS(this.config.getTimeoutForSolutionEvaluation(), "Timeout for pipeline in search phase.");
+	public Double evaluateSupervised(final ComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
 		try {
 			if (this.config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {
 				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.config.getEvaluationMeasurementBridge()).getShallowCopy(c);
@@ -78,29 +68,9 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 			if (this.searchBenchmark instanceof IInformedObjectEvaluatorExtension) {
 				((IInformedObjectEvaluatorExtension<Double>) this.searchBenchmark).updateBestScore(this.bestScore);
 			}
-			double evaluationScore = this.searchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
-			System.out.println(Thread.currentThread().getName() + ": Evaluation score of " + c.getNestedComponentDescription() + ": " + evaluationScore);
-
-			return evaluationScore;
-		} catch (InterruptedException e) {
-			this.logger.info("Received InterruptedException!");
-			assert !Thread.currentThread().isInterrupted() : "The interrupt-flag should not be true when an InterruptedException is thrown! Stack trace of the InterruptedException is \n\t"
-					+ Arrays.asList(e.getStackTrace()).stream().map(StackTraceElement::toString).collect(Collectors.joining("\n\t"));
-			this.logger.info("Checking whether interrupt is triggered by task {}", task);
-			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
-				this.logger.debug("This is a controlled interrupt of ourselves for task {}.", task);
-				Thread.interrupted(); // reset thread interruption flag, because the thread is not really interrupted but should only stop the evaluation
-				Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
-				assert !Interrupter.get().hasCurrentThreadOpenInterrupts() : "There are still open interrupts!";
-				throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.");
-			}
-			this.logger.info("Recognized uncontrolled interrupt. Forwarding this exception.");
-			throw e;
+			return this.searchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
-		} finally {
-			task.cancel();
-			this.logger.debug("Canceled timeout job {}", task);
 		}
 	}
 
@@ -109,4 +79,17 @@ public class SearchPhasePipelineEvaluator implements IObjectEvaluator<ComponentI
 		this.bestScore = bestScore;
 	}
 
+	public PipelineEvaluatorBuilder getConfig() {
+		return this.config;
+	}
+
+	@Override
+	public long getTimeout(final ComponentInstance item) {
+		return this.config.getTimeoutForSolutionEvaluation();
+	}
+
+	@Override
+	public String getMessage(final ComponentInstance item) {
+		return "Pipeline evaluation during search phase";
+	}
 }

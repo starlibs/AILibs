@@ -1,7 +1,5 @@
 package de.upb.crc901.mlplan.core;
 
-import java.util.TimerTask;
-
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,14 +9,10 @@ import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.concurrent.GlobalTimer;
-import jaicore.concurrent.GlobalTimer.TimeoutSubmitter;
-import jaicore.interrupt.Interrupter;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
+import jaicore.timing.TimedObjectEvaluator;
 
 /**
  * Evaluator used in the selection phase of mlplan. Uses MCCV by default, but can be configured to use other Benchmarks.
@@ -26,7 +20,7 @@ import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBrid
  * @author fmohr
  * @author jnowack
  */
-public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<ComponentInstance, Double>, IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
+public class SelectionPhasePipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(SelectionPhasePipelineEvaluator.class);
 
@@ -50,7 +44,7 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 	}
 
 	@Override
-	public Double evaluate(final ComponentInstance c) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluateSupervised(final ComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
 
 		if (this.bestScore == null) {
 			throw new UnsupportedOperationException("Cannot evaluated in selection phase if no best solution has been propagated.");
@@ -65,20 +59,12 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 				this.config.getTrainFoldSize(), this.config.getSeed());
 
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		TimeoutSubmitter sub = GlobalTimer.getInstance().getSubmitter();
-		TimerTask task = sub.interruptMeAfterMS(this.config.getTimeoutForSolutionEvaluation() - 100, "Timeout for pipeline in selection phase for candidate " + c + ".");
 		try {
 			mccv.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c), stats);
 		} catch (InterruptedException e) {
-			if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
-				throw new ObjectEvaluationFailedException("Evaluation of composition failed since the timeout was hit.", e);
-			}
 			throw e;
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
-		} finally {
-			task.cancel();
-			this.logger.debug("Canceled timeout job {}", task);
 		}
 
 		/* now retrieve .75-percentile from stats */
@@ -95,6 +81,16 @@ public class SelectionPhasePipelineEvaluator implements IObjectEvaluator<Compone
 			throw new IllegalArgumentException("Best known score must not be updated with NULL");
 		}
 		this.bestScore = bestScore;
+	}
+
+	@Override
+	public long getTimeout(ComponentInstance item) {
+		return config.getTimeoutForSolutionEvaluation();
+	}
+
+	@Override
+	public String getMessage(ComponentInstance item) {
+		return "Pipeline evaluation during selection phase for candidate " + item;
 	}
 
 }
