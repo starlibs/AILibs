@@ -184,7 +184,7 @@
   </logger>
   
   <logger name="testedalgorithm">
-    <level value="info" />
+    <level value="debug" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -198,6 +198,10 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
     <level value="info" />
   </logger>
   

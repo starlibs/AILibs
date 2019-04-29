@@ -50,7 +50,7 @@ public class Interrupter {
 	public synchronized void interruptThread(final Thread t, final Object reason) {
 		if (blackListedInterruptReasons.containsKey(t) && blackListedInterruptReasons.get(t).contains(reason)) {
 			blackListedInterruptReasons.get(t).remove(reason);
-			logger.info("Thread {} is not interrupted with reason {}, because this reason has been marked to be avoided. Removing the entry from the black list.",  t, reason);
+			logger.info("Thread {} is not interrupted, because it has been marked to be avoided for reason {}. Removing the entry from the black list.",  t, reason);
 			return;
 		}
 		openInterrupts.add(new Interrupt(Thread.currentThread(), t, System.currentTimeMillis(), reason));
@@ -117,7 +117,7 @@ public class Interrupter {
 
 	public synchronized void markInterruptAsResolved(final Thread t, final Object reason) {
 		if (!hasThreadBeenInterruptedWithReason(t, reason)) {
-			throw new IllegalArgumentException("The thread " + t + " has not been interrupted with reason " + reason);
+			throw new IllegalArgumentException("The thread " + t + " has not been interrupted with reason " + reason + ". Reasons for which it has been interrupted: " + Interrupter.get().getAllUnresolvedInterruptsOfThread(Thread.currentThread()).stream().map(Interrupt::getReasonForInterruption).collect(Collectors.toList()));
 		}
 		logger.debug("Removing interrupt with reason {} from list of open interrupts for thread {}", reason, t);
 		openInterrupts.removeIf(i -> i.getInterruptedThread() == t && i.getReasonForInterruption().equals(reason));

@@ -47,7 +47,7 @@ import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.timing.TimedComputation;
 
 public class RandomCompletionBasedNodeEvaluator<T, A, V extends Comparable<V>> extends TimeAwareNodeEvaluator<T, V>
-		implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IPotentiallyUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
+implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V>, ICancelableNodeEvaluator, IPotentiallyUncertaintyAnnotatingNodeEvaluator<T, V>, ILoggingCustomizable {
 
 	private static final String ALGORITHM_ID = "RandomCompletion";
 	private static final boolean LOG_FAILURES_AS_ERRORS = false;

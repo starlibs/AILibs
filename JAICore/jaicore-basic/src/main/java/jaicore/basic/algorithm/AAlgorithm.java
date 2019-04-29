@@ -75,8 +75,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	protected AAlgorithm(final IAlgorithmConfig config, final I input) {
 		this.config = config;
 		this.input = input;
-		if (this.config == null)
+		if (this.config == null) {
 			throw new IllegalArgumentException("Algorithm configuration must not be null!");
+		}
 	}
 
 	@Override
@@ -92,7 +93,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	@Override
 	public AlgorithmEvent next() {
 		try {
-			return this.nextWithException();
+			return nextWithException();
 		} catch (Exception e) {
 			this.unregisterThreadAndShutdown();
 			throw new ExceptionInAlgorithmIterationException(e);
@@ -456,7 +457,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			announceTimeoutDetected();
 			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 		}
-		
+
 		/* conduct timed computation */
 		try {
 			return TimedComputation.compute(r, remainingTime - this.timeoutPrecautionOffset, reasonToLogOnTimeout);

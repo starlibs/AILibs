@@ -89,17 +89,21 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 	}
 
 	protected void checkInterruption() throws InterruptedException {
-		if (Thread.currentThread().isInterrupted()) {
+		boolean interrupted = Thread.currentThread().isInterrupted();
+		logger.debug("Checking interruption of RCNE: {}", interrupted);
+		if (interrupted) {
 			Thread.interrupted(); // reset flag
 			throw new InterruptedException("Node evaluation of " + this.getClass().getName() + " has been interrupted.");
 		}
 	}
 
-	public void setLoggerName(String name) {
+	@Override
+	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Switched logger name to {}", name);
 	}
 
+	@Override
 	public String getLoggerName() {
 		return this.logger.getName();
 	}
