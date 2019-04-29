@@ -107,7 +107,8 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 					@SuppressWarnings("unchecked")
 					HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 					TwoPhaseHASCO.this.updateBestSeenSolution(solution);
-					TwoPhaseHASCO.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", solution.getComponentInstance(), solution.getScore(), solution.getTimeToEvaluateCandidate());
+					TwoPhaseHASCO.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", solution.getComponentInstance().getNestedComponentDescription(), solution.getScore(),
+							solution.getTimeToEvaluateCandidate());
 					TwoPhaseHASCO.this.phase1ResultQueue.add(solution);
 				}
 
@@ -128,7 +129,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.logger.info(
 					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).\nThe search factory is: {}",
 					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().numberOfRandomCompletions(),
-					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing(), hasco.getSearchFactory());
+					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing(), this.hasco.getSearchFactory());
 			DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
 
 			/* set HASCO objects within the default path prioritizing node evaluator */
@@ -139,11 +140,9 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 		/* active is only one step in this model; this could be refined */
 		case active:
-
 			/* phase 1: gather solutions */
 			GlobalTimer timer = GlobalTimer.getInstance();
 			TimerTask task = new TimerTask() {
-
 				@Override
 				public void run() {
 					int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
@@ -151,7 +150,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 					if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
 						TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
 						TwoPhaseHASCO.this.hasco.cancel();
-						TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - timeOfStart) - timeElapsed);
+						TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart) - timeElapsed);
 						this.cancel();
 					}
 				}
@@ -163,7 +162,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			} catch (AlgorithmExecutionCanceledException e) {
 				this.logger.info("HASCO has terminated due to a cancel.");
 			} catch (AlgorithmTimeoutedException e) {
-				this.logger.warn("HASCO has timeouted. In fact, time to deadline is {}ms", getTimeout().milliseconds() - (System.currentTimeMillis() - timeOfStart));
+				this.logger.warn("HASCO has timeouted. In fact, time to deadline is {}ms", this.getTimeout().milliseconds() - (System.currentTimeMillis() - this.timeOfStart));
 			}
 			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
 
@@ -251,7 +250,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			actuallySelectedSolutions.add(pl);
 			expectedRuntime = this.getExpectedTotalRemainingRuntimeForAGivenPool(actuallySelectedSolutions, true);
 			if (expectedRuntime > remainingTime && actuallySelectedSolutions.size() > 1) {
-				this.logger.info("Not considering solution {} for phase 2, because the expected runtime of the whole thing would be {}/{}", pl, expectedRuntime, remainingTime);
+				this.logger.info("Not considering solution {} for phase 2, because the expected runtime of the whole thing would be {}/{}", pl.getComponentInstance().getNestedComponentDescription(), expectedRuntime, remainingTime);
 				actuallySelectedSolutions.remove(pl);
 			}
 		}
@@ -377,7 +376,8 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 				TwoPhaseHASCO.this.logger.info(
 						"During search, the currently chosen model {} had a total evaluation time of {}ms ({}ms per iteration). " + "We estimate an evaluation in the selection phase to take {}ms, and the final build to take {}. "
 								+ "This yields a total time of {}ms.",
-						c.getComponentInstance(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection);
+						c.getComponentInstance().getNestedComponentDescription(), inSearchSolutionEvaluationTime, inSearchSolutionEvaluationTime, estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime,
+						estimatedTotalEffortInCaseOfSelection);
 
 				/* If we have a global timeout, check whether considering this model is feasible. */
 				if (TwoPhaseHASCO.this.getTimeout().seconds() > 0) {
@@ -385,7 +385,8 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 					if (estimatedTotalEffortInCaseOfSelection >= remainingTime) {
 						TwoPhaseHASCO.this.logger.info(
 								"Not evaluating solution {} anymore, because its insearch evaluation time was {}, expected evaluation time for selection is {}, and expected post-processing time is {}. This adds up to {}, which exceeds the remaining time of {}!",
-								c.getComponentInstance(), c.getTimeToEvaluateCandidate(), estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection, remainingTime);
+								c.getComponentInstance().getNestedComponentDescription(), c.getTimeToEvaluateCandidate(), estimatedInSelectionSingleIterationEvaluationTime, estimatedPostProcessingTime, estimatedTotalEffortInCaseOfSelection,
+								remainingTime);
 						sem.release();
 						return;
 					}
@@ -398,18 +399,20 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 						double selectionScore = evaluator.evaluate(c.getComponentInstance());
 						evaluatedModels.incrementAndGet();
 						long trueEvaluationTime = (System.currentTimeMillis() - timestampStart);
-						TwoPhaseHASCO.this.logger.info("Evaluated candidate {} with score {} (score assigned by HASCO was {}). Time to evaluate was {}ms", c.getComponentInstance(), selectionScore, c.getScore(), trueEvaluationTime);
+						TwoPhaseHASCO.this.logger.info("Evaluated candidate {} with score {} (score assigned by HASCO was {}). Time to evaluate was {}ms", c.getComponentInstance().getNestedComponentDescription(), selectionScore,
+								c.getScore(), trueEvaluationTime);
 						stats.set(run, selectionScore);
 						return true;
-					}, timeoutForEvaluation, "Timeout for evaluation of ensemble candidate " + c.getComponentInstance());
+					}, timeoutForEvaluation, "Timeout for evaluation of ensemble candidate " + c.getComponentInstance().getNestedComponentDescription());
 				} catch (InterruptedException e) {
 					assert !Thread.currentThread().isInterrupted() : "The interrupted-flag should not be true when an InterruptedException is thrown!";
-					TwoPhaseHASCO.this.logger.info("Selection eval of {} got interrupted after {}ms. Defined timeout was: {}ms", c.getComponentInstance(), (System.currentTimeMillis() - timestampStart), timeoutForEvaluation);
+					TwoPhaseHASCO.this.logger.info("Selection eval of {} got interrupted after {}ms. Defined timeout was: {}ms", c.getComponentInstance().getNestedComponentDescription(), (System.currentTimeMillis() - timestampStart),
+							timeoutForEvaluation);
 					Thread.currentThread().interrupt(); // no controlled interrupt needed here, because this is only a re-interrupt, and the execution will cease after this anyway
 				} catch (ExecutionException e) {
 					TwoPhaseHASCO.this.logger.error("Observed an exeption when trying to evaluate a candidate in the selection phase.\n{}", LoggerUtil.getExceptionInfo(e.getCause()));
 				} catch (AlgorithmTimeoutedException e) {
-					TwoPhaseHASCO.this.logger.debug("Evaluation of candidate has timeouted: {}", c);
+					TwoPhaseHASCO.this.logger.debug("Evaluation of candidate has timeouted: {}", c.getComponentInstance().getNestedComponentDescription());
 				} finally {
 					sem.release();
 					TwoPhaseHASCO.this.logger.debug("Released. Sem state: {}", sem.availablePermits());
@@ -437,7 +440,8 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			int selectedModelIndex = this.getCandidateThatWouldCurrentlyBeSelectedWithinPhase2(ensembleToSelectFrom, stats);
 			if (selectedModelIndex >= 0) {
 				selectedModel = ensembleToSelectFrom.get(selectedModelIndex);
-				this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", selectedModel.getComponentInstance(), selectedModel.getScore(), stats.get(selectedModelIndex));
+				this.logger.info("Selected a configuration: {}. Its internal score was {}. Selection score was {}", selectedModel.getComponentInstance().getNestedComponentDescription(), selectedModel.getScore(),
+						stats.get(selectedModelIndex));
 			} else {
 				this.logger.warn("Could not select any real solution in selection phase, just returning the best we have seen in HASCO.");
 				return bestSolution;

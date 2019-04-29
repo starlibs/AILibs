@@ -9,6 +9,7 @@ import com.google.common.eventbus.Subscribe;
 
 import de.upb.crc901.mlplan.core.events.ClassifierFoundEvent;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.core.HASCOFactory;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.events.HASCOSolutionEvent;
@@ -29,6 +30,7 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.ml.WekaUtil;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
@@ -175,8 +177,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 						@SuppressWarnings("unchecked")
 						HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 						try {
-							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()),
-									solution.getScore(), solution.getTimeToEvaluateCandidate());
+							Classifier c = MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance());
+							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", (c instanceof MLPipeline) ? c : WekaUtil.printNestedWekaClassifier(c), solution.getScore(),
+									solution.getTimeToEvaluateCandidate());
 						} catch (Exception e) {
 							MLPlan.this.logger.warn("Could not print log due to exception while preparing the log message.", e);
 						}
@@ -228,7 +231,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			}
 			long endBuildTime = System.currentTimeMillis();
 			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
-					endBuildTime - startOptimizationTime, this.selectedClassifier);
+					endBuildTime - startOptimizationTime, (this.selectedClassifier instanceof MLPipeline) ? this.selectedClassifier : WekaUtil.printNestedWekaClassifier(this.selectedClassifier));
 			return this.terminate();
 
 		default:
