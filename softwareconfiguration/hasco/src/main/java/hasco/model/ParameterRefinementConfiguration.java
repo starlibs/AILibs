@@ -16,7 +16,7 @@ public class ParameterRefinementConfiguration {
 		super();
 		this.focusPoint = focusPoint;
 		this.logBasis = logBasis;
-		initRefinementOnLogScale = focusPoint != Double.NaN;
+		this.initRefinementOnLogScale = !Double.isNaN(focusPoint);
 		this.initWithExtremalPoints = initWithExtremalPoints;
 		this.refinementsPerStep = refinementsPerStep;
 		this.intervalLength = intervalLength;
