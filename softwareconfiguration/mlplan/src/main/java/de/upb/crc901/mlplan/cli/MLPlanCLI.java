@@ -64,7 +64,6 @@ public class MLPlanCLI {
 	private static String totalTimeoutOption = "timeoutTotal";
 	private static String nodeEvaluationTimeoutOption = "timeoutNodeEval";
 	private static String solutionEvaluationTimeoutOption = "timeoutSolutionEval";
-	private static String mlplanConfigurationOption = "mlplanConfig";
 	private static String algorithmConfigurationOption = "algorithmConfig";
 	private static String searchSpaceConfigurationOption = "searchSpaceConfig";
 	private static String evaluationMeasureOption = "evaluationMeasure";
@@ -126,17 +125,11 @@ public class MLPlanCLI {
 				.hasArg()
 				.desc("timeout for the evaluation of a solution in seconds")
 				.build();
-		final Option mlplanConfiguration = Option.builder("mc")
-				.longOpt(mlplanConfigurationOption)
-				.required(false)
-				.hasArg()
-				.desc("configuration file for mlplan")
-				.build();
 		final Option algorithmConfiguration = Option.builder("ac")
 				.longOpt(algorithmConfigurationOption)
 				.required(false)
 				.hasArg()
-				.desc("configuration file for the search")
+				.desc("configuration file for mlplan")
 				.build();
 		final Option searchSpaceConfiguration = Option.builder("sc")
 				.longOpt(searchSpaceConfigurationOption)
@@ -208,7 +201,6 @@ public class MLPlanCLI {
 		options.addOption(totalTimeout);
 		options.addOption(nodeEvaluationTimeout);
 		options.addOption(solutionEvaluation);
-		options.addOption(mlplanConfiguration);
 		options.addOption(algorithmConfiguration);
 		options.addOption(searchSpaceConfiguration);
 		options.addOption(evaluationMeasure);
@@ -320,7 +312,12 @@ public class MLPlanCLI {
 		builder.withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(Integer.parseInt(commandLine.getOptionValue(nodeEvaluationTimeoutOption, nodeEvaluationTimeout)), TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
-
+		if (commandLine.hasOption(algorithmConfigurationOption)) {
+			builder.withAlgorithmConfigFile(new File(commandLine.getOptionValue(algorithmConfigurationOption)));
+		}
+		
+		
+		
 		MLPlan mlplan = new MLPlan(builder, trainData);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(new TimeOut(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
