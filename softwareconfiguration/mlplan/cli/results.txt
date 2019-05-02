@@ -1,0 +1,191 @@
+Internally believed error: 0.2442952910972242
+
+Best Model: 
+[] (preprocessors), weka.classifiers.trees.J48- [-O, -C, 0.25, -B, -M, 2] (classifier)
+
+Summary
+Correctly Classified Instances        1720               99.537  %
+Incorrectly Classified Instances         8                0.463  %
+Kappa statistic                          0.9899
+K&B Relative Info Score                 98.6799 %
+K&B Information Score                 2056.033  bits      1.1898 bits/instance
+Class complexity | order 0            2083.5375 bits      1.2058 bits/instance
+Class complexity | scheme               33.0027 bits      0.0191 bits/instance
+Complexity improvement     (Sf)       2050.5349 bits      1.1867 bits/instance
+Mean absolute error                      0.0039
+Root mean squared error                  0.0442
+Relative absolute error                  1.7086 %
+Root relative squared error             13.0809 %
+Total Number of Instances             1728     
+
+Class Details
+                 TP Rate  FP Rate  Precision  Recall   F-Measure  MCC      ROC Area  PRC Area  Class
+                 0,997    0,000    1,000      0,997    0,998      0,995    1,000     1,000     unacc
+                 0,990    0,003    0,990      0,990    0,990      0,987    1,000     0,999     acc
+                 1,000    0,002    0,958      1,000    0,979      0,978    1,000     0,995     good
+                 1,000    0,001    0,985      1,000    0,992      0,992    1,000     0,999     vgood
+Weighted Avg.    0,995    0,001    0,995      0,995    0,995      0,992    1,000     0,999     
+
+Evaluation Overview
+ -1       0    
+ -0.816   0.174
+ -0.752   0.231
+ -0.668   0.347
+ -0.5     0.463
+  0.5     0.81 
+  0.664   1.389
+  0.748   1.794
+  0.812   3.472
+  1     100    
+
+Matrix
+    a    b    c    d   <-- classified as
+ 1206    4    0    0 |    a = unacc
+    0  380    3    1 |    b = acc
+    0    0   69    0 |    c = good
+    0    0    0   65 |    d = vgood
+Classifier Representation: 
+
+J48 pruned tree
+------------------
+
+persons = 2: unacc (576.0)
+persons != 2
+|   safety = low: unacc (384.0)
+|   safety != low
+|   |   buying = vhigh
+|   |   |   maint = vhigh: unacc (48.0)
+|   |   |   maint != vhigh
+|   |   |   |   maint = high: unacc (48.0)
+|   |   |   |   maint != high
+|   |   |   |   |   lug_boot = small
+|   |   |   |   |   |   safety = med: unacc (16.0)
+|   |   |   |   |   |   safety != med
+|   |   |   |   |   |   |   doors = 2
+|   |   |   |   |   |   |   |   persons = 4: acc (2.0)
+|   |   |   |   |   |   |   |   persons != 4: unacc (2.0)
+|   |   |   |   |   |   |   doors != 2: acc (12.0)
+|   |   |   |   |   lug_boot != small
+|   |   |   |   |   |   lug_boot = med
+|   |   |   |   |   |   |   safety = med
+|   |   |   |   |   |   |   |   doors = 2: unacc (4.0)
+|   |   |   |   |   |   |   |   doors != 2
+|   |   |   |   |   |   |   |   |   doors = 3
+|   |   |   |   |   |   |   |   |   |   persons = 4: unacc (2.0)
+|   |   |   |   |   |   |   |   |   |   persons != 4: acc (2.0)
+|   |   |   |   |   |   |   |   |   doors != 3: acc (8.0)
+|   |   |   |   |   |   |   safety != med: acc (16.0)
+|   |   |   |   |   |   lug_boot != med: acc (32.0)
+|   |   buying != vhigh
+|   |   |   buying = high
+|   |   |   |   maint = vhigh: unacc (48.0)
+|   |   |   |   maint != vhigh
+|   |   |   |   |   lug_boot = small
+|   |   |   |   |   |   safety = med: unacc (24.0)
+|   |   |   |   |   |   safety != med
+|   |   |   |   |   |   |   doors = 2
+|   |   |   |   |   |   |   |   persons = 4: acc (3.0)
+|   |   |   |   |   |   |   |   persons != 4: unacc (3.0)
+|   |   |   |   |   |   |   doors != 2: acc (18.0)
+|   |   |   |   |   lug_boot != small
+|   |   |   |   |   |   lug_boot = med
+|   |   |   |   |   |   |   safety = med
+|   |   |   |   |   |   |   |   doors = 2: unacc (6.0)
+|   |   |   |   |   |   |   |   doors != 2
+|   |   |   |   |   |   |   |   |   doors = 3
+|   |   |   |   |   |   |   |   |   |   persons = 4: unacc (3.0)
+|   |   |   |   |   |   |   |   |   |   persons != 4: acc (3.0)
+|   |   |   |   |   |   |   |   |   doors != 3: acc (12.0)
+|   |   |   |   |   |   |   safety != med: acc (24.0)
+|   |   |   |   |   |   lug_boot != med: acc (48.0)
+|   |   |   buying != high
+|   |   |   |   maint = vhigh
+|   |   |   |   |   lug_boot = small
+|   |   |   |   |   |   safety = med: unacc (16.0)
+|   |   |   |   |   |   safety != med
+|   |   |   |   |   |   |   doors = 2
+|   |   |   |   |   |   |   |   persons = 4: acc (2.0)
+|   |   |   |   |   |   |   |   persons != 4: unacc (2.0)
+|   |   |   |   |   |   |   doors != 2: acc (12.0)
+|   |   |   |   |   lug_boot != small
+|   |   |   |   |   |   lug_boot = med
+|   |   |   |   |   |   |   safety = med
+|   |   |   |   |   |   |   |   doors = 2: unacc (4.0)
+|   |   |   |   |   |   |   |   doors != 2
+|   |   |   |   |   |   |   |   |   doors = 3
+|   |   |   |   |   |   |   |   |   |   persons = 4: unacc (2.0)
+|   |   |   |   |   |   |   |   |   |   persons != 4: acc (2.0)
+|   |   |   |   |   |   |   |   |   doors != 3: acc (8.0)
+|   |   |   |   |   |   |   safety != med: acc (16.0)
+|   |   |   |   |   |   lug_boot != med: acc (32.0)
+|   |   |   |   maint != vhigh
+|   |   |   |   |   safety = med
+|   |   |   |   |   |   lug_boot = small
+|   |   |   |   |   |   |   maint = high
+|   |   |   |   |   |   |   |   buying = med: unacc (8.0)
+|   |   |   |   |   |   |   |   buying != med: acc (8.0/1.0)
+|   |   |   |   |   |   |   maint != high
+|   |   |   |   |   |   |   |   doors = 2
+|   |   |   |   |   |   |   |   |   persons = 4: acc (4.0)
+|   |   |   |   |   |   |   |   |   persons != 4: unacc (4.0)
+|   |   |   |   |   |   |   |   doors != 2: acc (24.0)
+|   |   |   |   |   |   lug_boot != small
+|   |   |   |   |   |   |   maint = high: acc (32.0/3.0)
+|   |   |   |   |   |   |   maint != high
+|   |   |   |   |   |   |   |   buying = med
+|   |   |   |   |   |   |   |   |   maint = med: acc (16.0)
+|   |   |   |   |   |   |   |   |   maint != med
+|   |   |   |   |   |   |   |   |   |   lug_boot = med
+|   |   |   |   |   |   |   |   |   |   |   doors = 2: acc (2.0)
+|   |   |   |   |   |   |   |   |   |   |   doors != 2: good (6.0/1.0)
+|   |   |   |   |   |   |   |   |   |   lug_boot != med: good (8.0)
+|   |   |   |   |   |   |   |   buying != med
+|   |   |   |   |   |   |   |   |   lug_boot = med
+|   |   |   |   |   |   |   |   |   |   doors = 2: acc (4.0)
+|   |   |   |   |   |   |   |   |   |   doors != 2
+|   |   |   |   |   |   |   |   |   |   |   doors = 3
+|   |   |   |   |   |   |   |   |   |   |   |   persons = 4: acc (2.0)
+|   |   |   |   |   |   |   |   |   |   |   |   persons != 4: good (2.0)
+|   |   |   |   |   |   |   |   |   |   |   doors != 3: good (8.0)
+|   |   |   |   |   |   |   |   |   lug_boot != med: good (16.0)
+|   |   |   |   |   safety != med
+|   |   |   |   |   |   lug_boot = small
+|   |   |   |   |   |   |   maint = high
+|   |   |   |   |   |   |   |   doors = 2
+|   |   |   |   |   |   |   |   |   persons = 4: acc (2.0)
+|   |   |   |   |   |   |   |   |   persons != 4: unacc (2.0)
+|   |   |   |   |   |   |   |   doors != 2: acc (12.0)
+|   |   |   |   |   |   |   maint != high
+|   |   |   |   |   |   |   |   doors = 2
+|   |   |   |   |   |   |   |   |   persons = 4: good (4.0/1.0)
+|   |   |   |   |   |   |   |   |   persons != 4: unacc (4.0)
+|   |   |   |   |   |   |   |   doors != 2
+|   |   |   |   |   |   |   |   |   buying = med
+|   |   |   |   |   |   |   |   |   |   maint = med: acc (6.0)
+|   |   |   |   |   |   |   |   |   |   maint != med: good (6.0)
+|   |   |   |   |   |   |   |   |   buying != med: good (12.0)
+|   |   |   |   |   |   lug_boot != small
+|   |   |   |   |   |   |   maint = high
+|   |   |   |   |   |   |   |   buying = med: acc (16.0)
+|   |   |   |   |   |   |   |   buying != med
+|   |   |   |   |   |   |   |   |   lug_boot = med
+|   |   |   |   |   |   |   |   |   |   doors = 2: acc (2.0)
+|   |   |   |   |   |   |   |   |   |   doors != 2: vgood (6.0/1.0)
+|   |   |   |   |   |   |   |   |   lug_boot != med: vgood (8.0)
+|   |   |   |   |   |   |   maint != high
+|   |   |   |   |   |   |   |   lug_boot = med
+|   |   |   |   |   |   |   |   |   doors = 2
+|   |   |   |   |   |   |   |   |   |   buying = med
+|   |   |   |   |   |   |   |   |   |   |   maint = med: acc (2.0)
+|   |   |   |   |   |   |   |   |   |   |   maint != med: good (2.0)
+|   |   |   |   |   |   |   |   |   |   buying != med: good (4.0)
+|   |   |   |   |   |   |   |   |   doors != 2
+|   |   |   |   |   |   |   |   |   |   doors = 3
+|   |   |   |   |   |   |   |   |   |   |   persons = 4: good (4.0/1.0)
+|   |   |   |   |   |   |   |   |   |   |   persons != 4: vgood (4.0)
+|   |   |   |   |   |   |   |   |   |   doors != 3: vgood (16.0)
+|   |   |   |   |   |   |   |   lug_boot != med: vgood (32.0)
+
+Number of Leaves  : 	69
+
+Size of the tree : 	137

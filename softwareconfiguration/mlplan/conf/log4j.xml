@@ -80,6 +80,13 @@
   	 <level value="debug" />
   </logger>
   
+  <logger name="MLPlanCLI">
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
   
   <logger name="jaicore.graphvisualizer">
     <level value="warn" />

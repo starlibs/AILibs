@@ -28,7 +28,7 @@ public class MLPipeline implements Classifier, Serializable {
 	private static final Logger logger = LoggerFactory.getLogger(MLPipeline.class);
 
 	private final List<SupervisedFilterSelector> preprocessors = new ArrayList<>();
-	private final transient Classifier baseClassifier;
+	private final Classifier baseClassifier;
 
 	private boolean trained = false;
 
