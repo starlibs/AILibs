@@ -48,7 +48,6 @@ public class ML2PlanARFFExample {
 		List<Instances> split = testSplitter.split(data, 0, .7);
 
 		MLPlanClassifierConfig algoConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
-		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.0");
 
 		MLPlanBuilder builder = new MLPlanBuilder();
 		builder.withMekaDefaultConfiguration();

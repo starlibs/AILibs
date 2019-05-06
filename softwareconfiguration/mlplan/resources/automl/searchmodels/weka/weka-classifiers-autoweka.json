@@ -93,7 +93,7 @@
 					"min": 1.0E-12,
 					"max": 10.0,
 					"refineSplits": 8,
-					"minInterval": 10
+					"minInterval": 5.0E-12
 				}
 			],
 			"dependencies": [

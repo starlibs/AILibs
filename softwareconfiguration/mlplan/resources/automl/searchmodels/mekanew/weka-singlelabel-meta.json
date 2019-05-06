@@ -250,7 +250,7 @@
   }, {
     "name" : "weka.classifiers.meta.LogitBoost",
     "requiredInterface" : [ {"id": "W", "name": "BaseClassifier" } ],
-    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "BaseClassifier", "WeightedInstancesHandler" ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
     "parameter" : [ ],
     "dependencies" : [ ]
   }, {

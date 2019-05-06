@@ -14,6 +14,7 @@ import hasco.model.NumericParameterDomain;
 import jaicore.basic.sets.SetUtil;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.MultipleClassifiersCombiner;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.OptionHandler;
@@ -31,12 +32,11 @@ public class MekaPipelineFactory implements IClassifierFactory {
 	@Override
 	public Classifier getComponentInstantiation(final ComponentInstance ci) throws ComponentInstantiationFailedException {
 		MultiLabelClassifier instance = null;
-		List<String> optionsList = null;
 		try {
 			instance = (MultiLabelClassifier) this.getClassifier(ci);
 			return instance;
 		} catch (Exception e) {
-			throw new ComponentInstantiationFailedException(e, "Could not instantiate " + ci.getComponent().getName() + " with options " + optionsList);
+			throw new ComponentInstantiationFailedException(e, "Could not instantiate " + ci.getComponent().getName());
 		}
 	}
 
@@ -48,14 +48,7 @@ public class MekaPipelineFactory implements IClassifierFactory {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
 				logger.warn("Required interface of component {} has dash or underscore in interface id {}", ci.getComponent(), reqI.getKey());
 			}
-			if (reqI.getKey().equals("B")) {
-				logger.debug("Add base classifier {} in the form of options string to {}", reqI.getValue().getComponent().getName(), ci.getComponent().getName());
-				optionsList.add("-" + reqI.getKey());
-				List<String> valueList = new LinkedList<>();
-				valueList.add(reqI.getValue().getComponent().getName());
-				valueList.addAll(this.getOptionsRecursively(reqI.getValue()));
-				optionsList.add(SetUtil.implode(valueList, " "));
-			} else if (!(c instanceof SingleClassifierEnhancer) && !(reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO"))) {
+			if (!reqI.getKey().equals("B") && !(c instanceof SingleClassifierEnhancer) && !(reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO"))) {
 				logger.warn("Classifier {} is not a single classifier enhancer and still has an unexpected required interface: {}. Try to set this configuration in the form of options.", ci.getComponent().getName(), reqI);
 				optionsList.add("-" + reqI.getKey());
 				optionsList.add(reqI.getValue().getComponent().getName());
@@ -77,7 +70,10 @@ public class MekaPipelineFactory implements IClassifierFactory {
 				logger.debug("Set kernel for SMO to be {}", kernelCI.getComponent().getName());
 				Kernel k = (Kernel) Class.forName(kernelCI.getComponent().getName()).newInstance();
 				k.setOptions(this.getOptionsForParameterValues(kernelCI).toArray(new String[0]));
-			} else if (!(reqI.getKey().equals("B")) && (c instanceof SingleClassifierEnhancer)) {
+			} else if (reqI.getKey().equals("B") && (c instanceof MultipleClassifiersCombiner)) {
+				Classifier[] classifiers = this.getListOfBaseLearners(reqI.getValue()).toArray(new Classifier[0]);
+				((MultipleClassifiersCombiner) c).setClassifiers(classifiers);
+			} else if (reqI.getKey().equals("W") && (c instanceof SingleClassifierEnhancer)) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Set {} as a base classifier for {}", reqI.getValue().getComponent().getName(), ci.getComponent().getName());
 				}
@@ -86,6 +82,17 @@ public class MekaPipelineFactory implements IClassifierFactory {
 		}
 
 		return c;
+	}
+
+	private List<Classifier> getListOfBaseLearners(final ComponentInstance ci) throws Exception {
+		List<Classifier> baseLearnerList = new LinkedList<>();
+		if (ci.getComponent().getName().equals("MultipleBaseLearnerListElement")) {
+			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier")));
+		} else if (ci.getComponent().getName().equals("MultipleBaseLearnerListChain")) {
+			baseLearnerList.add(this.getClassifier(ci.getSatisfactionOfRequiredInterfaces().get("classifier")));
+			baseLearnerList.addAll(this.getListOfBaseLearners(ci.getSatisfactionOfRequiredInterfaces().get("chain")));
+		}
+		return baseLearnerList;
 	}
 
 	private List<String> getOptionsForParameterValues(final ComponentInstance ci) {

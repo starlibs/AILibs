@@ -163,8 +163,8 @@
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.EM",
-			"providedInterface": ["MLClassifier","MetaMLClassifier","ProblemTransformationMethod"],
-			"requiredInterface": [{"id": "W","name": "BasicMLClassifier"}],
+			"providedInterface": ["MLClassifier","MetaMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "ProblemTransformationMethod"}],
 			"parameter": [
 				{
 					"comment": "Sets the number of models (default 10)",
