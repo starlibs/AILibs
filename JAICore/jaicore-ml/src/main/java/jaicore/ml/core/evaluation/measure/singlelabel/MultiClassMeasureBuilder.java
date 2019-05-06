@@ -1,8 +1,9 @@
 package jaicore.ml.core.evaluation.measure.singlelabel;
 
-import jaicore.ml.core.evaluation.measure.ADecomposableDoubleMeasure;
+import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.ExactMatchAccuracy;
 import jaicore.ml.core.evaluation.measure.multilabel.ExactMatchLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageD;
@@ -13,12 +14,11 @@ import jaicore.ml.core.evaluation.measure.multilabel.HammingAccuracy;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.JaccardLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.JaccardScore;
-import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankScore;
 
 public class MultiClassMeasureBuilder {
-	public ADecomposableDoubleMeasure<Double> getEvaluator(EMultiClassPerformanceMeasure pm) {
+	public IMeasure<Double, Double> getEvaluator(final EMultiClassPerformanceMeasure pm) {
 		switch (pm) {
 		case ERRORRATE:
 			return new ZeroOneLoss();
@@ -26,12 +26,14 @@ public class MultiClassMeasureBuilder {
 			return new MeanSquaredErrorLoss();
 		case ROOT_MEAN_SQUARED_ERROR:
 			return new RootMeanSquaredErrorLoss();
+		case PRECISION:
+			return new PrecisionAsLoss(0);
 		default:
 			throw new IllegalArgumentException("No support for performance measure " + pm);
 		}
 	}
 
-	public ADecomposableDoubleMeasure<double[]> getEvaluator(EMultilabelPerformanceMeasure pm) {
+	public IMeasure<double[], Double> getEvaluator(final EMultilabelPerformanceMeasure pm) {
 		switch (pm) {
 		case AUTO_MEKA_GGP_FITNESS:
 			return new AutoMEKAGGPFitnessMeasure();

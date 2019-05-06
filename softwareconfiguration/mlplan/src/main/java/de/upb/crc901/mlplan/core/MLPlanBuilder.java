@@ -156,7 +156,11 @@ public class MLPlanBuilder {
 		super();
 
 		/* Setting up all generic default values. */
-		this.withAlgorithmConfigFile(DEFAULT_ALGORITHM_CONFIG_FILE);
+		try {
+			this.withAlgorithmConfigFile(DEFAULT_ALGORITHM_CONFIG_FILE);
+		} catch (IllegalArgumentException e) {
+			this.logger.error("The default algorithm configuration file could not be loaded.", e);
+		}
 		this.useCache = DEFAULT_USE_CACHE;
 		this.priorizingPredicate = DEFAULT_PRIORIZING_PREDICATE;
 		this.requestedHASCOInterface = DEFAULT_REQUESTED_HASCO_INTERFACE;
@@ -261,7 +265,7 @@ public class MLPlanBuilder {
 		this.withRandomCompletionBasedBestFirstSearch();
 		if (!(defConfig == EDefaultConfig.MEKA) && this.singleLabelPerformanceMeasure == null) {
 			this.singleLabelPerformanceMeasure = EMultiClassPerformanceMeasure.ERRORRATE;
-			this.withSingleLabelClassificationMeasure(singleLabelPerformanceMeasure);		
+			this.withSingleLabelClassificationMeasure(this.singleLabelPerformanceMeasure);
 		}
 		return this;
 	}
@@ -300,7 +304,7 @@ public class MLPlanBuilder {
 		this.singleLabelPerformanceMeasure = measure;
 		return this.withEvaluatorMeasureBridge(this.getSingleLabelEvaluationMeasurementBridge(new MultiClassMeasureBuilder().getEvaluator(measure)));
 	}
-	
+
 	public MLPlanBuilder withMultiLabelClassificationMeasure(final EMultilabelPerformanceMeasure measure) {
 		this.multiLabelPerformanceMeasure = measure;
 		return this.withEvaluatorMeasureBridge(this.getMultiLabelEvaluationMeasurementBridge(new MultiClassMeasureBuilder().getEvaluator(measure)));
@@ -410,8 +414,8 @@ public class MLPlanBuilder {
 	}
 
 	private void updateEverything() {
-		updateSearchProblemTransformer();
-		updateAlgorithmConfigOfHASCO();
+		this.updateSearchProblemTransformer();
+		this.updateAlgorithmConfigOfHASCO();
 	}
 
 	/**
@@ -480,7 +484,7 @@ public class MLPlanBuilder {
 	public EMultiClassPerformanceMeasure getSingleLabelPerformanceMeasure() {
 		return this.singleLabelPerformanceMeasure;
 	}
-	
+
 	public EMultilabelPerformanceMeasure getMultiLabelPerformanceMeasure() {
 		return this.multiLabelPerformanceMeasure;
 	}
@@ -496,8 +500,8 @@ public class MLPlanBuilder {
 			return this.evaluatorMeasureBridge;
 		}
 	}
-	
-	public IEvaluatorMeasureBridge<Double> getMultiLabelEvaluationMeasurementBridge(final IMeasure<double [], Double> measure) {
+
+	public IEvaluatorMeasureBridge<Double> getMultiLabelEvaluationMeasurementBridge(final IMeasure<double[], Double> measure) {
 		if (this.evaluatorMeasureBridge == null) {
 			return new SimpleMLCEvaluatorMeasureBridge(measure);
 		} else {

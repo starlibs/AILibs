@@ -93,7 +93,7 @@
   </logger>
   
   <logger name="jaicore.interrupt">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="hasco">
