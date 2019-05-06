@@ -32,14 +32,14 @@ import jaicore.concurrent.GlobalTimer;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
-import weka.classifiers.evaluation.Evaluation;
+import weka.classifiers.Evaluation;
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSink;
 
 /**
  * This test tests whether or not the algorithm delivers a solution on each given dataset within 30 seconds.
- * 
+ *
  * @author fmohr
  *
  */
@@ -47,6 +47,7 @@ import weka.core.converters.ConverterUtils.DataSink;
 public abstract class AutoMLAlgorithmResultProductionTester {
 
 	private static final Logger logger = LoggerFactory.getLogger(AutoMLAlgorithmResultProductionTester.class);
+	private static final TimeOut timeout = new TimeOut(600, TimeUnit.SECONDS);
 
 	// creates the test data
 	@Parameters(name = "{0}")
@@ -58,16 +59,33 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
 		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		problemSets.add(new OpenMLProblemSet(1457)); // amazon
+		problemSets.add(new OpenMLProblemSet(1501)); // semeion
 		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
 		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
 		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
+		problemSets.add(new OpenMLProblemSet(1590)); // adult
+		problemSets.add(new OpenMLProblemSet(182)); // satimage
+		problemSets.add(new OpenMLProblemSet(24)); // mushroom
+		problemSets.add(new OpenMLProblemSet(39)); // ecoli
+		problemSets.add(new OpenMLProblemSet(44)); // spambase
+		problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
+		problemSets.add(new OpenMLProblemSet(61)); // iris
+		problemSets.add(new OpenMLProblemSet(9)); // autos
+		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
+		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
+		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+		problemSets.add(new OpenMLProblemSet(554)); // mnist
+		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
+		problemSets.add(new OpenMLProblemSet(40691)); // winequality
+
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
 			data[i][0] = problemSets.get(i);
 		}
 		return Arrays.asList(data);
 	}
-	
+
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
@@ -75,7 +93,6 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 
 	@Test
 	public void testThatModelIsTrained() throws Exception {
-		
 		try {
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
 			System.gc();
