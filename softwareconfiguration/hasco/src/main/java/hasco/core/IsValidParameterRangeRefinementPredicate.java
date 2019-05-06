@@ -146,7 +146,7 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 				}
 				double focus = Double.parseDouble(focusPredicate.get().getParameters().get(2).getName());
 				if (refinementConfig.getLogBasis() <= 1) {
-					throw new UnsupportedOperationException("The basis for log-scaled parameters must be strictly greater than 1 (but is " + refinementConfig.getLogBasis() + ").");
+					throw new UnsupportedOperationException("The basis for log-scaled parameter " + param.getName() + " of component " + instance.getComponent().getName() + " must be strictly greater than 1 (but is " + refinementConfig.getLogBasis() + ").");
 				}
 				List<Interval> proposedRefinements = refineOnLogScale(currentInterval, refinementConfig.getRefinementsPerStep(), refinementConfig.getLogBasis(), focus, refinementConfig.isInitWithExtremalPoints() && !hasBeenSetBefore);
 				for (Interval proposedRefinement : proposedRefinements) {
