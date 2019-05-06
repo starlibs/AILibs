@@ -184,7 +184,9 @@ dependencies{
 	compile project(":hasco")
 	compile project(":mlplan")
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-ea")
+	compile (project(":JAICore:jaicore-ea")) {
+		exclude group: 'commons-cli'
+	}
 	compile project(":JAICore:jaicore-experiments")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-logic")

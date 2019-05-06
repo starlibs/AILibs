@@ -56,7 +56,7 @@ public interface IAlgorithmConfig extends Mutable {
 	 */
 	default IAlgorithmConfig loadPropertiesFromFile(final File file) {
 		if (!file.exists() || !file.isFile()) {
-			throw new IllegalArgumentException("File to load properties from does not exist or is not a file.");
+			throw new IllegalArgumentException("File (" + file.getAbsolutePath() + ") to load properties from does not exist or is not a file.");
 		}
 		try {
 			return loadPropertiesFromList(FileUtil.readFileAsList(file));

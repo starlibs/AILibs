@@ -229,7 +229,6 @@ public class ComponentLoader {
 						}
 						else {
 							paramConfig.put(p, new ParameterRefinementConfiguration(boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
-
 						}
 						break;
 					case "bool":

@@ -36,6 +36,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassMeasureBuilder;
 import jaicore.ml.evaluation.evaluators.weka.factory.ExtrapolatedSaturationPointEvaluatorFactory;
@@ -142,7 +143,8 @@ public class MLPlanBuilder {
 	private boolean useCache;
 	private PerformanceDBAdapter dbAdapter = null;
 
-	private EMultiClassPerformanceMeasure performanceMeasure = EMultiClassPerformanceMeasure.ERRORRATE;
+	private EMultiClassPerformanceMeasure singleLabelPerformanceMeasure;
+	private EMultilabelPerformanceMeasure multiLabelPerformanceMeasure;
 	private IMeasure<Double, Double> measure;
 	private IEvaluatorMeasureBridge<Double> evaluatorMeasureBridge;
 
@@ -154,7 +156,11 @@ public class MLPlanBuilder {
 		super();
 
 		/* Setting up all generic default values. */
-		this.withAlgorithmConfigFile(DEFAULT_ALGORITHM_CONFIG_FILE);
+		try {
+			this.withAlgorithmConfigFile(DEFAULT_ALGORITHM_CONFIG_FILE);
+		} catch (IllegalArgumentException e) {
+			this.logger.error("The default algorithm configuration file could not be loaded.", e);
+		}
 		this.useCache = DEFAULT_USE_CACHE;
 		this.priorizingPredicate = DEFAULT_PRIORIZING_PREDICATE;
 		this.requestedHASCOInterface = DEFAULT_REQUESTED_HASCO_INTERFACE;
@@ -164,7 +170,7 @@ public class MLPlanBuilder {
 		this();
 		this.withAlgorithmConfigFile(algorithmConfigFile);
 		this.searchSpaceConfigFile = searchSpaceConfigFile;
-		this.performanceMeasure = performanceMeasure;
+		this.singleLabelPerformanceMeasure = performanceMeasure;
 		this.useCache = false;
 	}
 
@@ -240,6 +246,8 @@ public class MLPlanBuilder {
 
 	public MLPlanBuilder withMekaDefaultConfiguration() throws IOException {
 		this.withDefaultConfiguration(EDefaultConfig.MEKA);
+		this.singleLabelPerformanceMeasure = null;
+		this.multiLabelPerformanceMeasure = EMultilabelPerformanceMeasure.AUTO_MEKA_GGP_FITNESS_LOSS;
 		this.evaluatorMeasureBridge = new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss());
 		this.classifierFactory = new MekaPipelineFactory();
 		this.requestedHASCOInterface = MLC_REQUESTED_HASCO_INTERFACE;
@@ -255,7 +263,10 @@ public class MLPlanBuilder {
 		}
 		this.withPreferredComponentsFile(defConfig.preferredComponentsFile);
 		this.withRandomCompletionBasedBestFirstSearch();
-		this.withSingleLabelClassificationMeasure(EMultiClassPerformanceMeasure.ERRORRATE);
+		if (!(defConfig == EDefaultConfig.MEKA) && this.singleLabelPerformanceMeasure == null) {
+			this.singleLabelPerformanceMeasure = EMultiClassPerformanceMeasure.ERRORRATE;
+			this.withSingleLabelClassificationMeasure(this.singleLabelPerformanceMeasure);
+		}
 		return this;
 	}
 
@@ -290,7 +301,13 @@ public class MLPlanBuilder {
 	}
 
 	public MLPlanBuilder withSingleLabelClassificationMeasure(final EMultiClassPerformanceMeasure measure) {
-		return this.withEvaluatorMeasureBridge(this.getEvaluationMeasurementBridge(new MultiClassMeasureBuilder().getEvaluator(measure)));
+		this.singleLabelPerformanceMeasure = measure;
+		return this.withEvaluatorMeasureBridge(this.getSingleLabelEvaluationMeasurementBridge(new MultiClassMeasureBuilder().getEvaluator(measure)));
+	}
+
+	public MLPlanBuilder withMultiLabelClassificationMeasure(final EMultilabelPerformanceMeasure measure) {
+		this.multiLabelPerformanceMeasure = measure;
+		return this.withEvaluatorMeasureBridge(this.getMultiLabelEvaluationMeasurementBridge(new MultiClassMeasureBuilder().getEvaluator(measure)));
 	}
 
 	/**
@@ -397,8 +414,8 @@ public class MLPlanBuilder {
 	}
 
 	private void updateEverything() {
-		updateSearchProblemTransformer();
-		updateAlgorithmConfigOfHASCO();
+		this.updateSearchProblemTransformer();
+		this.updateAlgorithmConfigOfHASCO();
 	}
 
 	/**
@@ -464,17 +481,29 @@ public class MLPlanBuilder {
 		return this.algorithmConfig;
 	}
 
-	public EMultiClassPerformanceMeasure getPerformanceMeasure() {
-		return this.performanceMeasure;
+	public EMultiClassPerformanceMeasure getSingleLabelPerformanceMeasure() {
+		return this.singleLabelPerformanceMeasure;
 	}
 
-	public IEvaluatorMeasureBridge<Double> getEvaluationMeasurementBridge(final IMeasure<Double, Double> measure) {
+	public EMultilabelPerformanceMeasure getMultiLabelPerformanceMeasure() {
+		return this.multiLabelPerformanceMeasure;
+	}
+
+	public IEvaluatorMeasureBridge<Double> getSingleLabelEvaluationMeasurementBridge(final IMeasure<Double, Double> measure) {
 		if (this.evaluatorMeasureBridge == null) {
 			if (this.getUseCache()) {
 				return new CacheEvaluatorMeasureBridge(measure, this.getDBAdapter());
 			} else {
 				return new SimpleSLCEvaluatorMeasureBridge(measure);
 			}
+		} else {
+			return this.evaluatorMeasureBridge;
+		}
+	}
+
+	public IEvaluatorMeasureBridge<Double> getMultiLabelEvaluationMeasurementBridge(final IMeasure<double[], Double> measure) {
+		if (this.evaluatorMeasureBridge == null) {
+			return new SimpleMLCEvaluatorMeasureBridge(measure);
 		} else {
 			return this.evaluatorMeasureBridge;
 		}
@@ -491,7 +520,7 @@ public class MLPlanBuilder {
 		}
 
 		if (this.measure != null) {
-			return this.getEvaluationMeasurementBridge(this.measure);
+			return this.getSingleLabelEvaluationMeasurementBridge(this.measure);
 		} else {
 			throw new IllegalStateException("Can not create evaluator measure bridge without a measure.");
 		}
