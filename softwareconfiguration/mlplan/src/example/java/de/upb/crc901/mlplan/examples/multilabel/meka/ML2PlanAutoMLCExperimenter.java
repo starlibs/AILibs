@@ -26,7 +26,7 @@ import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISimpleMLCSplitBasedClassifierEvaluator;
 import jaicore.ml.wekautil.dataset.splitter.MultilabelDatasetSplitter;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -89,20 +89,20 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			int metricIdToOptimize = Integer.parseInt(experimentDescription.get("metric_id"));
 			switch (metricIdToOptimize) {
 			case 8: // rank loss
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new RankLoss()));
+				builder.withEvaluatorMeasureBridge(new ISimpleMLCSplitBasedClassifierEvaluator(new RankLoss()));
 				break;
 			case 1: // hamming
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new HammingLoss()));
+				builder.withEvaluatorMeasureBridge(new ISimpleMLCSplitBasedClassifierEvaluator(new HammingLoss()));
 				break;
 			case 62: // F1Measure avgd by instances
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new F1MacroAverageDLoss()));
+				builder.withEvaluatorMeasureBridge(new ISimpleMLCSplitBasedClassifierEvaluator(new F1MacroAverageDLoss()));
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new F1MacroAverageLLoss()));
+				builder.withEvaluatorMeasureBridge(new ISimpleMLCSplitBasedClassifierEvaluator(new F1MacroAverageLLoss()));
 				break;
 			case 73: // fitness
 			default:
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss()));
+				builder.withEvaluatorMeasureBridge(new ISimpleMLCSplitBasedClassifierEvaluator(new AutoMEKAGGPFitnessMeasureLoss()));
 				break;
 			}
 

@@ -85,7 +85,6 @@ public class ExperimentRunner {
 		} else {
 			this.memoryLimit = this.config.getMemoryLimitInMB();
 		}
-
 		this.cpuLimit = this.config.getNumberOfCPUs();
 		int numExperiments = 1;
 

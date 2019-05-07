@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.evaluators.weka.measurebridge;
+package jaicore.ml.evaluation.evaluators.weka.splitevaluation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,14 +12,14 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * Basic implementation of the {@link AbstractEvaluatorMeasureBridge}. Uses the given loss function to compute loss on the given data. No extra steps are performed.
+ * Basic implementation of the {@link AbstractSplitBasedClassifierEvaluator}. Uses the given loss function to compute loss on the given data. No extra steps are performed.
  *
  * @author jnowack
  *
  */
-public class SimpleSLCEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<Double, Double> {
+public class ISimpleSLCBasedSplitEvaluator extends AbstractSplitBasedClassifierEvaluator<Double, Double> {
 
-	public SimpleSLCEvaluatorMeasureBridge(final IMeasure<Double, Double> basicEvaluator) {
+	public ISimpleSLCBasedSplitEvaluator(final IMeasure<Double, Double> basicEvaluator) {
 		super(basicEvaluator);
 	}
 

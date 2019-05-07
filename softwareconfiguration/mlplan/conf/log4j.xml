@@ -86,7 +86,7 @@
   </logger>
   
   <logger name="jaicore.interrupt">
-    <level value="debug" />
+    <level value="info" />
   </logger>
   
   <logger name="hasco">
@@ -195,6 +195,10 @@
   
   <logger name="testedalgorithm.optimizingfactory">
     <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo">
+    <level value="debug" />
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">

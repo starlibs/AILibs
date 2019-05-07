@@ -10,7 +10,6 @@ import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
 import jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
@@ -32,24 +31,23 @@ public class SearchPhasePipelineEvaluator extends TimedObjectEvaluator<Component
 	public SearchPhasePipelineEvaluator(final PipelineEvaluatorBuilder config) {
 		super();
 		this.config = config;
-		searchBenchmark = new MonteCarloCrossValidationEvaluator(this.config.getEvaluationMeasurementBridge(), this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.config.getData(), this.config.getTrainFoldSize(),
-				this.config.getSeed());
+		this.searchBenchmark = config.getClassifierEvaluator();
 	}
 
 	@Override
 	public String getLoggerName() {
-		return logger.getName();
+		return this.logger.getName();
 	}
 
 	@Override
 	public void setLoggerName(final String name) {
-		logger.info("Switching logger name from {} to {}", logger.getName(), name);
-		logger = LoggerFactory.getLogger(name);
-		if (searchBenchmark instanceof ILoggingCustomizable) {
-			logger.info("Setting logger name of actual benchmark {} to {}.benchmark", searchBenchmark.getClass().getName(), name);
-			((ILoggingCustomizable) searchBenchmark).setLoggerName(name + ".benchmark");
+		this.logger.info("Switching logger name from {} to {}", this.logger.getName(), name);
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.searchBenchmark instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger name of actual benchmark {} to {}.benchmark", this.searchBenchmark.getClass().getName(), name);
+			((ILoggingCustomizable) this.searchBenchmark).setLoggerName(name + ".benchmark");
 		} else {
-			logger.info("Benchmark {} does not implement ILoggingCustomizable, not customizing its logger.", searchBenchmark.getClass().getName());
+			this.logger.info("Benchmark {} does not implement ILoggingCustomizable, not customizing its logger.", this.searchBenchmark.getClass().getName());
 		}
 	}
 
@@ -57,17 +55,17 @@ public class SearchPhasePipelineEvaluator extends TimedObjectEvaluator<Component
 	@Override
 	public Double evaluateSupervised(final ComponentInstance c) throws InterruptedException, ObjectEvaluationFailedException {
 		try {
-			if (config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {
-				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) config.getEvaluationMeasurementBridge()).getShallowCopy(c);
-				int subSeed = config.getSeed() + c.hashCode();
-				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, config.getDatasetSplitter(), config.getNumMCIterations(), bestScore, config.getData(),
-						config.getTrainFoldSize(), subSeed);
-				return copiedSearchBenchmark.evaluate(config.getClassifierFactory().getComponentInstantiation(c));
+			if (this.config.getEvaluationMeasurementBridge() instanceof CacheEvaluatorMeasureBridge) {
+				CacheEvaluatorMeasureBridge bridge = ((CacheEvaluatorMeasureBridge) this.config.getEvaluationMeasurementBridge()).getShallowCopy(c);
+				int subSeed = this.config.getSeed() + c.hashCode();
+				IObjectEvaluator<Classifier, Double> copiedSearchBenchmark = new ProbabilisticMonteCarloCrossValidationEvaluator(bridge, this.config.getDatasetSplitter(), this.config.getNumMCIterations(), this.bestScore, this.config.getData(),
+						this.config.getTrainFoldSize(), subSeed);
+				return copiedSearchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
 			}
-			if (searchBenchmark instanceof IInformedObjectEvaluatorExtension) {
-				((IInformedObjectEvaluatorExtension<Double>) searchBenchmark).updateBestScore(bestScore);
+			if (this.searchBenchmark instanceof IInformedObjectEvaluatorExtension) {
+				((IInformedObjectEvaluatorExtension<Double>) this.searchBenchmark).updateBestScore(this.bestScore);
 			}
-			return searchBenchmark.evaluate(config.getClassifierFactory().getComponentInstantiation(c));
+			return this.searchBenchmark.evaluate(this.config.getClassifierFactory().getComponentInstantiation(c));
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);
 		}
@@ -79,16 +77,16 @@ public class SearchPhasePipelineEvaluator extends TimedObjectEvaluator<Component
 	}
 
 	public PipelineEvaluatorBuilder getConfig() {
-		return config;
+		return this.config;
 	}
 
 	@Override
-	public long getTimeout(ComponentInstance item) {
-		return config.getTimeoutForSolutionEvaluation();
+	public long getTimeout(final ComponentInstance item) {
+		return this.config.getTimeoutForSolutionEvaluation();
 	}
 
 	@Override
-	public String getMessage(ComponentInstance item) {
+	public String getMessage(final ComponentInstance item) {
 		return "Pipeline evaluation during search phase";
 	}
 }

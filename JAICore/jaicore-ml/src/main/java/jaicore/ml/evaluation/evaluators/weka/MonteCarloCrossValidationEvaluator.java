@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.AbstractEvaluatorMeasureBridge;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import jaicore.ml.wekautil.dataset.splitter.MulticlassClassStratifiedSplitter;
 import weka.classifiers.Classifier;
@@ -18,7 +18,7 @@ import weka.core.Instances;
 /**
  * A classifier evaluator that can perform a (monte-carlo)cross-validation on
  * the given dataset. Thereby, it uses the
- * {@link AbstractEvaluatorMeasureBridge} to evaluate the classifier on a random
+ * {@link AbstractSplitBasedClassifierEvaluator} to evaluate the classifier on a random
  * split of the dataset.
  *
  * @author fmohr, joshua
@@ -35,9 +35,9 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	private final long seed;
 
 	/* Can either compute the loss or cache it */
-	private final IEvaluatorMeasureBridge<Double> bridge;
+	private final ISplitBasedClassifierEvaluator<Double> bridge;
 
-	public MonteCarloCrossValidationEvaluator(final IEvaluatorMeasureBridge<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion, final long seed) {
+	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion, final long seed) {
 		super();
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
@@ -47,7 +47,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 		this.seed = seed;
 	}
 
-	public MonteCarloCrossValidationEvaluator(final IEvaluatorMeasureBridge<Double> bridge, final int repeats, final Instances data, final double trainingPortion, final long seed) {
+	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> bridge, final int repeats, final Instances data, final double trainingPortion, final long seed) {
 		super();
 		this.datasetSplitter = new MulticlassClassStratifiedSplitter();
 		this.repeats = repeats;
@@ -97,7 +97,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 		return score;
 	}
 
-	public IEvaluatorMeasureBridge<Double> getBridge() {
+	public ISplitBasedClassifierEvaluator<Double> getBridge() {
 		return this.bridge;
 	}
 

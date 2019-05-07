@@ -2,7 +2,7 @@ package de.upb.crc901.mlplan.core;
 
 import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import weka.core.Instances;
 
@@ -10,7 +10,7 @@ public class PipelineEvaluatorBuilder {
 
 	private IClassifierFactory classifierFactory;
 	private IDatasetSplitter datasetSplitter;
-	private IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge;
+	private ISplitBasedClassifierEvaluator<Double> evaluationMeasurementBridge;
 	private int seed;
 	private int numMCIterations;
 	private Instances data;
@@ -30,7 +30,7 @@ public class PipelineEvaluatorBuilder {
 		return this.datasetSplitter;
 	}
 
-	public IEvaluatorMeasureBridge<Double> getEvaluationMeasurementBridge() {
+	public ISplitBasedClassifierEvaluator<Double> getEvaluationMeasurementBridge() {
 		return this.evaluationMeasurementBridge;
 	}
 
@@ -64,7 +64,7 @@ public class PipelineEvaluatorBuilder {
 		return this;
 	}
 
-	public PipelineEvaluatorBuilder withEvaluationMeasurementBridge(final IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge) {
+	public PipelineEvaluatorBuilder withEvaluationMeasurementBridge(final ISplitBasedClassifierEvaluator<Double> evaluationMeasurementBridge) {
 		this.evaluationMeasurementBridge = evaluationMeasurementBridge;
 		return this;
 	}
@@ -101,5 +101,4 @@ public class PipelineEvaluatorBuilder {
 	public IClassifierEvaluator getClassifierEvaluator() {
 		return this.classifierEvaluator;
 	}
-
 }

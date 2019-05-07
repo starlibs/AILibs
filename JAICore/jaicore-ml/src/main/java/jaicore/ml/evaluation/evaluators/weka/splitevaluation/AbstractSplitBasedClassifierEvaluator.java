@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.evaluators.weka.measurebridge;
+package jaicore.ml.evaluation.evaluators.weka.splitevaluation;
 
 import jaicore.ml.core.evaluation.measure.IMeasure;
 
@@ -11,11 +11,11 @@ import jaicore.ml.core.evaluation.measure.IMeasure;
  * @param <I> the input type
  * @param <O> the output type
  */
-public abstract class AbstractEvaluatorMeasureBridge<I, O> implements IEvaluatorMeasureBridge<O> {
+public abstract class AbstractSplitBasedClassifierEvaluator<I, O> implements ISplitBasedClassifierEvaluator<O> {
 
 	private IMeasure<I, O> basicEvaluator;
 
-	public AbstractEvaluatorMeasureBridge(final IMeasure<I, O> basicEvaluator) {
+	public AbstractSplitBasedClassifierEvaluator(final IMeasure<I, O> basicEvaluator) {
 		this.basicEvaluator = basicEvaluator;
 	}
 

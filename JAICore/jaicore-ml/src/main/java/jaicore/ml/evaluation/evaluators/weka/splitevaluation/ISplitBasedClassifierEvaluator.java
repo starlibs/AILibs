@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.evaluators.weka.measurebridge;
+package jaicore.ml.evaluation.evaluators.weka.splitevaluation;
 
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import weka.classifiers.Classifier;
@@ -11,7 +11,7 @@ import weka.core.Instances;
  *
  * @param <O> The type of the measured value.
  */
-public interface IEvaluatorMeasureBridge<O> {
+public interface ISplitBasedClassifierEvaluator<O> {
 
 	/**
 	 * Evaluate a hypothesis h being trained on a set of trainingData for some validationData.

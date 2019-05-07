@@ -41,9 +41,9 @@ import jaicore.ml.core.evaluation.measure.singlelabel.MultiClassMeasureBuilder;
 import jaicore.ml.evaluation.evaluators.weka.factory.ExtrapolatedSaturationPointEvaluatorFactory;
 import jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
 import jaicore.ml.evaluation.evaluators.weka.factory.LearningCurveExtrapolationEvaluatorFactory;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleSLCEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISimpleMLCSplitBasedClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISimpleSLCBasedSplitEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import jaicore.ml.wekautil.dataset.splitter.ArbitrarySplitter;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
@@ -144,11 +144,12 @@ public class MLPlanBuilder {
 
 	private EMultiClassPerformanceMeasure performanceMeasure = EMultiClassPerformanceMeasure.ERRORRATE;
 	private IMeasure<Double, Double> measure;
-	private IEvaluatorMeasureBridge<Double> evaluatorMeasureBridge;
+	private ISplitBasedClassifierEvaluator<Double> evaluatorMeasureBridge;
 
 	private Predicate<TFDNode> priorizingPredicate = null;
 
-	private IClassifierEvaluatorFactory classifierEvaluatorFactory = null;
+	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSearchPhase = null;
+	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSelectionPhase = null;
 
 	public MLPlanBuilder() {
 		super();
@@ -240,7 +241,7 @@ public class MLPlanBuilder {
 
 	public MLPlanBuilder withMekaDefaultConfiguration() throws IOException {
 		this.withDefaultConfiguration(EDefaultConfig.MEKA);
-		this.evaluatorMeasureBridge = new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss());
+		this.evaluatorMeasureBridge = new ISimpleMLCSplitBasedClassifierEvaluator(new AutoMEKAGGPFitnessMeasureLoss());
 		this.classifierFactory = new MekaPipelineFactory();
 		this.requestedHASCOInterface = MLC_REQUESTED_HASCO_INTERFACE;
 		this.withDatasetSplitterForSearchSelectionSplit(new ArbitrarySplitter());
@@ -316,7 +317,7 @@ public class MLPlanBuilder {
 		return this;
 	}
 
-	public MLPlanBuilder withEvaluatorMeasureBridge(final IEvaluatorMeasureBridge<Double> bridge) {
+	public MLPlanBuilder withEvaluatorMeasureBridge(final ISplitBasedClassifierEvaluator<Double> bridge) {
 		this.evaluatorMeasureBridge = bridge;
 		return this;
 	}
@@ -397,8 +398,8 @@ public class MLPlanBuilder {
 	}
 
 	private void updateEverything() {
-		updateSearchProblemTransformer();
-		updateAlgorithmConfigOfHASCO();
+		this.updateSearchProblemTransformer();
+		this.updateAlgorithmConfigOfHASCO();
 	}
 
 	/**
@@ -431,13 +432,13 @@ public class MLPlanBuilder {
 
 	public void withExtrapolatedSaturationPointEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
-		this.classifierEvaluatorFactory = new ExtrapolatedSaturationPointEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
+		this.factoryForPipelineEvaluationInSearchPhase = new ExtrapolatedSaturationPointEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
 
 	}
 
 	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
-		this.classifierEvaluatorFactory = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
+		this.factoryForPipelineEvaluationInSearchPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
 	}
 
 	public boolean getUseCache() {
@@ -468,12 +469,12 @@ public class MLPlanBuilder {
 		return this.performanceMeasure;
 	}
 
-	public IEvaluatorMeasureBridge<Double> getEvaluationMeasurementBridge(final IMeasure<Double, Double> measure) {
+	public ISplitBasedClassifierEvaluator<Double> getEvaluationMeasurementBridge(final IMeasure<Double, Double> measure) {
 		if (this.evaluatorMeasureBridge == null) {
 			if (this.getUseCache()) {
 				return new CacheEvaluatorMeasureBridge(measure, this.getDBAdapter());
 			} else {
-				return new SimpleSLCEvaluatorMeasureBridge(measure);
+				return new ISimpleSLCBasedSplitEvaluator(measure);
 			}
 		} else {
 			return this.evaluatorMeasureBridge;
@@ -485,7 +486,7 @@ public class MLPlanBuilder {
 		return this.hascoFactory;
 	}
 
-	public IEvaluatorMeasureBridge<Double> getEvaluationMeasurementBridge() {
+	public ISplitBasedClassifierEvaluator<Double> getEvaluationMeasurementBridge() {
 		if (this.evaluatorMeasureBridge != null) {
 			return this.evaluatorMeasureBridge;
 		}
@@ -506,7 +507,7 @@ public class MLPlanBuilder {
 	}
 
 	public IClassifierEvaluatorFactory getClassifierEvaluatorFactory() {
-		return this.classifierEvaluatorFactory;
+		return this.factoryForPipelineEvaluationInSearchPhase;
 	}
 
 }

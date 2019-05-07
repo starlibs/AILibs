@@ -22,10 +22,10 @@ public abstract class TimedComputation {
 	private static final Logger logger = LoggerFactory.getLogger(TimedComputation.class);
 
 	private TimedComputation() {
-		
+
 		/* no explicit instantiation allowed */
 	}
-	
+
 	public static <T> T compute(final Callable<T> callable, final long timeoutInMs, final String reasonToLogOnTimeout) throws ExecutionException, AlgorithmTimeoutedException, InterruptedException {
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
@@ -52,7 +52,7 @@ public abstract class TimedComputation {
 		 */
 		int runtime = (int)(System.currentTimeMillis() - start);
 		int delay = runtime - (int)timeoutInMs;
-		logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed {}", runtime, delay, caughtException != null ? caughtException.getClass().getName() : output);
+		logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed {}", runtime, delay, caughtException != null ? "exception: " + caughtException.getClass().getName() : "regular output return value: " + output);
 
 		/* now make sure that
 		 * a) the timeoutTriggered flag is true iff the TimerTask for the timeout has been executed
@@ -62,8 +62,9 @@ public abstract class TimedComputation {
 		synchronized (interrupter) {
 
 			/* if the timeout has been triggered (with caution) */
+			logger.debug("Checking for an interruption and resolving potential interrupts.");
 			if (interrupter.hasCurrentThreadBeenInterruptedWithReason(task)) {
-				logger.info("Interrupt is internal. Resolving interrupt.");
+				logger.info("Thread has been interrupted internally. Resolving the interrupt (this may throw an InterruptedException).");
 				timeoutTriggered = true;
 				Thread.interrupted(); // clear the interrupted field
 				try {

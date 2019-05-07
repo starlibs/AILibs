@@ -15,9 +15,8 @@ public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEv
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 
-	public LearningCurveExtrapolationEvaluatorFactory(int[] anchorpoints,
-			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
-			double trainSplitForAnchorpointsMeasurement, LearningCurveExtrapolationMethod extrapolationMethod) {
+	public LearningCurveExtrapolationEvaluatorFactory(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory, final double trainSplitForAnchorpointsMeasurement,
+			final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.subsamplingAlgorithmFactory = subsamplingAlgorithmFactory;
@@ -26,9 +25,8 @@ public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEv
 	}
 
 	@Override
-	public IClassifierEvaluator getIClassifierEvaluator(IDataset<? extends IInstance> dataset, long seed) {
-		return new LearningCurveExtrapolationEvaluator(anchorpoints, subsamplingAlgorithmFactory, dataset,
-				trainSplitForAnchorpointsMeasurement, extrapolationMethod, seed);
+	public IClassifierEvaluator getIClassifierEvaluator(final IDataset<? extends IInstance> dataset, final long seed) {
+		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, dataset, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed);
 	}
 
 }

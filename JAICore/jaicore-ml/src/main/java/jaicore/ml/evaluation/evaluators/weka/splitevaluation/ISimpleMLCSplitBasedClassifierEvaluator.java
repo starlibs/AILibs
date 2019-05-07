@@ -1,4 +1,4 @@
-package jaicore.ml.evaluation.evaluators.weka.measurebridge;
+package jaicore.ml.evaluation.evaluators.weka.splitevaluation;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -10,9 +10,9 @@ import meka.core.MLUtils;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
-public class SimpleMLCEvaluatorMeasureBridge extends AbstractEvaluatorMeasureBridge<double[], Double> {
+public class ISimpleMLCSplitBasedClassifierEvaluator extends AbstractSplitBasedClassifierEvaluator<double[], Double> {
 
-	public SimpleMLCEvaluatorMeasureBridge(final IMeasure<double[], Double> basicEvaluator) {
+	public ISimpleMLCSplitBasedClassifierEvaluator(final IMeasure<double[], Double> basicEvaluator) {
 		super(basicEvaluator);
 	}
 
