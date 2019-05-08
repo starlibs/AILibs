@@ -31,6 +31,8 @@ import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.GlobalTimer;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.WekaUtil;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Attribute;
@@ -58,26 +60,26 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 		//		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 		//		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
 		//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
-		problemSets.add(new OpenMLProblemSet(1457)); // amazon
-		problemSets.add(new OpenMLProblemSet(1501)); // semeion
+		//		problemSets.add(new OpenMLProblemSet(1457)); // amazon
+		//		problemSets.add(new OpenMLProblemSet(1501)); // semeion
 		//		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
 		//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
 		//		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
-		problemSets.add(new OpenMLProblemSet(1590)); // adult
-		problemSets.add(new OpenMLProblemSet(182)); // satimage
-		problemSets.add(new OpenMLProblemSet(24)); // mushroom
-		problemSets.add(new OpenMLProblemSet(39)); // ecoli
-		problemSets.add(new OpenMLProblemSet(44)); // spambase
-		problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
-		problemSets.add(new OpenMLProblemSet(61)); // iris
-		problemSets.add(new OpenMLProblemSet(9)); // autos
-		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
-		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
-		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
-		problemSets.add(new OpenMLProblemSet(554)); // mnist
-		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+		//		problemSets.add(new OpenMLProblemSet(1590)); // adult
+		//		problemSets.add(new OpenMLProblemSet(182)); // satimage
+		//		problemSets.add(new OpenMLProblemSet(24)); // mushroom
+		//		problemSets.add(new OpenMLProblemSet(39)); // ecoli
+		//		problemSets.add(new OpenMLProblemSet(44)); // spambase
+		//		problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
+		//		problemSets.add(new OpenMLProblemSet(61)); // iris
+		//		problemSets.add(new OpenMLProblemSet(9)); // autos
+		//		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
+		//		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
+		//		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+		//		problemSets.add(new OpenMLProblemSet(554)); // mnist
+		//		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 		//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
-		problemSets.add(new OpenMLProblemSet(40691)); // winequality
+		//		problemSets.add(new OpenMLProblemSet(40691)); // winequality
 
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
@@ -89,7 +91,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
-	public abstract IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(Instances data);
+	public abstract IAlgorithm<IDataset, Classifier> getAutoMLAlgorithm(IDataset data);
 
 	@Test
 	public void testThatModelIsTrained() throws Exception {
@@ -116,11 +118,12 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			Instances train = new Instances(dataset, 0, splitIndex);
 			Instances test = new Instances(dataset, splitIndex, dataset.size() - train.size());
 			assertEquals(dataset.size(), train.size() + test.size());
+			String datasetname = dataset.relationName();
 			dataset = null;
 
 			/* get algorithm */
 			logger.info("Loading the algorithm");
-			IAlgorithm<Instances, Classifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			IAlgorithm<IDataset, Classifier> algorithm = this.getAutoMLAlgorithm(WekaInstancesUtil.wekaInstancesToDataset(train)); // AutoML-tools should deliver a classifier
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
@@ -128,19 +131,19 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			algorithm.setTimeout(timeout);
 
 			/* find classifier */
-			Instances data = algorithm.getInput();
-			logger.info("Checking that {} delivers a model on dataset {}", algorithm.getId(), algorithm.getInput().relationName());
+			IDataset data = algorithm.getInput();
+			logger.info("Checking that {} delivers a model on dataset {}", algorithm.getId(), datasetname);
 			Classifier c = algorithm.call();
 			assertFalse("The thread should not be interrupted after calling the AutoML-tool!", Thread.currentThread().isInterrupted());
 			logger.info("Identified classifier {} as solution to the problem.", WekaUtil.getClassifierDescriptor(c));
 			assertNotNull("The algorithm as not returned any classifier.", c);
 
 			/* compute error rate */
-			Evaluation eval = new Evaluation(data);
+			Evaluation eval = new Evaluation(train);
 			eval.evaluateModel(c, test);
 			assertTrue("At least 10 instances must be classified!", test.size() >= 10);
 			assertTrue("There are still jobs on the global timer: " + GlobalTimer.getInstance().getActiveTasks(), GlobalTimer.getInstance().getActiveTasks().isEmpty());
-			logger.info("Error rate of solution {} on {} is: {}", c.getClass().getName(), data.relationName(), eval.errorRate());
+			logger.info("Error rate of solution {} on {} is: {}", c.getClass().getName(), datasetname, eval.errorRate());
 		}
 		catch (AlgorithmTimeoutedException e) {
 			fail("No solution was found in the given timeout. Stack trace: " + Arrays.stream(e.getStackTrace()).map(se -> "\n\t" + se.toString()).collect(Collectors.joining()));

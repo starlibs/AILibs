@@ -111,13 +111,13 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 		this.logger.debug("Deriving search problem");
 		RefinementConfiguredSoftwareConfigurationProblem<V> refConfigSoftwareConfigurationProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
 				new SoftwareConfigurationProblem<V>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper), this.getInput().getParamRefinementConfig());
-		HASCOReduction<V> hascoReduction = new HASCOReduction<>(() -> getBestSeenSolution());
+		HASCOReduction<V> hascoReduction = new HASCOReduction<>(() -> this.getBestSeenSolution());
 		this.planningProblem = hascoReduction.encodeProblem(refConfigSoftwareConfigurationProblem);
 		if (this.logger.isDebugEnabled()) {
 			String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
 					.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
 			String methods = this.planningProblem.getCorePlanningProblem().getDomain().getMethods().stream().map(m -> "\n\t\t" + m.getName() + "(" + m.getParameters() + ") for task " + m.getTask() + "\n\t\t\tPre: " + m.getPrecondition()
-					+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
+			+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
 			this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
 		}
 		this.searchProblem = new CostSensitivePlanningToSearchProblemTransformer<CEOCIPSTNPlanningProblem, V, N, A>(this.planningGraphGeneratorDeriver).encodeProblem(this.planningProblem);
@@ -154,7 +154,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			} else {
 				this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName, (this.search instanceof ILoggingCustomizable));
 			}
-			
+
 			/* register a listener on the search that will forward all events to HASCO's event bus */
 			this.search.registerListener(new Object() {
 
@@ -205,7 +205,9 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			return event;
 
 		case active:
+
 			/* step search */
+			this.logger.debug("Stepping search algorithm.");
 			AlgorithmEvent searchEvent = this.search.nextWithException();
 			if (searchEvent instanceof AlgorithmFinishedEvent) {
 				this.logger.info("The search algorithm has finished. Terminating HASCO.");
@@ -220,6 +222,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 						this.returnedUnparametrizedComponentInstances.size(), this.numUnparametrizedSolutions);
 				return hascoSolutionEvent;
 			} else {
+				this.logger.debug("Ignoring irrelevant search event {}", searchEvent);
 				return searchEvent;
 			}
 

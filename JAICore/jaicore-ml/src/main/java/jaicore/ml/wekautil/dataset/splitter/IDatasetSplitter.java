@@ -2,10 +2,11 @@ package jaicore.ml.wekautil.dataset.splitter;
 
 import java.util.List;
 
-import weka.core.Instances;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IInstance;
 
-public interface IDatasetSplitter {
+public interface IDatasetSplitter<O extends IInstance> {
 
-	public List<Instances> split(Instances data, long seed, double... portions);
+	public <I extends IInstance> List<IDataset<O>> split(IDataset<I> data, long seed, double... portions);
 
 }

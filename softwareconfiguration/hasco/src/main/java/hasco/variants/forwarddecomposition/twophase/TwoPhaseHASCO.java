@@ -389,6 +389,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 				/* Schedule a timeout for this evaluation, which is 10% over the estimated time */
 				int timeoutForEvaluation = (int) Math.max(50, estimatedInSelectionSingleIterationEvaluationTime * (1 + TwoPhaseHASCO.this.getConfig().selectionPhaseTimeoutTolerance()));
 				try {
+					this.logger.debug("Starting selection performance computation with timeout {}", timeoutForEvaluation);
 					TimedComputation.compute(() -> {
 						double selectionScore = evaluator.evaluate(c.getComponentInstance());
 						evaluatedModels.incrementAndGet();
@@ -405,7 +406,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 				} catch (ExecutionException e) {
 					TwoPhaseHASCO.this.logger.error("Observed an exeption when trying to evaluate a candidate in the selection phase.\n{}", LoggerUtil.getExceptionInfo(e.getCause()));
 				} catch (AlgorithmTimeoutedException e) {
-					TwoPhaseHASCO.this.logger.debug("Evaluation of candidate has timeouted: {}", c);
+					TwoPhaseHASCO.this.logger.info("Evaluation of candidate has timed out: {}", c);
 				} finally {
 					sem.release();
 					TwoPhaseHASCO.this.logger.debug("Released. Sem state: {}", sem.availablePermits());

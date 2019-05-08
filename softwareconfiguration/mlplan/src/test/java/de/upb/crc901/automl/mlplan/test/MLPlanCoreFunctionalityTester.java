@@ -8,13 +8,13 @@ import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.IAlgorithm;
+import jaicore.ml.core.dataset.IDataset;
 import weka.classifiers.Classifier;
-import weka.core.Instances;
 
 public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctionalityTester {
 
 	@Override
-	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(final Instances data) {
+	public IAlgorithm<IDataset, Classifier> getAutoMLAlgorithm(final IDataset data) {
 		try {
 			MLPlanBuilder builder = new MLPlanBuilder().withTinyTestConfiguration().withRandomCompletionBasedBestFirstSearch();
 			builder.withTimeoutForNodeEvaluation(new TimeOut(10, TimeUnit.SECONDS));

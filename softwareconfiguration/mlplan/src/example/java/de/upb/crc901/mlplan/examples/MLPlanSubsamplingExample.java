@@ -21,6 +21,7 @@ import jaicore.ml.WekaUtil;
 import jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.infiles.stratified.sampling.ClassStratiFileAssigner;
 import jaicore.ml.core.dataset.sampling.infiles.stratified.sampling.StratifiedFileSampling;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
@@ -32,7 +33,7 @@ import weka.core.Instances;
 
 public class MLPlanSubsamplingExample {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		/* create a subsample of the input with 1000 datapoints */
 		File file = new File("testrsc/car.arff");
@@ -54,7 +55,7 @@ public class MLPlanSubsamplingExample {
 				.withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(10, TimeUnit.SECONDS));
-		MLPlan mlplan = new MLPlan(builder, split.get(0));
+		MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(split.get(0)));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);

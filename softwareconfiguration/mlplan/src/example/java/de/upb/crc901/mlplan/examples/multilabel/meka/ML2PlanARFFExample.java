@@ -16,6 +16,7 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.wekautil.dataset.splitter.ArbitrarySplitter;
 import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
@@ -27,11 +28,11 @@ import meka.core.MLUtils;
 import weka.core.Instances;
 
 /**
-* Example demonstrating the usage of Ml2Plan (MLPlan for multilabel classification).
-*
-* @author mwever, helegraf
-*
-*/
+ * Example demonstrating the usage of Ml2Plan (MLPlan for multilabel classification).
+ *
+ * @author mwever, helegraf
+ *
+ */
 public class ML2PlanARFFExample {
 
 	private static final boolean ACTIVATE_VISUALIZATION = false;
@@ -42,7 +43,7 @@ public class ML2PlanARFFExample {
 		MLUtils.prepareData(data);
 
 		IDatasetSplitter testSplitter = new ArbitrarySplitter();
-		List<Instances> split = testSplitter.split(data, 0, .7);
+		List<Instances> split = testSplitter.split(WekaInstancesUtil.wekaInstancesToDataset(data), 0, .7);
 
 		MLPlanClassifierConfig algoConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
 		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.0");
@@ -53,7 +54,7 @@ public class ML2PlanARFFExample {
 		builder.withTimeoutForNodeEvaluation(new TimeOut(60, TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(60, TimeUnit.SECONDS));
 
-		MLPlan ml2plan = new MLPlan(builder, split.get(0));
+		MLPlan ml2plan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(split.get(0)));
 		ml2plan.setLoggerName("ml2plan");
 		ml2plan.setTimeout(new TimeOut(150, TimeUnit.SECONDS));
 		ml2plan.setNumCPUs(8);

@@ -10,14 +10,14 @@ import org.slf4j.LoggerFactory;
 import hasco.model.ComponentInstance;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.cache.ReproducibleInstances;
+import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISimpleSLCBasedSplitEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import weka.classifiers.Classifier;
-import weka.core.Instances;
 
 /**
- * Implements a cache for the {@link AbstractSplitBasedClassifierEvaluator}. If no cache entry is found {@link ISimpleSLCBasedSplitEvaluator} is used.
+ * Implements a cache for the {@link AbstractSplitBasedClassifierEvaluator}. If no cache entry is found {@link SimpleSLCSplitBasedClassifierEvaluator} is used.
  *
  * @author mirko
  *
@@ -30,7 +30,7 @@ public class CacheEvaluatorMeasureBridge extends AbstractSplitBasedClassifierEva
 	private ComponentInstance evaluatedComponent;
 
 	/* Used for evaluating, when no cache entry could be found. */
-	private ISimpleSLCBasedSplitEvaluator simpleEvaluatorMeasureBridge;
+	private SimpleSLCSplitBasedClassifierEvaluator simpleEvaluatorMeasureBridge;
 
 	/* Used for looking up cache entries. */
 	private PerformanceDBAdapter performanceDBAdapter;
@@ -38,11 +38,11 @@ public class CacheEvaluatorMeasureBridge extends AbstractSplitBasedClassifierEva
 	public CacheEvaluatorMeasureBridge(final IMeasure<Double, Double> basicEvaluator, final PerformanceDBAdapter performanceDBAdapter) {
 		super(basicEvaluator);
 		this.performanceDBAdapter = performanceDBAdapter;
-		this.simpleEvaluatorMeasureBridge = new ISimpleSLCBasedSplitEvaluator(basicEvaluator);
+		this.simpleEvaluatorMeasureBridge = new SimpleSLCSplitBasedClassifierEvaluator(basicEvaluator);
 	}
 
 	@Override
-	public Double evaluateSplit(final Classifier pl, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
+	public Double evaluateSplit(final Classifier pl, final IDataset trainingData, final IDataset validationData) throws ObjectEvaluationFailedException, InterruptedException {
 		if (trainingData instanceof ReproducibleInstances) {
 
 			if (((ReproducibleInstances) trainingData).isCacheLookup()) {
