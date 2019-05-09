@@ -280,10 +280,12 @@ public class MLPlanBuilder {
 		int mccvIterationsDuringSelection = 5;
 		double mccvPortion = 0.7;
 		if (!(this.factoryForPipelineEvaluationInSearchPhase instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.factoryForPipelineEvaluationInSearchPhase = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(mccvIterationsDuringSearch).withTrainFoldSize(mccvPortion).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()));
+			this.factoryForPipelineEvaluationInSearchPhase = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(mccvIterationsDuringSearch).withTrainFoldSize(mccvPortion)
+					.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()));
 		}
 		if (!(this.factoryForPipelineEvaluationInSelectionPhase instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.factoryForPipelineEvaluationInSelectionPhase = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(mccvIterationsDuringSearch).withTrainFoldSize(mccvPortion).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()));
+			this.factoryForPipelineEvaluationInSelectionPhase = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(mccvIterationsDuringSearch).withTrainFoldSize(mccvPortion)
+					.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()));
 		}
 
 		/* configure blow-ups for MCCV */
@@ -465,16 +467,16 @@ public class MLPlanBuilder {
 		return this.requestedHASCOInterface;
 	}
 
-	//	public void withExtrapolatedSaturationPointEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
-	//			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
-	//		this.builderForPipelineEvaluationInSearchPhase = new ExtrapolatedSaturationPointEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
+	// public void withExtrapolatedSaturationPointEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
+	// final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+	// this.builderForPipelineEvaluationInSearchPhase = new ExtrapolatedSaturationPointEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
 	//
-	//	}
+	// }
 
 	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		this.factoryForPipelineEvaluationInSearchPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
-		//		this.factoryForPipelineEvaluationInSelectionPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
+		// this.factoryForPipelineEvaluationInSelectionPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
 		this.factoryForPipelineEvaluationInSelectionPhase = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()));
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
 	}
@@ -536,17 +538,17 @@ public class MLPlanBuilder {
 		return this.hascoFactory;
 	}
 
-	//	public ISplitBasedClassifierEvaluator<Double> getEvaluationMeasurementBridge() {
-	//		if (this.splitBasedClassifierEvaluator != null) {
-	//			return this.splitBasedClassifierEvaluator;
-	//		}
+	// public ISplitBasedClassifierEvaluator<Double> getEvaluationMeasurementBridge() {
+	// if (this.splitBasedClassifierEvaluator != null) {
+	// return this.splitBasedClassifierEvaluator;
+	// }
 	//
-	//		if (this.measure != null) {
-	//			return this.getSingleLabelEvaluationMeasurementBridge(this.measure);
-	//		} else {
-	//			throw new IllegalStateException("Can not create evaluator measure bridge without a measure.");
-	//		}
-	//	}
+	// if (this.measure != null) {
+	// return this.getSingleLabelEvaluationMeasurementBridge(this.measure);
+	// } else {
+	// throw new IllegalStateException("Can not create evaluator measure bridge without a measure.");
+	// }
+	// }
 
 	@Override
 	public String toString() {

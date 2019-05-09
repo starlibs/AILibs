@@ -80,8 +80,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				throw new IllegalStateException("Cannot generate search where number of CPUs is " + this.getConfig().cpus());
 			}
 
-
-
 			/* set up exact splits */
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.data.size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
@@ -122,9 +120,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
 						this.getInput().hashCode(), this.builder.getSingleLabelPerformanceMeasure() != null ? this.builder.getSingleLabelPerformanceMeasure() : this.builder.getMultiLabelPerformanceMeasure(), this.getConfig().cpus(),
-								this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(),
-								MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch, classifierEvaluatorForSelection, this.getConfig().expectedBlowupInSelection(),
-								this.getConfig().expectedBlowupInPostprocessing());
+						this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(),
+						MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch, classifierEvaluatorForSelection, this.getConfig().expectedBlowupInSelection(),
+						this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
