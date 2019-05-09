@@ -28,16 +28,15 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
+import weka.core.Instances;
 
-public class MLPlan extends AAlgorithm<IDataset, Classifier> implements ILoggingCustomizable {
+public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggingCustomizable {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlan.class);
@@ -48,11 +47,11 @@ public class MLPlan extends AAlgorithm<IDataset, Classifier> implements ILogging
 	private ComponentInstance componentInstanceOfSelectedClassifier;
 
 	private final MLPlanBuilder builder;
-	private final IDataset data;
+	private final Instances data;
 	private TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
-	public MLPlan(final MLPlanBuilder builder, final IDataset data) {
+	public MLPlan(final MLPlanBuilder builder, final Instances data) {
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
@@ -86,9 +85,9 @@ public class MLPlan extends AAlgorithm<IDataset, Classifier> implements ILogging
 			/* set up exact splits */
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.data.size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
-			IDataset dataShownToSearch;
+			Instances dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
-				dataShownToSearch = (IDataset) this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).get(1);
+				dataShownToSearch = this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).get(1);
 			} else {
 				dataShownToSearch = this.getInput();
 			}
@@ -197,6 +196,7 @@ public class MLPlan extends AAlgorithm<IDataset, Classifier> implements ILogging
 			long startOptimizationTime = System.currentTimeMillis();
 			try {
 				this.selectedClassifier = this.optimizingFactory.call();
+				this.logger.info("2-Phase-HASCO has chosen classifier {}, which will now be built on the entire data given, i.e. {} data points.", this.selectedClassifier, this.getInput().size());
 			} catch (AlgorithmException | InterruptedException | AlgorithmExecutionCanceledException | AlgorithmTimeoutedException e) {
 				this.terminate(); // send the termination event
 				throw e;
@@ -205,7 +205,7 @@ public class MLPlan extends AAlgorithm<IDataset, Classifier> implements ILogging
 			this.componentInstanceOfSelectedClassifier = this.optimizingFactory.getComponentInstanceOfObject();
 			long startBuildTime = System.currentTimeMillis();
 			try {
-				this.selectedClassifier.buildClassifier(WekaInstancesUtil.datasetToWekaInstances(this.getInput()));
+				this.selectedClassifier.buildClassifier(this.getInput());
 			} catch (Exception e) {
 				throw new AlgorithmException(e, "Training the classifier failed!");
 			}

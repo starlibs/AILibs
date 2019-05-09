@@ -10,7 +10,6 @@ import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
@@ -35,7 +34,7 @@ public class MLPlanOpenMLExample {
 		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(10, TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.SECONDS));
-		MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(split.get(0)));
+		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");

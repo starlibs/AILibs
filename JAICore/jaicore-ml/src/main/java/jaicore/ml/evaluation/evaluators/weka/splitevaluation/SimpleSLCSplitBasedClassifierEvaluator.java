@@ -5,14 +5,11 @@ import java.util.List;
 
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.evaluation.IInstancesClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.UnsupportedAttributeTypeException;
 
 /**
  * Basic implementation of the {@link AbstractSplitBasedClassifierEvaluator}. Uses the given loss function to compute loss on the given data. No extra steps are performed.
@@ -27,14 +24,6 @@ public class SimpleSLCSplitBasedClassifierEvaluator extends AbstractSplitBasedCl
 	}
 
 	@Override
-	public Double evaluateSplit(final Classifier classifier, final IDataset<?> trainingData, final IDataset<?> validationData) throws ObjectEvaluationFailedException, InterruptedException {
-		try {
-			return this.evaluateSplit(classifier, WekaInstancesUtil.datasetToWekaInstances(trainingData), WekaInstancesUtil.datasetToWekaInstances(validationData));
-		} catch (UnsupportedAttributeTypeException e) {
-			throw new ObjectEvaluationFailedException("Object evaluation failed due to dataset conversion exception.", e);
-		}
-	}
-
 	public Double evaluateSplit(final Classifier classifier, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
 		List<Double> actual = WekaUtil.getClassesAsList(validationData);
 		List<Double> predicted = new ArrayList<>();

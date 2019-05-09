@@ -1,10 +1,8 @@
 package jaicore.ml.evaluation.evaluators.weka.factory;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
-import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import weka.core.Instances;
 
 public class MonteCarloCrossValidationEvaluatorFactory implements IClassifierEvaluatorFactory {
@@ -85,7 +83,7 @@ public class MonteCarloCrossValidationEvaluatorFactory implements IClassifierEva
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluator getIClassifierEvaluator(final IDataset<? extends IInstance> dataset, final long seed) {
+	public MonteCarloCrossValidationEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) {
 		if (this.splitBasedEvaluator == null) {
 			throw new IllegalStateException("Cannot create MCCV, because no splitBasedEvaluator has been set!");
 		}

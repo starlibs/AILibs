@@ -31,8 +31,6 @@ import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.concurrent.GlobalTimer;
 import jaicore.interrupt.Interrupter;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Attribute;
@@ -55,7 +53,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+		//		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
 		//		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
 		//		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 		//		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
@@ -63,7 +61,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 		//		problemSets.add(new OpenMLProblemSet(1457)); // amazon
 		//		problemSets.add(new OpenMLProblemSet(1501)); // semeion
 		//		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
-		//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
+		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
 		//		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
 		//		problemSets.add(new OpenMLProblemSet(1590)); // adult
 		//		problemSets.add(new OpenMLProblemSet(182)); // satimage
@@ -91,7 +89,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
-	public abstract IAlgorithm<IDataset, Classifier> getAutoMLAlgorithm(IDataset data);
+	public abstract IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(Instances data);
 
 	@Test
 	public void testThatModelIsTrained() throws Exception {
@@ -113,17 +111,24 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			Instances dataset = new Instances(new FileReader(cacheFile));
 			Attribute targetAttribute = dataset.attribute(this.problemSet.getDatasetSource().getY());
 			dataset.setClassIndex(targetAttribute.index());
-			logger.info("Creating a 70/30 (non-stratified) split over the data");
-			int splitIndex = (int)Math.floor(dataset.size() * 0.7);
-			Instances train = new Instances(dataset, 0, splitIndex);
-			Instances test = new Instances(dataset, splitIndex, dataset.size() - train.size());
-			assertEquals(dataset.size(), train.size() + test.size());
 			String datasetname = dataset.relationName();
+
+			if (false) {
+				logger.info("Creating a 70/30 (non-stratified) split over the data");
+				int splitIndex = (int)Math.floor(dataset.size() * 0.7);
+				Instances train = new Instances(dataset, 0, splitIndex);
+				Instances test = new Instances(dataset, splitIndex, dataset.size() - train.size());
+				assertEquals(dataset.size(), train.size() + test.size());
+			}
+			List<Instances> splits = WekaUtil.getStratifiedSplit(dataset, 0, .7);
+			Instances train = splits.get(0);
+			Instances test = splits.get(1);
+
 			dataset = null;
 
 			/* get algorithm */
 			logger.info("Loading the algorithm");
-			IAlgorithm<IDataset, Classifier> algorithm = this.getAutoMLAlgorithm(WekaInstancesUtil.wekaInstancesToDataset(train)); // AutoML-tools should deliver a classifier
+			IAlgorithm<Instances, Classifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
@@ -131,7 +136,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			algorithm.setTimeout(timeout);
 
 			/* find classifier */
-			IDataset data = algorithm.getInput();
+			Instances data = algorithm.getInput();
 			logger.info("Checking that {} delivers a model on dataset {}", algorithm.getId(), datasetname);
 			Classifier c = algorithm.call();
 			assertFalse("The thread should not be interrupted after calling the AutoML-tool!", Thread.currentThread().isInterrupted());

@@ -41,6 +41,9 @@ import jaicore.ml.core.SimpleLabeledInstanceImpl;
 import jaicore.ml.core.WekaCompatibleInstancesImpl;
 import jaicore.ml.interfaces.LabeledInstance;
 import jaicore.ml.interfaces.LabeledInstances;
+import weka.attributeSelection.ASEvaluation;
+import weka.attributeSelection.ASSearch;
+import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -188,6 +191,28 @@ public class WekaUtil {
 			for (List<String> combo : combinations) {
 				if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
 					preprocessors.add(combo);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return preprocessors;
+	}
+
+	public static Collection<AttributeSelection> getAllPossibleFeatureSelectors() {
+		Collection<AttributeSelection> preprocessors = new ArrayList<>();
+		List<Collection<String>> sets = new ArrayList<>();
+		try {
+			sets.add(getSearchers());
+			sets.add(getFeatureEvaluators());
+			CartesianProductComputationProblem<String> problem = new CartesianProductComputationProblem<>(sets);
+			List<List<String>> combinations = new LDSRelationComputer<>(problem).call();
+			for (List<String> combo : combinations) {
+				if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
+					AttributeSelection as = new AttributeSelection();
+					as.setSearch(ASSearch.forName(combo.get(0), new String[] {}));
+					as.setEvaluator(ASEvaluation.forName(combo.get(1), new String[] {}));
+					preprocessors.add(as);
 				}
 			}
 		} catch (Exception e) {

@@ -4,8 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
@@ -19,19 +17,17 @@ public class SimpleMLCSplitBasedClassifierEvaluator extends AbstractSplitBasedCl
 	}
 
 	@Override
-	public Double evaluateSplit(final Classifier pl, final IDataset<?> trainingData, final IDataset<?> validationData) throws ObjectEvaluationFailedException, InterruptedException {
+	public Double evaluateSplit(final Classifier pl, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
 		try {
-			Instances trainingDataAsWEKA = WekaInstancesUtil.datasetToWekaInstances(trainingData);
-			Instances validationDataAsWEKA = WekaInstancesUtil.datasetToWekaInstances(validationData);
-			pl.buildClassifier(trainingDataAsWEKA);
-			int numLabels = trainingDataAsWEKA.classIndex();
+			pl.buildClassifier(trainingData);
+			int numLabels = trainingData.classIndex();
 
 			List<double[]> actual = new LinkedList<>();
 			List<double[]> expected = new LinkedList<>();
 
 			for (int i = 0; i < validationData.size(); i++) {
-				actual.add(pl.distributionForInstance(validationDataAsWEKA.get(i)));
-				expected.add(MLUtils.toDoubleArray(validationDataAsWEKA.get(i), numLabels));
+				actual.add(pl.distributionForInstance(validationData.get(i)));
+				expected.add(MLUtils.toDoubleArray(validationData.get(i), numLabels));
 
 				Double error = this.getBasicEvaluator().calculateAvgMeasure(actual, expected);
 

@@ -33,11 +33,9 @@ import jaicore.basic.MathExt;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
@@ -54,9 +52,9 @@ import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifi
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
-import jaicore.ml.wekautil.dataset.splitter.ArbitrarySplitter;
-import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
-import jaicore.ml.wekautil.dataset.splitter.MulticlassClassStratifiedSplitter;
+import jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
+import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -65,7 +63,7 @@ import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import jaicore.timing.TimedObjectEvaluator;
-import weka.core.UnsupportedAttributeTypeException;
+import weka.core.Instances;
 
 /**
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.
@@ -390,7 +388,7 @@ public class MLPlanBuilder {
 		return this;
 	}
 
-	public void prepareNodeEvaluatorInFactoryWithData(final IDataset<?> data) {
+	public void prepareNodeEvaluatorInFactoryWithData(final Instances data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
 		}
@@ -408,11 +406,7 @@ public class MLPlanBuilder {
 		INodeEvaluator<TFDNode, Double> actualNodeEvaluator;
 		if (this.pipelineValidityCheckingNodeEvaluator != null) {
 			this.pipelineValidityCheckingNodeEvaluator.setComponents(this.components);
-			try {
-				this.pipelineValidityCheckingNodeEvaluator.setData(WekaInstancesUtil.datasetToWekaInstances(data));
-			} catch (UnsupportedAttributeTypeException e) {
-				throw new IllegalArgumentException(e);
-			}
+			this.pipelineValidityCheckingNodeEvaluator.setData(data);
 			if (this.preferredNodeEvaluator != null) {
 				actualNodeEvaluator = new AlternativeNodeEvaluator<>(this.pipelineValidityCheckingNodeEvaluator, this.preferredNodeEvaluator);
 			} else {
@@ -562,7 +556,7 @@ public class MLPlanBuilder {
 		return ToJSONStringUtil.toJSONString(fields);
 	}
 
-	public TimedObjectEvaluator<ComponentInstance, Double> getClassifierEvaluationInSearchPhase(final IDataset<?> data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
+	public TimedObjectEvaluator<ComponentInstance, Double> getClassifierEvaluationInSearchPhase(final Instances data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSearchPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in search phase has been set!");
 		}
@@ -573,7 +567,7 @@ public class MLPlanBuilder {
 		return new PipelineEvaluator(this.getClassifierFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
 	}
 
-	public TimedObjectEvaluator<ComponentInstance, Double> getFactoryForClassifierEvaluationInSelectionPhase(final IDataset<?> data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
+	public TimedObjectEvaluator<ComponentInstance, Double> getFactoryForClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}

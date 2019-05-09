@@ -8,15 +8,15 @@ import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.Classifier;
+import weka.core.Instances;
 
 public class MLPlanWithLearningCurvePredictionResultDeliveryTester extends AutoMLAlgorithmResultProductionTester {
 
 	@Override
-	public IAlgorithm<IDataset, Classifier> getAutoMLAlgorithm(final IDataset data) {
+	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(final Instances data) {
 		try {
 			MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
 			builder.withLearningCurveExtrapolationEvaluation(new int[]{ 8, 16, 64, 128},new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());

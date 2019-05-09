@@ -30,7 +30,6 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.singlelabel.PrecisionAsLoss;
@@ -290,7 +289,7 @@ public class MLPlanCLI {
 		builder.withTimeoutForNodeEvaluation(new TimeOut(Integer.parseInt(commandLine.getOptionValue(nodeEvaluationTimeoutOption, nodeEvaluationTimeout)), TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
 
-		MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(trainData));
+		MLPlan mlplan = new MLPlan(builder, trainData);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(new TimeOut(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
 		mlplan.setRandomSeed(Integer.parseInt(commandLine.getOptionValue(randomSeedOption, randomSeed)));

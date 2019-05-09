@@ -1,12 +1,13 @@
 package jaicore.ml.evaluation.evaluators.weka.factory;
 
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
+import weka.core.Instances;
 
 public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEvaluatorFactory {
 
@@ -25,8 +26,8 @@ public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEv
 	}
 
 	@Override
-	public IClassifierEvaluator getIClassifierEvaluator(final IDataset<? extends IInstance> dataset, final long seed) {
-		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, dataset, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed);
+	public IClassifierEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) {
+		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, WekaInstancesUtil.wekaInstancesToDataset(dataset), this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed);
 	}
 
 }

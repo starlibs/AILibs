@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
-import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import weka.classifiers.Classifier;
+import weka.core.Instances;
 
 /**
  * A classifier evaluator that can perform a (monte-carlo)cross-validation on
@@ -33,7 +33,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 	private Logger logger = LoggerFactory.getLogger(ProbabilisticMonteCarloCrossValidationEvaluator.class);
 	private boolean canceled = false;
 	private final int repeats;
-	private final IDataset data;
+	private final Instances data;
 	private final double trainingPortion;
 	private final long seed;
 
@@ -48,7 +48,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		this.bestScore = bestScore;
 	}
 
-	public ProbabilisticMonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final double bestscore, final IDataset data, final double trainingPortion,
+	public ProbabilisticMonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final double bestscore, final Instances data, final double trainingPortion,
 			final long seed) {
 		super();
 		this.repeats = repeats;
@@ -79,7 +79,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		this.logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
 			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
-			List<IDataset> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
+			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 			try {
 				double score = this.bridge.evaluateSplit(pl, split.get(0), split.get(1));
 				this.logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);

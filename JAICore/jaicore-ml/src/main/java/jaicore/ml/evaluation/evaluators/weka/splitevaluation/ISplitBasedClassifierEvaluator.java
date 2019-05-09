@@ -1,8 +1,8 @@
 package jaicore.ml.evaluation.evaluators.weka.splitevaluation;
 
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.core.dataset.IDataset;
 import weka.classifiers.Classifier;
+import weka.core.Instances;
 
 /**
  * Interface for the evaluator measure bridge yielding the measured value as an instance of O.
@@ -21,6 +21,6 @@ public interface ISplitBasedClassifierEvaluator<O> {
 	 * @return Returns the result of the measured value.
 	 * @throws Exception Throws an Exception if there are issues training or validating the classifier.
 	 */
-	public abstract O evaluateSplit(final Classifier h, IDataset<?> trainingData, IDataset<?> validationData) throws ObjectEvaluationFailedException, InterruptedException;
+	public abstract O evaluateSplit(final Classifier h, Instances trainingData, Instances validationData) throws ObjectEvaluationFailedException, InterruptedException;
 
 }

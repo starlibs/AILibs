@@ -1,4 +1,4 @@
-package jaicore.ml.wekautil.dataset.splitter;
+package jaicore.ml.weka.dataset.splitter;
 
 import weka.core.Instances;
 

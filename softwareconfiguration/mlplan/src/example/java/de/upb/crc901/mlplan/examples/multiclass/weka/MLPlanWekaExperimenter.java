@@ -30,7 +30,6 @@ import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;
@@ -95,7 +94,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
 			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
 
-			MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(stratifiedSplit.get(0)));
+			MLPlan mlplan = new MLPlan(builder, stratifiedSplit.get(0));
 			mlplan.setLoggerName("mlplan");
 			mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
 			mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));

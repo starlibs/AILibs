@@ -185,7 +185,8 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			}
 			this.checkAndConductTermination();
 			this.selectedHASCOSolution = this.selectModel();
-			this.updateBestSeenSolution(this.selectedHASCOSolution);
+			this.setBestSeenSolution(this.selectedHASCOSolution);
+			assert this.getBestSeenSolution().equals(this.selectedHASCOSolution);
 			return this.terminate();
 
 		default:

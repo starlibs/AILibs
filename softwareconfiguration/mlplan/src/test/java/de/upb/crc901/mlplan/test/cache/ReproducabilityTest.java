@@ -18,7 +18,6 @@ import hasco.serialization.HASCOJacksonModule;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.cache.Instruction;
 import jaicore.ml.cache.ReproducibleInstances;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import weka.classifiers.Classifier;
 
@@ -52,7 +51,7 @@ public class ReproducabilityTest {
 		validationInstances.setCacheStorage(false);
 		WEKAPipelineFactory factory = new WEKAPipelineFactory();
 		Classifier pipeline = factory.getComponentInstantiation(composition);
-		Double score = bridge.evaluateSplit(pipeline, WekaInstancesUtil.wekaInstancesToDataset(trainInstances), WekaInstancesUtil.wekaInstancesToDataset(validationInstances));
+		Double score = bridge.evaluateSplit(pipeline, trainInstances, validationInstances);
 		System.out.println(score);
 	}
 }

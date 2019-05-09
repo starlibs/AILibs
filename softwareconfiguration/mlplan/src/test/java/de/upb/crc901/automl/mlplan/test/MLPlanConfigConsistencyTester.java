@@ -20,7 +20,6 @@ import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
@@ -49,7 +48,7 @@ public class MLPlanConfigConsistencyTester {
 		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(this.timeoutForNodeEvaluation);
 		builder.withTimeoutForSingleSolutionEvaluation(this.timeoutForSingleSolutionEvaluation);
-		MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(this.data));
+		MLPlan mlplan = new MLPlan(builder, this.data);
 		AlgorithmEvent event = mlplan.next();
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO)mlplan.getOptimizingFactory().getOptimizer();
@@ -66,7 +65,7 @@ public class MLPlanConfigConsistencyTester {
 		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(this.timeoutForNodeEvaluation);
 		builder.withTimeoutForSingleSolutionEvaluation(this.timeoutForSingleSolutionEvaluation);
-		MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(this.data));
+		MLPlan mlplan = new MLPlan(builder, this.data);
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, "" + this.timeoutForNodeEvaluation.milliseconds());
 		mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, "" + this.timeoutForSingleSolutionEvaluation.milliseconds());
 		AlgorithmEvent event = mlplan.next();
@@ -85,7 +84,7 @@ public class MLPlanConfigConsistencyTester {
 		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(this.timeoutForNodeEvaluation);
 		builder.withTimeoutForSingleSolutionEvaluation(this.timeoutForSingleSolutionEvaluation);
-		MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(this.data));
+		MLPlan mlplan = new MLPlan(builder, this.data);
 		AlgorithmEvent event = mlplan.next();
 		assertTrue(event instanceof AlgorithmInitializedEvent);
 		TwoPhaseHASCO twoPhaseHasco = (TwoPhaseHASCO)mlplan.getOptimizingFactory().getOptimizer();
@@ -99,7 +98,7 @@ public class MLPlanConfigConsistencyTester {
 			double blowUpSelection = Math.sqrt(i);
 			double blowUpPostProcessing = Math.sqrt(i / 2.0);
 			MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
-			MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(this.data));
+			MLPlan mlplan = new MLPlan(builder, this.data);
 			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + blowUpSelection);
 			mlplan.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, "" + blowUpPostProcessing);
 

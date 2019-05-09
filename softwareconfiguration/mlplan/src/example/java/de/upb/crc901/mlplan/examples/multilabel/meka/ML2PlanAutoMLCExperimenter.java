@@ -20,7 +20,6 @@ import jaicore.experiments.ExperimentDBEntry;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
@@ -28,7 +27,7 @@ import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
-import jaicore.ml.wekautil.dataset.splitter.MultilabelDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.MultilabelDatasetSplitter;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
@@ -113,7 +112,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 
 			MLPlan mlplan = null;
 			try {
-				mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(train));
+				mlplan = new MLPlan(builder, train);
 				mlplan.setTimeout(mlplanTimeOut);
 				mlplan.setNumCPUs(CONFIG.getNumberOfCPUs());
 				mlplan.setLoggerName("ml2plan");

@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import hasco.model.ComponentInstance;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.cache.ReproducibleInstances;
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import weka.classifiers.Classifier;
+import weka.core.Instances;
 
 /**
  * Implements a cache for the {@link AbstractSplitBasedClassifierEvaluator}. If no cache entry is found {@link SimpleSLCSplitBasedClassifierEvaluator} is used.
@@ -42,7 +42,7 @@ public class CacheEvaluatorMeasureBridge extends AbstractSplitBasedClassifierEva
 	}
 
 	@Override
-	public Double evaluateSplit(final Classifier pl, final IDataset trainingData, final IDataset validationData) throws ObjectEvaluationFailedException, InterruptedException {
+	public Double evaluateSplit(final Classifier pl, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
 		if (trainingData instanceof ReproducibleInstances) {
 
 			if (((ReproducibleInstances) trainingData).isCacheLookup()) {

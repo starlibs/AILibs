@@ -14,8 +14,6 @@ import jaicore.basic.algorithm.AlgorithmCreationException;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -52,11 +50,11 @@ public abstract class AutoMLAlgorithmCoreFunctionalityTester extends GeneralAlgo
 			Instances dataset = sourceClassAttributePair.getX().getDataSet();
 			Attribute targetAttribute = dataset.attribute(sourceClassAttributePair.getY());
 			dataset.setClassIndex(targetAttribute.index());
-			return this.getAutoMLAlgorithm(WekaInstancesUtil.wekaInstancesToDataset(dataset));
+			return this.getAutoMLAlgorithm(dataset);
 		} catch (Exception e) {
 			throw new AlgorithmCreationException(e);
 		}
 	}
 
-	public abstract IAlgorithm<IDataset, Classifier> getAutoMLAlgorithm(IDataset data);
+	public abstract IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(Instances data);
 }

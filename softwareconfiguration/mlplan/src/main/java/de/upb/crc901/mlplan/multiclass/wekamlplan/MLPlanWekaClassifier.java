@@ -18,7 +18,6 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.evaluation.IInstancesClassifier;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -70,7 +69,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	public void buildClassifier(final Instances data) throws Exception {
 		Objects.requireNonNull(this.timeout, "Timeout must be set before running ML-Plan.");
 
-		MLPlan mlplan = new MLPlan(this.builder, WekaInstancesUtil.wekaInstancesToDataset(data));
+		MLPlan mlplan = new MLPlan(this.builder, data);
 		mlplan.setTimeout(this.timeout);
 		if (this.loggerName != null) {
 			mlplan.setLoggerName(this.loggerName + "." + "mlplan");

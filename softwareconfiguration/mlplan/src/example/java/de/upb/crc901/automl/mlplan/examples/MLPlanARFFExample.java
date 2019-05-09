@@ -19,7 +19,6 @@ import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
@@ -47,7 +46,7 @@ public class MLPlanARFFExample {
 		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
 		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
 		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(10, TimeUnit.SECONDS));
-		MLPlan mlplan = new MLPlan(builder, WekaInstancesUtil.wekaInstancesToDataset(split.get(0)));
+		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300, TimeUnit.SECONDS);
