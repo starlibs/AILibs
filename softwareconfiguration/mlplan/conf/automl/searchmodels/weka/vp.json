@@ -1,0 +1,46 @@
+{
+	"repository": "Voted Perceptron",
+	"components": [
+		{
+			"name": "weka.classifiers.functions.VotedPerceptron",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"WekaBaseClassifier",
+				"BaseClassifier"
+			],
+			"parameter": [
+				{
+					"name": "I",
+					"type": "int",
+					"default": 1.0,
+					"min": 1.0,
+					"max": 10.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "M",
+					"type": "int",
+					"default": 10000.0,
+					"min": 5000.0,
+					"max": 50000.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				},
+				{
+					"name": "E",
+					"type": "double",
+					"default": 1.0,
+					"min": 0.2,
+					"max": 5.0,
+					"refineSplits": 8,
+					"minInterval": 1
+				}
+			],
+			"dependencies": [
+			]
+		}
+	]
+}

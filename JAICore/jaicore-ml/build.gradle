@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	compile project(":JAICore:jaicore-experiments")
@@ -22,3 +23,43 @@ dependencies {
 	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
 
 }
+=======
+sourceSets {
+    main {
+      java {
+            srcDir 'src'
+      }
+    }
+    test {
+     	java {
+     		srcDir 'test'
+     	}
+    }
+}
+
+dependencies {
+	compile project(":JAICore:jaicore-basic")
+	compile project(":JAICore:jaicore-concurrent")
+	compile project(":JAICore:jaicore-experiments")
+	compile project(":JAICore:jaicore-graph")
+	compile project(":JAICore:jaicore-graphvisualizer")
+	compile project(":JAICore:jaicore-search")
+	
+	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
+	compile group: 'de.upb.isys', name: 'omlwebapp', version: '0.0.1'
+	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
+	compile ('de.upb.isys:interruptable-weka:0.0.2') {
+	  	exclude group: 'log4j'
+    	exclude group: 'org.slf4j'
+	}
+	
+	//JTwig template engine
+	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
+	
+	// https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
+	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+	
+	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
+}
+>>>>>>> 4838afbf5d94b068c61e84a148886055828acd5b

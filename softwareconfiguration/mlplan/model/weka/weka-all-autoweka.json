@@ -1,0 +1,18 @@
+{
+	"repository" : "WEKA - Auto-WEKA Searchspace",
+	"include": ["./weka-classifiers-autoweka.json", "./weka-preprocessors-autoweka.json"],
+	"components" : [ {
+	  	    "name" : "pipeline",
+	  	    "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "preprocessor",
+	  	    		"name": "AbstractPreprocessor"
+	  	    	}, { 
+	  	    		"id": "classifier",
+	  	    		"name": "BaseClassifier"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }]
+}
