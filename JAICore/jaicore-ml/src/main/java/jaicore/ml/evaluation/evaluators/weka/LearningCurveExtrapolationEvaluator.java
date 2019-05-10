@@ -42,7 +42,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
 	private int fullDatasetSize = -1;
-	private final boolean evaluateAccuracy = false; // otherwise error rate
+	private static final boolean EVALUATE_ACCURACY = false; // otherwise error rate
 	private final EventBus eventBus = new EventBus();
 
 	/**
@@ -96,12 +96,13 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 			this.eventBus.post(new LearningCurveExtrapolatedEvent(extrapolator));
 
 			int evaluationPoint = this.dataset.size();
+
 			/* Overwrite evaluation point if a value was provided, otherwise evaluate on the size of the given dataset */
 			if (this.fullDatasetSize != -1) {
 				evaluationPoint = this.fullDatasetSize;
 			}
 
-			Double val = this.evaluateAccuracy ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
+			Double val = EVALUATE_ACCURACY ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
 			this.logger.info("Estimate for performance on full dataset is {}", val);
 			return val;
 		} catch (AlgorithmException | InvalidAnchorPointsException e) {

@@ -1,5 +1,7 @@
 package de.upb.crc901.mlplan.test.cache;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -38,8 +40,10 @@ public class ReproducabilityTest {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new HASCOJacksonModule());
 
-		List<Instruction> trainHistory = mapper.readValue(trainJson, new TypeReference<List<Instruction>>(){});
-		List<Instruction> validationHistory = mapper.readValue(validationJson, new TypeReference<List<Instruction>>(){});
+		List<Instruction> trainHistory = mapper.readValue(trainJson, new TypeReference<List<Instruction>>() {
+		});
+		List<Instruction> validationHistory = mapper.readValue(validationJson, new TypeReference<List<Instruction>>() {
+		});
 		ComponentInstance composition = mapper.readValue(compositionJson, ComponentInstance.class);
 		ReproducibleInstances trainInstances = ReproducibleInstances.fromHistory(trainHistory, "4350e421cdc16404033ef1812ea38c01");
 		ReproducibleInstances validationInstances = ReproducibleInstances.fromHistory(validationHistory, "4350e421cdc16404033ef1812ea38c01");
@@ -53,5 +57,6 @@ public class ReproducabilityTest {
 		Classifier pipeline = factory.getComponentInstantiation(composition);
 		Double score = bridge.evaluateSplit(pipeline, trainInstances, validationInstances);
 		System.out.println(score);
+		assertNotNull(score);
 	}
 }

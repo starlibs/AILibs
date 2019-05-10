@@ -10,8 +10,9 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
@@ -26,7 +27,6 @@ import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
-import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
 import jaicore.ml.weka.dataset.splitter.MultilabelDatasetSplitter;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -81,28 +81,27 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			// Evaluation: test
 			this.logger.info("Now test...");
 
-			MLPlanBuilder builder = new MLPlanBuilder();
-			builder.withMekaDefaultConfiguration();
-			builder.withTimeoutForNodeEvaluation(nodeEvalTimeOut);
-			builder.withTimeoutForSingleSolutionEvaluation(nodeEvalTimeOut);
+			MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
+			builder.withNodeEvaluationTimeOut(nodeEvalTimeOut);
+			builder.withCandidateEvaluationTimeOut(nodeEvalTimeOut);
 
 			int metricIdToOptimize = Integer.parseInt(experimentDescription.get("metric_id"));
 			switch (metricIdToOptimize) {
 			case 8: // rank loss
-				builder.withSplitBasedClassifierEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(new RankLoss()));
+				builder.withPerformanceMeasure(new RankLoss());
 				break;
 			case 1: // hamming
-				builder.withSplitBasedClassifierEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(new HammingLoss()));
+				builder.withPerformanceMeasure(new HammingLoss());
 				break;
 			case 62: // F1Measure avgd by instances
-				builder.withSplitBasedClassifierEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(new F1MacroAverageDLoss()));
+				builder.withPerformanceMeasure(new F1MacroAverageDLoss());
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
-				builder.withSplitBasedClassifierEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(new F1MacroAverageLLoss()));
+				builder.withPerformanceMeasure(new F1MacroAverageLLoss());
 				break;
 			case 73: // fitness
 			default:
-				builder.withSplitBasedClassifierEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(new AutoMEKAGGPFitnessMeasureLoss()));
+				builder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 				break;
 			}
 
@@ -157,8 +156,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 					mlplan.cancel();
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new ExperimentEvaluationFailedException(e);
 		}
 	}

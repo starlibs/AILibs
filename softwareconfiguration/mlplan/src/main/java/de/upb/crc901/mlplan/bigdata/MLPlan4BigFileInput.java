@@ -16,8 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.core.events.ClassifierCreatedEvent;
 import hasco.model.ComponentInstance;
 import jaicore.basic.ILoggingCustomizable;
@@ -109,47 +110,13 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				throw new AlgorithmException(e, "Could not create a sub-sample of the given data.");
 			}
 
-			/* reduce dimensionality */
-			// Collection<List<String>> preprocessors = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
-			// Map<String, int[]> selectedAttributes = new HashMap<>();
-			// preprocessors.parallelStream().forEach(l -> {
-			// try {
-			// AttributeSelection p = new AttributeSelection();
-			// p.setSearch(ASSearch.forName(l.get(0), new String[] {}));
-			// p.setEvaluator(ASEvaluation.forName(l.get(1), new String[] {}));
-			// this.logger.info("Starting feature selection with {}", l);
-			// p.SelectAttributes(data);
-			// selectedAttributes.put(p.getClass().getName(), p.selectedAttributes());
-			// this.logger.info("Finished feature selection with {}. Selected {}/{} attributes", l, p.selectedAttributes().length, data.numAttributes());
-			// } catch (Exception e) {
-			// e.printStackTrace();
-			// }
-			// });
-			// selectedAttributes.entrySet().forEach(e -> {
-			// this.logger.info("Attributes selected by {}: {}", e.getKey(), e.getValue());
-			// });
-			// System.exit(0);
-
-			// try {
-			// AttributeSelection as = new AttributeSelection();
-			// as.setSearch(new GreedyStepwise());
-			// as.setEvaluator(new CfsSubsetEval());
-			// as.SelectAttributes(data);
-			// int featuresBefore = data.numAttributes();
-			// data = as.reduceDimensionality(data);
-			// this.logger.info("Reduced number of features from {} to {}. Dataset is now {}x{}", featuresBefore, data.numAttributes(), data.size(), data.numAttributes());
-			// }
-			// catch (Exception e) {
-			// throw new AlgorithmException(e, "Could not reduce dimensionality of down-sampled data");
-			// }
-
 			/* apply ML-Plan to reduced data */
-			MLPlanBuilder builder;
+			MLPlanWekaBuilder builder;
 			try {
-				builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
+				builder = AbstractMLPlanBuilder.forWeka();
 				builder.withLearningCurveExtrapolationEvaluation(this.anchorpointsTraining, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());
-				builder.withTimeoutForNodeEvaluation(new TimeOut(15, TimeUnit.MINUTES));
-				builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.MINUTES));
+				builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
+				builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
 				this.mlplan = new MLPlan(builder, data);
 				this.mlplan.setLoggerName(this.getLoggerName() + ".mlplan");
 				this.mlplan.registerListener(this);

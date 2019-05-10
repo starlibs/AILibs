@@ -3,6 +3,7 @@ dependencies {
 	compile project(":JAICore:jaicore-experiments")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-processes")
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
