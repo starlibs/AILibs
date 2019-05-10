@@ -85,7 +85,7 @@ public class WekaInstancesTester {
 			for (int j = 0; j <= numAttributes; j++) {
 				IAttributeValue<?> value = j < numAttributes ? inst.getAttributeValue(j, Object.class) : inst.getTargetValue(Object.class);
 				if (value instanceof NumericAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValue(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), (double)value.getValue(), 0.0);
+					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValue(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), (Double)value.getValue(), 0.0);
 				}
 				else if (value instanceof BooleanAttributeValue) {
 					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValue(j, Object.class) + " but should have " + (data.get(i).value(j) == 1.0), data.get(i).value(j) == 1.0, value.getValue());
