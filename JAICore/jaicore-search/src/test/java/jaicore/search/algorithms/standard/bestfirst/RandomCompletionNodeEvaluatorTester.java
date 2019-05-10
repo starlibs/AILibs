@@ -86,7 +86,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	}
 
 	@Test
-	public void testThatAScoreIsReturnedIfExactlyOneSampleSuccess() throws NodeEvaluationException, InterruptedException {
+	public void testThatAScoreIsReturnedIfExactlyOneSampleSucceeds() throws NodeEvaluationException, InterruptedException {
 		int numSamples = 1;
 		for (int seed = 0; seed < 1; seed++) {
 			for (int successfulInvocation = 1; successfulInvocation <= numSamples; successfulInvocation++) {
@@ -107,8 +107,11 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 					try {
 						Double score = ne.f(node);
 						seenScores.add(score);
-					} catch (NoSuchElementException e) {
+					} catch (NodeEvaluationException e) {
+						
 						/* we expect this to happen for some cases */
+						if (!(e.getCause() instanceof NoSuchElementException))
+							throw e;
 					}
 				}
 				assertEquals("There should be exactly one solution.", 1, seenSolutions.size());
@@ -121,7 +124,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double> se = new IObjectEvaluator<SearchGraphPath<QueenNode, String>, Double>() {
 
 			@Override
-			public Double evaluate(final SearchGraphPath<QueenNode, String> solutionPath) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+			public Double evaluate(final SearchGraphPath<QueenNode, String> solutionPath) throws InterruptedException, ObjectEvaluationFailedException {
 				return oe.evaluate(solutionPath);
 			}
 		};

@@ -19,41 +19,45 @@ public class WekaCompatibleInstancesImpl extends SimpleLabeledInstancesImpl {
 
 	private final List<String> declaredClasses;
 
-	public WekaCompatibleInstancesImpl(List<String> declaredClasses) {
+	public WekaCompatibleInstancesImpl(final List<String> declaredClasses) {
 		this.declaredClasses = new ArrayList<>(declaredClasses);
 	}
-	
-	public WekaCompatibleInstancesImpl(String json) throws IOException {
+
+	public WekaCompatibleInstancesImpl(final String json) throws IOException {
 		this (new ObjectMapper().readTree(json));
 	}
 
-	public WekaCompatibleInstancesImpl(JsonNode jsonNode) {
-		if (!jsonNode.has("declaredclasses"))
+	public WekaCompatibleInstancesImpl(final JsonNode jsonNode) {
+		if (!jsonNode.has("declaredclasses")) {
 			throw new IllegalArgumentException("Given JSON serialization does not specify the declared classes, which is required for WEKA compatibility.");
+		}
 		JsonNode declaredClasses = jsonNode.get("declaredclasses");
-		if (!declaredClasses.isArray())
+		if (!declaredClasses.isArray()) {
 			throw new IllegalArgumentException("Class declaration in given JSON is not an array, which is required for WEKA compatibility.");
+		}
 		this.declaredClasses = new ArrayList<>();
 		for (JsonNode c : jsonNode.get("declaredclasses")) {
 			this.declaredClasses.add(c.asText());
 		}
-		addAllFromJson(jsonNode);
+		this.addAllFromJson(jsonNode);
 	}
 
-	public WekaCompatibleInstancesImpl(File jsonFile) throws IOException {
+	public WekaCompatibleInstancesImpl(final File jsonFile) throws IOException {
 		this (FileUtil.readFileAsString(jsonFile));
 	}
 
-	public boolean add(LabeledInstance<String> i) {
-		if (!declaredClasses.contains(i.getLabel()))
-			throw new IllegalArgumentException("Instance with label " + i.getLabel() + " cannot be inserted in a dataset with declared labels " + declaredClasses);
+	@Override
+	public boolean add(final LabeledInstance<String> i) {
+		if (!this.declaredClasses.contains(i.getLabel())) {
+			throw new IllegalArgumentException("Instance with label " + i.getLabel() + " cannot be inserted in a dataset with declared labels " + this.declaredClasses);
+		}
 		return super.add(i);
 	}
 
 	public List<String> getDeclaredClasses() {
-		return Collections.unmodifiableList(declaredClasses);
+		return Collections.unmodifiableList(this.declaredClasses);
 	}
-	
+
 	@Override
 	public String toJson() {
 		String json = super.toJson();

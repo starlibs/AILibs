@@ -36,7 +36,7 @@ public class OpenMLHelper {
 	private static final String DATASET_INDEX = "resources/datasets";
 
 	private static final String API_KEY = "resources/apikey.txt";
-	
+
 	private static String apiKey;
 
 	public static List<Integer> getDataSetsFromIndex() throws IOException {
@@ -53,19 +53,7 @@ public class OpenMLHelper {
 		return dataSets;
 	}
 
-	/**
-	 * Downloads the data set with the given id and returns the Instances file for
-	 * it. Will save the {@link org.openml.apiconnector.xml.DataSetDescription} and
-	 * the Instances to the location specified in the
-	 * {@link org.openml.apiconnector.settings.Settings} Class.
-	 * 
-	 * @param dataId
-	 * @return
-	 * @throws IOException if something goes wrong while loading Instances from openml
-	 */
-	public static Instances getInstancesById(int dataId) throws IOException {
-		Instances dataset = null;
-
+	public static DataSource getDataSourceById(final int dataId) throws IOException {
 		if (API_KEY == null) {
 			try (BufferedReader reader = Files.newBufferedReader(Paths.get(API_KEY), StandardCharsets.UTF_8)) {
 				apiKey = reader.readLine();
@@ -80,9 +68,30 @@ public class OpenMLHelper {
 			DataSetDescription description = client.dataGet(dataId);
 			File file = description.getDataset(OpenMLHelper.apiKey);
 			// Instances convert
-			DataSource source = new DataSource(file.getCanonicalPath());
+			return new DataSource(file.getCanonicalPath());
+		} catch (Exception e) {
+			// These are IOExceptions anyways in the extended sense of this method
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Downloads the data set with the given id and returns the Instances file for
+	 * it. Will save the {@link org.openml.apiconnector.xml.DataSetDescription} and
+	 * the Instances to the location specified in the
+	 * {@link org.openml.apiconnector.settings.Settings} Class.
+	 *
+	 * @param dataId
+	 * @return
+	 * @throws IOException if something goes wrong while loading Instances from openml
+	 */
+	public static Instances getInstancesById(final int dataId) throws IOException {
+		Instances dataset = null;
+		try {
+			OpenmlConnector client = new OpenmlConnector();
+			DataSetDescription description = client.dataGet(dataId);
+			DataSource source = getDataSourceById(dataId);
 			dataset = source.getDataSet();
-			dataset.setClassIndex(dataset.numAttributes() - 1);
 			Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
 			dataset.setClassIndex(targetAttribute.index());
 		} catch (Exception e) {
@@ -95,12 +104,12 @@ public class OpenMLHelper {
 	/**
 	 * Creates a list of data sets by id in a file with caps for the maximum of
 	 * features and instances. Caps ignored if set to values <= 0.
-	 * 
+	 *
 	 * @param maxNumFeatures
 	 * @param maxNumInstances
 	 * @throws Exception
 	 */
-	public static void createDataSetIndex(int maxNumFeatures, int maxNumInstances) throws Exception {
+	public static void createDataSetIndex(final int maxNumFeatures, final int maxNumInstances) throws Exception {
 		// For statistics
 		int unfiltered;
 		int filteredBNG = 0;
@@ -198,8 +207,8 @@ public class OpenMLHelper {
 		System.out.println("Numeric target: " + filteredNumeric);
 		System.out.println("Fit for analysis: " + fitForAnalysis);
 	}
-	
-	public static void main (String[] args) {
+
+	public static void main (final String[] args) {
 		try {
 			createDataSetIndex(-1, -1);
 		} catch (Exception e) {
@@ -208,7 +217,7 @@ public class OpenMLHelper {
 		}
 	}
 
-	public static void setApiKey(String apiKey) {
+	public static void setApiKey(final String apiKey) {
 		OpenMLHelper.apiKey = apiKey;
 	}
 

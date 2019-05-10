@@ -55,6 +55,8 @@ public class Graph<T> {
 		Node n = new Node();
 		n.t = item;
 		this.nodes.put(item, n);
+		if (!this.hasItem(n.t))
+			throw new IllegalStateException("Just added node " + item + " does not respond positively on a call to hasItem");
 	}
 
 	public Set<T> getItems() {
@@ -236,4 +238,23 @@ public class Graph<T> {
 		return sb.toString();
 	}
 
+	public boolean isGraphSane() {
+
+		/* check that all nodes are contained */
+		boolean allNodesContained = this.nodes.keySet().stream().allMatch(this::hasItem);
+		if (!allNodesContained) {
+			assert allNodesContained : "Not every node n in the node map have positive responses for a call of hasItem(n)";
+			return false;
+		}
+
+		/* check that all successors are contained */
+		boolean allSuccessorsContained = this.nodes.keySet().stream().allMatch(n -> this.getSuccessors(n).stream().allMatch(this::hasItem));
+		if (!allSuccessorsContained) {
+			assert allSuccessorsContained : "There is a node in the graph such that not every successor n of it has a positive response for a call of hasItem(n)";
+			return false;
+		}
+
+		/* check that all predecessors are contained */
+		return true;
+	}
 }

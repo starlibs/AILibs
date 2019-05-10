@@ -5,21 +5,31 @@ import java.util.List;
 
 import jaicore.basic.aggregate.IAggregateFunction;
 
-public abstract class ADecomposableMeasure<INPUT, OUTPUT> implements IMeasure<INPUT, OUTPUT> {
+/**
+ * A measure that is aggregated from e.g. instance-wise computations of the respective measure and which is then aggregated, e.g. taking the mean.
+ *
+ * @author mwever
+ *
+ * @param <I> The type of the inputs.
+ * @param <O> The type of the measurement result.
+ */
+
+public abstract class ADecomposableMeasure<I, O> implements IMeasure<I, O> {
 
 	@Override
-	public List<OUTPUT> calculateMeasure(List<INPUT> actual, List<INPUT> expected) {
-		int actualSize = actual.size();
-		assert actualSize == expected.size() : "Observing " + actualSize + " actual values and " + expected.size() + " expected values, but the two vectors must coincide in length!";
-		List<OUTPUT> deviations = new ArrayList<>(actualSize);
-		for (int i = 0; i < actualSize; i++) {
-			deviations.add(calculateMeasure(actual.get(i), expected.get(i)));
+	public List<O> calculateMeasure(final List<I> actual, final List<I> expected) {
+		if (expected.size() != actual.size()) {
+			throw new IllegalArgumentException("Actual and expected valued need to be of the same size.");
+		}
+		List<O> deviations = new ArrayList<>(actual.size());
+		for (int i = 0; i < actual.size(); i++) {
+			deviations.add(this.calculateMeasure(actual.get(i), expected.get(i)));
 		}
 		return deviations;
 	}
 
 	@Override
-	public OUTPUT calculateMeasure(List<INPUT> actual, List<INPUT> expected, IAggregateFunction<OUTPUT> aggregateFunction) {
-		return aggregateFunction.aggregate(calculateMeasure(actual, expected));
+	public O calculateMeasure(final List<I> actual, final List<I> expected, final IAggregateFunction<O> aggregateFunction) {
+		return aggregateFunction.aggregate(this.calculateMeasure(actual, expected));
 	}
 }

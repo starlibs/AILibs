@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.Cancelable;
+import jaicore.interrupt.InterruptionTimerTask;
 
 public class CancellationTimerTask extends NamedTimerTask {
 	private static final Logger logger = LoggerFactory.getLogger(InterruptionTimerTask.class);

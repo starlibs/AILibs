@@ -45,7 +45,7 @@ public class CVEvaluator implements IClassifierEvaluator {
 				c.buildClassifier(train);
 			}
 			catch (Exception e) {
-				throw new ObjectEvaluationFailedException(e, "Could not train classifier c");
+				throw new ObjectEvaluationFailedException("Could not train classifier c", e);
 			}
 			double score = evaluator.calculateAvgMeasure(actual, predicted);
 			logger.info("Score for evaluation of {} with split #{}/{}: {}", c, i + 1, folds, score);

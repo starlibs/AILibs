@@ -864,7 +864,7 @@
     } ],
     "dependencies" : [ ]
   }, {
-    "name" : "weka.classifiers.meta.RandomSubspace",
+    "name" : "weka.classifiers.meta.RandomSubSpace",
     "requiredInterface" : [ ],
     "providedInterface" : [ "AbstractClassifier", "BaseClassifier" ],
     "parameter" : [ {

@@ -10,10 +10,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
-import jaicore.basic.algorithm.events.AlgorithmCanceledEvent;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmInterruptedEvent;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.graph.TreeNode;
 import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
@@ -43,6 +44,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	/* communication */
 	protected TreeNode<T> traversalTree;
 	protected Collection<TreeNode<T>> expanded = new HashSet<>();
+	protected Collection<TreeNode<T>> exhausted = new HashSet<>();
 
 	/* graph construction helpers */
 	protected final SingleRootGenerator<T> rootGenerator;
@@ -51,13 +53,12 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	protected final PathGoalTester<T> pathGoalTester;
 	protected final NodeGoalTester<T> nodeGoalTester;
 
-	/* graph travesal helpers */
+	/* graph traversal helpers */
 	protected final Comparator<T> heuristic;
 
 	/* algorithm state */
-	private int maxK = 1;
-	private int currentK = 1;
-	private boolean probeHasExpandedNode = false;
+	private int maxK = 0;
+	private int currentK = 0;
 
 	public LimitedDiscrepancySearch(final GraphSearchWithNodeRecommenderInput<T, A> problemInput) {
 		super(problemInput);
@@ -67,7 +68,6 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		if (this.checkGoalPropertyOnEntirePath) {
 			this.nodeGoalTester = null;
 			this.pathGoalTester = (PathGoalTester<T>) this.getInput().getGraphGenerator().getGoalTester();
-			;
 		} else {
 			this.nodeGoalTester = (NodeGoalTester<T>) this.getInput().getGraphGenerator().getGoalTester();
 			this.pathGoalTester = null;
@@ -76,40 +76,51 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() {
-		switch (this.getState()) {
-		case created: {
-			this.traversalTree = this.newNode(null, this.rootGenerator.getRoot());
-			this.post(new GraphInitializedEvent<>(getId(), this.traversalTree));
-			return this.activate();
-		}
-		case active: {
-			try {
-				AlgorithmEvent event;
-				event = this.ldsProbe(this.traversalTree);
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		this.registerActiveThread();
+		try {
+			switch (this.getState()) {
+			case created:
+				this.traversalTree = this.newNode(null, this.rootGenerator.getRoot());
+				this.post(new GraphInitializedEvent<>(this.getId(), this.traversalTree));
+				return this.activate();
+
+			case active:
+				this.currentK = this.maxK;
+				AlgorithmEvent event = this.ldsProbe(this.traversalTree);
 				if (event instanceof NoMoreNodesOnLevelEvent) {
-					if (!this.probeHasExpandedNode) {
-						this.logger.info("Probe process has not expanded any node, finishing alogrithm");
-						return terminate();
-					} else {
-						this.logger.info("Probe process has not more nodes to be considered, restarting with augmented k {}", this.maxK + 1);
+					if (this.currentK == 0) { // if all deviations have been used, increase number of maximum deviations
+						this.logger.info("Probe process has no more nodes to be considered, restarting with augmented k {}", this.maxK + 1);
 						this.maxK++;
-						this.currentK = this.maxK;
-						this.probeHasExpandedNode = false;
 						return event;
+					}
+					else {
+						return this.terminate(); // otherwise, terminate (allowing for more deviations will not yield more results)
 					}
 				} else {
 					this.logger.info("Returning event {}", event);
+					this.post(event);
 					return event;
 				}
-			} catch (InterruptedException e) {
-				return new AlgorithmInterruptedEvent(getId());
-			} catch (Exception e) {
-				throw new RuntimeException(e);
+			default:
+				throw new IllegalStateException("The algorithm cannot do anything in state " + this.getState());
 			}
 		}
-		default:
-			throw new IllegalStateException("The algorithm cannot do anything in state " + this.getState());
+		finally {
+			this.unregisterActiveThread();
+		}
+	}
+
+	private void updateExhaustMap(final TreeNode<T> node) {
+		if (node == null) {
+			return;
+		}
+		if (this.exhausted.contains(node)) {
+			this.updateExhaustMap(node.getParent());
+		}
+		if (this.exhausted.containsAll(node.getChildren())) {
+			this.exhausted.add(node);
+			this.updateExhaustMap(node.getParent());
 		}
 	}
 
@@ -119,54 +130,71 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	 * @param node
 	 * @param k
 	 * @return
+	 * @throws InterruptedException
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws AlgorithmTimeoutedException
+	 * @throws AlgorithmException
 	 */
-	private AlgorithmEvent ldsProbe(final TreeNode<T> node) throws Exception {
-		this.logger.info("Probing under node {} with k = {}", node.getValue(), this.currentK);
+	private AlgorithmEvent ldsProbe(final TreeNode<T> node) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+		this.logger.debug("Probing under node {} with k = {}. Exhausted: {}", node.getValue(), this.currentK, this.exhausted.contains(node));
 
 		/* return solution event if this is a solution node */
 		if (this.nodeGoalTester.isGoal(node.getValue())) {
+			this.updateExhaustMap(node);
 			List<T> path = node.getValuesOnPathFromRoot();
 			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, null, null);
-			updateBestSeenSolution(solution);
-			return new ASolutionCandidateFoundEvent<>(getId(), solution);
+			this.updateBestSeenSolution(solution);
+			this.logger.debug("Found solution {}.", node.getValue());
+			return new ASolutionCandidateFoundEvent<>(this.getId(), solution);
 		}
 
 		/* if this node has not been expanded, compute successors and the priorities among them and attach them to search graph */
 		if (!this.expanded.contains(node)) {
 			this.expanded.add(node);
-			this.probeHasExpandedNode = true;
-			Collection<NodeExpansionDescription<T, A>> succ = this.successorGenerator.generateSuccessors(node.getValue());
+			this.logger.debug("Starting successor generation of {}", node.getValue());
+			long start = System.currentTimeMillis();
+			Collection<NodeExpansionDescription<T, A>> succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()), "Successor generation" , true);
 			if (succ == null || succ.isEmpty()) {
-				return new NoMoreNodesOnLevelEvent(getId());
+				this.logger.debug("No successors were generated.");
+				return new NoMoreNodesOnLevelEvent(this.getId());
 			}
+			this.logger.debug("Computed {} successors in {}ms. Attaching the nodes to the local model.", succ.size(), System.currentTimeMillis() - start);
 			List<NodeExpansionDescription<T, A>> prioSucc = succ.stream().sorted((d1, d2) -> this.heuristic.compare(d1.getTo(), d2.getTo())).collect(Collectors.toList());
+			this.checkAndConductTermination();
 			List<TreeNode<T>> generatedNodes = new ArrayList<>();
+			long lastCheck = System.currentTimeMillis();
 			for (NodeExpansionDescription<T, A> successorDescription : prioSucc) {
-				if (Thread.currentThread().isInterrupted()) {
-					this.cancel();
-					throw new InterruptedException("Thread that executes LDS has been interrupted. The LDS has been canceled.");
-				}
-				if (this.isCanceled()) {
-					return new AlgorithmCanceledEvent(getId());
+				if (System.currentTimeMillis() - lastCheck > 10) {
+					this.checkAndConductTermination();
+					lastCheck = System.currentTimeMillis();
 				}
 				TreeNode<T> newNode = this.newNode(node, successorDescription.getTo());
 				generatedNodes.add(newNode);
 			}
+			this.logger.debug("Local model updated.");
+			this.checkAndConductTermination();
 		} else {
 			this.logger.info("Not expanding node {} again.", node.getValue());
 		}
 		List<TreeNode<T>> children = node.getChildren();
 		if (children.isEmpty()) {
-			return new NoMoreNodesOnLevelEvent(getId());
+			return new NoMoreNodesOnLevelEvent(this.getId());
 		}
 
-		/* otherwise, deviate from the heuristic if this brings a solution */
-		/* if no more discrepancies are allowed, keep searching under the first child */
-		if (this.currentK > 0 && children.size() > 1) {
-			this.currentK--;
-			return this.ldsProbe(children.get(1));
+		/* if no deviation is allowed, return the probe for the first child (unless that child is already exhausted) */
+		if (this.currentK == 0 || children.size() == 1) {
+			boolean onlyAdmissibleChildExhausted = this.exhausted.contains(children.get(0));
+			this.logger.debug("No deviation allowed or only one child node. Probing this child (if not, the reason is that it is exhausted already): {}", !onlyAdmissibleChildExhausted);
+			return !onlyAdmissibleChildExhausted ? this.ldsProbe(children.get(0)) : new NoMoreNodesOnLevelEvent(this.getId());
 		}
-		return this.ldsProbe(children.get(0));
+
+		/* deviate from the heuristic. If no more discrepancies are allowed, keep searching under the first child unless that child has been exhausted */
+		this.currentK--;
+		this.logger.debug("Deviating from heuristic. Decreased current k to {}", this.currentK);
+		if (this.exhausted.contains(children.get(1))) {
+			return new NoMoreNodesOnLevelEvent(this.getId());
+		}
+		return this.ldsProbe(children.get(1));
 	}
 
 	protected synchronized TreeNode<T> newNode(final TreeNode<T> parent, final T newNode) {
@@ -177,7 +205,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		/* send events for this new node */
 		if (parent != null) {
 			boolean isGoal = this.nodeGoalTester.isGoal(newNode);
-			this.post(new NodeAddedEvent<TreeNode<T>>(getId(), parent, newTree, "or_" + (isGoal ? "solution" : "created")));
+			this.post(new NodeAddedEvent<TreeNode<T>>(this.getId(), parent, newTree, "or_" + (isGoal ? "solution" : "created")));
 		}
 		return newTree;
 	}

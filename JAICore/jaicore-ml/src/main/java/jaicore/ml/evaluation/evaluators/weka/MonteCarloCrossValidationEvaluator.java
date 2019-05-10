@@ -8,14 +8,17 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.WekaUtil;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
+import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 /**
  * A classifier evaluator that can perform a (monte-carlo)cross-validation on
  * the given dataset. Thereby, it uses the
- * {@link AbstractEvaluatorMeasureBridge} to evaluate the classifier on a random
+ * {@link AbstractSplitBasedClassifierEvaluator} to evaluate the classifier on a random
  * split of the dataset.
  *
  * @author fmohr, joshua
@@ -25,21 +28,33 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 
 	private Logger logger = LoggerFactory.getLogger(MonteCarloCrossValidationEvaluator.class);
 	private boolean canceled = false;
+	private final IDatasetSplitter datasetSplitter;
 	private final int repeats;
 	private final Instances data;
 	private final double trainingPortion;
 	private final long seed;
 
 	/* Can either compute the loss or cache it */
-	private final AbstractEvaluatorMeasureBridge<Double, Double> bridge;
+	private final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator;
 
-	public MonteCarloCrossValidationEvaluator(final AbstractEvaluatorMeasureBridge<Double, Double> bridge, final int repeats, final Instances data, final double trainingPortion, final long seed) {
+	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion, final long seed) {
 		super();
+		if (data == null) {
+			throw new IllegalArgumentException("Cannot work with NULL data");
+		}
+		if (splitBasedEvaluator == null) {
+			throw new IllegalArgumentException("Cannot work with NULL split based evaluator");
+		}
+		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
-		this.bridge = bridge;
+		this.splitBasedEvaluator = splitBasedEvaluator;
 		this.data = data;
 		this.trainingPortion = trainingPortion;
 		this.seed = seed;
+	}
+
+	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final int repeats, final Instances data, final double trainingPortion, final long seed) {
+		this (splitBasedEvaluator, new MulticlassClassStratifiedSplitter(), repeats, data, trainingPortion, seed);
 	}
 
 	public void cancel() {
@@ -59,32 +74,31 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 
 		long startTimestamp = System.currentTimeMillis();
 		/* perform random stratified split */
-		this.logger.info("Starting evaluation of {}", pl);
-		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
+		this.logger.info("Starting MMCV evaluation of {} (Description: {})", pl.getClass().getName(), pl);
+		for (int i = 0; i < this.repeats && !this.canceled; i++) {
 			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
-			List<Instances> split = WekaUtil.getStratifiedSplit(this.data, this.seed + i, this.trainingPortion);
+			if (Thread.interrupted()) { // clear the interrupted field. This is Java a general convention when an InterruptedException is thrown (see Java documentation for details)
+				this.logger.info("MCCV has been interrupted, leaving MCCV.");
+				throw new InterruptedException("MCCV has been interrupted.");
+			}
+			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 			try {
-				double score = this.bridge.evaluateSplit(pl, split.get(0), split.get(1));
+				double score = this.splitBasedEvaluator.evaluateSplit(pl, split.get(0), split.get(1));
 				this.logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl, i + 1, this.repeats, score, (System.currentTimeMillis() - startTimestamp));
 				stats.addValue(score);
 			} catch (InterruptedException e) {
 				throw e;
 			} catch (Exception e) {
-				throw new ObjectEvaluationFailedException(e, "Could not evaluate classifier!");
+				throw new ObjectEvaluationFailedException("Could not evaluate classifier!", e);
 			}
 		}
-		if (Thread.currentThread().isInterrupted()) {
-			Thread.interrupted(); // clear the interrupted field. This is Java a general convention when an InterruptedException is thrown (see Java documentation for details)
-			throw new InterruptedException("MCCV has been interrupted");
-		}
 		Double score = stats.getMean();
-
 		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl, (System.currentTimeMillis() - startTimestamp));
 		return score;
 	}
 
-	public AbstractEvaluatorMeasureBridge<Double, Double> getBridge() {
-		return this.bridge;
+	public ISplitBasedClassifierEvaluator<Double> getBridge() {
+		return this.splitBasedEvaluator;
 	}
 
 	@Override

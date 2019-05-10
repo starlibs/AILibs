@@ -2,13 +2,13 @@ package jaicore.search.testproblems.enhancedttsp;
 
 import it.unimi.dsi.fastutil.shorts.ShortList;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
+import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.testproblems.enhancedttsp.EnhancedTTSP;
 import jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 
 public class EnhancedTTSPToGraphSearchReducer
-implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>> {
+implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, SearchGraphPath<EnhancedTTSPNode, String>> {
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> encodeProblem(final EnhancedTTSP problem) {
@@ -16,9 +16,8 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 	}
 
 	@Override
-	public ShortList decodeSolution(final EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double> solution) {
+	public ShortList decodeSolution(final SearchGraphPath<EnhancedTTSPNode, String> solution) {
 		ShortList tour = solution.getNodes().get(solution.getNodes().size() - 1).getCurTour();
-		tour.removeShort(tour.size() - 1); // remove trailing 0
-		return tour;
+		return tour.subList(0, tour.size() - 1); // remove trailing 0
 	}
 }

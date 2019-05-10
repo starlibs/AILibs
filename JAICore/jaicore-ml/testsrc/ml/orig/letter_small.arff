@@ -1,0 +1,201 @@
+% 1. TITLE: 
+% 	Letter Image Recognition Data 
+% 
+%    The objective is to identify each of a large number of black-and-white
+%    rectangular pixel displays as one of the 26 capital letters in the English
+%    alphabet.  The character images were based on 20 different fonts and each
+%    letter within these 20 fonts was randomly distorted to produce a file of
+%    20,000 unique stimuli.  Each stimulus was converted into 16 primitive
+%    numerical attributes (statistical moments and edge counts) which were then
+%    scaled to fit into a range of integer values from 0 through 15.  We
+%    typically train on the first 16000 items and then use the resulting model
+%    to predict the letter category for the remaining 4000.  See the article
+%    cited above for more details.
+% 
+% 2.USE IN STATLOG
+% 	2.1 Testing Mode
+% 		Train and Test
+% 
+% 	2.2 Special PreProcessing
+% 		No
+% 	
+% 	2.3 Test Results
+% 				Error Rate 	TIME
+% 		Algorithm	Train	Test	Train	Test
+% 		--------------------------------------------	
+% 		Alloc80		0.065	0.064	39575	?
+% 		KNN		0	0.068	15	2135
+% 		LVQ		0.057	0.079	1487	48
+% 		QuaDisc		0.101	0.113	3736	1223
+% 		Cn2		0.021	0.115	40458	52
+% 		BayTree		0.015	0.124	276	7
+% 		NewId		0	0.128	1056	2
+% 		IndCart		0.010	0.130	1098	1020
+% 		C4.5		0.042	0.132	309	292
+% 		Dipol92		0.167	0.176	1303	80
+% 		Radial		0.220	0.233	?	?
+% 		LogDisc		0.234	0.234	5062	39
+% 		Ac2		0	0.245	2529	92
+% 		Castle		0.237	0.245	9455	2933	
+% 		Kohonen		0.218	0.252	?	?
+% 		Cal5		0.158	0.253	1033	8
+% 		Smart		0.287	0.295	400919	184
+% 		Discrim		0.297	0.302	326	84
+% 		BackProp	0.323	0.327	277445	22
+% 		Bayes		0.516	0.529	75	18
+% 		Itrule		0.585	0.594	22325	69
+% 		Default		0.955	0.960	?	?
+% 		Cascade		1.0
+% 		Cart		1.000
+% 
+% 3. SOURCE Information and Paste Usage
+% 	3.1 Source
+%    		-- Creator: David J. Slate
+%      		-- Odesta Corporation; 1890 Maple Ave; Suite 115; Evanston, IL 60201
+%    		-- Donor: David J. Slate (dave@math.nwu.edu) (708) 491-3867   
+%    		-- Date: January, 1991
+% 
+% 	3.2 Past Usage:
+%    	-- P. W. Frey and D. J. Slate (Machine Learning Vol 6 #2 March 91):
+% 	"Letter Recognition Using Holland-style Adaptive Classifiers".
+% 
+%    	The research for this article investigated the ability of several
+% 	variations of Holland-style adaptive classifier systems to learn to
+% 	correctly guess the letter categories associated with vectors of 16
+% 	integer attributes extracted from raster scan images of the letters.
+% 	The best accuracy obtained was a little over 80%.  It would be
+% 	interesting to see how well other methods do with the same data.
+% 
+% 
+% 4. DATASET DESCRIPTION
+% 	Number of Instances: 
+% 		20000
+% 		Train	15000
+% 		Test	 5000
+% 
+% 	Number of Attributes: 
+% 		16 (numeric features)
+% 
+% 	NUMBER of CLASSES : 26 
+% 		capital letter	(26 values from A to Z)
+% 		
+% 		Class Distribution:
+%  		789 A	   766 B     736 C     805 D	 768 E	   775 F     773 G
+%  		734 H	   755 I     747 J     739 K	 761 L	   792 M     783 N
+%  		753 O	   803 P     783 Q     758 R	 748 S	   796 T     813 U
+%  		764 V	   752 W     787 X     786 Y	 734 Z
+% 
+% 	Attribute Information:
+% 
+% 	 	1.	x-box	horizontal position of box	(integer)
+% 	 	2.	y-box	vertical position of box	(integer)
+% 	 	3.	width	width of box			(integer)
+% 	 	4.	high 	height of box			(integer)
+% 	 	5.	onpix	total # on pixels		(integer)
+% 	 	6.	x-bar	mean x of on pixels in box	(integer)
+% 	 	7.	y-bar	mean y of on pixels in box	(integer)
+% 	 	8.	x2bar	mean x variance			(integer)
+% 		9.	y2bar	mean y variance			(integer)
+% 		10.	xybar	mean x y correlation		(integer)
+% 		11.	x2ybr	mean of x * x * y		(integer)
+% 		12.	xy2br	mean of x * y * y		(integer)
+% 		13.	x-ege	mean edge count left to right	(integer)
+% 		14.	xegvy	correlation of x-ege with y	(integer)
+% 		15.	y-ege	mean edge count bottom to top	(integer)
+% 		16.	yegvx	correlation of y-ege with x	(integer)
+%  
+% 		Missing Attribute Values: None
+% 
+% CONTACTS
+% 	statlog-adm@ncc.up.pt
+% 	bob@stams.strathclyde.ac.uk
+% 	
+% 
+% ================================================================================
+% 
+% Num Instances:     20000
+% Num Attributes:    17
+% Num Continuous:    16 (Int 16 / Real 0)
+% Num Nominal:       1
+% Missing values:    0 /  0.0%
+%
+%     name                      type enum ints real     missing    distinct  (1)
+%   1 'x-box'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   2 'y-box'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   3 'width'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   4 'high'                    Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   5 'onpix'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   6 'x-bar'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   7 'y-bar'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   8 'x2bar'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%   9 'y2bar'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  10 'xybar'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  11 'x2ybr'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  12 'xy2br'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  13 'x-ege'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  14 'xegvy'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  15 'y-ege'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  16 'yegvx'                   Int    0% 100%   0%     0 /  0%    16 /  0%   0% 
+%  17 'class'                   Enum   0% 100%   0%     0 /  0%    26 /  0%   0% 
+% 
+%
+%
+%
+%
+% Relabeled values in attribute 'class'
+%    From: 1                       To: A                   
+%    From: 2                       To: B                   
+%    From: 3                       To: C                   
+%    From: 4                       To: D                   
+%    From: 5                       To: E                   
+%    From: 6                       To: F                   
+%    From: 7                       To: G                   
+%    From: 8                       To: H                   
+%    From: 9                       To: I                   
+%    From: 10                      To: J                   
+%    From: 11                      To: K                   
+%    From: 12                      To: L                   
+%    From: 13                      To: M                   
+%    From: 14                      To: N                   
+%    From: 15                      To: O                   
+%    From: 16                      To: P                   
+%    From: 17                      To: Q                   
+%    From: 18                      To: R                   
+%    From: 19                      To: S                   
+%    From: 20                      To: T                   
+%    From: 21                      To: U                   
+%    From: 22                      To: V                   
+%    From: 23                      To: W                   
+%    From: 24                      To: X                   
+%    From: 25                      To: Y                   
+%    From: 26                      To: Z                   
+%
+@relation letter
+@attribute 'x-box' integer
+@attribute 'y-box' integer
+@attribute 'width' integer
+@attribute 'high' integer
+@attribute 'onpix' integer
+@attribute 'x-bar' integer
+@attribute 'y-bar' integer
+@attribute 'x2bar' integer
+@attribute 'y2bar' integer
+@attribute 'xybar' integer
+@attribute 'x2ybr' integer
+@attribute 'xy2br' integer
+@attribute 'x-ege' integer
+@attribute 'xegvy' integer
+@attribute 'y-ege' integer
+@attribute 'yegvx' integer
+@attribute 'class' { A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z}
+@data
+2,4,4,3,2,7,8,2,9,11,7,7,1,8,5,6,Z
+4,7,5,5,5,5,9,6,4,8,7,9,2,9,7,10,P
+7,10,8,7,4,8,8,5,10,11,2,8,2,5,5,10,S
+4,9,5,7,4,7,7,13,1,7,6,8,3,8,0,8,H
+6,7,8,5,4,7,6,3,7,10,7,9,3,8,3,7,H
+4,7,5,5,3,4,12,2,5,13,7,5,1,10,1,7,F
+6,10,8,8,4,7,8,2,5,10,7,8,5,8,1,8,N
+1,0,2,0,1,6,10,7,2,7,5,8,2,7,4,9,R
+5,9,7,6,7,7,7,2,4,9,8,9,7,6,2,8,M
+1,0,2,1,1,5,7,8,6,7,6,6,2,8,3,8,D

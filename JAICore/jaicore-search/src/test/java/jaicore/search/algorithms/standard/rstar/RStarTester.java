@@ -6,7 +6,7 @@ import java.util.concurrent.TimeoutException;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.search.algorithms.GraphSearchTester;
+import jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
@@ -17,7 +17,7 @@ import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvalua
  * @author fmohr
  *
  */
-public class RStarTester extends GraphSearchTester {
+public class RStarTester extends GraphSearchSolutionIteratorTester {
 
 	@Override
 	public <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
