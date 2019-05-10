@@ -23,9 +23,9 @@ import jaicore.experiments.IExperimentSetEvaluator;
 import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
-import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
 import jaicore.ml.weka.dataset.splitter.MultilabelDatasetSplitter;
 import meka.classifiers.multilabel.Evaluation;
@@ -94,7 +94,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				builder.withPerformanceMeasure(new HammingLoss());
 				break;
 			case 62: // F1Measure avgd by instances
-				builder.withPerformanceMeasure(new F1MacroAverageDLoss());
+				builder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
 				builder.withPerformanceMeasure(new F1MacroAverageLLoss());

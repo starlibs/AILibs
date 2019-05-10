@@ -19,6 +19,7 @@ import com.google.common.eventbus.Subscribe;
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import hasco.model.ComponentUtil;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import hasco.model.UnparametrizedComponentInstance;
@@ -142,7 +143,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			AlgorithmInitializedEvent event = this.activate();
 
 			/* analyze problem */
-			this.numUnparametrizedSolutions = Util.getNumberOfUnparametrizedCompositions(this.getInput().getComponents(), this.getInput().getRequiredInterface());
+			this.numUnparametrizedSolutions = ComponentUtil.getNumberOfUnparametrizedCompositions(this.getInput().getComponents(), this.getInput().getRequiredInterface());
 			this.logger.info("Search space contains {} unparametrized solutions.", this.numUnparametrizedSolutions);
 
 			/* setup search algorithm */
@@ -181,7 +182,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 							score = HASCO.this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
 						}
 					} catch (ObjectEvaluationFailedException e) {
-						throw new AlgorithmException(e, "Could not evaluator component instance");
+						throw new AlgorithmException(e, "Could not evaluate component instance");
 					}
 					HASCO.this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score,
 							HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);

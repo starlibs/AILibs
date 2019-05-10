@@ -299,6 +299,22 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	}
 
 	/**
+	 * Returns a value as a File object.
+	 * @param key Key for which the value shall be returned.
+	 * @return The value for the given key as a file.
+	 */
+	public File getAsFile(final String key) {
+		Object value = this.get(key);
+		if (value instanceof File) {
+			return (File) value;
+		} else if (value instanceof String) {
+			return new File((String) value);
+		} else {
+			throw new IllegalStateException("Cannot return value as a file if it is not of that type.");
+		}
+	}
+
+	/**
 	 * Reads a KVStore from a string description.
 	 *
 	 * @param kvDescription

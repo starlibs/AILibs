@@ -3,7 +3,7 @@ package jaicore.ml.core.evaluation.measure.multilabel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class F1MacroAverageL extends F1MacroAverageD {
+public class F1MacroAverageL extends InstanceWiseF1 {
 
 	@Override
 	public Double calculateMeasure(final double[] actual, final double[] expected) {

@@ -35,7 +35,7 @@ import weka.core.Instances;
  */
 public class ML2PlanARFFExample {
 
-	private static final boolean ACTIVATE_VISUALIZATION = false;
+	private static final boolean ACTIVATE_VISUALIZATION = true;
 
 	public static void main(final String[] args) throws Exception {
 		/* load data for segment dataset and create a train-test-split */
