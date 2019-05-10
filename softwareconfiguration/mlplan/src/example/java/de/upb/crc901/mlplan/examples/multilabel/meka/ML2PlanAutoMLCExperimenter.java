@@ -10,8 +10,9 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
@@ -26,8 +27,7 @@ import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
-import jaicore.ml.wekautil.dataset.splitter.MultilabelDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.MultilabelDatasetSplitter;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
@@ -55,8 +55,8 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
 		try {
-			logger.info("Experiment ID: {}", experimentEntry.getId());
-			logger.info("Experiment Description: {}", experimentEntry.getExperiment().getValuesOfKeyFields());
+			this.logger.info("Experiment ID: {}", experimentEntry.getId());
+			this.logger.info("Experiment Description: {}", experimentEntry.getExperiment().getValuesOfKeyFields());
 
 			Map<String, String> experimentDescription = experimentEntry.getExperiment().getValuesOfKeyFields();
 
@@ -76,33 +76,32 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			TimeOut nodeEvalTimeOut = new TimeOut(Integer.parseInt(experimentDescription.get("node_timeout")), TimeUnit.MINUTES);
 
 			// Prepare connection
-			ResultsDBConnection connection = new ResultsDBConnection("intermediate_measurements", "final_measurements", "ordered_metric", experimentEntry.getId(), "ML2Plan", adapter);
+			ResultsDBConnection connection = new ResultsDBConnection("intermediate_measurements", "final_measurements", "ordered_metric", experimentEntry.getId(), "ML2Plan", this.adapter);
 
 			// Evaluation: test
-			logger.info("Now test...");
+			this.logger.info("Now test...");
 
-			MLPlanBuilder builder = new MLPlanBuilder();
-			builder.withMekaDefaultConfiguration();
-			builder.withTimeoutForNodeEvaluation(nodeEvalTimeOut);
-			builder.withTimeoutForSingleSolutionEvaluation(nodeEvalTimeOut);
+			MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
+			builder.withNodeEvaluationTimeOut(nodeEvalTimeOut);
+			builder.withCandidateEvaluationTimeOut(nodeEvalTimeOut);
 
 			int metricIdToOptimize = Integer.parseInt(experimentDescription.get("metric_id"));
 			switch (metricIdToOptimize) {
 			case 8: // rank loss
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new RankLoss()));
+				builder.withPerformanceMeasure(new RankLoss());
 				break;
 			case 1: // hamming
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new HammingLoss()));
+				builder.withPerformanceMeasure(new HammingLoss());
 				break;
 			case 62: // F1Measure avgd by instances
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new F1MacroAverageDLoss()));
+				builder.withPerformanceMeasure(new F1MacroAverageDLoss());
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new F1MacroAverageLLoss()));
+				builder.withPerformanceMeasure(new F1MacroAverageLLoss());
 				break;
 			case 73: // fitness
 			default:
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss()));
+				builder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 				break;
 			}
 
@@ -121,7 +120,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				try {
 					mlplan.call();
 				} catch (AlgorithmTimeoutedException e) {
-					logger.warn("MLPlan got a delayed timeout exception", e);
+					this.logger.warn("MLPlan got a delayed timeout exception", e);
 				} finally {
 					classifier = (MultiLabelClassifier) mlplan.getSelectedClassifier();
 				}
@@ -130,35 +129,34 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 					throw new NullPointerException("No classifier was found by ML2Plan");
 				}
 
-				logger.info("Evaluate classifier...");
+				this.logger.info("Evaluate classifier...");
 				Result result = Evaluation.evaluateModel(classifier, train, test);
-				logger.info("Done evaluating Classifier.");
-				logger.info("Store results in DB...");
+				this.logger.info("Done evaluating Classifier.");
+				this.logger.info("Store results in DB...");
 				HashMap<String, Double> metrics = new HashMap<>();
 				ClassifierMetricGetter.getMultiLabelMetrics().forEach(metric -> {
 					try {
 						metrics.put(metric, ClassifierMetricGetter.getValueOfMultilabelClassifier(result, metric));
 					} catch (Exception e) {
-						logger.warn("Could not measure metric {} for final classifier choice.", e);
+						this.logger.warn("Could not measure metric {} for final classifier choice.", e);
 					}
 				});
 				connection.addFinalMeasurements(metrics);
-				logger.info("Stored results in DB.");
-				logger.info("Done with evaluation. Send job result.");
+				this.logger.info("Stored results in DB.");
+				this.logger.info("Done with evaluation. Send job result.");
 				Map<String, Object> results = new HashMap<>();
 				results.put("completed", true);
 				results.put("classifier_string", mlplan.getComponentInstanceOfSelectedClassifier() + "");
 				results.put("value", mlplan.getInternalValidationErrorOfSelectedClassifier());
 				processor.processResults(results);
 
-				logger.info("Evaluation task completed.");
+				this.logger.info("Evaluation task completed.");
 			} finally {
 				if (mlplan != null) {
 					mlplan.cancel();
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new ExperimentEvaluationFailedException(e);
 		}
 	}

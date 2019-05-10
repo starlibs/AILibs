@@ -22,10 +22,9 @@ public abstract class TimedComputation {
 	private static final Logger logger = LoggerFactory.getLogger(TimedComputation.class);
 
 	private TimedComputation() {
-		
 		/* no explicit instantiation allowed */
 	}
-	
+
 	public static <T> T compute(final Callable<T> callable, final long timeoutInMs, final String reasonToLogOnTimeout) throws ExecutionException, AlgorithmTimeoutedException, InterruptedException {
 
 		/* schedule a timer that will interrupt the current thread and execute the task */
@@ -50,9 +49,13 @@ public abstract class TimedComputation {
 		 * 3. the time elapsed since calling the Callable is lower than the timeout or exceeds it
 		 *
 		 */
-		int runtime = (int)(System.currentTimeMillis() - start);
-		int delay = runtime - (int)timeoutInMs;
-		logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed {}", runtime, delay, caughtException != null ? caughtException.getClass().getName() : output);
+		int runtime = (int) (System.currentTimeMillis() - start);
+		int delay = runtime - (int) timeoutInMs;
+		if (caughtException != null) {
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed exception: {}", runtime, delay, caughtException.getClass().getName());
+		} else {
+			logger.info("Timed computation has returned control after {}ms, i.e., with a delay of {}ms. Observed regular output return value: {}", runtime, delay, output);
+		}
 
 		/* now make sure that
 		 * a) the timeoutTriggered flag is true iff the TimerTask for the timeout has been executed
@@ -62,14 +65,14 @@ public abstract class TimedComputation {
 		synchronized (interrupter) {
 
 			/* if the timeout has been triggered (with caution) */
+			logger.debug("Checking for an interruption and resolving potential interrupts.");
 			if (interrupter.hasCurrentThreadBeenInterruptedWithReason(task)) {
-				logger.info("Interrupt is internal. Resolving interrupt.");
+				logger.info("Thread has been interrupted internally. Resolving the interrupt (this may throw an InterruptedException).");
 				timeoutTriggered = true;
 				Thread.interrupted(); // clear the interrupted field
 				try {
 					Interrupter.get().markInterruptOnCurrentThreadAsResolved(task);
-				}
-				catch (InterruptedException e) {
+				} catch (InterruptedException e) {
 					logger.debug("Re-interrupting current thread, because another interrupt has been open.");
 					Thread.currentThread().interrupt();
 				}
@@ -94,12 +97,10 @@ public abstract class TimedComputation {
 			if (timeoutTriggered) {
 				logger.info("Throwing TimeoutException");
 				throw new AlgorithmTimeoutedException(delay);
-			}
-			else if (caughtException instanceof InterruptedException) {
+			} else if (caughtException instanceof InterruptedException) {
 				logger.debug("Now re-throwing {}, which was caught in timed computation. Interrupt-flag is {}.", caughtException, Thread.currentThread().isInterrupted());
-				throw (InterruptedException)caughtException;
-			}
-			else {
+				throw (InterruptedException) caughtException;
+			} else {
 				logger.debug("Now re-throwing {}, which was caught in timed computation. Interrupt-flag is {}.", caughtException, Thread.currentThread().isInterrupted());
 				throw new ExecutionException(caughtException);
 			}

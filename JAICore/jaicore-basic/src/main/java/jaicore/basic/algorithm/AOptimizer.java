@@ -63,6 +63,18 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 		return false;
 	}
 
+	/**
+	 * Sets the best seen solution regardless the currently best solution.
+	 *
+	 * @param candidate
+	 * @return true iff the new solution has a higher score than the existing one
+	 */
+	protected boolean setBestSeenSolution(final O candidate) {
+		boolean isBetterThanCurrent = (this.bestSeenSolution == null || (candidate.getScore() != null && candidate.getScore().compareTo(this.bestSeenSolution.getScore()) < 0));
+		this.bestSeenSolution = candidate;
+		return isBetterThanCurrent;
+	}
+
 	@Override
 	public O nextSolutionCandidate() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		O candidate = super.nextSolutionCandidate();

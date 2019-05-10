@@ -1,26 +1,19 @@
 package de.upb.crc901.automl;
 
-import static org.junit.Assert.assertNotNull;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmCreationException;
 import jaicore.basic.algorithm.GeneralAlgorithmTester;
 import jaicore.basic.algorithm.IAlgorithm;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;

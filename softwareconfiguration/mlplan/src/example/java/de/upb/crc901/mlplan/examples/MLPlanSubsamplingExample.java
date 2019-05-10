@@ -7,8 +7,9 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
@@ -32,14 +33,13 @@ import weka.core.Instances;
 
 public class MLPlanSubsamplingExample {
 
-	public static void main(String[] args) throws Exception {
+	public static void main(final String[] args) throws Exception {
 
 		/* create a subsample of the input with 1000 datapoints */
 		File file = new File("testrsc/car.arff");
 		File sampleFile = new File("testrsc/car_sample.arff");
 		sampleFile.deleteOnExit();
-		AFileSamplingAlgorithm samplingAlgorithm = new StratifiedFileSampling(new Random(1l),
-				new ClassStratiFileAssigner(), file);
+		AFileSamplingAlgorithm samplingAlgorithm = new StratifiedFileSampling(new Random(1l), new ClassStratiFileAssigner(), file);
 		samplingAlgorithm.setSampleSize(1000);
 		samplingAlgorithm.setOutputFileName(sampleFile.getAbsolutePath());
 		samplingAlgorithm.call();
@@ -50,21 +50,18 @@ public class MLPlanSubsamplingExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration()
-				.withRandomCompletionBasedBestFirstSearch();
-		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(10, TimeUnit.SECONDS));
+		MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
+		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
+		builder.withTimeOut(new TimeOut(300, TimeUnit.SECONDS));
+		builder.withNumCpus(1);
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(1);
 
 		new JFXPanel();
-		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(),
-				new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())),
-				new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(),
-				new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+				new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
 		Platform.runLater(window);
 
 		try {
@@ -78,8 +75,7 @@ public class MLPlanSubsamplingExample {
 			/* evaluate solution produced by mlplan */
 			Evaluation eval = new Evaluation(split.get(0));
 			eval.evaluateModel(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + ((100 - eval.pctCorrect()) / 100f)
-					+ ". Internally believed error was " + mlplan.getInternalValidationErrorOfSelectedClassifier());
+			System.out.println("Error Rate of the solution produced by ML-Plan: " + ((100 - eval.pctCorrect()) / 100f) + ". Internally believed error was " + mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
 			System.out.println("Building the classifier failed: " + e.getMessage());
 		}

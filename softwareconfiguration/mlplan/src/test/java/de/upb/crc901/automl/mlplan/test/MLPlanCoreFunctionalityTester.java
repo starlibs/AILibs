@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.automl.AutoMLAlgorithmCoreFunctionalityTester;
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.IAlgorithm;
 import weka.classifiers.Classifier;
@@ -16,15 +16,15 @@ public class MLPlanCoreFunctionalityTester extends AutoMLAlgorithmCoreFunctional
 	@Override
 	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(final Instances data) {
 		try {
-			MLPlanBuilder builder = new MLPlanBuilder().withTinyTestConfiguration().withRandomCompletionBasedBestFirstSearch();
-			builder.withTimeoutForNodeEvaluation(new TimeOut(10, TimeUnit.SECONDS));
-			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.SECONDS));
+			AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka().withTinyWekaSearchSpace();
+			builder.withNodeEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
+			builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.SECONDS));
+			builder.withNumCpus(1);
+			builder.withTimeOut(new TimeOut(5, TimeUnit.SECONDS));
 			MLPlan mlplan = new MLPlan(builder, data);
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(0f);
 			mlplan.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
-			mlplan.setTimeout(5, TimeUnit.SECONDS);
-			mlplan.setNumCPUs(1);
 			return mlplan;
 		} catch (IOException e) {
 			e.printStackTrace();

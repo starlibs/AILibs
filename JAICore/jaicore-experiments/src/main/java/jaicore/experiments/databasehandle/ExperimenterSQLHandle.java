@@ -44,10 +44,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	private final Collection<ExperimentDBEntry> knownExperimentEntries = new HashSet<>();
 
 	private IExperimentSetConfig config;
-
-	private final List<String> fieldsForWhichToIgnoreTime = new ArrayList<>();
-	private final List<String> fieldsForWhichToIgnoreMemory = new ArrayList<>();
-
+	
 	public ExperimenterSQLHandle(final SQLAdapter adapter, final String tablename) {
 		super();
 		this.adapter = adapter;
@@ -77,48 +74,45 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	@Override
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
 		this.config = config;
-
-		/* set fields for which to ignore memory and time */
-		if (this.config.getFieldsForWhichToIgnoreMemory() != null) {
-			this.fieldsForWhichToIgnoreMemory.addAll(this.config.getFieldsForWhichToIgnoreMemory());
-		}
-		if (this.config.getFieldsForWhichToIgnoreTime() != null) {
-			this.fieldsForWhichToIgnoreTime.addAll(this.config.getFieldsForWhichToIgnoreTime());
-		}
-
-		/* creates a new table if not existent already */
-		StringBuilder sql = new StringBuilder();
+		
+		/* first create tables for complex keys */
+		
+		/* creates basic table creation statement */
+		StringBuilder sqlMainTable = new StringBuilder();
 		StringBuilder keyFields = new StringBuilder();
-		sql.append("CREATE TABLE IF NOT EXISTS `" + this.tablename + "` (");
-		sql.append("`" + FIELD_ID + "` int(10) NOT NULL AUTO_INCREMENT,");
+		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + this.tablename + "` (");
+		sqlMainTable.append("`" + FIELD_ID + "` int(10) NOT NULL AUTO_INCREMENT,");
 		for (String key : this.config.getKeyFields()) {
 			String shortKey = this.getDatabaseFieldnameForConfigEntry(key);
-			sql.append("`" + shortKey + "` VARCHAR(100) NOT NULL,");
+			sqlMainTable.append("`" + shortKey + "` VARCHAR(100) NOT NULL,");
 			keyFields.append("`" + shortKey + "`,");
 		}
-		sql.append("`" + FIELD_NUMCPUS + "` int(2) NOT NULL,");
-		sql.append("`" + FIELD_HOST + "` varchar(255) NOT NULL,");
-		sql.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
-		sql.append("`" + FIELD_TIME + "_start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
-
+		sqlMainTable.append("`" + FIELD_NUMCPUS + "` int(2) NOT NULL,");
+		sqlMainTable.append("`" + FIELD_HOST + "` varchar(255) NOT NULL,");
+		sqlMainTable.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
+		sqlMainTable.append("`" + FIELD_TIME + "_start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
+		
+		/* add columns for result fields */
 		for (String result : this.config.getResultFields()) {
-			sql.append("`" + result + "` VARCHAR(500) NULL,");
-			if (!this.fieldsForWhichToIgnoreTime.contains(result)) {
-				sql.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
+			sqlMainTable.append("`" + result + "` VARCHAR(500) NULL,");
+			if (this.config.getFieldsForWhichToIgnoreTime() == null || !this.config.getFieldsForWhichToIgnoreTime().contains(result)) {
+				sqlMainTable.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
 			}
-			if (!this.fieldsForWhichToIgnoreMemory.contains(result)) {
-				sql.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
+			if (config.getFieldsForWhichToIgnoreMemory() == null || !config.getFieldsForWhichToIgnoreMemory().contains(result)) {
+				sqlMainTable.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
 			}
 		}
-		sql.append("`exception` TEXT NULL,");
-		sql.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
-		sql.append("PRIMARY KEY (`" + FIELD_ID + "`)");
-		sql.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
-		sql.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
+		
+		/* exception field and keys */
+		sqlMainTable.append("`exception` TEXT NULL,");
+		sqlMainTable.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
+		sqlMainTable.append("PRIMARY KEY (`" + FIELD_ID + "`)");
+		sqlMainTable.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
+		sqlMainTable.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
 		try {
-			this.adapter.update(sql.toString(), new String[] {});
+			this.adapter.update(sqlMainTable.toString(), new String[] {});
 		} catch (SQLException e) {
-			logger.error("An SQL exception occured with the following query: {}", sql);
+			logger.error("An SQL exception occured with the following query: {}", sqlMainTable);
 			throw new ExperimentDBInteractionFailedException(e);
 		}
 	}
@@ -185,10 +179,10 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
 		for (String result : values.keySet()) {
 			if (this.config.getResultFields().contains(result)) {
-				if (!this.fieldsForWhichToIgnoreTime.contains(result)) {
+				if (this.config.getFieldsForWhichToIgnoreTime() == null || !this.config.getFieldsForWhichToIgnoreTime().contains(result)) {
 					valuesToWrite.put(result + "_" + FIELD_TIME, now);
 				}
-				if (!this.fieldsForWhichToIgnoreMemory.contains(result)) {
+				if (this.config.getFieldsForWhichToIgnoreMemory() == null || !this.config.getFieldsForWhichToIgnoreMemory().contains(result)) {
 					valuesToWrite.put(result + "_" + FIELD_MEMORY, memoryUsageInMB);
 				}
 			}

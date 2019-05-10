@@ -18,8 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
@@ -56,11 +57,11 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			L.error("Could not find or access config file {}", configFile, e);
 			System.exit(1);
 		}
-		experimentConfig = ConfigFactory.create(MLPlanWekaExperimenterConfig.class, props);
-		if (experimentConfig.getDatasetFolder() == null) {
+		this.experimentConfig = ConfigFactory.create(MLPlanWekaExperimenterConfig.class, props);
+		if (this.experimentConfig.getDatasetFolder() == null) {
 			throw new IllegalArgumentException("No dataset folder (datasetfolder) set in config.");
 		}
-		if (experimentConfig.evaluationsTable() == null) {
+		if (this.experimentConfig.evaluationsTable() == null) {
 			throw new IllegalArgumentException("No evaluations table (db.evalTable) set in config");
 		}
 	}
@@ -68,7 +69,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
 		try {
-			experimentID = experimentEntry.getId();
+			this.experimentID = experimentEntry.getId();
 			Map<String, String> experimentValues = experimentEntry.getExperiment().getValuesOfKeyFields();
 
 			if (!experimentValues.containsKey("dataset")) {
@@ -78,7 +79,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 				throw new IllegalArgumentException("\"" + EVALUATION_TIMEOUT_FIELD + "\" is not configured as a keyword in the experiment config");
 			}
 
-			File datasetFile = new File(experimentConfig.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
+			File datasetFile = new File(this.experimentConfig.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
 			L.info("Load dataset file: {}", datasetFile.getAbsolutePath());
 
 			Instances data = new Instances(new FileReader(datasetFile));
@@ -88,17 +89,15 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, seed, .7);
 
 			/* initialize ML-Plan with the same config file that has been used to specify the experiments */
-			MLPlanBuilder builder = new MLPlanBuilder();
-			builder.withAutoWEKAConfiguration();
-			builder.withRandomCompletionBasedBestFirstSearch();
-			builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
-			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
+			builder.withNodeEvaluationTimeOut(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			builder.withCandidateEvaluationTimeOut(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			builder.withTimeOut(new TimeOut(Integer.parseInt(experimentValues.get("timeout")), TimeUnit.SECONDS));
+			builder.withNumCpus(experimentEntry.getExperiment().getNumCPUs());
 
 			MLPlan mlplan = new MLPlan(builder, stratifiedSplit.get(0));
 			mlplan.setLoggerName("mlplan");
-			mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
 			mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
-			mlplan.setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
 			mlplan.registerListener(this);
 
 			L.info("Build mlplan classifier");
@@ -116,20 +115,19 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			results.put(CLASSIFIER_FIELD, WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
 			results.put(PREPROCESSOR_FIELD, ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors().toString());
 
-			writeFile("chosenModel." + experimentID + ".txt", results.get(PREPROCESSOR_FIELD) + "\n\n\n" + results.get(CLASSIFIER_FIELD));
-			writeFile("result." + experimentID + ".txt", "intern: " + mlplan.getInternalValidationErrorOfSelectedClassifier() + "\ntest:" + results.get("loss") + "");
+			writeFile("chosenModel." + this.experimentID + ".txt", results.get(PREPROCESSOR_FIELD) + "\n\n\n" + results.get(CLASSIFIER_FIELD));
+			writeFile("result." + this.experimentID + ".txt", "intern: " + mlplan.getInternalValidationErrorOfSelectedClassifier() + "\ntest:" + results.get("loss") + "");
 
 			processor.processResults(results);
 			L.info("Experiment done.");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new ExperimentEvaluationFailedException(e);
 		}
 	}
 
 	@Subscribe
 	public void rcvHASCOSolutionEvent(final HASCOSolutionEvent<Double> e) {
-		if (adapter != null) {
+		if (this.adapter != null) {
 			try {
 				String classifier = "";
 				String preprocessor = "";
@@ -140,12 +138,12 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 					classifier = e.getSolutionCandidate().getComponentInstance().toString();
 				}
 				Map<String, Object> eval = new HashMap<>();
-				eval.put("experiment_id", experimentID);
+				eval.put("experiment_id", this.experimentID);
 				eval.put(PREPROCESSOR_FIELD, preprocessor);
 				eval.put(CLASSIFIER_FIELD, classifier);
 				eval.put("errorRate", e.getScore());
 				eval.put("time_train", e.getSolutionCandidate().getTimeToEvaluateCandidate());
-				adapter.insert(experimentConfig.evaluationsTable(), eval);
+				this.adapter.insert(this.experimentConfig.evaluationsTable(), eval);
 			} catch (Exception e1) {
 				L.error("Could not store hasco solution in database", e1);
 			}

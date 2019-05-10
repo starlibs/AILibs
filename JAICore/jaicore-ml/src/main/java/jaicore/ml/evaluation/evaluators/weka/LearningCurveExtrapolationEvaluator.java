@@ -17,12 +17,12 @@ import weka.classifiers.Classifier;
 
 /**
  * Evaluates a classifier by predicting its learning curve with a few
- * anchorpoints. The evaluation result is the predicted accuracy for the
+ * anchorpoints. The evaluation result is the accuracy or the error rate (configurable) for the
  * complete dataset. Depending on the chosen anchorpoints this evaluation method
  * will be really fast, but can be inaccurate depending on the learning curve
  * extrapolation method, since it will only give a prediction of the accuracy
  * and does not measure it.
- * 
+ *
  * @author Lukas Brandt
  */
 public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator {
@@ -37,29 +37,25 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
 	private int fullDatasetSize = -1;
+	private static final boolean EVALUATE_ACCURACY = false; // otherwise error rate
 
 	/**
 	 * Create a classifier evaluator with learning curve extrapolation.
-	 * 
-	 * @param anchorpoints                         Anchorpoints for the learning
-	 *                                             curve extrapolation.
-	 * @param samplingAlgorithmFactory             Subsampling factory to create a
-	 *                                             subsampler for the samples at the
-	 *                                             given anchorpoints.
-	 * @param dataset                              Dataset to evaluate the
-	 *                                             classifier with.
+	 *
+	 * @param anchorpoints Anchorpoints for the learning
+	 *            curve extrapolation.
+	 * @param samplingAlgorithmFactory Subsampling factory to create a
+	 *            subsampler for the samples at the given anchorpoints.
+	 * @param dataset Dataset to evaluate the classifier with.
 	 * @param trainSplitForAnchorpointsMeasurement Ratio to split the subsamples at
-	 *                                             the anchorpoints into train and
-	 *                                             test.
-	 * @param extrapolationMethod                  Method to extrapolate a learning
-	 *                                             curve from the accuracy
-	 *                                             measurements at the anchorpoints.
-	 * @param seed                                 Random seed.
+	 *            the anchorpoints into train and test.
+	 * @param extrapolationMethod Method to extrapolate a learning
+	 *            curve from the accuracy
+	 *            measurements at the anchorpoints.
+	 * @param seed Random seed.
 	 */
-	public LearningCurveExtrapolationEvaluator(int[] anchorpoints,
-			ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
-			IDataset<? extends IInstance> dataset, double trainSplitForAnchorpointsMeasurement,
-			LearningCurveExtrapolationMethod extrapolationMethod, long seed) {
+	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory, final IDataset<? extends IInstance> dataset,
+			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -69,33 +65,32 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 		this.seed = seed;
 	}
 
-	public void setFullDatasetSize(int fullDatasetSize) {
+	public void setFullDatasetSize(final int fullDatasetSize) {
 		this.fullDatasetSize = fullDatasetSize;
 	}
 
+	/**
+	 * Computes the (estimated) measure of the classifier on the full dataset
+	 */
 	@Override
-	public Double evaluate(Classifier classifier)
-			throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
+
 		// Create the learning curve extrapolator with the given configuration.
-		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier,
-				dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed);
+		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed);
 
 		try {
-			// Create the extrapolator and calculate the accuracy the classifier would have
-			// if it was trained on the complete dataset.
+			/* Create the extrapolator and calculate the accuracy the classifier would have if it was trained on the complete dataset. */
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve(this.anchorpoints);
 
-			int evaluationPoint = dataset.size();
-			// Overwrite evaluation point if a value was provided, otherwise evaluate on the
-			// size of the given dataset
+			int evaluationPoint = this.dataset.size();
+			/* Overwrite evaluation point if a value was provided, otherwise evaluate on the size of the given dataset */
 			if (this.fullDatasetSize != -1) {
 				evaluationPoint = this.fullDatasetSize;
 			}
 
-			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
+			return this.EVALUATE_ACCURACY ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
 		} catch (AlgorithmException | InvalidAnchorPointsException e) {
-			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
-					e.getClass().getName(), e.getMessage());
+			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;
 		}
 	}

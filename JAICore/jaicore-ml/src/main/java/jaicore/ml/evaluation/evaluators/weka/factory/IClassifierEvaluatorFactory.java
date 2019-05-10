@@ -1,11 +1,10 @@
 package jaicore.ml.evaluation.evaluators.weka.factory;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
+import weka.core.Instances;
 
 public interface IClassifierEvaluatorFactory {
 
-	public IClassifierEvaluator getIClassifierEvaluator(IDataset<? extends IInstance> dataset, long seed);
+	public IClassifierEvaluator getIClassifierEvaluator(Instances dataset, long seed) throws ClassifierEvaluatorConstructionFailedException;
 
 }

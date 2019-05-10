@@ -7,6 +7,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
@@ -20,21 +22,27 @@ import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class InversePowerLawExtrapolationTester {
+	private static final Logger logger = LoggerFactory.getLogger(InversePowerLawExtrapolationTester.class);
 
 	@Test(expected = InvalidAnchorPointsException.class)
 	public void testExceptionForIncorrectAnchorpoints() throws Exception {
 		int[] xValues = new int[] { 1, 2, 3 };
-		LearningCurveExtrapolator<SimpleInstance> extrapolator = createExtrapolationMethod();
+		LearningCurveExtrapolator<SimpleInstance> extrapolator = this.createExtrapolationMethod();
 		extrapolator.extrapolateLearningCurve(xValues);
 	}
 
 	@Test
 	public void testInversePowerLawParameterCreation() throws Exception {
 		int[] xValues = new int[] { 8, 16, 64, 128 };
-		LearningCurveExtrapolator<SimpleInstance> extrapolator = createExtrapolationMethod();
+		LearningCurveExtrapolator<SimpleInstance> extrapolator = this.createExtrapolationMethod();
 		InversePowerLawLearningCurve curve = (InversePowerLawLearningCurve) extrapolator.extrapolateLearningCurve(xValues);
 		Assert.assertNotNull(curve);
-		Assert.assertTrue(curve.getCurveValue(256) > 0 && curve.getCurveValue(256) < 1);
+		for (int i = 5; i < 20; i++) {
+			int k = (int) Math.pow(2, i);
+			double val = curve.getCurveValue(k);
+			logger.info("Extrapolated learning curve value at {} is {}", k, val);
+			Assert.assertTrue(val > 0 && val < 1);
+		}
 	}
 
 	private LearningCurveExtrapolator<SimpleInstance> createExtrapolationMethod() throws Exception {

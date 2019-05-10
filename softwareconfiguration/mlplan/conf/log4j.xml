@@ -204,6 +204,10 @@
     <level value="info" />
   </logger>
   
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
     <level value="info" />
   </logger>

@@ -76,8 +76,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	private final Predicate<T> priorityPredicateForRDFS;
 
 	private RandomSearch<T, ?> completer;
-	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of
-	// the completer is asynchronous
+	private final Semaphore completerInsertionSemaphore = new Semaphore(0); // this is required since the step-method of the completer is asynchronous
 	protected final IObjectEvaluator<SearchGraphPath<T, A>, V> solutionEvaluator;
 	protected IUncertaintySource<T, V> uncertaintySource;
 	protected SolutionEventBus<T> eventBus = new SolutionEventBus<>();
@@ -136,7 +135,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
 		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Enable DEBUG for node details.", n.hashCode(),
-				this.samples, getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
+				this.samples, this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
 		this.logger.debug("Node details: {}", n);
 
 		long startOfComputation = System.currentTimeMillis();
@@ -195,7 +194,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				this.logger.debug("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
 				while (successfulSamples.get() < this.samples) {
 					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
-					checkInterruption();
+					this.checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {
 						this.logger.info("Deadline for random completions hit! Finishing node evaluation.");
 						break;
@@ -261,7 +260,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 							return true;
 						}, timeoutForJob, "RCNE-timeout");
 					} catch (InterruptedException e) { // Interrupts are directly re-thrown
-						logger.debug("Path evaluation has been interrupted.");
+						this.logger.debug("Path evaluation has been interrupted.");
 						throw e;
 					} catch (Exception ex) {
 						if (countedExceptions == maxSamples) {
@@ -284,7 +283,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				V best = this.bestKnownScoreUnderNodeInCompleterGraph.get(n.externalPath());
 				this.logger.debug("Finished sampling. {} samples were drawn, {} were successful. Best seen score is {}", drawnSamples, successfulSamples, best);
 				if (best == null) {
-					checkInterruption();
+					this.checkInterruption();
 					if (countedExceptions > 0) {
 						throw new NoSuchElementException("Among " + drawnSamples + " evaluated candidates, we could not identify any candidate that did not throw an exception.");
 					} else {
@@ -294,7 +293,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 				/* if we are still interrupted, throw an exception */
 				this.logger.debug("Checking interruption.");
-				checkInterruption();
+				this.checkInterruption();
 				this.logger.debug("Not interrupted.");
 
 				/* add number of samples to node */
@@ -369,7 +368,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 			}
 			long duration = System.currentTimeMillis() - start;
 			if (duration >= this.timeoutForSingleCompletionEvaluationInMS) {
-				logger.warn("Evaluation took {}ms, but timeout is {}", duration, this.timeoutForSingleCompletionEvaluationInMS);
+				this.logger.warn("Evaluation took {}ms, but timeout is {}", duration, this.timeoutForSingleCompletionEvaluationInMS);
 				assert duration < this.timeoutForSingleCompletionEvaluationInMS + 10000 : "Evaluation took " + duration + "ms, but timeout is " + this.timeoutForSingleCompletionEvaluationInMS;
 			}
 
@@ -442,8 +441,8 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		GraphSearchWithSubpathEvaluationsInput<T, ?, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.generator, nodeEvaluator);
 		this.completer = new RandomSearch<>(completionProblem, this.priorityPredicateForRDFS, this.random);
-		if (getTotalDeadline() >= 0) {
-			this.completer.setTimeout(new TimeOut(getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
+		if (this.getTotalDeadline() >= 0) {
+			this.completer.setTimeout(new TimeOut(this.getTotalDeadline() - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
 		}
 		if (this.loggerName != null) {
 			this.completer.setLoggerName(this.loggerName + ".completer");
@@ -478,6 +477,10 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		this.uncertaintySource = uncertaintySource;
 	}
 
+	public IObjectEvaluator<SearchGraphPath<T, A>, V> getSolutionEvaluator() {
+		return this.solutionEvaluator;
+	}
+
 	public boolean isVisualizeSubSearch() {
 		return this.visualizeSubSearch;
 	}
@@ -495,7 +498,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 			this.completer.setLoggerName(name + ".randomsearch");
 		}
 		this.logger.info("Switched logger (name) of {} to {}", this, name);
-		this.logger.info("Reprinting RandomCompletionEvaluator configuration after logger switch: timeout {}ms for single evaluations and {}ms in total per node", timeoutForSingleCompletionEvaluationInMS, getTimeoutForNodeEvaluationInMS());
+		this.logger.info("Reprinting RandomCompletionEvaluator configuration after logger switch: timeout {}ms for single evaluations and {}ms in total per node", this.timeoutForSingleCompletionEvaluationInMS, this.getTimeoutForNodeEvaluationInMS());
 	}
 
 	@Override
