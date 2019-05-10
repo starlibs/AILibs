@@ -20,7 +20,7 @@ import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
-import hasco.model.ParameterDomain;
+import hasco.model.IParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.sets.SetUtil;
 import jaicore.logic.fol.structure.ConstantParam;
@@ -81,7 +81,7 @@ public class IsValidParameterRangeRefinementPredicate implements EvaluablePredic
 		ComponentInstance instance = Util.getComponentInstanceFromState(components, state, componentIdentifier, false);
 		logger.debug("Derived component instance to be refined: {}. Parameter to refine: {}. Current value of parameter: {}", instance, param, currentParamValue);
 		try {
-			Map<Parameter, ParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(instance);
+			Map<Parameter, IParameterDomain> paramDomains = Util.getUpdatedDomainsOfComponentParameters(instance);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Parameter domains are: {}", paramDomains.keySet().stream().map(k -> "\n\t" + k + ": " + paramDomains.get(k)).collect(Collectors.joining()));
 			}

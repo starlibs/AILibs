@@ -29,7 +29,7 @@ import hasco.model.Component;
 import hasco.model.Dependency;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
-import hasco.model.ParameterDomain;
+import hasco.model.IParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
@@ -268,11 +268,11 @@ public class ComponentLoader {
 
 					/* parse precondition */
 					String pre = dependency.get("pre").asText();
-					Collection<Collection<Pair<Parameter, ParameterDomain>>> premise = new ArrayList<>();
+					Collection<Collection<Pair<Parameter, IParameterDomain>>> premise = new ArrayList<>();
 					Collection<String> monoms = Arrays.asList(pre.split("\\|"));
 					for (String monom : monoms) {
 						Collection<String> literals = Arrays.asList(monom.split("&"));
-						Collection<Pair<Parameter, ParameterDomain>> monomInPremise = new ArrayList<>();
+						Collection<Pair<Parameter, IParameterDomain>> monomInPremise = new ArrayList<>();
 
 						for (String literal : literals) {
 							String[] parts = literal.trim().split(" ");
@@ -284,7 +284,7 @@ public class ComponentLoader {
 							String target = parts[2];
 							switch (parts[1]) {
 							case "=": {
-								Pair<Parameter, ParameterDomain> conditionItem;
+								Pair<Parameter, IParameterDomain> conditionItem;
 								if (param.isNumeric()) {
 									double val = Double.valueOf(target);
 									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
@@ -297,7 +297,7 @@ public class ComponentLoader {
 								break;
 							}
 							case "in": {
-								Pair<Parameter, ParameterDomain> conditionItem;
+								Pair<Parameter, IParameterDomain> conditionItem;
 								if (param.isNumeric()) {
 									Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 									conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
@@ -321,7 +321,7 @@ public class ComponentLoader {
 					}
 
 					/* parse postcondition */
-					Collection<Pair<Parameter, ParameterDomain>> conclusion = new ArrayList<>();
+					Collection<Pair<Parameter, IParameterDomain>> conclusion = new ArrayList<>();
 					String post = dependency.get("post").asText();
 					Collection<String> literals = Arrays.asList(post.split("&"));
 
@@ -340,7 +340,7 @@ public class ComponentLoader {
 						String target = parts[2];
 						switch (parts[1]) {
 						case "=": {
-							Pair<Parameter, ParameterDomain> conditionItem;
+							Pair<Parameter, IParameterDomain> conditionItem;
 							if (param.isNumeric()) {
 								double val = Double.valueOf(target);
 								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), val, val));
@@ -353,7 +353,7 @@ public class ComponentLoader {
 							break;
 						}
 						case "in": {
-							Pair<Parameter, ParameterDomain> conditionItem;
+							Pair<Parameter, IParameterDomain> conditionItem;
 							if (param.isNumeric()) {
 								Interval interval = SetUtil.unserializeInterval("[" + target.substring(1, target.length() - 1) + "]");
 								conditionItem = new Pair<>(param, new NumericParameterDomain(((NumericParameterDomain) param.getDefaultDomain()).isInteger(), interval.getInf(), interval.getSup()));
