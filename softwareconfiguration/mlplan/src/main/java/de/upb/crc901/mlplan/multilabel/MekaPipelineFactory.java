@@ -26,6 +26,8 @@ import weka.core.OptionHandler;
 */
 public class MekaPipelineFactory implements IClassifierFactory {
 
+	private static final String PARAMETER_NAME_WITH_DASH_WARNING = "Required interface of component {} has dash or underscore in interface id {}";
+
 	/* loggin */
 	private static final Logger logger = LoggerFactory.getLogger(MekaPipelineFactory.class);
 
@@ -46,7 +48,7 @@ public class MekaPipelineFactory implements IClassifierFactory {
 
 		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
-				logger.warn("Required interface of component {} has dash or underscore in interface id {}", ci.getComponent(), reqI.getKey());
+				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
 			if (!reqI.getKey().equals("B") && !(c instanceof SingleClassifierEnhancer) && !(reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO"))) {
 				logger.warn("Classifier {} is not a single classifier enhancer and still has an unexpected required interface: {}. Try to set this configuration in the form of options.", ci.getComponent().getName(), reqI);
@@ -63,7 +65,7 @@ public class MekaPipelineFactory implements IClassifierFactory {
 		}
 		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
-				logger.warn("Required interface of component {} has dash or underscore in interface id {}", ci.getComponent(), reqI.getKey());
+				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
 			if (reqI.getKey().equals("K") && ci.getComponent().getName().endsWith("SMO")) {
 				ComponentInstance kernelCI = reqI.getValue();
@@ -100,7 +102,7 @@ public class MekaPipelineFactory implements IClassifierFactory {
 		for (Entry<String, String> parameterValue : ci.getParameterValues().entrySet()) {
 
 			if (parameterValue.getKey().startsWith("-") || parameterValue.getKey().startsWith("_")) {
-				logger.warn("Parameter of component {} has dash or underscore in parameter name {}", ci.getComponent(), parameterValue);
+				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), parameterValue);
 			}
 
 			if (parameterValue.getValue().equals("true")) {
@@ -130,7 +132,7 @@ public class MekaPipelineFactory implements IClassifierFactory {
 
 		for (Entry<String, ComponentInstance> reqI : ci.getSatisfactionOfRequiredInterfaces().entrySet()) {
 			if (reqI.getKey().startsWith("-") || reqI.getKey().startsWith("_")) {
-				logger.warn("Required interface of component {} has dash or underscore in interface id {}", ci.getComponent(), reqI.getKey());
+				logger.warn(PARAMETER_NAME_WITH_DASH_WARNING, ci.getComponent(), reqI.getKey());
 			}
 
 			optionsList.add("-" + reqI.getKey());

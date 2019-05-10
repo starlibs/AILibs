@@ -59,7 +59,6 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				}
 			} else {
 				classifierName = instance.getComponent().getName();
-				// lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveMLClassifierWith");
 				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractClassifierWith");
 			}
 

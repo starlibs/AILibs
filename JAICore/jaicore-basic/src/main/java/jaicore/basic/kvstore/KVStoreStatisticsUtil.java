@@ -141,7 +141,17 @@ public class KVStoreStatisticsUtil {
 			if (bestValue.isPresent()) {
 				double best = bestValue.getAsDouble();
 				for (KVStore store : entry.getValue()) {
-					store.put(output, ((store.get(sampledValues) != null) ? StatisticsUtil.mean(store.getAsDoubleList(sampledValues)) : ((minimize) ? Double.MAX_VALUE : Double.MIN_VALUE)) == best);
+
+					if (store.get(sampledValues) != null) {
+						store.put(output, StatisticsUtil.mean(store.getAsDoubleList(sampledValues)) == best);
+					} else {
+						Double surrogateValue = Double.MIN_VALUE;
+						if (minimize) {
+							surrogateValue = Double.MAX_VALUE;
+						}
+						store.put(output, surrogateValue == best);
+					}
+
 				}
 			}
 		}
@@ -177,7 +187,6 @@ public class KVStoreStatisticsUtil {
 			Map<String, Double> sampleMapOfOne = toSampleMap(onesStore.getAsStringList(pairingIndex, ","), onesStore.getAsDoubleList(sampledValues, ","));
 
 			for (Entry<String, KVStoreCollection> sampleData : settingToSampleWisePartition.getValue().entrySet()) {
-				System.out.println(sampleData);
 				if (sampleData.getKey().equals(nameOfTestPopulation)) {
 					continue;
 				}
