@@ -237,9 +237,9 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		assertTrue("The algorithm has not emitted an interrupted exception.", controlledInterruptedExceptionSeen);
 
 		/*
-		 * now sending a cancel to make sure the algorithm structure is shutdown (this
-		 * is because the interrupt only requires that the executing thread is returned
-		 * but not that the algorithm is shutdown
+		 * now sending a cancel to make sure the algorithm structure is shutdown
+		 * (this is because the interrupt only requires that the executing thread
+		 * is returned but not that the algorithm is shutdown
 		 */
 		algorithm.cancel();
 		this.waitForThreadGroupToBecomeEmpty(algorithmThreadGroup);
@@ -355,7 +355,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			((ILoggingCustomizable) algorithm).setLoggerName(TESTEDALGORITHM_LOGGERNAME);
 		}
 		if (algorithm instanceof AAlgorithm) {
-			logger.info("Setting timeout precaution offset to 5000");
+			this.logger.info("Setting timeout precaution offset to 5000");
 			((AAlgorithm<?, ?>) algorithm).setTimeoutPrecautionOffset(5000);
 		}
 		int allowedCPUs = parallelized ? Runtime.getRuntime().availableProcessors() : 1;
