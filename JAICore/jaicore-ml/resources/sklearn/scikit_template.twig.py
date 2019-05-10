@@ -162,8 +162,9 @@ def parse_args():
     accessable as a list.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', choices=['train','test'], required=True, help="Selecting whether a train or a test is run.")
+    parser.add_argument('--mode', choices=['train','test','traintest'], required=True, help="Selecting whether a train or a test is run.")
     parser.add_argument('--arff', required=True, help="Path or ARFF to use for training/ testing.")
+    parser.add_argument('--testarff', required=False, help="Path or ARFF to use for testing when running with traintest mode.")
     parser.add_argument('--output', required=True, help="In train mode set the file where the model shall be dumped; in test mode set the file where the prediction results shall be serialized to.")
     parser.add_argument('--model', help="Path to the trained model (in .pcl format) that shall be used for testing.")
     parser.add_argument('--regression', action='store_true', help="If set, the data is assumed to be a regression problem instead of a categorical one.")
@@ -269,6 +270,34 @@ def run_train_mode(data):
     classifier_instance.fit(features, targets)
     serialize_model(classifier_instance)
 
+def run_train_test_mode(data, testdata):
+    """
+    Trains a model of the demanded classifier with the given data. The classifier is instantiated with the constructor
+    parameters that the were used for the template and the classifiers can run it training with either parameters that
+    the script was started with or those that were given to the template.
+    Returns path to serialized model.
+    """
+    if sys.argv["regression"]:
+        features, targets = get_feature_target_matrices(data)
+    else:
+        features, targets = data.input_matrix, data.output_matrix
+        y_train = []
+        for crow in targets:
+            for x in range(0, len(crow)):
+                if crow[x] == 1:
+                    y_train.append(x)
+        targets = np.array(y_train)
+        features = np.array(features)
+    # Create instance of classifier with given parameters.
+    classifier_instance = {{classifier_construct}}
+    classifier_instance.fit(features, targets)
+    
+    if sys.argv["regression"]:
+        test_features, test_targets = get_feature_target_matrices(testdata)
+    else:
+        test_features = testdata.input_matrix
+    prediction = classifier_instance.predict(test_features)
+    serialize_prediction(prediction)
 
 def run_test_mode(data):
     """
@@ -294,6 +323,9 @@ def main():
     elif sys.argv["mode"] == "test":
         assert sys.argv["model"]
         run_test_mode(data)
+    elif sys.argv["mode"] == "traintest":
+        testdata = load_arff_file(sys.argv["testarff"]);
+        run_train_test_mode(data, testdata)
 
 
 if __name__ == "__main__":

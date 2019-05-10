@@ -26,9 +26,15 @@ public abstract class AProcessListener implements IProcessListener {
 				}
 				String line;
 				while ((line = input.readLine()) != null) {
+					if (line.contains("import imp") || line.contains("imp module")) {
+						continue;
+					}
 					this.handleInput(line);
 				}
 				while ((line = error.readLine()) != null) {
+					if (line.contains("import imp") || line.contains("imp module")) {
+						continue;
+					}
 					this.handleError(line);
 				}
 			}
