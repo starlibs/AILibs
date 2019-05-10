@@ -13,12 +13,11 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.UnsupportedAttributeTypeException;
 
 /**
  * The idea behind this Sampling method is to weight instances depended on the
@@ -29,7 +28,7 @@ import weka.core.UnsupportedAttributeTypeException;
  * chosen. Instances that p is very unsure about their actual class and
  * classified them falsely are not likely to be chosen. Note that any instance
  * still has a base probability to be chosen.
- * 
+ *
  * @author noni4
  *
  * @param <I>
@@ -44,14 +43,14 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 	private double addForRightClassification;
 	private double baseValue;
 
-	public ClassifierWeightedSampling(Random rand, Instances instances, IDataset<I> input) {
+	public ClassifierWeightedSampling(final Random rand, final Instances instances, final IDataset<I> input) {
 		super(input);
 		this.rand = rand;
 		this.pilotEstimator = new NaiveBayes();
 		try {
 			this.pilotEstimator.buildClassifier(instances);
 		} catch (Exception e) {
-			logger.error("Cannot build pilot estimator", e);
+			this.logger.error("Cannot build pilot estimator", e);
 		}
 		double mid = this.getMean(instances);
 		// base probability to be chosen
@@ -69,13 +68,9 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 			for (I instance : this.getInput()) {
 				sampleCopy.add(instance);
 			}
-			try {
-				this.finalDistribution = calculateFinalInstanceBoundariesWithDiscaring(
-						WekaInstancesUtil.datasetToWekaInstances(sampleCopy), pilotEstimator);
-				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
-			} catch (UnsupportedAttributeTypeException e) {
-				logger.error("Cannot convert dataset to WEKA dataset", e);
-			}
+			this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(
+					((WekaInstances)sampleCopy).getList(), this.pilotEstimator);
+			this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			return this.activate();
 		case active:
 			I choosenInstance;
@@ -84,7 +79,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 					choosenInstance = this.getInput().get(this.finalDistribution.sample());
 				} while (this.sample.contains(choosenInstance));
 				this.sample.add(choosenInstance);
-				return new SampleElementAddedEvent(getId());
+				return new SampleElementAddedEvent(this.getId());
 			} else {
 				return this.terminate();
 			}
@@ -97,8 +92,8 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 		return null;
 	}
 
-	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(Instances instances,
-			Classifier pilotEstimator) {
+	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(final Instances instances,
+			final Classifier pilotEstimator) {
 		double[] weights = new double[instances.size()];
 		for (int i = 0; i < instances.size(); i++) {
 			try {
@@ -117,14 +112,15 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 		return new EnumeratedIntegerDistribution(indices, weights);
 	}
 
-	private double getMean(Instances instances) {
+	private double getMean(final Instances instances) {
 		double sum = 0.0;
-		for (Instance instance : instances)
+		for (Instance instance : instances) {
 			try {
 				sum += this.pilotEstimator.distributionForInstance(instance)[(int) instance.classValue()];
 			} catch (Exception e) {
-				logger.error("Unexpected error in pilot estimator", e);
+				this.logger.error("Unexpected error in pilot estimator", e);
 			}
+		}
 		return sum / instances.size();
 	}
 }
