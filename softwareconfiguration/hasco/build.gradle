@@ -1,6 +1,29 @@
+plugins {
+	id 'java'
+	id 'eclipse-wtp'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        resources {
+        	srcDir 'conf'
+    	}
+    }
+    test {
+	   	java {
+	   		srcDir 'test'
+	   	}
+    }
+}
+
 dependencies {
 	compile project(':JAICore:jaicore-basic')
+	compile project(':JAICore:jaicore-concurrent')
 	compile project(':JAICore:jaicore-logic')
+	compile project(':JAICore:jaicore-graph')
 	compile project(':JAICore:jaicore-graphvisualizer')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
@@ -10,5 +33,5 @@ dependencies {
 	// database connector	
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
 	
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArchives')
 }

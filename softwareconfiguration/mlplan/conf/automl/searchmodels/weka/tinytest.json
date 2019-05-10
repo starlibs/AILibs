@@ -1,0 +1,132 @@
+{
+  "repository" : "Tiny repository",
+  "components" : [
+  {
+          "name" : "pipeline",
+          "providedInterface" : [ "MLPipeline", "AbstractClassifier" ],
+          "requiredInterface" : [
+            {
+              "id": "preprocessor",
+              "name": "AbstractPreprocessor"
+            }, { 
+              "id": "classifier",
+              "name": "BaseClassifier"
+            }
+      ],
+        "parameter" : [ ]
+      }
+      ,
+  {
+    "name" : "weka.classifiers.bayes.BayesNet",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "Test" ],
+    "parameter" : [ {
+      "name" : "D",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "Q",
+      "type" : "cat",
+      "default" : "weka.classifiers.bayes.net.search.local.K2",
+      "values" : [ "weka.classifiers.bayes.net.search.local.K2", "weka.classifiers.bayes.net.search.local.HillClimber", "weka.classifiers.bayes.net.search.local.LAGDHillClimber", "weka.classifiers.bayes.net.search.local.SimulatedAnnealing", "weka.classifiers.bayes.net.search.local.TabuSearch", "weka.classifiers.bayes.net.search.local.TAN" ]
+    } ],
+    "dependencies" : [ ]
+  },
+  {
+    "name" : "weka.classifiers.trees.J48",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier", "Test" ],
+    "parameter" : [ {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "U",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "J",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "A",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "M",
+      "type" : "int",
+      "default" : 2.0,
+      "min" : 1.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ ]
+  }
+  , {
+    "name" : "weka.attributeSelection.AttributeSelection",
+    "providedInterface" : [ "AbstractPreprocessor" ],
+    "requiredInterface" : [ {"id": "eval", "name": "evaluator" }, {"id": "search", "name": "searcher" } ],
+    "parameter" : [ {
+      "name" : "M",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ ]
+  },
+  {
+    "name" : "weka.attributeSelection.Ranker",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "searcher" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  },
+{
+    "name" : "weka.attributeSelection.PrincipalComponents",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "evaluator" ],
+    "parameter" : [ {
+      "name" : "numActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "A",
+      "type" : "int",
+      "default" : "-1",
+      "values" : [ "-1" ],
+      "min" : -1.0,
+      "max" : -1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "C",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "R",
+      "type" : "double",
+      "default" : 0.95,
+      "min" : 0.5,
+      "max" : 1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "true"
+    } ],
+    "dependencies" : [ {
+      "pre" : "numActivator in {0}",
+      "post" : "A in {-1}"
+    }, {
+      "pre" : "numActivator in {1}",
+      "post" : "A in [1.0,1024.0]"
+    } ]
+  }
+  ]
+}

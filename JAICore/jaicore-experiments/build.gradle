@@ -1,16 +1,16 @@
 sourceSets {
     main {
       java {
-          srcDir 'src/examples/java'
+          srcDir 'src'
+          srcDir 'examples'
       }
     }
     test {
      	java {
-     		srcDir 'src/test_resource'
+     		srcDir 'test'
      	}
     }
 }
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-	compile 'mysql:mysql-connector-java:5.1.45'
 }
