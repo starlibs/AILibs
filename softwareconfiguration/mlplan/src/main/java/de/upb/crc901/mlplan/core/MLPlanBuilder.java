@@ -474,7 +474,7 @@ public class MLPlanBuilder {
 		this.factoryForPipelineEvaluationInSearchPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
 		//		this.factoryForPipelineEvaluationInSelectionPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
 		this.factoryForPipelineEvaluationInSelectionPhase = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()));
-		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
+		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 4); // evaluating on 1000 in selection MCCV is, assuming quadratic growth, roughly max 4 times costlier than search phase evaluations
 	}
 
 	public boolean getUseCache() {
@@ -554,6 +554,14 @@ public class MLPlanBuilder {
 		return ToJSONStringUtil.toJSONString(fields);
 	}
 
+	public IClassifierEvaluatorFactory getFactoryForPipelineEvaluationInSearchPhase() {
+		return this.factoryForPipelineEvaluationInSearchPhase;
+	}
+
+	public IClassifierEvaluatorFactory getFactoryForPipelineEvaluationInSelectionPhase() {
+		return this.factoryForPipelineEvaluationInSelectionPhase;
+	}
+
 	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final Instances data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSearchPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in search phase has been set!");
@@ -565,7 +573,7 @@ public class MLPlanBuilder {
 		return new PipelineEvaluator(this.getClassifierFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
 	}
 
-	public PipelineEvaluator getFactoryForClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}

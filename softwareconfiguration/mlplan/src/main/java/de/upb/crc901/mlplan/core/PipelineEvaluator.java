@@ -3,12 +3,18 @@ package de.upb.crc901.mlplan.core;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
+import de.upb.crc901.mlplan.core.events.ClassifierCreatedEvent;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.events.IEvent;
+import jaicore.basic.events.IEventEmitter;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
@@ -22,6 +28,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 
 	private Logger logger = LoggerFactory.getLogger(PipelineEvaluator.class);
 
+	private final EventBus eventBus = new EventBus();
 	private final IClassifierFactory classifierFactory;
 	private final IClassifierEvaluator benchmark;
 	private final int timeoutForEvaluation;
@@ -31,6 +38,9 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 		super();
 		this.classifierFactory = classifierFactory;
 		this.benchmark = benchmark;
+		if (benchmark instanceof IEventEmitter) {
+			((IEventEmitter) benchmark).registerListener(this);
+		}
 		this.timeoutForEvaluation = timeoutForEvaluation;
 	}
 
@@ -60,8 +70,9 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).updateBestScore(this.bestScore);
 			}
 			Classifier classifier = this.classifierFactory.getComponentInstantiation(c);
+			this.eventBus.post(new ClassifierCreatedEvent(c, classifier)); // inform listeners about the creation of the classifier
 			this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, classifier);
-			Double score =  this.benchmark.evaluate(classifier);
+			Double score = this.benchmark.evaluate(classifier);
 			this.logger.info("Obtained score {} for classifier {}", score, classifier);
 			return score;
 		} catch (ComponentInstantiationFailedException e) {
@@ -86,5 +97,24 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 
 	public IClassifierEvaluator getBenchmark() {
 		return this.benchmark;
+	}
+
+	/**
+	 * Here, we send a coupling event that informs the listener about which ComponentInstance has been used to create a classifier.
+	 *
+	 * @param listener
+	 */
+	public void registerListener(final Object listener) {
+		this.eventBus.register(listener);
+	}
+
+	/**
+	 * Forwards every incoming event e
+	 *
+	 * @param e
+	 */
+	@Subscribe
+	public void receiveEvent(final IEvent e) {
+		this.eventBus.post(e);
 	}
 }

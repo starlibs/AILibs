@@ -48,9 +48,9 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 	protected ASamplingAlgorithm<I> samplingAlgorithm;
 	protected Random random;
 	protected LearningCurveExtrapolationMethod extrapolationMethod;
-	private int[] anchorPoints;
-	private double[] yValues;
-	private int[] trainingTimes;
+	private final int[] anchorPoints;
+	private final double[] yValues;
+	private final int[] trainingTimes;
 
 	/**
 	 * Create a learning curve extrapolator with a subsampling factory.
@@ -80,6 +80,8 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 		this.samplingAlgorithm = null;
 		this.random = new Random(seed);
 		this.createSplit(trainsplit, seed);
+		this.yValues = new double[this.anchorPoints.length];
+		this.trainingTimes = new int[this.anchorPoints.length];
 	}
 
 	/**
@@ -101,10 +103,8 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 	 */
 	@SuppressWarnings("unchecked")
 	public LearningCurve extrapolateLearningCurve() throws InvalidAnchorPointsException, AlgorithmException, InterruptedException {
-		this.yValues = new double[this.anchorPoints.length];
-		this.trainingTimes = new int[this.anchorPoints.length];
 		try {
-			Instances testInstances = ((WekaInstances)this.test).getList();
+			Instances testInstances = ((WekaInstances) this.test).getList();
 
 			// Create subsamples at the anchorpoints and measure the accuracy there.
 			for (int i = 0; i < this.anchorPoints.length; i++) {
@@ -119,8 +119,8 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 				// Train classifier on subsample.
 				this.logger.debug("Running classifier with {} data points.", this.anchorPoints[i]);
 				long start = System.currentTimeMillis();
-				this.learner.buildClassifier(((WekaInstances)subsampledDataset).getList());
-				this.trainingTimes[i] = (int)(System.currentTimeMillis() - start);
+				this.learner.buildClassifier(((WekaInstances) subsampledDataset).getList());
+				this.trainingTimes[i] = (int) (System.currentTimeMillis() - start);
 
 				// Measure accuracy of the trained learner on test split.
 				double correctCounter = 0d;
@@ -209,6 +209,30 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 		Collections.shuffle(this.train, r);
 		Collections.shuffle(this.test, r);
 		this.logger.debug("Finished split creation after {}ms", System.currentTimeMillis() - start);
+	}
+
+	public Classifier getLearner() {
+		return this.learner;
+	}
+
+	public IDataset<I> getDataset() {
+		return this.dataset;
+	}
+
+	public LearningCurveExtrapolationMethod getExtrapolationMethod() {
+		return this.extrapolationMethod;
+	}
+
+	public int[] getAnchorPoints() {
+		return this.anchorPoints;
+	}
+
+	public double[] getyValues() {
+		return this.yValues;
+	}
+
+	public int[] getTrainingTimes() {
+		return this.trainingTimes;
 	}
 
 	@Override

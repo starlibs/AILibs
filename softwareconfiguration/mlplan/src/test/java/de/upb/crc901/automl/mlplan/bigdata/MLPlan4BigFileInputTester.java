@@ -3,10 +3,12 @@ package de.upb.crc901.automl.mlplan.bigdata;
 import java.io.File;
 import java.io.FileReader;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
 import de.upb.crc901.mlplan.bigdata.MLPlan4BigFileInput;
+import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
@@ -19,9 +21,9 @@ public class MLPlan4BigFileInputTester {
 	public void test() throws Exception {
 		//		MLPlan4BigFileInput mlplan = new MLPlan4BigFileInput(new File("testrsc/openml/41103.arff"));
 
-		String origDataSrcName = "testrsc/openml/3.arff";
+		String origDataSrcName = "testrsc/openml/1240.arff";
 
-		if (false) {
+		if (true) {
 			Instances data = new Instances(new FileReader(new File(origDataSrcName)));
 			data.setClassIndex(data.numAttributes() - 1);
 			List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
@@ -36,9 +38,11 @@ public class MLPlan4BigFileInputTester {
 		}
 
 		MLPlan4BigFileInput mlplan = new MLPlan4BigFileInput(new File(origDataSrcName + ".train"));
+		mlplan.setTimeout(new TimeOut(5, TimeUnit.MINUTES));
 		mlplan.setLoggerName("testedalgorithm");
+		long start = System.currentTimeMillis();
 		Classifier c = mlplan.call();
-		System.out.println(c);
+		System.out.println("Observed output: " + c + " after " + (System.currentTimeMillis() - start) + "ms. Now validating the model");
 
 		/* check quality */
 		Instances testData = new Instances(new FileReader(new File(origDataSrcName + ".test")));

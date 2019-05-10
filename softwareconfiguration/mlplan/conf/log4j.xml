@@ -231,7 +231,7 @@
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
-    <level value="debug" />
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco">
@@ -243,6 +243,6 @@
   </logger>
   
   <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="debug" />
+    <level value="info" />
   </logger>
 </log4j:configuration>

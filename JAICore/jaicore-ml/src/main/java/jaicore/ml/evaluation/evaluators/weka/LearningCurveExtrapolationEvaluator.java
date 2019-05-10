@@ -3,15 +3,19 @@ package jaicore.ml.evaluation.evaluators.weka;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
+
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.events.IEventEmitter;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
+import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolator;
 import weka.classifiers.Classifier;
@@ -26,7 +30,7 @@ import weka.classifiers.Classifier;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator, ILoggingCustomizable {
+public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
@@ -39,6 +43,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	private long seed;
 	private int fullDatasetSize = -1;
 	private final boolean evaluateAccuracy = false; // otherwise error rate
+	private final EventBus eventBus = new EventBus();
 
 	/**
 	 * Create a classifier evaluator with learning curve extrapolation.
@@ -88,6 +93,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 			this.logger.debug("Extrapolating learning curve.");
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();
 			this.logger.debug("Retrieved learning curve {}.", learningCurve);
+			this.eventBus.post(new LearningCurveExtrapolatedEvent(extrapolator));
 
 			int evaluationPoint = this.dataset.size();
 			/* Overwrite evaluation point if a value was provided, otherwise evaluate on the size of the given dataset */
@@ -113,4 +119,13 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 		this.logger = LoggerFactory.getLogger(name);
 	}
 
+	/**
+	 * Register observers for learning curve predictions (including estimates of the time)
+	 *
+	 * @param listener
+	 */
+	@Override
+	public void registerListener(final Object listener) {
+		this.eventBus.register(listener);
+	}
 }
