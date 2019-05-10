@@ -25,7 +25,7 @@ import hasco.model.ComponentInstance;
 import hasco.model.Dependency;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
-import hasco.model.ParameterDomain;
+import hasco.model.IParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
@@ -303,7 +303,7 @@ public class Util {
 		return components;
 	}
 
-	public static Map<Parameter, ParameterDomain> getUpdatedDomainsOfComponentParameters(final Monom state, final Component component, final String objectIdentifierInState) {
+	public static Map<Parameter, IParameterDomain> getUpdatedDomainsOfComponentParameters(final Monom state, final Component component, final String objectIdentifierInState) {
 		Map<String, String> parameterContainerMap = new HashMap<>();
 		Map<String, String> parameterContainerMapInv = new HashMap<>();
 		Map<String, String> parameterValues = new HashMap<>();
@@ -377,11 +377,11 @@ public class Util {
 		return interpretedValue;
 	}
 
-	public static Map<Parameter, ParameterDomain> getUpdatedDomainsOfComponentParameters(final ComponentInstance componentInstance) {
+	public static Map<Parameter, IParameterDomain> getUpdatedDomainsOfComponentParameters(final ComponentInstance componentInstance) {
 		Component component = componentInstance.getComponent();
 
 		/* initialize all params for which a decision has been made already with their respective value */
-		Map<Parameter, ParameterDomain> domains = new HashMap<>();
+		Map<Parameter, IParameterDomain> domains = new HashMap<>();
 		for (Parameter p : componentInstance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
 				NumericParameterDomain defaultDomain = (NumericParameterDomain) p.getDefaultDomain();
@@ -402,13 +402,13 @@ public class Util {
 		for (Dependency dependency : component.getDependencies()) {
 			if (isDependencyPremiseSatisfied(dependency, domains)) {
 				logger.info("Premise of dependency {} is satisfied, applying its conclusions ...", dependency);
-				for (Pair<Parameter, ParameterDomain> newDomain : dependency.getConclusion()) {
+				for (Pair<Parameter, IParameterDomain> newDomain : dependency.getConclusion()) {
 					/*
 					 * directly use the concluded domain if the current value is NOT subsumed by it. Otherwise, just
 					 * stick to the current domain
 					 */
 					Parameter param = newDomain.getX();
-					ParameterDomain concludedDomain = newDomain.getY();
+					IParameterDomain concludedDomain = newDomain.getY();
 					if (!componentInstance.getParametersThatHaveBeenSetExplicitly().contains(param)) {
 						domains.put(param, concludedDomain);
 						logger.debug("Changing domain of {} from {} to {}", param, domains.get(param), concludedDomain);
@@ -423,9 +423,9 @@ public class Util {
 		return domains;
 	}
 
-	public static boolean isDependencyPremiseSatisfied(final Dependency dependency, final Map<Parameter, ParameterDomain> values) {
+	public static boolean isDependencyPremiseSatisfied(final Dependency dependency, final Map<Parameter, IParameterDomain> values) {
 		logger.debug("Checking satisfcation of dependency {} with values {}", dependency, values);
-		for (Collection<Pair<Parameter, ParameterDomain>> condition : dependency.getPremise()) {
+		for (Collection<Pair<Parameter, IParameterDomain>> condition : dependency.getPremise()) {
 			boolean check = isDependencyConditionSatisfied(condition, values);
 			logger.trace("Result of check for condition {}: {}", condition, check);
 			if (!check) {
@@ -435,11 +435,11 @@ public class Util {
 		return true;
 	}
 
-	public static boolean isDependencyConditionSatisfied(final Collection<Pair<Parameter, ParameterDomain>> condition, final Map<Parameter, ParameterDomain> values) {
-		for (Pair<Parameter, ParameterDomain> conditionItem : condition) {
-			ParameterDomain requiredDomain = conditionItem.getY();
+	public static boolean isDependencyConditionSatisfied(final Collection<Pair<Parameter, IParameterDomain>> condition, final Map<Parameter, IParameterDomain> values) {
+		for (Pair<Parameter, IParameterDomain> conditionItem : condition) {
+			IParameterDomain requiredDomain = conditionItem.getY();
 			Parameter param = conditionItem.getX();
-			ParameterDomain actualDomain = values.get(param);
+			IParameterDomain actualDomain = values.get(param);
 			if (!values.containsKey(param)) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values);
 			}
