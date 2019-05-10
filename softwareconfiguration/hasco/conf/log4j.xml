@@ -68,8 +68,12 @@
     <appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	 <logger name="hasco.core.HASCO">
-    <level value="info" />
+  <logger name="hasco.core.HASCO">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="hasco.core.IsValidParameterRangeRefinementPredicate">
+    <level value="warn" />
   </logger>
   
   <logger name="jaicore.graphvisualizer">
@@ -81,13 +85,21 @@
   </logger>
 	
 	<logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
     <appender-ref ref="warnFileAppender" />
     <appender-ref ref="errFileAppender" />
     <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="jaicore.timing">
+    <level value="info" />
+  </logger>
+  
+  <logger name="jaicore.interrupt">
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm.search">

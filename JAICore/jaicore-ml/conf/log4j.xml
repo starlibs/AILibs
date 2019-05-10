@@ -8,7 +8,7 @@
     <layout class="org.apache.log4j.PatternLayout">
       <!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
         - %m%n" /> -->
-      <param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="%-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -17,7 +17,7 @@
     <param name="Threshold" value="INFO" />
     <param name="Append" value="false" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -25,7 +25,7 @@
     <param name="File" value="logs/error.log" />
     <param name="Threshold" value="ERROR" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
   
@@ -33,7 +33,7 @@
     <param name="File" value="logs/warn.log" />
     <param name="Threshold" value="WARN" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
 
@@ -42,18 +42,9 @@
     <param name="Threshold" value="TRACE" />
     <param name="Append" value="false" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
     </layout>
   </appender>
-
-  <logger name="de.upb.crc901">
-    <level value="warn" />
-    <appender-ref ref="console" />
-    <appender-ref ref="infoFileAppender" />
-    <appender-ref ref="warnFileAppender" />
-    <appender-ref ref="errFileAppender" />
-    <appender-ref ref="traceFileAppender" />
-  </logger>
   
   <logger name="jaicore">
     <level value="warn" />
@@ -72,64 +63,20 @@
     <level value="warn" />
   </logger>
   
-  <logger name="hasco">
-    <level value="warn" />
-    <appender-ref ref="console" />
-    <appender-ref ref="infoFileAppender" />
-    <appender-ref ref="warnFileAppender" />
-    <appender-ref ref="errFileAppender" />
-    <appender-ref ref="traceFileAppender" />
+  <logger name="jaicore.ml">
+    <level value="debug" />
   </logger>
   
-  <logger name="mlplan">
-    <level value="trace" />
-    <appender-ref ref="console" />
-    <appender-ref ref="infoFileAppender" />
-    <appender-ref ref="warnFileAppender" />
-    <appender-ref ref="errFileAppender" />
-    <appender-ref ref="traceFileAppender" />
-  </logger>
-
-	<logger name="org.nd4j">
-		<level value="info" />
-		<appender-ref ref="console" />
-	</logger>
-	
-		<logger name="org.deeplearning4j">
-		<level value="info" />
-		<appender-ref ref="console" />
-	</logger>
-
-  <logger name="mlplan.optimizingfactory.optAlgo">
-    <level value="warn" />
+  <logger name="jaicore.interrupt">
+    <level value="debug" />
   </logger>
   
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco">
-    <level value="info" />
-  </logger>
-  
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
-    <level value="warn" />
-  </logger>
-  
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
-    <level value="warn" />
-  </logger>
-  
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
-    <level value="warn" />
-  </logger>
-  
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="warn" />
-  </logger>
-  
-  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
-    <level value="warn" />
+  <logger name="jaicore.timing">
+    <level value="debug" />
   </logger>
   
   <logger name="testedalgorithm">
-    <level value="trace" />
+    <level value="debug" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />

@@ -17,17 +17,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.FileUtil;
-import jaicore.basic.ListHelper;
 import jaicore.basic.Maps;
 import jaicore.basic.StatisticsUtil;
+import jaicore.basic.sets.SetUtil;
 
 public class KVStoreCollection extends LinkedList<KVStore> {
 
 	/** Logger for controlled output. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(KVStoreCollection.class);
+	private static final Logger logger = LoggerFactory.getLogger(KVStoreCollection.class);
 
 	/** Automatically generated serial version UID. */
 	private static final long serialVersionUID = -4198481782449606136L;
+
+	private static final String LABEL_GROUP_SIZE = "GROUP_SIZE";
 
 	public enum EGroupMethod {
 		AVG, MIN, MAX, MAJORITY, MINORITY, LIST, ADD;
@@ -68,13 +70,13 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 							this.add(kvStore);
 						}
 					} catch (Exception e) {
-						LOGGER.error("An exception occurred while parsing the directory collecting the chunk: {}", e);
+						logger.error("An exception occurred while parsing the directory collecting the chunk: {}", e);
 					}
 				} else {
 					try {
 						this.readFrom(FileUtil.readFileAsString(file));
 					} catch (Exception e) {
-						LOGGER.error("An exception occurred while reading the chunk from the given file: {}", e);
+						logger.error("An exception occurred while reading the chunk from the given file: {}", e);
 					}
 				}
 			}
@@ -160,9 +162,9 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	public void removeAny(final Map<String, String> condition, final boolean or) {
 		if (or) {
 			this.removeIf(t -> {
-				for (String key : condition.keySet()) {
-					String val = t.getAsString(key);
-					if (val == null && condition.get(key) == null || val != null && val.equals(condition.get(key))) {
+				for (Entry<String, String> entry : condition.entrySet()) {
+					String val = t.getAsString(entry.getKey());
+					if (val == null && entry.getValue() == null || val != null && val.equals(entry.getValue())) {
 						return true;
 					}
 				}
@@ -170,8 +172,8 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 			});
 		} else {
 			this.removeIf(t -> {
-				for (String key : condition.keySet()) {
-					if (!t.getAsString(key).equals(condition.get(key))) {
+				for (Entry<String, String> entry : condition.entrySet()) {
+					if (!t.getAsString(entry.getKey()).equals(entry.getValue())) {
 						return false;
 					}
 				}
@@ -183,7 +185,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	public void removeGroupsIfNotAtLeastWithSize(final int size) {
 		Map<String, String> groupSizeCondition = new HashMap<>();
 		for (int i = 1; i < size; i++) {
-			groupSizeCondition.put("GROUP_SIZE", "" + i);
+			groupSizeCondition.put(LABEL_GROUP_SIZE, "" + i);
 			this.removeAny(groupSizeCondition, true);
 		}
 	}
@@ -191,22 +193,22 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	public void removeGroupsIfNotAtLeastWithSizeButOne(final int size, final String[] groupingKeys) {
 		Map<String, String> groupSizeCondition = new HashMap<>();
 		for (int i = 1; i < size; i++) {
-			System.out.println("Remove any groups that dont have at least " + (i + 1) + " entries.");
+			logger.debug("Remove any groups that dont have at least {} entries.", (i + 1));
 
 			int currentMinLength = i;
 			KVStoreCollection group = new KVStoreCollection(this.toString());
-			group.renameKey("GROUP_SIZE", "size");
+			group.renameKey(LABEL_GROUP_SIZE, "size");
 			group = group.group(groupingKeys, new HashMap<>());
 
 			for (KVStore t : group) {
 				List<Integer> sizeList = t.getAsIntList("size", ",").stream().filter(x -> x > currentMinLength).collect(Collectors.toList());
-				System.out.println(currentMinLength + " " + sizeList + " " + t.getAsIntList("size", ","));
+				logger.debug("{} {} {}", currentMinLength, sizeList, t.getAsIntList("size", ","));
 				if (sizeList.size() > 0) {
 					for (String groupingKey : groupingKeys) {
 						groupSizeCondition.put(groupingKey, t.getAsString(groupingKey));
 					}
-					groupSizeCondition.put("GROUP_SIZE", "" + i);
-					System.out.println(groupSizeCondition);
+					groupSizeCondition.put(LABEL_GROUP_SIZE, "" + i);
+					logger.debug("{}", groupSizeCondition);
 					this.removeAny(groupSizeCondition, false);
 				}
 			}
@@ -241,8 +243,8 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 
 		for (Entry<String, List<KVStore>> groupedTaskEntry : groupedTasks.entrySet()) {
 			List<KVStore> groupedTaskList = groupedTaskEntry.getValue();
-			KVStore groupedTask = groupedTaskList.get(0).clone();
-			groupedTask.put("GROUP_SIZE", groupedTaskList.size());
+			KVStore groupedTask = new KVStore(groupedTaskList.get(0));
+			groupedTask.put(LABEL_GROUP_SIZE, groupedTaskList.size());
 
 			Map<String, List<Object>> values = new HashMap<>();
 
@@ -274,69 +276,38 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 					groupingMethod = STANDARD_GROUPING_HANDLER;
 				}
 
-				String value = "";
+				Object value = null;
 				switch (groupingMethod) {
-				case AVG: {
+				case AVG:
 					List<Double> valueList = valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList());
-					groupedTask.put(valueEntry.getKey() + "_stdDev", StatisticsUtil.standardDeviation(valueList) + "");
-					// groupedTask.store(valueEntry.getKey() + "_max", StatisticsUtil.max(valueList) + "");
-					// groupedTask.store(valueEntry.getKey() + "_min", StatisticsUtil.min(valueList) + "");
-					// groupedTask.store(valueEntry.getKey() + "_var", StatisticsUtil.variance(valueList) + "");
-					// groupedTask.store(valueEntry.getKey() + "_sum", StatisticsUtil.sum(valueList) + "");
-					value = StatisticsUtil.mean(valueList) + "";
+					groupedTask.put(valueEntry.getKey() + "_stdDev", StatisticsUtil.standardDeviation(valueList));
+					groupedTask.put(valueEntry.getKey() + "_max", StatisticsUtil.max(valueList));
+					groupedTask.put(valueEntry.getKey() + "_min", StatisticsUtil.min(valueList));
+					groupedTask.put(valueEntry.getKey() + "_var", StatisticsUtil.variance(valueList));
+					groupedTask.put(valueEntry.getKey() + "_sum", StatisticsUtil.sum(valueList));
+					value = StatisticsUtil.mean(valueList);
 					break;
-				}
-				case MIN: {
-					List<Double> valueList = valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList());
-					value = StatisticsUtil.min(valueList) + "";
+				case MIN:
+					value = StatisticsUtil.min(valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList()));
 					break;
-				}
-				case MAX: {
-					List<Double> valueList = valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList());
-					value = StatisticsUtil.max(valueList) + "";
-					break;
-				}
-				case MINORITY: {
-					Map<Object, Integer> counterMap = new HashMap<>();
-					for (Object v : valueEntry.getValue()) {
-						Maps.increaseCounterInMap(counterMap, v);
-					}
 
-					Object minorityObject = null;
-					for (Object object : counterMap.keySet()) {
-						if (minorityObject == null || counterMap.get(object) < counterMap.get(minorityObject)) {
-							minorityObject = object;
-						}
-					}
-					value = minorityObject + "";
+				case MAX:
+					value = StatisticsUtil.max(valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList()));
 					break;
-				}
-				case MAJORITY: {
-					Map<Object, Integer> counterMap = new HashMap<>();
-					for (Object v : valueEntry.getValue()) {
-						Maps.increaseCounterInMap(counterMap, v);
-					}
 
-					Object minorityObject = null;
-					for (Object object : counterMap.keySet()) {
-						if (minorityObject == null || counterMap.get(object) > counterMap.get(minorityObject)) {
-							minorityObject = object;
-						}
-					}
-					value = minorityObject + "";
+				case MINORITY:
+					value = this.frequentObject(valueEntry.getValue(), false);
 					break;
-				}
-				case ADD: {
-					List<Double> valueList = valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList());
-					value = StatisticsUtil.sum(valueList) + "";
+				case MAJORITY:
+					value = this.frequentObject(valueEntry.getValue(), true);
 					break;
-				}
+				case ADD:
+					value = StatisticsUtil.sum(valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList()));
+					break;
 				default:
-				case LIST: {
-					value = ListHelper.implode(valueEntry.getValue(), ",");
+				case LIST:
+					value = SetUtil.implode(valueEntry.getValue(), ",");
 					break;
-				}
-
 				}
 
 				groupedTask.put(valueEntry.getKey(), value);
@@ -345,6 +316,27 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 		}
 
 		return new KVStoreCollection(tempCollection.toString());
+	}
+
+	/**
+	 * Searches for the most or least frequent object within a list.
+	 *
+	 * @param top If set to true most frequent object is returned otherwise the least frequent.
+	 * @return The most frequent or least frequent object.
+	 */
+	private Object frequentObject(final List<Object> listOfObjects, final boolean top) {
+		Map<Object, Integer> counterMap = new HashMap<>();
+		for (Object v : listOfObjects) {
+			Maps.increaseCounterInMap(counterMap, v);
+		}
+
+		Object frequentObject = null;
+		for (Entry<Object, Integer> counterMapEntry : counterMap.entrySet()) {
+			if (frequentObject == null || (top && counterMap.get(counterMapEntry.getKey()) > counterMap.get(frequentObject)) || (!top && counterMap.get(counterMapEntry.getKey()) < counterMap.get(frequentObject))) {
+				frequentObject = counterMapEntry.getKey();
+			}
+		}
+		return frequentObject;
 	}
 
 	public void merge(final String[] fieldKeys, final String separator, final String newFieldName) {
@@ -374,6 +366,12 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 		}
 	}
 
+	public void applyFilter(final String keyName, final IKVFilter filter) {
+		Map<String, IKVFilter> filterMap = new HashMap<>();
+		filterMap.put(keyName, filter);
+		this.applyFilter(filterMap);
+	}
+
 	public void mergeTasks(final KVStore other, final Map<String, String> combineMap) {
 		for (KVStore t : this) {
 			boolean equals = true;
@@ -398,15 +396,18 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 		this.metaData.put(FIELD_COLLECTIONID, collectionID);
 	}
 
-	public void serializeTo(final File file) {
+	public void serializeTo(final File file) throws IOException {
 		this.serializeTo(file, false);
 	}
 
-	public void serializeTo(final File file, final boolean append) {
-		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+	public void serializeTo(final File file, final boolean append) throws IOException {
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, append))) {
 			bw.write(this.toString());
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
+
+	public void group(final String... groupingKeys) {
+		this.group(groupingKeys, new HashMap<>());
+	}
+
 }

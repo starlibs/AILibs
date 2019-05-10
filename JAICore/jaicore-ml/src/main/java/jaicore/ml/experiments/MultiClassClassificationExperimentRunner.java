@@ -31,7 +31,7 @@ import com.google.common.collect.Range;
 
 import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.core.evaluation.measure.singlelabel.MulticlassMetric;
+import jaicore.ml.core.evaluation.measure.singlelabel.EMulticlassMeasure;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -50,7 +50,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 	private final float trainingPortion;
 	private final int numberOfCPUs;
 	private final int memoryInMB;
-	private final MulticlassMetric performanceMeasure;
+	private final EMulticlassMeasure performanceMeasure;
 	private final IMultiClassClassificationExperimentDatabase database;
 	private final int totalExperimentSize;
 	private Collection<MLExperiment> experimentsConductedEarlier;
@@ -63,7 +63,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 	}
 	
 	public MultiClassClassificationExperimentRunner(File datasetFolder, String[] classifiers, Map<String, String[]> setups, int[] timeoutsInSeconds, int numberOfRunsPerExperiment,
-			float trainingPortion, int numberOfCPUs, int memoryInMB, MulticlassMetric performanceMeasure, IMultiClassClassificationExperimentDatabase logger) throws IOException {
+			float trainingPortion, int numberOfCPUs, int memoryInMB, EMulticlassMeasure performanceMeasure, IMultiClassClassificationExperimentDatabase logger) throws IOException {
 		super();
 		this.datasetFolder = datasetFolder;
 		this.availableDatasets = getAvailableDatasets(datasetFolder);
@@ -94,7 +94,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 	}
 
 	protected abstract Classifier getConfiguredClassifier(int seed, String algoName, String algoMode, int timeout, int numberOfCPUs, int memoryInMB,
-			MulticlassMetric performanceMeasure);
+			EMulticlassMeasure performanceMeasure);
 
 	public void runAll() throws Exception {
 		experimentsConductedEarlier = database.getExperimentsForWhichARunExists();
@@ -189,7 +189,7 @@ public abstract class MultiClassClassificationExperimentRunner {
 		String algo = classifiers[algoId];
 		String algoMode = setups.get(algo)[setupId];
 		int timeoutInSeconds = timeoutsInSeconds[timeoutId];
-		if (performanceMeasure != MulticlassMetric.errorRate) {
+		if (performanceMeasure != EMulticlassMeasure.ERROR_RATE) {
 			throw new IllegalArgumentException("Currently the only supported performance measure is errorRate");
 		}
 		MLExperiment exp = new MLExperiment(new File(datasetFolder + File.separator + availableDatasets.get(datasetId)).getAbsolutePath(), algo, algoMode, seedId, timeoutInSeconds, numberOfCPUs, memoryInMB, performanceMeasure.toString());

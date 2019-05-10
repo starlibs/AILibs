@@ -3,12 +3,12 @@ package hasco.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class NumericParameterDomain extends ParameterDomain {
+public class NumericParameterDomain implements IParameterDomain {
 	private final boolean isInteger;
 	private final double min, max;
 
 	@JsonCreator
-	public NumericParameterDomain(@JsonProperty("integer") final boolean isInteger, @JsonProperty("min")final double min, @JsonProperty("maxf")final double max) {
+	public NumericParameterDomain(@JsonProperty("integer") final boolean isInteger, @JsonProperty("min") final double min, @JsonProperty("maxf") final double max) {
 		super();
 		this.isInteger = isInteger;
 		this.min = min;
@@ -29,24 +29,27 @@ public class NumericParameterDomain extends ParameterDomain {
 
 	@Override
 	public String toString() {
-		return "NumericParameterDomain [isInteger=" + isInteger + ", min=" + min + ", max=" + max + "]";
+		return "NumericParameterDomain [isInteger=" + this.isInteger + ", min=" + this.min + ", max=" + this.max + "]";
 	}
 
 	@Override
-	public boolean contains(Object item) {
-		if (!(item instanceof Number))
+	public boolean contains(final Object item) {
+		if (!(item instanceof Number)) {
 			return false;
-		Double n = (Double)item;
-		return n >= min && n <= max;
+		}
+		Double n = (Double) item;
+		return n >= this.min && n <= this.max;
 	}
 
 	@Override
-	public boolean subsumes(ParameterDomain otherDomain) {
-		if (!(otherDomain instanceof NumericParameterDomain))
+	public boolean subsumes(final IParameterDomain otherDomain) {
+		if (!(otherDomain instanceof NumericParameterDomain)) {
 			return false;
-		NumericParameterDomain otherNumericDomain = (NumericParameterDomain)otherDomain;
-		if (this.isInteger && !otherNumericDomain.isInteger)
+		}
+		NumericParameterDomain otherNumericDomain = (NumericParameterDomain) otherDomain;
+		if (this.isInteger && !otherNumericDomain.isInteger) {
 			return false;
+		}
 		return this.min <= otherNumericDomain.getMin() && this.max >= otherNumericDomain.getMax();
 	}
 
@@ -54,30 +57,36 @@ public class NumericParameterDomain extends ParameterDomain {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (isInteger ? 1231 : 1237);
+		result = prime * result + (this.isInteger ? 1231 : 1237);
 		long temp;
-		temp = Double.doubleToLongBits(max);
+		temp = Double.doubleToLongBits(this.max);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(min);
+		temp = Double.doubleToLongBits(this.min);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		NumericParameterDomain other = (NumericParameterDomain) obj;
-		if (isInteger != other.isInteger)
+		if (this.isInteger != other.isInteger) {
 			return false;
-		if (Double.doubleToLongBits(max) != Double.doubleToLongBits(other.max))
+		}
+		if (Double.doubleToLongBits(this.max) != Double.doubleToLongBits(other.max)) {
 			return false;
-		if (Double.doubleToLongBits(min) != Double.doubleToLongBits(other.min))
+		}
+		if (Double.doubleToLongBits(this.min) != Double.doubleToLongBits(other.min)) {
 			return false;
+		}
 		return true;
 	}
 }

@@ -16,11 +16,9 @@ import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.OptionHandler;
-
 
 /**
- * 
+ *
  * @author Felix Mohr
  *
  */
@@ -28,56 +26,63 @@ import weka.core.OptionHandler;
 public class MLPipeline implements Classifier, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(MLPipeline.class);
-	
+
 	private final List<SupervisedFilterSelector> preprocessors = new ArrayList<>();
 	private final Classifier baseClassifier;
-	private boolean trained = false;
-	private int timeForTrainingPreprocessors, timeForTrainingClassifier;
-	private DescriptiveStatistics timeForExecutingPreprocessors, timeForExecutingClassifier;
 
-	public MLPipeline(List<SupervisedFilterSelector> preprocessors, Classifier baseClassifier) {
+	private boolean trained = false;
+
+	private int timeForTrainingPreprocessors;
+	private int timeForTrainingClassifier;
+
+	private DescriptiveStatistics timeForExecutingPreprocessors;
+	private DescriptiveStatistics timeForExecutingClassifier;
+
+	public MLPipeline(final List<SupervisedFilterSelector> preprocessors, final Classifier baseClassifier) {
 		super();
-		if (baseClassifier == null)
+		if (baseClassifier == null) {
 			throw new IllegalArgumentException("Base classifier must not be null!");
+		}
 		this.preprocessors.addAll(preprocessors);
 		this.baseClassifier = baseClassifier;
 	}
 
-	public MLPipeline(ASSearch searcher, ASEvaluation evaluator, Classifier baseClassifier) {
+	public MLPipeline(final ASSearch searcher, final ASEvaluation evaluator, final Classifier baseClassifier) {
 		super();
-		if (baseClassifier == null)
+		if (baseClassifier == null) {
 			throw new IllegalArgumentException("Base classifier must not be null!");
+		}
 		if (searcher != null && evaluator != null) {
 			AttributeSelection selector = new AttributeSelection();
 			selector.setSearch(searcher);
 			selector.setEvaluator(evaluator);
-			preprocessors.add(new SupervisedFilterSelector(searcher, evaluator, selector));
+			this.preprocessors.add(new SupervisedFilterSelector(searcher, evaluator, selector));
 		}
 		this.baseClassifier = baseClassifier;
 	}
 
 	@Override
 	public void buildClassifier(Instances data) throws Exception {
-		
+
 		/* reduce dimensionality */
-		long start = System.currentTimeMillis();
+		long start;
 		int numAttributesBefore = data.numAttributes();
 		logger.info("Starting to build the preprocessors of the pipeline.");
-		
-		for (SupervisedFilterSelector pp : preprocessors) {
+
+		for (SupervisedFilterSelector pp : this.preprocessors) {
 
 			/* if the filter has not been trained yet, do so now and store it */
 			if (!pp.isPrepared()) {
 				try {
 					start = System.currentTimeMillis();
 					pp.prepare(data);
-					timeForTrainingPreprocessors = (int)(System.currentTimeMillis() - start);
+					this.timeForTrainingPreprocessors = (int) (System.currentTimeMillis() - start);
 					int newNumberOfClasses = pp.apply(data).numClasses();
 					if (data.numClasses() != newNumberOfClasses) {
-						System.out.println(pp.getSelector() + " changed number of classes from " + data.numClasses() + " to " + newNumberOfClasses);
+						logger.info("{} changed number of classes from {} to {}", pp.getSelector(), data.numClasses(), newNumberOfClasses);
 					}
 				} catch (NullPointerException e) {
-					e.printStackTrace();
+					logger.error("Could not apply preprocessor", e);
 				}
 			}
 
@@ -88,112 +93,96 @@ public class MLPipeline implements Classifier, Serializable {
 
 		/* build classifier based on reduced data */
 		start = System.currentTimeMillis();
-		baseClassifier.buildClassifier(data);
-		timeForTrainingClassifier = (int)(System.currentTimeMillis() - start);
-		trained = true;
-		timeForExecutingPreprocessors = new DescriptiveStatistics();
-		timeForExecutingClassifier = new DescriptiveStatistics();
+		this.baseClassifier.buildClassifier(data);
+		this.timeForTrainingClassifier = (int) (System.currentTimeMillis() - start);
+		this.trained = true;
+		this.timeForExecutingPreprocessors = new DescriptiveStatistics();
+		this.timeForExecutingClassifier = new DescriptiveStatistics();
 	}
 
 	private Instance applyPreprocessors(Instance data) throws Exception {
 		long start = System.currentTimeMillis();
-		for (SupervisedFilterSelector pp : preprocessors) {
+		for (SupervisedFilterSelector pp : this.preprocessors) {
 			data = pp.apply(data);
 		}
-		timeForExecutingPreprocessors.addValue((int)(System.currentTimeMillis() - start));
+		this.timeForExecutingPreprocessors.addValue((int) (System.currentTimeMillis() - start));
 		return data;
 	}
 
 	@Override
 	public double classifyInstance(Instance arg0) throws Exception {
-		if (!trained)
+		if (!this.trained) {
 			throw new IllegalStateException("Cannot make predictions on untrained pipeline!");
+		}
 		int numAttributesBefore = arg0.numAttributes();
-		arg0 = applyPreprocessors(arg0);
-		if (numAttributesBefore != arg0.numAttributes())
+		arg0 = this.applyPreprocessors(arg0);
+		if (numAttributesBefore != arg0.numAttributes()) {
 			logger.info("Reduced number of attributes from {} to {}", numAttributesBefore, arg0.numAttributes());
+		}
 		long start = System.currentTimeMillis();
-		double result = baseClassifier.classifyInstance(arg0);
-		timeForExecutingClassifier.addValue((System.currentTimeMillis() - start));
+		double result = this.baseClassifier.classifyInstance(arg0);
+		this.timeForExecutingClassifier.addValue((System.currentTimeMillis() - start));
 		return result;
 	}
-	
-	public double[] classifyInstances(Instances arg0) throws Exception {
+
+	public double[] classifyInstances(final Instances arg0) throws Exception {
 		int n = arg0.size();
 		double[] answers = new double[n];
-		for (int i = 0; i < n; i++)
-			answers[i] = classifyInstance(arg0.get(i));
+		for (int i = 0; i < n; i++) {
+			answers[i] = this.classifyInstance(arg0.get(i));
+		}
 		return answers;
 	}
 
 	@Override
 	public double[] distributionForInstance(Instance arg0) throws Exception {
-		if (!trained)
+		if (!this.trained) {
 			throw new IllegalStateException("Cannot make predictions on untrained pipeline!");
-		if (arg0 == null)
+		}
+		if (arg0 == null) {
 			throw new IllegalArgumentException("Cannot make predictions for null-instance");
-		arg0 = applyPreprocessors(arg0);
-		if (arg0 == null)
+		}
+		arg0 = this.applyPreprocessors(arg0);
+		if (arg0 == null) {
 			throw new IllegalStateException("The filter has turned the instance into NULL");
+		}
 		long start = System.currentTimeMillis();
-		double[] result = baseClassifier.distributionForInstance(arg0);
-		timeForExecutingClassifier.addValue((int)(System.currentTimeMillis() - start));
+		double[] result = this.baseClassifier.distributionForInstance(arg0);
+		this.timeForExecutingClassifier.addValue((int) (System.currentTimeMillis() - start));
 		return result;
 	}
 
 	@Override
 	public Capabilities getCapabilities() {
-		return baseClassifier.getCapabilities();
+		return this.baseClassifier.getCapabilities();
 	}
 
 	public Classifier getBaseClassifier() {
-		return baseClassifier;
+		return this.baseClassifier;
 	}
 
 	public List<SupervisedFilterSelector> getPreprocessors() {
-		return preprocessors;
+		return this.preprocessors;
 	}
 
 	@Override
 	public String toString() {
-		return getPreprocessors() + " (preprocessors), " + WekaUtil.getClassifierDescriptor(getBaseClassifier()) + " (classifier)";
+		return this.getPreprocessors() + " (preprocessors), " + WekaUtil.getClassifierDescriptor(this.getBaseClassifier()) + " (classifier)";
 	}
 
 	public long getTimeForTrainingPreprocessor() {
-		return timeForTrainingPreprocessors;
+		return this.timeForTrainingPreprocessors;
 	}
 
 	public long getTimeForTrainingClassifier() {
-		return timeForTrainingClassifier;
+		return this.timeForTrainingClassifier;
 	}
 
 	public DescriptiveStatistics getTimeForExecutingPreprocessor() {
-		return timeForExecutingPreprocessors;
+		return this.timeForExecutingPreprocessors;
 	}
 
 	public DescriptiveStatistics getTimeForExecutingClassifier() {
-		return timeForExecutingClassifier;
-	}
-
-	public MLPipeline clone() {
-		List<SupervisedFilterSelector> clonedPreprocessing = new ArrayList<>();
-		try {
-			
-			/* clone preprocessing */
-			for (SupervisedFilterSelector s : preprocessors) {
-				ASSearch search = s.getSearcher();
-				ASSearch searchClone = ASSearch.forName(search.getClass().getName(), (search instanceof OptionHandler) ? ((OptionHandler) search).getOptions() : new String[] {});
-				ASEvaluation eval = s.getEvaluator();
-				ASEvaluation evalClone = ASEvaluation.forName(eval.getClass().getName(), (eval instanceof OptionHandler) ? ((OptionHandler) eval).getOptions() : new String[] {});
-				clonedPreprocessing.add(new SupervisedFilterSelector(searchClone, evalClone));
-			}
-			
-			/* clone classifier */
-			Classifier classifierClone = WekaUtil.cloneClassifier(baseClassifier);
-			return new MLPipeline(clonedPreprocessing, classifierClone);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+		return this.timeForExecutingClassifier;
 	}
 }

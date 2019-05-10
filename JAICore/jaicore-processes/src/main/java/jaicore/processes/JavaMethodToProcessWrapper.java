@@ -13,15 +13,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.FileUtil;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.timing.TimedComputation;
 
 /**
  * This class outsources the call to an arbitrary method into a separate process. This is specifically relevant if you work with libraries that do no respect the interrupt-functionality.
@@ -79,17 +79,13 @@ public class JavaMethodToProcessWrapper {
 	 * @throws InterruptedException
 	 *             This is only thrown if the executing thread is interrupted from *outside* but not when it is canceled due to the timeout
 	 */
-	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final int timeout, final Object... inputs) throws IOException, InvocationTargetException, InterruptedException {
-		TimeoutSubmitter submitter = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask timerTask = submitter.interruptMeAfterMS(timeout, "Process has timed out!");
+	public Optional<Object> runWithTimeout(final String clazz, final String method, final Object target, final int timeout, final Object... inputs) throws AlgorithmTimeoutedException, InvocationTargetException, InterruptedException {
 		Object c;
 		try {
-			c = this.run(clazz, method, target, inputs);
-		} catch (Exception e) {
-			submitter.close();
-			throw e;
+			c = TimedComputation.compute(() -> this.run(clazz, method, target, inputs), timeout, "Process has timed out!");
+		} catch (ExecutionException e) {
+			throw new InvocationTargetException(e.getCause());
 		}
-		timerTask.cancel();
 		if (Thread.interrupted()) {
 			throw new IllegalStateException("We got interrupted but no InterruptedException was thrown!");
 		}
