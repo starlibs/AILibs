@@ -46,6 +46,7 @@
     </layout>
   </appender>
 
+<<<<<<< HEAD
   <logger name="de.upb.crc901">
     <level value="warn" />
     <appender-ref ref="console" />
@@ -94,6 +95,52 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   <logger name="sklmlplanc.mlplan.optimizingfactory">
+=======
+	<appender name="traceFileAppender" class="org.apache.log4j.FileAppender">
+		<param name="File" value="logs/trace.log" />
+		<param name="Threshold" value="TRACE" />
+		<param name="Append" value="false" />
+		<layout class="org.apache.log4j.PatternLayout">
+			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+		</layout>
+	</appender>
+
+	<logger name="jaicore">
+		<level value="warn" />
+<!-- 		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+ -->		<appender-ref ref="warnFileAppender" />
+<!-- 		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" />
+ -->	</logger>
+
+	<logger name="de.upb.crc901">
+		<level value="warn" />
+		<appender-ref ref="console" />
+<!-- 		<appender-ref ref="infoFileAppender" />
+ -->		<appender-ref ref="warnFileAppender" />
+<!-- 		<appender-ref ref="errFileAppender" />
+		<appender-ref ref="traceFileAppender" /> -->
+	</logger>
+	
+	<logger name="hasco">
+		<level value="warn" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender"/>
+	</logger>
+	
+	<logger name="mlplan">
+		<level value="debug" />
+		<appender-ref ref="console" />
+		<appender-ref ref="infoFileAppender" />
+	</logger>
+	
+	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
+		<level value="off" />
+	</logger>
+	
+	<logger name="mlplan.2phasehasco.optimizer.hasco">
+>>>>>>> 4838afbf5d94b068c61e84a148886055828acd5b
     <level value="warn" />
   </logger>
   <logger name="sklmlplanc.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">

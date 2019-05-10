@@ -1,5 +1,6 @@
 package hasco.core;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,9 @@ public class isNotRefinable implements EvaluablePredicate {
 		super();
 		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration);
 	}
+
 	
+
 	@Override
 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(Monom state, ConstantParam... partialGrounding) {
 		throw new UnsupportedOperationException();

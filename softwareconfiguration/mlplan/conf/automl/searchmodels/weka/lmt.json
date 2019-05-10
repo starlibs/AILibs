@@ -1,0 +1,82 @@
+{
+	"repository": "LMT",
+	"components": [
+		{
+			"name": "weka.classifiers.trees.LMT",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"WekaBaseClassifier",
+				"BaseClassifier"
+			],
+			"parameter": [
+				{
+					"name": "B",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "R",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "C",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "P",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "M",
+					"type": "int",
+					"default": 15.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "WActivator",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1"
+					]
+				},
+				{
+					"name": "W",
+					"type": "double",
+					"default": "0",
+					"values": [
+						"0"
+					],
+					"min": 0.0,
+					"max": 0.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "A",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "WActivator in {0}",
+					"post": "W in {0}"
+				},
+				{
+					"pre": "WActivator in {1}",
+					"post": "W in [0.0,1.0]"
+				}
+			]
+		}
+	]
+}
