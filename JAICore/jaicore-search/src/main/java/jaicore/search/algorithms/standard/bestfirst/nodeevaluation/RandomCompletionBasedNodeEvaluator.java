@@ -170,7 +170,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					if (path.size() > 1 && !nodeHasSibling && parentHasFValue) {
 						V score = this.fValues.get(n.getParent());
 						this.fValues.put(n, score);
-						this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
+						this.logger.debug("Score {} of parent is used since the last action did not affect the performance.", score);
 						if (score == null) {
 							this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
 						}
