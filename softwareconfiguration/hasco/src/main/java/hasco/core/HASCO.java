@@ -209,6 +209,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			/* step search */
 			this.logger.debug("Stepping search algorithm.");
 			AlgorithmEvent searchEvent = this.search.nextWithException();
+			this.logger.debug("Search step completed, observed {}.", searchEvent.getClass().getName());
 			if (searchEvent instanceof AlgorithmFinishedEvent) {
 				this.logger.info("The search algorithm has finished. Terminating HASCO.");
 				return this.terminate();

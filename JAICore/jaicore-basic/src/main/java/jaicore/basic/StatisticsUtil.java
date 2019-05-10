@@ -26,8 +26,8 @@ public class StatisticsUtil {
 	 * @param values Values to take the maximum from.
 	 * @return The maximum value of the provided collection.
 	 */
-	public static double max(final Collection<Double> values) {
-		return values.stream().mapToDouble(x -> x).max().getAsDouble();
+	public static double max(final Collection<? extends Number> values) {
+		return values.stream().mapToDouble(x -> x.doubleValue()).max().getAsDouble();
 	}
 
 	/**
@@ -36,8 +36,8 @@ public class StatisticsUtil {
 	 * @param values Values to take the minimum from.
 	 * @return The minimum value of the provided collection.
 	 */
-	public static double min(final Collection<Double> values) {
-		return values.stream().mapToDouble(x -> x).min().getAsDouble();
+	public static double min(final Collection<? extends Number> values) {
+		return values.stream().mapToDouble(x -> x.doubleValue()).min().getAsDouble();
 	}
 
 	/**
@@ -46,8 +46,8 @@ public class StatisticsUtil {
 	 * @param values Values to take the mean of.
 	 * @return The mean of the provided values.
 	 */
-	public static double mean(final Collection<Double> values) {
-		return values.stream().mapToDouble(x -> x).average().getAsDouble();
+	public static double mean(final Collection<? extends Number> values) {
+		return values.stream().mapToDouble(x -> x.doubleValue()).average().getAsDouble();
 	}
 
 	/**
@@ -56,8 +56,8 @@ public class StatisticsUtil {
 	 * @param values Values to take the sum of.
 	 * @return The sum of the provided values.
 	 */
-	public static double sum(final Collection<Double> values) {
-		return values.stream().mapToDouble(x -> x).sum();
+	public static double sum(final Collection<? extends Number> values) {
+		return values.stream().mapToDouble(x -> x.doubleValue()).sum();
 	}
 
 	/**
@@ -66,9 +66,9 @@ public class StatisticsUtil {
 	 * @param values Values to compute the variance for.
 	 * @return The variance of the provided values.
 	 */
-	public static double variance(final Collection<Double> values) {
+	public static double variance(final Collection<? extends Number> values) {
 		final double mean = mean(values);
-		return values.stream().mapToDouble(x -> x).map(x -> Math.pow(x - mean, 2) / values.size()).sum();
+		return values.stream().mapToDouble(x -> x.doubleValue()).map(x -> Math.pow(x - mean, 2) / values.size()).sum();
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class StatisticsUtil {
 	 * @param values Values to compute the standard deviation for.
 	 * @return The standard deviation of the provided values.
 	 */
-	public static double standardDeviation(final Collection<Double> values) {
+	public static double standardDeviation(final Collection<? extends Number> values) {
 		return Math.sqrt(variance(values));
 	}
 
