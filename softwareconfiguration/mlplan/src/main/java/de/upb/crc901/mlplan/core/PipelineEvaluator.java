@@ -71,9 +71,9 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			}
 			Classifier classifier = this.classifierFactory.getComponentInstantiation(c);
 			this.eventBus.post(new ClassifierCreatedEvent(c, classifier)); // inform listeners about the creation of the classifier
-			this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, classifier);
+			this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, classifier.getClass().getName());
 			Double score = this.benchmark.evaluate(classifier);
-			this.logger.info("Obtained score {} for classifier {}", score, classifier);
+			this.logger.info("Obtained score {} for classifier {}", score, classifier.getClass().getName());
 			return score;
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);

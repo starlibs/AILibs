@@ -175,8 +175,13 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 				this.hasco.call();
 			} catch (AlgorithmExecutionCanceledException e) {
 				this.logger.info("HASCO has terminated due to a cancel.");
+				if (this.isCanceled()) {
+					throw new AlgorithmExecutionCanceledException(e.getDelay());
+				}
 			} catch (AlgorithmTimeoutedException e) {
 				this.logger.warn("HASCO has timeouted. In fact, time to deadline is {}ms", this.getTimeout().milliseconds() - (System.currentTimeMillis() - this.timeOfStart));
+			} finally {
+				this.phase1CancellationTask.cancel();
 			}
 			this.secondsSpentInPhase1 = (int) Math.round(System.currentTimeMillis() - this.timeOfStart / 1000.0);
 

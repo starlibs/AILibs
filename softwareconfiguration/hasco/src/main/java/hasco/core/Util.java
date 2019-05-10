@@ -23,9 +23,9 @@ import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Dependency;
+import hasco.model.IParameterDomain;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
-import hasco.model.IParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
@@ -207,7 +207,7 @@ public class Util {
 			for (Parameter p : object.getComponent().getParameters()) {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
-				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined!";
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: " + state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);

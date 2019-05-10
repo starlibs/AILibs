@@ -47,37 +47,37 @@ import weka.core.converters.ConverterUtils.DataSink;
 public abstract class AutoMLAlgorithmResultProductionTester {
 
 	private static final Logger logger = LoggerFactory.getLogger(AutoMLAlgorithmResultProductionTester.class);
-	private static final TimeOut timeout = new TimeOut(60, TimeUnit.SECONDS);
+	private static final TimeOut timeout = new TimeOut(2, TimeUnit.MINUTES);
 
 	// creates the test data
 	@Parameters(name = "{0}")
 	public static Collection<OpenMLProblemSet[]> data() throws IOException, Exception {
 		List<OpenMLProblemSet> problemSets = new ArrayList<>();
-		//		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
-		//		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
-		//		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
+		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
+		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
+		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 		//		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
 		//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
-		//		problemSets.add(new OpenMLProblemSet(1457)); // amazon
-		//		problemSets.add(new OpenMLProblemSet(1501)); // semeion
+		problemSets.add(new OpenMLProblemSet(1457)); // amazon
+		problemSets.add(new OpenMLProblemSet(1501)); // semeion
 		//		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
-		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
+		//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
 		//		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
-		//		problemSets.add(new OpenMLProblemSet(1590)); // adult
+		problemSets.add(new OpenMLProblemSet(1590)); // adult
 		//		problemSets.add(new OpenMLProblemSet(182)); // satimage
-		//		problemSets.add(new OpenMLProblemSet(24)); // mushroom
-		//		problemSets.add(new OpenMLProblemSet(39)); // ecoli
-		//		problemSets.add(new OpenMLProblemSet(44)); // spambase
-		//		problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
-		//		problemSets.add(new OpenMLProblemSet(61)); // iris
-		//		problemSets.add(new OpenMLProblemSet(9)); // autos
+		//				problemSets.add(new OpenMLProblemSet(24)); // mushroom
+		problemSets.add(new OpenMLProblemSet(39)); // ecoli
+		problemSets.add(new OpenMLProblemSet(44)); // spambase
+		problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
+		problemSets.add(new OpenMLProblemSet(61)); // iris
+		problemSets.add(new OpenMLProblemSet(9)); // autos
 		//		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
 		//		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
 		//		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
-		//		problemSets.add(new OpenMLProblemSet(554)); // mnist
+		problemSets.add(new OpenMLProblemSet(554)); // mnist
 		//		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 		//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
-		//		problemSets.add(new OpenMLProblemSet(40691)); // winequality
+		problemSets.add(new OpenMLProblemSet(40691)); // winequality
 
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
 		for (int i = 0; i < data.length; i++) {
