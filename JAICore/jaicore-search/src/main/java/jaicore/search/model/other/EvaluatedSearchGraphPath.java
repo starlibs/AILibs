@@ -2,7 +2,7 @@ package jaicore.search.model.other;
 
 import java.util.List;
 
-import jaicore.basic.ScoredItem;
+import ai.libs.jaicore.basic.ScoredItem;
 
 public class EvaluatedSearchGraphPath<N, A, V extends Comparable<V>> extends SearchGraphPath<N, A> implements ScoredItem<V> {
 	private final V score;

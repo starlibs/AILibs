@@ -11,16 +11,16 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmState;
-import jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
-import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmState;
+import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
+import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
+import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;

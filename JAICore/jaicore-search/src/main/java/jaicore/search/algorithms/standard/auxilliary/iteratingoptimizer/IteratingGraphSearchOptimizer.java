@@ -2,11 +2,11 @@ package jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer;
 
 import com.google.common.eventbus.Subscribe;
 
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;

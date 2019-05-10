@@ -1,11 +1,11 @@
 package jaicore.search.gui.plugins.rollouthistograms;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.graphvisualizer.events.gui.GUIEvent;
-import jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
-import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
-import jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
-import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
+import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
+import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
+import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
+import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 
 public class SearchRolloutHistogramPluginController<N> extends ASimpleMVCPluginController<SearchRolloutHistogramPluginModel<N>, SearchRolloutHistogramPluginView<N>> {

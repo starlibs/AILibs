@@ -1,6 +1,6 @@
 package jaicore.search.core.interfaces;
 
-import jaicore.basic.algorithm.IOptimizationAlgorithm;
+import ai.libs.jaicore.basic.algorithm.IOptimizationAlgorithm;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;
 

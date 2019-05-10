@@ -2,7 +2,7 @@ package jaicore.search.probleminputs;
 
 import java.util.List;
 
-import jaicore.basic.IMetric;
+import ai.libs.jaicore.basic.IMetric;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.Node;

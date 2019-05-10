@@ -6,10 +6,10 @@ import java.util.Stack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
-import jaicore.graphvisualizer.events.graph.NodeAddedEvent;
-import jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
+import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
+import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
+import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;

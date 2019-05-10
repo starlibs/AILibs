@@ -3,9 +3,9 @@ package jaicore.search.core.interfaces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.algorithm.AAlgorithm;
-import jaicore.basic.algorithm.ASolutionCandidateIterator;
-import jaicore.basic.algorithm.IAlgorithmConfig;
+import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.basic.algorithm.ASolutionCandidateIterator;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import jaicore.search.model.other.SearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchInput;

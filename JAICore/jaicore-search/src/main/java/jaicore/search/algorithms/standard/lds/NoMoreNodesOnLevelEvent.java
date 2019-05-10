@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.lds;
 
-import jaicore.basic.algorithm.events.AAlgorithmEvent;
+import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
 
 public class NoMoreNodesOnLevelEvent extends AAlgorithmEvent {
 

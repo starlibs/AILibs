@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst;
 
-import jaicore.basic.algorithm.IAlgorithmConfig;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst.ParentDiscarding;
 
 public interface IBestFirstConfig extends IAlgorithmConfig {

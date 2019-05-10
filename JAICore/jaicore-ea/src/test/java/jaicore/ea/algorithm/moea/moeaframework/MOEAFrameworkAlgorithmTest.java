@@ -5,9 +5,14 @@ import java.util.concurrent.TimeoutException;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
+
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.ea.algorithm.moea.moeaframework.IMOEAFrameworkAlgorithmConfig;
+import ai.libs.jaicore.ea.algorithm.moea.moeaframework.IMOEAFrameworkAlgorithmInput;
+import ai.libs.jaicore.ea.algorithm.moea.moeaframework.MOEAFrameworkAlgorithm;
+import ai.libs.jaicore.ea.algorithm.moea.moeaframework.MOEAFrameworkAlgorithmResult;
+import ai.libs.jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
 
 public class MOEAFrameworkAlgorithmTest {
 

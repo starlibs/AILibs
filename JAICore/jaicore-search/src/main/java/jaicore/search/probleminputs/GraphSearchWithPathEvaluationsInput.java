@@ -3,8 +3,8 @@ package jaicore.search.probleminputs;
 import java.util.HashMap;
 import java.util.Map;
 
-import jaicore.basic.IObjectEvaluator;
-import jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.basic.IObjectEvaluator;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.SearchGraphPath;
 

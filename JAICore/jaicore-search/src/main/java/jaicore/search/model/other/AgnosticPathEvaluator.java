@@ -1,6 +1,6 @@
 package jaicore.search.model.other;
 
-import jaicore.basic.IObjectEvaluator;
+import ai.libs.jaicore.basic.IObjectEvaluator;
 
 public class AgnosticPathEvaluator<N, A> implements IObjectEvaluator<SearchGraphPath<N, A>, Double> {
 

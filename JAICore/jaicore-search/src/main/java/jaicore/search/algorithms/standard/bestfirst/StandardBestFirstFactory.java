@@ -6,8 +6,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.ILoggingCustomizable;
-import jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.core.interfaces.GraphGenerator;

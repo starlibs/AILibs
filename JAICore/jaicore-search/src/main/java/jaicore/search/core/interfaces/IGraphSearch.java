@@ -1,6 +1,6 @@
 package jaicore.search.core.interfaces;
 
-import jaicore.basic.algorithm.IAlgorithm;
+import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import jaicore.search.probleminputs.GraphSearchInput;
 
 /**

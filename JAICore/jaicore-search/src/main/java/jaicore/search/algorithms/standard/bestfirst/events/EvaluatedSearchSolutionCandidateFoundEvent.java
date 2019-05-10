@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst.events;
 
-import jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent;
+import ai.libs.jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 
 public class EvaluatedSearchSolutionCandidateFoundEvent<N, A, V extends Comparable<V>> extends GraphSearchSolutionCandidateFoundEvent<N, A, EvaluatedSearchGraphPath<N, A, V>> implements ScoredSolutionCandidateFoundEvent<EvaluatedSearchGraphPath<N, A, V>, V> {

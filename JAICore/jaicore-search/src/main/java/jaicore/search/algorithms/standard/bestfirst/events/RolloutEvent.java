@@ -2,7 +2,7 @@ package jaicore.search.algorithms.standard.bestfirst.events;
 
 import java.util.List;
 
-import jaicore.basic.algorithm.events.AAlgorithmEvent;
+import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
 
 public class RolloutEvent<N, V extends Comparable<V>> extends AAlgorithmEvent {
 

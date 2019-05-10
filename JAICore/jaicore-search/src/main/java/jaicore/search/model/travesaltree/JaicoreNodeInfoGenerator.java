@@ -4,7 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 
 public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements NodeInfoGenerator<Node<N, V>> {
 

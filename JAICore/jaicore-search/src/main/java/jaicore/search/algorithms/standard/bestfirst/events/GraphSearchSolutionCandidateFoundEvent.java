@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst.events;
 
-import jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
+import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
 import jaicore.search.model.other.SearchGraphPath;
 
 /**

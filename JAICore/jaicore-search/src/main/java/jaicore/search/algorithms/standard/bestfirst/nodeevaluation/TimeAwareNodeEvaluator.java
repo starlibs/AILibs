@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.timing.TimedComputation;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
-import jaicore.timing.TimedComputation;
 
 /**
  * This class can be used to create node evaluators with a time limit for the evaluation of each node.

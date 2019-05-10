@@ -1,6 +1,6 @@
 package jaicore.search.core.interfaces;
 
-import jaicore.basic.algorithm.IAlgorithmFactory;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 
 public interface IGraphSearchFactory<I extends GraphSearchInput<N, A>, O, N, A> extends IAlgorithmFactory<I, O> {

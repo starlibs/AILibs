@@ -3,8 +3,8 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.HashMap;
 import java.util.Map;
 
-import jaicore.basic.ILoggingCustomizable;
-import jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.Node;

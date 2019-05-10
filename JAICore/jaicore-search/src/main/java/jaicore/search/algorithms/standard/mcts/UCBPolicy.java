@@ -10,7 +10,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.basic.ILoggingCustomizable;
 
 public class UCBPolicy<T,A> implements IPathUpdatablePolicy<T,A,Double>, ILoggingCustomizable {
 	

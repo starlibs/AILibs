@@ -1,7 +1,7 @@
 package jaicore.search.gui.plugins.rollouthistograms;
 
-import jaicore.graphvisualizer.events.gui.Histogram;
-import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
+import ai.libs.jaicore.graphvisualizer.events.gui.Histogram;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
 import javafx.scene.layout.FlowPane;
 

@@ -1,6 +1,6 @@
 package jaicore.search.problemtransformers;
 
-import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.model.other.EvaluatedSearchGraphPath;
 import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;

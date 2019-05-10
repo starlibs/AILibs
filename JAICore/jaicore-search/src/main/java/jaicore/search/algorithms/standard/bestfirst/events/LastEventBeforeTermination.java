@@ -1,6 +1,6 @@
 package jaicore.search.algorithms.standard.bestfirst.events;
 
-import jaicore.basic.algorithm.events.AAlgorithmEvent;
+import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
 
 public class LastEventBeforeTermination extends AAlgorithmEvent {
 

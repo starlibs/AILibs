@@ -3,6 +3,8 @@ package jaicore.ea.algorithm.moea.moeaframework;
 import org.moeaframework.problem.AbstractProblem;
 import org.moeaframework.problem.CEC2009.CF5;
 
+import ai.libs.jaicore.ea.algorithm.moea.moeaframework.IMOEAFrameworkAlgorithmInput;
+
 public class SimpleTestProblem implements IMOEAFrameworkAlgorithmInput {
 
 	private final int numberOfVariables;

@@ -1,6 +1,6 @@
 package jaicore.search.core.interfaces;
 
-import jaicore.basic.IObjectEvaluator;
+import ai.libs.jaicore.basic.IObjectEvaluator;
 import jaicore.search.model.other.SearchGraphPath;
 
 /**

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class Node<T, V extends Comparable<V>> {
 	private final T externalLabel;

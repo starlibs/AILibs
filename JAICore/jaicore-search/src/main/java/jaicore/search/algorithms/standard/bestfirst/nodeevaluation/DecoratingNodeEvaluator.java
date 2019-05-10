@@ -3,7 +3,7 @@ package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.basic.ILoggingCustomizable;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.travesaltree.Node;

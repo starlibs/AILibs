@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.sets.SetUtil;
 import jaicore.search.model.travesaltree.Node;
 
 /**
