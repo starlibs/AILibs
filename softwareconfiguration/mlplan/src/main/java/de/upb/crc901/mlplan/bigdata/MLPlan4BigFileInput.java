@@ -68,40 +68,6 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				throw new AlgorithmException(e, "Could not create a sub-sample of the given data.");
 			}
 
-			/* reduce dimensionality */
-			// Collection<List<String>> preprocessors = WekaUtil.getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection();
-			// Map<String, int[]> selectedAttributes = new HashMap<>();
-			// preprocessors.parallelStream().forEach(l -> {
-			// try {
-			// AttributeSelection p = new AttributeSelection();
-			// p.setSearch(ASSearch.forName(l.get(0), new String[] {}));
-			// p.setEvaluator(ASEvaluation.forName(l.get(1), new String[] {}));
-			// this.logger.info("Starting feature selection with {}", l);
-			// p.SelectAttributes(data);
-			// selectedAttributes.put(p.getClass().getName(), p.selectedAttributes());
-			// this.logger.info("Finished feature selection with {}. Selected {}/{} attributes", l, p.selectedAttributes().length, data.numAttributes());
-			// } catch (Exception e) {
-			// e.printStackTrace();
-			// }
-			// });
-			// selectedAttributes.entrySet().forEach(e -> {
-			// this.logger.info("Attributes selected by {}: {}", e.getKey(), e.getValue());
-			// });
-			// System.exit(0);
-
-			// try {
-			// AttributeSelection as = new AttributeSelection();
-			// as.setSearch(new GreedyStepwise());
-			// as.setEvaluator(new CfsSubsetEval());
-			// as.SelectAttributes(data);
-			// int featuresBefore = data.numAttributes();
-			// data = as.reduceDimensionality(data);
-			// this.logger.info("Reduced number of features from {} to {}. Dataset is now {}x{}", featuresBefore, data.numAttributes(), data.size(), data.numAttributes());
-			// }
-			// catch (Exception e) {
-			// throw new AlgorithmException(e, "Could not reduce dimensionality of down-sampled data");
-			// }
-
 			/* apply ML-Plan to reduced data */
 			MLPlanWekaBuilder builder;
 			try {

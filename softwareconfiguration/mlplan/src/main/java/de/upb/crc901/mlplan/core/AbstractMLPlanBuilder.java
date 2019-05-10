@@ -78,7 +78,6 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	private IClassifierFactory classifierFactory;
 
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
-	private File preferredComponentsFile;
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 	/* The splitter is used to create the split for separating search and selection data */
 	private IDatasetSplitter searchSelectionDatasetSplitter;

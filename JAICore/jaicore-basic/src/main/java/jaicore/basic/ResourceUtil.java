@@ -15,6 +15,10 @@ import java.util.List;
  */
 public class ResourceUtil {
 
+	private ResourceUtil() {
+		/* Intentionally left blank; simply prevent this util class to be instantiated. */
+	}
+
 	/**
 	 * Reads the contents of a resource to a string.
 	 *
@@ -59,7 +63,6 @@ public class ResourceUtil {
 	 * @return The resource file corresponding to the given path.
 	 */
 	public static File getResourceAsFile(final String path) {
-		String resFile = ResourceUtil.class.getClassLoader().getResource(path).getFile();
 		return new File(ResourceUtil.class.getClassLoader().getResource(path).getFile());
 	}
 

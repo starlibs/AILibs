@@ -138,7 +138,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
-			/* active is only one step in this model; this could be refined */
+		/* active is only one step in this model; this could be refined */
 		case active:
 
 			/* phase 1: gather solutions */
@@ -178,7 +178,9 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 			/* phase 2: select model */
 			IObjectEvaluator<?, Double> selectionBenchmark = this.getInput().getSelectionBenchmark();
-			this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Entering phase 2. Solutions seen so far had an (internal) error of {}", this.phase1ResultQueue.stream().map(e -> "\n\t" + e.getScore() + "(" + e.getComponentInstance() + ")").collect(Collectors.joining()));
+			}
 			if (selectionBenchmark instanceof IInformedObjectEvaluatorExtension) {
 				this.logger.debug("Setting best score for selection phase node evaluator to {}", this.phase1ResultQueue.peek().getScore());
 				((IInformedObjectEvaluatorExtension<Double>) selectionBenchmark).updateBestScore(this.phase1ResultQueue.peek().getScore());

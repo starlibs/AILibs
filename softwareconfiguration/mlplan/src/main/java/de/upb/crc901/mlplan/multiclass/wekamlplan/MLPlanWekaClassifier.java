@@ -53,7 +53,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private boolean visualizationEnabled = false;
 
 	/* MLPlan Builder and the instance of mlplan */
-	private final AbstractMLPlanBuilder builder;
+	private final transient AbstractMLPlanBuilder builder;
 
 	/* The timeout for the selecting a classifier. */
 	private TimeOut timeout;

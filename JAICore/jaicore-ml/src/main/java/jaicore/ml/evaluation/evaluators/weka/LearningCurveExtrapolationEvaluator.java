@@ -37,7 +37,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
 	private int fullDatasetSize = -1;
-	private final boolean evaluateAccuracy = false; // otherwise error rate
+	private static final boolean EVALUATE_ACCURACY = false; // otherwise error rate
 
 	/**
 	 * Create a classifier evaluator with learning curve extrapolation.
@@ -88,7 +88,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 				evaluationPoint = this.fullDatasetSize;
 			}
 
-			return this.evaluateAccuracy ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
+			return this.EVALUATE_ACCURACY ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
 		} catch (AlgorithmException | InvalidAnchorPointsException e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;

@@ -1,5 +1,7 @@
 package de.upb.crc901.automl.mlplan.bigdata;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
 import java.io.FileReader;
 import java.util.List;
@@ -17,7 +19,7 @@ public class MLPlan4BigFileInputTester {
 
 	@Test
 	public void test() throws Exception {
-		//		MLPlan4BigFileInput mlplan = new MLPlan4BigFileInput(new File("testrsc/openml/41103.arff"));
+		// MLPlan4BigFileInput mlplan = new MLPlan4BigFileInput(new File("testrsc/openml/41103.arff"));
 
 		String origDataSrcName = "testrsc/openml/41103.arff";
 
@@ -46,5 +48,7 @@ public class MLPlan4BigFileInputTester {
 		Evaluation eval = new Evaluation(testData);
 		eval.evaluateModel(c, testData);
 		System.out.println(eval.toSummaryString());
+
+		assertNotNull(c);
 	}
 }
