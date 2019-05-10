@@ -42,7 +42,7 @@ public class SKLearnClassifierFactory implements IClassifierFactory, ILoggingCus
 		importSet.forEach(imports::append);
 
 		try {
-			return new ScikitLearnWrapper(constructInstruction.toString(), imports.toString());
+			return new ScikitLearnWrapper(constructInstruction.toString(), imports.toString(), true);
 		} catch (IOException e) {
 			this.logger.error("Could not create sklearn wrapper for construction {} and imports {}.", constructInstruction, imports);
 			return null;
@@ -51,7 +51,6 @@ public class SKLearnClassifierFactory implements IClassifierFactory, ILoggingCus
 
 	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
-
 		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source"), importSet));
 			sb.append(",");
@@ -68,6 +67,11 @@ public class SKLearnClassifierFactory implements IClassifierFactory, ILoggingCus
 		String className = packagePathSplit[packagePathSplit.length - 1];
 
 		importSet.add("from " + fromSB.toString() + " import " + className + "\n");
+
+		if (groundComponent.getComponent().getName().startsWith("sklearn.feature_selection.f_classif")) {
+			sb.append("sklearn.feature_selection.f_classif(features, targets)");
+			return sb.toString();
+		}
 
 		sb.append(className);
 		sb.append("(");

@@ -85,7 +85,7 @@
   </logger>
 	
 	<logger name="testedalgorithm">
-    <level value="debug" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -95,11 +95,11 @@
   </logger>
   
   <logger name="jaicore.timing">
-    <level value="trace" />
+    <level value="info" />
   </logger>
   
   <logger name="jaicore.interrupt">
-    <level value="trace" />
+    <level value="info" />
   </logger>
   
   <logger name="testedalgorithm.search">

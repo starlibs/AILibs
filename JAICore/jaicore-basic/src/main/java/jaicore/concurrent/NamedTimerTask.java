@@ -3,7 +3,12 @@ package jaicore.concurrent;
 import java.util.TimerTask;
 
 public abstract class NamedTimerTask extends TimerTask {
+
 	private String descriptor;
+
+	public NamedTimerTask() {
+		this("<unnamed task>");
+	}
 
 	public NamedTimerTask(final String descriptor) {
 		super();

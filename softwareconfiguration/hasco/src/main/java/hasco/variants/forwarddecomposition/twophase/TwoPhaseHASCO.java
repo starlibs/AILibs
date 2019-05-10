@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -41,6 +40,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.sets.SetUtil;
 import jaicore.concurrent.GlobalTimer;
+import jaicore.concurrent.NamedTimerTask;
 import jaicore.logging.LoggerUtil;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.search.core.interfaces.GraphGenerator;
@@ -55,6 +55,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 	/* HASCO configuration */
 	private HASCO<S, N, A, Double> hasco;
+	private NamedTimerTask phase1CancellationTask;
 
 	/** The solution selected during selection phase. */
 	private final Queue<HASCOSolutionCandidate<Double>> phase1ResultQueue = new LinkedBlockingQueue<>();
@@ -128,7 +129,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			AlgorithmInitializedEvent event = this.activate();
 			this.logger.info(
 					"Starting 2-Phase HASCO with the following setup:\n\tCPUs:{},\n\tTimeout: {}s\n\tTimeout per node evaluation: {}ms\n\tTimeout per candidate: {}ms\n\tNumber of Random Completions: {}\n\tExpected blow-ups are {} (selection) and {} (post-processing).\nThe search factory is: {}",
-					this.getNumCPUs(), this.getTimeout(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().numberOfRandomCompletions(),
+					this.getNumCPUs(), this.getTimeout().seconds(), this.getConfig().timeoutForNodeEvaluation(), this.getConfig().timeoutForCandidateEvaluation(), this.getConfig().numberOfRandomCompletions(),
 					this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing(), this.hasco.getSearchFactory());
 			DefaultPathPriorizingPredicate<N, A> prioritizingPredicate = new DefaultPathPriorizingPredicate<>();
 
@@ -138,28 +139,39 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			this.logger.info("Initialized HASCO with start time {}.", this.timeOfStart);
 			return event;
 
-		/* active is only one step in this model; this could be refined */
+			/* active is only one step in this model; this could be refined */
 		case active:
 
 			/* phase 1: gather solutions */
-			GlobalTimer timer = GlobalTimer.getInstance();
-			TimerTask task = new TimerTask() {
+			if (this.hasco.getTimeout().milliseconds() >= 0) {
+				GlobalTimer timer = GlobalTimer.getInstance();
+				this.phase1CancellationTask = new NamedTimerTask() {
 
-				@Override
-				public void run() {
-					int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
-					int timeRemaining = (int) TwoPhaseHASCO.this.getTimeout().milliseconds() - timeElapsed;
-					if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
-						TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
-						TwoPhaseHASCO.this.hasco.cancel();
-						TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart) - timeElapsed);
-						this.cancel();
+					@Override
+					public void run() {
+
+						/* check whether the algorithm has been shutdown, then also cancel this task */
+						if (TwoPhaseHASCO.this.isShutdownInitialized()) {
+							this.cancel();
+							return;
+						}
+
+						/* check termination of phase 1 */
+						int timeElapsed = (int) (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart);
+						int timeRemaining = (int) TwoPhaseHASCO.this.hasco.getTimeout().milliseconds() - timeElapsed;
+						if (timeRemaining < 2000 || TwoPhaseHASCO.this.shouldSearchTerminate(timeRemaining)) {
+							TwoPhaseHASCO.this.logger.info("Canceling HASCO (first phase). {}ms remaining.", timeRemaining);
+							TwoPhaseHASCO.this.hasco.cancel();
+							TwoPhaseHASCO.this.logger.info("HASCO canceled successfully after {}ms", (System.currentTimeMillis() - TwoPhaseHASCO.this.timeOfStart) - timeElapsed);
+							this.cancel();
+						}
 					}
-				}
-			};
+				};
+				this.phase1CancellationTask.setDescriptor("TwoPhaseHASCO task to check termination of phase 1");
+				timer.scheduleAtFixedRate(this.phase1CancellationTask, 1000, 1000);
+			}
 			this.logger.info("Entering phase 1. Calling HASCO with timeout {}.", this.hasco.getTimeout());
 			try {
-				timer.scheduleAtFixedRate(task, 1000, 1000);
 				this.hasco.call();
 			} catch (AlgorithmExecutionCanceledException e) {
 				this.logger.info("HASCO has terminated due to a cancel.");
@@ -194,7 +206,6 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());
 		}
-
 	}
 
 	protected boolean shouldSearchTerminate(final long timeRemaining) {
@@ -237,6 +248,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 		List<HASCOSolutionCandidate<Double>> remainingCandidates = new ArrayList<>(SetUtil.difference(potentialCandidates, selectionCandidates));
 		Collections.shuffle(remainingCandidates, new Random(this.getConfig().randomSeed()));
 		selectionCandidates.addAll(remainingCandidates.stream().limit(randomK).collect(Collectors.toList()));
+		assert selectionCandidates.contains(internallyOptimalSolution);
 		if (this.logger.isTraceEnabled()) {
 			this.logger.trace("Determined the following candidates for selection phase (in this order): {}", selectionCandidates.stream().map(c -> "\n\t" + c.getScore() + ": " + c.getComponentInstance()).collect(Collectors.joining()));
 		}
@@ -473,6 +485,15 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 
 	public Map<HASCOSolutionCandidate<Double>, Double> getSelectionScoresOfCandidates() {
 		return this.selectionScoresOfCandidates;
+	}
+
+	@Override
+	public void shutdown() {
+		this.logger.info("Received shutdown signal. Cancelling phase 1 timer and invoking shutdown on parent.");
+		if (this.phase1CancellationTask != null) {
+			this.phase1CancellationTask.cancel();
+		}
+		super.shutdown();
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.upb.crc901.mlplan.core.events.ClassifierCreatedEvent;
 import de.upb.crc901.mlplan.core.events.ClassifierFoundEvent;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.core.HASCOFactory;
@@ -28,11 +29,12 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationEvent;
 import jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
+import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -50,6 +52,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	private final Instances data;
 	private TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
+
+	private boolean buildSelectedClasifierOnGivenData = true;
 
 	public MLPlan(final IMLPlanBuilder builder, final Instances data) {
 		super(builder.getAlgorithmConfig(), data);
@@ -97,7 +101,11 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
 				this.logger.info("No expected blow-up for selection phase has been defined. Automatically configuring {}", blowUpInSelectionPhase);
 			}
-			if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
+			if (!this.buildSelectedClasifierOnGivenData) {
+				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
+				this.logger.info("Selected classifier won't be built, so now blow-up is calculated.");
+			}
+			else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
 				double blowUpInPostprocessing = 1;
 				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 				this.logger.info("No expected blow-up for postprocessing phase has been defined. Automatically configuring {}", blowUpInPostprocessing);
@@ -105,14 +113,17 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 			/* setup the pipeline evaluators */
 			this.logger.debug("Setting up the pipeline evaluators.");
-			TimedObjectEvaluator<ComponentInstance, Double> classifierEvaluatorForSearch;
-			TimedObjectEvaluator<ComponentInstance, Double> classifierEvaluatorForSelection;
+			PipelineEvaluator classifierEvaluatorForSearch;
+			PipelineEvaluator classifierEvaluatorForSelection;
 			try {
 				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
 				classifierEvaluatorForSelection = this.builder.getClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
 			} catch (ClassifierEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException(e2, "Could not create the pipeline evaluator");
 			}
+			classifierEvaluatorForSearch.registerListener(this); // events will be forwarded
+			classifierEvaluatorForSelection.registerListener(this); // events will be forwarded
+
 			/* communicate the parameters with which ML-Plan will run */
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
@@ -134,7 +145,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			/* create 2-phase HASCO */
 			this.logger.info("Creating the twoPhaseHASCOFactory.");
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.builder.getClassifierFactory(), problem);
-			@SuppressWarnings("unchecked")
 			HASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
 			this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 
@@ -198,15 +208,19 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			}
 			this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
 			this.componentInstanceOfSelectedClassifier = this.optimizingFactory.getComponentInstanceOfObject();
-			long startBuildTime = System.currentTimeMillis();
-			try {
-				this.selectedClassifier.buildClassifier(this.getInput());
-			} catch (Exception e) {
-				throw new AlgorithmException(e, "Training the classifier failed!");
+			if (this.buildSelectedClasifierOnGivenData) {
+				long startBuildTime = System.currentTimeMillis();
+				try {
+					this.selectedClassifier.buildClassifier(this.getInput());
+				} catch (Exception e) {
+					throw new AlgorithmException(e, "Training the classifier failed!");
+				}
+				long endBuildTime = System.currentTimeMillis();
+				this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
+						endBuildTime - startOptimizationTime, this.selectedClassifier);
+			} else {
+				this.logger.info("Selected model has not been built, since model building has been disabled. Total construction time was {}ms.", System.currentTimeMillis() - startOptimizationTime);
 			}
-			long endBuildTime = System.currentTimeMillis();
-			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
-					endBuildTime - startOptimizationTime, this.selectedClassifier);
 			return this.terminate();
 
 		default:
@@ -288,7 +302,30 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		return this.optimizingFactory;
 	}
 
+	@Subscribe
+	public void receiveClassifierCreatedEvent(final ClassifierCreatedEvent e) {
+		this.post(e);
+	}
+
+	@Subscribe
+	public void receiveClassifierCreatedEvent(final LearningCurveExtrapolatedEvent e) {
+		this.post(e);
+	}
+
+	@Subscribe
+	public void receiveClassifierCreatedEvent(final MCCVSplitEvaluationEvent e) {
+		this.post(e);
+	}
+
 	public TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> getTwoPhaseHASCOFactory() {
 		return this.twoPhaseHASCOFactory;
+	}
+
+	public boolean isBuildSelectedClasifierOnGivenData() {
+		return this.buildSelectedClasifierOnGivenData;
+	}
+
+	public void setBuildSelectedClasifierOnGivenData(final boolean buildSelectedClasifierOnGivenData) {
+		this.buildSelectedClasifierOnGivenData = buildSelectedClasifierOnGivenData;
 	}
 }
