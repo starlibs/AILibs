@@ -221,6 +221,15 @@ public class ComponentInstance {
 		return true;
 	}
 
+	public String toComponentNameString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getComponent().getName());
+		if (!this.satisfactionOfRequiredInterfaces.isEmpty()) {
+			sb.append(this.satisfactionOfRequiredInterfaces.entrySet().stream().map(x -> x.getValue().toComponentNameString()).collect(Collectors.toList()).toString());
+		}
+		return sb.toString();
+	}
+
 	@JsonIgnore
 	@Override
 	public String toString() {
@@ -246,6 +255,13 @@ public class ComponentInstance {
 	@JsonIgnore
 	public String getPrettyPrint() throws IOException {
 		return new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT).writeValueAsString(this);
+	}
+
+	public String getNestedComponentDescription() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(this.getComponent().getName());
+		this.satisfactionOfRequiredInterfaces.values().stream().map(x -> " - " + x.getNestedComponentDescription()).forEach(sb::append);
+		return sb.toString();
 	}
 
 }

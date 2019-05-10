@@ -23,9 +23,9 @@ import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Dependency;
+import hasco.model.IParameterDomain;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
-import hasco.model.IParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.sets.SetUtil;
 import jaicore.basic.sets.SetUtil.Pair;
@@ -207,7 +207,7 @@ public class Util {
 			for (Parameter p : object.getComponent().getParameters()) {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
-				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined!";
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: " + state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);
@@ -607,52 +607,4 @@ public class Util {
 		} while (!openRefinements.isEmpty());
 	}
 
-	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
-		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
-			if (p.isNumeric()) {
-				List<String> intervalAsList = SetUtil.unserializeList(instance.getParameterValue(p));
-				double defaultValue = Double.parseDouble(p.getDefaultValue().toString());
-				boolean isCompatibleWithDefaultValue = defaultValue >= Double.parseDouble(intervalAsList.get(0)) && defaultValue <= Double.parseDouble(intervalAsList.get(1));
-				if (!isCompatibleWithDefaultValue) {
-					logger.info("{} has value {}, which does not subsume the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
-					return false;
-				} else {
-					logger.info("{} has value {}, which IS COMPATIBLE with the default value {}", p.getName(), instance.getParameterValue(p), defaultValue);
-				}
-			} else {
-				if (!instance.getParameterValue(p).equals(p.getDefaultValue().toString())) {
-					logger.info("{} has value {}, which is not the default {}", p.getName(), instance.getParameterValue(p), p.getDefaultValue());
-					return false;
-				}
-			}
-		}
-		for (ComponentInstance child : instance.getSatisfactionOfRequiredInterfaces().values()) {
-			if (!isDefaultConfiguration(child)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public static int getNumberOfUnparametrizedCompositions(final Collection<Component> components, final String requiredInterface) {
-		Collection<Component> candidates = components.stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
-		int numCandidates = 0;
-		for (Component candidate : candidates) {
-			int waysToResolveComponent = 0;
-			if (candidate.getRequiredInterfaces().isEmpty()) {
-				waysToResolveComponent = 1;
-			} else {
-				for (String req : candidate.getRequiredInterfaces().keySet()) {
-					int subSolutionsForThisInterface = getNumberOfUnparametrizedCompositions(components, candidate.getRequiredInterfaces().get(req));
-					if (waysToResolveComponent > 0) {
-						waysToResolveComponent *= subSolutionsForThisInterface;
-					} else {
-						waysToResolveComponent = subSolutionsForThisInterface;
-					}
-				}
-			}
-			numCandidates += waysToResolveComponent;
-		}
-		return numCandidates;
-	}
 }
