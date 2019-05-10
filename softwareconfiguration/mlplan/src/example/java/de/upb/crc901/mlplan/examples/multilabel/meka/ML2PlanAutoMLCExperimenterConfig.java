@@ -11,4 +11,8 @@ import jaicore.ml.experiments.IMultiClassClassificationExperimentConfig;
 @Sources({ "file:conf/ml2planAutoExperimenter.properties", "file:conf/ml2planAutodatabase.properties" })
 public interface ML2PlanAutoMLCExperimenterConfig extends IMultiClassClassificationExperimentConfig, IDatabaseConfig {
 
+	@Key("gui.show")
+	@DefaultValue("false")
+	public boolean showGUI();
+
 }

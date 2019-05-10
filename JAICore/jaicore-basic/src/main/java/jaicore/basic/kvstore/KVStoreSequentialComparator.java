@@ -6,7 +6,7 @@ public class KVStoreSequentialComparator implements Comparator<KVStore> {
 
 	private final String[] sortKeys;
 
-	public KVStoreSequentialComparator(final String[] sortKeys) {
+	public KVStoreSequentialComparator(final String... sortKeys) {
 		this.sortKeys = sortKeys;
 	}
 

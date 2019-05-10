@@ -1,18 +1,16 @@
 {
 	"repository": "MEKA_META",
-	"include": [
-		"./mlplan-multilabel-small.json"
-	],
+	"include": [],
 	"parameters": [
 	],
 	"components": [
 		{
 			"name": "meka.classifiers.multilabel.meta.BaggingML",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"requiredInterface": [ { "id": "W", "name": "BasicMLClassifier" } ],
 			"parameter": [
 				{
-					"name": "_I",
+					"name": "I",
 					"comment": "Sets the number of models (default 10)",
 					"type": "int",
 					"default": 10,

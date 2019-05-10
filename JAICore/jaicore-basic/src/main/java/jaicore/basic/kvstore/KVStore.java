@@ -150,6 +150,8 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 			return (Double) value;
 		} else if (value instanceof String) {
 			return Double.valueOf((String) value);
+		} else if (value instanceof Integer) {
+			return Double.parseDouble(value + "");
 		} else {
 			throw new IllegalStateException("Tried to get non-double value as double from KVStore.");
 		}
@@ -427,6 +429,9 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 *            The filter for applying to the value of the given {@code key}.
 	 */
 	public void filter(final String key, final IKVFilter filter) {
+		if (!this.containsKey(key)) {
+			return;
+		}
 		this.put(key, filter.filter(this.get(key)));
 	}
 
