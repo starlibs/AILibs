@@ -1,11 +1,5 @@
 package de.upb.crc901.mlplan.core;
 
-<<<<<<< HEAD
-public class MLPlanWekaBuilder extends MLPlanBuilder {
-
-	public MLPlanWekaBuilder(final MLPlanBuilder builder) {
-		super(builder);
-=======
 import java.io.File;
 import java.io.IOException;
 
@@ -85,7 +79,6 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 		this.withSearchPhaseEvaluatorFactory(new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod));
 		this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss())));
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, "" + 10);
->>>>>>> refs/remotes/origin/dev
 	}
 
 }
