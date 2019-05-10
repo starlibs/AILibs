@@ -11,6 +11,7 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
@@ -136,7 +137,7 @@ public class WekaInstancesUtil {
 			for (int i = 0; i < att.numValues(); i++) {
 				domain.add(att.value(i));
 			}
-			return new CategoricalAttributeType(domain);
+			return att.numValues() == 2 ? new BooleanAttributeType() : new CategoricalAttributeType(domain);
 		}
 		throw new IllegalArgumentException("Can only transform numeric or categorical attributes");
 	}

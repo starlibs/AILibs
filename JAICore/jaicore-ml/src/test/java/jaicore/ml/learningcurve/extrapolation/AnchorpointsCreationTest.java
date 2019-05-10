@@ -9,8 +9,6 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
 import jaicore.ml.core.dataset.standard.SimpleInstance;
@@ -47,8 +45,8 @@ public class AnchorpointsCreationTest {
 				Assert.assertTrue(y[i] > 0.0d);
 			}
 			return null;
-		}, new J48(), simpleDataset, 0.7d, new SystematicSamplingFactory<>(), 1l);
-		extrapolator.extrapolateLearningCurve(xValues);
+		}, new J48(), simpleDataset, 0.7d, xValues, new SystematicSamplingFactory<>(), 1l);
+		extrapolator.extrapolateLearningCurve();
 	}
 
 }

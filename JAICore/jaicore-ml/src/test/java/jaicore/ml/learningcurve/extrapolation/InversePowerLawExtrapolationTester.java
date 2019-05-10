@@ -26,16 +26,14 @@ public class InversePowerLawExtrapolationTester {
 
 	@Test(expected = InvalidAnchorPointsException.class)
 	public void testExceptionForIncorrectAnchorpoints() throws Exception {
-		int[] xValues = new int[] { 1, 2, 3 };
-		LearningCurveExtrapolator<SimpleInstance> extrapolator = this.createExtrapolationMethod();
-		extrapolator.extrapolateLearningCurve(xValues);
+		LearningCurveExtrapolator<SimpleInstance> extrapolator = this.createExtrapolationMethod(new int[] { 1, 2, 3 });
+		extrapolator.extrapolateLearningCurve();
 	}
 
 	@Test
 	public void testInversePowerLawParameterCreation() throws Exception {
-		int[] xValues = new int[] { 8, 16, 64, 128 };
-		LearningCurveExtrapolator<SimpleInstance> extrapolator = this.createExtrapolationMethod();
-		InversePowerLawLearningCurve curve = (InversePowerLawLearningCurve) extrapolator.extrapolateLearningCurve(xValues);
+		LearningCurveExtrapolator<SimpleInstance> extrapolator = this.createExtrapolationMethod(new int[] { 8, 16, 64, 128 });
+		InversePowerLawLearningCurve curve = (InversePowerLawLearningCurve) extrapolator.extrapolateLearningCurve();
 		Assert.assertNotNull(curve);
 		for (int i = 5; i < 20; i++) {
 			int k = (int) Math.pow(2, i);
@@ -45,7 +43,7 @@ public class InversePowerLawExtrapolationTester {
 		}
 	}
 
-	private LearningCurveExtrapolator<SimpleInstance> createExtrapolationMethod() throws Exception {
+	private LearningCurveExtrapolator<SimpleInstance> createExtrapolationMethod(final int[] xValues) throws Exception {
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
 		try {
@@ -61,7 +59,7 @@ public class InversePowerLawExtrapolationTester {
 		}
 
 		SimpleDataset simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
-		return new LearningCurveExtrapolator<>(new InversePowerLawExtrapolationMethod(), new J48(), simpleDataset, 0.7d, new SimpleRandomSamplingFactory<>(), 1l);
+		return new LearningCurveExtrapolator<>(new InversePowerLawExtrapolationMethod(), new J48(), simpleDataset, 0.7d, xValues, new SimpleRandomSamplingFactory<>(), 1l);
 	}
 
 }

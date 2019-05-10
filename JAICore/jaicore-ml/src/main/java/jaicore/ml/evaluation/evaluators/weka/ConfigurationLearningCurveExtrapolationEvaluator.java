@@ -16,10 +16,10 @@ import weka.classifiers.Classifier;
  * Predicts the accuracy of a classifier with certain configurations on a point
  * of its learning curve, given some anchorpoint and its configurations using
  * the LCNet of pybnn
- * 
+ *
  * Note: This code was copied from LearningCurveExtrapolationEvaluator and
  * slightly reworked
- * 
+ *
  * @author noni4
  */
 
@@ -37,10 +37,10 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(int[] anchorpoints,
-			ISamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
-			IDataset<IInstance> dataset, double trainSplitForAnchorpointsMeasurement, long seed, String identifier,
-			double[] configurations) {
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
+			final ISamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
+			final IDataset<IInstance> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier,
+			final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -51,23 +51,23 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 		this.configurations = configurations;
 	}
 
-	public void setFullDatasetSize(int fullDatasetSize) {
+	public void setFullDatasetSize(final int fullDatasetSize) {
 		this.fullDatasetSize = fullDatasetSize;
 	}
 
 	@Override
-	public Double evaluate(Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier,
-				dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed,
+				this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed,
 				this.identifier, this.configurations);
 
 		try {
 			// Create the extrapolator and calculate the accuracy the classifier would have
 			// if it was trained on the complete dataset.
-			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve(this.anchorpoints);
+			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();
 
-			int evaluationPoint = dataset.size();
+			int evaluationPoint = this.dataset.size();
 			// Overwrite evaluation point if a value was provided, otherwise evaluate on the
 			// size of the given dataset
 			if (this.fullDatasetSize != -1) {
@@ -76,7 +76,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
 		} catch (Exception e) {
-			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
+			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
 					e.getClass().getName(), e.getMessage());
 			return null;
 		}
