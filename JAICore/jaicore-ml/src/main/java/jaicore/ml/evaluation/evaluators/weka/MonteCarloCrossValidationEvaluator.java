@@ -37,7 +37,8 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	/* Can either compute the loss or cache it */
 	private final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator;
 
-	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion, final long seed) {
+	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion,
+			final long seed) {
 		super();
 		if (data == null) {
 			throw new IllegalArgumentException("Cannot work with NULL data");
@@ -54,7 +55,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	}
 
 	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final int repeats, final Instances data, final double trainingPortion, final long seed) {
-		this (splitBasedEvaluator, new MulticlassClassStratifiedSplitter(), repeats, data, trainingPortion, seed);
+		this(splitBasedEvaluator, new MulticlassClassStratifiedSplitter(), repeats, data, trainingPortion, seed);
 	}
 
 	public void cancel() {
@@ -93,6 +94,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 			}
 		}
 		Double score = stats.getMean();
+		System.err.println(pl.toString() + " " + score + " " + (System.currentTimeMillis() - startTimestamp));
 		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl, (System.currentTimeMillis() - startTimestamp));
 		return score;
 	}

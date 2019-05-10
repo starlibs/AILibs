@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jaicore.basic.FileUtil;
+import jaicore.basic.ResourceUtil;
 import jaicore.ml.evaluation.IInstancesClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
@@ -67,7 +68,10 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final Logger L = LoggerFactory.getLogger(ScikitLearnWrapper.class);
 
 	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
-	private static final File SCIKIT_TEMPLATE = new File("resources/scikit_template.twig.py"); // Path to the used python template.
+
+	private static final String RES_SCIKIT_TEMPLATE_PATH = "sklearn/scikit_template.twig.py";
+	private static final File SCIKIT_TEMPLATE = ResourceUtil.getResourceAsFile(RES_SCIKIT_TEMPLATE_PATH); // Path to the used python template.
+
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
 	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.
 	private static final boolean DELETE_TEMPORARY_FILES_ON_EXIT = true;
@@ -84,6 +88,11 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	/* Identifying the wrapped sklearn instance. */
 	private final String configurationUID;
 	private File modelFile;
+	private File trainArff;
+
+	private final boolean withoutModelDump;
+
+	private String constructInstruction;
 
 	/* Since the ScikitLearn is able to do multi-target prediction but Weka is unable to depict it as a result of classifyInstances correctly, this List of
 	 * Lists will keep the unflattened results until classifyInstances is called again. classifyInstances will only return a flattened representation of a multi-target prediction.
@@ -98,9 +107,11 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
 	 * @throws IOException The script could not be created.
 	 */
-	public ScikitLearnWrapper(final String constructInstruction, final String imports) throws IOException {
-		Map<String, Object> templateValues = this.getTemplateValueMap(constructInstruction, imports);
+	public ScikitLearnWrapper(final String constructInstruction, final String imports, final boolean withoutModelDump) throws IOException {
+		this.withoutModelDump = withoutModelDump;
+		this.constructInstruction = constructInstruction;
 
+		Map<String, Object> templateValues = this.getTemplateValueMap(constructInstruction, imports);
 		String hashCode = StringUtils.join(constructInstruction, imports).hashCode() + "";
 		this.configurationUID = hashCode.startsWith("-") ? hashCode.replace("-", "1") : "0" + hashCode;
 
@@ -122,8 +133,19 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		template.render(model, new FileOutputStream(scriptFile));
 	}
 
+	/**
+	 * Starts a new wrapper and creates its underlying script with the given parameters.
+	 *
+	 * @param constructInstruction String that defines what constructor to call for the classifier and with which parameters to call it.
+	 * @param imports Imports that are appended to the beginning of the script. Normally only the necessary imports for the constructor instruction must be added here.
+	 * @throws IOException The script could not be created.
+	 */
+	public ScikitLearnWrapper(final String constructInstruction, final String imports) throws IOException {
+		this(constructInstruction, imports, false);
+	}
+
 	public ScikitLearnWrapper(final String constructInstruction, final String imports, final File trainedModelPath) throws IOException {
-		this(constructInstruction, imports);
+		this(constructInstruction, imports, false);
 		this.modelFile = trainedModelPath;
 	}
 
@@ -148,16 +170,17 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		/* Ensure model dump directory exists and get the name of the dump */
 		MODEL_DUMPS_DIRECTORY.mkdirs();
 		String arffName = this.getArffName(data);
+		this.trainArff = this.getArffFile(data, arffName);
 
-		File arffFile = this.getArffFile(data, arffName);
-		this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
+		if (!this.withoutModelDump) {
+			this.modelFile = new File(MODEL_DUMPS_DIRECTORY, this.configurationUID + "_" + arffName + MODEL_DUMP_FILE_EXT);
+			String[] trainCommand = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(this.trainArff).withOutputFile(this.modelFile).toCommandArray();
 
-		String[] trainCommand = new SKLearnWrapperCommandBuilder().withTrainMode().withArffFile(arffFile).withOutputFile(this.modelFile).toCommandArray();
-
-		if (L.isDebugEnabled()) {
-			L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
+			if (L.isDebugEnabled()) {
+				L.debug("{} run train mode {}", Thread.currentThread().getName(), Arrays.toString(trainCommand));
+			}
+			this.runProcess(trainCommand, new DefaultProcessListener(VERBOSE));
 		}
-		this.runProcess(trainCommand, new DefaultProcessListener(VERBOSE));
 	}
 
 	/**
@@ -170,6 +193,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 */
 	private File getArffFile(final Instances data, final String arffName) throws IOException {
 		File arffOutputFile = new File(TMP_FOLDER, arffName + ".arff");
+		if (DELETE_TEMPORARY_FILES_ON_EXIT) {
+			arffOutputFile.deleteOnExit();
+		}
 		/* If Instances with the same Instance (given the hash is collision resistant) is already serialized, there is no need for doing it once more. */
 		if (arffOutputFile.exists()) {
 			L.debug("Reusing {}.arff", arffName);
@@ -187,22 +213,34 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		MODEL_DUMPS_DIRECTORY.mkdirs();
 		String arffName = this.getArffName(data);
 
-		File arffFile = this.getArffFile(data, arffName);
+		File testArff = this.getArffFile(data, arffName);
 		File outputFile = this.getResultFile(arffName);
 		outputFile.getParentFile().mkdirs();
 
-		String[] testCommand = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(arffFile).withModelFile(this.modelFile).withOutputFile(outputFile).toCommandArray();
+		if (!this.withoutModelDump) {
+			String[] testCommand = new SKLearnWrapperCommandBuilder().withTestMode().withArffFile(testArff).withModelFile(this.modelFile).withOutputFile(outputFile).toCommandArray();
 
-		if (L.isDebugEnabled()) {
-			L.debug("Run test mode with {}", Arrays.toString(testCommand));
+			if (L.isDebugEnabled()) {
+				L.debug("Run test mode with {}", Arrays.toString(testCommand));
+			}
+
+			this.runProcess(testCommand, new DefaultProcessListener(VERBOSE));
+		} else {
+			String[] testCommand = new SKLearnWrapperCommandBuilder().withTrainTestMode().withArffFile(this.trainArff).withTestArffFile(testArff).withOutputFile(outputFile).toCommandArray();
+			if (L.isDebugEnabled()) {
+				L.debug("Run train test mode with {}", Arrays.toString(testCommand));
+			}
+
+			this.runProcess(testCommand, new DefaultProcessListener(VERBOSE));
 		}
-
-		this.runProcess(testCommand, new DefaultProcessListener(VERBOSE));
 
 		String fileContent = "";
 		try {
 			/* Parse the result */
 			fileContent = FileUtil.readFileAsString(outputFile);
+			if (DELETE_TEMPORARY_FILES_ON_EXIT) {
+				outputFile.delete();
+			}
 			ObjectMapper objMapper = new ObjectMapper();
 			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);
 		} catch (IOException e) {
@@ -356,7 +394,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * @author wever
 	 */
 	private enum WrapperExecutionMode {
-		TRAIN("train"), TEST("test");
+		TRAIN("train"), TEST("test"), TRAIN_TEST("traintest");
 
 		private String name;
 
@@ -379,12 +417,14 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private class SKLearnWrapperCommandBuilder {
 
 		private static final String ARFF_FLAG = "--arff";
+		private static final String TEST_ARFF_FLAG = "--testarff";
 		private static final String MODE_FLAG = "--mode";
 		private static final String MODEL_FLAG = "--model";
 		private static final String OUTPUT_FLAG = "--output";
 		private static final String REGRESSION_FLAG = "--regression";
 
 		private String arffFile;
+		private String testArffFile;
 		private WrapperExecutionMode mode;
 		private String modelFile;
 		private String outputFile;
@@ -393,12 +433,21 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 
 		}
 
+		public SKLearnWrapperCommandBuilder withTestArffFile(final File testArffFile) {
+			this.testArffFile = testArffFile.getAbsolutePath();
+			return this;
+		}
+
 		public SKLearnWrapperCommandBuilder withTrainMode() {
 			return this.withMode(WrapperExecutionMode.TRAIN);
 		}
 
 		public SKLearnWrapperCommandBuilder withTestMode() {
 			return this.withMode(WrapperExecutionMode.TEST);
+		}
+
+		public SKLearnWrapperCommandBuilder withTrainTestMode() {
+			return this.withMode(WrapperExecutionMode.TRAIN_TEST);
 		}
 
 		private SKLearnWrapperCommandBuilder withMode(final WrapperExecutionMode execMode) {
@@ -446,6 +495,9 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 			// set mode, output, and arff
 			processParameters.addAll(Arrays.asList(MODE_FLAG, this.mode.toString()));
 			processParameters.addAll(Arrays.asList(ARFF_FLAG, this.arffFile));
+			if (this.testArffFile != null) {
+				processParameters.addAll(Arrays.asList(TEST_ARFF_FLAG, this.testArffFile));
+			}
 			processParameters.addAll(Arrays.asList(OUTPUT_FLAG, this.outputFile));
 
 			if (ScikitLearnWrapper.this.problemType == ScikitLearnWrapper.ProblemType.REGRESSION) {
@@ -466,6 +518,11 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 			/* All additional parameters that the script shall consider. */
 			return processParameters.toArray(new String[] {});
 		}
+	}
+
+	@Override
+	public String toString() {
+		return this.constructInstruction;
 	}
 
 }

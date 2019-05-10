@@ -33,7 +33,7 @@ public class MLPlanSKLearnExample {
 
 		AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 		builder.withTimeOut(TIMEOUT);
-		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new TimeOut(90, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
 
 		SKLearnMLPlanWekaClassifier mlplan = new SKLearnMLPlanWekaClassifier(builder);
