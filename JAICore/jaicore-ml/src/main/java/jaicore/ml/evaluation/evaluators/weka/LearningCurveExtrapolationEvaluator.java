@@ -3,6 +3,7 @@ package jaicore.ml.evaluation.evaluators.weka;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.core.dataset.IDataset;
@@ -25,9 +26,9 @@ import weka.classifiers.Classifier;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator {
+public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator, ILoggingCustomizable {
 
-	private static final Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
+	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
@@ -76,11 +77,17 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 
 		// Create the learning curve extrapolator with the given configuration.
-		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.samplingAlgorithmFactory, this.seed);
+		this.logger.info("Receive request to evaluate classifier {}", classifier);
+		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
+		if (extrapolator instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) extrapolator).setLoggerName(this.getLoggerName() + ".extrapolator");
+		}
 
 		try {
 			/* Create the extrapolator and calculate the accuracy the classifier would have if it was trained on the complete dataset. */
-			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve(this.anchorpoints);
+			this.logger.debug("Extrapolating learning curve.");
+			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();
+			this.logger.debug("Retrieved learning curve {}.", learningCurve);
 
 			int evaluationPoint = this.dataset.size();
 			/* Overwrite evaluation point if a value was provided, otherwise evaluate on the size of the given dataset */
@@ -88,11 +95,22 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 				evaluationPoint = this.fullDatasetSize;
 			}
 
-			return this.evaluateAccuracy ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
+			Double val = this.evaluateAccuracy ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
+			this.logger.info("Estimate for performance on full dataset is {}", val);
+			return val;
 		} catch (AlgorithmException | InvalidAnchorPointsException e) {
-			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
-			return null;
+			throw new ObjectEvaluationFailedException("Could not compute a score based on the learning curve.", e);
 		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

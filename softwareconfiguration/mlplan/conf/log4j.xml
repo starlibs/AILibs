@@ -190,8 +190,9 @@
   	<level value="info" />
   </logger>
   
+  <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
-    <level value="debug" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -201,6 +202,10 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo">
     <level value="info" />
   </logger>
   
@@ -216,7 +221,28 @@
     <level value="info" />
   </logger>
   
-  <logger name="testedalgorithm._algorithm">
+  <!-- configuration for ML-Plan 4 big data Test logging -->
+  <logger name="testedalgorithm.mlplan.optimizingfactory">
     <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+    <level value="debug" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+    <level value="debug" />
   </logger>
 </log4j:configuration>

@@ -109,7 +109,9 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				builder.withTimeoutForNodeEvaluation(new TimeOut(15, TimeUnit.MINUTES));
 				builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.MINUTES));
 				this.mlplan = new MLPlan(builder, data);
-				this.mlplan.setTimeout(new TimeOut(20, TimeUnit.MINUTES));
+				this.mlplan.setLoggerName(this.getLoggerName() + ".mlplan");
+				this.mlplan.setTimeout(new TimeOut(5, TimeUnit.MINUTES));
+				this.mlplan.setNumCPUs(8);
 				this.logger.info("ML-Plan initialized, activation finished!");
 				return this.activate();
 			} catch (IOException e) {
@@ -118,7 +120,14 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 		case active:
 			this.logger.info("Starting ML-Plan.");
 			this.mlplan.call();
-			this.logger.info("ML-Plan has finished. Selected classifier is {} with observed internal performance {}.", this.mlplan.getSelectedClassifier(), this.mlplan.getInternalValidationErrorOfSelectedClassifier());
+			this.logger.info("ML-Plan has finished. Selected classifier is {} with observed internal performance {}. Now training on full data", this.mlplan.getSelectedClassifier(), this.mlplan.getInternalValidationErrorOfSelectedClassifier());
+			try {
+				Instances completeData = new Instances(new FileReader(this.getInput()));
+				completeData.setClassIndex(completeData.numAttributes() - 1);
+				this.mlplan.getSelectedClassifier().buildClassifier(completeData);
+			} catch (Exception e) {
+				throw new AlgorithmException(e, "Could not train the final classifier with the full data.");
+			}
 			return this.terminate();
 		default:
 			throw new IllegalStateException();

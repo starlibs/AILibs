@@ -24,7 +24,6 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheck
 import de.upb.crc901.mlplan.multilabel.MekaPipelineFactory;
 import hasco.core.HASCOFactory;
 import hasco.model.Component;
-import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
@@ -62,7 +61,6 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
-import jaicore.timing.TimedObjectEvaluator;
 import weka.core.Instances;
 
 /**
@@ -556,7 +554,7 @@ public class MLPlanBuilder {
 		return ToJSONStringUtil.toJSONString(fields);
 	}
 
-	public TimedObjectEvaluator<ComponentInstance, Double> getClassifierEvaluationInSearchPhase(final Instances data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final Instances data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSearchPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in search phase has been set!");
 		}
@@ -567,7 +565,7 @@ public class MLPlanBuilder {
 		return new PipelineEvaluator(this.getClassifierFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
 	}
 
-	public TimedObjectEvaluator<ComponentInstance, Double> getFactoryForClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator getFactoryForClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}

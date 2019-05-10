@@ -19,7 +19,7 @@ public class MLPlan4BigFileInputTester {
 	public void test() throws Exception {
 		//		MLPlan4BigFileInput mlplan = new MLPlan4BigFileInput(new File("testrsc/openml/41103.arff"));
 
-		String origDataSrcName = "testrsc/openml/41103.arff";
+		String origDataSrcName = "testrsc/openml/3.arff";
 
 		if (false) {
 			Instances data = new Instances(new FileReader(new File(origDataSrcName)));

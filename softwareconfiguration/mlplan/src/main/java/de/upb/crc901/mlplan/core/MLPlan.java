@@ -32,7 +32,6 @@ import jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstruc
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -109,8 +108,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 			/* setup the pipeline evaluators */
 			this.logger.debug("Setting up the pipeline evaluators.");
-			TimedObjectEvaluator<ComponentInstance, Double> classifierEvaluatorForSearch;
-			TimedObjectEvaluator<ComponentInstance, Double> classifierEvaluatorForSelection;
+			PipelineEvaluator classifierEvaluatorForSearch;
+			PipelineEvaluator classifierEvaluatorForSelection;
 			try {
 				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
 				classifierEvaluatorForSelection = this.builder.getFactoryForClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
@@ -123,7 +122,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
 						this.getInput().hashCode(), this.builder.getSingleLabelPerformanceMeasure() != null ? this.builder.getSingleLabelPerformanceMeasure() : this.builder.getMultiLabelPerformanceMeasure(), this.getConfig().cpus(),
 								this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(),
-								MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch, classifierEvaluatorForSelection, this.getConfig().expectedBlowupInSelection(),
+								MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch.getBenchmark(), classifierEvaluatorForSelection.getBenchmark(), this.getConfig().expectedBlowupInSelection(),
 								this.getConfig().expectedBlowupInPostprocessing());
 			}
 
