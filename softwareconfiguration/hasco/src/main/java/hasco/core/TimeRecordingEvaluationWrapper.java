@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import hasco.model.ComponentInstance;
+import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.logging.ToJSONStringUtil;
 
-public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V> {
+public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V>, IInformedObjectEvaluatorExtension<V> {
 
 	private final IObjectEvaluator<ComponentInstance, V> baseEvaluator;
 	private final Map<ComponentInstance, Integer> consumedTimes = new HashMap<>();
@@ -20,7 +20,7 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 	}
 
 	@Override
-	public V evaluate(final ComponentInstance object) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+	public V evaluate(final ComponentInstance object) throws InterruptedException, ObjectEvaluationFailedException {
 		long start = System.currentTimeMillis();
 		V score = this.baseEvaluator.evaluate(object);
 		long end = System.currentTimeMillis();
@@ -43,4 +43,13 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 		fields.put("consumedTimes", this.consumedTimes);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void updateBestScore(V bestScore) {
+		if(baseEvaluator instanceof IInformedObjectEvaluatorExtension) {
+			((IInformedObjectEvaluatorExtension<V>) baseEvaluator).updateBestScore(bestScore);
+		}
+	}
+	
 }

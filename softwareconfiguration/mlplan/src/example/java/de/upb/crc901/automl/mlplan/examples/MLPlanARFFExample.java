@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.TimeOut;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -28,6 +30,8 @@ import weka.core.Instances;
 
 public class MLPlanARFFExample {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(MLPlanARFFExample.class);
+
 	private static final boolean ACTIVATE_VISUALIZATION = true;
 
 	public static void main(final String[] args) throws Exception {
@@ -39,14 +43,15 @@ public class MLPlanARFFExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
-		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(10, TimeUnit.SECONDS));
+		AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka();
+		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
+		builder.withTimeOut(new TimeOut(300, TimeUnit.SECONDS));
+		builder.withNumCpus(2);
+
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(2);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();
@@ -59,16 +64,18 @@ public class MLPlanARFFExample {
 			long start = System.currentTimeMillis();
 			Classifier optimizedClassifier = mlplan.call();
 			long trainTime = (int) (System.currentTimeMillis() - start) / 1000;
-			System.out.println("Finished build of the classifier.");
-			System.out.println("Chosen model is: " + ((MLPipeline) mlplan.getSelectedClassifier()).toString());
-			System.out.println("Training time was " + trainTime + "s.");
+			LOGGER.info("Finished build of the classifier.");
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("Chosen model is: {}", (mlplan.getSelectedClassifier()));
+			}
+			LOGGER.info("Training time was {}s.", trainTime);
 
 			/* evaluate solution produced by mlplan */
 			Evaluation eval = new Evaluation(split.get(0));
 			eval.evaluateModel(optimizedClassifier, split.get(1));
-			System.out.println("Error Rate of the solution produced by ML-Plan: " + ((100 - eval.pctCorrect()) / 100f) + ". Internally believed error was " + mlplan.getInternalValidationErrorOfSelectedClassifier());
+			LOGGER.info("Error Rate of the solution produced by ML-Plan: {}. Internally believed error was {}", ((100 - eval.pctCorrect()) / 100f), mlplan.getInternalValidationErrorOfSelectedClassifier());
 		} catch (NoSuchElementException e) {
-			System.out.println("Building the classifier failed: " + e.getMessage());
+			LOGGER.error("Building the classifier failed.", e);
 		}
 	}
 

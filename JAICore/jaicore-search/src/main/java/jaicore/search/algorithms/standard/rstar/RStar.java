@@ -56,7 +56,7 @@ import jaicore.search.structure.graphgenerator.SingleRootGenerator;
 public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> {
 
 	/* Open list. */
-	protected PriorityQueue<GammaNode<T>> open = new PriorityQueue<>();
+	protected PriorityQueue<GammaNode<T>> open = new PriorityQueue<>((n1, n2) -> (n1.getInternalLabel().compareTo(n2.getInternalLabel())));
 
 	/* Closed list of already expanded states. */
 	protected ArrayList<GammaNode<T>> closed = new ArrayList<>();
@@ -161,107 +161,110 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
-		this.logger.debug("Performing next step. Current state is {}", this.getState());
-		this.checkAndConductTermination();
-		switch (this.getState()) {
-		case created:
-			this.registerActiveThread();
-			AlgorithmInitializedEvent initializationEvent = this.activate();
+		try {
 
-			/* Lines 14 to 17 */
-			RootGenerator<T> rootGenerator = this.getInput().getGraphGenerator().getRootGenerator();
-			if (rootGenerator instanceof MultipleRootGenerator) {
-				for (T root : ((MultipleRootGenerator<T>) rootGenerator).getRoots()) {
-					GammaNode<T> internalRoot = new GammaNode<>(root);
+			this.registerActiveThread();
+			this.logger.debug("Performing next step. Current state is {}", this.getState());
+			this.checkAndConductTermination();
+			switch (this.getState()) {
+			case created:
+				AlgorithmInitializedEvent initializationEvent = this.activate();
+
+				/* Lines 14 to 17 */
+				RootGenerator<T> rootGenerator = this.getInput().getGraphGenerator().getRootGenerator();
+				if (rootGenerator instanceof MultipleRootGenerator) {
+					for (T root : ((MultipleRootGenerator<T>) rootGenerator).getRoots()) {
+						GammaNode<T> internalRoot = new GammaNode<>(root);
+						internalRoot.setInternalLabel(new RStarK(false, this.w * this.h.f(internalRoot)));
+						internalRoot.setG(0);
+						this.open.add(internalRoot);
+					}
+				} else if (rootGenerator instanceof SingleRootGenerator) {
+					GammaNode<T> internalRoot = new GammaNode<>(((SingleRootGenerator<T>) rootGenerator).getRoot());
 					internalRoot.setInternalLabel(new RStarK(false, this.w * this.h.f(internalRoot)));
 					internalRoot.setG(0);
 					this.open.add(internalRoot);
+				} else {
+					assert false : "Only MultipleRootGenerator or SingleRootGenerators allowed.";
 				}
-			} else if (rootGenerator instanceof SingleRootGenerator) {
-				GammaNode<T> internalRoot = new GammaNode<>(((SingleRootGenerator<T>) rootGenerator).getRoot());
-				internalRoot.setInternalLabel(new RStarK(false, this.w * this.h.f(internalRoot)));
-				internalRoot.setG(0);
-				this.open.add(internalRoot);
-			} else {
-				assert false : "Only MultipleRootGenerator or SingleRootGenerators allowed.";
-			}
-			assert !this.open.isEmpty() : "OPEN must not be empty after initialization!";
-			this.unregisterActiveThread();
-			return initializationEvent;
+				assert !this.open.isEmpty() : "OPEN must not be empty after initialization!";
+				return initializationEvent;
 
-		case active:
+			case active:
 
-			/* return unreturned solutions if such exist */
-			if (!this.unreturnedSolutionEvents.isEmpty()) {
-				this.logger.info("Returning known solution from solution cache!");
-				return this.unreturnedSolutionEvents.remove(0);
-			}
+				/* return unreturned solutions if such exist */
+				if (!this.unreturnedSolutionEvents.isEmpty()) {
+					this.logger.info("Returning known solution from solution cache!");
+					return this.unreturnedSolutionEvents.remove(0);
+				}
 
-			/**
-			 * Run while the open list is not empty and there exists a node in the open list
-			 * with higher priority i.e. less k than k_n_goal (if the highest priority is a
-			 * goal node, then we return in th next lines).
-			 */
-			// Lines 18 & 19
-			GammaNode<T> n = this.open.poll();
-			this.logger.debug("Selected {} for expansion.", n);
-			if (n == null || (this.bestSeenGoalNode != null && n.getInternalLabel().compareTo(this.bestSeenGoalNode.getInternalLabel()) > 0)) {
-				this.logger.info("Terminating RStar.");
-				return this.terminate();
-			}
-			this.registerActiveThread();
+				/**
+				 * Run while the open list is not empty and there exists a node in the open list
+				 * with higher priority i.e. less k than k_n_goal (if the highest priority is a
+				 * goal node, then we return in th next lines).
+				 */
+				// Lines 18 & 19
+				GammaNode<T> n = this.open.poll();
+				this.logger.debug("Selected {} for expansion.", n);
+				if (n == null || (this.bestSeenGoalNode != null && n.getInternalLabel().compareTo(this.bestSeenGoalNode.getInternalLabel()) > 0)) {
+					this.logger.info("Terminating RStar.");
+					return this.terminate();
+				}
 
-			// Lines 20 & 21
-			if (n.getParent() != null && !this.isPathRealizationKnownForAbstractEdgeToNode(n)) {
+				// Lines 20 & 21
+				if (n.getParent() != null && !this.isPathRealizationKnownForAbstractEdgeToNode(n)) {
 
-				/* The path that corresponds to the edge bp(s)->s has not been computed yet. Try to compute it using reevaluateState. */
-				this.reevaluateState(n);
+					/* The path that corresponds to the edge bp(s)->s has not been computed yet. Try to compute it using reevaluateState. */
+					this.reevaluateState(n);
 
-				/* put the node on OPEN again */
-				this.logger.debug("Putting node {} on OPEN again", n);
-				this.open.add(n);
+					/* put the node on OPEN again */
+					this.logger.debug("Putting node {} on OPEN again", n);
+					this.open.add(n);
 
-			} else { // The path from bp(s)->s has already been computed.
+				} else { // The path from bp(s)->s has already been computed.
 
-				// Line 23.
-				this.closed.add(n);
+					// Line 23.
+					this.closed.add(n);
 
-				/* Line 24 to 27: Compute successors */
-				this.logger.debug("Starting generation of successors of {}", n);
-				Collection<GammaNode<T>> successors = this.generateGammaSuccessors(n);
-				this.logger.debug("Generated {} successors.", successors.size());
-				for (GammaNode<T> n_ : successors) { // Line 28
+					/* Line 24 to 27: Compute successors */
+					this.logger.debug("Starting generation of successors of {}", n);
+					Collection<GammaNode<T>> successors = this.generateGammaSuccessors(n);
+					this.logger.debug("Generated {} successors.", successors.size());
+					for (GammaNode<T> n_ : successors) { // Line 28
 
-					/* Line 29: Initialize successors by setting the path from s to s_ to null, and by estimating the lowest cost from s to s_ with the heuristic h(s, s_). */
-					n.cLow.put(n_, this.hPath.h(n, n_));
+						/* Line 29: Initialize successors by setting the path from s to s_ to null, and by estimating the lowest cost from s to s_ with the heuristic h(s, s_). */
+						n.cLow.put(n_, this.hPath.h(n, n_));
 
-					/* Lines 30 and 31 of the algorithm can be omitted here. They contain further initialization of
+						/* Lines 30 and 31 of the algorithm can be omitted here. They contain further initialization of
 						   the successors, but This is done implicitly in the generation process of the Gamma successors. */
 
-					/*
-					 * If the generated successor n_ i.e. s_ has never been visited yet (n_.getParent() == null)
-					 * or the actual cost to s (n.g) plus the (estimated) cost from s to s_ (c_low(s, s_)) is better
-					 * than the actual known cost (n_.g) to s_, then we have to update these values for s_ (because
-					 * with s we found a better predecessor for s_).
-					 */
-					// Line 32
-					boolean isNewNode = n_.getParent() == null;
-					if (isNewNode || (n.getG() + n.cLow.get(n_) < n_.getG())) {
-						n_.setG(n.getG() + n.cLow.get(n_));
-						n_.setParent(n);
-						this.updateState(n_); // updates priority of n_ in open list.
-						if (isNewNode) {
-							this.logger.debug("Adding new node {} to OPEN.", n_);
-							this.open.add(n_);
+						/*
+						 * If the generated successor n_ i.e. s_ has never been visited yet (n_.getParent() == null)
+						 * or the actual cost to s (n.g) plus the (estimated) cost from s to s_ (c_low(s, s_)) is better
+						 * than the actual known cost (n_.g) to s_, then we have to update these values for s_ (because
+						 * with s we found a better predecessor for s_).
+						 */
+						// Line 32
+						boolean isNewNode = n_.getParent() == null;
+						if (isNewNode || (n.getG() + n.cLow.get(n_) < n_.getG())) {
+							n_.setG(n.getG() + n.cLow.get(n_));
+							n_.setParent(n);
+							this.updateState(n_); // updates priority of n_ in open list.
+							if (isNewNode) {
+								this.logger.debug("Adding new node {} to OPEN.", n_);
+								this.open.add(n_);
+							}
 						}
 					}
 				}
-			}
-			this.unregisterActiveThread();
-			return new NodeExpansionCompletedEvent<>(this.getId(), n.getPoint());
+				return new NodeExpansionCompletedEvent<>(this.getId(), n.getPoint());
 
-		default:
-			throw new IllegalStateException("Cannot do anything in state " + this.getState());
+			default:
+				throw new IllegalStateException("Cannot do anything in state " + this.getState());
+			}
+		}
+		finally {
+			this.unregisterActiveThread();
 		}
 	}
 
@@ -333,7 +336,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 
 		/* first create a list of k nodes that are in reach of delta of the current node */
 		this.logger.trace("Invoking distant successor generator timeout-aware.");
-		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getPoint(), this.k, this.metricOverStates, this.delta));
+		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getPoint(), this.k, this.metricOverStates, this.delta), "Computing distant successors", true);
 		assert randomDistantSuccessors.size() == new HashSet<>(randomDistantSuccessors).size() : "Distant successor generator has created the same successor ar least twice: \n\t "
 				+ SetUtil.getMultiplyContainedItems(randomDistantSuccessors).stream().map(T::toString).collect(Collectors.joining("\n\t"));
 		this.logger.trace("Distant successor generator generated {}/{} successors.", randomDistantSuccessors.size(), this.k);

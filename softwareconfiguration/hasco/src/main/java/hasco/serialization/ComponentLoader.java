@@ -62,12 +62,12 @@ public class ComponentLoader {
 
 	public ComponentLoader(final File jsonFile) throws IOException {
 		this();
-		this.loadComponents(jsonFile);
+		loadComponents(jsonFile);
 	}
 
 	public ComponentLoader(final File jsonFile, final boolean checkRequiredInterfacesResolvable) throws IOException {
 		this(checkRequiredInterfacesResolvable);
-		this.loadComponents(jsonFile);
+		loadComponents(jsonFile);
 	}
 
 	private void parseFile(final File jsonFile) throws IOException {
@@ -82,10 +82,10 @@ public class ComponentLoader {
 		String jsonDescription = stringDescriptionSB.toString();
 		jsonDescription = jsonDescription.replaceAll("/\\*(.*)\\*/", "");
 
-		JsonNode rootNode = this.objectMapper.readTree(jsonDescription);
+		JsonNode rootNode = objectMapper.readTree(jsonDescription);
 
 		for (JsonNode elem : rootNode.path("parameters")) {
-			this.parameterMap.put(elem.get("name").asText(), elem);
+			parameterMap.put(elem.get("name").asText(), elem);
 		}
 		JsonNode includes = rootNode.path("include");
 
@@ -97,30 +97,30 @@ public class ComponentLoader {
 		for (JsonNode includePathNode : includes) {
 			String path = includePathNode.asText();
 			File subFile = new File(baseFolder.getAbsolutePath() + File.separator + path);
-			if (!this.parsedFiles.contains(subFile.getCanonicalPath())) {
+			if (!parsedFiles.contains(subFile.getCanonicalPath())) {
 				if (!subFile.exists()) {
 					throw new IllegalArgumentException("Cannot load " + subFile.getName() + " as this file or folder does not exist in " + subFile.getParent());
 				}
 				if (subFile.isFile()) {
-					this.parsedFiles.add(subFile.getCanonicalPath());
-					this.parseFile(subFile.getCanonicalFile());
+					parsedFiles.add(subFile.getCanonicalPath());
+					parseFile(subFile.getCanonicalFile());
 				} else {
 					for (File subsubFile : subFile.listFiles()) {
-						if (!this.parsedFiles.contains(subsubFile.getCanonicalPath()) && subsubFile.isFile() && subsubFile.getName().endsWith(".json")) {
-							this.parsedFiles.add(subsubFile.getCanonicalPath());
-							this.parseFile(subsubFile.getCanonicalFile());
+						if (!parsedFiles.contains(subsubFile.getCanonicalPath()) && subsubFile.isFile() && subsubFile.getName().endsWith(".json")) {
+							parsedFiles.add(subsubFile.getCanonicalPath());
+							parseFile(subsubFile.getCanonicalFile());
 						}
 					}
-					this.parsedFiles.add(subFile.getCanonicalPath());
+					parsedFiles.add(subFile.getCanonicalPath());
 				}
 			}
 		}
-		this.readFromJson(rootNode);
+		readFromJson(rootNode);
 	}
 
 	public void readFromString(final String json) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		this.readFromJson(mapper.readTree(json));
+		readFromJson(mapper.readTree(json));
 	}
 
 	private void readFromJson(final JsonNode rootNode) throws IOException {
@@ -130,9 +130,9 @@ public class ComponentLoader {
 			Component c;
 			for (JsonNode component : components) {
 				c = new Component(component.get("name").asText());
-				this.componentMap.put(c.getName(), component);
+				componentMap.put(c.getName(), component);
 
-				if (!this.uniqueComponentNames.add(c.getName())) {
+				if (!uniqueComponentNames.add(c.getName())) {
 					throw new IllegalArgumentException("Noticed a component with duplicative component name: " + c.getName());
 				}
 
@@ -162,14 +162,14 @@ public class ComponentLoader {
 					String[] stringParams = new String[] { "type", "values", "default" };
 					String[] stringParamValues = new String[stringParams.length];
 					// possible boolean params
-					String[] boolParams = new String[] { "default" };
+					String[] boolParams = new String[] { "default", "includeExtremals" };
 					boolean[] boolParamValues = new boolean[boolParams.length];
 					// possible double params
 					String[] doubleParams = new String[] { "default", "min", "max", "refineSplits", "minInterval" };
 					double[] doubleParamValues = new double[doubleParams.length];
 
-					if (this.parameterMap.containsKey(name)) {
-						JsonNode commonParameter = this.parameterMap.get(name);
+					if (parameterMap.containsKey(name)) {
+						JsonNode commonParameter = parameterMap.get(name);
 						// get string parameter values from common parameter
 						for (int i = 0; i < stringParams.length; i++) {
 							if (commonParameter.get(stringParams[i]) != null) {
@@ -213,15 +213,23 @@ public class ComponentLoader {
 					String type = stringParamValues[Arrays.stream(stringParams).collect(Collectors.toList()).indexOf("type")];
 					switch (type) {
 					case "int":
+					case "int-log":
 					case "double":
-						p = new Parameter(name, new NumericParameterDomain(type.equals("int"), doubleParamValues[1], doubleParamValues[2]), doubleParamValues[0]);
+					case "double-log":
+						p = new Parameter(name, new NumericParameterDomain(type.equals("int") || type.equals("int-log"), doubleParamValues[1], doubleParamValues[2]), doubleParamValues[0]);
 						if (doubleParamValues[3] == 0) {
 							throw new IllegalArgumentException("Please specify the parameter \"refineSplits\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
 						}
 						if (doubleParamValues[4] <= 0) {
 							throw new IllegalArgumentException("Please specify a strictly positive parameter value for \"minInterval\" for the parameter \"" + p.getName() + "\" in component \"" + c.getName() + "\"");
 						}
-						paramConfig.put(p, new ParameterRefinementConfiguration((int) doubleParamValues[3], doubleParamValues[4]));
+						if (type.endsWith("-log")) {
+							paramConfig.put(p, new ParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
+
+						}
+						else {
+							paramConfig.put(p, new ParameterRefinementConfiguration(boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
+						}
 						break;
 					case "bool":
 					case "boolean":
@@ -237,8 +245,8 @@ public class ComponentLoader {
 								for (JsonNode value : parameter.get("values")) {
 									values.add(value.asText());
 								}
-							} else if (this.parameterMap.containsKey(name)) {
-								for (JsonNode value : this.parameterMap.get(name).get("values")) {
+							} else if (parameterMap.containsKey(name)) {
+								for (JsonNode value : parameterMap.get(name).get("values")) {
 									values.add(value.asText());
 								}
 							} else {
@@ -369,25 +377,25 @@ public class ComponentLoader {
 					c.addDependency(new Dependency(premise, conclusion));
 				}
 
-				this.paramConfigs.put(c, paramConfig);
+				paramConfigs.put(c, paramConfig);
 				this.components.add(c);
 
-				this.requiredInterfaces.addAll(c.getRequiredInterfaces().values());
-				this.providedInterfaces.addAll(c.getProvidedInterfaces());
+				requiredInterfaces.addAll(c.getRequiredInterfaces().values());
+				providedInterfaces.addAll(c.getProvidedInterfaces());
 			}
 		}
 	}
 
 	public ComponentLoader loadComponents(final File componentDescriptionFile) throws IOException, UnresolvableRequiredInterfaceException {
-		this.paramConfigs.clear();
-		this.components.clear();
-		this.uniqueComponentNames.clear();
-		this.requiredInterfaces.clear();
-		this.providedInterfaces.clear();
+		paramConfigs.clear();
+		components.clear();
+		uniqueComponentNames.clear();
+		requiredInterfaces.clear();
+		providedInterfaces.clear();
 
-		this.parseFile(componentDescriptionFile);
+		parseFile(componentDescriptionFile);
 
-		if (this.checkRequiredInterfacesResolvable && !this.getUnresolvableRequiredInterfaces().isEmpty()) {
+		if (checkRequiredInterfacesResolvable && !getUnresolvableRequiredInterfaces().isEmpty()) {
 			throw new UnresolvableRequiredInterfaceException();
 		}
 
@@ -398,7 +406,7 @@ public class ComponentLoader {
 	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
 	 */
 	public Collection<String> getUnresolvableRequiredInterfaces() {
-		return SetUtil.difference(this.requiredInterfaces, this.providedInterfaces);
+		return SetUtil.difference(requiredInterfaces, providedInterfaces);
 	}
 
 	/**
@@ -407,21 +415,21 @@ public class ComponentLoader {
 	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
 	 */
 	public JsonNode getComponentAsJsonNode(final String componentName) {
-		return this.componentMap.get(componentName);
+		return componentMap.get(componentName);
 	}
 
 	/**
 	 * @return The map describing for each component individually how its parameters may be refined.
 	 */
 	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
-		return this.paramConfigs;
+		return paramConfigs;
 	}
 
 	/**
 	 * @return The collection of parsed components.
 	 */
 	public Collection<Component> getComponents() {
-		return this.components;
+		return components;
 	}
 
 	/**
@@ -430,7 +438,7 @@ public class ComponentLoader {
 	 * @return The component for the given name.
 	 */
 	public Component getComponentWithName(final String name) {
-		for (Component component : this.getComponents()) {
+		for (Component component : getComponents()) {
 			if (component.getName().equals(name)) {
 				return component;
 			}
@@ -444,7 +452,7 @@ public class ComponentLoader {
 	}
 
 	public Map<String, JsonNode> getJsonNodeComponents() {
-		return this.componentMap;
+		return componentMap;
 	}
 
 }
