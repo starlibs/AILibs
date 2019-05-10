@@ -19,8 +19,10 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
+import de.upb.crc901.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
@@ -30,10 +32,17 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
-import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
+import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.ExactMatchLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.JaccardLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
+import jaicore.ml.core.evaluation.measure.singlelabel.MeanSquaredErrorLoss;
 import jaicore.ml.core.evaluation.measure.singlelabel.PrecisionAsLoss;
-import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import jaicore.ml.core.evaluation.measure.singlelabel.RootMeanSquaredErrorLoss;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
@@ -104,7 +113,7 @@ public class MLPlanCLI {
 		final Option nodeEvaluationTimeout = Option.builder("tne").longOpt(nodeEvaluationTimeoutOption).required(false).hasArg().desc("timeout for the evaluation of a single node in seconds").build();
 		final Option solutionEvaluation = Option.builder("tse").longOpt(solutionEvaluationTimeoutOption).required(false).hasArg().desc("timeout for the evaluation of a solution in seconds").build();
 		final Option algorithmConfiguration = Option.builder("ac").longOpt(algorithmConfigurationOption).required(false).hasArg().desc("configuration file for mlplan").build();
-		final Option searchSpaceConfiguration = Option.builder("sc").longOpt(searchSpaceConfigurationOption).required(false).hasArg().desc("search space configuration file, or alternatively: autoweka, meka, autosklearn, tpot, or tinytest")
+		final Option searchSpaceConfiguration = Option.builder("sc").longOpt(searchSpaceConfigurationOption).required(false).hasArg().desc("search space configuration file, or alternatively: weka, weka-tiny, sklearn, sklearn-ul, meka")
 				.build();
 		final Option evaluationMeasure = Option.builder("em").longOpt(evaluationMeasureOption).required(false).hasArg().desc(
 				"measure for assessing solution quality, allowed values: \nsinglelabel: \nERRORRATE, MEAN_SQUARED_ERROR, PRECISION, ROOT_MEAN_SQUARED_ERROR \nmultilabel: \nAUTO_MEKA_GGP_FITNESS, AUTO_MEKA_GGP_FITNESS_LOSS, EXACT_MATCH_ACCURARY, EXACT_MATCH_LOSS, F1_MACRO_AVG_D, F1_MACRO_AVG_D_LOSS, F1_MACRO_AVG_L, F1_MACRO_AVG_L_LOSS,  HAMMING_ACCURACY, HAMMING_LOSS, JACCARD_LOSS, JACCARD_SCORE, RANK_LOSS, RANK_SCORE")
@@ -185,115 +194,92 @@ public class MLPlanCLI {
 			trainData.setClassIndex(trainData.numAttributes() - 1);
 		}
 
-		MLPlanBuilder builder = new MLPlanBuilder();
-		if (commandLine.hasOption(evaluationMeasureOption)) {
-			if (commandLine.hasOption(multiLabelOption)) {
-				switch (commandLine.getOptionValue(evaluationMeasureOption)) {
-				case "AUTO_MEKA_GGP_FITNESS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.AUTO_MEKA_GGP_FITNESS);
-					break;
-				case "AUTO_MEKA_GGP_FITNESS_LOSS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.AUTO_MEKA_GGP_FITNESS_LOSS);
-					break;
-				case "EXACT_MATCH_ACCURARY":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.EXACT_MATCH_ACCURARY);
-					break;
-				case "EXACT_MATCH_LOSS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.EXACT_MATCH_LOSS);
-					break;
-				case "F1_MACRO_AVG_D":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.F1_MACRO_AVG_D);
-					break;
-				case "F1_MACRO_AVG_D_LOSS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.F1_MACRO_AVG_D_LOSS);
-					break;
-				case "F1_MACRO_AVG_L":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.F1_MACRO_AVG_L);
-					break;
-				case "F1_MACRO_AVG_L_LOSS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.F1_MACRO_AVG_L_LOSS);
-					break;
-				case "HAMMING_ACCURACY":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.HAMMING_ACCURACY);
-					break;
-				case "HAMMING_LOSS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.HAMMING_LOSS);
-					break;
-				case "JACCARD_LOSS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.JACCARD_LOSS);
-					break;
-				case "JACCARD_SCORE":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.JACCARD_SCORE);
-					break;
-				case "RANK_LOSS":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.RANK_LOSS);
-					break;
-				case "RANK_SCORE":
-					builder.withMultiLabelClassificationMeasure(EMultilabelPerformanceMeasure.RANK_SCORE);
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid multilabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
-				}
-			} else {
-				switch (commandLine.getOptionValue(evaluationMeasureOption)) {
-				case "ERRORRATE":
-					builder.withSingleLabelClassificationMeasure(EMultiClassPerformanceMeasure.ERRORRATE);
-					break;
-				case "MEAN_SQUARED_ERROR":
-					builder.withSingleLabelClassificationMeasure(EMultiClassPerformanceMeasure.MEAN_SQUARED_ERROR);
-					break;
-				case "PRECISION":
-					builder.withSingleLabelClassificationMeasure(EMultiClassPerformanceMeasure.PRECISION);
-					if (commandLine.hasOption(positiveClassIndex)) {
-						int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
-						builder.withSplitBasedClassifierEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new PrecisionAsLoss(classIndex)));
-					}
-					break;
-				case "ROOT_MEAN_SQUARED_ERROR":
-					builder.withSingleLabelClassificationMeasure(EMultiClassPerformanceMeasure.ROOT_MEAN_SQUARED_ERROR);
-					break;
-				default:
-					throw new IllegalArgumentException("Invalid singlelabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
-				}
-			}
-		}
+		AbstractMLPlanBuilder builder;
 		if (commandLine.hasOption(searchSpaceConfigurationOption)) {
 			switch (commandLine.getOptionValue(searchSpaceConfigurationOption)) {
-			case "autoweka":
-				builder.withAutoWEKAConfiguration();
+			case "weka":
+				builder = AbstractMLPlanBuilder.forWeka();
+				break;
+			case "weka-tiny":
+				builder = AbstractMLPlanBuilder.forWeka().withTinyWekaSearchSpace();
+				break;
+			case "sklearn":
+				builder = AbstractMLPlanBuilder.forSKLearn();
+				break;
+			case "sklearn-ul":
+				builder = AbstractMLPlanBuilder.forSKLearn().withUnlimitedLengthPipelineSearchSpace();
 				break;
 			case "meka":
-				builder.withMekaDefaultConfiguration();
-				break;
-			case "tpot":
-				builder.withTpotConfig();
-				break;
-			case "autosklearn":
-				builder.withAutoSKLearnConfig();
-				break;
-			case "tinytest":
-				builder.withTinyTestConfiguration();
+				builder = AbstractMLPlanBuilder.forMeka();
 				break;
 			default:
-				builder.withSearchSpaceConfigFile(new File(commandLine.getOptionValue(searchSpaceConfigurationOption)));
+				throw new IllegalArgumentException("Could not identify search space configuration");
 			}
 		} else {
-			builder.withAutoWEKAConfiguration();
+			builder = AbstractMLPlanBuilder.forWeka();
 		}
+
+		if (commandLine.hasOption(multiLabelOption)) {
+			MLPlanMekaBuilder mekaBuilder = (MLPlanMekaBuilder) builder;
+			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
+			case "AUTO_MEKA_GGP_FITNESS":
+				mekaBuilder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
+				break;
+			case "EXACT_MATCH":
+				mekaBuilder.withPerformanceMeasure(new ExactMatchLoss());
+				break;
+			case "F1_MACRO_AVG_D":
+				mekaBuilder.withPerformanceMeasure(new F1MacroAverageDLoss());
+				break;
+			case "F1_MACRO_AVG_L":
+				mekaBuilder.withPerformanceMeasure(new F1MacroAverageLLoss());
+				break;
+			case "HAMMING":
+				mekaBuilder.withPerformanceMeasure(new HammingLoss());
+				break;
+			case "JACCARD":
+				mekaBuilder.withPerformanceMeasure(new JaccardLoss());
+				break;
+			case "RANK_LOSS":
+				mekaBuilder.withPerformanceMeasure(new RankLoss());
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid multilabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
+			}
+		} else {
+			AbstractMLPlanSingleLabelBuilder slcBuilder = (AbstractMLPlanSingleLabelBuilder) builder;
+
+			switch (commandLine.getOptionValue(evaluationMeasureOption)) {
+			case "ERRORRATE":
+				slcBuilder.withPerformanceMeasure(new ZeroOneLoss());
+				break;
+			case "MEAN_SQUARED_ERROR":
+				slcBuilder.withPerformanceMeasure(new MeanSquaredErrorLoss());
+				break;
+			case "PRECISION":
+				int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
+				slcBuilder.withPerformanceMeasure(new PrecisionAsLoss(classIndex));
+				break;
+			case "ROOT_MEAN_SQUARED_ERROR":
+				slcBuilder.withPerformanceMeasure(new RootMeanSquaredErrorLoss());
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid singlelabel measure " + commandLine.getOptionValue(evaluationMeasureOption));
+			}
+		}
+
 		if (commandLine.hasOption(algorithmConfigurationOption)) {
 			File algoConfigFile = new File(commandLine.getOptionValue(algorithmConfigurationOption));
-			System.out.println(algoConfigFile.getAbsolutePath());
 			builder.withAlgorithmConfigFile(algoConfigFile);
 		}
-		builder.withRandomCompletionBasedBestFirstSearch();
-		builder.withTimeoutForNodeEvaluation(new TimeOut(Integer.parseInt(commandLine.getOptionValue(nodeEvaluationTimeoutOption, nodeEvaluationTimeout)), TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(nodeEvaluationTimeoutOption, nodeEvaluationTimeout)), TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(solutionEvaluationTimeoutOption, solutionEvaluationTimeout)), TimeUnit.SECONDS));
+		builder.withTimeOut(new TimeOut(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
+		builder.withNumCpus(Integer.parseInt(commandLine.getOptionValue(numCPUsOption, numCPUS)));
 
-		MLPlan mlplan = new MLPlan(builder, trainData);
+		MLPlan mlplan = builder.build(trainData);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(new TimeOut(Integer.parseInt(commandLine.getOptionValue(totalTimeoutOption, totalTimeout)), TimeUnit.SECONDS));
 		mlplan.setRandomSeed(Integer.parseInt(commandLine.getOptionValue(randomSeedOption, randomSeed)));
-		mlplan.setNumCPUs(Integer.parseInt(commandLine.getOptionValue(numCPUsOption, numCPUS)));
 
 		Instances testData = null;
 		if (commandLine.hasOption(testOption)) {

@@ -9,8 +9,9 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AAlgorithm;
@@ -102,12 +103,12 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 			// }
 
 			/* apply ML-Plan to reduced data */
-			MLPlanBuilder builder;
+			MLPlanWekaBuilder builder;
 			try {
-				builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
+				builder = AbstractMLPlanBuilder.forWeka();
 				builder.withLearningCurveExtrapolationEvaluation(new int[] { 8, 16, 64, 128 }, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());
-				builder.withTimeoutForNodeEvaluation(new TimeOut(15, TimeUnit.MINUTES));
-				builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.MINUTES));
+				builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
+				builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
 				this.mlplan = new MLPlan(builder, data);
 				this.mlplan.setTimeout(new TimeOut(20, TimeUnit.MINUTES));
 				this.logger.info("ML-Plan initialized, activation finished!");

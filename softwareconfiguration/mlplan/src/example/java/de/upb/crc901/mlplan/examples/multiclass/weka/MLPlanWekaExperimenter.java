@@ -18,8 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
@@ -88,17 +89,15 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, seed, .7);
 
 			/* initialize ML-Plan with the same config file that has been used to specify the experiments */
-			MLPlanBuilder builder = new MLPlanBuilder();
-			builder.withAutoWEKAConfiguration();
-			builder.withRandomCompletionBasedBestFirstSearch();
-			builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
-			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
+			builder.withNodeEvaluationTimeOut(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			builder.withCandidateEvaluationTimeOut(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			builder.withTimeOut(new TimeOut(Integer.parseInt(experimentValues.get("timeout")), TimeUnit.SECONDS));
+			builder.withNumCpus(experimentEntry.getExperiment().getNumCPUs());
 
 			MLPlan mlplan = new MLPlan(builder, stratifiedSplit.get(0));
 			mlplan.setLoggerName("mlplan");
-			mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
 			mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
-			mlplan.setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
 			mlplan.registerListener(this);
 
 			L.info("Build mlplan classifier");
@@ -121,8 +120,7 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 
 			processor.processResults(results);
 			L.info("Experiment done.");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new ExperimentEvaluationFailedException(e);
 		}
 	}

@@ -46,15 +46,14 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	private double internalValidationErrorOfSelectedClassifier;
 	private ComponentInstance componentInstanceOfSelectedClassifier;
 
-	private final MLPlanBuilder builder;
+	private final IMLPlanBuilder builder;
 	private final Instances data;
 	private TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
-	public MLPlan(final MLPlanBuilder builder, final Instances data) {
+	public MLPlan(final IMLPlanBuilder builder, final Instances data) {
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
-
 		/* sanity checks */
 		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
 			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
@@ -62,7 +61,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		if (builder.getClassifierFactory() == null) {
 			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
 		}
-
 		/* store builder and data for main algorithm */
 		this.builder = builder;
 		this.data = data;
@@ -111,7 +109,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			TimedObjectEvaluator<ComponentInstance, Double> classifierEvaluatorForSelection;
 			try {
 				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
-				classifierEvaluatorForSelection = this.builder.getFactoryForClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
+				classifierEvaluatorForSelection = this.builder.getClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
 			} catch (ClassifierEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException(e2, "Could not create the pipeline evaluator");
 			}
@@ -119,10 +117,9 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().hashCode(), this.builder.getSingleLabelPerformanceMeasure() != null ? this.builder.getSingleLabelPerformanceMeasure() : this.builder.getMultiLabelPerformanceMeasure(), this.getConfig().cpus(),
-						this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000, this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(),
-						MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch, classifierEvaluatorForSelection, this.getConfig().expectedBlowupInSelection(),
-						this.getConfig().expectedBlowupInPostprocessing());
+						this.getInput().hashCode(), this.builder.getPerformanceMeasureName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
+						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch,
+						classifierEvaluatorForSelection, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */

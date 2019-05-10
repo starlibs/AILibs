@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.TimeOut;
@@ -43,14 +43,15 @@ public class MLPlanARFFExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
 		/* initialize mlplan with a tiny search space, and let it run for 30 seconds */
-		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
-		builder.withTimeoutForNodeEvaluation(new TimeOut(30, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(10, TimeUnit.SECONDS));
+		AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka();
+		builder.withNodeEvaluationTimeOut(new TimeOut(30, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
+		builder.withTimeOut(new TimeOut(300, TimeUnit.SECONDS));
+		builder.withNumCpus(2);
+
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(2);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();

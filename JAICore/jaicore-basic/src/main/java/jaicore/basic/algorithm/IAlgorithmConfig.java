@@ -19,7 +19,6 @@ public interface IAlgorithmConfig extends Mutable {
 	public static final String K_THREADS = "threads";
 	public static final String K_MEMORY = "memory";
 	public static final String K_TIMEOUT = "timeout";
-	public static final String K_TIMEOUT_CAUTIONBUFFER = "timeout_buffer";
 
 	/**
 	 * @return Number of CPU cores available for parallelization.

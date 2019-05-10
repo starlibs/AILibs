@@ -6,8 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
@@ -47,16 +48,15 @@ public class ML2PlanARFFExample {
 		MLPlanClassifierConfig algoConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
 		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.0");
 
-		MLPlanBuilder builder = new MLPlanBuilder();
-		builder.withMekaDefaultConfiguration();
+		MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
 		builder.withAlgorithmConfig(algoConfig);
-		builder.withTimeoutForNodeEvaluation(new TimeOut(60, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withNumCpus(8);
+		builder.withTimeOut(new TimeOut(150, TimeUnit.SECONDS));
 
 		MLPlan ml2plan = new MLPlan(builder, split.get(0));
 		ml2plan.setLoggerName("ml2plan");
-		ml2plan.setTimeout(new TimeOut(150, TimeUnit.SECONDS));
-		ml2plan.setNumCPUs(8);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();
