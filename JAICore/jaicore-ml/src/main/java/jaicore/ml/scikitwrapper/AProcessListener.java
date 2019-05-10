@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import jaicore.processes.ProcessUtil;
+
 /**
  * The process listener may be attached to a process in order to handle its ouputs streams in a controlled way.
  * For instance, the process listener can be used to pipe all outputs of the invoked process to a logger system.
@@ -18,14 +20,21 @@ public abstract class AProcessListener implements IProcessListener {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
 				if (Thread.currentThread().isInterrupted()) {
+					ProcessUtil.killProcess(ProcessUtil.getPID(process));
 					process.destroyForcibly();
 					throw new InterruptedException("Process execution was interrupted.");
 				}
 				String line;
 				while ((line = input.readLine()) != null) {
+					if (line.contains("import imp") || line.contains("imp module")) {
+						continue;
+					}
 					this.handleInput(line);
 				}
 				while ((line = error.readLine()) != null) {
+					if (line.contains("import imp") || line.contains("imp module")) {
+						continue;
+					}
 					this.handleError(line);
 				}
 			}

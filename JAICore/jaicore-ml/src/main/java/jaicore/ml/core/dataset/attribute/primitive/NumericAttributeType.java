@@ -34,5 +34,4 @@ public class NumericAttributeType implements IPrimitiveAttributeType<Double> {
 	public String toString() {
 		return "NUM";
 	}
-
 }

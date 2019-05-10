@@ -59,8 +59,8 @@
 	 <level value="warn" />
 	</logger>
 	
-	<logger name="testedalgorithm">
-    <level value="warn" />
+  <logger name="testedalgorithm">
+    <level value="trace" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -70,7 +70,7 @@
   </logger>
   
   <logger name="testedalgorithm._orgraphsearch._algorithm">
-    <level value="warn" />
+    <level value="trace" />
   </logger>
   
   <logger name="testedalgorithm.nodeevaluator">
@@ -85,8 +85,16 @@
     <level value="info" />
   </logger>
   
+  <logger name="jaicore.interrupt">
+    <level value="debug" />
+  </logger>
+  
+  <logger name="jaicore.timing">
+    <level value="debug" />
+  </logger>
+  
   <logger name="jaicore.concurrent">
-    <level value="warn" />
+    <level value="debug" />
   </logger>
   
   <logger name="testednodeevaluator">

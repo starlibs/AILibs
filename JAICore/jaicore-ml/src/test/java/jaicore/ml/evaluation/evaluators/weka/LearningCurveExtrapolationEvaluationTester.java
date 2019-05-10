@@ -9,8 +9,8 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
@@ -31,7 +31,7 @@ public class LearningCurveExtrapolationEvaluationTester {
 		dataset.setClassIndex(dataset.numAttributes() - 1);
 		Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
 		dataset.setClassIndex(targetAttribute.index());
-		IDataset<IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
+		IDataset<? extends IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
 
 		// Test classifier evaluation by learning curve extrapolation
 		LearningCurveExtrapolationEvaluator evaluator = new LearningCurveExtrapolationEvaluator(

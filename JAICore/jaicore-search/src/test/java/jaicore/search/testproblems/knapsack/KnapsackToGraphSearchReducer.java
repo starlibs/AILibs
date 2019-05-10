@@ -3,7 +3,6 @@ package jaicore.search.testproblems.knapsack;
 import java.util.List;
 import java.util.Set;
 
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
@@ -26,7 +25,7 @@ public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction
 					List<KnapsackConfiguration> path = node.externalPath();
 					return problem.getSolutionEvaluator().evaluate(path.get(path.size() - 1));
 				}
-				catch (ObjectEvaluationFailedException | AlgorithmTimeoutedException e) {
+				catch (ObjectEvaluationFailedException e) {
 					throw new NodeEvaluationException(e, "Could not evaluate node due to an algorithm exception: " + e.getMessage());
 				}
 			}

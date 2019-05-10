@@ -6,7 +6,8 @@ import java.util.Random;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
+import jaicore.ml.core.dataset.standard.SimpleDataset;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -52,7 +53,7 @@ public class OSMAC<I extends IInstance> extends PilotEstimateSampling<I> {
 			boundaryOfCurrentInstance += loss * vectorLength / sumOfDistributionLosses;
 			instanceProbabilityBoundaries.add(new Pair<Instance, Double>(instance, boundaryOfCurrentInstance));
 		}
-		IDataset<IInstance> dataset = WekaInstancesUtil.wekaInstancesToDataset(instances);
+		SimpleDataset dataset = WekaInstancesUtil.wekaInstancesToDataset(instances);
 		int iterator = 0;
 		for (IInstance instance : dataset) {
 			probabilityBoundaries

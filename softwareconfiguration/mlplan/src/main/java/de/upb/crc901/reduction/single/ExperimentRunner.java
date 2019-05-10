@@ -15,18 +15,18 @@ import jaicore.ml.classification.multiclass.reduction.splitters.ISplitterFactory
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.FixedSplitClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleSLCEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 public class ExperimentRunner<T extends ISplitter> {
-	
+
 	private final int k;
 	private final int mccvRepeats;
 	private final ISplitterFactory<T> splitterFactory;
-	
-	public ExperimentRunner(int k, int mccvRepeats, ISplitterFactory<T> splitterFactory) {
+
+	public ExperimentRunner(final int k, final int mccvRepeats, final ISplitterFactory<T> splitterFactory) {
 		super();
 		this.k = k;
 		this.mccvRepeats = mccvRepeats;
@@ -34,7 +34,7 @@ public class ExperimentRunner<T extends ISplitter> {
 	}
 
 
-	public Map<String, Object> conductSingleOneStepReductionExperiment(ReductionExperiment experiment) throws Exception {
+	public Map<String, Object> conductSingleOneStepReductionExperiment(final ReductionExperiment experiment) throws Exception {
 
 		/* load data */
 		Instances data = new Instances(new BufferedReader(new FileReader(experiment.getDataset())));
@@ -46,13 +46,13 @@ public class ExperimentRunner<T extends ISplitter> {
 		Classifier innerClassifier = AbstractClassifier.forName(experiment.getNameOfInnerClassifier(), null);
 		Classifier rightClassifier = AbstractClassifier.forName(experiment.getNameOfRightClassifier(), null);
 		List<Instances> outerSplit = WekaUtil.getStratifiedSplit(data, experiment.getSeed(), .7);
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(new SimpleSLCEvaluatorMeasureBridge(new ZeroOneLoss()), mccvRepeats, outerSplit.get(0), .7, seed);
-		ISplitter splitter = splitterFactory.getSplitter(seed);
-		
+		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), this.mccvRepeats, outerSplit.get(0), .7, seed);
+		ISplitter splitter = this.splitterFactory.getSplitter(seed);
+
 		/* compute best of k splits */
 		MCTreeNodeReD bestFoundClassifier = null;
 		double bestFoundScore = Double.MAX_VALUE;
-		for (int i = 0; i < k; i++) {
+		for (int i = 0; i < this.k; i++) {
 			List<Collection<String>> classSplit;
 			try {
 				classSplit = new ArrayList<>(splitter.split(outerSplit.get(0)));
@@ -67,13 +67,13 @@ public class ExperimentRunner<T extends ISplitter> {
 				bestFoundClassifier = classifier;
 			}
 		}
-		
+
 		/* train classifier on all data */
 		double loss = new FixedSplitClassifierEvaluator(outerSplit.get(0), outerSplit.get(1)).evaluate(bestFoundClassifier);
 		Map<String, Object> result = new HashMap<>();
 		System.out.println("\t\t\tBest previously observed loss was " + bestFoundScore + ". The retrained classifier achieves " + loss + " on the full data.");
 		result.put("errorRate", loss);
-//		result.put("trainTime", time);
+		//		result.put("trainTime", time);
 		return result;
 	}
 }

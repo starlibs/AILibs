@@ -1,5 +1,6 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Objects;
@@ -7,8 +8,8 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import hasco.model.Component;
@@ -52,7 +53,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private boolean visualizationEnabled = false;
 
 	/* MLPlan Builder and the instance of mlplan */
-	private final MLPlanBuilder builder;
+	private final transient AbstractMLPlanBuilder builder;
 
 	/* The timeout for the selecting a classifier. */
 	private TimeOut timeout;
@@ -61,8 +62,9 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private Classifier classifierFoundByMLPlan;
 	private double internalValidationErrorOfSelectedClassifier;
 
-	public MLPlanWekaClassifier(final MLPlanBuilder builder) {
+	public MLPlanWekaClassifier(final AbstractMLPlanBuilder builder) {
 		this.builder = builder;
+		this.timeout = builder.getTimeOut();
 	}
 
 	@Override
@@ -164,7 +166,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		return this.builder.getAlgorithmConfig();
 	}
 
-	public Collection<Component> getComponents() {
+	public Collection<Component> getComponents() throws IOException {
 		return this.builder.getComponents();
 	}
 

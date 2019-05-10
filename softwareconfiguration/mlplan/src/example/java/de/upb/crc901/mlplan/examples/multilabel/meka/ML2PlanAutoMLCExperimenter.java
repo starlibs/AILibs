@@ -2,7 +2,6 @@ package de.upb.crc901.mlplan.examples.multilabel.meka;
 
 import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -11,29 +10,24 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.experiments.ExperimentDBEntry;
-import jaicore.experiments.ExperimentRunner;
-import jaicore.experiments.IExperimentDatabaseHandle;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetEvaluator;
-import jaicore.experiments.databasehandle.ExperimenterSQLHandle;
-import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import jaicore.experiments.exceptions.IllegalExperimentSetupException;
 import jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
-import jaicore.ml.wekautil.dataset.splitter.MultilabelDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.MultilabelDatasetSplitter;
 import meka.classifiers.multilabel.Evaluation;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;
@@ -41,26 +35,26 @@ import meka.core.Result;
 import weka.core.Instances;
 
 /**
-* Experimenter for ML2PLan & AutoMLC
-*
-* @author helegraf, mwever
-*
-*/
+ * Experimenter for ML2PLan & AutoMLC
+ *
+ * @author helegraf, mwever
+ *
+ */
 public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 
 	private static final ML2PlanAutoMLCExperimenterConfig CONFIG = ConfigCache.getOrCreate(ML2PlanAutoMLCExperimenterConfig.class);
 
 	/* Logging */
+	private final SQLAdapter adapter;
 	private Logger logger = LoggerFactory.getLogger(ML2PlanAutoMLCExperimenter.class);
 
-	public ML2PlanAutoMLCExperimenter() {
-		// nothing to do here
+	public ML2PlanAutoMLCExperimenter(final SQLAdapter adapter) {
+		this.adapter = adapter;
 	}
 
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
-		try (SQLAdapter adapter = new SQLAdapter(CONFIG.getDBHost(), CONFIG.getDBUsername(), CONFIG.getDBPassword(), CONFIG.getDBDatabaseName())) {
-
+		try {
 			this.logger.info("Experiment ID: {}", experimentEntry.getId());
 			this.logger.info("Experiment Description: {}", experimentEntry.getExperiment().getValuesOfKeyFields());
 
@@ -68,13 +62,8 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 
 			// Load dataset and prepare the dataset to be ready for multi-label classification
 			File datasetFile = new File(CONFIG.getDatasetFolder(), experimentDescription.get("dataset") + ".arff");
-			Instances data;
-			try {
-				data = new Instances(new FileReader(datasetFile));
-				MLUtils.prepareData(data);
-			} catch (Exception e) {
-				throw new ExperimentEvaluationFailedException(e);
-			}
+			Instances data = new Instances(new FileReader(datasetFile));
+			MLUtils.prepareData(data);
 
 			// Get train / test splits
 			String splitDescriptionTrainTest = experimentDescription.get("test_split_tech");
@@ -87,33 +76,32 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			TimeOut nodeEvalTimeOut = new TimeOut(Integer.parseInt(experimentDescription.get("node_timeout")), TimeUnit.MINUTES);
 
 			// Prepare connection
-			ResultsDBConnection connection = new ResultsDBConnection("intermediate_measurements", "final_measurements", "ordered_metric", experimentEntry.getId(), "ML2Plan", adapter);
+			ResultsDBConnection connection = new ResultsDBConnection("intermediate_measurements", "final_measurements", "ordered_metric", experimentEntry.getId(), "ML2Plan", this.adapter);
 
 			// Evaluation: test
 			this.logger.info("Now test...");
 
-			MLPlanBuilder builder = new MLPlanBuilder();
-			builder.withMekaDefaultConfiguration();
-			builder.withTimeoutForNodeEvaluation(nodeEvalTimeOut);
-			builder.withTimeoutForSingleSolutionEvaluation(nodeEvalTimeOut);
+			MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
+			builder.withNodeEvaluationTimeOut(nodeEvalTimeOut);
+			builder.withCandidateEvaluationTimeOut(nodeEvalTimeOut);
 
 			int metricIdToOptimize = Integer.parseInt(experimentDescription.get("metric_id"));
 			switch (metricIdToOptimize) {
 			case 8: // rank loss
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new RankLoss()));
+				builder.withPerformanceMeasure(new RankLoss());
 				break;
 			case 1: // hamming
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new HammingLoss()));
+				builder.withPerformanceMeasure(new HammingLoss());
 				break;
 			case 62: // F1Measure avgd by instances
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new InstanceWiseF1AsLoss()));
+				builder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new F1MacroAverageLLoss()));
+				builder.withPerformanceMeasure(new F1MacroAverageLLoss());
 				break;
 			case 73: // fitness
 			default:
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss()));
+				builder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 				break;
 			}
 
@@ -163,23 +151,13 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				processor.processResults(results);
 
 				this.logger.info("Evaluation task completed.");
-			} catch (Exception e) {
-				throw new ExperimentEvaluationFailedException(e);
 			} finally {
 				if (mlplan != null) {
 					mlplan.cancel();
 				}
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new ExperimentEvaluationFailedException(e);
 		}
 	}
-
-	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
-		IExperimentDatabaseHandle dbHandle = new ExperimenterSQLHandle(CONFIG);
-		ExperimentRunner runner = new ExperimentRunner(CONFIG, new ML2PlanAutoMLCExperimenter(), dbHandle);
-		runner.randomlyConductExperiments(1, false);
-		System.exit(0);
-	}
-
 }

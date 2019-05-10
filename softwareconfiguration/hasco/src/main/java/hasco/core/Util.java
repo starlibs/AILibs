@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -363,7 +364,7 @@ public class Util {
 				if (np.isInteger()) {
 					interpretedValue = String.valueOf((int) Math.round(interval.getBarycenter()));
 				} else {
-					interpretedValue = String.valueOf(interval.getBarycenter());
+					interpretedValue = String.valueOf(interval.checkPoint((double)p.getDefaultValue(), 0.001) == Location.INSIDE ? (double)p.getDefaultValue() : interval.getBarycenter());
 				}
 			} else {
 				interpretedValue = assignedValue;
@@ -498,7 +499,7 @@ public class Util {
 		for (Interval proposedRefinement : proposedRefinements) {
 			double epsilon = 1E-7;
 			assert proposedRefinement.getInf() + epsilon >= inf && proposedRefinement.getSup() <= sup + epsilon : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-					+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
+			+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
 			if (proposedRefinement.equals(interval)) {
 				throw new IllegalStateException("No real refinement! Intervals are identical.");
 			}

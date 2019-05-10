@@ -10,16 +10,16 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.AbstractEvaluatorMeasureBridge;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
-import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
+import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
 /**
  * A classifier evaluator that can perform a (monte-carlo)cross-validation on
  * the given dataset. Thereby, it uses the
- * {@link AbstractEvaluatorMeasureBridge} to evaluate the classifier on a random
+ * {@link AbstractSplitBasedClassifierEvaluator} to evaluate the classifier on a random
  * split of the dataset.
  * This probabilistic version can be used to speed up the process by early termination based on
  * a threshold value that has to be beaten by the evaluation. If it is unlikely after the first
@@ -40,7 +40,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 	private double bestScore = 1.0;
 
 	/* Can either compute the loss or cache it */
-	private final IEvaluatorMeasureBridge<Double> bridge;
+	private final ISplitBasedClassifierEvaluator<Double> bridge;
 	private final IDatasetSplitter datasetSplitter;
 
 	@Override
@@ -48,7 +48,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		this.bestScore = bestScore;
 	}
 
-	public ProbabilisticMonteCarloCrossValidationEvaluator(final IEvaluatorMeasureBridge<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final double bestscore, final Instances data, final double trainingPortion,
+	public ProbabilisticMonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final double bestscore, final Instances data, final double trainingPortion,
 			final long seed) {
 		super();
 		this.repeats = repeats;
@@ -111,7 +111,7 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		return score;
 	}
 
-	public IEvaluatorMeasureBridge<Double> getBridge() {
+	public ISplitBasedClassifierEvaluator<Double> getBridge() {
 		return this.bridge;
 	}
 

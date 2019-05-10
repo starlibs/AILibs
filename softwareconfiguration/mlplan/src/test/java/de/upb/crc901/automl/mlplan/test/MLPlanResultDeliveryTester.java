@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import de.upb.crc901.automl.AutoMLAlgorithmResultProductionTester;
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.IAlgorithm;
 import weka.classifiers.Classifier;
@@ -16,14 +16,13 @@ public class MLPlanResultDeliveryTester extends AutoMLAlgorithmResultProductionT
 	@Override
 	public IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(final Instances data) {
 		try {
-			MLPlanBuilder builder = new MLPlanBuilder().withTinyTestConfiguration().withRandomCompletionBasedBestFirstSearch();
-			builder.withTimeoutForNodeEvaluation(new TimeOut(10, TimeUnit.SECONDS));
-			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.SECONDS));
+			AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka();
+			builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
+			builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
+			builder.withNumCpus(2);
 			MLPlan mlplan = new MLPlan(builder, data);
 			mlplan.setRandomSeed(1);
-			mlplan.setPortionOfDataForPhase2(0f);
-			mlplan.setTimeout(30, TimeUnit.SECONDS);
-			mlplan.setNumCPUs(1);
+			mlplan.setPortionOfDataForPhase2(.0f);
 			return mlplan;
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -43,4 +43,4 @@ if __name__ == "__main__":
         port = os.environ['IPL_PORT']
     else:
         port = 8081
-    app.run("0.0.0.0", port=port, debug=True)
+    app.run("0.0.0.0", port=port, debug=False)

@@ -6,8 +6,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
@@ -16,8 +17,8 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import jaicore.ml.wekautil.dataset.splitter.ArbitrarySplitter;
-import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
+import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
@@ -27,11 +28,11 @@ import meka.core.MLUtils;
 import weka.core.Instances;
 
 /**
-* Example demonstrating the usage of Ml2Plan (MLPlan for multilabel classification).
-*
-* @author mwever, helegraf
-*
-*/
+ * Example demonstrating the usage of Ml2Plan (MLPlan for multilabel classification).
+ *
+ * @author mwever, helegraf
+ *
+ */
 public class ML2PlanARFFExample {
 
 	private static final boolean ACTIVATE_VISUALIZATION = true;
@@ -47,16 +48,15 @@ public class ML2PlanARFFExample {
 		MLPlanClassifierConfig algoConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
 		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.0");
 
-		MLPlanBuilder builder = new MLPlanBuilder();
-		builder.withMekaDefaultConfiguration();
+		MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
 		builder.withAlgorithmConfig(algoConfig);
-		builder.withTimeoutForNodeEvaluation(new TimeOut(60, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withNumCpus(8);
+		builder.withTimeOut(new TimeOut(150, TimeUnit.SECONDS));
 
 		MLPlan ml2plan = new MLPlan(builder, split.get(0));
 		ml2plan.setLoggerName("ml2plan");
-		ml2plan.setTimeout(new TimeOut(150, TimeUnit.SECONDS));
-		ml2plan.setNumCPUs(8);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();

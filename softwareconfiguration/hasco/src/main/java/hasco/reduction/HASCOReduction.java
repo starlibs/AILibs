@@ -11,11 +11,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import hasco.core.HASCOSolutionCandidate;
+import hasco.core.IsRefinementCompletedPredicate;
+import hasco.core.IsValidParameterRangeRefinementPredicate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
 import hasco.core.isNotRefinable;
-import hasco.core.IsRefinementCompletedPredicate;
-import hasco.core.IsValidParameterRangeRefinementPredicate;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
@@ -23,7 +23,6 @@ import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import jaicore.basic.IInformedObjectEvaluatorExtension;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
@@ -131,7 +130,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
 					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + p.getDefaultValue() + "')"));
+						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
@@ -295,7 +294,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public V evaluate(final Plan plan) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+			public V evaluate(final Plan plan) throws InterruptedException, ObjectEvaluationFailedException {
 				ComponentInstance solution = HASCOReduction.this.decodeSolution(plan);
 				if (solution == null) {
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));

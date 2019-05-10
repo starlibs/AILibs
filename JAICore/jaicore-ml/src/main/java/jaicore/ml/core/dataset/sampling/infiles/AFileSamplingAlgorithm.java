@@ -30,17 +30,17 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 	private String outputFilePath = null;
 	protected FileWriter outputFileWriter;
 
-	protected AFileSamplingAlgorithm(File input) {
+	protected AFileSamplingAlgorithm(final File input) {
 		super(input);
 	}
 
-	public void setSampleSize(int size) {
+	public void setSampleSize(final int size) {
 		this.sampleSize = size;
 	}
 
-	public void setOutputFileName(String outputFilePath) throws IOException {
+	public void setOutputFileName(final String outputFilePath) throws IOException {
 		this.outputFilePath = outputFilePath;
-		outputFileWriter = new FileWriter(outputFilePath);
+		this.outputFileWriter = new FileWriter(outputFilePath);
 	}
 
 	@Override
@@ -50,16 +50,16 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
 			timeoutTime = Instant.MAX;
 		} else {
-			timeoutTime = Instant.now().plus(getTimeout().milliseconds(), ChronoUnit.MILLIS);
+			timeoutTime = Instant.now().plus(this.getTimeout().milliseconds(), ChronoUnit.MILLIS);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Set timeout to {}", timeoutTime);
 			}
 		}
 		// Check missing or invalid configuration.
-		if (outputFilePath == null || outputFilePath.length() == 0) {
+		if (this.outputFilePath == null || this.outputFilePath.length() == 0) {
 			throw new AlgorithmException("No output file path specified");
 		}
-		if (sampleSize == null) {
+		if (this.sampleSize == null) {
 			throw new AlgorithmException("No valid sample size specified");
 		}
 		File dataset = this.getInput();
@@ -69,22 +69,22 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 		// Working configuration, so create the actual sample.
 		// Write the ARFF header to the output file.
 		try {
-			outputFileWriter.write(ArffUtilities.extractArffHeader(getInput()));
+			this.outputFileWriter.write(ArffUtilities.extractArffHeader(this.getInput()));
 		} catch (IOException e) {
 			throw new AlgorithmException(e, "Error while writing to given output path.");
 		}
 		// Check if the requested sample size is zero and we can stop directly.
-		if (sampleSize == 0) {
+		if (this.sampleSize == 0) {
 			LOG.warn("Sample size is 0, so an empty data set is returned!");
-			return new File(outputFilePath);
+			return new File(this.outputFilePath);
 		}
 		// Start the sampling process otherwise.
 		this.setState(AlgorithmState.created);
 		while (this.hasNext()) {
 			try {
-				checkAndConductTermination();
+				this.checkAndConductTermination();
 			} catch (AlgorithmTimeoutedException e) {
-				cleanUp();
+				this.cleanUp();
 				throw new AlgorithmException(e.getMessage());
 			}
 			if (Instant.now().isAfter(timeoutTime)) {
@@ -96,14 +96,14 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			}
 		}
 		try {
-			outputFileWriter.flush();
-			outputFileWriter.close();
+			this.outputFileWriter.flush();
+			this.outputFileWriter.close();
 		} catch (IOException e) {
-			cleanUp();
+			this.cleanUp();
 			throw new AlgorithmException(e, "Could not close File writer for sampling output file");
 		}
-		cleanUp();
-		return new File(outputFilePath);
+		this.cleanUp();
+		return new File(this.outputFilePath);
 	}
 
 	/**

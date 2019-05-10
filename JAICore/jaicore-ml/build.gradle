@@ -3,6 +3,7 @@ dependencies {
 	compile project(":JAICore:jaicore-experiments")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-processes")
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
@@ -25,16 +26,13 @@ dependencies {
 
 	// end dependencies for meka
 	
-	compile ('de.upb.isys:interruptable-weka:0.0.12') {
+	compile ('de.upb.isys:interruptable-weka:0.0.16') {
 		  	exclude group: 'log4j'
 	    	exclude group: 'org.slf4j'
 	}
 	
 	//JTwig template engine
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
-	
-	// https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
-	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
 	
 	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
 	
