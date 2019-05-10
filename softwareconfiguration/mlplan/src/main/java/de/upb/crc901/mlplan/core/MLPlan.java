@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.upb.crc901.mlplan.core.events.ClassifierCreatedEvent;
 import de.upb.crc901.mlplan.core.events.ClassifierFoundEvent;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.core.HASCOFactory;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.events.HASCOSolutionEvent;
@@ -21,7 +21,6 @@ import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.MathExt;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -30,16 +29,9 @@ import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import jaicore.ml.WekaUtil;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
-import jaicore.ml.core.evaluation.measure.singlelabel.EMultiClassPerformanceMeasure;
-import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.ProbabilisticMonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.IEvaluatorMeasureBridge;
+import jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationEvent;
+import jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
+import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.probleminputs.GraphSearchInput;
@@ -56,15 +48,16 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	private double internalValidationErrorOfSelectedClassifier;
 	private ComponentInstance componentInstanceOfSelectedClassifier;
 
-	private final MLPlanBuilder builder;
+	private final IMLPlanBuilder builder;
 	private final Instances data;
 	private TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
-	public MLPlan(final MLPlanBuilder builder, final Instances data) {
+	private boolean buildSelectedClasifierOnGivenData = true;
+
+	public MLPlan(final IMLPlanBuilder builder, final Instances data) {
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
-
 		/* sanity checks */
 		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
 			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
@@ -72,7 +65,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		if (builder.getClassifierFactory() == null) {
 			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
 		}
-
 		/* store builder and data for main algorithm */
 		this.builder = builder;
 		this.data = data;
@@ -90,16 +82,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				throw new IllegalStateException("Cannot generate search where number of CPUs is " + this.getConfig().cpus());
 			}
 
-			/* communicate the parameters with which ML-Plan will run */
-			if (this.logger.isInfoEnabled()) {
-				this.logger.info(
-						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tMCCV for search: {} iterations with {}% for training\n\tMCCV for select: {} iterations with {}% for training\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().relationName(), EMultiClassPerformanceMeasure.ERRORRATE, this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
-						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2),
-						this.getConfig().numberOfMCIterationsDuringSearch(), (int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSearch()), this.getConfig().numberOfMCIterationsDuringSelection(),
-						(int) (100 * this.getConfig().getMCCVTrainFoldSizeDuringSelection()), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
-			}
-
 			/* set up exact splits */
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.data.size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
@@ -114,44 +96,48 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			}
 
 			/* dynamically compute blow-ups */
-			double blowUpInSelectionPhase = MathExt.round(1f / this.getConfig().getMCCVTrainFoldSizeDuringSearch() * this.getConfig().numberOfMCIterationsDuringSelection() / this.getConfig().numberOfMCIterationsDuringSearch(), 2);
-			double blowUpInPostprocessing = MathExt.round((1 / (1 - dataPortionUsedForSelection)) / this.getConfig().numberOfMCIterationsDuringSelection(), 2);
-			this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
-			this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
+			if (Double.isNaN(this.getConfig().expectedBlowupInSelection())) {
+				double blowUpInSelectionPhase = 1;
+				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
+				this.logger.info("No expected blow-up for selection phase has been defined. Automatically configuring {}", blowUpInSelectionPhase);
+			}
+			if (!this.buildSelectedClasifierOnGivenData) {
+				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
+				this.logger.info("Selected classifier won't be built, so now blow-up is calculated.");
+			}
+			else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
+				double blowUpInPostprocessing = 1;
+				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
+				this.logger.info("No expected blow-up for postprocessing phase has been defined. Automatically configuring {}", blowUpInPostprocessing);
+			}
 
-			/* set evaluation measure bridge */
-			this.logger.debug("Setting up evaluation measurement bridge.");
-			IEvaluatorMeasureBridge<Double> evaluationMeasurementBridge = this.builder.getEvaluationMeasurementBridge();
-			IClassifierEvaluator classifierEvaluator;
-			if (this.builder.getClassifierEvaluatorFactory() != null) {
-				IClassifierEvaluatorFactory classifierEvaluatorFactory = this.builder.getClassifierEvaluatorFactory();
-				@SuppressWarnings("unchecked")
-				IDataset<IInstance> datasetSearch = WekaInstancesUtil.wekaInstancesToDataset(dataShownToSearch);
-				classifierEvaluator = classifierEvaluatorFactory.getIClassifierEvaluator(datasetSearch, this.getConfig().randomSeed());
-				if (classifierEvaluator instanceof LearningCurveExtrapolationEvaluator) {
-					((LearningCurveExtrapolationEvaluator) classifierEvaluator).setFullDatasetSize(MLPlan.this.getInput().size());
-				}
-			} else {
-				classifierEvaluator = new ProbabilisticMonteCarloCrossValidationEvaluator(evaluationMeasurementBridge, this.builder.getSearchPhaseDatasetSplitter(), this.getConfig().numberOfMCIterationsDuringSearch(), 1.0,
-						dataShownToSearch, this.getConfig().getMCCVTrainFoldSizeDuringSearch(), this.getConfig().randomSeed());
+			/* setup the pipeline evaluators */
+			this.logger.debug("Setting up the pipeline evaluators.");
+			PipelineEvaluator classifierEvaluatorForSearch;
+			PipelineEvaluator classifierEvaluatorForSelection;
+			try {
+				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
+				classifierEvaluatorForSelection = this.builder.getClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
+			} catch (ClassifierEvaluatorConstructionFailedException e2) {
+				throw new AlgorithmException(e2, "Could not create the pipeline evaluator");
+			}
+			classifierEvaluatorForSearch.registerListener(this); // events will be forwarded
+			classifierEvaluatorForSelection.registerListener(this); // events will be forwarded
+
+			/* communicate the parameters with which ML-Plan will run */
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info(
+						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
+						this.getInput().hashCode(), this.builder.getPerformanceMeasureName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
+						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch,
+						classifierEvaluatorForSelection, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
 			this.logger.debug("Creating 2-phase software configuration problem.");
-			PipelineEvaluatorBuilder searchEvaluatorBuilder = new PipelineEvaluatorBuilder();
-			searchEvaluatorBuilder.withClassifierFactory(this.builder.getClassifierFactory()).withDatasetSplitter(this.builder.getSearchPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge)
-					.withData(dataShownToSearch).withSeed(this.getConfig().randomSeed()).withTimeoutForSolutionEvaluation(this.getConfig().timeoutForCandidateEvaluation())
-					.withNumMCIterations(this.getConfig().numberOfMCIterationsDuringSearch()).withTrainFoldSize(this.getConfig().getMCCVTrainFoldSizeDuringSearch()).withClassifierEvaluator(classifierEvaluator);
-			IObjectEvaluator<ComponentInstance, Double> searchBenchmark = new SearchPhasePipelineEvaluator(searchEvaluatorBuilder);
-
-			PipelineEvaluatorBuilder selectionEvaluatorBuilder = new PipelineEvaluatorBuilder();
-			selectionEvaluatorBuilder.withClassifierFactory(this.builder.getClassifierFactory()).withDatasetSplitter(this.builder.getSelectionPhaseDatasetSplitter()).withEvaluationMeasurementBridge(evaluationMeasurementBridge)
-					.withData(MLPlan.this.getInput()).withSeed(this.getConfig().randomSeed()).withTimeoutForSolutionEvaluation(this.getConfig().timeoutForCandidateEvaluation())
-					.withNumMCIterations(this.getConfig().numberOfMCIterationsDuringSelection()).withTrainFoldSize(this.getConfig().getMCCVTrainFoldSizeDuringSelection());
-			IObjectEvaluator<ComponentInstance, Double> selectionBenchmark = new SelectionPhasePipelineEvaluator(selectionEvaluatorBuilder);
 			TwoPhaseSoftwareConfigurationProblem problem = null;
 			try {
-				problem = new TwoPhaseSoftwareConfigurationProblem(this.builder.getSearchSpaceConfigFile(), this.builder.getRequestedInterface(), searchBenchmark, selectionBenchmark);
+				problem = new TwoPhaseSoftwareConfigurationProblem(this.builder.getSearchSpaceConfigFile(), this.builder.getRequestedInterface(), classifierEvaluatorForSearch, classifierEvaluatorForSelection);
 			} catch (IOException e1) {
 				throw new AlgorithmException(e1, "Could not activate ML-Plan!");
 			}
@@ -159,7 +145,6 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			/* create 2-phase HASCO */
 			this.logger.info("Creating the twoPhaseHASCOFactory.");
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.builder.getClassifierFactory(), problem);
-			@SuppressWarnings("unchecked")
 			HASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
 			this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 
@@ -177,9 +162,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 						@SuppressWarnings("unchecked")
 						HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 						try {
-							Classifier c = MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance());
-							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", (c instanceof MLPipeline) ? c : WekaUtil.printNestedWekaClassifier(c), solution.getScore(),
-									solution.getTimeToEvaluateCandidate());
+							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()),
+									solution.getScore(), solution.getTimeToEvaluateCandidate());
 						} catch (Exception e) {
 							MLPlan.this.logger.warn("Could not print log due to exception while preparing the log message.", e);
 						}
@@ -217,21 +201,26 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			long startOptimizationTime = System.currentTimeMillis();
 			try {
 				this.selectedClassifier = this.optimizingFactory.call();
+				this.logger.info("2-Phase-HASCO has chosen classifier {}, which will now be built on the entire data given, i.e. {} data points.", this.selectedClassifier, this.getInput().size());
 			} catch (AlgorithmException | InterruptedException | AlgorithmExecutionCanceledException | AlgorithmTimeoutedException e) {
 				this.terminate(); // send the termination event
 				throw e;
 			}
 			this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
 			this.componentInstanceOfSelectedClassifier = this.optimizingFactory.getComponentInstanceOfObject();
-			long startBuildTime = System.currentTimeMillis();
-			try {
-				this.selectedClassifier.buildClassifier(this.getInput());
-			} catch (Exception e) {
-				throw new AlgorithmException(e, "Training the classifier failed!");
+			if (this.buildSelectedClasifierOnGivenData) {
+				long startBuildTime = System.currentTimeMillis();
+				try {
+					this.selectedClassifier.buildClassifier(this.getInput());
+				} catch (Exception e) {
+					throw new AlgorithmException(e, "Training the classifier failed!");
+				}
+				long endBuildTime = System.currentTimeMillis();
+				this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
+						endBuildTime - startOptimizationTime, this.selectedClassifier);
+			} else {
+				this.logger.info("Selected model has not been built, since model building has been disabled. Total construction time was {}ms.", System.currentTimeMillis() - startOptimizationTime);
 			}
-			long endBuildTime = System.currentTimeMillis();
-			this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
-					endBuildTime - startOptimizationTime, (this.selectedClassifier instanceof MLPipeline) ? this.selectedClassifier : WekaUtil.printNestedWekaClassifier(this.selectedClassifier));
 			return this.terminate();
 
 		default:
@@ -313,7 +302,30 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		return this.optimizingFactory;
 	}
 
+	@Subscribe
+	public void receiveClassifierCreatedEvent(final ClassifierCreatedEvent e) {
+		this.post(e);
+	}
+
+	@Subscribe
+	public void receiveClassifierCreatedEvent(final LearningCurveExtrapolatedEvent e) {
+		this.post(e);
+	}
+
+	@Subscribe
+	public void receiveClassifierCreatedEvent(final MCCVSplitEvaluationEvent e) {
+		this.post(e);
+	}
+
 	public TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> getTwoPhaseHASCOFactory() {
 		return this.twoPhaseHASCOFactory;
+	}
+
+	public boolean isBuildSelectedClasifierOnGivenData() {
+		return this.buildSelectedClasifierOnGivenData;
+	}
+
+	public void setBuildSelectedClasifierOnGivenData(final boolean buildSelectedClasifierOnGivenData) {
+		this.buildSelectedClasifierOnGivenData = buildSelectedClasifierOnGivenData;
 	}
 }

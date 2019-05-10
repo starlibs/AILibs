@@ -187,4 +187,26 @@ public class FileUtil {
 			throw new FileIsDirectoryException("The file " + file.getAbsolutePath() + " is not a file but a directory.");
 		}
 	}
+
+	/**
+	 * Returns the file for a given path with the highest priority which also exists; the resource path is the backup solution with lowest priority.
+	 * The getter iterates over the fileSytemPaths array and returns the first existing file, i.e. paths with a lower array index have higher priority.
+	 * If there is no element in the array or none of the given paths exists as a file, the file corresponding to the resource path will be returned as
+	 * a fall-back, i.e., the resource path has the lowest priority.
+	 *
+	 * @param resourcePath The resource path that is to be taken as a fall-back.
+	 * @param fileSystemPaths An array of paths with descending priority.
+	 * @return The existing file with highest priority.
+	 */
+	public static File getExistingFileWithHighestPriority(final String resourcePath, final String... fileSystemPaths) {
+		if (fileSystemPaths.length > 0) {
+			for (String fileSystemConfig : fileSystemPaths) {
+				File configFile = new File(fileSystemConfig);
+				if (configFile.exists()) {
+					return configFile;
+				}
+			}
+		}
+		return ResourceUtil.getResourceAsFile(resourcePath);
+	}
 }

@@ -1256,4 +1256,22 @@ public class WekaUtil {
 		}
 		return result;
 	}
+	
+	public static String printNestedWekaClassifier(final Classifier c) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(c.getClass().getName());
+		sb.append("(");
+
+		if (c instanceof SingleClassifierEnhancer) {
+			sb.append(printNestedWekaClassifier(((SingleClassifierEnhancer) c).getClassifier()));
+		} else if (c instanceof SMO) {
+			sb.append(((SMO) c).getKernel().getClass().getName());
+		} else if (c instanceof MultipleClassifiersCombiner) {
+			sb.append(printNestedWekaClassifier(((MultipleClassifiersCombiner) c).getClassifier(0)));
+		}
+
+		sb.append(")");
+
+		return sb.toString();
+	}
 }

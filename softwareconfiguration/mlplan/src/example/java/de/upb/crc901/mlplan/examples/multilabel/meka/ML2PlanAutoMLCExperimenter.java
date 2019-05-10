@@ -14,8 +14,9 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import hasco.model.ComponentInstance;
@@ -42,7 +43,6 @@ import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
@@ -106,43 +106,42 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 			// Evaluation: test
 			this.logger.info("Now test...");
 
-			MLPlanBuilder builder = new MLPlanBuilder();
-			builder.withMekaDefaultConfiguration();
-			builder.withTimeoutForNodeEvaluation(nodeEvalTimeOut);
-			builder.withTimeoutForSingleSolutionEvaluation(nodeEvalTimeOut);
+			MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
+			builder.withNodeEvaluationTimeOut(nodeEvalTimeOut);
+			builder.withCandidateEvaluationTimeOut(nodeEvalTimeOut);
 
 			int metricIdToOptimize = Integer.parseInt(experimentDescription.get("metric_id"));
 			switch (metricIdToOptimize) {
 			case 8: // rank loss
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new RankLoss()));
+				builder.withPerformanceMeasure(new RankLoss());
 				break;
 			case 1: // hamming
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new HammingLoss()));
+				builder.withPerformanceMeasure(new HammingLoss());
 				break;
 			case 62: // F1Measure avgd by instances
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new InstanceWiseF1AsLoss()));
+				builder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new F1MacroAverageLLoss()));
+				builder.withPerformanceMeasure(new F1MacroAverageLLoss());
 				break;
 			case 73: // fitness
 			default:
-				builder.withEvaluatorMeasureBridge(new SimpleMLCEvaluatorMeasureBridge(new AutoMEKAGGPFitnessMeasureLoss()));
+				builder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 				break;
 			}
 
 			MLPlanClassifierConfig algoConfig = builder.getAlgorithmConfig();
 			algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.3");
-			algoConfig.setProperty(MLPlanClassifierConfig.SEARCH_MCCV_ITERATIONS, "3");
 			algoConfig.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_NUM, "3");
+
 			builder.withAlgorithmConfig(algoConfig);
+			builder.withTimeOut(mlplanTimeOut);
+			builder.withNumCpus(CONFIG.getNumberOfCPUs());
 
 			MLPlan mlplan = null;
 
 			try {
 				mlplan = new MLPlan(builder, trainTestSplit.get(0));
-				mlplan.setTimeout(mlplanTimeOut);
-				mlplan.setNumCPUs(CONFIG.getNumberOfCPUs());
 				mlplan.setLoggerName("ml2plan");
 
 				if (CONFIG.showGUI()) {

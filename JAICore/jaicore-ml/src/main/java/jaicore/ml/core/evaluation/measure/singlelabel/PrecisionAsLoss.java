@@ -1,54 +1,59 @@
 package jaicore.ml.core.evaluation.measure.singlelabel;
 
 import java.util.List;
-import java.util.stream.IntStream;
 
 import jaicore.basic.aggregate.IAggregateFunction;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 
-/**
- * Computes the precision measure in calculateAvgMeasure and returns 1-precision as a loss.
- *
- * @author mwever
- */
 public class PrecisionAsLoss implements IMeasure<Double, Double> {
 
-	private final Double positiveClass;
+	private final int positiveClass;
 
-	public PrecisionAsLoss(final Double positiveClass) {
+	public PrecisionAsLoss(final int positiveClass) {
 		this.positiveClass = positiveClass;
 	}
 
 	@Override
 	public Double calculateMeasure(final Double actual, final Double expected) {
-		throw new UnsupportedOperationException("Precision can only be assessed via calculateAvgMeasure");
+		throw new UnsupportedOperationException("Precision is a batch loss function.");
 	}
 
 	@Override
 	public List<Double> calculateMeasure(final List<Double> actual, final List<Double> expected) {
-		throw new UnsupportedOperationException("Precision can only be assessed via calculateAvgMeasure");
+		throw new UnsupportedOperationException("Precision is a batch loss function.");
 	}
 
 	@Override
 	public Double calculateMeasure(final List<Double> actual, final List<Double> expected, final IAggregateFunction<Double> aggregateFunction) {
-		throw new UnsupportedOperationException("Precision can only be assessed via calculateAvgMeasure");
+		throw new UnsupportedOperationException("Precision is a batch loss function.");
 	}
 
 	@Override
 	public Double calculateAvgMeasure(final List<Double> actual, final List<Double> expected) {
-		if (actual.size() != expected.size()) {
-			throw new IllegalArgumentException("Actual and expected must be of the same size.");
+		int tp = 0;
+		int fp = 0;
+
+		for (int i = 0; i < actual.size(); i++) {
+			int actualValue = (int) (double) actual.get(i);
+			int expectedValue = (int) (double) expected.get(i);
+
+			if (actualValue == this.positiveClass) {
+				if (actualValue == expectedValue) {
+					tp++;
+				} else {
+					fp++;
+				}
+			}
 		}
 
-		int intersection = IntStream.range(0, actual.size()).filter(x -> actual.get(x) == this.positiveClass && expected.get(x) == this.positiveClass).map(x -> 1).sum();
-		int predicted = (int) actual.stream().filter(this.positiveClass::equals).count();
-
-		if (predicted == 0) {
-			return 0.0;
+		double precision;
+		if (tp + fp > 0) {
+			precision = (double) tp / (tp + fp);
+		} else {
+			precision = 0;
 		}
 
-		System.out.println("Precision computed to be " + ((double) intersection / predicted));
-		return 1.0 - (double) intersection / predicted;
+		return 1 - precision;
 	}
 
 }

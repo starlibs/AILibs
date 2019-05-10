@@ -1,14 +1,14 @@
 package de.upb.crc901.mlplan.examples.multilabel.meka;
 
-import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
@@ -17,10 +17,8 @@ import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
-import jaicore.ml.evaluation.evaluators.weka.measurebridge.SimpleMLCEvaluatorMeasureBridge;
-import jaicore.ml.wekautil.dataset.splitter.ArbitrarySplitter;
-import jaicore.ml.wekautil.dataset.splitter.IDatasetSplitter;
+import jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
+import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
@@ -30,14 +28,14 @@ import meka.core.MLUtils;
 import weka.core.Instances;
 
 /**
-* Example demonstrating the usage of Ml2Plan (MLPlan for multilabel classification).
-*
-* @author mwever, helegraf
-*
-*/
+ * Example demonstrating the usage of Ml2Plan (MLPlan for multilabel classification).
+ *
+ * @author mwever, helegraf
+ *
+ */
 public class ML2PlanARFFExample {
 
-	private static final boolean ACTIVATE_VISUALIZATION = true;
+	private static final boolean ACTIVATE_VISUALIZATION = false;
 
 	public static void main(final String[] args) throws Exception {
 		/* load data for segment dataset and create a train-test-split */
@@ -48,22 +46,17 @@ public class ML2PlanARFFExample {
 		List<Instances> split = testSplitter.split(data, 0, .7);
 
 		MLPlanClassifierConfig algoConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
+		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.0");
 
-		MLPlanBuilder builder = new MLPlanBuilder();
-		builder.withMekaDefaultConfiguration();
-		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/meka/mlplan-multilabel-small.json"));
-
-		SimpleMLCEvaluatorMeasureBridge bridge = new SimpleMLCEvaluatorMeasureBridge(new InstanceWiseF1AsLoss());
-		builder.withEvaluatorMeasureBridge(bridge);
-
+		MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
 		builder.withAlgorithmConfig(algoConfig);
-		builder.withTimeoutForNodeEvaluation(new TimeOut(60, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withNodeEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
+		builder.withNumCpus(8);
+		builder.withTimeOut(new TimeOut(150, TimeUnit.SECONDS));
 
 		MLPlan ml2plan = new MLPlan(builder, split.get(0));
 		ml2plan.setLoggerName("ml2plan");
-		ml2plan.setTimeout(new TimeOut(150, TimeUnit.SECONDS));
-		ml2plan.setNumCPUs(1);
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();

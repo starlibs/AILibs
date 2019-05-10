@@ -12,17 +12,17 @@ import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBa
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSplit {
+public class StratifiedSplit<I extends IInstance> {
 
-	private final IDataset<IInstance> dataset;
+	private final IDataset<I> dataset;
 
-	private IDataset<IInstance> trainingData;
+	private IDataset<I> trainingData;
 
-	private IDataset<IInstance> testData;
+	private IDataset<I> testData;
 
 	private final long seed;
 
-	public StratifiedSplit(IDataset<IInstance> dataset, long seed) {
+	public StratifiedSplit(IDataset<I> dataset, long seed) {
 		super();
 		this.dataset = dataset;
 		this.seed = seed;
@@ -31,10 +31,8 @@ public class StratifiedSplit {
 	public void doSplit(double trainPortion) throws AlgorithmException {
 		Random r = new Random(seed);
 		List<Integer> attributeIndices = Collections.singletonList(dataset.getNumberOfAttributes());
-		AttributeBasedStratiAmountSelectorAndAssigner<IInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
-				attributeIndices, DiscretizationStrategy.EQUAL_SIZE, 10);
-		StratifiedSampling<IInstance> stratifiedSampling = new StratifiedSampling<>(selectorAndAssigner,
-				selectorAndAssigner, r, dataset);
+		AttributeBasedStratiAmountSelectorAndAssigner<I> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(attributeIndices, DiscretizationStrategy.EQUAL_SIZE, 10);
+		StratifiedSampling<I> stratifiedSampling = new StratifiedSampling<>(selectorAndAssigner, selectorAndAssigner, r, dataset);
 		int sampleSize = (int) (trainPortion * dataset.size());
 		stratifiedSampling.setSampleSize(sampleSize);
 		try {
@@ -49,11 +47,11 @@ public class StratifiedSplit {
 		}
 	}
 
-	public IDataset<IInstance> getTrainingData() {
+	public IDataset<I> getTrainingData() {
 		return trainingData;
 	}
 
-	public IDataset<IInstance> getTestData() {
+	public IDataset<I> getTestData() {
 		return testData;
 	}
 

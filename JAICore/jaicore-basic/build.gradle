@@ -2,7 +2,6 @@ dependencies {
   compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
   compile group: 'it.unimi.dsi', name: 'fastutil', version: '8.2.1'
   compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.7'
-  
   testCompile 'org.awaitility:awaitility:3.1.6'
 }
 

@@ -13,8 +13,10 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.sampling.inmemory.WekaInstancesUtil;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
+import jaicore.ml.core.dataset.standard.SimpleDataset;
+import jaicore.ml.core.dataset.standard.SimpleInstance;
+import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
@@ -23,7 +25,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class ExtrapolatedSaturationPointEvaluationTester {
 
-	private IDataset<IInstance> train, test;
+	private SimpleDataset train, test;
 
 	@Test
 	public void testClassifierEvaluationAtSaturationPoint() throws Exception {
@@ -37,22 +39,22 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		dataset.setClassIndex(dataset.numAttributes() - 1);
 		Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
 		dataset.setClassIndex(targetAttribute.index());
-		IDataset<IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
+		SimpleDataset simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
 		this.createSplit(simpleDataset, 0.8, 123l);
 
 		// Test classifier evaluation at saturation point
-		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(
-				new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<IInstance>(), this.train, 0.7,
+		ExtrapolatedSaturationPointEvaluator<SimpleInstance> evaluator = new ExtrapolatedSaturationPointEvaluator<>(
+				new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), this.train, 0.7,
 				new InversePowerLawExtrapolationMethod(), 123l, this.test);
 		evaluator.setEpsilon(0.0005d);
 		double evaluationResult = evaluator.evaluate(new SMO());
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 
-	private void createSplit(IDataset<IInstance> dataset, double trainsplit, long seed) {
+	private void createSplit(SimpleDataset dataset, double trainsplit, long seed) {
 		this.train = dataset.createEmpty();
 		this.test = dataset.createEmpty();
-		IDataset<IInstance> data = dataset.createEmpty();
+		SimpleDataset data = dataset.createEmpty();
 		data.addAll(dataset);
 
 		// Shuffle the data
@@ -60,7 +62,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		Collections.shuffle(data, random);
 
 		// Stratify the data by class
-		Map<Object, IDataset<IInstance>> classStrati = new HashMap<Object, IDataset<IInstance>>();
+		Map<Object, SimpleDataset> classStrati = new HashMap<>();
 		dataset.forEach(d -> {
 			Object c = d.getTargetValue(Object.class).getValue();
 			if (!classStrati.containsKey(c)) {
@@ -77,7 +79,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 
 		// First assign one item of each class to train and test
 		for (Object c : classStrati.keySet()) {
-			IDataset<IInstance> availableInstances = classStrati.get(c);
+			SimpleDataset availableInstances = classStrati.get(c);
 			if (!availableInstances.isEmpty()) {
 				train.add(availableInstances.get(0));
 				availableInstances.remove(0);
@@ -90,7 +92,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 
 		// Distribute remaining instances over train test
 		for (Object c : classStrati.keySet()) {
-			IDataset<IInstance> availableInstances = classStrati.get(c);
+			SimpleDataset availableInstances = classStrati.get(c);
 			int trainItems = (int) Math.min(availableInstances.size(), Math.ceil(trainsplit * classStratiSizes.get(c)));
 			for (int j = 0; j < trainItems; j++) {
 				this.train.add(availableInstances.get(0));

@@ -18,21 +18,18 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
+import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.events.HASCOSolutionEvent;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.TimeOut;
 import jaicore.concurrent.GlobalTimer;
 import jaicore.experiments.ExperimentDBEntry;
-import jaicore.experiments.ExperimentRunner;
 import jaicore.experiments.IExperimentIntermediateResultProcessor;
 import jaicore.experiments.IExperimentSetEvaluator;
-import jaicore.experiments.databasehandle.ExperimenterSQLHandle;
-import jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import jaicore.experiments.exceptions.IllegalExperimentSetupException;
 import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
@@ -47,17 +44,84 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 	private static final Logger L = LoggerFactory.getLogger(MLPlanWekaExperimenter.class);
 
 	private static final File configFile = new File("conf/mlplan-weka-eval.properties");
-	private static MLPlanWekaExperimenterConfig experimentConfig;
+	private final MLPlanWekaExperimenterConfig experimentConfig;
 	private SQLAdapter adapter;
 	private int experimentID;
 
 	public MLPlanWekaExperimenter(final File configFile) {
 		super();
+		Properties props = new Properties();
+		try {
+			props.load(new FileInputStream(configFile));
+		} catch (IOException e) {
+			L.error("Could not find or access config file {}", configFile, e);
+			System.exit(1);
+		}
+		this.experimentConfig = ConfigFactory.create(MLPlanWekaExperimenterConfig.class, props);
 		if (this.experimentConfig.getDatasetFolder() == null) {
 			throw new IllegalArgumentException("No dataset folder (datasetfolder) set in config.");
 		}
 		if (this.experimentConfig.evaluationsTable() == null) {
 			throw new IllegalArgumentException("No evaluations table (db.evalTable) set in config");
+		}
+	}
+
+	@Override
+	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
+		try {
+			this.experimentID = experimentEntry.getId();
+			Map<String, String> experimentValues = experimentEntry.getExperiment().getValuesOfKeyFields();
+
+			if (!experimentValues.containsKey("dataset")) {
+				throw new IllegalArgumentException("\"dataset\" is not configured as a keyword in the experiment config");
+			}
+			if (!experimentValues.containsKey(EVALUATION_TIMEOUT_FIELD)) {
+				throw new IllegalArgumentException("\"" + EVALUATION_TIMEOUT_FIELD + "\" is not configured as a keyword in the experiment config");
+			}
+
+			File datasetFile = new File(this.experimentConfig.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
+			L.info("Load dataset file: {}", datasetFile.getAbsolutePath());
+
+			Instances data = new Instances(new FileReader(datasetFile));
+			data.setClassIndex(data.numAttributes() - 1);
+			long seed = Long.parseLong(experimentValues.get("seed"));
+			L.info("Split instances with seed {}", seed);
+			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, seed, .7);
+
+			/* initialize ML-Plan with the same config file that has been used to specify the experiments */
+			MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
+			builder.withNodeEvaluationTimeOut(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			builder.withCandidateEvaluationTimeOut(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
+			builder.withTimeOut(new TimeOut(Integer.parseInt(experimentValues.get("timeout")), TimeUnit.SECONDS));
+			builder.withNumCpus(experimentEntry.getExperiment().getNumCPUs());
+
+			MLPlan mlplan = new MLPlan(builder, stratifiedSplit.get(0));
+			mlplan.setLoggerName("mlplan");
+			mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
+			mlplan.registerListener(this);
+
+			L.info("Build mlplan classifier");
+			Classifier optimizedClassifier = mlplan.call();
+
+			L.info("Open timeout tasks: {}", GlobalTimer.getInstance().getActiveTasks());
+
+			Evaluation eval = new Evaluation(data);
+			L.info("Assess test performance...");
+			eval.evaluateModel(optimizedClassifier, stratifiedSplit.get(1));
+
+			L.info("Test error was {}. Internally estimated error for this model was {}", eval.errorRate(), mlplan.getInternalValidationErrorOfSelectedClassifier());
+			Map<String, Object> results = new HashMap<>();
+			results.put("loss", eval.errorRate());
+			results.put(CLASSIFIER_FIELD, WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
+			results.put(PREPROCESSOR_FIELD, ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors().toString());
+
+			writeFile("chosenModel." + this.experimentID + ".txt", results.get(PREPROCESSOR_FIELD) + "\n\n\n" + results.get(CLASSIFIER_FIELD));
+			writeFile("result." + this.experimentID + ".txt", "intern: " + mlplan.getInternalValidationErrorOfSelectedClassifier() + "\ntest:" + results.get("loss") + "");
+
+			processor.processResults(results);
+			L.info("Experiment done.");
+		} catch (Exception e) {
+			throw new ExperimentEvaluationFailedException(e);
 		}
 	}
 
@@ -91,90 +155,6 @@ public class MLPlanWekaExperimenter implements IExperimentSetEvaluator {
 			bw.write(value);
 		} catch (IOException e) {
 			L.error("Could not write value to file {}: {}", fileName, value);
-		}
-	}
-
-	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
-		Properties props = new Properties();
-		try {
-			props.load(new FileInputStream(configFile));
-		} catch (IOException e) {
-			L.error("Could not find or access config file {}", configFile, e);
-			System.exit(1);
-		}
-		experimentConfig = ConfigFactory.create(MLPlanWekaExperimenterConfig.class, props);
-
-		/* check config */
-		L.info("Start experiment runner...");
-		ExperimentRunner runner = new ExperimentRunner(experimentConfig, new MLPlanWekaExperimenter(configFile), new ExperimenterSQLHandle(experimentConfig));
-		L.info("Conduct random experiment...");
-		runner.randomlyConductExperiments(1, false);
-		L.info("Experiment conducted");
-	}
-
-	@Override
-	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
-		try {
-			this.experimentID = experimentEntry.getId();
-			Map<String, String> experimentValues = experimentEntry.getExperiment().getValuesOfKeyFields();
-
-			if (!experimentValues.containsKey("dataset")) {
-				throw new IllegalArgumentException("\"dataset\" is not configured as a keyword in the experiment config");
-			}
-			if (!experimentValues.containsKey(EVALUATION_TIMEOUT_FIELD)) {
-				throw new IllegalArgumentException("\"" + EVALUATION_TIMEOUT_FIELD + "\" is not configured as a keyword in the experiment config");
-			}
-
-			File datasetFile = new File(this.experimentConfig.getDatasetFolder().getAbsolutePath() + File.separator + experimentValues.get("dataset") + ".arff");
-			L.info("Load dataset file: {}", datasetFile.getAbsolutePath());
-
-			Instances data = new Instances(new FileReader(datasetFile));
-			data.setClassIndex(data.numAttributes() - 1);
-			long seed = Long.parseLong(experimentValues.get("seed"));
-			L.info("Split instances with seed {}", seed);
-			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, seed, .7);
-
-			/* initialize ML-Plan with the same config file that has been used to specify the experiments */
-			MLPlanBuilder builder = new MLPlanBuilder();
-			builder.withAutoWEKAConfiguration();
-			builder.withRandomCompletionBasedBestFirstSearch();
-			builder.withTimeoutForNodeEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
-			builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(new Integer(experimentValues.get(EVALUATION_TIMEOUT_FIELD)), TimeUnit.SECONDS));
-
-			MLPlan mlplan = new MLPlan(builder, stratifiedSplit.get(0));
-			mlplan.setLoggerName("mlplan");
-			mlplan.setTimeout(new Integer(experimentValues.get("timeout")), TimeUnit.SECONDS);
-			mlplan.setRandomSeed(new Integer(experimentValues.get("seed")));
-			mlplan.setNumCPUs(experimentEntry.getExperiment().getNumCPUs());
-			mlplan.registerListener(this);
-
-			L.info("Build mlplan classifier");
-			Classifier optimizedClassifier = mlplan.call();
-
-			L.info("Open timeout tasks: {}", GlobalTimer.getInstance());
-
-			Evaluation eval = new Evaluation(data);
-			L.info("Assess test performance...");
-			eval.evaluateModel(optimizedClassifier, stratifiedSplit.get(1));
-
-			L.info("Test error was {}. Internally estimated error for this model was {}", eval.errorRate(), mlplan.getInternalValidationErrorOfSelectedClassifier());
-			Map<String, Object> results = new HashMap<>();
-			results.put("loss", eval.errorRate());
-			if (mlplan.getSelectedClassifier() instanceof MLPipeline) {
-				results.put(CLASSIFIER_FIELD, WekaUtil.getClassifierDescriptor(((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier()));
-				results.put(PREPROCESSOR_FIELD, ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors().toString());
-			} else {
-				results.put(CLASSIFIER_FIELD, WekaUtil.getClassifierDescriptor(mlplan.getSelectedClassifier()));
-				results.put(PREPROCESSOR_FIELD, "");
-			}
-
-			writeFile("chosenModel." + this.experimentID + ".txt", results.get(PREPROCESSOR_FIELD) + "\n\n\n" + results.get(CLASSIFIER_FIELD));
-			writeFile("result." + this.experimentID + ".txt", "intern: " + mlplan.getInternalValidationErrorOfSelectedClassifier() + "\ntest:" + results.get("loss") + "");
-
-			processor.processResults(results);
-			L.info("Experiment done.");
-		} catch (Exception e) {
-			throw new ExperimentEvaluationFailedException(e);
 		}
 	}
 }

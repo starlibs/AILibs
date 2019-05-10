@@ -80,13 +80,20 @@
   	 <level value="debug" />
   </logger>
   
+  <logger name="MLPlanCLI">
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
   
   <logger name="jaicore.graphvisualizer">
     <level value="warn" />
   </logger>
   
   <logger name="jaicore.interrupt">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="hasco">
@@ -183,8 +190,9 @@
   	<level value="info" />
   </logger>
   
+  <!-- configuration for ML-Plan Test logging -->
   <logger name="testedalgorithm">
-    <level value="debug" />
+    <level value="info" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -197,6 +205,14 @@
     <level value="info" />
   </logger>
   
+  <logger name="testedalgorithm.optimizingfactory.optAlgo">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
     <level value="info" />
   </logger>
@@ -205,7 +221,28 @@
     <level value="info" />
   </logger>
   
-  <logger name="testedalgorithm._algorithm">
+  <!-- configuration for ML-Plan 4 big data Test logging -->
+  <logger name="testedalgorithm.mlplan.optimizingfactory">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
     <level value="info" />
   </logger>
 </log4j:configuration>

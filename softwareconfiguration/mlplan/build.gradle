@@ -33,7 +33,11 @@ dependencies {
 	  exclude group: 'org.slf4j'
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+	  exclude group: 'commons-cli'
 	}
+	
+	// https://mvnrepository.com/artifact/commons-cli/commons-cli
+	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
@@ -96,5 +100,19 @@ uploadArchives {
       		}
     	}
   	}
+}
+
+task mlplanCLIjar(type: Jar) {
+	zip64 = true
+    manifest {
+        attributes 'Main-Class': 'de.upb.crc901.mlplan.cli.MLPlanCLI'
+    }
+    destinationDir = file("${projectDir}/cli")
+    archivesBaseName="mlplancli"
+    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+    from sourceSets.main.allSource
+    from { (configurations.compile)
+            .collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }
 

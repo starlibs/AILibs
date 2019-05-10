@@ -21,7 +21,7 @@ import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
  * points, creates a request and sends this request to an Extrapolation Service.
  * The configuration which was computed by the Extrapolation Service is returned
  * after the response has been received.
- * 
+ *
  * @author Felix Weiland
  * @author Lukas Brandt
  *
@@ -31,14 +31,14 @@ public class ExtrapolationServiceClient<C> {
 	private String serviceUrl;
 	private Class<C> configClass;
 
-	public ExtrapolationServiceClient(String serviceUrl, Class<C> configClass) {
+	public ExtrapolationServiceClient(final String serviceUrl, final Class<C> configClass) {
 		this.serviceUrl = serviceUrl;
 		this.configClass = configClass;
 	}
 
-	public C getConfigForAnchorPoints(int[] xValuesArr, double[] yValuesArr)
-			throws InvalidAnchorPointsException, InterruptedException, ExecutionException {
-		// Create request
+	public C getConfigForAnchorPoints(final int[] xValuesArr, final double[] yValuesArr) throws InvalidAnchorPointsException, InterruptedException, ExecutionException {
+
+		/* Create request */
 		ExtrapolationRequest request = new ExtrapolationRequest();
 		List<Integer> xValues = new ArrayList<>();
 		for (int x : xValuesArr) {
@@ -51,7 +51,7 @@ public class ExtrapolationServiceClient<C> {
 		request.setxValues(xValues);
 		request.setyValues(yValues);
 
-		// Create service client
+		/* Create service client */
 		Client client = ClientBuilder.newClient();
 		WebTarget target = null;
 		try {
@@ -60,10 +60,8 @@ public class ExtrapolationServiceClient<C> {
 			throw new IllegalStateException("No WebTarget!", e);
 		}
 
-		// Send request and wait for response
-		Future<Response> future = target.request(MediaType.APPLICATION_JSON).async()
-				.post(Entity.entity(request, MediaType.APPLICATION_JSON));
-
+		/* Send request and wait for response */
+		Future<Response> future = target.request(MediaType.APPLICATION_JSON).async().post(Entity.entity(request, MediaType.APPLICATION_JSON));
 		Response response;
 		response = future.get();
 

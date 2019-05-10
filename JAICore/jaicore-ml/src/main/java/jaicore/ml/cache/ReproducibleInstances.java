@@ -93,10 +93,10 @@ public class ReproducibleInstances extends Instances {
 	 * @return new {@link ReproducibleInstances} object
 	 * @throws IOException if something goes wrong while loading Instances from openml
 	 */
-	public static ReproducibleInstances fromOpenML(final String id, final String apiKey) throws NumberFormatException, IOException {
+	public static ReproducibleInstances fromOpenML(final String id, final String apiKey) throws IOException {
 		OpenMLHelper.setApiKey(apiKey);
 		ReproducibleInstances result = new ReproducibleInstances(OpenMLHelper.getInstancesById(Integer.parseInt(id)));
-		result.history.add(new LoadDataSetInstruction("openml.org", id));
+		result.history.add(new LoadDataSetInstruction(DataProvider.OPENML, id));
 		result.cacheLookup = true;
 		result.cacheStorage = true;
 		return result;
@@ -114,7 +114,7 @@ public class ReproducibleInstances extends Instances {
 		data.setClassIndex(data.numAttributes() - 1);
 		ReproducibleInstances result = new ReproducibleInstances(data);
 		InetAddress addr = InetAddress.getLocalHost();
-		result.history.add(new LoadDataSetInstruction("file://" + addr.getHostName() + "/", new File(path).getAbsolutePath()));
+		result.history.add(new LoadDataSetInstruction(DataProvider.ARFFFILE, "file://" + addr.getHostName() + File.separator + new File(path).getAbsolutePath()));
 		result.cacheLookup = true;
 		result.cacheStorage = true;
 		return result;

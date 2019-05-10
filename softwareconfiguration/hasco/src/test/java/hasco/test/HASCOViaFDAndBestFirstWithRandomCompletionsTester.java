@@ -10,6 +10,8 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsTester extends HASCOTest
 
 	@Override
 	public HASCO<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getAlgorithmForSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
-		return new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(0, 3).getAlgorithm(problem);
+		HASCOViaFDAndBestFirstWithRandomCompletionsFactory factory = new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(0, 3);
+		factory.withDefaultAlgorithmConfig();
+		return factory.getAlgorithm(problem);
 	}
 }
