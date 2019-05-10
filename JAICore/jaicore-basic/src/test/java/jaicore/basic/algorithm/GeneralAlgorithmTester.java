@@ -160,7 +160,12 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 
 	@Test
 	public void testTimeout() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
-		this.runTimeoutTest(false);
+		try {
+			this.runTimeoutTest(false);
+		}
+		finally {
+
+		}
 	}
 
 	@Test
@@ -401,6 +406,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			timeoutTriggered = true;
 		} finally {
 			threadCountObserverThread.cancel();
+
 		}
 		long end = System.currentTimeMillis();
 		int runtime = (int) (end - start);

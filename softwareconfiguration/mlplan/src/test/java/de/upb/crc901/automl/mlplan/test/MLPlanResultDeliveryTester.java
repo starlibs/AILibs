@@ -19,7 +19,7 @@ public class MLPlanResultDeliveryTester extends AutoMLAlgorithmResultProductionT
 			AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka();
 			builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
 			builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
-			builder.withNumCpus(2);
+			builder.withNumCpus(4);
 			MLPlan mlplan = new MLPlan(builder, data);
 			mlplan.setRandomSeed(1);
 			mlplan.setPortionOfDataForPhase2(.0f);
