@@ -18,7 +18,7 @@ import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
-import hasco.model.ParameterDomain;
+import hasco.model.IParameterDomain;
 import hasco.serialization.ComponentLoader;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Literal;
@@ -52,7 +52,7 @@ public class UtilTester {
 		/* first check that the domain is default if c is not set at all */
 		{
 			ComponentInstance inst = new ComponentInstance(bComponent, null, null);
-			Map<Parameter, ParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
+			Map<Parameter, IParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
 			assertEquals(dParameter.getDefaultDomain(), newDomains.get(dParameter));
 		}
 		
@@ -61,7 +61,7 @@ public class UtilTester {
 			Map<String, String> parameterValues = new HashMap<>();
 			parameterValues.put("c", "false");
 			ComponentInstance inst = new ComponentInstance(bComponent, parameterValues, null);
-			Map<Parameter, ParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
+			Map<Parameter, IParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
 			assertEquals(dParameter.getDefaultDomain(), newDomains.get(dParameter));
 		}
 		
@@ -70,14 +70,14 @@ public class UtilTester {
 			Map<String, String> parameterValues = new HashMap<>();
 			parameterValues.put("c", "true");
 			ComponentInstance inst = new ComponentInstance(bComponent, parameterValues, null);
-			Map<Parameter, ParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
+			Map<Parameter, IParameterDomain> newDomains = Util.getUpdatedDomainsOfComponentParameters(inst);
 			Set<String> expectedValues = new HashSet<>();
 			expectedValues.add("blue");
 			expectedValues.add("white");
 			expectedValues.add("red");
 			expectedValues.add("green");
 			expectedValues.add("black");
-			ParameterDomain expectedDomain = new CategoricalParameterDomain(expectedValues);
+			IParameterDomain expectedDomain = new CategoricalParameterDomain(expectedValues);
 			assertEquals(expectedDomain, newDomains.get(dParameter));
 		}
 	}
