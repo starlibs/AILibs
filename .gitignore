@@ -250,3 +250,6 @@ gradle-app.setting
 # Generated files by running skikitwrapper
 JAICore/jaicore-ml/tmp/
 JAICore/jaicore-ml/model_dumps/
+
+
+softwareconfiguration/autofe/testres/
