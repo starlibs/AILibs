@@ -13,6 +13,7 @@ import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.basic.events.IEvent;
 import ai.libs.jaicore.basic.events.IEventEmitter;
+import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
@@ -70,8 +71,8 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	}
 
 	public void cancel() {
-		this.logger.info("Received cancel");
-		this.canceled = true;
+		logger.info("Received cancel");
+		canceled = true;
 	}
 
 	@Override
@@ -86,21 +87,21 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 
 		long startTimestamp = System.currentTimeMillis();
 		/* perform random stratified split */
-		this.logger.info("Starting MMCV evaluation of {} (Description: {})", pl.getClass().getName(), pl);
-		for (int i = 0; i < this.repeats && !this.canceled; i++) {
-			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
+		logger.info("Starting MMCV evaluation of {} (Description: {})", pl.getClass().getName(), WekaUtil.getClassifierDescriptor(pl));
+		for (int i = 0; i < repeats && !canceled; i++) {
+			logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, repeats);
 			if (Thread.interrupted()) { // clear the interrupted field. This is Java a general convention when an InterruptedException is thrown (see Java documentation for details)
-				this.logger.info("MCCV has been interrupted, leaving MCCV.");
+				logger.info("MCCV has been interrupted, leaving MCCV.");
 				throw new InterruptedException("MCCV has been interrupted.");
 			}
-			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
+			List<Instances> split = datasetSplitter.split(data, seed + i, trainingPortion);
 			try {
 				long startTimeForSplitEvaluation = System.currentTimeMillis();
-				double score = this.splitBasedEvaluator.evaluateSplit(pl, split.get(0), split.get(1));
-				if (this.hasListeners) {
-					this.eventBus.post(new MCCVSplitEvaluationEvent(pl, split.get(0).size(), split.get(1).size(), (int)(System.currentTimeMillis() - startTimeForSplitEvaluation), score));
+				double score = splitBasedEvaluator.evaluateSplit(pl, split.get(0), split.get(1));
+				if (hasListeners) {
+					eventBus.post(new MCCVSplitEvaluationEvent(pl, split.get(0).size(), split.get(1).size(), (int)(System.currentTimeMillis() - startTimeForSplitEvaluation), score));
 				}
-				this.logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl.getClass().getName(), i + 1, this.repeats, score, (System.currentTimeMillis() - startTimestamp));
+				logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl.getClass().getName(), i + 1, repeats, score, (System.currentTimeMillis() - startTimestamp));
 				stats.addValue(score);
 			} catch (InterruptedException e) {
 				throw e;
@@ -109,35 +110,35 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 			}
 		}
 		Double score = stats.getMean();
-		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl.getClass().getName(), (System.currentTimeMillis() - startTimestamp));
+		logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl.getClass().getName(), (System.currentTimeMillis() - startTimestamp));
 		return score;
 	}
 
 	public ISplitBasedClassifierEvaluator<Double> getBridge() {
-		return this.splitBasedEvaluator;
+		return splitBasedEvaluator;
 	}
 
 	@Override
 	public String getLoggerName() {
-		return this.logger.getName();
+		return logger.getName();
 	}
 
 	@Override
 	public void setLoggerName(final String name) {
-		this.logger.info("Switching logger of {} from {} to {}", this, this.logger.getName(), name);
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Switched logger of {} to {}", this, name);
+		logger.info("Switching logger of {} from {} to {}", this, logger.getName(), name);
+		logger = LoggerFactory.getLogger(name);
+		logger.info("Switched logger of {} to {}", this, name);
 	}
 
 	@Override
 	public void registerListener(final Object listener) {
-		this.hasListeners = true;
-		this.eventBus.register(listener);
+		hasListeners = true;
+		eventBus.register(listener);
 	}
 
 	/* forward all events potentially coming in from the split evaluator */
 	@Subscribe
 	public void receiveEvent(final IEvent event) {
-		this.eventBus.post(event);
+		eventBus.post(event);
 	}
 }
