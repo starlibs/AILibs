@@ -47,7 +47,7 @@ import weka.core.converters.ConverterUtils.DataSink;
 public abstract class AutoMLAlgorithmResultProductionTester {
 
 	private static final Logger logger = LoggerFactory.getLogger(AutoMLAlgorithmResultProductionTester.class);
-	private static final TimeOut timeout = new TimeOut(2, TimeUnit.MINUTES);
+	private static final TimeOut timeout = new TimeOut(10, TimeUnit.MINUTES);
 
 	// creates the test data
 	@Parameters(name = "{0}")
@@ -56,27 +56,27 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
 		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
 		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
-		//		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
-		//		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
+		problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
+		problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		problemSets.add(new OpenMLProblemSet(1457)); // amazon
 		problemSets.add(new OpenMLProblemSet(1501)); // semeion
-		//		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
-		//		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
-		//		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
+		problemSets.add(new OpenMLProblemSet(149)); // CovPokElec
+		problemSets.add(new OpenMLProblemSet(41103)); // cifar-10
+		problemSets.add(new OpenMLProblemSet(40668)); // connect-4
 		problemSets.add(new OpenMLProblemSet(1590)); // adult
-		//		problemSets.add(new OpenMLProblemSet(182)); // satimage
-		//				problemSets.add(new OpenMLProblemSet(24)); // mushroom
+		problemSets.add(new OpenMLProblemSet(182)); // satimage
+		problemSets.add(new OpenMLProblemSet(24)); // mushroom
 		problemSets.add(new OpenMLProblemSet(39)); // ecoli
 		problemSets.add(new OpenMLProblemSet(44)); // spambase
 		problemSets.add(new OpenMLProblemSet(60)); // waveform-5000
 		problemSets.add(new OpenMLProblemSet(61)); // iris
 		problemSets.add(new OpenMLProblemSet(9)); // autos
-		//		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
-		//		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
-		//		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+		problemSets.add(new OpenMLProblemSet(1039)); // hiva-agnostic
+		problemSets.add(new OpenMLProblemSet(1104)); // leukemia
+		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
 		problemSets.add(new OpenMLProblemSet(554)); // mnist
-		//		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
-		//		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
+		problemSets.add(new OpenMLProblemSet(1101)); // lymphoma_2classes
+		problemSets.add(new OpenMLProblemSet(155)); // pokerhand
 		problemSets.add(new OpenMLProblemSet(40691)); // winequality
 
 		OpenMLProblemSet[][] data = new OpenMLProblemSet[problemSets.size()][1];
@@ -99,17 +99,17 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
 
 			/* create instances and set attribute */
-			logger.info("Loading dataset {} from {} for test.", this.problemSet.getName(), this.problemSet.getDatasetSource().getX());
-			File cacheFile = new File("testrsc/openml/" + this.problemSet.getId() + ".arff");
+			logger.info("Loading dataset {} from {} for test.", problemSet.getName(), problemSet.getDatasetSource().getX());
+			File cacheFile = new File("testrsc/openml/" + problemSet.getId() + ".arff");
 			if (!cacheFile.exists()) {
 				logger.info("Cache file does not exist, creating it.");
 				cacheFile.getParentFile().mkdirs();
-				Instances dataset = this.problemSet.getDatasetSource().getX().getDataSet();
+				Instances dataset = problemSet.getDatasetSource().getX().getDataSet();
 				DataSink.write(cacheFile.getAbsolutePath(), dataset);
 			}
 			logger.info("Loading ARFF file from cache.");
 			Instances dataset = new Instances(new FileReader(cacheFile));
-			Attribute targetAttribute = dataset.attribute(this.problemSet.getDatasetSource().getY());
+			Attribute targetAttribute = dataset.attribute(problemSet.getDatasetSource().getY());
 			dataset.setClassIndex(targetAttribute.index());
 			String datasetname = dataset.relationName();
 
@@ -128,7 +128,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 
 			/* get algorithm */
 			logger.info("Loading the algorithm");
-			IAlgorithm<Instances, Classifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			IAlgorithm<Instances, Classifier> algorithm = getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");
