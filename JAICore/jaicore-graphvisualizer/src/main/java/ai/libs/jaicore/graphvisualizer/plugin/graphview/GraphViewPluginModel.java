@@ -12,9 +12,12 @@ import org.graphstream.graph.IdAlreadyInUseException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
+import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
 public class GraphViewPluginModel implements IGUIPluginModel {
+
+	private static final String STYLESHEET_URL = "url('" + ResourceUtil.getResourceAsFile("searchgraph.css") + "')";
 
 	private int nodeIdCounter;
 
@@ -27,7 +30,7 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 	private ConcurrentMap<Node, Set<Edge>> nodeToConnectedEdgesMap;
 
 	public GraphViewPluginModel(final GraphViewPluginView view) {
-		this(view, "conf/searchgraph.css");
+		this(view, STYLESHEET_URL);
 	}
 
 	public GraphViewPluginModel(final GraphViewPluginView view, final String searchGraphCSSPath) {
@@ -40,9 +43,9 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		this.initializeGraph(searchGraphCSSPath);
 	}
 
-	private void initializeGraph(final String searchGraphCSSPath) {
+	private void initializeGraph(final String styleSheetURL) {
 		this.graph = new SingleGraph("Search Graph");
-		this.graph.setAttribute("ui.stylesheet", "url('" + searchGraphCSSPath + "')");
+		this.graph.setAttribute("ui.stylesheet", styleSheetURL);
 	}
 
 	public void addNode(final Object node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {
@@ -134,7 +137,7 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 
 	public void reset() {
 		this.graph.clear();
-		this.graph.setAttribute("ui.stylesheet", "url('conf/searchgraph.css')");
+		this.graph.setAttribute("ui.stylesheet", STYLESHEET_URL);
 		this.searchGraphNodesToViewGraphNodesMap.clear();
 		this.viewGraphNodesToSearchGraphNodesMap.clear();
 		this.nodeToConnectedEdgesMap.clear();

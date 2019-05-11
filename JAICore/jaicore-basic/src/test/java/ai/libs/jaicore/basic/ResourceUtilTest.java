@@ -9,8 +9,6 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.ResourceUtil;
-
 /**
  * This test checks the basic functionalities provided by the ResourceUtil class which provides a convenient API for handling resource files.
  *
@@ -18,7 +16,7 @@ import ai.libs.jaicore.basic.ResourceUtil;
  */
 public class ResourceUtilTest {
 
-	private static final String RESOURCE_FILE_PATH = "testrsc/dummy.resource";
+	private static final String RESOURCE_FILE_PATH = "ai/libs/jaicore/basic/testrsc/dummy.resource";
 	private static final String EXPECTED_CONTENT = "Lorem ipsum dolor sit amet.";
 
 	/**

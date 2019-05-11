@@ -46,7 +46,7 @@
 		</layout>
 	</appender>
 
-	<logger name="jaicore">
+	<logger name="ai.libs.jaicore">
 		<level value="warn" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -55,7 +55,7 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="jaicore.experiments">
+	<logger name="ai.libs.jaicore.experiments">
 	 <level value="trace" />
 	</logger>
 </log4j:configuration>
