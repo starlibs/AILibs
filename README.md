@@ -10,25 +10,20 @@ AILibs is a collection of Java libraries related to automated decision making. I
 * **softwareconfiguration** is a collection of projects related to automatically configuring software systems. Here we also maintain the code for our AutoML flagship **[ML-Plan](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan)**
 
 ## Using AILibs in your project
-You can resolve snapshots of this projects via a maven-dependency.
+You can resolve each of our projects via a Maven dependency (using Maven central as repository).
+### Maven
+```
+<dependency>
+  <groupId>ai.libs</groupId>
+  <artifactId>jaicore-ml</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
 ### Gradle 
-First register our departements nexus as a maven repository:
-```
-repositories {
-    mavenCentral()
-	  maven { url "https://nexus.cs.upb.de/repository/sfb901-snapshots/" }
-}
-```
-Then, you can either import the bundeled library via:
 ```
 dependencies {
-	 compile group: "de.upb.isys", name: "AILibs", version:"0.0.1-SNAPSHOT"
-}
-```
-Or, the different artifacts individually e.g.
-```
-dependencies {
-	 compile group: "de.upb.isys", name: "jaicore-ml", version:"0.0.1-SNAPSHOT"
+    implementation 'ai.libs:jaicore-ml:0.1.1'
 }
 ```
 
