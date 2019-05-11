@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/fmohr/AILibs.svg?branch=dev)](https://travis-ci.org/fmohr/AILibs)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=alert_status)](https://sonarcloud.io/dashboard/index/starlibs.ailibs)
+[![Javadocs](https://javadoc.io/badge/ai.libs/jaicore-basic.svg)](https://javadoc.io/doc/ai.libs/jaicore-basic)
 
 
 # AILibs
@@ -45,21 +46,18 @@ Then open Eclipse and go to the import menu, e.g., in the package manager. Choos
 
 ### JAICore
 
-* [JAICore:jaicore-basic](JAICore/jaicore-basic/docs/javadoc/)
-* [JAICore:jaicore-concurrent](JAICore/jaicore-concurrent/docs/javadoc/)
-* [JAICore:jaicore-ea](JAICore/jaicore-ea/docs/javadoc/)
-* [JAICore:jaicore-experiments](JAICore/jaicore-experiments/docs/javadoc/)
-* [JAICore:jaicore-graph](JAICore/jaicore-graph/docs/javadoc/)
-* [JAICore:jaicore-graphvisualizer](JAICore/jaicore-graphvisualizer/docs/javadoc/)
-* [JAICore:jaicore-logic](JAICore/jaicore-logic/docs/javadoc/)
-* [JAICore:jaicore-math](JAICore/jaicore-math/docs/javadoc/)
-* [JAICore:jaicore-ml](JAICore/jaicore-ml/docs/javadoc/)
-* [JAICore:jaicore-planning](JAICore/jaicore-planning/docs/javadoc/)
-* [JAICore:jaicore-processes](JAICore/jaicore-processes/docs/javadoc/)
-* [JAICore:jaicore-search](JAICore/jaicore-search/docs/javadoc/)
-* [JAICore:jaicore-services](JAICore/jaicore-services/docs/javadoc/)
+* [JAICore:jaicore-basic](https://javadoc.io/doc/ai.libs/jaicore-basic/0.1.0)
+* [JAICore:jaicore-ea](https://javadoc.io/doc/ai.libs/jaicore-ea/0.1.0)
+* [JAICore:jaicore-experiments](https://javadoc.io/doc/ai.libs/jaicore-experiments/0.1.0)
+* [JAICore:jaicore-graphvisualizer](https://javadoc.io/doc/ai.libs/jaicore-graphvisualizer/0.1.0)
+* [JAICore:jaicore-logic](https://javadoc.io/doc/ai.libs/jaicore-logic/0.1.0)
+* [JAICore:jaicore-math](https://javadoc.io/doc/ai.libs/jaicore-math/0.1.0)
+* [JAICore:jaicore-ml](https://javadoc.io/doc/ai.libs/jaicore-ml/0.1.0)
+* [JAICore:jaicore-planning](https://javadoc.io/doc/ai.libs/jaicore-planning/0.1.0)
+* [JAICore:jaicore-processes](https://javadoc.io/doc/ai.libs/jaicore-processes/0.1.0)
+* [JAICore:jaicore-search](https://javadoc.io/doc/ai.libs/jaicore-search/0.1.0)
 
 ### Software Configuration
 
-* [HASCO](softwareconfiguration/hasco/docs/javadoc/)
-* [ML-Plan](softwareconfiguration/mlplan/docs/javadoc/)
+* [HASCO](https://javadoc.io/doc/ai.libs/hasco/0.1.0)
+* [ML-Plan](https://javadoc.io/doc/ai.libs/mlplan/0.1.0)
