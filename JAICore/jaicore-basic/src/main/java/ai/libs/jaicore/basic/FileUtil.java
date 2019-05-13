@@ -43,7 +43,11 @@ public class FileUtil {
 	}
 
 	public static List<String> readFileAsList(final File file) throws IOException {
-		return readFileAsList(file.getAbsolutePath());
+		if (file instanceof ResourceFile) {
+			return ResourceUtil.readResourceFileToStringList((ResourceFile) file);
+		} else {
+			return readFileAsList(file.getAbsolutePath());
+		}
 	}
 
 	public static List<String> readFileAsList(final String filename) throws IOException {
@@ -180,6 +184,10 @@ public class FileUtil {
 	 */
 	public static void requireFileExists(final File file) throws FileIsDirectoryException, FileNotFoundException {
 		Objects.requireNonNull(file);
+		if (file instanceof ResourceFile) {
+			return;
+		}
+
 		if (!file.exists()) {
 			throw new FileNotFoundException("File " + file.getAbsolutePath() + " does not exist");
 		}
@@ -207,6 +215,7 @@ public class FileUtil {
 				}
 			}
 		}
+
 		return ResourceUtil.getResourceAsFile(resourcePath);
 	}
 }

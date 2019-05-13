@@ -14,6 +14,7 @@ import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedExceptio
 import ai.libs.jaicore.basic.events.IEvent;
 import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
+import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
@@ -71,9 +72,13 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			}
 			Classifier classifier = this.classifierFactory.getComponentInstantiation(c);
 			this.eventBus.post(new ClassifierCreatedEvent(c, classifier)); // inform listeners about the creation of the classifier
-			this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, classifier.getClass().getName());
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (classifier instanceof ScikitLearnWrapper) ? classifier.toString() : classifier.getClass().getName());
+			}
 			Double score = this.benchmark.evaluate(classifier);
-			this.logger.info("Obtained score {} for classifier {}", score, classifier.getClass().getName());
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Obtained score {} for classifier {}", score, (classifier instanceof ScikitLearnWrapper) ? classifier.toString() : classifier.getClass().getName());
+			}
 			return score;
 		} catch (ComponentInstantiationFailedException e) {
 			throw new ObjectEvaluationFailedException("Evaluation of composition failed as the component instantiation could not be built.", e);

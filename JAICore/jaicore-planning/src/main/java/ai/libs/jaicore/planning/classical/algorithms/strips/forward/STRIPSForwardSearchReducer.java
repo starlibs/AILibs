@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsAction;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;
 import ai.libs.jaicore.planning.core.Plan;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 public class STRIPSForwardSearchReducer implements ISTRIPSPlanningGraphGeneratorDeriver<StripsForwardPlanningNode, String> {
 

@@ -7,10 +7,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.TimeAwareNodeEvaluator;
+import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.search.testproblems.nqueens.QueenNode;
 import ai.libs.jaicore.timing.TimedComputation;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.TimeAwareNodeEvaluator;
-import jaicore.search.model.travesaltree.Node;
 
 public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvaluator<QueenNode, Double>> extends NodeEvaluatorTester<T> {
 

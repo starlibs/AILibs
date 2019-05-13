@@ -18,11 +18,11 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.Solutio
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.evaluation.IInstancesClassifier;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
+import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
-import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import weka.classifiers.Classifier;

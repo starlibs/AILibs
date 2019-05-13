@@ -30,11 +30,11 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationE
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.probleminputs.GraphSearchInput;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 

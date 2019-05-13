@@ -70,7 +70,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	private static final File TMP_FOLDER = new File("tmp"); // Folder to put the serialized arff files and the scripts in.
 
 	private static final String RES_SCIKIT_TEMPLATE_PATH = "sklearn/scikit_template.twig.py";
-	private static final File SCIKIT_TEMPLATE = ResourceUtil.getResourceAsFile(RES_SCIKIT_TEMPLATE_PATH); // Path to the used python template.
+	private static final File SCIKIT_TEMPLATE = new File(ResourceUtil.getResourceAsTempFile(RES_SCIKIT_TEMPLATE_PATH)); // Path to the used python template.
 
 	private static final File MODEL_DUMPS_DIRECTORY = new File(TMP_FOLDER, "model_dumps");
 	private static final boolean VERBOSE = false; // If true the output stream of the python process is printed.

@@ -46,7 +46,7 @@
 		</layout>
 	</appender>
 
-	<logger name="jaicore">
+	<logger name="ai.libs.jaicore">
 		<level value="warn" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -55,11 +55,11 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+	<logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
 	 <level value="info" />
 	</logger>
 	
-	<logger name="hasco">
+	<logger name="ai.libs.hasco">
 	  <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -68,19 +68,19 @@
     <appender-ref ref="traceFileAppender" />
 	</logger>
 	
-  <logger name="hasco.core.HASCO">
+  <logger name="ai.libs.hasco.core.HASCO">
     <level value="warn" />
   </logger>
   
-  <logger name="hasco.core.IsValidParameterRangeRefinementPredicate">
+  <logger name="ai.libs.hasco.core.IsValidParameterRangeRefinementPredicate">
     <level value="warn" />
   </logger>
   
-  <logger name="jaicore.graphvisualizer">
+  <logger name="ai.libs.jaicore.graphvisualizer">
     <level value="warn" />
   </logger>
   
-  <logger name="hasco.gui.statsplugin">
+  <logger name="ai.libs.hasco.gui.statsplugin">
     <level value="trace" />
   </logger>
 	
@@ -94,11 +94,11 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="jaicore.timing">
+  <logger name="ai.libs.jaicore.timing">
     <level value="info" />
   </logger>
   
-  <logger name="jaicore.interrupt">
+  <logger name="ai.libs.jaicore.interrupt">
     <level value="info" />
   </logger>
   

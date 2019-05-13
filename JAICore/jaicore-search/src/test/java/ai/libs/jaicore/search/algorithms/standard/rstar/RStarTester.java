@@ -7,11 +7,11 @@ import java.util.concurrent.TimeoutException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import jaicore.search.algorithms.standard.rstar.GraphBasedDistantSuccessorGenerator;
-import jaicore.search.algorithms.standard.rstar.RStarFactory;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
+import ai.libs.jaicore.search.algorithms.standard.rstar.GraphBasedDistantSuccessorGenerator;
+import ai.libs.jaicore.search.algorithms.standard.rstar.RStarFactory;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 
 /**
  * This test deactivates the solution enumerators, because RStar is not a complete algorithm

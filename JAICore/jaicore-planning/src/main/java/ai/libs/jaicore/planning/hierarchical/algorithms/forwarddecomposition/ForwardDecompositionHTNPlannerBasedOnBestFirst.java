@@ -2,10 +2,10 @@ package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
-import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import jaicore.search.probleminputs.builders.GraphSearchWithSubpathEvaluationsInputBuilder;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.probleminputs.builders.GraphSearchWithSubpathEvaluationsInputBuilder;
 
 public class ForwardDecompositionHTNPlannerBasedOnBestFirst<IPlanning extends IHTNPlanningProblem, V extends Comparable<V>> extends ForwardDecompositionHTNPlanner<IPlanning, V, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>> {
 

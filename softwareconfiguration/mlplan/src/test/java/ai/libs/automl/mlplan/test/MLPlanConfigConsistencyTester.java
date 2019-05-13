@@ -16,13 +16,13 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import weka.core.Instances;
 
 /**

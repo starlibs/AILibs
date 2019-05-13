@@ -1,10 +1,10 @@
 package ai.libs.jaicore.search.testproblems.nqueens;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class NQueensGraphSearchToGraphSearchWithSubPathEvaluationReducer implements AlgorithmicProblemReduction<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>, GraphSearchWithSubpathEvaluationsInput<QueenNode, String, Double>, SearchGraphPath<QueenNode, String>> {
 

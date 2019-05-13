@@ -4,7 +4,7 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
-import jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 public class TwoPhaseHASCOFactory<S extends GraphSearchInput<N, A>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 

@@ -6,11 +6,11 @@ import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.testproblems.cannibals.CannibalProblem;
-import jaicore.search.algorithms.standard.astar.AStar;
-import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
-import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 

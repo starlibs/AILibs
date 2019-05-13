@@ -27,12 +27,12 @@ import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.sets.SetUtil.Pair;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.util.CycleDetectedResult;
-import jaicore.search.util.DeadEndDetectedResult;
-import jaicore.search.util.GraphSanityChecker;
-import jaicore.search.util.SanityCheckResult;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.util.CycleDetectedResult;
+import ai.libs.jaicore.search.util.DeadEndDetectedResult;
+import ai.libs.jaicore.search.util.GraphSanityChecker;
+import ai.libs.jaicore.search.util.SanityCheckResult;
 
 public abstract class HASCOTester<S extends GraphSearchInput<N, A>, N, A> extends SoftwareConfigurationAlgorithmTester {
 

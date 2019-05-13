@@ -9,11 +9,11 @@ import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.jaicore.basic.algorithm.SolutionCandidateFinderTester;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPAsGraphSearchSet;
 import ai.libs.jaicore.search.testproblems.knapsack.KnapsackProblemAsGraphSearchSet;
 import ai.libs.jaicore.search.testproblems.nqueens.NQueensProblemAsGraphSearchSet;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.probleminputs.GraphSearchInput;
 
 public abstract class GraphSearchSingleSolutionTester extends SolutionCandidateFinderTester {
 

@@ -46,7 +46,7 @@
     </layout>
   </appender>
 
-  <logger name="de.upb.crc901">
+  <logger name="ai.libs.mlplan">
     <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -55,7 +55,7 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="jaicore">
+  <logger name="ai.libs.jaicore">
     <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -64,19 +64,19 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+  <logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
    <level value="trace" />
   </logger>
     
-  <logger name="de.upb.crc901.automl.AutoMLAlgorithmTester">
+  <logger name="ai.libs.automl.AutoMLAlgorithmTester">
     <level value="info" />
   </logger>
   
-  <logger name="de.upb.crc901.automl.AutoMLAlgorithmResultProductionTester">
+  <logger name="ai.libs.automl.AutoMLAlgorithmResultProductionTester">
     <level value="info" />
   </logger>
     
-  <logger name="de.upb.crc901.mlplan.core">
+  <logger name="ai.libs.mlplan.core">
   	 <level value="debug" />
   </logger>
   
@@ -88,15 +88,15 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="jaicore.graphvisualizer">
+  <logger name="ai.libs.jaicore.graphvisualizer">
     <level value="warn" />
   </logger>
   
-  <logger name="jaicore.interrupt">
+  <logger name="ai.libs.jaicore.interrupt">
     <level value="warn" />
   </logger>
   
-  <logger name="hasco">
+  <logger name="ai.libs.hasco">
     <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -138,11 +138,11 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="hasco.core.Util">
+  <logger name="ai.libs.hasco.core.Util">
   	 <level value="warn" />
   </logger>
   
-  <logger name="hasco.core.IsRefinementCompletedPredicate">
+  <logger name="ai.libs.hasco.core.IsRefinementCompletedPredicate">
   	 <level value="warn" />
   </logger>
   
@@ -182,11 +182,11 @@
     <level value="warn" />
   </logger>
   
-  <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
+  <logger name="ai.libs.hasco.core.isValidParameterRangeRefinementPredicate">
   	<level value="warn" />
   </logger>
   
-  <logger name="de.upb.crc901.mlplan.examples.multilabel.meka.ML2PlanAutoMLCExperimenter">
+  <logger name="ai.libs.mlplan.examples.multilabel.meka.ML2PlanAutoMLCExperimenter">
   	<level value="info" />
   </logger>
   

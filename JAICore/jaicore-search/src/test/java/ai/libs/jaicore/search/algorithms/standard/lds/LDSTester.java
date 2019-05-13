@@ -1,10 +1,10 @@
 package ai.libs.jaicore.search.algorithms.standard.lds;
 
 import ai.libs.jaicore.search.algorithms.GeneralGraphSearchAlgorithmTester;
-import jaicore.search.algorithms.standard.lds.LimitedDiscrepancySearch;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
+import ai.libs.jaicore.search.algorithms.standard.lds.LimitedDiscrepancySearch;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 
 public class LDSTester extends GeneralGraphSearchAlgorithmTester {
 

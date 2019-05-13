@@ -5,7 +5,7 @@ import java.util.List;
 
 import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.search.GraphGeneratorTester;
-import jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 
 public class NQueensGraphGeneratorTester extends GraphGeneratorTester<QueenNode, String> {
 
