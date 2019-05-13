@@ -35,7 +35,7 @@ MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 #### Configuring timeouts
 With the `builder` variable being configured as above, you can specify timeouts for ML-Plan as a whole, as well as timeouts for the evaluation of a single solution candidate or nodes in the search.
 By default, all these timeouts are set to 60 seconds.
-```
+```java
 /* set the global timeout of ML-Plan to 1 hour: */
 builder.withTimeOut(new TimeOut(3600, TimeUnit.SECONDS));
 
