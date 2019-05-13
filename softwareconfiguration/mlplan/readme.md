@@ -55,7 +55,7 @@ Instances trainDataset = new Instances(new FileReader("myDataset.arff"));
 /* configure the builder to use the given data */
 builder.withDataset(trainDataset);
 
-/* build an call ML-Plan */
+/* build and call ML-Plan */
 MLPlan mlplan = builder.build();
 Classifier chosenClassifier = mlplan.call();
 ```
