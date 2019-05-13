@@ -53,7 +53,7 @@ By default, all these timeouts are set to 60 seconds.
 /* set the global timeout of ML-Plan to 1 hour: */
 builder.withTimeOut(new TimeOut(3600, TimeUnit.SECONDS));
 
-/* set the timeout of a single node in the search graph (evaluation of all random completions of a node): */
+/* set the timeout of a node in the search graph (evaluation of all random completions of a node): */
 builder.withNodeEvaluationTimeOut(new TimeOut(300, TimeUnit.SECONDS));
 
 /* set the timeout of a single solution candidate */
