@@ -32,6 +32,16 @@ MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
 MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 ```
 
+**Note**: If you want to use ML-Plan for scikit-learn, then ML-Plan assumes Python 3.5 or higher to be active (invoked when calling `python` on the command line), and the following packages must be installed:
+`numpy`, 
+`json`,
+`pickle`,
+`os`,
+`sys`,
+`warnings`,
+`scipy`,
+`sklearn`.
+
 #### Configuring timeouts
 With the `builder` variable being configured as above, you can specify timeouts for ML-Plan as a whole, as well as timeouts for the evaluation of a single solution candidate or nodes in the search.
 By default, all these timeouts are set to 60 seconds.
@@ -42,7 +52,7 @@ builder.withTimeOut(new TimeOut(3600, TimeUnit.SECONDS));
 /* set the timeout of a single node in the search graph (evaluation of all random completions of a node): */
 builder.withNodeEvaluationTimeOut(new TimeOut(300, TimeUnit.SECONDS));
 
-/* set the timeout of a single */
+/* set the timeout of a single solution candidate */
 builder.withCandidateEvaluationTimeOut(new TimeOut(300, TimeUnit.SECONDS));
 ```
 
