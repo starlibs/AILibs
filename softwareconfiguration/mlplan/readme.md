@@ -59,6 +59,9 @@ MLPlanSKLearnBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 `scipy`,
 `scikit-learn`.
 Please make sure that you really have `liac-arff` installed, and **not** the `arff` package.
+Optionally, ML-Plan is able to configure pipleines in the style of TPOT, which requires the `tpot` package to be installed.
+The TPOT algorithm is not used, but we use one of its pipeline utility classes.
+Without having TPOT installed, you may observe some errors in the log files, but these just document that no TPOT pipelines are built and don't do any harm.
 
 #### Configuring timeouts
 With the `builder` variable being configured as above, you can specify timeouts for ML-Plan as a whole, as well as timeouts for the evaluation of a single solution candidate or nodes in the search.
