@@ -21,7 +21,7 @@ You can resolve each of our projects via a Maven dependency (using Maven central
 ```
 
 ### Gradle 
-```
+```gradle
 dependencies {
     implementation 'ai.libs:jaicore-ml:0.1.1'
 }
