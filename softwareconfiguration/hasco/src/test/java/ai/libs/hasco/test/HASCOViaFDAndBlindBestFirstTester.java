@@ -4,7 +4,7 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class HASCOViaFDAndBlindBestFirstTester extends HASCOTester<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> {
 

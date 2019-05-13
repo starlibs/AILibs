@@ -16,7 +16,7 @@ import ai.libs.mlplan.multilabel.MekaPipelineFactory;
 
 public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 
-	private static final String RES_SSC_MEKA_COMPLETE = "automl/searchmodels/meka/meka-multilabel.json";
+	private static final String RES_SSC_MEKA_COMPLETE = "automl/searchmodels/meka/mlplan-meka.json";
 	private static final String FS_SSC_MEKA_COMPLETE = "conf/mlplan-meka.json";
 
 	private static final String RES_PREFC_MEKA = "mlplan/meka-preferenceList.txt";

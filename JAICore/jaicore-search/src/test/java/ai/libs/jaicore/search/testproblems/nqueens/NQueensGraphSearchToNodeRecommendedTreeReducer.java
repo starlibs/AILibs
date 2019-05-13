@@ -1,9 +1,9 @@
 package ai.libs.jaicore.search.testproblems.nqueens;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 
 public class NQueensGraphSearchToNodeRecommendedTreeReducer implements AlgorithmicProblemReduction<GraphSearchInput<QueenNode, String>, SearchGraphPath<QueenNode, String>, GraphSearchWithNodeRecommenderInput<QueenNode, String>, SearchGraphPath<QueenNode, String>> {
 

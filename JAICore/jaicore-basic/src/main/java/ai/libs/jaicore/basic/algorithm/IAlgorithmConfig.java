@@ -12,6 +12,8 @@ import org.aeonbits.owner.Mutable;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.PropertiesLoadFailedException;
+import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.jaicore.basic.ResourceUtil;
 
 public interface IAlgorithmConfig extends Mutable {
 
@@ -54,11 +56,28 @@ public interface IAlgorithmConfig extends Mutable {
 	 * @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given file.
 	 */
 	default IAlgorithmConfig loadPropertiesFromFile(final File file) {
-		if (!file.exists() || !file.isFile()) {
-			throw new IllegalArgumentException("File (" + file.getAbsolutePath() + ") to load properties from does not exist or is not a file.");
+		if (!(file instanceof ResourceFile) && !file.exists()) {
+			throw new IllegalArgumentException("File (" + file + ") to load properties from does not exist.");
 		}
 		try {
-			return loadPropertiesFromList(FileUtil.readFileAsList(file));
+			if (file instanceof ResourceFile) {
+				return loadPropertiesFromList(ResourceUtil.readResourceFileToStringList((ResourceFile) file));
+			} else {
+				return loadPropertiesFromList(FileUtil.readFileAsList(file));
+			}
+		} catch (IOException e) {
+			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
+		}
+	}
+
+	/**
+	* Reads properties of a config from a config file.
+	* @param file The file to read in as properties.
+	* @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given file.
+	*/
+	default IAlgorithmConfig loadPropertiesFromPath(final String path) {
+		try {
+			return loadPropertiesFromList(FileUtil.readFileAsList(path));
 		} catch (IOException e) {
 			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
 		}

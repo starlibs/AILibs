@@ -23,11 +23,11 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 
 /**
  *

@@ -17,7 +17,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
 public class GraphViewPluginModel implements IGUIPluginModel {
 
-	private static final String STYLESHEET_URL = "url('" + ResourceUtil.getResourceAsFile("searchgraph.css") + "')";
+	private static final String STYLESHEET_URL = "url('" + ResourceUtil.getResourceAsTempFile("searchgraph.css") + "')";
 
 	private int nodeIdCounter;
 
@@ -46,6 +46,7 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 	private void initializeGraph(final String styleSheetURL) {
 		this.graph = new SingleGraph("Search Graph");
 		this.graph.setAttribute("ui.stylesheet", styleSheetURL);
+		System.out.println("Stylesheet URL " + STYLESHEET_URL);
 	}
 
 	public void addNode(final Object node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {

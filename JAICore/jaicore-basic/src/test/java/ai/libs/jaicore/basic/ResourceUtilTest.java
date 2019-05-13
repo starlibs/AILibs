@@ -3,9 +3,11 @@ package ai.libs.jaicore.basic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.junit.Test;
 
@@ -38,6 +40,31 @@ public class ResourceUtilTest {
 		File resourceFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
 		assertTrue("The file returned for the resource path does not exist", resourceFile.exists());
 		assertTrue("The file returned is not a file but a directory.", !resourceFile.isDirectory());
+	}
+
+	@Test
+	public void test() {
+		ResourceFile resFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
+		this.readRes(resFile.getPathName());
+
+		ResourceFile res2File = new ResourceFile(resFile.getParentFile(), "dummy2.resource");
+
+		this.readRes(resFile.getPathName());
+		this.readRes(res2File.getPathName());
+	}
+
+	private void readRes(final String path) {
+		System.out.println("READ " + path);
+		System.out.println(this.getClass().getClassLoader().getResourceAsStream(path));
+
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path)))) {
+			String line;
+			while ((line = br.readLine()) != null) {
+				System.out.println(line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

@@ -1,11 +1,11 @@
 package ai.libs.jaicore.search.testproblems.enhancedttsp;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 import it.unimi.dsi.fastutil.shorts.ShortList;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class EnhancedTTSPToGraphSearchReducer
 implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, SearchGraphPath<EnhancedTTSPNode, String>> {

@@ -14,12 +14,12 @@ import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsAction;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningDomain;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.model.travesaltree.NodeExpansionDescription;
-import jaicore.search.model.travesaltree.NodeType;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import ai.libs.jaicore.search.model.travesaltree.NodeType;
+import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
+import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import ai.libs.jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 
 public class StripsForwardPlanningGraphGenerator implements GraphGenerator<StripsForwardPlanningNode, String> {
 

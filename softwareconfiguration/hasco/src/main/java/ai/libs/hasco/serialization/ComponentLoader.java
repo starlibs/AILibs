@@ -1,8 +1,6 @@
 package ai.libs.hasco.serialization;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +29,9 @@ import ai.libs.hasco.model.IParameterDomain;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 
@@ -62,65 +63,53 @@ public class ComponentLoader {
 
 	public ComponentLoader(final File jsonFile) throws IOException {
 		this();
-		loadComponents(jsonFile);
+		this.loadComponents(jsonFile);
 	}
 
 	public ComponentLoader(final File jsonFile, final boolean checkRequiredInterfacesResolvable) throws IOException {
 		this(checkRequiredInterfacesResolvable);
-		loadComponents(jsonFile);
+		this.loadComponents(jsonFile);
 	}
 
 	private void parseFile(final File jsonFile) throws IOException {
 		L.debug("Parse file {}...", jsonFile.getAbsolutePath());
-		StringBuilder stringDescriptionSB = new StringBuilder();
-		String line;
-		try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
-			while ((line = br.readLine()) != null) {
-				stringDescriptionSB.append(line + "\n");
-			}
+
+		String jsonDescription;
+		if (jsonFile instanceof ResourceFile) {
+			jsonDescription = ResourceUtil.readResourceFileToString(((ResourceFile) jsonFile).getPathName());
+		} else {
+			jsonDescription = FileUtil.readFileAsString(jsonFile);
 		}
-		String jsonDescription = stringDescriptionSB.toString();
 		jsonDescription = jsonDescription.replaceAll("/\\*(.*)\\*/", "");
 
-		JsonNode rootNode = objectMapper.readTree(jsonDescription);
+		JsonNode rootNode = this.objectMapper.readTree(jsonDescription);
 
 		for (JsonNode elem : rootNode.path("parameters")) {
-			parameterMap.put(elem.get("name").asText(), elem);
+			this.parameterMap.put(elem.get("name").asText(), elem);
 		}
 		JsonNode includes = rootNode.path("include");
 
-		File baseFolder = new File(jsonFile.getCanonicalPath());
-		if (jsonFile.isFile()) {
-			baseFolder = new File(jsonFile.getCanonicalFile().getParentFile().getCanonicalPath());
-		}
-
+		File baseFolder = jsonFile.getParentFile();
 		for (JsonNode includePathNode : includes) {
 			String path = includePathNode.asText();
-			File subFile = new File(baseFolder.getAbsolutePath() + File.separator + path);
-			if (!parsedFiles.contains(subFile.getCanonicalPath())) {
-				if (!subFile.exists()) {
-					throw new IllegalArgumentException("Cannot load " + subFile.getName() + " as this file or folder does not exist in " + subFile.getParent());
-				}
-				if (subFile.isFile()) {
-					parsedFiles.add(subFile.getCanonicalPath());
-					parseFile(subFile.getCanonicalFile());
-				} else {
-					for (File subsubFile : subFile.listFiles()) {
-						if (!parsedFiles.contains(subsubFile.getCanonicalPath()) && subsubFile.isFile() && subsubFile.getName().endsWith(".json")) {
-							parsedFiles.add(subsubFile.getCanonicalPath());
-							parseFile(subsubFile.getCanonicalFile());
-						}
-					}
-					parsedFiles.add(subFile.getCanonicalPath());
-				}
+			File subFile;
+			if (baseFolder instanceof ResourceFile) {
+				subFile = new ResourceFile((ResourceFile) baseFolder, path);
+			} else {
+				subFile = new File(baseFolder, path);
+			}
+
+			if (!this.parsedFiles.contains(subFile.getCanonicalPath())) {
+				this.parsedFiles.add(subFile.getCanonicalPath());
+				this.parseFile(subFile);
 			}
 		}
-		readFromJson(rootNode);
+		this.readFromJson(rootNode);
 	}
 
 	public void readFromString(final String json) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		readFromJson(mapper.readTree(json));
+		this.readFromJson(mapper.readTree(json));
 	}
 
 	private void readFromJson(final JsonNode rootNode) throws IOException {
@@ -130,9 +119,9 @@ public class ComponentLoader {
 			Component c;
 			for (JsonNode component : components) {
 				c = new Component(component.get("name").asText());
-				componentMap.put(c.getName(), component);
+				this.componentMap.put(c.getName(), component);
 
-				if (!uniqueComponentNames.add(c.getName())) {
+				if (!this.uniqueComponentNames.add(c.getName())) {
 					throw new IllegalArgumentException("Noticed a component with duplicative component name: " + c.getName());
 				}
 
@@ -168,8 +157,8 @@ public class ComponentLoader {
 					String[] doubleParams = new String[] { "default", "min", "max", "refineSplits", "minInterval" };
 					double[] doubleParamValues = new double[doubleParams.length];
 
-					if (parameterMap.containsKey(name)) {
-						JsonNode commonParameter = parameterMap.get(name);
+					if (this.parameterMap.containsKey(name)) {
+						JsonNode commonParameter = this.parameterMap.get(name);
 						// get string parameter values from common parameter
 						for (int i = 0; i < stringParams.length; i++) {
 							if (commonParameter.get(stringParams[i]) != null) {
@@ -226,8 +215,7 @@ public class ComponentLoader {
 						if (type.endsWith("-log")) {
 							paramConfig.put(p, new ParameterRefinementConfiguration(parameter.get("focus").asDouble(), parameter.get("basis").asDouble(), boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
 
-						}
-						else {
+						} else {
 							paramConfig.put(p, new ParameterRefinementConfiguration(boolParamValues[1], (int) doubleParamValues[3], doubleParamValues[4]));
 						}
 						break;
@@ -245,8 +233,8 @@ public class ComponentLoader {
 								for (JsonNode value : parameter.get("values")) {
 									values.add(value.asText());
 								}
-							} else if (parameterMap.containsKey(name)) {
-								for (JsonNode value : parameterMap.get(name).get("values")) {
+							} else if (this.parameterMap.containsKey(name)) {
+								for (JsonNode value : this.parameterMap.get(name).get("values")) {
 									values.add(value.asText());
 								}
 							} else {
@@ -377,25 +365,25 @@ public class ComponentLoader {
 					c.addDependency(new Dependency(premise, conclusion));
 				}
 
-				paramConfigs.put(c, paramConfig);
+				this.paramConfigs.put(c, paramConfig);
 				this.components.add(c);
 
-				requiredInterfaces.addAll(c.getRequiredInterfaces().values());
-				providedInterfaces.addAll(c.getProvidedInterfaces());
+				this.requiredInterfaces.addAll(c.getRequiredInterfaces().values());
+				this.providedInterfaces.addAll(c.getProvidedInterfaces());
 			}
 		}
 	}
 
 	public ComponentLoader loadComponents(final File componentDescriptionFile) throws IOException, UnresolvableRequiredInterfaceException {
-		paramConfigs.clear();
-		components.clear();
-		uniqueComponentNames.clear();
-		requiredInterfaces.clear();
-		providedInterfaces.clear();
+		this.paramConfigs.clear();
+		this.components.clear();
+		this.uniqueComponentNames.clear();
+		this.requiredInterfaces.clear();
+		this.providedInterfaces.clear();
 
-		parseFile(componentDescriptionFile);
+		this.parseFile(componentDescriptionFile);
 
-		if (checkRequiredInterfacesResolvable && !getUnresolvableRequiredInterfaces().isEmpty()) {
+		if (this.checkRequiredInterfacesResolvable && !this.getUnresolvableRequiredInterfaces().isEmpty()) {
 			throw new UnresolvableRequiredInterfaceException();
 		}
 
@@ -406,7 +394,7 @@ public class ComponentLoader {
 	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
 	 */
 	public Collection<String> getUnresolvableRequiredInterfaces() {
-		return SetUtil.difference(requiredInterfaces, providedInterfaces);
+		return SetUtil.difference(this.requiredInterfaces, this.providedInterfaces);
 	}
 
 	/**
@@ -415,21 +403,21 @@ public class ComponentLoader {
 	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
 	 */
 	public JsonNode getComponentAsJsonNode(final String componentName) {
-		return componentMap.get(componentName);
+		return this.componentMap.get(componentName);
 	}
 
 	/**
 	 * @return The map describing for each component individually how its parameters may be refined.
 	 */
 	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
-		return paramConfigs;
+		return this.paramConfigs;
 	}
 
 	/**
 	 * @return The collection of parsed components.
 	 */
 	public Collection<Component> getComponents() {
-		return components;
+		return this.components;
 	}
 
 	/**
@@ -438,7 +426,7 @@ public class ComponentLoader {
 	 * @return The component for the given name.
 	 */
 	public Component getComponentWithName(final String name) {
-		for (Component component : getComponents()) {
+		for (Component component : this.getComponents()) {
 			if (component.getName().equals(name)) {
 				return component;
 			}
@@ -452,7 +440,7 @@ public class ComponentLoader {
 	}
 
 	public Map<String, JsonNode> getJsonNodeComponents() {
-		return componentMap;
+		return this.componentMap;
 	}
 
 }

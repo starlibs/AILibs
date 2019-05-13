@@ -8,9 +8,9 @@ import java.util.List;
 import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.GraphGeneratorTester;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import jaicore.search.core.interfaces.GraphGenerator;
 import weka.core.Instances;
 
 public class MLPlanGraphGeneratorTest extends GraphGeneratorTester<TFDNode, String> {

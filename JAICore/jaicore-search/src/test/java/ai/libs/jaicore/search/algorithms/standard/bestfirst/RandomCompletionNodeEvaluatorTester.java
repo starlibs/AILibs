@@ -21,14 +21,14 @@ import ai.libs.jaicore.basic.PartiallyFailingObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.search.testproblems.nqueens.QueenNode;
-import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
-import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
-import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.travesaltree.Node;
 
 public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<QueenNode, String, Double>> {
 

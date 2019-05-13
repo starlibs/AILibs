@@ -9,7 +9,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.Node;
 
 /**
  * This info generator is meant to be used in combination with the node info plug-in.

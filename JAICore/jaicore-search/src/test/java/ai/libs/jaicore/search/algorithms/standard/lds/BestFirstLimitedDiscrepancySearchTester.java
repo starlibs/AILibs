@@ -1,10 +1,10 @@
 package ai.libs.jaicore.search.algorithms.standard.lds;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
+import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 
 public class BestFirstLimitedDiscrepancySearchTester extends GraphSearchSolutionIteratorTester {
 

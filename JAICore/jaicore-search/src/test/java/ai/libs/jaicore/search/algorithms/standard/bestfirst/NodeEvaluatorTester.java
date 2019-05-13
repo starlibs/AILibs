@@ -14,12 +14,12 @@ import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.testproblems.nqueens.NQueensGraphGenerator;
 import ai.libs.jaicore.search.testproblems.nqueens.QueenNode;
-import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.travesaltree.Node;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public abstract class NodeEvaluatorTester<N extends INodeEvaluator<QueenNode, Double>> {
 

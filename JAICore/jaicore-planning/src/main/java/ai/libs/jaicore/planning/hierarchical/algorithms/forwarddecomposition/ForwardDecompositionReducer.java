@@ -12,9 +12,9 @@ import ai.libs.jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningPro
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.STNPlanningProblem;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 public class ForwardDecompositionReducer<IPlanning extends IHTNPlanningProblem> implements IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, TFDNode, String> {
 

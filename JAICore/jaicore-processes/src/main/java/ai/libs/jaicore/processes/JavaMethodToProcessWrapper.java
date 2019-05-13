@@ -62,7 +62,7 @@ public class JavaMethodToProcessWrapper {
 		return null;
 	}
 
-	public Object run(final String clazz, final String method, final Object target, final Object... inputs) throws IOException, InterruptedException, InvocationTargetException {
+	public Object run(final String clazz, final String method, final Object target, final Object... inputs) throws IOException, InterruptedException, InvocationTargetException, ProcessIDNotRetrievableException {
 		return this.run(clazz, method, target, Arrays.asList(inputs));
 	}
 
@@ -92,7 +92,7 @@ public class JavaMethodToProcessWrapper {
 		return (c != null) ? Optional.of(c) : Optional.empty();
 	}
 
-	public Object run(final String clazz, final String method, final Object target, final List<Object> inputs) throws IOException, InterruptedException, InvocationTargetException {
+	public Object run(final String clazz, final String method, final Object target, final List<Object> inputs) throws IOException, InterruptedException, InvocationTargetException, ProcessIDNotRetrievableException {
 
 		/* create new id for the invocation */
 		String id = String.valueOf(random.nextLong());
