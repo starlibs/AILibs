@@ -18,7 +18,7 @@ dependencies {
 ```
 
 ### Usage
-#### Loading data and creating an ML-Plan builder
+#### Creating an ML-Plan builder for your learning framework
 Depending on the library you want to work with, you then can construct a WEKA or scikit-learn related builder for ML-Plan.
 Note that ML-Plan for scikit-learn is also Java-based, i.e. we do not have a Python version of ML-Plan only for being able to cope with scikit-learn. Instead, ML-Plan can be configured to work with scikit-learn as the library to be used.
 
