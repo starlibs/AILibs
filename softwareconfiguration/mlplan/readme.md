@@ -47,6 +47,7 @@ MLPlanSKLearnBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 ```
 
 **Note**: If you want to use ML-Plan for scikit-learn, then ML-Plan assumes Python 3.5 or higher to be active (invoked when calling `python` on the command line), and the following packages must be installed:
+`liac-arff`,
 `numpy`, 
 `json`,
 `pickle`,
@@ -54,7 +55,8 @@ MLPlanSKLearnBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 `sys`,
 `warnings`,
 `scipy`,
-`sklearn`.
+`scikit-learn`.
+Please make sure that you really have `liac-arff` installed, and **not** the `arff` package.
 
 #### Configuring timeouts
 With the `builder` variable being configured as above, you can specify timeouts for ML-Plan as a whole, as well as timeouts for the evaluation of a single solution candidate or nodes in the search.
