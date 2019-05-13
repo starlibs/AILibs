@@ -18,6 +18,16 @@ dependencies {
 ```
 
 ### Usage
+The shortest way to obtain an optimized WEKA classifier via ML-Plan for your data object `data` is to run
+```java
+Classifier optimizedClassifier = AbstractMLPlanBuilder.forWeka().withDataset(data).build().call();
+```
+An analogous call exists for scikit-learn pipelines.
+Here, several default parameters apply that you may usually want to customize.
+
+### Customizing ML-Plan
+This is just a quick overview of the most important configurations of ML-Plan.
+
 #### Creating an ML-Plan builder for your learning framework
 Depending on the library you want to work with, you then can construct a WEKA or scikit-learn related builder for ML-Plan.
 Both builders have the same basic capacities (and only these are needed for the simple example below).
