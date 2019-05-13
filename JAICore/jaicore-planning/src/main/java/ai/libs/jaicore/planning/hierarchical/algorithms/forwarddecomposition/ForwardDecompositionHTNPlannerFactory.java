@@ -4,9 +4,9 @@ import ai.libs.jaicore.basic.algorithm.AAlgorithmFactory;
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 
 public class ForwardDecompositionHTNPlannerFactory<IPlanner extends IHTNPlanningProblem, V extends Comparable<V>, ISearch extends GraphSearchInput<TFDNode, String>>
 extends AAlgorithmFactory<IPlanner, EvaluatedSearchGraphBasedPlan<V, TFDNode>> {

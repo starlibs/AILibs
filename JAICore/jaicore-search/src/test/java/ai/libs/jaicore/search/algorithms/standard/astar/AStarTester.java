@@ -1,10 +1,10 @@
 package ai.libs.jaicore.search.algorithms.standard.astar;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import jaicore.search.algorithms.standard.astar.AStar;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
+import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 
 public class AStarTester extends GraphSearchSolutionIteratorTester {
 

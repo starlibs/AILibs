@@ -6,11 +6,11 @@ import org.junit.Test;
 
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.graph.Graph;
+import ai.libs.jaicore.search.algorithms.andor.AndORBottomUpFilter;
 import ai.libs.jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
-import jaicore.search.algorithms.andor.AndORBottomUpFilter;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class AndOrTester {
 

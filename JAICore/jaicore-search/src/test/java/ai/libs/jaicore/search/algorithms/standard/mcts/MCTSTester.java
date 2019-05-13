@@ -1,11 +1,11 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import jaicore.search.algorithms.standard.mcts.UCTFactory;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.model.other.AgnosticPathEvaluator;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.standard.mcts.UCTFactory;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class MCTSTester extends GraphSearchSolutionIteratorTester {
 

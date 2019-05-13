@@ -5,13 +5,13 @@ import java.util.Set;
 
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.testproblems.knapsack.KnapsackConfiguration;
 import ai.libs.jaicore.testproblems.knapsack.KnapsackProblem;
-import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.travesaltree.Node;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction<KnapsackProblem, Set<String>, GraphSearchWithSubpathEvaluationsInput<KnapsackConfiguration, String, Double>, SearchGraphPath<KnapsackConfiguration, String>> {
 

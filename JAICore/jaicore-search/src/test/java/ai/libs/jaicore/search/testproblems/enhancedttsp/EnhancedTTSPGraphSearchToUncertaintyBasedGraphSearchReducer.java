@@ -4,15 +4,15 @@ import java.util.Random;
 
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import ai.libs.jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
+import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
-import jaicore.search.model.other.AgnosticPathEvaluator;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
 public class EnhancedTTSPGraphSearchToUncertaintyBasedGraphSearchReducer implements AlgorithmicProblemReduction<GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>, GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double>, EvaluatedSearchGraphPath<EnhancedTTSPNode, String, Double>> {
 

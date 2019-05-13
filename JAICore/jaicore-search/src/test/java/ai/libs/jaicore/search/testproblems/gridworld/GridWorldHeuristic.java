@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.testproblems.gridworld;
 
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.testproblems.gridworld.GridWorldNode;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.travesaltree.Node;
 
 public class GridWorldHeuristic implements INodeEvaluator<GridWorldNode, Double> {
 

@@ -40,13 +40,13 @@ import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemTransformer;
-import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 /**
  * Hierarchically create an object of type T

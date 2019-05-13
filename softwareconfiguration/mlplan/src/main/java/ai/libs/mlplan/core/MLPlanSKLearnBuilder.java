@@ -25,8 +25,13 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 
 	private Logger logger = LoggerFactory.getLogger(MLPlanSKLearnBuilder.class);
 
-	private static final String PYTHON_REQUIRED_VERSION = "Python 3.6.*";
-	private static final String[] PYTHON_REQUIRED_MODULES = { "numpy", "json", "pickle", "os", "sys", "warnings", "scipy.io.arff", "sklearn" };
+	private static final String MSG_MODULE_NOT_AVAILABLE = "Could not load python module {}: {}";
+	private static final String PYTHON_MINIMUM_REQUIRED_VERSION = "Python 3.5.0";
+	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_REL = 3;
+	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MAJ = 5;
+	private static final int PYTHON_MINIMUM_REQUIRED_VERSION_MIN = 0;
+
+	private static final String[] PYTHON_REQUIRED_MODULES = { "arff", "numpy", "json", "pickle", "os", "sys", "warnings", "scipy", "sklearn" };
 
 	private static final String COMMAND_PYTHON = "python";
 	private static final String[] COMMAND_PYTHON_VERSION = { COMMAND_PYTHON, "--version" };
@@ -101,9 +106,21 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 				}
 			}
 			String versionString = sb.toString();
-			String regEx = PYTHON_REQUIRED_VERSION.replaceAll("\\.", "\\\\\\.").replaceAll("\\*", "[0-9]");
-			if (!versionString.matches(regEx)) {
-				throw new SystemRequirementsNotMetException("The installed python version does not match the required " + PYTHON_REQUIRED_VERSION);
+			if (!versionString.startsWith("Python ")) {
+				throw new SystemRequirementsNotMetException("Could not detect valid python version.");
+			}
+
+			String[] versionSplit = versionString.substring(7).split("\\.");
+			if (versionSplit.length != 3) {
+				throw new SystemRequirementsNotMetException("Could not parse python version to be of the shape X.X.X");
+			}
+
+			int rel = Integer.parseInt(versionSplit[0]);
+			int maj = Integer.parseInt(versionSplit[1]);
+			int min = Integer.parseInt(versionSplit[2]);
+
+			if (!this.isValidVersion(rel, maj, min)) {
+				throw new SystemRequirementsNotMetException("Python version does not conform the minimum required python version of " + PYTHON_MINIMUM_REQUIRED_VERSION);
 			}
 
 			/* Check whether we have all required python modules available*/
@@ -137,8 +154,16 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 						}
 					}
 					if (!errorSB.toString().isEmpty() && errorSB.toString().contains(PYTHON_MODULE_NOT_FOUND_ERROR_MSG)) {
-						this.logger.debug("Could not load python module {}: {}", module, errorSB);
-						modulesNotFound.add(module);
+						if (module.equals("arff")) {
+							this.logger.debug(MSG_MODULE_NOT_AVAILABLE, "liac-arff", errorSB);
+							modulesNotFound.add("liac-arff");
+						} else if (module.equals("sklearn")) {
+							this.logger.debug(MSG_MODULE_NOT_AVAILABLE, "scikit-learn", errorSB);
+							modulesNotFound.add("scikit-learn");
+						} else {
+							this.logger.debug(MSG_MODULE_NOT_AVAILABLE, module, errorSB);
+							modulesNotFound.add(module);
+						}
 					}
 				}
 				if (!modulesNotFound.isEmpty()) {
@@ -149,6 +174,11 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 		} catch (IOException e) {
 			throw new SystemRequirementsNotMetException("Could not check whether python is installed in the required version. Is python available as a command on your command line?");
 		}
+	}
+
+	private boolean isValidVersion(final int rel, final int maj, final int min) {
+		return ((rel > PYTHON_MINIMUM_REQUIRED_VERSION_REL) || (rel == PYTHON_MINIMUM_REQUIRED_VERSION_REL && maj > PYTHON_MINIMUM_REQUIRED_VERSION_MAJ)
+				|| (rel == PYTHON_MINIMUM_REQUIRED_VERSION_REL && maj == PYTHON_MINIMUM_REQUIRED_VERSION_MAJ && min >= PYTHON_MINIMUM_REQUIRED_VERSION_MIN));
 	}
 
 	@Override

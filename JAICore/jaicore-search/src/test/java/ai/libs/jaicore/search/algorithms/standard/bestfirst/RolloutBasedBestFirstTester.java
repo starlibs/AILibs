@@ -3,13 +3,13 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 import java.util.Random;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.model.other.AgnosticPathEvaluator;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class RolloutBasedBestFirstTester extends GraphSearchSolutionIteratorTester {
 

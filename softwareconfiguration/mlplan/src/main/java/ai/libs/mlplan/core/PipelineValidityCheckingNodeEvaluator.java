@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import weka.core.Instances;
 
 public abstract class PipelineValidityCheckingNodeEvaluator implements INodeEvaluator<TFDNode, Double> {

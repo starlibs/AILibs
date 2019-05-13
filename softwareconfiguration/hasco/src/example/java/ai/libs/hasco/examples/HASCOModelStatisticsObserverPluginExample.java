@@ -21,8 +21,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
-import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
-
+import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 public class HASCOModelStatisticsObserverPluginExample {

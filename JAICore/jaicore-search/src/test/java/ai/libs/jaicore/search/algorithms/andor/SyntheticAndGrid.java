@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ai.libs.jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.model.travesaltree.NodeExpansionDescription;
-import jaicore.search.model.travesaltree.NodeType;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import ai.libs.jaicore.search.model.travesaltree.NodeType;
+import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
+import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
 	

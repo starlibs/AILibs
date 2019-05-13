@@ -3,9 +3,9 @@ package ai.libs.jaicore.planning.hierarchical.problems.htn;
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.EvaluatedPlan;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class CostSensitivePlanningToSearchProblemTransformer<IPlanning extends IHTNPlanningProblem, V extends Comparable<V>, N, A>
 implements AlgorithmicProblemReduction<CostSensitiveHTNPlanningProblem<IPlanning, V>, EvaluatedPlan<V>, GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> {

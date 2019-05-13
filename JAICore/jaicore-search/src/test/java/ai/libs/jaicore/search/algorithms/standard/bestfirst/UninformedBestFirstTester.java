@@ -1,9 +1,9 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchWithSubPathEvaluationUninformedTester;
-import jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class UninformedBestFirstTester extends GraphSearchWithSubPathEvaluationUninformedTester {
 

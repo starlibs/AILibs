@@ -21,12 +21,12 @@ import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;
 import ai.libs.jaicore.planning.core.EvaluatedPlan;
 import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.core.events.PlanFoundEvent;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.core.interfaces.IPathInORGraphSearch;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.core.interfaces.IPathInORGraphSearch;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPlanningProblem, EvaluatedPlan<V>, V> {
 

@@ -12,15 +12,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import ai.libs.jaicore.search.model.travesaltree.NodeType;
+import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
+import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import ai.libs.jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
+import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import ai.libs.jaicore.testproblems.knapsack.KnapsackConfiguration;
 import ai.libs.jaicore.testproblems.knapsack.KnapsackProblem;
-import jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import jaicore.search.model.travesaltree.NodeExpansionDescription;
-import jaicore.search.model.travesaltree.NodeType;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator<KnapsackConfiguration, String>, ILoggingCustomizable {
 

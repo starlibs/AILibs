@@ -42,7 +42,7 @@ import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
-import jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 
 /**
  * This is the class that conducts the actual problem reduction of software configuration to HTN Planning

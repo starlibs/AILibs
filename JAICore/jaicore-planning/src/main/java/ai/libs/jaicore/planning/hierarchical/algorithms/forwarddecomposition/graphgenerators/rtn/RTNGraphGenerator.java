@@ -25,11 +25,11 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.rtn.RTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
-import jaicore.search.core.interfaces.GraphGenerator;
-import jaicore.search.model.travesaltree.NodeExpansionDescription;
-import jaicore.search.structure.graphgenerator.NodeGoalTester;
-import jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
+import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
+import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 

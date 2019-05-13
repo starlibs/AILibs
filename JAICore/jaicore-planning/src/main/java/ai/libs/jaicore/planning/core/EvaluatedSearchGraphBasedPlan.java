@@ -2,7 +2,7 @@ package ai.libs.jaicore.planning.core;
 
 import java.util.List;
 
-import jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 public class EvaluatedSearchGraphBasedPlan<V extends Comparable<V>, N> extends EvaluatedPlan<V> {
 

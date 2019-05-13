@@ -3,9 +3,9 @@ package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 import ai.libs.jaicore.planning.hierarchical.algorithms.GraphSearchBasedHTNPlanningAlgorithm;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.builders.SearchProblemInputBuilder;
 
 /**
  * Hierarchically create an object of type T

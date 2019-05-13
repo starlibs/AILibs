@@ -3,15 +3,15 @@ package ai.libs.jaicore.search.algorithms.standard.uncertainty;
 import java.util.Random;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
-import jaicore.search.algorithms.standard.uncertainty.BasicUncertaintySource;
-import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
-import jaicore.search.algorithms.standard.uncertainty.UncertaintyORGraphSearchFactory;
-import jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.OversearchAvoidanceMode;
-import jaicore.search.core.interfaces.IGraphSearch;
-import jaicore.search.model.other.AgnosticPathEvaluator;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
+import ai.libs.jaicore.search.algorithms.standard.uncertainty.BasicUncertaintySource;
+import ai.libs.jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig;
+import ai.libs.jaicore.search.algorithms.standard.uncertainty.UncertaintyORGraphSearchFactory;
+import ai.libs.jaicore.search.algorithms.standard.uncertainty.OversearchAvoidanceConfig.OversearchAvoidanceMode;
+import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
 public class TwoPhaseTester extends GraphSearchSolutionIteratorTester {
 

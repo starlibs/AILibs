@@ -37,8 +37,8 @@ import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.model.travesaltree.Node;
 
 public class Util {
 
