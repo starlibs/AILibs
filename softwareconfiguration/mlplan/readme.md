@@ -20,6 +20,10 @@ dependencies {
 ### Usage
 #### Creating an ML-Plan builder for your learning framework
 Depending on the library you want to work with, you then can construct a WEKA or scikit-learn related builder for ML-Plan.
+Both builders have the same basic capacities (and only these are needed for the simple example below).
+For library-specific aspects, there may be additional methods for the respective builders.
+
+
 Note that ML-Plan for scikit-learn is also Java-based, i.e. we do not have a Python version of ML-Plan only for being able to cope with scikit-learn. Instead, ML-Plan can be configured to work with scikit-learn as the library to be used.
 
 ##### ML-Plan for WEKA
@@ -29,7 +33,7 @@ MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
 
 ##### ML-Plan for scikit-learn
 ```java
-MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forSKLearn();
+MLPlanSKLearnBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 ```
 
 **Note**: If you want to use ML-Plan for scikit-learn, then ML-Plan assumes Python 3.5 or higher to be active (invoked when calling `python` on the command line), and the following packages must be installed:
