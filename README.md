@@ -16,14 +16,14 @@ You can resolve each of our projects via a Maven dependency (using Maven central
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>jaicore-ml</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.2</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-ml:0.1.1'
+    implementation 'ai.libs:jaicore-ml:0.1.2'
 }
 ```
 
@@ -41,18 +41,18 @@ Then open Eclipse and go to the import menu, e.g., in the package manager. Choos
 
 ### JAICore
 
-* [JAICore:jaicore-basic](https://javadoc.io/doc/ai.libs/jaicore-basic/0.1.0)
-* [JAICore:jaicore-ea](https://javadoc.io/doc/ai.libs/jaicore-ea/0.1.0)
-* [JAICore:jaicore-experiments](https://javadoc.io/doc/ai.libs/jaicore-experiments/0.1.0)
-* [JAICore:jaicore-graphvisualizer](https://javadoc.io/doc/ai.libs/jaicore-graphvisualizer/0.1.0)
-* [JAICore:jaicore-logic](https://javadoc.io/doc/ai.libs/jaicore-logic/0.1.0)
-* [JAICore:jaicore-math](https://javadoc.io/doc/ai.libs/jaicore-math/0.1.0)
-* [JAICore:jaicore-ml](https://javadoc.io/doc/ai.libs/jaicore-ml/0.1.0)
-* [JAICore:jaicore-planning](https://javadoc.io/doc/ai.libs/jaicore-planning/0.1.0)
-* [JAICore:jaicore-processes](https://javadoc.io/doc/ai.libs/jaicore-processes/0.1.0)
-* [JAICore:jaicore-search](https://javadoc.io/doc/ai.libs/jaicore-search/0.1.0)
+* [JAICore:jaicore-basic](https://javadoc.io/doc/ai.libs/jaicore-basic/)
+* [JAICore:jaicore-ea](https://javadoc.io/doc/ai.libs/jaicore-ea/)
+* [JAICore:jaicore-experiments](https://javadoc.io/doc/ai.libs/jaicore-experiments/)
+* [JAICore:jaicore-graphvisualizer](https://javadoc.io/doc/ai.libs/jaicore-graphvisualizer/)
+* [JAICore:jaicore-logic](https://javadoc.io/doc/ai.libs/jaicore-logic/)
+* [JAICore:jaicore-math](https://javadoc.io/doc/ai.libs/jaicore-math/)
+* [JAICore:jaicore-ml](https://javadoc.io/doc/ai.libs/jaicore-ml/)
+* [JAICore:jaicore-planning](https://javadoc.io/doc/ai.libs/jaicore-planning/)
+* [JAICore:jaicore-processes](https://javadoc.io/doc/ai.libs/jaicore-processes/)
+* [JAICore:jaicore-search](https://javadoc.io/doc/ai.libs/jaicore-search/)
 
 ### Software Configuration
 
-* [HASCO](https://javadoc.io/doc/ai.libs/hasco/0.1.0)
-* [ML-Plan](https://javadoc.io/doc/ai.libs/mlplan/0.1.0)
+* [HASCO](https://javadoc.io/doc/ai.libs/hasco/)
+* [ML-Plan](https://javadoc.io/doc/ai.libs/mlplan/)
