@@ -6,14 +6,14 @@ You can bind in ML-Plan via a Maven dependency (using Maven central as repositor
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>mlplan</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:mlplan:0.1.1'
+    implementation 'ai.libs:mlplan:0.1.2'
 }
 ```
 
@@ -85,3 +85,6 @@ builder.withDataset(trainDataset);
 MLPlan mlplan = builder.build();
 Classifier chosenClassifier = mlplan.call();
 ```
+
+### JavaDoc
+JavaDoc is available here: https://javadoc.io/doc/ai.libs/mlplan/
