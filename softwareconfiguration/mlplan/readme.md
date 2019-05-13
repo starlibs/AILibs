@@ -1,5 +1,5 @@
-## ML-Plan
-### Installation
+# ML-Plan
+## Installation
 You can bind in ML-Plan via a Maven dependency (using Maven central as repository).
 ### Maven
 ```
@@ -17,7 +17,9 @@ dependencies {
 }
 ```
 
-### Usage
+## Usage from within Java
+
+### Get it running
 The shortest way to obtain an optimized WEKA classifier via ML-Plan for your data object `data` is to run
 ```java
 Classifier optimizedClassifier = AbstractMLPlanBuilder.forWeka().withDataset(data).build().call();
