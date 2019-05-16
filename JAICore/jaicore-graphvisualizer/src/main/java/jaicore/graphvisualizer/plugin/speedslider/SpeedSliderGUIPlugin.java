@@ -1,7 +1,7 @@
 package jaicore.graphvisualizer.plugin.speedslider;
 
-import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
+import jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
 import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.IGUIPluginController;
 import jaicore.graphvisualizer.plugin.IGUIPluginModel;
@@ -33,7 +33,7 @@ public class SpeedSliderGUIPlugin implements IGUIPlugin {
 	}
 
 	@Override
-	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource) {
+	public void setAlgorithmEventSource(PropertyProcessedAlgorithmEventSource graphEventSource) {
 		graphEventSource.registerListener(controller);
 	}
 

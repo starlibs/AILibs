@@ -1,6 +1,6 @@
 package jaicore.graphvisualizer.plugin.timeslider;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.plugin.IGUIPluginController;
@@ -20,7 +20,7 @@ public class TimeSliderGUIPluginController implements IGUIPluginController {
 	}
 
 	@Override
-	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+	public void handleSerializableAlgorithmEvent(PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
 		if (amountOfEventsToIgnore <= 0) {
 			model.increaseCurrentTimeStep();
 			model.increaseMaximumTimeStep();

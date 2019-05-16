@@ -6,12 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
-import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.events.gui.GUIEventListener;
+import jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventListener;
+import jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
 import jaicore.graphvisualizer.plugin.controlbar.PauseEvent;
 import jaicore.graphvisualizer.plugin.controlbar.PlayEvent;
 import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
@@ -25,11 +26,11 @@ import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
  * @author ahetzer
  *
  */
-public class AlgorithmEventHistoryEntryDeliverer extends Thread implements AlgorithmEventSource, GUIEventListener {
+public class AlgorithmEventHistoryEntryDeliverer extends Thread implements PropertyProcessedAlgorithmEventSource, GUIEventListener {
 
 	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistoryEntryDeliverer.class);
 
-	private Set<AlgorithmEventListener> algorithmEventListeners;
+	private Set<PropertyProcessedAlgorithmEventListener> algorithmEventListeners;
 	private AlgorithmEventHistory eventHistory;
 	private int maximumSleepTimeInMilliseconds;
 
@@ -54,12 +55,12 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 	}
 
 	@Override
-	public void registerListener(final AlgorithmEventListener algorithmEventListener) {
+	public void registerListener(final PropertyProcessedAlgorithmEventListener algorithmEventListener) {
 		this.algorithmEventListeners.add(algorithmEventListener);
 	}
 
 	@Override
-	public void unregisterListener(final AlgorithmEventListener algorithmEventListener) {
+	public void unregisterListener(final PropertyProcessedAlgorithmEventListener algorithmEventListener) {
 		this.algorithmEventListeners.remove(algorithmEventListener);
 	}
 
@@ -68,7 +69,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 		while (true) {
 			if (!this.paused && this.timestep < this.eventHistory.getLength()) {
 				AlgorithmEventHistoryEntry historyEntry = this.eventHistory.getEntryAtTimeStep(this.timestep);
-				AlgorithmEvent algorithmEvent = historyEntry.getAlgorithmEvent();
+				PropertyProcessedAlgorithmEvent algorithmEvent = historyEntry.getAlgorithmEvent();
 				this.logger.debug("Pulled event entry {} associated with event {} at position {}.", historyEntry, algorithmEvent, this.timestep);
 
 				this.sendAlgorithmEventToListeners(algorithmEvent);
@@ -93,8 +94,8 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 		}
 	}
 
-	private void sendAlgorithmEventToListeners(final AlgorithmEvent algorithmEvent) {
-		for (AlgorithmEventListener eventListener : this.algorithmEventListeners) {
+	private void sendAlgorithmEventToListeners(final PropertyProcessedAlgorithmEvent algorithmEvent) {
+		for (PropertyProcessedAlgorithmEventListener eventListener : this.algorithmEventListeners) {
 			try {
 				this.sendAlgorithmEventToListener(algorithmEvent, eventListener);
 			} catch (Throwable e) {
@@ -104,11 +105,11 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 		this.logger.info("Pulled and sent event {} as entry at time step {}.", algorithmEvent, this.timestep);
 	}
 
-	private void sendAlgorithmEventToListener(final AlgorithmEvent algorithmEvent, final AlgorithmEventListener eventListener) throws HandleAlgorithmEventException {
+	private void sendAlgorithmEventToListener(final PropertyProcessedAlgorithmEvent algorithmEvent, final PropertyProcessedAlgorithmEventListener eventListener) throws HandleAlgorithmEventException {
 		this.logger.debug("Sending event {} to listener {}.", algorithmEvent, eventListener);
 
 		long startTime = System.currentTimeMillis();
-		eventListener.handleAlgorithmEvent(algorithmEvent);
+		eventListener.handleSerializableAlgorithmEvent(algorithmEvent);
 		long dispatchTime = System.currentTimeMillis() - startTime;
 
 		if (dispatchTime > 10) {
@@ -152,7 +153,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 		this.resetTimeStep();
 		GoToTimeStepEvent goToTimeStepEvent = (GoToTimeStepEvent) guiEvent;
 		while (this.timestep < goToTimeStepEvent.getNewTimeStep() && this.timestep < this.eventHistory.getLength()) {
-			AlgorithmEvent algorithmEvent = this.eventHistory.getEntryAtTimeStep(this.timestep).getAlgorithmEvent();
+			PropertyProcessedAlgorithmEvent algorithmEvent = this.eventHistory.getEntryAtTimeStep(this.timestep).getAlgorithmEvent();
 			this.sendAlgorithmEventToListeners(algorithmEvent);
 			this.timestep++;
 		}

@@ -6,8 +6,8 @@ import java.lang.reflect.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
+import jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
 
 public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V extends ASimpleMVCPluginView<M, C, ?>, C extends ASimpleMVCPluginController<M, V>> implements IGUIPlugin {
 
@@ -67,8 +67,8 @@ public abstract class ASimpleMVCPlugin<M extends ASimpleMVCPluginModel<V, C>, V 
 	}
 
 	@Override
-	public void setAlgorithmEventSource(final AlgorithmEventSource graphEventSource) {
-		graphEventSource.registerListener(this.controller);
+	public void setAlgorithmEventSource(final PropertyProcessedAlgorithmEventSource algorithmEventSource) {
+		algorithmEventSource.registerListener(this.controller);
 	}
 
 	@Override

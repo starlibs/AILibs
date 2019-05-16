@@ -1,6 +1,6 @@
 package jaicore.search.gui.plugins.rollouthistograms;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 import jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
@@ -19,7 +19,7 @@ public class SearchRolloutHistogramPluginController<N> extends ASimpleMVCPluginC
 		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
 			getModel().clear();
 		}
-		
+
 		else if (guiEvent instanceof NodeClickedEvent) {
 			getModel().setCurrentlySelectedNode((N) ((NodeClickedEvent) guiEvent).getSearchGraphNode());
 			getView().update();
@@ -27,8 +27,8 @@ public class SearchRolloutHistogramPluginController<N> extends ASimpleMVCPluginC
 	}
 
 	@Override
-	public void handleAlgorithmEventInternally(AlgorithmEvent algorithmEvent) {
-//		String eventName = algorithmEvent.getClass().getSimpleName();
+	public void handleAlgorithmEventInternally(PropertyProcessedAlgorithmEvent algorithmEvent) {
+		// String eventName = algorithmEvent.getClass().getSimpleName();
 		if (RolloutEvent.class.isInstance(algorithmEvent)) {
 			RolloutEvent<N, Double> event = (RolloutEvent<N, Double>) algorithmEvent;
 			event.getPath().forEach(n -> getModel().addEntry(n, event.getScore()));

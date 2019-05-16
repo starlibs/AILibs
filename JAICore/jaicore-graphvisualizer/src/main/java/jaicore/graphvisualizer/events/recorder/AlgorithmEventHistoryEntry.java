@@ -1,19 +1,24 @@
 package jaicore.graphvisualizer.events.recorder;
 
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 
 public class AlgorithmEventHistoryEntry {
 
-	private AlgorithmEvent algorithmEvent;
+	private PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent;
 	private long timeEventWasReceived;
 
-	public AlgorithmEventHistoryEntry(AlgorithmEvent algorithmEvent, long timeEventWasReceived) {
-		this.algorithmEvent = algorithmEvent;
+	@SuppressWarnings("unused")
+	private AlgorithmEventHistoryEntry() {
+		// for serialization purposes
+	}
+
+	public AlgorithmEventHistoryEntry(PropertyProcessedAlgorithmEvent algorithmEvent, long timeEventWasReceived) {
+		this.propertyProcessedAlgorithmEvent = algorithmEvent;
 		this.timeEventWasReceived = timeEventWasReceived;
 	}
 
-	public AlgorithmEvent getAlgorithmEvent() {
-		return algorithmEvent;
+	public PropertyProcessedAlgorithmEvent getAlgorithmEvent() {
+		return propertyProcessedAlgorithmEvent;
 	}
 
 	public long getTimeEventWasReceived() {

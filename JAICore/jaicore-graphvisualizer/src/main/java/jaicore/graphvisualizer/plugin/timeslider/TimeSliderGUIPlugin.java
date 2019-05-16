@@ -1,7 +1,7 @@
 package jaicore.graphvisualizer.plugin.timeslider;
 
-import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.GUIEventSource;
+import jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
 import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.IGUIPluginController;
 import jaicore.graphvisualizer.plugin.IGUIPluginModel;
@@ -33,8 +33,8 @@ public class TimeSliderGUIPlugin implements IGUIPlugin {
 	}
 
 	@Override
-	public void setAlgorithmEventSource(AlgorithmEventSource graphEventSource) {
-		graphEventSource.registerListener(controller);
+	public void setAlgorithmEventSource(PropertyProcessedAlgorithmEventSource algorithmEventSource) {
+		algorithmEventSource.registerListener(controller);
 	}
 
 	@Override

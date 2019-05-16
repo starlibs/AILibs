@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.graphvisualizer.events.graph.bus.AlgorithmEventSource;
 import jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryEntryDeliverer;
 import jaicore.graphvisualizer.events.recorder.AlgorithmEventHistoryRecorder;
+import jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
+import jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventSource;
 import jaicore.graphvisualizer.plugin.IGUIPlugin;
 import jaicore.graphvisualizer.plugin.controlbar.ControlBarGUIPlugin;
 import jaicore.graphvisualizer.plugin.speedslider.SpeedSliderGUIPlugin;
@@ -22,8 +23,10 @@ import javafx.stage.Stage;
 
 public class AlgorithmVisualizationWindow implements Runnable {
 
-	private AlgorithmEventSource algorithmEventSource;
+	private PropertyProcessedAlgorithmEventSource algorithmEventSource;
 	private AlgorithmEventHistoryEntryDeliverer algorithmEventHistoryPuller;
+
+	private AlgorithmEventHistory algorithmEventHistory;
 
 	private List<IGUIPlugin> visualizationPlugins;
 
@@ -43,18 +46,20 @@ public class AlgorithmVisualizationWindow implements Runnable {
 
 	public AlgorithmVisualizationWindow(AlgorithmEventHistory algorithmEventHistory, IGUIPlugin mainPlugin, IGUIPlugin... visualizationPlugins) {
 		this.mainPlugin = mainPlugin;
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(algorithmEventHistory);
+		this.algorithmEventHistory = algorithmEventHistory;
+		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(algorithmEventHistory);
 		this.algorithmEventSource = algorithmEventHistoryPuller;
 		initializePlugins(visualizationPlugins);
 		// it is important to register the history puller as a last listener!
 		DefaultGUIEventBus.getInstance().registerListener(algorithmEventHistoryPuller);
 	}
 
-	public AlgorithmVisualizationWindow(IAlgorithm<?, ?> algorithm, IGUIPlugin mainPlugin, IGUIPlugin... visualizationPlugins) {
+	public AlgorithmVisualizationWindow(IAlgorithm<?, ?> algorithm, List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers, IGUIPlugin mainPlugin, IGUIPlugin... visualizationPlugins) {
 		this.mainPlugin = mainPlugin;
-		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder();
+		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);
 		algorithm.registerListener(historyRecorder);
-		algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(historyRecorder.getHistory());
+		this.algorithmEventHistory = historyRecorder.getHistory();
+		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(historyRecorder.getHistory());
 		this.algorithmEventSource = algorithmEventHistoryPuller;
 		initializePlugins(visualizationPlugins);
 		// it is important to register the history puller as a last listener!
@@ -151,4 +156,7 @@ public class AlgorithmVisualizationWindow implements Runnable {
 		stage.setTitle(title);
 	}
 
+	public AlgorithmEventHistory getAlgorithmEventHistory() {
+		return algorithmEventHistory;
+	}
 }

@@ -3,55 +3,61 @@ package jaicore.graphvisualizer.events.recorder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.ILoggingCustomizable;
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 
 public class AlgorithmEventHistory implements ILoggingCustomizable {
 
-	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistory.class);
-	private String loggerName;
+	private transient Logger logger = LoggerFactory.getLogger(AlgorithmEventHistory.class);
+	private transient String loggerName;
 
-	private List<AlgorithmEventHistoryEntry> events;
+	private List<AlgorithmEventHistoryEntry> entries;
 
 	public AlgorithmEventHistory() {
-		this.events = Collections.synchronizedList(new ArrayList<>());
+		this.entries = Collections.synchronizedList(new ArrayList<>());
 	}
 
-	public void addEvent(final AlgorithmEvent algorithmEvent) {
-		AlgorithmEventHistoryEntry entry = this.generateHistoryEntry(algorithmEvent);
-		this.events.add(entry);
-		this.logger.debug("Added entry {} for algorithm event {} to history at position {}.", entry, algorithmEvent, this.events.size() - 1);
+	public AlgorithmEventHistory(List<AlgorithmEventHistoryEntry> algorithmEventHistoryEntries) {
+		this();
+		for (AlgorithmEventHistoryEntry entry : algorithmEventHistoryEntries) {
+			entries.add(entry);
+		}
 	}
 
-	private AlgorithmEventHistoryEntry generateHistoryEntry(final AlgorithmEvent algorithmEvent) {
-		return new AlgorithmEventHistoryEntry(algorithmEvent, this.getCurrentReceptionTime());
+	public void addEvent(final PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
+		AlgorithmEventHistoryEntry entry = this.generateHistoryEntry(propertyProcessedAlgorithmEvent);
+		this.entries.add(entry);
+		this.logger.debug("Added entry {} for algorithm event {} to history at position {}.", entry, propertyProcessedAlgorithmEvent, this.entries.size() - 1);
+	}
+
+	private AlgorithmEventHistoryEntry generateHistoryEntry(final PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
+		return new AlgorithmEventHistoryEntry(propertyProcessedAlgorithmEvent, this.getCurrentReceptionTime());
 	}
 
 	private long getCurrentReceptionTime() {
 		long currentTime = System.currentTimeMillis();
-		return Math.max(0, currentTime - this.getReceptionTimeOfFirstEvent());
+		return currentTime;
 	}
 
-	private long getReceptionTimeOfFirstEvent() {
-		Optional<AlgorithmEventHistoryEntry> firstHistoryEntryOptional = this.events.stream().findFirst();
-		if (!firstHistoryEntryOptional.isPresent()) {
-			return -1;
-		}
-
-		return firstHistoryEntryOptional.get().getTimeEventWasReceived();
-	}
+	// private long getReceptionTimeOfFirstEvent() {
+	// Optional<AlgorithmEventHistoryEntry> firstHistoryEntryOptional = this.entries.stream().findFirst();
+	// if (!firstHistoryEntryOptional.isPresent()) {
+	// return -1;
+	// }
+	//
+	// return firstHistoryEntryOptional.get().getTimeEventWasReceived();
+	// }
 
 	public AlgorithmEventHistoryEntry getEntryAtTimeStep(final int timestep) {
-		return this.events.get(timestep);
+		return this.entries.get(timestep);
 	}
 
 	public long getLength() {
-		return this.events.size();
+		return this.entries.size();
 	}
 
 	@Override
