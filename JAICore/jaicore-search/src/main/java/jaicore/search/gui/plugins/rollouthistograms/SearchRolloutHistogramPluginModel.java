@@ -44,7 +44,7 @@ public class SearchRolloutHistogramPluginModel extends ASimpleMVCPluginModel<Sea
 
 	public void setCurrentlySelectedNode(String currentlySelectedNode) {
 		this.currentlySelectedNode = currentlySelectedNode;
-
+		getView().clear();
 		getView().update();
 	}
 
