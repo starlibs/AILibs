@@ -9,15 +9,15 @@ import javafx.scene.layout.FlowPane;
  *
  * @author fmohr
  *
- * @param <N> The node class
+ * @param <N>
+ *            The node class
  */
-public class SearchRolloutHistogramPluginView<N>
-extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel<N>, SearchRolloutHistogramPluginController<N>, FlowPane> {
+public class SearchRolloutHistogramPluginView extends ASimpleMVCPluginView<SearchRolloutHistogramPluginModel, SearchRolloutHistogramPluginController, FlowPane> {
 
 	private final Histogram histogram;
 	private final int n = 100;
 
-	public SearchRolloutHistogramPluginView(final SearchRolloutHistogramPluginModel<N> model) {
+	public SearchRolloutHistogramPluginView(final SearchRolloutHistogramPluginModel model) {
 		super(model, new FlowPane());
 		this.histogram = new Histogram(this.n);
 		this.histogram.setTitle("Search Rollout Performances");

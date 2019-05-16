@@ -8,9 +8,9 @@ import jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 import jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 
-public class SearchRolloutHistogramPluginController<N> extends ASimpleMVCPluginController<SearchRolloutHistogramPluginModel<N>, SearchRolloutHistogramPluginView<N>> {
+public class SearchRolloutHistogramPluginController extends ASimpleMVCPluginController<SearchRolloutHistogramPluginModel, SearchRolloutHistogramPluginView> {
 
-	public SearchRolloutHistogramPluginController(SearchRolloutHistogramPluginModel<N> model, SearchRolloutHistogramPluginView<N> view) {
+	public SearchRolloutHistogramPluginController(SearchRolloutHistogramPluginModel model, SearchRolloutHistogramPluginView view) {
 		super(model, view);
 	}
 
@@ -18,10 +18,8 @@ public class SearchRolloutHistogramPluginController<N> extends ASimpleMVCPluginC
 	public void handleGUIEvent(GUIEvent guiEvent) {
 		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
 			getModel().clear();
-		}
-
-		else if (guiEvent instanceof NodeClickedEvent) {
-			getModel().setCurrentlySelectedNode((N) ((NodeClickedEvent) guiEvent).getSearchGraphNode());
+		} else if (guiEvent instanceof NodeClickedEvent) {
+			getModel().setCurrentlySelectedNode(((NodeClickedEvent) guiEvent).getSearchGraphNode());
 			getView().update();
 		}
 	}
@@ -29,9 +27,11 @@ public class SearchRolloutHistogramPluginController<N> extends ASimpleMVCPluginC
 	@Override
 	public void handleAlgorithmEventInternally(PropertyProcessedAlgorithmEvent algorithmEvent) {
 		// String eventName = algorithmEvent.getClass().getSimpleName();
-		if (RolloutEvent.class.isInstance(algorithmEvent)) {
-			RolloutEvent<N, Double> event = (RolloutEvent<N, Double>) algorithmEvent;
-			event.getPath().forEach(n -> getModel().addEntry(n, event.getScore()));
+		if (algorithmEvent.correspondsToEventOfClass(RolloutEvent.class)) {
+
+			RolloutInfo rolloutInfo = (RolloutInfo) algorithmEvent.getProperty(RolloutInfoAlgorithmEventPropertyComputer.ROLLOUT_SCORE_PROPERTY_NAME);
+
+			rolloutInfo.getPath().forEach(n -> getModel().addEntry(n, (double) rolloutInfo.getScore()));
 		}
 	}
 

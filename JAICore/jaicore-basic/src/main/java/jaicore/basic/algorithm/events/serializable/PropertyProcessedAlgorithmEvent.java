@@ -11,4 +11,6 @@ public interface PropertyProcessedAlgorithmEvent {
 	public <N> N getProperty(String propertyName, Class<N> expectedClassToBeReturned) throws ClassCastException;
 
 	public AlgorithmEvent getOriginalEvent();
+
+	public boolean correspondsToEventOfClass(Class<?> eventClass);
 }

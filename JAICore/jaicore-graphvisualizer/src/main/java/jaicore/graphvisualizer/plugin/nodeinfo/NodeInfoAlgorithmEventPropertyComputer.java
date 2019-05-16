@@ -65,4 +65,8 @@ public class NodeInfoAlgorithmEventPropertyComputer implements AlgorithmEventPro
 		return String.valueOf(nodeToIdMap.get(node));
 	}
 
+	public String getIdOfNodeIfExistent(Object node) {
+		return String.valueOf(nodeToIdMap.get(node));
+	}
+
 }

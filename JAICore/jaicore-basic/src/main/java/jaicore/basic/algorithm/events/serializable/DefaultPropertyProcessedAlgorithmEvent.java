@@ -55,4 +55,9 @@ public class DefaultPropertyProcessedAlgorithmEvent implements PropertyProcessed
 		return originalAlgorithmEvent;
 	}
 
+	@Override
+	public boolean correspondsToEventOfClass(Class<?> eventClass) {
+		return eventClass.getSimpleName().equals(getEventName());
+	}
+
 }
