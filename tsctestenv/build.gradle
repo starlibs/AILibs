@@ -1,0 +1,29 @@
+plugins {
+	id 'eclipse-wtp'
+}
+
+sourceSets {
+	main {
+		resources {
+        	srcDir 'conf'
+        }
+	}
+    test {
+	   	java {
+	   		srcDir 'test'
+	   	}
+    }
+}
+
+dependencies {
+	compile project(':JAICore:jaicore-basic')
+	compile project(':JAICore:jaicore-ml')
+	compile project(':JAICore:jaicore-experiments')
+	
+	// Reference repositories
+	compile 'com.github.patrickzib:SFA:v0.1'
+	compile files('lib/TimeSeriesClassification.jar')
+	
+	// DB connector
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
+}

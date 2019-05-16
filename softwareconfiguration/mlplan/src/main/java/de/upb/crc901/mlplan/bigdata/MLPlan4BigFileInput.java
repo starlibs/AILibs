@@ -121,7 +121,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				this.mlplan.setLoggerName(this.getLoggerName() + ".mlplan");
 				this.mlplan.registerListener(this);
 				this.mlplan.setTimeout(new TimeOut(this.getTimeout().seconds() - 30, TimeUnit.SECONDS));
-				this.mlplan.setNumCPUs(8);
+				this.mlplan.setNumCPUs(3);
 				this.mlplan.setBuildSelectedClasifierOnGivenData(false); // we will build the classifier, ML-Plan should not waste time with this
 				this.logger.info("ML-Plan initialized, activation finished!");
 				return this.activate();

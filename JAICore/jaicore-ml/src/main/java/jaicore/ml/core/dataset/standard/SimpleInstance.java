@@ -77,5 +77,4 @@ public class SimpleInstance implements IInstance {
 		sb.append(this.targetValue.getValue());
 		return sb.toString();
 	}
-
 }

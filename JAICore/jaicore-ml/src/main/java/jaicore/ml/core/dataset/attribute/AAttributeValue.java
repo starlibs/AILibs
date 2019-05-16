@@ -58,8 +58,7 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	@Override
 	public void setValue(final D value) {
 		if (!this.type.isValidValue(value)) {
-			throw new IllegalArgumentException(
-					"The attribute value does not conform the domain of the attribute type.");
+			throw new IllegalArgumentException("The attribute value does not conform the domain of the attribute type.");
 		}
 		this.value = value;
 	}
