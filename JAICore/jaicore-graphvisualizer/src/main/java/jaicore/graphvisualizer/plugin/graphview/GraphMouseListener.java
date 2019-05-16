@@ -22,7 +22,7 @@ public class GraphMouseListener implements ViewerListener, Runnable {
 	@Override
 	public void buttonPushed(String id) {
 		Node viewGraphNode = viewModel.getGraph().getNode(id);
-		Object searchGraphNode = viewModel.getSearchGraphNodeMappedToViewGraphNode(viewGraphNode);
+		String searchGraphNode = viewModel.getSearchGraphNodeMappedToViewGraphNode(viewGraphNode);
 		DefaultGUIEventBus.getInstance().postEvent(new NodeClickedEvent(viewGraphNode, searchGraphNode));
 	}
 

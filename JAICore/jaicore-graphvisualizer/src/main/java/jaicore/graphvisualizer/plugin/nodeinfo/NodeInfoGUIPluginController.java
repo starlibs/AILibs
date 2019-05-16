@@ -6,24 +6,31 @@ import jaicore.graphvisualizer.events.gui.GUIEvent;
 import jaicore.graphvisualizer.plugin.IGUIPluginController;
 import jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 
-public class NodeInfoGUIPluginController<N> implements IGUIPluginController {
+public class NodeInfoGUIPluginController implements IGUIPluginController {
 
-	private NodeInfoGUIPluginModel<N> model;
+	private NodeInfoGUIPluginModel model;
 
-	public NodeInfoGUIPluginController(NodeInfoGUIPluginModel<N> model) {
+	public NodeInfoGUIPluginController(NodeInfoGUIPluginModel model) {
 		this.model = model;
 	}
 
 	@Override
 	public void handleSerializableAlgorithmEvent(PropertyProcessedAlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+		Object rawNodeDisplayInfoProperty = algorithmEvent.getProperty(NodeDisplayInfoAlgorithmEventPropertyComputer.NODE_DISPLAY_INFO_PROPERTY_NAME);
+		Object rawNodeInfoProperty = algorithmEvent.getProperty(NodeInfoAlgorithmEventPropertyComputer.NODE_INFO_PROPERTY_NAME);
+		if (rawNodeDisplayInfoProperty != null && rawNodeInfoProperty != null) {
+			NodeInfo nodeInfo = (NodeInfo) rawNodeInfoProperty;
+			String nodeInfoText = (String) rawNodeDisplayInfoProperty;
+			model.addNodeIdToNodeInfoMapping(nodeInfo.getMainNodeId(), nodeInfoText);
+		}
 	}
 
 	@Override
 	public void handleGUIEvent(GUIEvent guiEvent) {
 		if (NodeClickedEvent.class.isInstance(guiEvent)) {
 			NodeClickedEvent nodeClickedEvent = (NodeClickedEvent) guiEvent;
-			Object searchGraphNodeCorrespondingToClickedViewGraphNode = nodeClickedEvent.getSearchGraphNode();
-			this.model.setCurrentlySelectedNode((N) searchGraphNodeCorrespondingToClickedViewGraphNode);
+			String searchGraphNodeCorrespondingToClickedViewGraphNode = nodeClickedEvent.getSearchGraphNode();
+			model.setCurrentlySelectedNode(searchGraphNodeCorrespondingToClickedViewGraphNode);
 		}
 	}
 

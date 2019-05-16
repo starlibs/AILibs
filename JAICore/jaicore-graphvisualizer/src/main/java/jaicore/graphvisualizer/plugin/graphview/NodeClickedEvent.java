@@ -7,9 +7,9 @@ import jaicore.graphvisualizer.events.gui.GUIEvent;
 public class NodeClickedEvent implements GUIEvent {
 
 	private Node viewerNode;
-	private Object searchGraphNode;
+	private String searchGraphNode;
 
-	public NodeClickedEvent(Node viewerNode, Object searchGraphNode) {
+	public NodeClickedEvent(Node viewerNode, String searchGraphNode) {
 		this.viewerNode = viewerNode;
 		this.searchGraphNode = searchGraphNode;
 	}
@@ -18,7 +18,7 @@ public class NodeClickedEvent implements GUIEvent {
 		return viewerNode;
 	}
 
-	public Object getSearchGraphNode() {
+	public String getSearchGraphNode() {
 		return searchGraphNode;
 	}
 

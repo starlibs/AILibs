@@ -8,25 +8,22 @@ import jaicore.graphvisualizer.events.recorder.property.PropertyComputationFaile
 
 public class NodeDisplayInfoAlgorithmEventPropertyComputer<N> implements AlgorithmEventPropertyComputer {
 
-	public static final String NODE_INFO_PROPERTY_NAME = "node_display_info";
+	public static final String NODE_DISPLAY_INFO_PROPERTY_NAME = "node_display_info";
 
 	private NodeInfoGenerator<N> nodeInfoGenerator;
 
-	private Class<N> nodeClass;
-
-	public NodeDisplayInfoAlgorithmEventPropertyComputer(NodeInfoGenerator<N> nodeInfoGenerator, Class<N> nodeClass) {
+	public NodeDisplayInfoAlgorithmEventPropertyComputer(NodeInfoGenerator<N> nodeInfoGenerator) {
 		this.nodeInfoGenerator = nodeInfoGenerator;
-		this.nodeClass = nodeClass;
 	}
 
 	@Override
 	public String computeAlgorithmEventProperty(AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		String nodeInfo = null;
 		if (algorithmEvent instanceof GraphInitializedEvent) {
-			GraphInitializedEvent<?> graphInitializedEvent = (GraphInitializedEvent<?>) algorithmEvent;
+			GraphInitializedEvent<N> graphInitializedEvent = (GraphInitializedEvent<N>) algorithmEvent;
 			return getNodeInfoForNodeIfTypeFits(graphInitializedEvent.getRoot());
 		} else if (algorithmEvent instanceof NodeAddedEvent) {
-			NodeAddedEvent<?> nodeAddedEvent = (NodeAddedEvent<?>) algorithmEvent;
+			NodeAddedEvent<N> nodeAddedEvent = (NodeAddedEvent<N>) algorithmEvent;
 			return getNodeInfoForNodeIfTypeFits(nodeAddedEvent.getNode());
 		}
 		return nodeInfo;
@@ -34,16 +31,12 @@ public class NodeDisplayInfoAlgorithmEventPropertyComputer<N> implements Algorit
 
 	@Override
 	public String getPropertyName() {
-		return NODE_INFO_PROPERTY_NAME;
+		return NODE_DISPLAY_INFO_PROPERTY_NAME;
 	}
 
-	private String getNodeInfoForNodeIfTypeFits(Object rawNode) {
-		if (nodeClass.isAssignableFrom(rawNode.getClass())) {
-			@SuppressWarnings("unchecked")
-			N node = (N) rawNode;
-			return nodeInfoGenerator.generateInfoForNode(node);
-		}
-		return null;
+	private String getNodeInfoForNodeIfTypeFits(N node) {
+		return nodeInfoGenerator.generateInfoForNode(node);
+
 	}
 
 }

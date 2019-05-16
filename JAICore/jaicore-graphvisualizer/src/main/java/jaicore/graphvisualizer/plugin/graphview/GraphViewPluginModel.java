@@ -21,8 +21,8 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 	private GraphViewPluginView view;
 
 	private Graph graph;
-	private ConcurrentMap<Object, Node> searchGraphNodesToViewGraphNodesMap;
-	private ConcurrentMap<Node, Object> viewGraphNodesToSearchGraphNodesMap;
+	private ConcurrentMap<String, Node> searchGraphNodesToViewGraphNodesMap;
+	private ConcurrentMap<Node, String> viewGraphNodesToSearchGraphNodesMap;
 
 	private ConcurrentMap<Node, Set<Edge>> nodeToConnectedEdgesMap;
 
@@ -45,7 +45,7 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		this.graph.setAttribute("ui.stylesheet", "url('" + searchGraphCSSPath + "')");
 	}
 
-	public void addNode(final Object node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {
+	public void addNode(final String node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {
 		try {
 			Node viewNode = this.graph.addNode(String.valueOf(this.nodeIdCounter));
 			this.registerNodeMapping(node, viewNode);
@@ -73,7 +73,7 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		this.registerEdgeConnectedToNodesInMap(edge);
 	}
 
-	private void registerNodeMapping(final Object node, final Node viewNode) {
+	private void registerNodeMapping(final String node, final Node viewNode) {
 		this.searchGraphNodesToViewGraphNodesMap.put(node, viewNode);
 		this.viewGraphNodesToSearchGraphNodesMap.put(viewNode, node);
 	}
@@ -145,7 +145,7 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		return this.graph;
 	}
 
-	public Object getSearchGraphNodeMappedToViewGraphNode(final Object searchGraphNode) {
-		return this.viewGraphNodesToSearchGraphNodesMap.get(searchGraphNode);
+	public String getSearchGraphNodeMappedToViewGraphNode(final Object viewGraphNode) {
+		return this.viewGraphNodesToSearchGraphNodesMap.get(viewGraphNode);
 	}
 }

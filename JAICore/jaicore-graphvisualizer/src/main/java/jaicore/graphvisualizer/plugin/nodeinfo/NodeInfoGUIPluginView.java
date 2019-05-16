@@ -13,23 +13,21 @@ import javafx.scene.web.WebView;
  * @param <N>
  *            The node class
  */
-public class NodeInfoGUIPluginView<N> implements IGUIPluginView {
+public class NodeInfoGUIPluginView implements IGUIPluginView {
 
-	private NodeInfoGUIPluginModel<N> model;
-	private NodeInfoGenerator<N> nodeInfoGenerator;
+	private NodeInfoGUIPluginModel model;
 
 	private String title;
 
 	private WebEngine webViewEngine;
 
-	public NodeInfoGUIPluginView(NodeInfoGenerator<N> nodeInfoGenerator, String title) {
-		this.model = new NodeInfoGUIPluginModel<>(this);
-		this.nodeInfoGenerator = nodeInfoGenerator;
+	public NodeInfoGUIPluginView(String title) {
+		this.model = new NodeInfoGUIPluginModel(this);
 		this.title = title;
 	}
 
-	public NodeInfoGUIPluginView(NodeInfoGenerator<N> nodeInfoGenerator) {
-		this(nodeInfoGenerator, "Node Info View");
+	public NodeInfoGUIPluginView() {
+		this("Node Info View");
 	}
 
 	@Override
@@ -44,14 +42,13 @@ public class NodeInfoGUIPluginView<N> implements IGUIPluginView {
 
 	@Override
 	public void update() {
-		N currentlySelectedNode = model.getCurrentlySelectedNode();
-		String nodeInfoOfCurrentlySelectedNode = nodeInfoGenerator.generateInfoForNode(currentlySelectedNode);
+		String nodeInfoOfCurrentlySelectedNode = model.getNodeInfoForCurrentlySelectedNode();
 		Platform.runLater(() -> {
 			webViewEngine.loadContent(nodeInfoOfCurrentlySelectedNode);
 		});
 	}
 
-	public NodeInfoGUIPluginModel<N> getModel() {
+	public NodeInfoGUIPluginModel getModel() {
 		return model;
 	}
 
