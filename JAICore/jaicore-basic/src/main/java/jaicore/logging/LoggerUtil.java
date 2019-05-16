@@ -26,8 +26,7 @@ public class LoggerUtil {
 		Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
 		while (e.getCause() != null) {
 			e = e.getCause();
-			sb.append("\n\tCaused by " + e.getClass().getName() + " with message " + e.getMessage()
-			+ ". Stack trace of the cause:");
+			sb.append("\n\tCaused by " + e.getClass().getName() + " with message " + e.getMessage() + ". Stack trace of the cause:");
 			Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
 		}
 
