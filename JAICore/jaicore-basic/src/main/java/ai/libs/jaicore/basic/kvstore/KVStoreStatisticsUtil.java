@@ -125,7 +125,7 @@ public class KVStoreStatisticsUtil {
 		KVStoreCollection grouped = new KVStoreCollection(collection);
 		grouped.group(setting, sampleID);
 
-		KVStoreCollectionPartition partition = new KVStoreCollectionPartition(setting, collection);
+		SingleLayerKVStoreCollectionPartition partition = new SingleLayerKVStoreCollectionPartition(setting, collection);
 
 		for (Entry<String, KVStoreCollection> entry : partition) {
 
