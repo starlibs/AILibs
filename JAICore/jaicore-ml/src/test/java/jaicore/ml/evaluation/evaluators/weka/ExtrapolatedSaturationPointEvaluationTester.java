@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import jaicore.ml.core.dataset.standard.SimpleDataset;

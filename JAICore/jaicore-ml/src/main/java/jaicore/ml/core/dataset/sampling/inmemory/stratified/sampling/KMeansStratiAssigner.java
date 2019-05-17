@@ -5,7 +5,7 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericArrayInstance;
 
 /**
  * Cluster the data set with k-means into k Clusters, where each cluster stands
@@ -14,7 +14,7 @@ import jaicore.ml.core.dataset.IInstance;
  * 
  * @author Lukas Brandt
  */
-public class KMeansStratiAssigner<I extends IInstance> extends ClusterStratiAssigner<I> {
+public class KMeansStratiAssigner<I extends INumericArrayInstance, D extends IDataset<I>> extends ClusterStratiAssigner<I, D> {
 
 	/**
 	 * Constructor for KMeansStratiAssigner.
@@ -31,7 +31,7 @@ public class KMeansStratiAssigner<I extends IInstance> extends ClusterStratiAssi
 	}
 
 	@Override
-	public void init(IDataset<I> dataset, int stratiAmount) {
+	public void init(D dataset, int stratiAmount) {
 		// Perform initial Clustering of the dataset.
 		JDKRandomGenerator rand = new JDKRandomGenerator();
 		rand.setSeed(this.randomSeed);

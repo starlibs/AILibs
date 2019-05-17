@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.basic.sets.ListDecorator;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AINumericLabeledAttributeArrayDataset;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstance> implements IDataset<WekaInstance> {
+public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstance> implements IOrderedLabeledAttributeArrayDataset<WekaInstance> {
 
 	private final IAttributeType<?> targetType;
 	private final List<IAttributeType<?>> attributeTypes = new ArrayList<>();
@@ -30,11 +32,6 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 	}
 
 	@Override
-	public <T> IAttributeType<T> getTargetType(final Class<T> clazz) {
-		return (IAttributeType<T>)this.targetType;
-	}
-
-	@Override
 	public IAttributeType<?> getTargetType() {
 		return this.targetType;
 	}
@@ -50,7 +47,7 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 	}
 
 	@Override
-	public IDataset<WekaInstance> createEmpty() {
+	public AILabeledAttributeArrayDataset<WekaInstance> createEmpty() {
 		return new WekaInstances(new Instances(this.getList(), 0));
 	}
 }

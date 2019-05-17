@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
@@ -71,7 +71,7 @@ public class WekaInstancesUtil {
 		return dataset;
 	}
 
-	public static Instances datasetToWekaInstances(final IDataset<? extends IInstance> dataset) throws UnsupportedAttributeTypeException {
+	public static Instances datasetToWekaInstances(final IOrderedLabeledAttributeArrayDataset<?> dataset) throws UnsupportedAttributeTypeException {
 		List<Attribute> attributes = new LinkedList<>();
 		Attribute classAttribute;
 
@@ -101,7 +101,7 @@ public class WekaInstancesUtil {
 		Instances wekaInstances = new Instances("weka-instances", attributeList, 0);
 		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
 
-		for (IInstance inst : dataset) {
+		for (ILabeledAttributeArrayInstance inst : dataset) {
 			DenseInstance iNew = new DenseInstance(attributeList.size());
 			iNew.setDataset(wekaInstances);
 
@@ -115,13 +115,13 @@ public class WekaInstancesUtil {
 				}
 			}
 
-			if (dataset.getTargetType() instanceof NumericAttributeType) {
-				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
-				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
-				IAttributeValue<String> val = inst.getTargetValue(String.class);
-				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-			}
+//			if (dataset.getTargetType() instanceof NumericAttributeType) {
+//				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
+//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
+//			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
+//				IAttributeValue<String> val = inst.getTargetValue(String.class);
+//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
+//			}
 
 			wekaInstances.add(iNew);
 		}

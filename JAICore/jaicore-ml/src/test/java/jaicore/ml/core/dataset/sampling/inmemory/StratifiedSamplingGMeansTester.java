@@ -3,7 +3,7 @@ package jaicore.ml.core.dataset.sampling.inmemory;
 import java.util.Random;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.StratifiedSamplingFactory;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.GMeansStratiAmountSelectorAndAssigner;
@@ -17,7 +17,7 @@ public class StratifiedSamplingGMeansTester<I extends IInstance> extends General
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
 		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
+		AILabeledAttributeArrayDataset<I> dataset = (AILabeledAttributeArrayDataset<I>) problem;
 		GMeansStratiAmountSelectorAndAssigner<I> g = new GMeansStratiAmountSelectorAndAssigner<I>(RANDOM_SEED);
 		StratifiedSamplingFactory<I> factory = new StratifiedSamplingFactory<>(g, g);
 		if (dataset != null) {

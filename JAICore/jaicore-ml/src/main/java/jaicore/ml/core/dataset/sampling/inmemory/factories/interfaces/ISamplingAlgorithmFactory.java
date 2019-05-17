@@ -3,7 +3,6 @@ package jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces;
 import java.util.Random;
 
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
 /**
@@ -13,7 +12,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
  * @param <I> Type of the dataset instances.
  * @param <A> Type of the sampling algorithm that will be created.
  */
-public interface ISamplingAlgorithmFactory<I extends IInstance, A extends ASamplingAlgorithm<I>> {
+public interface ISamplingAlgorithmFactory<D extends IDataset<?>, A extends ASamplingAlgorithm<D>> {
 
 	/**
 	 * After the necessary config is done, this method returns a fully configured
@@ -24,6 +23,6 @@ public interface ISamplingAlgorithmFactory<I extends IInstance, A extends ASampl
 	 * @param random       Random object to make samples reproducible.
 	 * @return Configured sampling algorithm object.
 	 */
-	public A getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random);
+	public A getAlgorithm(int sampleSize, D inputDataset, Random random);
 
 }

@@ -1,13 +1,13 @@
 package jaicore.ml.core.predictivemodel;
 
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
 
 /**
  * The {@link IBatchLearner} models a learning algorithm which works in a batch
- * fashion, i.e. takes a whole {@link IDataset} as training input. It can be
- * trained based on an {@link IDataset} in order to make predictions.
+ * fashion, i.e. takes a whole {@link AILabeledAttributeArrayDataset} as training input. It can be
+ * trained based on an {@link AILabeledAttributeArrayDataset} in order to make predictions.
  * 
  * @author Alexander Hetzer, Julian Lienen
  *
@@ -19,14 +19,14 @@ import jaicore.ml.core.exception.TrainingException;
  * @param <DATASET>
  *            The type of the data set used to learn from and predict batches.
  */
-public interface IBatchLearner<TARGET, INSTANCE extends IInstance, DATASET extends IDataset<INSTANCE>>
+public interface IBatchLearner<TARGET, INSTANCE, DATASET extends IDataset<INSTANCE>>
 		extends IPredictiveModel<TARGET, INSTANCE, DATASET> {
 
 	/**
-	 * Trains this {@link IBatchLearner} using the given {@link IDataset}.
+	 * Trains this {@link IBatchLearner} using the given {@link AILabeledAttributeArrayDataset}.
 	 * 
 	 * @param dataset
-	 *            The {@link IDataset} which should be used for the training.
+	 *            The {@link AILabeledAttributeArrayDataset} which should be used for the training.
 	 * @throws TrainingException
 	 *             If something fails during the training process.
 	 */

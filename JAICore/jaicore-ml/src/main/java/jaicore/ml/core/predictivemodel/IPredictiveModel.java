@@ -2,8 +2,8 @@ package jaicore.ml.core.predictivemodel;
 
 import java.util.List;
 
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 
@@ -22,7 +22,7 @@ import jaicore.ml.core.exception.PredictionException;
  * @param <DATASET>
  *            The type of the data set used to learn from and predict batches.
  */
-public interface IPredictiveModel<TARGET, INSTANCE extends IInstance, DATASET extends IDataset<INSTANCE>> {
+public interface IPredictiveModel<TARGET, INSTANCE, DATASET extends IDataset<INSTANCE>> {
 
 	/**
 	 * Performs a prediction based on the given {@link IInstance} and returns the
@@ -38,10 +38,10 @@ public interface IPredictiveModel<TARGET, INSTANCE extends IInstance, DATASET ex
 
 	/**
 	 * Performs multiple predictions based on the {@link IInstance}s contained in
-	 * the given {@link IDataset}s and returns the result.
+	 * the given {@link AILabeledAttributeArrayDataset}s and returns the result.
 	 * 
 	 * @param dataset
-	 *            The {@link IDataset} for which predictions should be made.
+	 *            The {@link AILabeledAttributeArrayDataset} for which predictions should be made.
 	 * @return The result of the predictions.
 	 * @throws PredictionException
 	 *             If something fails during the prediction process.

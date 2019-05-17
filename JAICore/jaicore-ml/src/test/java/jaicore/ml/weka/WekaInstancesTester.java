@@ -19,7 +19,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
@@ -106,7 +106,7 @@ public class WekaInstancesTester {
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 		int size = wrapped.size();
-		IDataset<?> emptyCopy = wrapped.createEmpty();
+		AILabeledAttributeArrayDataset<?> emptyCopy = wrapped.createEmpty();
 
 		/* check that the empty copy indeed IS empty and that the original list is unchanged */
 		assertTrue(emptyCopy.isEmpty());

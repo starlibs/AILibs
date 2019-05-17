@@ -1,7 +1,6 @@
 package jaicore.ml.core.predictivemodel;
 
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 
 /**
  * Abstract extension of {@link IPredictiveModel} to be able to construct
@@ -21,7 +20,7 @@ import jaicore.ml.core.dataset.IInstance;
  * @param <DATASET>
  *            The type of the data set used to learn from and predict batches.
  */
-public abstract class APredictiveModel<TARGETTYPE, TARGETVALUETYPE, INSTANCE extends IInstance, DATASET extends IDataset<INSTANCE>>
+public abstract class APredictiveModel<TARGETTYPE, TARGETVALUETYPE, INSTANCE, DATASET extends IDataset<INSTANCE>>
 		implements IPredictiveModel<TARGETVALUETYPE, INSTANCE, DATASET> {
 
 	/**

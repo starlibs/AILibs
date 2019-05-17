@@ -2,13 +2,12 @@ package jaicore.ml.core.dataset;
 
 import java.util.List;
 
-import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 /**
  * TimeSeriesInstance
  */
-public class TimeSeriesInstance implements IInstance {
+public class TimeSeriesInstance implements ILabeledAttributeArrayInstance {
 
     /** Attribute values of the instance. */
     List<IAttributeValue<?>> attributeValues;
@@ -41,23 +40,8 @@ public class TimeSeriesInstance implements IInstance {
     }
 
     @Override
-    public boolean removeAttributeValue(int position) {
-        try {
-            attributeValues.remove(position);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
     public int getNumberOfAttributes() {
         return attributeValues.size();
-    }
-
-    @Override
-    public List<IAttributeValue<?>> getAttributeValues() {
-        return attributeValues;
     }
 
 }

@@ -5,7 +5,7 @@ import java.util.Random;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.StratifiedSamplingFactory;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.IStratiAmountSelector;
@@ -20,7 +20,7 @@ public class StratifiedSamplingKMeansTester<I extends IInstance> extends General
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
 		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
+		AILabeledAttributeArrayDataset<I> dataset = (AILabeledAttributeArrayDataset<I>) problem;
 		KMeansStratiAssigner<I> k = new KMeansStratiAssigner<I>(new ManhattanDistance(), RANDOM_SEED);
 		StratifiedSamplingFactory<I> factory = new StratifiedSamplingFactory<>(new IStratiAmountSelector<I>() {
 			@Override
@@ -28,7 +28,7 @@ public class StratifiedSamplingKMeansTester<I extends IInstance> extends General
 			}
 
 			@Override
-			public int selectStratiAmount(IDataset<I> dataset) {
+			public int selectStratiAmount(AILabeledAttributeArrayDataset<I> dataset) {
 				return dataset.getNumberOfAttributes() * 2;
 			}
 

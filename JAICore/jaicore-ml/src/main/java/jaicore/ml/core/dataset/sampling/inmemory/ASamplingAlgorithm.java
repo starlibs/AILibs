@@ -13,7 +13,6 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 
 /**
  * An abstract class for sampling algorithms providing basic functionality of an
@@ -24,14 +23,14 @@ import jaicore.ml.core.dataset.IInstance;
  * @author Felix Weiland
  * @author jnowack
  */
-public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm<IDataset<I>, IDataset<I>> {
+public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
 	protected Integer sampleSize = null;
-	protected IDataset<I> sample = null;
+	protected D sample = null;
 
-	protected ASamplingAlgorithm(IDataset<I> input) {
+	protected ASamplingAlgorithm(D input) {
 		super(input);
 	}
 
@@ -39,8 +38,9 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 		this.sampleSize = size;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IDataset<I> call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public D call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		Instant timeoutTime = null;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
@@ -57,9 +57,9 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 		}
 		if (sampleSize == 0) {
 			LOG.warn("Sample size is 0, so an empty data set is returned!");
-			return getInput().createEmpty();
+			return (D)getInput().createEmpty();
 		}
-		IDataset<I> dataset = this.getInput();
+		D dataset = this.getInput();
 		if (dataset == null || dataset.isEmpty()) {
 			throw new AlgorithmException("No dataset or an empty dataset was given as an input.");
 		}
@@ -99,5 +99,4 @@ public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm
 			return this.terminate();
 		}
 	}
-
 }

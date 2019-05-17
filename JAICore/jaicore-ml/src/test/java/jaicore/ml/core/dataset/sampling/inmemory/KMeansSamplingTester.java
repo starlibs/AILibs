@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.KmeansSamplingFactory;
 
@@ -30,7 +30,7 @@ public class KMeansSamplingTester<I extends IInstance> extends GeneralSamplingTe
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
 		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
+		AILabeledAttributeArrayDataset<I> dataset = (AILabeledAttributeArrayDataset<I>) problem;
 		KmeansSamplingFactory<I> factory = new KmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);

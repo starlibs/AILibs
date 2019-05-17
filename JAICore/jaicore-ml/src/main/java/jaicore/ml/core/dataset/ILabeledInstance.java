@@ -8,7 +8,7 @@ import jaicore.ml.core.dataset.attribute.IAttributeValue;
  * @author wever, fmohr
  *
  */
-public interface ILabeledInstance extends IInstance {
+public interface ILabeledInstance {
 
 	/**
 	 * Getter for the value of the target attribute.

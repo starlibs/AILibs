@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.StratifiedSamplingFactory;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
@@ -20,7 +20,7 @@ public class AttributeBasedStratifiedSamplingTester<I extends IInstance> extends
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
 		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
+		AILabeledAttributeArrayDataset<I> dataset = (AILabeledAttributeArrayDataset<I>) problem;
 
 		List<Integer> attributeIndices = new ArrayList<>();
 		// We assume that the target is the last attribute

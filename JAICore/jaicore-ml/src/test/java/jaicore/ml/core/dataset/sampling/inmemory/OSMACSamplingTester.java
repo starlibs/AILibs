@@ -3,7 +3,7 @@ package jaicore.ml.core.dataset.sampling.inmemory;
 import java.util.Random;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.OSMACSamplingFactory;
 
@@ -16,7 +16,7 @@ public class OSMACSamplingTester<I extends IInstance> extends GeneralSamplingTes
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
 		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
+		AILabeledAttributeArrayDataset<I> dataset = (AILabeledAttributeArrayDataset<I>) problem;
 		OSMACSamplingFactory<I> factory = new OSMACSamplingFactory<>();
 		if (dataset != null) {
 			factory.setPreSampleSize((int) (PRE_SAMPLING_FRACTION * dataset.size()));

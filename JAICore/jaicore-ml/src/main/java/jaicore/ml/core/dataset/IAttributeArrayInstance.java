@@ -8,7 +8,7 @@ import jaicore.ml.core.dataset.attribute.IAttributeValue;
  * @author wever, fmohr
  *
  */
-public interface IAttributeArrayInstance extends IInstance {
+public interface IAttributeArrayInstance {
 
 	/**
 	 * Getter for the value of an attribute for the given position.

@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
 
-public class SimpleInstance implements IInstance {
+public class SimpleInstance implements INumericLabeledAttributeArrayInstance {
 	/**
 	 *
 	 */
@@ -76,5 +76,23 @@ public class SimpleInstance implements IInstance {
 		}
 		sb.append(this.targetValue.getValue());
 		return sb.toString();
+	}
+
+	@Override
+	public IAttributeValue<Double> getAttributeValue(int position) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<IAttributeValue<?>> getAttributeValues() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getNumberOfAttributes() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

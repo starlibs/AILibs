@@ -3,7 +3,6 @@ package jaicore.ml.core.predictivemodel;
 import java.util.Set;
 
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
 
 /**
@@ -21,7 +20,7 @@ import jaicore.ml.core.exception.TrainingException;
  * @param <DATASET>
  *            The type of the data set used to learn from and predict batches.
  */
-public interface IOnlineLearner<TARGET, INSTANCE extends IInstance, DATASET extends IDataset<INSTANCE>>
+public interface IOnlineLearner<TARGET, INSTANCE, DATASET extends IDataset<INSTANCE>>
 		extends IBatchLearner<TARGET, INSTANCE, DATASET> {
 
 	/**

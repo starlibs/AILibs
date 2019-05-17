@@ -1,6 +1,6 @@
 package jaicore.ml.core.dataset;
 
-public interface IModifiableInstance extends IInstance {
+public interface IModifiableInstance {
 
 	/**
 	 * Removes an attribute value for the given position.

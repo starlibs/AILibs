@@ -3,7 +3,7 @@ package jaicore.ml.core.dataset.sampling.inmemory;
 import java.util.Random;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 
@@ -16,7 +16,7 @@ public class SystematicSamplingTester<I extends IInstance> extends GeneralSampli
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
 		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
+		AILabeledAttributeArrayDataset<I> dataset = (AILabeledAttributeArrayDataset<I>) problem;
 		SystematicSamplingFactory<I> factory = new SystematicSamplingFactory<>();
 		if (dataset != null) {
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) dataset.size());

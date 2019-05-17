@@ -7,7 +7,7 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
@@ -31,7 +31,7 @@ public class LearningCurveExtrapolationEvaluationTester {
 		dataset.setClassIndex(dataset.numAttributes() - 1);
 		Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
 		dataset.setClassIndex(targetAttribute.index());
-		IDataset<? extends IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
+		AILabeledAttributeArrayDataset<? extends IInstance> simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
 
 		// Test classifier evaluation by learning curve extrapolation
 		LearningCurveExtrapolationEvaluator evaluator = new LearningCurveExtrapolationEvaluator(
