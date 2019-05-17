@@ -57,6 +57,9 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	private Logger logger = LoggerFactory.getLogger(MLPlan4BigFileInput.class);
 
 	private File intermediateSizeDownsampledFile = new File("testrsc/sampled/intermediate/" + this.getInput().getName());
+	
+	private static final String serviceHost = "131.234.250.141";
+	private static final String servicePort = "80";
 
 	private final int[] anchorpointsTraining = new int[] { 8, 16, 64, 128 };
 	private Map<Classifier, ComponentInstance> classifier2modelMap = new HashMap<>();
@@ -70,7 +73,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	}
 
 	private void downsampleData(final File from, final File to, final int size) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		ReservoirSampling sampler = new ReservoirSampling(new Random(0), this.getInput());
+		ReservoirSampling sampler = new ReservoirSampling(new Random(0), from);
 		try {
 			File outputFolder = to.getParentFile();
 			if (!outputFolder.exists()) {
@@ -114,7 +117,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 			MLPlanWekaBuilder builder;
 			try {
 				builder = AbstractMLPlanBuilder.forWeka();
-				builder.withLearningCurveExtrapolationEvaluation(this.anchorpointsTraining, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod());
+				builder.withLearningCurveExtrapolationEvaluation(this.anchorpointsTraining, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod(serviceHost, servicePort));
 				builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
 				builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
 				this.mlplan = new MLPlan(builder, data);
@@ -222,7 +225,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	}
 
 	private Instance getInstanceForRuntimeAnalysis(final int numberOfInstances) {
-		Instance inst = new DenseInstance(3);
+		Instance inst = new DenseInstance(2);
 		inst.setValue(0, numberOfInstances);
 		//		inst.setValue(1, Math.pow(numberOfInstances, 2));
 		return inst;

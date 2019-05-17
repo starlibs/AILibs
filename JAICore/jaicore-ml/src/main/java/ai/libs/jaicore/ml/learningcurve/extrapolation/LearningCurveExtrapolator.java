@@ -243,6 +243,9 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+		if (extrapolationMethod instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) extrapolationMethod).setLoggerName(name + ".extrapolationmethod");
+		}
 	}
 
 }

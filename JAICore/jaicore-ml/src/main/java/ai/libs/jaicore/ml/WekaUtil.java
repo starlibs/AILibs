@@ -57,6 +57,7 @@ import weka.core.json.JSONInstances;
 import weka.core.json.JSONNode;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.filters.unsupervised.attribute.Reorder;
 
 public class WekaUtil {
 
@@ -1206,6 +1207,29 @@ public class WekaUtil {
 		remove.setAttributeIndices("" + (inst.classIndex() + 1));
 		remove.setInputFormat(inst.dataset());
 		return useFilterOnSingleInstance(inst, remove);
+	}
+	
+	public static Instances moveClassAttributeIndexToEnd(final Instances data) throws Exception  {
+		int currentClassIndex = data.classIndex();
+		if (currentClassIndex < 0) {
+			throw new IllegalArgumentException("Class index of data is not set!");
+		}
+		int[] attributes = new int[data.numAttributes()];
+		int n = attributes.length;
+		boolean skipped = false;
+		for (int i = 0; i < n - 1; i++) {
+			if (i == currentClassIndex) {
+				skipped = true;
+			}
+			attributes[i] = skipped ? i + 1 : i;
+		}
+		attributes[n - 1] = currentClassIndex;
+		Reorder reorder = new Reorder();
+		reorder.setAttributeIndicesArray(attributes);
+		reorder.setInputFormat(data); // This MUST be used AFTER the setAttributeIndicesArray
+		Instances reorderedInstances = Filter.useFilter(data, reorder);
+		reorderedInstances.setClassIndex(reorderedInstances.numAttributes() - 1);
+		return reorderedInstances;
 	}
 
 	public static Classifier cloneClassifier(final Classifier c) throws Exception {
