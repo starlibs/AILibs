@@ -61,6 +61,7 @@ public class SolutionPerformanceTimelinePluginView extends ASimpleMVCPluginView<
 		return "Solution Performance Timeline";
 	}
 
+	@Override
 	public void clear() {
 		nextIndexToDisplay = 0;
 		performanceSeries.getData().clear();

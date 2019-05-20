@@ -6,6 +6,8 @@ public interface PropertyProcessedAlgorithmEvent {
 
 	public String getEventName();
 
+	public String getCompleteOriginalEventName();
+
 	public Object getProperty(String propertyName);
 
 	public <N> N getProperty(String propertyName, Class<N> expectedClassToBeReturned) throws ClassCastException;
@@ -13,4 +15,6 @@ public interface PropertyProcessedAlgorithmEvent {
 	public AlgorithmEvent getOriginalEvent();
 
 	public boolean correspondsToEventOfClass(Class<?> eventClass);
+
+	public long getTimestampOfEvent();
 }

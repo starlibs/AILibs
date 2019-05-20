@@ -25,21 +25,30 @@ public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPlugi
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void handleAlgorithmEventInternally(PropertyProcessedAlgorithmEvent algorithmEvent) {
-		if (algorithmEvent instanceof ScoredSolutionCandidateFoundEvent) {
+		if (algorithmEvent.correspondsToEventOfClass(ScoredSolutionCandidateFoundEvent.class)) {
+
 			logger.debug("Received solution event {}", algorithmEvent);
-			ScoredSolutionCandidateFoundEvent<?, ?> event = (ScoredSolutionCandidateFoundEvent<?, ?>) algorithmEvent;
-			if (!(event.getScore() instanceof Number)) {
-				logger.warn("Received SolutionCandidateFoundEvent, but the score is of type {}, which is not a number.", event.getScore().getClass().getName());
-				return;
+
+			Object rawScoredSolutionCandidateInfo = algorithmEvent.getProperty(ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer.SCORED_SOLUTION_CANDIDATE_INFO_PROPERTY_NAME);
+			if (rawScoredSolutionCandidateInfo != null) {
+				ScoredSolutionCandidateInfo scoredSolutionCandidateInfo = (ScoredSolutionCandidateInfo) rawScoredSolutionCandidateInfo;
+
+				try {
+					logger.debug("Adding solution to model and updating view.");
+					getModel().addEntry(algorithmEvent.getTimestampOfEvent(), parseScoreToDouble(scoredSolutionCandidateInfo.getScore()));
+					logger.debug("Added solution to model.");
+				} catch (NumberFormatException exception) {
+					logger.warn("Received processed SolutionCandidateFoundEvent, but the score {} cannot be parsed to a double.", scoredSolutionCandidateInfo.getScore());
+					return;
+				}
 			}
-			logger.debug("Adding solution to model and updating view.");
-			getModel().addEntry((ScoredSolutionCandidateFoundEvent<?, ? extends Number>) event);
-		} else {
-			logger.trace("Received and ignored irrelevant event {}", algorithmEvent);
 		}
+	}
+
+	private double parseScoreToDouble(String score) throws NumberFormatException {
+		return Double.parseDouble(score);
 	}
 
 }
