@@ -5,8 +5,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanBuilder;
 import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.cache.ReproducibleInstances;
@@ -31,16 +31,17 @@ public class MLPlanOpenMLExample {
 		List<Instances> split = WekaUtil.getStratifiedSplit((Instances) data, (new Random(0)).nextLong(), 0.7d);
 
 		/* initialize mlplan, and let it run for 30 seconds */
-		MLPlanBuilder builder = new MLPlanBuilder().withAutoWEKAConfiguration().withRandomCompletionBasedBestFirstSearch();
-		builder.withTimeoutForNodeEvaluation(new TimeOut(10, TimeUnit.SECONDS));
-		builder.withTimeoutForSingleSolutionEvaluation(new TimeOut(5, TimeUnit.SECONDS));
+		AbstractMLPlanBuilder builder = AbstractMLPlanBuilder.forWeka();
+		builder.withNodeEvaluationTimeOut(new TimeOut(10, TimeUnit.SECONDS));
+		builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.SECONDS));
+		builder.withTimeOut(new TimeOut(300, TimeUnit.SECONDS));
+		builder.withNumCpus(1);
+
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
 		mlplan.setRandomSeed(1);
 		mlplan.setPortionOfDataForPhase2(0f);
 		mlplan.setLoggerName("mlplan");
-		mlplan.setTimeout(300, TimeUnit.SECONDS);
-		mlplan.setNumCPUs(1);
-		
+
 		try {
 			long start = System.currentTimeMillis();
 			Classifier optimizedClassifier = mlplan.call();

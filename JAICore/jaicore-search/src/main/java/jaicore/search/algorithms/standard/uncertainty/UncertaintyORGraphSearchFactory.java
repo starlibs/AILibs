@@ -7,15 +7,17 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.BestFirstFactory;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicClockModelPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.BasicExplorationCandidateSelector;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.IPhaseLengthAdjuster;
 import jaicore.search.algorithms.standard.uncertainty.explorationexploitationsearch.UncertaintyExplorationOpenSelection;
-import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoNode;
 import jaicore.search.algorithms.standard.uncertainty.paretosearch.ParetoSelection;
+import jaicore.search.model.travesaltree.Node;
 import jaicore.search.probleminputs.GraphSearchWithUncertaintyBasedSubpathEvaluationInput;
 
-public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
+public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>>
+		extends BestFirstFactory<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(UncertaintyORGraphSearchFactory.class);
 
@@ -27,8 +29,18 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> exte
 			throw new IllegalStateException("Uncertainty Config has not been set yet.");
 		}
 
-		/* let the best first factory configure general aspects of the best first search */
+		/*
+		 * let the best first factory configure general aspects of the best first search
+		 */
 		BestFirst<GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V>, N, A, V> search = super.getAlgorithm();
+
+		/* check that node evaluator supports uncertainty */
+		if (!(search.getNodeEvaluator() instanceof IPotentiallyUncertaintyAnnotatingNodeEvaluator)) {
+			throw new UnsupportedOperationException("Cannot create uncertainty based search with node evaluator " + search.getNodeEvaluator().getClass().getName() + ", which does not implement " + IPotentiallyUncertaintyAnnotatingNodeEvaluator.class.getName());
+		}
+		if (!((IPotentiallyUncertaintyAnnotatingNodeEvaluator<?,?>)search.getNodeEvaluator()).annotatesUncertainty()) {
+			throw new UnsupportedOperationException("The given node evaluator supports uncertainty annotation, but it declares that it will not annotate uncertainty. Maybe no uncertainty source has been defined.");
+		}
 
 		/* now set uncertainty-specific behavior */
 		switch (this.oversearchAvoidanceConfig.getOversearchAvoidanceMode()) {
@@ -71,7 +83,7 @@ public class UncertaintyORGraphSearchFactory<N, A, V extends Comparable<V>> exte
 			}
 			break;
 		case PARETO_FRONT_SELECTION:
-			PriorityQueue<ParetoNode<N, V>> pareto = new PriorityQueue<>(this.oversearchAvoidanceConfig.getParetoComperator());
+			PriorityQueue<Node<N, V>> pareto = new PriorityQueue<>(oversearchAvoidanceConfig.getParetoComperator());
 			search.setOpen(new ParetoSelection<>(pareto));
 			break;
 		default:

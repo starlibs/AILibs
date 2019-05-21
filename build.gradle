@@ -1,4 +1,4 @@
-buildscript {
+buildscript { 
 	repositories {
 		mavenLocal()
 		mavenCentral()
@@ -29,6 +29,7 @@ allprojects {
 	//Other
 	apply plugin: "maven"
 	apply plugin: "jacoco"
+	//apply plugin: "signing"
 
 	//Nebula
 	apply plugin: 'nebula.project'
@@ -40,8 +41,14 @@ allprojects {
 	targetCompatibility = 1.8
 
 	//Project properties
-	project.group = 'de.upb.isys'
-	project.version = '0.0.1-SNAPSHOT'
+	project.group = 'ai.libs'
+	project.version = '0.0.8'
+	
+	ext {
+	    ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
+	    ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
+	}
+
 	
 	sourceSets {
 		main {
@@ -97,6 +104,7 @@ allprojects {
 	configurations.all {
 		// check for updates every build
 		resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	    exclude module: 'all'
 	}
 
 	//Nebula releases
@@ -154,8 +162,7 @@ allprojects {
 	//      testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	artifacts {
 		testArtifacts testClassesJar
-		archives sourcesJar
-		archives javadocJar
+		archives sourcesJar, javadocJar
 	}
 	
 	// generate JavaDoc for each project
@@ -165,14 +172,21 @@ allprojects {
         	destinationDir = file("docs/javadoc")
 //		failOnError = true
     	}
-
+	
 }
+
+//signing {
+//	sign configurations.archives
+//}
+
 
 dependencies{
 	compile project(":hasco")
 	compile project(":mlplan")
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-ea")
+	compile (project(":JAICore:jaicore-ea")) {
+		exclude group: 'commons-cli'
+	}
 	compile project(":JAICore:jaicore-experiments")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-logic")
@@ -181,6 +195,10 @@ dependencies{
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
+}
+
+test{
+     maxHeapSize = "4g"
 }
 
 publish.dependsOn shadowJar

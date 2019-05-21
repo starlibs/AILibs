@@ -2,6 +2,12 @@ package jaicore.experiments;
 
 import java.util.Map;
 
+/**
+ * Basic experiment class that describes an experiment conceptually in terms of hardware information and semantic keys.
+ * 
+ * @author fmohr
+ *
+ */
 public class Experiment {
 	private final int memoryInMB;
 	private final int numCPUs;
@@ -52,12 +58,11 @@ public class Experiment {
 		if (valuesOfKeyFields == null) {
 			if (other.valuesOfKeyFields != null)
 				return false;
-		} else if (!valuesOfKeyFields.equals(other.valuesOfKeyFields))
+		} else if (!valuesOfKeyFields.equals(other.valuesOfKeyFields)) {
 			return false;
+		}
 		if (memoryInMB != other.memoryInMB)
 			return false;
-		if (numCPUs != other.numCPUs)
-			return false;
-		return true;
+		return numCPUs == other.numCPUs;
 	}
 }

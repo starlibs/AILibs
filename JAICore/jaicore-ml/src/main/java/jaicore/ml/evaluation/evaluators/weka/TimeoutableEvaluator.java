@@ -1,14 +1,11 @@
 package jaicore.ml.evaluation.evaluators.weka;
 
-import java.util.TimerTask;
-
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.interrupt.Interrupter;
+import jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
 
-public class TimeoutableEvaluator implements IClassifierEvaluator {
+public class TimeoutableEvaluator extends TimedObjectEvaluator<Classifier, Double> implements IClassifierEvaluator {
 
 	/** The object evaluator that shall actually be called. */
 	private IObjectEvaluator<Classifier, Double> ce;
@@ -30,22 +27,18 @@ public class TimeoutableEvaluator implements IClassifierEvaluator {
 	}
 
 	@Override
-	public Double evaluate(final Classifier object) throws ObjectEvaluationFailedException, InterruptedException {
-		TimerTask timeoutTask = TimeoutTimer.getInstance().getSubmitter().interruptMeAfterMS(this.timeoutInMS, "Evaluation of classifier " + object + " has timeouted (" + TimeoutableEvaluator.class.getName() + ")");
-		Double returnValue = 30000.0;
-		try {
-			returnValue = this.ce.evaluate(object);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-			Interrupter.get().markInterruptOnCurrentThreadAsResolved(timeoutTask);
-		} catch (Throwable e) {
-			if (!e.getMessage().contains("Killed WEKA") && !e.getMessage().contains("Bag size needs")) {
-				throw new ObjectEvaluationFailedException(e, "Error");
-			}
-		} finally {
-			timeoutTask.cancel();
-		}
-		return returnValue;
+	public Double evaluateSupervised(final Classifier object) throws ObjectEvaluationFailedException, InterruptedException {
+		return this.ce.evaluate(object);
+	}
+
+	@Override
+	public long getTimeout(Classifier item) {
+		return this.timeoutInMS;
+	}
+
+	@Override
+	public String getMessage(Classifier item) {
+		return "Evaluation of classifier " + item + " has timeouted (" + TimeoutableEvaluator.class.getName() + ")";
 	}
 
 }

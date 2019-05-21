@@ -5,6 +5,50 @@
 	],
 	"components": [
 		{
+			"name": "meka.classifiers.multilabel.meta.MultiSearch",
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"comment": "LEFT OUT: _search, _algorithm",
+			"parameter": [
+				{
+					"name": "F",
+					"comment": "Determines the parameter used for evaluation: ACC = Accuracy JIDX = Jaccard index HSCORE = Hamming score EM = Exact match JDIST = Jaccard distance HLOSS = Hamming loss ZOLOSS = ZeroOne loss HARSCORE = Harmonic score OE = One error RLOSS = Rank loss AVGPREC = Avg precision LOGLOSSL = Log Loss (lim. L) LOGLOSSD = Log Loss (lim. D) F1MICRO = F1 (micro averaged) F1MACROEX = F1 (macro averaged by example) F1MACROLBL = F1 (macro averaged by label) AUPRC = AUPRC (macro averaged) AUROC = AUROC (macro averaged) LCARD = Label cardinality (predicted) LDIST = Levenshtein distance (default: ACC)",
+					"type": "cat",
+					"default": "ACC",
+					"values": [
+						"ACC",
+						"JIDX",
+						"HSCORE",
+						"EM",
+						"JDIST",
+						"HLOSS",
+						"ZOLOSS",
+						"HARSCORE",
+						"OE",
+						"RLOSS",
+						"AVGPREC",
+						"LOGLOSSL",
+						"LOGLOSSD",
+						"F1MICRO",
+						"F1MACROEX",
+						"F1MACROLBL",
+						"AUPRC",
+						"AUROC",
+						"LCARD",
+						"LDIST"
+					]
+				}
+			]
+		},
+		{
 			"name": "meka.classifiers.multilabel.PLST",
 			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
 			"requiredInterface": ["BasicMTClassifier"],

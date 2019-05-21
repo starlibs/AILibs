@@ -5,11 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 
-public class SimpleDataset extends LinkedList<SimpleInstance> implements IDataset<SimpleInstance> {
+public class SimpleDataset extends LinkedList<SimpleInstance> implements IOrderedLabeledAttributeArrayDataset<SimpleInstance> {
 
 	/**
 	 *
@@ -20,11 +20,6 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 
 	public SimpleDataset(final InstanceSchema instanceSchema) {
 		this.instanceSchema = instanceSchema;
-	}
-
-	@Override
-	public <T> IAttributeType<T> getTargetType(final Class<T> clazz) {
-		return this.instanceSchema.getTargetType(clazz);
 	}
 
 	@Override
@@ -73,5 +68,34 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 
 		return sb.toString();
 	}
+	
+	@Override
+	public SimpleDataset createEmpty() {
+		return new SimpleDataset(instanceSchema);
+	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((instanceSchema == null) ? 0 : instanceSchema.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SimpleDataset other = (SimpleDataset) obj;
+		if (instanceSchema == null) {
+			if (other.instanceSchema != null)
+				return false;
+		} else if (!instanceSchema.equals(other.instanceSchema))
+			return false;
+		return true;
+	}
 }
