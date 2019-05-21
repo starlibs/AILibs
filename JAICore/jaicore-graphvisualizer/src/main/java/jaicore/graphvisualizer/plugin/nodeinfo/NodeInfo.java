@@ -1,5 +1,6 @@
 package jaicore.graphvisualizer.plugin.nodeinfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NodeInfo {
@@ -17,8 +18,12 @@ public class NodeInfo {
 	public NodeInfo(String mainNodeId, List<String> parentNodeIds, List<String> childrenNodeIds, String nodeType) {
 		super();
 		this.mainNodeId = mainNodeId;
-		this.parentNodeIds = parentNodeIds;
-		this.childrenNodeIds = childrenNodeIds;
+		if (parentNodeIds != null) {
+			this.parentNodeIds = new ArrayList<>(parentNodeIds);
+		}
+		if (childrenNodeIds != null) {
+			this.childrenNodeIds = new ArrayList<>(childrenNodeIds);
+		}
 		this.nodeType = nodeType;
 	}
 
