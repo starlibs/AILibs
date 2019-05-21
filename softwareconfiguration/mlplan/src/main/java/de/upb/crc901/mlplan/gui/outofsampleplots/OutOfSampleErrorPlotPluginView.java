@@ -21,8 +21,8 @@ import javafx.scene.chart.XYChart.Series;
 public class OutOfSampleErrorPlotPluginView extends ASimpleMVCPluginView<OutOfSampleErrorPlotPluginModel, OutOfSampleErrorPlotPluginController, LineChart<Number, Number>> {
 
 	private Logger logger = LoggerFactory.getLogger(OutOfSampleErrorPlotPluginView.class);
-	private final Series<Number,Number> believedErrorSeries;
-	private final Series<Number,Number> outOfSampleErrorSeries;
+	private final Series<Number, Number> believedErrorSeries;
+	private final Series<Number, Number> outOfSampleErrorSeries;
 	private int nextIndexToDisplay = 0;
 
 	public OutOfSampleErrorPlotPluginView(OutOfSampleErrorPlotPluginModel model) {
@@ -39,7 +39,7 @@ public class OutOfSampleErrorPlotPluginView extends ASimpleMVCPluginView<OutOfSa
 
 	@Override
 	public void update() {
-		
+
 		/* compute data to add */
 		List<Integer> observedTimestamps = getModel().getTimestamps();
 		List<List<Double>> performances = getModel().getPerformances();
@@ -62,7 +62,8 @@ public class OutOfSampleErrorPlotPluginView extends ASimpleMVCPluginView<OutOfSa
 	public String getTitle() {
 		return "Out-of-Sample Error Timeline";
 	}
-	
+
+	@Override
 	public void clear() {
 		nextIndexToDisplay = 0;
 		believedErrorSeries.getData().clear();
@@ -71,5 +72,5 @@ public class OutOfSampleErrorPlotPluginView extends ASimpleMVCPluginView<OutOfSa
 
 	public int getNextIndexToDisplay() {
 		return nextIndexToDisplay;
-	}	
+	}
 }

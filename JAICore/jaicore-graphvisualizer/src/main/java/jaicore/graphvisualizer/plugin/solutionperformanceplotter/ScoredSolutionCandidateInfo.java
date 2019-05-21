@@ -5,8 +5,7 @@ public class ScoredSolutionCandidateInfo {
 	private String solutionCandidateRepresentation;
 	private String score;
 
-	@SuppressWarnings("unused")
-	private ScoredSolutionCandidateInfo() {
+	protected ScoredSolutionCandidateInfo() {
 		// for serialization purposes
 	}
 

@@ -17,14 +17,14 @@ public class OutOfSampleErrorPlotPluginModel extends ASimpleMVCPluginModel<OutOf
 	private final List<Classifier> classifiers = new ArrayList<>();
 	private final List<List<Double>> performances = new ArrayList<>();
 	private long timestampOfFirstEvent = -1;
-	
+
 	public final void addEntry(long timestamp, Classifier classifier, List<Double> performances) {
 		int offset = 0;
 		if (timestampOfFirstEvent == -1) {
 			timestampOfFirstEvent = timestamp;
+		} else {
+			offset = (int) (timestamp - timestampOfFirstEvent);
 		}
-		else
-			offset = (int)(timestamp - timestampOfFirstEvent);
 		this.timestamps.add(offset);
 		this.classifiers.add(classifier);
 		this.performances.add(performances);
@@ -35,6 +35,7 @@ public class OutOfSampleErrorPlotPluginModel extends ASimpleMVCPluginModel<OutOf
 		return timestampOfFirstEvent;
 	}
 
+	@Override
 	public void clear() {
 		timestamps.clear();
 		classifiers.clear();
