@@ -10,33 +10,34 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
-import jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.Logistic;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.UnsupportedAttributeTypeException;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 
-public abstract class PilotEstimateSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
+public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInstance, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
 
 	protected int preSampleSize;
 	private I chosenInstance = null;
 
-	protected PilotEstimateSampling(IDataset<I> input) {
+	protected PilotEstimateSampling(final D input) {
 		super(input);
+		if (!(input instanceof WekaInstances))
+			throw new IllegalArgumentException("Pilot Estimate Sampling currently only works with WekaInstances. The signature is kept general to avoid refactoring later on.");
 	}
 
 	public I getChosenInstance() {
-		return chosenInstance;
+		return this.chosenInstance;
 	}
 
-	public void setChosenInstance(I chosenInstance) {
+	public void setChosenInstance(final I chosenInstance) {
 		this.chosenInstance = chosenInstance;
 	}
 
@@ -50,19 +51,19 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 			if (this.sample.size() < this.sampleSize) {
 				do {
 					double r = this.rand.nextDouble();
-					chosenInstance = null;
-					for (int i = 0; i < probabilityBoundaries.size(); i++) {
-						if (probabilityBoundaries.get(i).getY().doubleValue() > r) {
-							chosenInstance = probabilityBoundaries.get(i).getX();
+					this.chosenInstance = null;
+					for (int i = 0; i < this.probabilityBoundaries.size(); i++) {
+						if (this.probabilityBoundaries.get(i).getY().doubleValue() > r) {
+							this.chosenInstance = this.probabilityBoundaries.get(i).getX();
 							break;
 						}
 					}
-					if (chosenInstance == null) {
-						chosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
+					if (this.chosenInstance == null) {
+						this.chosenInstance = this.probabilityBoundaries.get(this.probabilityBoundaries.size() - 1).getX();
 					}
-				} while (this.sample.contains(chosenInstance));
-				this.sample.add(chosenInstance);
-				return new SampleElementAddedEvent(getId());
+				} while (this.sample.contains(this.chosenInstance));
+				this.sample.add(this.chosenInstance);
+				return new SampleElementAddedEvent(this.getId());
 			} else {
 				return this.terminate();
 			}
@@ -76,29 +77,29 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 	}
 
 	private AlgorithmEvent doInitStep() {
-		this.sample = this.getInput().createEmpty();
-		if (probabilityBoundaries == null || chosenInstance == null) {
+		this.sample = (D) this.getInput().createEmpty();
+		if (this.probabilityBoundaries == null || this.chosenInstance == null) {
 			Classifier pilotEstimator = new Logistic();
 			// set preSampleSize to |Dataset|/2 as default value, if preSampleSize would be
 			// smaller than 1
 			if (this.preSampleSize < 1) {
 				this.preSampleSize = this.getInput().size() / 2;
 			}
-			IDataset<I> pilotEstimateSample = this.getInput().createEmpty();
-			IDataset<I> sampleCopy = this.getInput().createEmpty();
+			D pilotEstimateSample = (D) this.getInput().createEmpty();
+			D sampleCopy = (D) this.getInput().createEmpty();
 
 			for (I instance : this.getInput()) {
 				sampleCopy.add(instance);
 			}
 
-			HashMap<Object, Integer> classOccurrences = countClassOccurrences(sampleCopy);
+			HashMap<Object, Integer> classOccurrences = this.countClassOccurrences(sampleCopy);
 
 			// Count number of classes
 			int numberOfClasses = classOccurrences.keySet().size();
 
 			// Calculate Boundaries that define which Instances is choose for which random
 			// number
-			probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
+			this.probabilityBoundaries = this.calculateInstanceBoundaries(classOccurrences, numberOfClasses);
 
 			double r;
 			I choosenInstance;
@@ -106,25 +107,19 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 				do {
 					r = this.rand.nextDouble();
 					choosenInstance = null;
-					for (int j = 0; j < probabilityBoundaries.size(); j++) {
-						if (probabilityBoundaries.get(j).getY().doubleValue() > r) {
-							choosenInstance = probabilityBoundaries.get(j).getX();
+					for (int j = 0; j < this.probabilityBoundaries.size(); j++) {
+						if (this.probabilityBoundaries.get(j).getY().doubleValue() > r) {
+							choosenInstance = this.probabilityBoundaries.get(j).getX();
 							break;
 						}
 					}
 					if (choosenInstance == null) {
-						choosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
+						choosenInstance = this.probabilityBoundaries.get(this.probabilityBoundaries.size() - 1).getX();
 					}
 				} while (pilotEstimateSample.contains(choosenInstance));
 				pilotEstimateSample.add(choosenInstance);
 			}
-			Instances pilotEstimateInstances = null;
-			try {
-				pilotEstimateInstances = WekaInstancesUtil.datasetToWekaInstances(pilotEstimateSample);
-			} catch (UnsupportedAttributeTypeException e) {
-				logger.error("Error while converting dataset to WEKA dataset", e);
-				this.terminate();
-			}
+			Instances pilotEstimateInstances = ((WekaInstances) pilotEstimateSample).getList();
 
 			NumericToNominal numericToNominal = new NumericToNominal();
 			String[] options = new String[2];
@@ -134,14 +129,14 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 				numericToNominal.setOptions(options);
 				numericToNominal.setInputFormat(pilotEstimateInstances);
 			} catch (Exception e) {
-				logger.error("Unexpected error", e);
+				this.logger.error("Unexpected error", e);
 				this.terminate();
 			}
 
 			try {
 				pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
 			} catch (Exception e) {
-				logger.error("Cannot apply filter", e);
+				this.logger.error("Cannot apply filter", e);
 				this.terminate();
 			}
 
@@ -162,21 +157,13 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 			try {
 				pilotEstimator.buildClassifier(pilotEstimateInstances);
 			} catch (Exception e) {
-				logger.error("Cannot build classifier", e);
+				this.logger.error("Cannot build classifier", e);
 				this.terminate();
 			}
-
-			try {
-				probabilityBoundaries = calculateFinalInstanceBoundaries(
-						WekaInstancesUtil.datasetToWekaInstances(sampleCopy), pilotEstimator);
-			} catch (UnsupportedAttributeTypeException e) {
-				logger.error("Error while converting dataset to WEKA dataset", e);
-				this.terminate();
-			}
+			this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 		}
 		return this.activate();
 	}
 
-	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances,
-			Classifier pilotEstimator);
+	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(D instances, Classifier pilotEstimator);
 }

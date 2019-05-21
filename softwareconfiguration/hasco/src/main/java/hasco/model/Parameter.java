@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({"name", "defaultDomain", "defaultValue"})
 public class Parameter {
 	private final String name;
-	private final ParameterDomain defaultDomain;
+	private final IParameterDomain defaultDomain;
 	private final Object defaultValue;
 
 	
-	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain")ParameterDomain defaultDomain,@JsonProperty("defaultValue") Object defaultValue) {
+	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain")IParameterDomain defaultDomain,@JsonProperty("defaultValue") Object defaultValue) {
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;
@@ -21,7 +21,7 @@ public class Parameter {
 		return name;
 	}
 
-	public ParameterDomain getDefaultDomain() {
+	public IParameterDomain getDefaultDomain() {
 		return defaultDomain;
 	}
 

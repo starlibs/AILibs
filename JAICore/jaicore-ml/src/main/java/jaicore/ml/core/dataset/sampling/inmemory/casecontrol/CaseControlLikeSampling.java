@@ -7,15 +7,15 @@ import java.util.Random;
 
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
-public abstract class CaseControlLikeSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
+public abstract class CaseControlLikeSampling<I extends ILabeledInstance, D extends IDataset<I>> extends ASamplingAlgorithm<D> {
 
 	protected Random rand;
 	protected List<Pair<I, Double>> probabilityBoundaries = null;
 
-	protected CaseControlLikeSampling(IDataset<I> input) {
+	protected CaseControlLikeSampling(D input) {
 		super(input);
 	}
 
@@ -36,7 +36,7 @@ public abstract class CaseControlLikeSampling<I extends IInstance> extends ASamp
 	 * @return HashMap of occurrences
 	 * @throws ClassNotFoundException
 	 */
-	protected HashMap<Object, Integer> countClassOccurrences(IDataset<I> dataset) {
+	protected HashMap<Object, Integer> countClassOccurrences(D dataset) {
 		HashMap<Object, Integer> classOccurrences = new HashMap<>();
 		for (I instance : dataset) {
 			boolean classExists = false;

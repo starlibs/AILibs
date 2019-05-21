@@ -4,17 +4,16 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
-public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
+public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Random random;
 
-	private IDataset<I> copyDataset;
+	private D copyDataset;
 
-	public SimpleRandomSampling(Random random, IDataset<I> input) {
+	public SimpleRandomSampling(Random random, D input) {
 		super(input);
 		this.random = random;
 	}
@@ -23,8 +22,8 @@ public class SimpleRandomSampling<I extends IInstance> extends ASamplingAlgorith
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.sample = getInput().createEmpty();
-			this.copyDataset = this.getInput().createEmpty();
+			this.sample = (D)getInput().createEmpty();
+			this.copyDataset = (D)this.getInput().createEmpty();
 			this.copyDataset.addAll(this.getInput());
 			return this.activate();
 		case active:

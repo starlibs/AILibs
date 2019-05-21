@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
 
-public class SimpleInstance implements IInstance {
+public class SimpleInstance implements INumericLabeledAttributeArrayInstance {
 	/**
 	 *
 	 */
@@ -36,7 +36,7 @@ public class SimpleInstance implements IInstance {
 	}
 
 	@Override
-	public <T> IAttributeValue<T> getAttributeValue(final int position, final Class<T> type) {
+	public <T> IAttributeValue<T> getAttributeValueAtPosition(final int position, final Class<T> type) {
 		return (IAttributeValue<T>) this.attributeValues.get(position);
 	}
 
@@ -78,4 +78,20 @@ public class SimpleInstance implements IInstance {
 		return sb.toString();
 	}
 
+	@Override
+	public IAttributeValue<Double> getAttributeValue(int position) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IAttributeValue<?>[] getAllAttributeValues() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int getNumberOfAttributes() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

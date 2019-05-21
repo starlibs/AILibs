@@ -13,6 +13,7 @@ import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,10 +90,24 @@ public class KVStoreStatisticsUtil {
 	 * @param sampleID The field name of the ids for the different populations, e.g. algorithm.
 	 * @param sampledValues The field name of the values sampled from the populations, e.g. error rates.
 	 * @param output The name of the field where to store the result to.
+	 * @param minimize Whether minimum is better or not.
+	 */
+	public static void best(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final String output, final boolean minimize) {
+		Set<String> availableSampleIDs = collection.stream().map(x -> x.getAsString(sampleID)).collect(Collectors.toSet());
+		best(collection, setting, sampleID, sampledValues, availableSampleIDs, output, minimize);
+	}
+
+	/**
+	 * For each setting this method finds the best mean value for setting <code>setting</code> among all the <code>sampleIDs</code> averaging the <code>sampledValues</code> (minimization).
+	 *
+	 * @param collection The collection of KVStores.
+	 * @param setting The field name of the setting description, e.g. dataset.
+	 * @param sampleID The field name of the ids for the different populations, e.g. algorithm.
+	 * @param sampledValues The field name of the values sampled from the populations, e.g. error rates.
+	 * @param output The name of the field where to store the result to.
 	 */
 	public static void best(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final String output) {
-		Set<String> availableSampleIDs = collection.stream().map(x -> x.getAsString(sampleID)).collect(Collectors.toSet());
-		best(collection, setting, sampleID, sampledValues, availableSampleIDs, output);
+		best(collection, setting, sampleID, sampledValues, output, true);
 	}
 
 	/**
@@ -104,20 +119,39 @@ public class KVStoreStatisticsUtil {
 	 * @param sampledValues The field name of the values sampled from the populations, e.g. error rates.
 	 * @param sampleIDsToConsider The set of sample IDs which are to be considered in the comparison.
 	 * @param output The name of the field where to store the result to.
+	 * @param minimize Whether minimum is better or not.
 	 */
-	public static void best(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final Set<String> sampleIDsToConsider, final String output) {
+	public static void best(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final Set<String> sampleIDsToConsider, final String output, final boolean minimize) {
 		KVStoreCollection grouped = new KVStoreCollection(collection);
 		grouped.group(setting, sampleID);
 
 		KVStoreCollectionPartition partition = new KVStoreCollectionPartition(setting, collection);
 
 		for (Entry<String, KVStoreCollection> entry : partition) {
-			OptionalDouble min = entry.getValue().stream().filter(x -> sampleIDsToConsider.contains(x.getAsString(sampleID)))
-					.mapToDouble(x -> (x.get(sampledValues) != null) ? StatisticsUtil.mean(x.getAsDoubleList(sampledValues)) : Double.MAX_VALUE).min();
-			if (min.isPresent()) {
-				double minimum = min.getAsDouble();
+
+			OptionalDouble bestValue;
+			if (minimize) {
+				bestValue = entry.getValue().stream().filter(x -> sampleIDsToConsider.contains(x.getAsString(sampleID)))
+						.mapToDouble(x -> (x.get(sampledValues) != null) ? StatisticsUtil.mean(x.getAsDoubleList(sampledValues)) : Double.MAX_VALUE).min();
+			} else {
+				bestValue = entry.getValue().stream().filter(x -> sampleIDsToConsider.contains(x.getAsString(sampleID)))
+						.mapToDouble(x -> (x.get(sampledValues) != null) ? StatisticsUtil.mean(x.getAsDoubleList(sampledValues)) : Double.MIN_VALUE).max();
+			}
+
+			if (bestValue.isPresent()) {
+				double best = bestValue.getAsDouble();
 				for (KVStore store : entry.getValue()) {
-					store.put(output, ((store.get(sampledValues) != null) ? StatisticsUtil.mean(store.getAsDoubleList(sampledValues)) : Double.MAX_VALUE) == minimum);
+
+					if (store.get(sampledValues) != null) {
+						store.put(output, StatisticsUtil.mean(store.getAsDoubleList(sampledValues)) == best);
+					} else {
+						Double surrogateValue = Double.MIN_VALUE;
+						if (minimize) {
+							surrogateValue = Double.MAX_VALUE;
+						}
+						store.put(output, surrogateValue == best);
+					}
+
 				}
 			}
 		}
@@ -388,6 +422,28 @@ public class KVStoreStatisticsUtil {
 			sampleMap.put(pairingIndices.get(i), sampledValues.get(i));
 		}
 		return sampleMap;
+	}
+
+	/**
+	 * Computes a statistic of average rankings for sampleIDs.
+	 *
+	 * @param groupedAll The collection of KVStores to compute the average rank for the respective sampleIDs.
+	 * @param sampleIDs The name of the field distinguishing the different samples.
+	 * @param rank The name of the field containing the rank information.
+	 * @return
+	 */
+	public static Map<String, DescriptiveStatistics> averageRank(final KVStoreCollection groupedAll, final String sampleIDs, final String rank) {
+		Map<String, DescriptiveStatistics> averageRanks = new HashMap<>();
+
+		for (KVStore s : groupedAll) {
+			DescriptiveStatistics stats = averageRanks.get(s.getAsString(sampleIDs));
+			if (stats == null) {
+				stats = new DescriptiveStatistics();
+				averageRanks.put(s.getAsString(sampleIDs), stats);
+			}
+			stats.addValue(s.getAsDouble(rank));
+		}
+		return averageRanks;
 	}
 
 }

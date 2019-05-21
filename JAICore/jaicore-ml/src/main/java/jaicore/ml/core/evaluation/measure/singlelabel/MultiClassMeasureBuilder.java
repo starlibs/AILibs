@@ -6,12 +6,12 @@ import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLo
 import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.ExactMatchAccuracy;
 import jaicore.ml.core.evaluation.measure.multilabel.ExactMatchLoss;
-import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageD;
-import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageL;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingAccuracy;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1;
+import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.JaccardLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.JaccardScore;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
@@ -44,9 +44,9 @@ public class MultiClassMeasureBuilder {
 		case EXACT_MATCH_LOSS:
 			return new ExactMatchLoss();
 		case F1_MACRO_AVG_D:
-			return new F1MacroAverageD();
+			return new InstanceWiseF1();
 		case F1_MACRO_AVG_D_LOSS:
-			return new F1MacroAverageDLoss();
+			return new InstanceWiseF1AsLoss();
 		case F1_MACRO_AVG_L:
 			return new F1MacroAverageL();
 		case F1_MACRO_AVG_L_LOSS:

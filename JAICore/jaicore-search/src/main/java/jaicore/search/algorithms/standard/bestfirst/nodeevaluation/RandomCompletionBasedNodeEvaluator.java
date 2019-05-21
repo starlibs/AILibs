@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,12 +165,12 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				if (n.getParent() != null && this.completer.getExploredGraph().hasItem(n.getParent().getPoint())) {
 					boolean parentHasFValue = this.fValues.containsKey(n.getParent());
 					assert parentHasFValue || n.getParent().getParent() == null : "No f-value has been stored for the parent of node with hash code " + n.hashCode() + " (hash code of parent is " + n.getParent().hashCode()
-							+ ") whose f-value we may want to reuse. This is only allowed for top-level nodes! The path is: " + path;
+							+ ") whose f-value we may want to reuse.\nThis is only allowed for top-level nodes, but the actual path is: " + n.path().stream().map(k -> "\n\t" + k.hashCode() + "\t(f-value: " + k.getInternalLabel() + ")").collect(Collectors.joining());
 					boolean nodeHasSibling = this.completer.getExploredGraph().getSuccessors(n.getParent().getPoint()).size() > 1;
 					if (path.size() > 1 && !nodeHasSibling && parentHasFValue) {
 						V score = this.fValues.get(n.getParent());
 						this.fValues.put(n, score);
-						this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
+						this.logger.debug("Score {} of parent is used since the last action did not affect the performance.", score);
 						if (score == null) {
 							this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
 						}
@@ -177,10 +178,16 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					}
 				}
 
-				/* make sure that the completer has the path from the root to the node in question */
+				/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
 				if (!this.completer.knowsNode(n.getPoint())) {
 					synchronized (this.completer) {
 						this.completer.appendPathToNode(n.externalPath());
+					}
+					Node<T, ?> current = n.getParent();
+					while (current != null && !this.fValues.containsKey(current)) {
+						this.fValues.put(current, (V)current.getInternalLabel());
+						this.logger.debug("Filling up the f-value of {} with {}", current.hashCode(), current.getInternalLabel());
+						current = current.getParent();
 					}
 				}
 
