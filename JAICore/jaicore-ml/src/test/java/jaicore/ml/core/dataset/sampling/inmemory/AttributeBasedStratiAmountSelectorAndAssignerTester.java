@@ -32,7 +32,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_allAttributes_categorical_serial() {
 		SimpleDataset dataset = createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(6, computedNumber);
@@ -42,7 +42,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_allAttributes_categorical_parallel() {
 		SimpleDataset dataset = createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(6, computedNumber);
@@ -52,7 +52,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_onlyTargetAttribute_categorical_serial() {
 		SimpleDataset dataset = createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(3, computedNumber);
@@ -62,7 +62,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_onlyTargetAttribute_categorical_parallel() {
 		SimpleDataset dataset = createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(3, computedNumber);
@@ -72,7 +72,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_assignment_onlyTargetAttribute_categorical_serial() {
 		SimpleDataset dataset = createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
 		selectorAndAssigner.init(dataset);
 		Map<SimpleInstance, Integer> stratiAssignment = new HashMap<>();
@@ -99,7 +99,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_assignment_onlyTargetAttribute_categorical_parallel() {
 		SimpleDataset dataset = createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
 		selectorAndAssigner.init(dataset);
 		Map<SimpleInstance, Integer> stratiAssignment = new HashMap<>();
@@ -126,7 +126,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_allAttributes_mixed_equalLength_serial() {
 		SimpleDataset dataset = createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -136,7 +136,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_allAttributes_mixed_equalLength_parallel() {
 		SimpleDataset dataset = createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -146,7 +146,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_allAttributes_mixed_equalSize_serial() {
 		SimpleDataset dataset = createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -156,7 +156,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_number_allAttributes_mixed_equalSize_parallel() {
 		SimpleDataset dataset = createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -166,7 +166,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_assignment_onlyTargetAttribute_mixed_serial() {
 		SimpleDataset dataset = createToyDatasetMixed();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(1);
 		selectorAndAssigner.init(dataset);
 		Map<SimpleInstance, Integer> stratiAssignment = new HashMap<>();
@@ -191,7 +191,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public void test_assignment_onlyTargetAttribute_mixed_parallel() {
 		SimpleDataset dataset = createToyDatasetMixed();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance, SimpleDataset> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(4);
 		selectorAndAssigner.init(dataset);
 		Map<SimpleInstance, Integer> stratiAssignment = new HashMap<>();
