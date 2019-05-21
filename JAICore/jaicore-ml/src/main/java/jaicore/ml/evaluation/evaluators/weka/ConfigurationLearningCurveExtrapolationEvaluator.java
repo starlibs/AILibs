@@ -4,9 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
+import jaicore.ml.core.dataset.weka.WekaInstance;
+import jaicore.ml.core.dataset.weka.WekaInstances;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.ConfigurationLearningCurveExtrapolator;
 import weka.classifiers.Classifier;
@@ -28,8 +29,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<IOrderedLabeledAttributeArrayDataset, ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset>> samplingAlgorithmFactory;
-	private IOrderedLabeledAttributeArrayDataset dataset;
+	private ISamplingAlgorithmFactory<WekaInstances, ASamplingAlgorithm<WekaInstances>> samplingAlgorithmFactory;
+	private WekaInstances dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
 	private String identifier;
@@ -37,8 +38,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	private int fullDatasetSize = -1;
 
 	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<IOrderedLabeledAttributeArrayDataset, ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset>> samplingAlgorithmFactory,
-			final IOrderedLabeledAttributeArrayDataset dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier,
+			final ISamplingAlgorithmFactory<WekaInstances, ASamplingAlgorithm<WekaInstances>> samplingAlgorithmFactory,
+			final WekaInstances dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier,
 			final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -57,7 +58,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	@Override
 	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
-		ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier,
+		ConfigurationLearningCurveExtrapolator<WekaInstance, WekaInstances> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier,
 				this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed,
 				this.identifier, this.configurations);
 

@@ -15,8 +15,8 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
- * Time series forest classifier as described in Deng, Houtao et al. “A Time
- * Series Forest for Classification and Feature Extraction.” Inf. Sci. 239
+ * Time series forest classifier as described in Deng, Houtao et al. "A Time
+ * Series Forest for Classification and Feature Extraction." Inf. Sci. 239
  * (2013): 142-153. Consists of mutliple {@link TimeSeriesTreeClassifier} classifier.
  *
  * This classifier only supports univariate time series prediction.

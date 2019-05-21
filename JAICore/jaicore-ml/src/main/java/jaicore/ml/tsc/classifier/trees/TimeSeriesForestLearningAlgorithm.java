@@ -19,8 +19,8 @@ import jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /**
  * Algorithm to train a time series forest classifier as described in Deng,
- * Houtao et al. “A Time Series Forest for Classification and Feature
- * Extraction.” Inf. Sci. 239 (2013): 142-153. Consists of mutliple
+ * Houtao et al. "A Time Series Forest for Classification and Feature
+ * Extraction." Inf. Sci. 239 (2013): 142-153. Consists of mutliple
  * {@link TimeSeriesTreeClassifier} classifier.
  *
  * @author Julian Lienen

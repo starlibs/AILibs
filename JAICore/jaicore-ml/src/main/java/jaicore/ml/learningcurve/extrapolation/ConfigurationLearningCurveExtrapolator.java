@@ -1,5 +1,6 @@
 package jaicore.ml.learningcurve.extrapolation;
 
+import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
@@ -14,10 +15,10 @@ import weka.classifiers.Classifier;
  * @author noni4
  */
 
-public class ConfigurationLearningCurveExtrapolator extends LearningCurveExtrapolator {
+public class ConfigurationLearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance, D extends IOrderedLabeledAttributeArrayDataset<I>> extends LearningCurveExtrapolator<I, D> {
 
-	public ConfigurationLearningCurveExtrapolator(final Classifier learner, final IOrderedLabeledAttributeArrayDataset dataset, final double trainsplit, final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<IOrderedLabeledAttributeArrayDataset, ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset>> samplingAlgorithmFactory, final long seed, final String identifier, final double[] configurations) {
+	public ConfigurationLearningCurveExtrapolator(final Classifier learner, final D dataset, final double trainsplit, final int[] anchorpoints, final ISamplingAlgorithmFactory<D, ASamplingAlgorithm<D>> samplingAlgorithmFactory,
+			final long seed, final String identifier, final double[] configurations) {
 		super(null, learner, dataset, trainsplit, anchorpoints, samplingAlgorithmFactory, seed);
 		this.extrapolationMethod = new LCNetExtrapolationMethod(identifier);
 		((LCNetExtrapolationMethod) this.extrapolationMethod).setConfigurations(configurations);
