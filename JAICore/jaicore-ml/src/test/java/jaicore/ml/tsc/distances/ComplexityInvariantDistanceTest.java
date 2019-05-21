@@ -1,7 +1,6 @@
 package jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,22 +49,18 @@ public class ComplexityInvariantDistanceTest {
      * Robustness test: When initializing with <code>null</code> for the distance
      * measure, the constructor is supposed to throw an IllegalArgumentExpection.
      */
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testRobustnessForNullDistanceMeasure() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new ComplexityInvariantDistance(null, stretchingComplexity);
-        });
+           new ComplexityInvariantDistance(null, stretchingComplexity);
     }
 
     /**
      * Robustness test: When initializing with <code>null</code> for the complexity
      * measure, the constructor is supposed to throw an IllegalArgumentExpection.
      */
-    @Test
+    @Test (expected = IllegalArgumentException.class)
     public void testRobustnessForNullComplexityMeasure() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new ComplexityInvariantDistance(euclideanDistance, null);
-        });
+           new ComplexityInvariantDistance(euclideanDistance, null);
     }
 
 }

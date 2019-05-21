@@ -1,7 +1,5 @@
 package jaicore.ml.core.dataset.weka;
 
-import java.util.List;
-
 import jaicore.basic.sets.ElementDecorator;
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
 import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
@@ -23,7 +21,7 @@ public class WekaInstance extends ElementDecorator<Instance> implements INumeric
 	}
 
 	@Override
-	public <T> IAttributeValue<T> getAttributeValue(final int position, final Class<T> type) {
+	public <T> IAttributeValue<T> getAttributeValueAtPosition(final int position, final Class<T> type) {
 		return this.getAttributeValue(this.getElement().attribute(position), type);
 	}
 
@@ -59,8 +57,8 @@ public class WekaInstance extends ElementDecorator<Instance> implements INumeric
 	}
 
 	@Override
-	public List<IAttributeValue<?>> getAttributeValues() {
-		return null;
+	public IAttributeValue<?>[] getAllAttributeValues() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

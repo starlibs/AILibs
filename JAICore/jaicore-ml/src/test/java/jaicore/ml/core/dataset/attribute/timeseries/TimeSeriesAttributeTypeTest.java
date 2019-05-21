@@ -1,7 +1,6 @@
 package jaicore.ml.core.dataset.attribute.timeseries;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;

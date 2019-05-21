@@ -107,10 +107,10 @@ public class WekaInstancesUtil {
 
 			for (int i = 0; i < dataset.getNumberOfAttributes(); i++) {
 				if (dataset.getAttributeTypes().get(i) instanceof NumericAttributeType) {
-					IAttributeValue<Double> val = inst.getAttributeValue(i, Double.class);
+					IAttributeValue<Double> val = inst.getAttributeValueAtPosition(i, Double.class);
 					iNew.setValue(i, val.getValue());
 				} else if (dataset.getAttributeTypes().get(i) instanceof CategoricalAttributeType) {
-					IAttributeValue<String> val = inst.getAttributeValue(i, String.class);
+					IAttributeValue<String> val = inst.getAttributeValueAtPosition(i, String.class);
 					iNew.setValue(i, val.getValue());
 				}
 			}

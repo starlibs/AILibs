@@ -71,7 +71,7 @@ public class WekaUtil {
 	 */
 	// TODO: Add meta attribute support
 	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance instance) {
-		List<IAttributeValue<?>> attValues = instance.getAttributeValues();
+		IAttributeValue<?>[] attValues = instance.getAllAttributeValues();
 		List<INDArray> indArrays = new ArrayList<>();
 
 		for (final IAttributeValue<?> attValue : attValues) {

@@ -3,6 +3,8 @@ package jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.INumericArrayInstance;
@@ -16,6 +18,7 @@ import jaicore.ml.core.dataset.INumericArrayInstance;
  */
 public class KMeansStratiAssigner<I extends INumericArrayInstance, D extends IDataset<I>> extends ClusterStratiAssigner<I, D> {
 
+	private Logger logger = LoggerFactory.getLogger(KMeansStratiAssigner.class);
 	/**
 	 * Constructor for KMeansStratiAssigner.
 	 * 
@@ -35,9 +38,10 @@ public class KMeansStratiAssigner<I extends INumericArrayInstance, D extends IDa
 		// Perform initial Clustering of the dataset.
 		JDKRandomGenerator rand = new JDKRandomGenerator();
 		rand.setSeed(this.randomSeed);
-		KMeansPlusPlusClusterer<I> clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure,
-				rand);
+		KMeansPlusPlusClusterer<I> clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure, rand);
+		logger.info("Clustering dataset with {} instances.", dataset.size());
 		this.clusters = clusterer.cluster(dataset);
+		logger.info("Finished clustering");
 	}
 
 }

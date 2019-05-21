@@ -36,7 +36,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.Discretizat
  * @author Felix Weiland
  *
  */
-public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLabeledAttributeArrayInstance, D extends IOrderedLabeledAttributeArrayDataset<I>> implements IStratiAmountSelector<I, D>, IStratiAssigner<I, D> {
+public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLabeledAttributeArrayInstance, D extends IOrderedLabeledAttributeArrayDataset<I>> implements IStratiAmountSelector<D>, IStratiAssigner<I, D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
 
@@ -291,14 +291,14 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 				if (attributeIndex == dataset.getNumberOfAttributes()) {
 					raw = datapoint.getTargetValue(Object.class).getValue();
 				} else {
-					raw = datapoint.getAttributeValue(attributeIndex, Object.class).getValue();
+					raw = datapoint.getAttributeValueAtPosition(attributeIndex, Object.class).getValue();
 				}
 				value = discretizationHelper.discretize((double) raw, discretizationPolicies.get(attributeIndex));
 			} else {
 				if (attributeIndex == dataset.getNumberOfAttributes()) {
 					value = datapoint.getTargetValue(Object.class).getValue();
 				} else {
-					value = datapoint.getAttributeValue(attributeIndex, Object.class).getValue();
+					value = datapoint.getAttributeValueAtPosition(attributeIndex, Object.class).getValue();
 				}
 			}
 
@@ -373,7 +373,7 @@ class ListProcessor<I extends ILabeledAttributeArrayInstance, D extends AILabele
 					attributeValues.get(attributeIndex).add(instance.getTargetValue(Object.class).getValue());
 
 				} else {
-					attributeValues.get(attributeIndex).add(instance.getAttributeValue(attributeIndex, Object.class).getValue());
+					attributeValues.get(attributeIndex).add(instance.getAttributeValueAtPosition(attributeIndex, Object.class).getValue());
 				}
 			}
 		}

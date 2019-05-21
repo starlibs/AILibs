@@ -1,6 +1,6 @@
 package jaicore.ml.tsc.filter.transform;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 

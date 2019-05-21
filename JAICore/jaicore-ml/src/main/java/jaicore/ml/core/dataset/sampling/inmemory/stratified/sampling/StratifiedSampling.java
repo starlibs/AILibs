@@ -25,7 +25,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEvent;
 public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Logger logger = LoggerFactory.getLogger(StratifiedSampling.class);
-	private IStratiAmountSelector<I, D> stratiAmountSelector;
+	private IStratiAmountSelector<D> stratiAmountSelector;
 	private IStratiAssigner<I, D> stratiAssigner;
 	private Random random;
 	private IDataset[] strati = null;
@@ -44,7 +44,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 	 * @param random
 	 *            Random object for sampling inside of the strati.
 	 */
-	public StratifiedSampling(IStratiAmountSelector<I, D> stratiAmountSelector, IStratiAssigner<I, D> stratiAssigner,
+	public StratifiedSampling(IStratiAmountSelector<D> stratiAmountSelector, IStratiAssigner<I, D> stratiAssigner,
 			Random random, D input) {
 		super(input);
 		this.stratiAmountSelector = stratiAmountSelector;

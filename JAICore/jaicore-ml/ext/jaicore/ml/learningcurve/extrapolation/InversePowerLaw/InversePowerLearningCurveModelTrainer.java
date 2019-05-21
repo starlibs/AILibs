@@ -52,7 +52,6 @@ public class InversePowerLearningCurveModelTrainer {
 		int s = newData.numAttributes();
 		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(newData);
-
 		return slw;
 	}
 

@@ -1,20 +1,11 @@
 package jaicore.ml.core.dataset;
 
-import java.util.List;
-
 import org.apache.commons.math3.ml.clustering.Clusterable;
 
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 public interface INumericArrayInstance extends IAttributeArrayInstance, Clusterable {
 	public IAttributeValue<Double> getAttributeValue(int position);
-
-	/**
-	 * Getter for the attribute values.
-	 *
-	 * @return The attribute values of the instance.
-	 */
-	public List<IAttributeValue<?>> getAttributeValues();
 
 	/**
 	 * Turns the instance into a double vector.

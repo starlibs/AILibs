@@ -10,11 +10,11 @@ import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedS
 
 public class StratifiedSamplingFactory<I, D extends IOrderedDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, StratifiedSampling<I, D>> {
 
-	private IStratiAmountSelector<I, D> stratiAmountSelector;
+	private IStratiAmountSelector<D> stratiAmountSelector;
 	private IStratiAssigner<I, D> stratiAssigner;
 	private StratifiedSampling<I, D> previousRun = null;
 
-	public StratifiedSamplingFactory(IStratiAmountSelector<I, D> stratiAmountSelector, IStratiAssigner<I, D> stratiAssigner) {
+	public StratifiedSamplingFactory(IStratiAmountSelector<D> stratiAmountSelector, IStratiAssigner<I, D> stratiAssigner) {
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 	}

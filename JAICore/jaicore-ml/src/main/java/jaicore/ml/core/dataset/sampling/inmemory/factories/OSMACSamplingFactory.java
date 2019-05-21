@@ -7,9 +7,9 @@ import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.casecontrol.OSMAC;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class OSMACSamplingFactory<D extends IDataset<ILabeledAttributeArrayInstance>> implements IRerunnableSamplingAlgorithmFactory<D, OSMAC<D>> {
+public class OSMACSamplingFactory<I extends ILabeledAttributeArrayInstance, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, OSMAC<I, D>> {
 
-	private OSMAC<D> previousRun;
+	private OSMAC<I, D> previousRun;
 	private int preSampleSize = -1;
 
 	/**
@@ -23,13 +23,13 @@ public class OSMACSamplingFactory<D extends IDataset<ILabeledAttributeArrayInsta
 	}
 
 	@Override
-	public void setPreviousRun(OSMAC<D> previousRun) {
+	public void setPreviousRun(OSMAC<I, D> previousRun) {
 		this.previousRun = previousRun;
 	}
 
 	@Override
-	public OSMAC<D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
-		OSMAC<D> osmac = new OSMAC<>(random, this.preSampleSize, inputDataset);
+	public OSMAC<I, D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
+		OSMAC<I, D> osmac = new OSMAC<>(random, this.preSampleSize, inputDataset);
 		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null) {
 			osmac.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
 			osmac.setChosenInstance(previousRun.getChosenInstance());

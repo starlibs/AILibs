@@ -29,6 +29,8 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 
 	protected PilotEstimateSampling(final D input) {
 		super(input);
+		if (!(input instanceof WekaInstances))
+			throw new IllegalArgumentException("Pilot Estimate Sampling currently only works with WekaInstances. The signature is kept general to avoid refactoring later on.");
 	}
 
 	public I getChosenInstance() {
@@ -158,10 +160,10 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 				this.logger.error("Cannot build classifier", e);
 				this.terminate();
 			}
-			this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(((WekaInstances) sampleCopy).getList(), pilotEstimator);
+			this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 		}
 		return this.activate();
 	}
 
-	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator);
+	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(D instances, Classifier pilotEstimator);
 }

@@ -6,7 +6,6 @@ import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import jaicore.ml.clustering.GMeans;
-import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.INumericArrayInstance;
 
@@ -28,7 +27,7 @@ import jaicore.ml.core.dataset.INumericArrayInstance;
  * 
  * @author Lukas Brandt
  */
-public class GMeansStratiAmountSelectorAndAssigner<I extends INumericArrayInstance, D extends IDataset<I>> extends ClusterStratiAssigner<I, D> implements IStratiAmountSelector<I, D> {
+public class GMeansStratiAmountSelectorAndAssigner<I extends INumericArrayInstance, D extends IDataset<I>> extends ClusterStratiAssigner<I, D> implements IStratiAmountSelector<D> {
 
 	private GMeans<I> clusterer;
 

@@ -36,7 +36,7 @@ public class SimpleInstance implements INumericLabeledAttributeArrayInstance {
 	}
 
 	@Override
-	public <T> IAttributeValue<T> getAttributeValue(final int position, final Class<T> type) {
+	public <T> IAttributeValue<T> getAttributeValueAtPosition(final int position, final Class<T> type) {
 		return (IAttributeValue<T>) this.attributeValues.get(position);
 	}
 
@@ -85,9 +85,8 @@ public class SimpleInstance implements INumericLabeledAttributeArrayInstance {
 	}
 
 	@Override
-	public List<IAttributeValue<?>> getAttributeValues() {
-		// TODO Auto-generated method stub
-		return null;
+	public IAttributeValue<?>[] getAllAttributeValues() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

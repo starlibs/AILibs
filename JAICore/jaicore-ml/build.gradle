@@ -32,10 +32,15 @@ dependencies {
 
 	// end dependencies for meka
 	
+	// weka dependencies
 	compile ('de.upb.isys:interruptable-weka:0.0.17') {
 		  	exclude group: 'log4j'
 	    	exclude group: 'org.slf4j'
 	}
+	compile ('nz.ac.waikato.cms.weka:rotationForest:1.0.3') {
+		exclude group: 'weka-dev'
+	}
+	
 	
 	//JTwig template engine
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"

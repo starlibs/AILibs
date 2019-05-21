@@ -32,9 +32,9 @@ import jaicore.basic.MathExt;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import jaicore.logging.ToJSONStringUtil;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
+import jaicore.ml.core.dataset.weka.WekaInstances;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.EMultilabelPerformanceMeasure;
@@ -469,7 +469,7 @@ public class MLPlanBuilder {
 	//
 	//	}
 
-	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory,
+	public void  withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstances, ? extends ASamplingAlgorithm<WekaInstances>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		this.factoryForPipelineEvaluationInSearchPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);
 		//		this.factoryForPipelineEvaluationInSelectionPhase = new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod);

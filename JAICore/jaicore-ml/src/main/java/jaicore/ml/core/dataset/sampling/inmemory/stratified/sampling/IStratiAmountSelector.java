@@ -8,7 +8,7 @@ import jaicore.ml.core.dataset.IDataset;
  * 
  * @author Lukas Brandt
  */
-public interface IStratiAmountSelector<I, D extends IDataset<I>> {
+public interface IStratiAmountSelector<D extends IDataset<?>> {
 
 	/**
 	 * Select a suitable amount of strati for a Dataset.

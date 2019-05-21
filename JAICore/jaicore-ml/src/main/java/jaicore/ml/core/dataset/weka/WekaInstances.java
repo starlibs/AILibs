@@ -47,7 +47,7 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 	}
 
 	@Override
-	public AILabeledAttributeArrayDataset<WekaInstance> createEmpty() {
+	public WekaInstances createEmpty() {
 		return new WekaInstances(new Instances(this.getList(), 0));
 	}
 }
