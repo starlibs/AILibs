@@ -22,6 +22,3 @@ project(":hasco").projectDir = new File(configPrefix,"hasco")
 
 include 'mlplan'
 project(":mlplan").projectDir = new File(configPrefix,"mlplan")
-
-include 'tsctestenv'
-project(":tsctestenv").projectDir = new File("tsctestenv")
