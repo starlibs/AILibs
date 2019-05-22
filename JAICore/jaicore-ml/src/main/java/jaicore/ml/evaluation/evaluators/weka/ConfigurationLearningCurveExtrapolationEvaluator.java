@@ -37,10 +37,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<WekaInstances<Object>, ASamplingAlgorithm<WekaInstances<Object>>> samplingAlgorithmFactory,
-			final WekaInstances<Object> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier,
-			final double[] configurations) {
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstances<Object>, ASamplingAlgorithm<WekaInstances<Object>>> samplingAlgorithmFactory,
+			final WekaInstances<Object> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -58,11 +56,10 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	@Override
 	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
-		ConfigurationLearningCurveExtrapolator<WekaInstance<Object>, WekaInstances<Object>> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier,
-				this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed,
-				this.identifier, this.configurations);
-
 		try {
+			ConfigurationLearningCurveExtrapolator<WekaInstance<Object>, WekaInstances<Object>> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement,
+					this.anchorpoints, this.samplingAlgorithmFactory, this.seed, this.identifier, this.configurations);
+
 			// Create the extrapolator and calculate the accuracy the classifier would have
 			// if it was trained on the complete dataset.
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();
@@ -76,8 +73,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
 		} catch (Exception e) {
-			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
-					e.getClass().getName(), e.getMessage());
+			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;
 		}
 	}

@@ -9,6 +9,7 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import jaicore.ml.core.dataset.weka.WekaInstance;
 import jaicore.ml.core.dataset.weka.WekaInstances;
@@ -21,7 +22,7 @@ public class AnchorpointsCreationTest {
 
 	@Test
 	public void anchorpointsAreCreatedAndHaveTheValues()
-			throws IOException, InvalidAnchorPointsException, AlgorithmException, InterruptedException, ClassNotFoundException {
+			throws IOException, InvalidAnchorPointsException, AlgorithmException, InterruptedException, ClassNotFoundException, DatasetCreationException {
 		int[] xValues = new int[] { 2, 4, 8, 16, 32, 64 };
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();

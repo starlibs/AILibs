@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
@@ -91,9 +92,9 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 	@Override
 	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
-		LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.train, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
-				this.seed);
 		try {
+			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.train, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
+					this.seed);
 			// Create the extrapolator and calculate sample size of the saturation point
 			// with the given epsilon
 			AnalyticalLearningCurve learningCurve = (AnalyticalLearningCurve) extrapolator.extrapolateLearningCurve();
@@ -108,7 +109,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 			Instances testInstances = ((WekaInstances<Object>) this.test).getList();
 			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointInstances, testInstances);
 			return evaluator.evaluate(classifier);
-		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException e) {
+		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException | DatasetCreationException e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;
 		}

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.ILabeledInstance;
 import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
@@ -59,18 +60,20 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.sample = (D)this.getInput().createEmpty();
-			D sampleCopy = (D)this.getInput().createEmpty();
-			for (I instance : this.getInput()) {
-				sampleCopy.add(instance);
+			try {
+				this.sample = (D) this.getInput().createEmpty();
+				D sampleCopy = (D) this.getInput().createEmpty();
+				for (I instance : this.getInput()) {
+					sampleCopy.add(instance);
+				}
+				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(((WekaInstances<?>) sampleCopy).getList(), this.pilotEstimator);
+				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
-			this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(
-					((WekaInstances<?>)sampleCopy).getList(), this.pilotEstimator);
-			this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			return this.activate();
 		case active:
 			I choosenInstance;
@@ -92,15 +95,13 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends
 		return null;
 	}
 
-	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(final Instances instances,
-			final Classifier pilotEstimator) {
+	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(final Instances instances, final Classifier pilotEstimator) {
 		double[] weights = new double[instances.size()];
 		for (int i = 0; i < instances.size(); i++) {
 			try {
 				double clazz = this.pilotEstimator.classifyInstance(instances.get(i));
 				if (clazz == instances.get(i).classValue()) {
-					weights[i] = this.addForRightClassification - pilotEstimator
-							.distributionForInstance(instances.get(i))[(int) instances.get(i).classValue()];
+					weights[i] = this.addForRightClassification - pilotEstimator.distributionForInstance(instances.get(i))[(int) instances.get(i).classValue()];
 				} else {
 					weights[i] = this.baseValue + pilotEstimator.distributionForInstance(instances.get(i))[(int) clazz];
 				}

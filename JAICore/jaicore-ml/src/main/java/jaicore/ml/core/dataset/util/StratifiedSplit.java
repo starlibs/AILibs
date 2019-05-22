@@ -6,6 +6,7 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
@@ -45,6 +46,8 @@ public class StratifiedSplit<I extends INumericLabeledAttributeArrayInstance<L>,
 			throw new AlgorithmException("Stratified split has been cancelled");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} catch (DatasetCreationException e) {
+			throw new AlgorithmException("Could not create an empty copy of the given dataset.");
 		}
 	}
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.basic.sets.ListDecorator;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import weka.core.Instance;
@@ -25,7 +26,7 @@ public class WekaInstances<L> extends ListDecorator<Instances, Instance, WekaIns
 		for (int i = 0; i < numAttributes; i++) {
 			this.attributeTypes.add(WekaInstancesUtil.transformWEKAAttributeToAttributeType(list.attribute(i)));
 		}
-		this.targetType = (IAttributeType<L>)this.attributeTypes.get(targetIndex);
+		this.targetType = (IAttributeType<L>) this.attributeTypes.get(targetIndex);
 		this.attributeTypes.remove(targetIndex);
 	}
 
@@ -45,12 +46,11 @@ public class WekaInstances<L> extends ListDecorator<Instances, Instance, WekaIns
 	}
 
 	@Override
-	public WekaInstances<L> createEmpty() {
+	public WekaInstances<L> createEmpty() throws DatasetCreationException {
 		try {
 			return new WekaInstances<>(new Instances(this.getList(), 0));
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			return null;
+			throw new DatasetCreationException(e);
 		}
 	}
 }

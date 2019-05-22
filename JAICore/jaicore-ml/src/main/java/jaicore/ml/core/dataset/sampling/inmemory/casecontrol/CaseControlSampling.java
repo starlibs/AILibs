@@ -5,6 +5,7 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.ILabeledInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
@@ -34,7 +35,11 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.sample = (D)getInput().createEmpty();
+			try {
+				this.sample = (D)getInput().createEmpty();
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			}
 
 			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
 

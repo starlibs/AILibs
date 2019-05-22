@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import jaicore.ml.core.dataset.weka.WekaInstance;
 import jaicore.ml.core.dataset.weka.WekaInstances;
@@ -47,7 +48,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 
-	private void createSplit(WekaInstances<Object> dataset, double trainsplit, long seed) {
+	private void createSplit(WekaInstances<Object> dataset, double trainsplit, long seed) throws DatasetCreationException {
 		this.train = dataset.createEmpty();
 		this.test = dataset.createEmpty();
 		WekaInstances<Object> data = dataset.createEmpty();
@@ -59,13 +60,13 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 
 		// Stratify the data by class
 		Map<Object, WekaInstances<Object>> classStrati = new HashMap<>();
-		dataset.forEach(d -> {
+		for (WekaInstance<Object> d : dataset) {
 			Object c = d.getTargetValue();
 			if (!classStrati.containsKey(c)) {
 				classStrati.put(c, dataset.createEmpty());
 			}
 			classStrati.get(c).add(d);
-		});
+		};
 
 		// Retrieve strati sizes
 		Map<Object, Integer> classStratiSizes = new HashMap<>(classStrati.size());
