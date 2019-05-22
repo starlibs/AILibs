@@ -1,0 +1,22 @@
+{
+  "repository" : "AutoFE filters",
+  "components" : [ {
+    "name" : "autofe.algorithm.hasco.filter.image.CatalanoWrapperFilter",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractFilter", "BasicFilter" ],
+    "parameter" : [ {
+    	"name" : "catFilter",
+    	"type" : "cat",
+    	"default" : "GaussianBlur",
+    	"values" : ["GaussianBlur", "SobelEdgeDetector", "ExtractBoundary", "DifferenceEdgeDetector", "Erosion", "FastVariance", "Emboss", "GaborFilter", "HighBoost", "HomogenityEdgeDetector","HorizontalRunLengthSmoothing", "ImageQuantization","ImageNormalization", "MorphologicGradientImage", "KirschCompassEdgeDetector", "IsotropicCompassEdgeDetector", "RobertsCrossEdgeDetector", "SobelCompassEdgeDetector", "WeightedMedian"]
+    }],
+    "dependencies" : [ ]
+  }, {
+    "name" : "autofe.algorithm.hasco.filter.image.LocalBinaryPatternFilter",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractFilter" , "BasicFilter"],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }
+  ]
+}

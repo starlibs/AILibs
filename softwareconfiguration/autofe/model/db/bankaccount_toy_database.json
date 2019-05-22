@@ -1,0 +1,140 @@
+{
+  "tables": [
+    {
+      "name": "BankAccount",
+      "columns": [
+        {
+          "fullName": "BankAccount.BankAccountId",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "BankAccount.Balance",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "BankAccount.TransactionCounter",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "BankAccount.BankName",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "BankAccount.Credible",
+          "type": "TEXT",
+          "isTarget": true,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": true
+    },
+    {
+      "name": "Customer",
+      "columns": [
+        {
+          "fullName": "Customer.CustomerId",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "Customer.BankAccountId",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Customer.FirstName",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "Orders",
+      "columns": [
+        {
+          "fullName": "Orders.OrderId",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "Orders.CustomerId",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Orders.OrderDate",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "Product",
+      "columns": [
+        {
+          "fullName": "Product.ProductId",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "Product.OrderId",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Product.ProductName",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Product.Price",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    }
+  ],
+  "forwards": [
+    {
+      "fromTableName": "BankAccount",
+      "toTableName": "Customer",
+      "commonAttributeName": "BankAccountId"
+    }
+  ],
+  "backwards": [
+    {
+      "fromTableName": "Customer",
+      "toTableName": "Orders",
+      "commonAttributeName": "CustomerId"
+    },
+    {
+      "fromTableName": "Orders",
+      "toTableName": "Product",
+      "commonAttributeName": "OrderId"
+    }
+  ],
+  "jdbcDriver": "sqlite",
+  "jdbcDatabase" : "model/db/bankaccount_toy_database.db"
+
+}

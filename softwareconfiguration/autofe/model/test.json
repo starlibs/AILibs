@@ -1,0 +1,44 @@
+{
+	"repository" : "AutoFE test space",
+	"include": ["./filters.json"],
+	"components" : [ {
+	  	    "name" : "pipeline",
+	  	    "providedInterface" : [ "FilterPipeline"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "pipe",
+	  	    		"name": "AbstractFilter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    },{
+	  	    "name" : "autofe.MakeUnion",
+	  	    "providedInterface" : [ "AbstractFilter", "MakeUnion"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "filter1",
+	  	    		"name": "AbstractPipeline"
+	  	    	},
+	  	    	{
+	  	    		"id": "filter2",
+	  	    		"name": "AbstractFilter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }, {
+	  	    "name" : "autofe.MakeForward",
+	  	    "providedInterface" : [ "AbstractFilter", "MakeForward", "AbstractPipeline"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "filter",
+	  	    		"name": "BasicFilter"
+	  	    	},
+	  	    	{
+	  	    		"id": "source",
+	  	    		"name": "AbstractPipeline"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }
+	    ]
+}

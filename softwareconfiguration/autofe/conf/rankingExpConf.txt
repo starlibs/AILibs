@@ -1,0 +1,14 @@
+mem.max = 16392
+cpu.max = 6
+
+db.host = localhost
+db.username = experiments2
+db.password = experiments123!
+db.database = experiments
+db.table = rankingExperiments
+
+datasets = mnist
+benchmarks = Cluster, Ensemble, Random, COCO
+
+keyfields = datasets, benchmarks
+resultfields = kendallsTau
