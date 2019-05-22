@@ -17,4 +17,10 @@ public interface PropertyProcessedAlgorithmEvent {
 	public boolean correspondsToEventOfClass(Class<?> eventClass);
 
 	public long getTimestampOfEvent();
+
+	@Override
+	public int hashCode();
+
+	@Override
+	public boolean equals(Object obj);
 }

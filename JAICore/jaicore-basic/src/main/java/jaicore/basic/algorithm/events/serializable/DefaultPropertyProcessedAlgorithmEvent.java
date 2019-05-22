@@ -52,6 +52,7 @@ public class DefaultPropertyProcessedAlgorithmEvent implements PropertyProcessed
 		return properties.get(propertyName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <N> N getProperty(String propertyName, Class<N> expectedClassToBeReturned) {
 
@@ -88,6 +89,61 @@ public class DefaultPropertyProcessedAlgorithmEvent implements PropertyProcessed
 			LOGGER.warn("Cannot find class with name {}.", getCompleteOriginalEventName(), e);
 			return null;
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((completeOriginalEventName == null) ? 0 : completeOriginalEventName.hashCode());
+		result = prime * result + ((eventName == null) ? 0 : eventName.hashCode());
+		result = prime * result + ((properties == null) ? 0 : properties.hashCode());
+		result = prime * result + (int) (timestampOfEvent ^ (timestampOfEvent >>> 32));
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		DefaultPropertyProcessedAlgorithmEvent other = (DefaultPropertyProcessedAlgorithmEvent) obj;
+		if (completeOriginalEventName == null) {
+			if (other.completeOriginalEventName != null) {
+				return false;
+			}
+		} else if (!completeOriginalEventName.equals(other.completeOriginalEventName)) {
+			return false;
+		}
+		if (eventName == null) {
+			if (other.eventName != null) {
+				return false;
+			}
+		} else if (!eventName.equals(other.eventName)) {
+			return false;
+		}
+		if (properties == null) {
+			if (other.properties != null) {
+				return false;
+			}
+		} else if (!properties.equals(other.properties)) {
+			return false;
+		}
+		if (timestampOfEvent != other.timestampOfEvent) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "DefaultPropertyProcessedAlgorithmEvent [eventName=" + eventName + ", completeOriginalEventName=" + completeOriginalEventName + ", properties=" + properties + ", timestampOfEvent=" + timestampOfEvent + "]";
 	}
 
 }

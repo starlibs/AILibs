@@ -3,6 +3,7 @@ package jaicore.graphvisualizer.events.recorder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,15 +44,6 @@ public class AlgorithmEventHistory implements ILoggingCustomizable {
 		return currentTime;
 	}
 
-	// private long getReceptionTimeOfFirstEvent() {
-	// Optional<AlgorithmEventHistoryEntry> firstHistoryEntryOptional = this.entries.stream().findFirst();
-	// if (!firstHistoryEntryOptional.isPresent()) {
-	// return -1;
-	// }
-	//
-	// return firstHistoryEntryOptional.get().getTimeEventWasReceived();
-	// }
-
 	public AlgorithmEventHistoryEntry getEntryAtTimeStep(final int timestep) {
 		return this.entries.get(timestep);
 	}
@@ -71,6 +63,46 @@ public class AlgorithmEventHistory implements ILoggingCustomizable {
 		this.logger.info("Switching logger name to {}", name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Switched logger name to {}", name);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((entries == null) ? 0 : entries.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		AlgorithmEventHistory other = (AlgorithmEventHistory) obj;
+		if (entries == null) {
+			if (other.entries != null) {
+				return false;
+			}
+		} else if (!entries.equals(other.entries)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		String header = "AlgorithmEventHistory \n";
+		StringJoiner joiner = new StringJoiner("\n");
+		for (AlgorithmEventHistoryEntry entry : entries) {
+			joiner.add(entry.toString());
+		}
+		return header + joiner.toString();
 	}
 
 }
