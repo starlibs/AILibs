@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hasco.events.HASCOSolutionEvent;
 import hasco.model.ComponentInstance;
 import hasco.model.UnparametrizedComponentInstance;
 import jaicore.basic.sets.SetUtil.Pair;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -74,16 +74,17 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		List<String> reqInterfacePath = selectionPath.stream().map(p -> p.getX()).collect(Collectors.toList());
 		reqInterfacePath.remove(0); // this is null and only needed as a selector in the selectionPath
 		ObservableList<String> items = this.componentSelector.getItems();
-		for (HASCOSolutionEvent<?> se : model.getAllSeenSolutionEventsUnordered()) {
-			ComponentInstance ci = se.getSolutionCandidate().getComponentInstance();
+		for (ScoredSolutionCandidateInfo scoredSolutionCandidateInfo : model.getAllSeenSolutionCandidateFoundInfosUnordered()) {
+			ComponentInstance ci = model.deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
 			if (!ci.matchesPathRestriction(selectionPath)) {
 				continue;
 			}
 
 			/* determine sub-component relevant for this path and add the respective component lexicographically correctly (unless it is already in the list) */
 			UnparametrizedComponentInstance uci = new UnparametrizedComponentInstance(ci).getSubComposition(reqInterfacePath);
-			if (this.componentSelector.getItems().contains(uci.getComponentName()))
+			if (this.componentSelector.getItems().contains(uci.getComponentName())) {
 				continue;
+			}
 			logger.trace("Relevant UCI of {} for path {} is {}", ci, reqInterfacePath, uci);
 			int n = items.size();
 			String nameOfNewComponent = uci.getComponentName();
@@ -98,7 +99,7 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		long duration = System.currentTimeMillis() - start;
 		logger.debug("Update of {} took {}ms", this, duration);
 	}
-	
+
 	/**
 	 * Resets the combo box to the wild-card and removes all child nodes.
 	 */
@@ -106,11 +107,9 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		this.componentSelector.getItems().removeIf(s -> !s.equals("*"));
 		getChildren().clear();
 	}
-	
 
 	/**
-	 * Gets the choices made in the combo boxes on the path from the root to here.
-	 * The first entry has a null-key just saying what the choice for the root component has been.
+	 * Gets the choices made in the combo boxes on the path from the root to here. The first entry has a null-key just saying what the choice for the root component has been.
 	 * 
 	 * @return List of choices.
 	 */
@@ -119,10 +118,9 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 		path.add(new Pair<>(this.requiredInterface, componentSelector.getValue()));
 		return path;
 	}
-	
+
 	/**
-	 * Determines the set of all selection paths from here to a any leaf.
-	 * For the root node, this is the set of constraints specified in the combo boxes.
+	 * Determines the set of all selection paths from here to a any leaf. For the root node, this is the set of constraints specified in the combo boxes.
 	 * 
 	 * @return Collection of paths to leafs.
 	 */
@@ -146,7 +144,7 @@ public class HASCOModelStatisticsComponentSelector extends TreeItem<HASCOModelSt
 	public String getRequiredInterface() {
 		return requiredInterface;
 	}
-	
+
 	public ComboBox<String> getComponentSelector() {
 		return componentSelector;
 	}

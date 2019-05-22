@@ -24,8 +24,8 @@ import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.logging.ToJSONStringUtil;
 
 /**
- * For a given <code>Component</code>, a <code>Component Instance</code> defines all parameter values and the
- * required interfaces (recursively) and thus provides a grounding of the respective <code>Component</code>.
+ * For a given <code>Component</code>, a <code>Component Instance</code> defines all parameter values and the required interfaces (recursively) and thus provides a grounding of the respective
+ * <code>Component</code>.
  *
  * @author fmohr, mwever
  *
@@ -43,11 +43,23 @@ public class ComponentInstance {
 	private final Map<String, String> parameterValues;
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
+	@SuppressWarnings("unused")
+	private ComponentInstance() {
+		// for serialization purposes
+		component = null;
+		parameterValues = null;
+		satisfactionOfRequiredInterfaces = null;
+	}
+
 	/**
 	 * Constructor for creating a <code>ComponentInstance</code> for a particular <code>Component</code>.
-	 * @param component The component that is grounded.
-	 * @param parameterValues A map containing the parameter values of this grounding.
-	 * @param satisfactionOfRequiredInterfaces The refinement of the required interfaces.
+	 * 
+	 * @param component
+	 *            The component that is grounded.
+	 * @param parameterValues
+	 *            A map containing the parameter values of this grounding.
+	 * @param satisfactionOfRequiredInterfaces
+	 *            The refinement of the required interfaces.
 	 */
 	public ComponentInstance(@JsonProperty("component") final Component component, @JsonProperty("parameterValues") final Map<String, String> parameterValues,
 			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
@@ -89,7 +101,8 @@ public class ComponentInstance {
 	}
 
 	/**
-	 * @param param The parameter for which the value shall be returned.
+	 * @param param
+	 *            The parameter for which the value shall be returned.
 	 * @return The value of the parameter.
 	 */
 	public String getParameterValue(final Parameter param) {
@@ -97,7 +110,8 @@ public class ComponentInstance {
 	}
 
 	/**
-	 * @param paramName The name of the parameter for which the value is requested.
+	 * @param paramName
+	 *            The name of the parameter for which the value is requested.
 	 * @return The value of the parameter with the given name.
 	 */
 	public String getParameterValue(final String paramName) {
@@ -105,8 +119,7 @@ public class ComponentInstance {
 	}
 
 	/**
-	 * @return This method returns a mapping of interface IDs to component
-	 *         instances.
+	 * @return This method returns a mapping of interface IDs to component instances.
 	 */
 	public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
 		return this.satisfactionOfRequiredInterfaces;
@@ -126,7 +139,9 @@ public class ComponentInstance {
 
 	/**
 	 * This method checks, whether a given list of paths of refinements conforms the constraints for parameter refinements.
-	 * @param paths A list of paths of refinements to be checked.
+	 * 
+	 * @param paths
+	 *            A list of paths of refinements to be checked.
 	 * @return Returns true if everything is alright and false if there is an issue with the given paths.
 	 */
 	public boolean matchesPathRestrictions(final Collection<List<Pair<String, String>>> paths) {
@@ -140,7 +155,9 @@ public class ComponentInstance {
 
 	/**
 	 * This method checks, whether a path of refinements conforms the constraints for parameter refinements.
-	 * @param path A path of refinements to be checked.
+	 * 
+	 * @param path
+	 *            A path of refinements to be checked.
 	 * @return Returns true if everything is alright and false if there is an issue with the given path.
 	 */
 	public boolean matchesPathRestriction(final List<Pair<String, String>> path) {
@@ -250,7 +267,8 @@ public class ComponentInstance {
 	 * Returns the description of a <code>ComponentInstance</code> as a pretty print with indentation.
 	 *
 	 * @return A string representing this object in JSON format.
-	 * @throws IOException An IOException is thrown if the object cannot be serialized to a String.
+	 * @throws IOException
+	 *             An IOException is thrown if the object cannot be serialized to a String.
 	 */
 	@JsonIgnore
 	public String getPrettyPrint() throws IOException {

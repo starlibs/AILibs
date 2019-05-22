@@ -35,6 +35,7 @@ public abstract class ASimpleMVCPluginView<M extends IGUIPluginModel, C extends 
 	/**
 	 * Gets the node that represents this view
 	 */
+	@Override
 	public N getNode() {
 		return node;
 	}

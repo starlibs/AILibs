@@ -6,6 +6,12 @@ import java.util.Collection;
 public class CategoricalParameterDomain implements IParameterDomain {
 	private final String[] values;
 
+	@SuppressWarnings("unused")
+	private CategoricalParameterDomain() {
+		// for serialization
+		values = null;
+	}
+
 	public CategoricalParameterDomain(final String[] values) {
 		super();
 		this.values = values;
@@ -64,7 +70,7 @@ public class CategoricalParameterDomain implements IParameterDomain {
 		if (!(otherDomain instanceof CategoricalParameterDomain)) {
 			return false;
 		}
-		CategoricalParameterDomain otherCategoricalDomain = (CategoricalParameterDomain)otherDomain;
+		CategoricalParameterDomain otherCategoricalDomain = (CategoricalParameterDomain) otherDomain;
 		return Arrays.asList(this.values).containsAll(Arrays.asList(otherCategoricalDomain.getValues()));
 	}
 

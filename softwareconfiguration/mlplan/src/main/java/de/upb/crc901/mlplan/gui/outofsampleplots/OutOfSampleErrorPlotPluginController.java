@@ -85,7 +85,6 @@ public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginContro
 	}
 
 	private Classifier deserializeClassifier(String serializedClassifier) throws Exception {
-		System.out.println(serializedClassifier);
 		final byte[] bytes = Base64.getDecoder().decode(serializedClassifier);
 		Classifier classifier = (Classifier) SerializationHelper.read(new ByteArrayInputStream(bytes));
 		return classifier;

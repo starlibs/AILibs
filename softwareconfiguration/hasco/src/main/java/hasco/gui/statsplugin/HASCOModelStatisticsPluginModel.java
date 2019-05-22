@@ -1,5 +1,6 @@
 package hasco.gui.statsplugin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -7,12 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import hasco.events.HASCOSolutionEvent;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.UnparametrizedComponentInstance;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 
 /**
  * 
@@ -22,7 +25,11 @@ import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
  */
 public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCOModelStatisticsPluginView, HASCOModelStatisticsPluginController> {
 
-	private final Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> observedSolutionsGroupedModuloParameters = new HashMap<>();
+	private static final Logger LOGGER = LoggerFactory.getLogger(HASCOModelStatisticsPluginModel.class);
+
+	private ComponentInstanceSerializer componentInstanceSerializer = new ComponentInstanceSerializer();
+
+	private final Map<UnparametrizedComponentInstance, List<ScoredSolutionCandidateInfo>> observedSolutionsGroupedModuloParameters = new HashMap<>();
 	private final Map<String, Component> knownComponents = new HashMap<>();
 
 	/**
@@ -30,15 +37,20 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	 * 
 	 * @param solutionEvent
 	 */
-	public final void addEntry(HASCOSolutionEvent<Double> solutionEvent) {
-		ComponentInstance ci = solutionEvent.getSolutionCandidate().getComponentInstance();
+	public final void addEntry(ScoredSolutionCandidateInfo scoredSolutionCandidateInfo) {
+		ComponentInstance ci = deserializeComponentInstance(scoredSolutionCandidateInfo.getSolutionCandidateRepresentation());
+		if (ci == null) {
+			return;
+		}
 		UnparametrizedComponentInstance uci = new UnparametrizedComponentInstance(ci);
-		if (!observedSolutionsGroupedModuloParameters.containsKey(uci))
+		if (!observedSolutionsGroupedModuloParameters.containsKey(uci)) {
 			observedSolutionsGroupedModuloParameters.put(uci, new ArrayList<>());
-		observedSolutionsGroupedModuloParameters.get(uci).add(solutionEvent);
+		}
+		observedSolutionsGroupedModuloParameters.get(uci).add(scoredSolutionCandidateInfo);
 		ci.getContainedComponents().forEach(c -> {
-			if (!knownComponents.containsKey(c.getName()))
+			if (!knownComponents.containsKey(c.getName())) {
 				knownComponents.put(c.getName(), c);
+			}
 		});
 		getView().update();
 	}
@@ -48,19 +60,10 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	 * 
 	 * @return Collection of solutions.
 	 */
-	public Collection<HASCOSolutionEvent<Double>> getAllSeenSolutionEventsUnordered() {
-		List<HASCOSolutionEvent<Double>> solutionEvents = new ArrayList<>();
+	public Collection<ScoredSolutionCandidateInfo> getAllSeenSolutionCandidateFoundInfosUnordered() {
+		List<ScoredSolutionCandidateInfo> solutionEvents = new ArrayList<>();
 		observedSolutionsGroupedModuloParameters.values().forEach(l -> solutionEvents.addAll(l));
 		return solutionEvents;
-	}
-
-	/**
-	 * Gets all solutions received so far grouped in a map in which the keys are unparametrized component instances.
-	 * 
-	 * @return Map with all solutions grouped by unparametrized component instances
-	 */
-	public Map<UnparametrizedComponentInstance, List<HASCOSolutionEvent<Double>>> getObservedSolutionsGroupedModuloParameters() {
-		return observedSolutionsGroupedModuloParameters;
 	}
 
 	/**
@@ -77,10 +80,10 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 	 */
 	public DescriptiveStatistics getPerformanceStatisticsForComposition(UnparametrizedComponentInstance composition) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		observedSolutionsGroupedModuloParameters.get(composition).forEach(e -> stats.addValue(e.getSolutionCandidate().getScore()));
+		observedSolutionsGroupedModuloParameters.get(composition).forEach(e -> stats.addValue(parseScoreToDouble(e.getScore())));
 		return stats;
 	}
-	
+
 	/**
 	 * Clears the model (and subsequently the view)
 	 */
@@ -90,4 +93,18 @@ public class HASCOModelStatisticsPluginModel extends ASimpleMVCPluginModel<HASCO
 		knownComponents.clear();
 		getView().clear();
 	}
+
+	public ComponentInstance deserializeComponentInstance(String serializedComponentInstance) {
+		try {
+			return componentInstanceSerializer.deserializeComponentInstance(serializedComponentInstance);
+		} catch (IOException e) {
+			LOGGER.warn("Cannot deserialize component instance {}.", serializedComponentInstance, e);
+		}
+		return null;
+	}
+
+	public double parseScoreToDouble(String score) throws NumberFormatException {
+		return Double.parseDouble(score);
+	}
+
 }

@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
-import hasco.core.HASCOSolutionCandidate;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.graphvisualizer.events.gui.Histogram;
 import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfo;
 import javafx.application.Platform;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;
@@ -23,9 +23,9 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 
 	private final HASCOModelStatisticsComponentSelector rootNode; // the root of the TreeView shown at the top
 	private final Histogram histogram; // the histogram shown on the bottom
-	
+
 	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model) {
-		this (model, 100);
+		this(model, 100);
 	}
 
 	public HASCOModelStatisticsPluginView(HASCOModelStatisticsPluginModel model, int n) {
@@ -45,17 +45,16 @@ public class HASCOModelStatisticsPluginView extends ASimpleMVCPluginView<HASCOMo
 		rootNode.update();
 		updateHistogram();
 	}
-	
+
 	/**
-	 * Updates the histogram at the bottom.
-	 * This is called in both the update method of the general view as well as in the change listener of the combo boxes.
+	 * Updates the histogram at the bottom. This is called in both the update method of the general view as well as in the change listener of the combo boxes.
 	 */
 	public void updateHistogram() {
 		Collection<List<Pair<String, String>>> activeFilters = rootNode.getAllSelectionsOnPathToAnyLeaf();
-		List<HASCOSolutionCandidate<Double>> activeSolutions = getModel().getAllSeenSolutionEventsUnordered().stream().map(s -> s.getSolutionCandidate()).filter(ci -> ci.getComponentInstance().matchesPathRestrictions(activeFilters))
-				.collect(Collectors.toList());
+		List<ScoredSolutionCandidateInfo> activeSolutions = getModel().getAllSeenSolutionCandidateFoundInfosUnordered().stream()
+				.filter(i -> getModel().deserializeComponentInstance(i.getSolutionCandidateRepresentation()).matchesPathRestrictions(activeFilters)).collect(Collectors.toList());
 		DescriptiveStatistics stats = new DescriptiveStatistics();
-		activeSolutions.forEach(s -> stats.addValue(s.getScore()));
+		activeSolutions.forEach(s -> stats.addValue(getModel().parseScoreToDouble(s.getScore())));
 		Platform.runLater(() -> {
 			histogram.update(stats);
 		});
