@@ -1,0 +1,432 @@
+{
+  "tables": [
+    {
+      "name": "account",
+      "columns": [
+        {
+          "fullName": "account.account_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "account.district_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "account.frequency",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "account.date",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "card",
+      "columns": [
+        {
+          "fullName": "card.card_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "card.disp_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "card.type",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "card.isued",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "client",
+      "columns": [
+        {
+          "fullName": "client.client_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "client.gender",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "client.birth_date",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "client.district_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "disp",
+      "columns": [
+        {
+          "fullName": "disp.disp_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "disp.client_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "disp.account_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "disp.type",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "district",
+      "columns": [
+        {
+          "fullName": "district.district_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "district.A2",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A3",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A4",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A5",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A6",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A7",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A8",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A9",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A10",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A11",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A12",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A13",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A14",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A15",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "district.A16",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "loan",
+      "columns": [
+        {
+          "fullName": "loan.loan_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "loan.account_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "loan.date",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "loan.amount",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "loan.duration",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "loan.payments",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "loan.status",
+          "type": "TEXT",
+          "isTarget": true,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": true
+    },
+    {
+      "name": "order",
+      "columns": [
+        {
+          "fullName": "order.order_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "order.account_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "order.bank_to",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "order.account_to",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "order.amount",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "order.k_symbol",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "trans",
+      "columns": [
+        {
+          "fullName": "trans.trans_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "trans.account_id",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.date",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.type",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.operation",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.amount",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.balance",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.k_symbol",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.bank",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "trans.account",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    }
+  ],
+  "forwards": [
+    {
+      "fromTableName": "loan",
+      "toTableName": "account",
+      "commonAttributeName": "account_id"
+    },
+    {
+      "fromTableName": "account",
+      "toTableName": "district",
+      "commonAttributeName": "district_id"
+    }
+  ],
+  "backwards": [
+    {
+      "fromTableName": "account",
+      "toTableName": "order",
+      "commonAttributeName": "account_id"
+    },
+    {
+      "fromTableName": "account",
+      "toTableName": "trans",
+      "commonAttributeName": "account_id"
+    },
+    {
+      "fromTableName": "account",
+      "toTableName": "disp",
+      "commonAttributeName": "account_id"
+    },
+    {
+      "fromTableName": "district",
+      "toTableName": "client",
+      "commonAttributeName": "district_id"
+    },
+    {
+      "fromTableName": "client",
+      "toTableName": "disp",
+      "commonAttributeName": "client_id"
+    },
+    {
+      "fromTableName": "disp",
+      "toTableName": "card",
+      "commonAttributeName": "disp_id"
+    }
+  ],
+  "jdbcDriver": "mysql",
+  "jdbcUrl" : "isys-db.cs.upb.de",
+  "jdbcUsername" : "pgotfml",
+  "jdbcPassword" : "automl2018",
+  "jdbcDatabase" : "fweiland_financial"
+
+}
