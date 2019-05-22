@@ -10,7 +10,7 @@ import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.KmeansSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class KmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, KmeansSampling<I, D>> {
+public class KmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, KmeansSampling<I, D>> {
 
 	private KmeansSampling<I, D> previousRun;
 	private int k = -1;

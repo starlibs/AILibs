@@ -9,7 +9,7 @@ import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.KmeansSamplingFactory;
 
-public class KMeansSamplingTester extends GeneralSamplingTester {
+public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 
 	private static final long SEED = 1;
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
@@ -28,8 +28,8 @@ public class KMeansSamplingTester extends GeneralSamplingTester {
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance> dataset) {
-		KmeansSamplingFactory<INumericLabeledAttributeArrayInstance, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance>> factory = new KmeansSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number> dataset) {
+		KmeansSamplingFactory<INumericLabeledAttributeArrayInstance<Number>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number>> factory = new KmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			factory.setK(K);

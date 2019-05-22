@@ -7,7 +7,7 @@ import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.casecontrol.LocalCaseControlSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class LocalCaseControlSamplingFactory<I extends ILabeledAttributeArrayInstance, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, LocalCaseControlSampling<I, D>> {
+public class LocalCaseControlSamplingFactory<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, LocalCaseControlSampling<I, D>> {
 
 	private LocalCaseControlSampling<I, D> previousRun = null;
 	private int preSampleSize = -1;

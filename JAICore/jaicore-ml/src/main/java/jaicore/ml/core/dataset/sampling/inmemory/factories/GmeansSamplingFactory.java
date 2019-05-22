@@ -10,7 +10,7 @@ import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.GmeansSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class GmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, GmeansSampling<I, D>> {
+public class GmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, GmeansSampling<I, D>> {
 
 	private GmeansSampling<I, D> previousRun;
 	private long clusterSeed = System.currentTimeMillis();

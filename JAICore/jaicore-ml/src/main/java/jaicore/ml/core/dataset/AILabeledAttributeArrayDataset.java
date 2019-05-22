@@ -1,6 +1,5 @@
 package jaicore.ml.core.dataset;
 
-import java.util.Collection;
 import java.util.List;
 
 import jaicore.ml.core.dataset.attribute.IAttributeType;
@@ -12,14 +11,14 @@ import jaicore.ml.core.dataset.attribute.IAttributeType;
  *
  * @author wever
  */
-public interface AILabeledAttributeArrayDataset<I extends ILabeledAttributeArrayInstance> extends IDataset<I> {
+public interface AILabeledAttributeArrayDataset<I extends ILabeledAttributeArrayInstance<L>, L> extends IDataset<I> {
 
 	/**
 	 * Returns the attribute type of the target attribute.
 	 *
 	 * @return The attribute type of the target attribute.
 	 */
-	public <T> IAttributeType<T> getTargetType();
+	public IAttributeType<L> getTargetType();
 
 	/**
 	 * Returns the list of attribute types.

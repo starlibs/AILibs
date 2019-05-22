@@ -1,25 +1,22 @@
 package jaicore.ml.core.dataset;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
-import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 
 /**
  * Time Series Dataset.
  */
-public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSeriesInstance> {
+public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDataset<TimeSeriesInstance<L>, L> {
 
 	/** Number of instances contained in the dataset. */
 	private long numberOfInstances;
@@ -33,6 +30,8 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 	/** Target values for the instances. */
 	private INDArray targets;
 
+	private final IAttributeType<L> targetType;
+
 	/**
 	 * Attribute types for the time series variables contained in this dataset.
 	 * These are implicitly created/removed whenever a new timeseries variable (as
@@ -41,58 +40,20 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 	 */
 	private List<IAttributeType<?>> attributeTypes;
 
-	private IAttributeType<?> targetType;
-
 	/**
 	 * Creates a TimeSeries dataset. Let `n` be the number of instances.
 	 *
-	 * @param valueMatrices     Values for the time series variables. List of
-	 *                          2D-Arrays with shape `[n, ?]`.
+	 * @param valueMatrices Values for the time series variables. List of
+	 *            2D-Arrays with shape `[n, ?]`.
 	 * @param timestampMatrices Timestamps for the time series variables. List of
-	 *                          2D-Arrays with shape `[n, ?]`. Or `null` if no
-	 *                          timestamps exist for the corresponding time series
-	 *                          variable. The shape of the `i`th index must be equal
-	 *                          to the shape of the `i`th element of
-	 *                          `valueMatrices`.
-	 * @param targets           Target values for the instances.
-	 */
-	public TimeSeriesDataset(final List<INDArray> valueMatrices, final List<INDArray> timestampMatrices, final INDArray targets) {
-		// Parameter checks.
-		// ..
-		this.numberOfInstances = valueMatrices.get(0).shape()[0];
-		this.valueMatrices = valueMatrices;
-		this.timestampMatrices = timestampMatrices;
-		this.targets = targets;
-		// Create time series attributes types.
-		this.attributeTypes = new ArrayList<>();
-		for (INDArray valueMatrix : valueMatrices) {
-			this.addAttributeType(valueMatrix);
-		}
-		// Create target attribute type.
-		this.targetType = new NumericAttributeType();
-	}
-
-	/**
-	 * Creates a TimeSeries dataset. Let `n` be the number of instances.
-	 *
-	 * @param valueMatrices
-	 *            Values for the time series variables. List of 2D-Arrays with shape
-	 *            `[n, ?]`.
-	 * @param timestampMatrices
-	 *            Timestamps for the time series variables. List of 2D-Arrays with
-	 *            shape `[n, ?]`. Or `null` if no timestamps exist for the
-	 *            corresponding time series variable. The shape of the `i`th index
-	 *            must be equal to the shape of the `i`th element of
+	 *            2D-Arrays with shape `[n, ?]`. Or `null` if no
+	 *            timestamps exist for the corresponding time series
+	 *            variable. The shape of the `i`th index must be equal
+	 *            to the shape of the `i`th element of
 	 *            `valueMatrices`.
-	 * @param targets
-	 *            Target values for the instances.
-	 * @param classNamens
-	 *            Ordered list of String objects containing the mapped class names
-	 *            for the target values (target value 0 corresponds to first list
-	 *            element, ....).
+	 * @param targets Target values for the instances.
 	 */
-	public TimeSeriesDataset(final List<INDArray> valueMatrices, final List<INDArray> timestampMatrices, final INDArray targets,
-			final List<String> classNames) {
+	public TimeSeriesDataset(final List<INDArray> valueMatrices, final List<INDArray> timestampMatrices, final INDArray targets, final IAttributeType<L> targetType) {
 		// Parameter checks.
 		// ..
 		this.numberOfInstances = valueMatrices.get(0).shape()[0];
@@ -105,19 +66,19 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 			this.addAttributeType(valueMatrix);
 		}
 		// Create target attribute type.
-		this.targetType = new CategoricalAttributeType(classNames);
+		this.targetType = targetType;
 	}
 
 	/**
 	 * Add a time series variable to the dataset.
 	 *
-	 * @param valueMatrix     Values for the time series variable to add. 2D-Arrays
-	 *                        with shape `[n, ?]` where `n` is the number of
-	 *                        instances of the dataset.
+	 * @param valueMatrix Values for the time series variable to add. 2D-Arrays
+	 *            with shape `[n, ?]` where `n` is the number of
+	 *            instances of the dataset.
 	 * @param timestampMatrix Timestamps for the time series variable to add.
-	 *                        2D-Arrays with shape `[n, ?]` where `n` is the number
-	 *                        of instances of the dataset. Or `null` if no timestamp
-	 *                        exists for this time series variable.
+	 *            2D-Arrays with shape `[n, ?]` where `n` is the number
+	 *            of instances of the dataset. Or `null` if no timestamp
+	 *            exists for this time series variable.
 	 */
 	public void add(final INDArray valueMatrix, final INDArray timestampMatrix) {
 		// Parameter checks.
@@ -131,28 +92,31 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 	 * Removes the time series variable at a given index.
 	 *
 	 * @param index
+	 * @return 
 	 * @throws IndexOutOfBoundsException
 	 */
-	public void remove(final int index) throws IndexOutOfBoundsException {
+	public TimeSeriesInstance<L> remove(final int index) {
+		TimeSeriesInstance<L> instance = get(index);
 		this.valueMatrices.remove(index);
 		this.timestampMatrices.remove(index);
 		this.attributeTypes.remove(index);
+		return instance;
 	}
 
 	/**
 	 * Replaces the time series variable at a given index with a new one.
 	 *
-	 * @param index           Index of the time series varialbe to replace.
-	 * @param valueMatrix     Values for the time series variable to add. 2D-Arrays
-	 *                        with shape `[n, ?]` where `n` is the number of
-	 *                        instances of the dataset.
+	 * @param index Index of the time series varialbe to replace.
+	 * @param valueMatrix Values for the time series variable to add. 2D-Arrays
+	 *            with shape `[n, ?]` where `n` is the number of
+	 *            instances of the dataset.
 	 * @param timestampMatrix Timestamps for the time series variable to add.
-	 *                        2D-Arrays with shape `[n, ?]` where `n` is the number
-	 *                        of instances of the dataset. Or `null` if no timestamp
-	 *                        exists for this time series variable.
+	 *            2D-Arrays with shape `[n, ?]` where `n` is the number
+	 *            of instances of the dataset. Or `null` if no timestamp
+	 *            exists for this time series variable.
 	 * @throws IndexOutOfBoundsException Thrown if `numberOfInstances <= index`.
 	 */
-	public void replace(final int index, final INDArray valueMatrix, final INDArray timestampMatrix) throws IndexOutOfBoundsException {
+	public void replace(final int index, final INDArray valueMatrix, final INDArray timestampMatrix) {
 		this.valueMatrices.set(index, valueMatrix);
 		if (timestampMatrix != null && this.timestampMatrices != null && this.timestampMatrices.size() > index) {
 			this.timestampMatrices.set(index, timestampMatrix);
@@ -173,11 +137,11 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 		return this.numberOfInstances;
 	}
 
-	public INDArray getValues(final int index) throws IndexOutOfBoundsException {
+	public INDArray getValues(final int index) {
 		return this.valueMatrices.get(index);
 	}
 
-	public INDArray getTimestamps(final int index) throws IndexOutOfBoundsException {
+	public INDArray getTimestamps(final int index) {
 		return this.timestampMatrices.get(index);
 	}
 
@@ -207,8 +171,7 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 
 	private TimeSeriesAttributeType createAttributeType(final INDArray valueMatrix) {
 		int length = (int) valueMatrix.shape()[1];
-		TimeSeriesAttributeType type = new TimeSeriesAttributeType(length);
-		return type;
+		return new TimeSeriesAttributeType(length);
 	}
 
 	private void addAttributeType(final INDArray valueMatrix) {
@@ -224,41 +187,43 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 	 * Iterator for the @{@link}TimeSeriesDataset. Iterates and implicitly creates
 	 * the @{link}TimeSeriesInstance.
 	 */
-	class TimeSeriesDatasetIterator implements Iterator<TimeSeriesInstance> {
+	class TimeSeriesDatasetIterator implements Iterator<TimeSeriesInstance<L>> {
 
 		int current = 0;
 
 		@Override
 		public boolean hasNext() {
-			return TimeSeriesDataset.this.numberOfInstances > this.current ? true : false;
+			return TimeSeriesDataset.this.numberOfInstances > this.current;
 		}
 
 		@Override
-		public TimeSeriesInstance next() {
+		public TimeSeriesInstance<L> next() {
 			if (!this.hasNext()) {
 				throw new NoSuchElementException();
 			}
-			// Build attribute value as view on the row of the attribute matrix.
-			List<IAttributeValue<?>> attributeValues = new ArrayList<>();
-			for (int i = 0; i < TimeSeriesDataset.this.valueMatrices.size(); i++) {
-				INDArray viewOnCurrent = TimeSeriesDataset.this.valueMatrices.get(i).getRow(this.current);
-				IAttributeType<?> type = TimeSeriesDataset.this.attributeTypes.get(i);
-				IAttributeValue<?> value = type.buildAttributeValue(viewOnCurrent);
-				attributeValues.add(value);
-			}
-			// Build target value.
-			double target = TimeSeriesDataset.this.targets.getDouble(this.current);
-			IAttributeValue<?> targetValue = TimeSeriesDataset.this.targetType.buildAttributeValue(target);
-			// Return time series instance.
-			this.current++;
-			TimeSeriesInstance instance = new TimeSeriesInstance(attributeValues, targetValue);
-			return instance;
-		}
 
+			return get(this.current++);
+		}
 	}
 
 	@Override
-	public Iterator<TimeSeriesInstance> iterator() {
+	public TimeSeriesInstance<L> get(int index) {
+
+		// Build attribute value as view on the row of the attribute matrix.
+		List<IAttributeValue<?>> attributeValues = new ArrayList<>();
+		for (int i = 0; i < TimeSeriesDataset.this.valueMatrices.size(); i++) {
+			INDArray viewOnCurrent = TimeSeriesDataset.this.valueMatrices.get(i).getRow(index);
+			IAttributeType<?> type = TimeSeriesDataset.this.attributeTypes.get(i);
+			IAttributeValue<?> value = type.buildAttributeValue(viewOnCurrent);
+			attributeValues.add(value);
+		}
+		// Build target value.
+		double target = TimeSeriesDataset.this.targets.getDouble(index);
+		return new TimeSeriesInstance<>(attributeValues, targetType.buildAttributeValue(target).getValue());
+	}
+
+	@Override
+	public Iterator<TimeSeriesInstance<L>> iterator() {
 		return new TimeSeriesDatasetIterator();
 	}
 
@@ -273,79 +238,107 @@ public class TimeSeriesDataset implements AILabeledAttributeArrayDataset<TimeSer
 	}
 
 	@Override
-	public IAttributeType<?> getTargetType() {
+	public IAttributeType<L> getTargetType() {
 		return this.targetType;
 	}
 
 	@Override
-	public IDataset<TimeSeriesInstance> createEmpty() {
-		// TODO Auto-generated method stub
-		return null;
+	public IDataset<TimeSeriesInstance<L>> createEmpty() {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean add(TimeSeriesInstance e) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean add(TimeSeriesInstance<L> e) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends TimeSeriesInstance> c) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean addAll(Collection<? extends TimeSeriesInstance<L>> c) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean contains(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public <T> T[] toArray(T[] a) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void add(int arg0, TimeSeriesInstance<L> arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean addAll(int arg0, Collection<? extends TimeSeriesInstance<L>> arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int indexOf(Object arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int lastIndexOf(Object arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ListIterator<TimeSeriesInstance<L>> listIterator() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public ListIterator<TimeSeriesInstance<L>> listIterator(int arg0) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public TimeSeriesInstance<L> set(int arg0, TimeSeriesInstance<L> arg1) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public List<TimeSeriesInstance<L>> subList(int arg0, int arg1) {
+		throw new UnsupportedOperationException();
 	}
 }

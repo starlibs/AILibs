@@ -11,7 +11,7 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
-public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayInstance, D extends IDataset<I>> extends ASamplingAlgorithm<D> {
+public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ASamplingAlgorithm<D> {
 
 	protected List<CentroidCluster<I>> clusterResults = null;
 	protected int currentCluster = 0;
@@ -46,7 +46,7 @@ public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayIns
 			CentroidCluster<I> cluster = clusterResults.get(currentCluster++);
 			boolean same = true;
 			for (int i = 1; i < cluster.getPoints().size(); i++) {
-				if (!cluster.getPoints().get(i - 1).getTargetValue(Double.class).equals(cluster.getPoints().get(i).getTargetValue(Double.class))) {
+				if (!cluster.getPoints().get(i - 1).getTargetValue().equals(cluster.getPoints().get(i).getTargetValue())) {
 					same = false;
 					break;
 				}

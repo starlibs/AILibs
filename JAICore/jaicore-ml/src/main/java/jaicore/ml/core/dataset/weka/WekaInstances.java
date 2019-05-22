@@ -4,19 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jaicore.basic.sets.ListDecorator;
-import jaicore.ml.core.dataset.AINumericLabeledAttributeArrayDataset;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
-import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstance> implements IOrderedLabeledAttributeArrayDataset<WekaInstance> {
+public class WekaInstances<L> extends ListDecorator<Instances, Instance, WekaInstance<L>> implements IOrderedLabeledAttributeArrayDataset<WekaInstance<L>, L> {
 
-	private final IAttributeType<?> targetType;
+	private final IAttributeType<L> targetType;
 	private final List<IAttributeType<?>> attributeTypes = new ArrayList<>();
 
-	public WekaInstances(final Instances list) {
+	public WekaInstances(final Instances list) throws ClassNotFoundException {
 		super(list);
 		int targetIndex = list.classIndex();
 		if (targetIndex < 0) {
@@ -27,12 +26,12 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 		for (int i = 0; i < numAttributes; i++) {
 			this.attributeTypes.add(WekaInstancesUtil.transformWEKAAttributeToAttributeType(list.attribute(i)));
 		}
-		this.targetType = this.attributeTypes.get(targetIndex);
+		this.targetType = (IAttributeType<L>) this.attributeTypes.get(targetIndex);
 		this.attributeTypes.remove(targetIndex);
 	}
 
 	@Override
-	public IAttributeType<?> getTargetType() {
+	public IAttributeType<L> getTargetType() {
 		return this.targetType;
 	}
 
@@ -47,7 +46,11 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 	}
 
 	@Override
-	public WekaInstances createEmpty() {
-		return new WekaInstances(new Instances(this.getList(), 0));
+	public WekaInstances<L> createEmpty() throws DatasetCreationException {
+		try {
+			return new WekaInstances<>(new Instances(this.getList(), 0));
+		} catch (ClassNotFoundException e) {
+			throw new DatasetCreationException(e);
+		}
 	}
 }

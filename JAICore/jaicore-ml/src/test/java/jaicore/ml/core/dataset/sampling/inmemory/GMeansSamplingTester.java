@@ -9,7 +9,7 @@ import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.GmeansSamplingFactory;
 
-public class GMeansSamplingTester extends GeneralSamplingTester {
+public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 
 	private static final long SEED = 1;
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
@@ -27,8 +27,8 @@ public class GMeansSamplingTester extends GeneralSamplingTester {
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance> dataset) {
-		GmeansSamplingFactory<INumericLabeledAttributeArrayInstance, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance>> factory = new GmeansSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number> dataset) {
+		GmeansSamplingFactory<INumericLabeledAttributeArrayInstance<Number>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number>> factory = new GmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) dataset.size());

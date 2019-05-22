@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
 /**
@@ -75,14 +76,14 @@ public class TimeSeriesLoader {
 	 *             created from the given file.
 	 */
 	@SuppressWarnings("unchecked")
-	public static TimeSeriesDataset loadArff(final File arffFile) throws TimeSeriesLoadingException {
+	public static TimeSeriesDataset<String> loadArff(final File arffFile) throws TimeSeriesLoadingException {
 		if (arffFile == null)
 			throw new IllegalArgumentException("Parameter 'arffFile' must not be null!");
 
 		Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-		return new TimeSeriesDataset(Arrays.asList((INDArray) tsTargetClassNames[0]), new ArrayList<INDArray>(),
-				(INDArray) tsTargetClassNames[1], (List<String>) tsTargetClassNames[2]);
+		return new TimeSeriesDataset<>(Arrays.asList((INDArray) tsTargetClassNames[0]), new ArrayList<INDArray>(),
+				(INDArray) tsTargetClassNames[1], new CategoricalAttributeType((List<String>) tsTargetClassNames[2]));
 	}
 
 	/**
@@ -100,7 +101,7 @@ public class TimeSeriesLoader {
 	 *             created from the given files.
 	 */
 	@SuppressWarnings("unchecked")
-	public static TimeSeriesDataset loadArffs(final File... arffFiles) throws TimeSeriesLoadingException {
+	public static TimeSeriesDataset<String> loadArffs(final File... arffFiles) throws TimeSeriesLoadingException {
 		if (arffFiles == null)
 			throw new IllegalArgumentException("Parameter 'arffFiles' must not be null!");
 
@@ -144,7 +145,7 @@ public class TimeSeriesLoader {
 
 			matrices.add((INDArray) tsTargetClassNames[0]);
 		}
-		return new TimeSeriesDataset(matrices, new ArrayList<INDArray>(), target, classNames);
+		return new TimeSeriesDataset<>(matrices, new ArrayList<INDArray>(), target, new CategoricalAttributeType(classNames));
 	}
 
 	/**

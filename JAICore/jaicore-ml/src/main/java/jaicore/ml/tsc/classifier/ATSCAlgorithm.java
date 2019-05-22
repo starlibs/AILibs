@@ -10,31 +10,30 @@ import jaicore.ml.core.dataset.TimeSeriesDataset;
  * 
  * @author Julian Lienen
  *
- * @param <TARGETTYPE>
+ * @param <L>
  *            The type of the target that the <CLASSIFIER> to be trained
- * @param <TARGETVALUETYPE>
+ * @param <V>
  *            The value type of the target that the <CLASSIFIER> to be trained
  *            predicts.
- * @param <DATASET>
+ * @param <D>
  *            The type of the time series data set used to learn from and
  *            predict batches.
- * @param <CLASSIFIER>
+ * @param <C>
  *            The time series classifier which is modified and returned as
  *            algorithm result.
  */
-public abstract class ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET extends TimeSeriesDataset, CLASSIFIER extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>>
-		implements IAlgorithm<TimeSeriesDataset, CLASSIFIER> {
+public abstract class ATSCAlgorithm<L, V, D extends TimeSeriesDataset<L>, C extends TSClassifier<L, V, D>> implements IAlgorithm<TimeSeriesDataset<L>, C> {
 
 	/**
 	 * The model which is maintained during algorithm calls
 	 */
-	protected CLASSIFIER model;
+	protected C model;
 
 	/**
 	 * The {@link TimeSeriesDataset} object used for maintaining the
 	 * <code>model</code>.
 	 */
-	protected TimeSeriesDataset input;
+	protected D input;
 
 	/**
 	 * Setter for the model to be maintained.
@@ -44,8 +43,8 @@ public abstract class ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET extends
 	 *            algorithm calls.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>> void setModel(T model) {
-		this.model = (CLASSIFIER) model;
+	public <T extends TSClassifier<L, V, D>> void setModel(T model) {
+		this.model = (C) model;
 	}
 
 	/**
@@ -55,7 +54,7 @@ public abstract class ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET extends
 	 *            The {@link TimeSeriesDataset} object (or a subtype) used for the
 	 *            model maintenance
 	 */
-	public void setInput(DATASET input) {
+	public void setInput(D input) {
 		this.input = input;
 	}
 
@@ -63,7 +62,7 @@ public abstract class ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET extends
 	 * Getter for the data set input used during algorithm calls.
 	 */
 	@Override
-	public DATASET getInput() {
-		return (DATASET) this.input;
+	public D getInput() {
+		return this.input;
 	}
 }
