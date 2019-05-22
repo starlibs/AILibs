@@ -8,11 +8,11 @@ import jaicore.basic.sets.SetUtil.Pair;
 
 public class LoggerUtil {
 
-	public static String getExceptionInfo(Throwable e) {
+	public static String getExceptionInfo(final Throwable e) {
 		return getExceptionInfo(e, new ArrayList<>());
 	}
 
-	public static String getExceptionInfo(Throwable e, List<Pair<String, Object>> additionalInformationObjects) {
+	public static String getExceptionInfo(Throwable e, final List<Pair<String, Object>> additionalInformationObjects) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n\tError class: ");
 		sb.append(e.getClass().getName());
@@ -26,8 +26,7 @@ public class LoggerUtil {
 		Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
 		while (e.getCause() != null) {
 			e = e.getCause();
-			sb.append("\n\tCaused by " + e.getClass().getName() + " with message " + e.getMessage()
-					+ ". Stack trace of the cause:");
+			sb.append("\n\tCaused by " + e.getClass().getName() + " with message " + e.getMessage() + ". Stack trace of the cause:");
 			Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
 		}
 
@@ -41,7 +40,7 @@ public class LoggerUtil {
 		return sb.toString();
 	}
 
-	public static String logException(Throwable e) {
+	public static String logException(final Throwable e) {
 		return getExceptionInfo(e, new ArrayList<>());
 	}
 }

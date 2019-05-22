@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledInstance;
+import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.classifiers.Classifier;
@@ -34,7 +34,7 @@ import weka.core.Instances;
  * @param <I>
  */
 
-public class ClassifierWeightedSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
+public class ClassifierWeightedSampling<I extends ILabeledInstance, D extends IOrderedDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
 
@@ -43,7 +43,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 	private double addForRightClassification;
 	private double baseValue;
 
-	public ClassifierWeightedSampling(final Random rand, final Instances instances, final IDataset<I> input) {
+	public ClassifierWeightedSampling(final Random rand, final Instances instances, final D input) {
 		super(input);
 		this.rand = rand;
 		this.pilotEstimator = new NaiveBayes();
@@ -63,8 +63,8 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.sample = this.getInput().createEmpty();
-			IDataset<I> sampleCopy = this.getInput().createEmpty();
+			this.sample = (D)this.getInput().createEmpty();
+			D sampleCopy = (D)this.getInput().createEmpty();
 			for (I instance : this.getInput()) {
 				sampleCopy.add(instance);
 			}

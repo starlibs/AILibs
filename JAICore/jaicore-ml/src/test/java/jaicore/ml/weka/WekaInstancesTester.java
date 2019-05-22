@@ -19,7 +19,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
@@ -83,15 +83,15 @@ public class WekaInstancesTester {
 
 			/* check for each value that the contained information is correct */
 			for (int j = 0; j <= numAttributes; j++) {
-				IAttributeValue<?> value = j < numAttributes ? inst.getAttributeValue(j, Object.class) : inst.getTargetValue(Object.class);
+				IAttributeValue<?> value = j < numAttributes ? inst.getAttributeValueAtPosition(j, Object.class) : inst.getTargetValue(Object.class);
 				if (value instanceof NumericAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValue(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), (Double)value.getValue(), 0.0);
+					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), (Double)value.getValue(), 0.0);
 				}
 				else if (value instanceof BooleanAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValue(j, Object.class) + " but should have " + (data.get(i).value(j) == 1.0), data.get(i).value(j) == 1.0, value.getValue());
+					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + (data.get(i).value(j) == 1.0), data.get(i).value(j) == 1.0, value.getValue());
 				}
 				else if (value instanceof CategoricalAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValue(j, Object.class) + " but should have " + data.get(i).stringValue(j), data.get(i).stringValue(j), value.getValue());
+					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).stringValue(j), data.get(i).stringValue(j), value.getValue());
 				} else {
 					fail("Unsupported attribute value type " + value.getClass());
 				}
@@ -106,7 +106,7 @@ public class WekaInstancesTester {
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 		int size = wrapped.size();
-		IDataset<?> emptyCopy = wrapped.createEmpty();
+		AILabeledAttributeArrayDataset<?> emptyCopy = wrapped.createEmpty();
 
 		/* check that the empty copy indeed IS empty and that the original list is unchanged */
 		assertTrue(emptyCopy.isEmpty());
