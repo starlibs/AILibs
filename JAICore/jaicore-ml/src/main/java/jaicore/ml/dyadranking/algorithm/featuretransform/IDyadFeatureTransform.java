@@ -47,7 +47,7 @@ public interface IDyadFeatureTransform {
 	default Map<IDyadRankingInstance, Map<Dyad, Vector>> getPreComputedFeatureTransforms(DyadRankingDataset dataset) {
 		Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms = new HashMap<>();
 		for (IDyadRankingInstance instance : dataset) {
-			IDyadRankingInstance rankingInstance = (IDyadRankingInstance) instance;
+			IDyadRankingInstance rankingInstance = instance;
 			Map<Dyad, Vector> transforms = new HashMap<>();
 			for (int i = 0; i < rankingInstance.length(); i++) {
 				transforms.put(rankingInstance.getDyadAtPosition(i),

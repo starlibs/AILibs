@@ -1,6 +1,5 @@
 package jaicore.ml.dyadranking.algorithm;
 
-import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.predictivemodel.IBatchLearner;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;

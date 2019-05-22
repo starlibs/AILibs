@@ -83,8 +83,7 @@ import weka.core.Instances;
  * @author Mirko Juergens
  *
  */
-public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
-		implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V> {
+public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DyadRankingBasedNodeEvaluator.class);
 
@@ -187,8 +186,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		this.evaluatedPaths = config.getNumberOfEvaluations();
 		this.randomlyCompletedPaths = config.getNumberOfRandomSamples();
 
-		logger.debug("Initialized DyadRankingBasedNodeEvaluator with evalNum: {} and completionNum: {}",
-				randomlyCompletedPaths, evaluatedPaths);
+		logger.debug("Initialized DyadRankingBasedNodeEvaluator with evalNum: {} and completionNum: {}", randomlyCompletedPaths, evaluatedPaths);
 
 		this.characterizer = new ComponentInstanceVectorFeatureGenerator(loader.getComponents());
 
@@ -253,8 +251,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		if (allRankedPaths.isEmpty())
 			return (V) ((Double) 9000.0d);
 		// get the top k paths
-		List<ComponentInstance> topKRankedPaths = allRankedPaths.subList(0,
-				Math.min(evaluatedPaths, allRankedPaths.size()));
+		List<ComponentInstance> topKRankedPaths = allRankedPaths.subList(0, Math.min(evaluatedPaths, allRankedPaths.size()));
 		// evaluate the top k paths
 		List<Pair<ComponentInstance, V>> allEvaluatedPaths = null;
 		try {
@@ -271,11 +268,10 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		Duration evaluationTime = Duration.between(startOfEvaluation, Instant.now());
 		logger.info("Evaluation took {}ms", evaluationTime.toMillis());
 		V bestSoultion = getBestSolution(allEvaluatedPaths);
-		logger.info("Best solution is {}, {}", bestSoultion,
-				allEvaluatedPaths.stream().map(Pair::getY).collect(Collectors.toList()));
+		logger.info("Best solution is {}, {}", bestSoultion, allEvaluatedPaths.stream().map(Pair::getY).collect(Collectors.toList()));
 		if (bestSoultion == null)
 			return (V) ((Double) 9000.0d);
-		eventBus.post(new FValueEvent<V>(bestSoultion, evaluationTime.toMillis()));
+		eventBus.post(new FValueEvent<V>(null, bestSoultion, evaluationTime.toMillis()));
 		return bestSoultion;
 	}
 
@@ -342,8 +338,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 			} else {
 				Vector y = new DenseDoubleVector(characterizer.characterize(cI));
 				if (scaler != null) {
-					List<IDyadRankingInstance> asList = Arrays.asList(new SparseDyadRankingInstance(
-							new DenseDoubleVector(datasetMetaFeatures), Arrays.asList(y)));
+					List<IDyadRankingInstance> asList = Arrays.asList(new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures), Arrays.asList(y)));
 					DyadRankingDataset dataset = new DyadRankingDataset(asList);
 					scaler.transformAlternatives(dataset);
 				}
@@ -395,8 +390,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		List<Vector> alternatives = new ArrayList<>(randomPipelines.keySet());
 
 		/* Use a sparse instance for ranking */
-		SparseDyadRankingInstance toRank = new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures),
-				alternatives);
+		SparseDyadRankingInstance toRank = new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures), alternatives);
 		IDyadRankingInstance rankedInstance;
 		try {
 			rankedInstance = dyadRanker.predict(toRank);
@@ -421,8 +415,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 * @throws ExecutionException
 	 * @throws TimeoutException
 	 */
-	private List<Pair<ComponentInstance, V>> evaluateTopKPaths(List<ComponentInstance> topKRankedPaths)
-			throws InterruptedException, ExecutionException, TimeoutException {
+	private List<Pair<ComponentInstance, V>> evaluateTopKPaths(List<ComponentInstance> topKRankedPaths) throws InterruptedException, ExecutionException, TimeoutException {
 
 		// we use the executionservice mechanism to make sure we wait at most 5 seconds
 		// for an evaluation
@@ -449,8 +442,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		}
 		// collect the results but not wait longer than 5 seconds for a result to appear
 		for (int i = 0; i < topKRankedPaths.size(); i++) {
-			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(),
-					i + 1, topKRankedPaths.size());
+			logger.info("Got {} solutions. Waiting for iteration {} of max iterations {}", evaluatedSolutions.size(), i + 1, topKRankedPaths.size());
 			Future<Pair<ComponentInstance, V>> evaluatedPipe = completionService.poll(20, TimeUnit.SECONDS);
 			if (evaluatedPipe == null) {
 				logger.info("Didn't receive any futures (expected {} futures)", topKRankedPaths.size());
@@ -501,8 +493,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	private void initializeRandomSearch() {
 		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		@SuppressWarnings("unchecked")
-		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(
-				(GraphGenerator<T, String>) graphGenerator, nodeEvaluator);
+		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>((GraphGenerator<T, String>) graphGenerator, nodeEvaluator);
 		randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);
 		while (!(randomPathCompleter.next() instanceof AlgorithmInitializedEvent))
 			;
@@ -571,14 +562,12 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 		try {
 			@SuppressWarnings("unchecked")
 			List<T> pathToSolution = (List<T>) pathToPipelines.getKey(solution);
-			EvaluatedSearchGraphPath<T, ?, V> solutionObject = new EvaluatedSearchGraphPath<>(pathToSolution, null,
-					score);
+			EvaluatedSearchGraphPath<T, ?, V> solutionObject = new EvaluatedSearchGraphPath<>(pathToSolution, null, score);
 			solutionObject.setAnnotation("fTime", time);
 			solutionObject.setAnnotation("timeToSolution", Duration.between(firstEvaluation, Instant.now()).toMillis());
 			solutionObject.setAnnotation("nodesEvaluatedToSolution", this.randomlyCompletedPaths);
 			logger.debug("Posting solution {}", solutionObject);
-			this.eventBus.post(
-					new EvaluatedSearchSolutionCandidateFoundEvent<>("DyadRankingBasedCompletion", solutionObject));
+			this.eventBus.post(new EvaluatedSearchSolutionCandidateFoundEvent<>("DyadRankingBasedCompletion", solutionObject));
 		} catch (Exception e) {
 			logger.error("Couldn't post solution to event bus.", e);
 		}

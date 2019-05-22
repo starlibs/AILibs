@@ -33,7 +33,7 @@ import jaicore.ml.dyadranking.Dyad;
  */
 public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implements IOrderedLabeledDataset<IDyadRankingInstance,IDyadRankingInstance> {
 	
-	private Logger logger = LoggerFactory.getLogger(DyadRankingDataset.class);
+	private transient Logger logger = LoggerFactory.getLogger(DyadRankingDataset.class);
 
 	private static final long serialVersionUID = -1102494546233523992L;
 
@@ -153,11 +153,6 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 		return result;
 	}
 
-	@Override
-	public IDyadRankingInstance get(int index) {
-		return (IDyadRankingInstance) super.get(index);
-	}
-
 	/**
 	 * Converts this data set to a list of ND4j {@link INDArray}s. 
 	 * Each dyad ranking is represented by a 2D-matrix where a row is a dyad.
@@ -166,7 +161,7 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 	public List<INDArray> toND4j() {
 		List<INDArray> ndList = new ArrayList<>();
 		for (IDyadRankingInstance instance : this) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+			IDyadRankingInstance drInstance = instance;
 			ndList.add(dyadRankingToMatrix(drInstance));
 		}
 		return ndList;	
