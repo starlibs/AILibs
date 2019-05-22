@@ -22,7 +22,7 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 	 */
 	private static final long serialVersionUID = 4216559441244072999L;
 
-	private Collection<Component> possibleComponents;
+	private transient Collection<Component> possibleComponents; // the idea is not to serialize the deserializer, so this can be transient
 
 	public ComponentInstanceDeserializer(Collection<Component> possibleComponents) {
 		super(ComponentInstance.class);

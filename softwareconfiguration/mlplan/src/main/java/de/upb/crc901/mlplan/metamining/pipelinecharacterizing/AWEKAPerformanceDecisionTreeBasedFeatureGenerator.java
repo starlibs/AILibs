@@ -5,6 +5,7 @@ import java.util.Map;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.exception.TrainingException;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -20,7 +21,7 @@ public abstract class AWEKAPerformanceDecisionTreeBasedFeatureGenerator
 		implements IPerformanceDecisionTreeBasedFeatureGenerator {
 
 	@Override
-	public void train(Map<Vector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws Exception {
+	public void train(Map<Vector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws TrainingException {
 		// Step 1: Transform to Instances Object
 		ArrayList<Attribute> attInfo = new ArrayList<>();
 		for (int i = 0; i < intermediatePipelineRepresentationsWithPerformanceValues.keySet().toArray(new Vector[0])[0]
@@ -40,7 +41,11 @@ public abstract class AWEKAPerformanceDecisionTreeBasedFeatureGenerator
 			train.add(new DenseInstance(1, values));
 		});
 
-		train(train);
+		try {
+			train(train);
+		} catch (AlgorithmException e) {
+			throw new TrainingException("Could not train the " + getClass().getName() + ".", e);
+		}
 	}
 
 	/**

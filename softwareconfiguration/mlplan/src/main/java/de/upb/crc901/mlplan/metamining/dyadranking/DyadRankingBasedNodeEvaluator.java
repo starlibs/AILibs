@@ -55,6 +55,7 @@ import jaicore.ml.metafeatures.LandmarkerCharacterizer;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
@@ -215,7 +216,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public V f(Node<T, ?> node) throws InterruptedException {
+	public V f(Node<T, ?> node) throws InterruptedException, NodeEvaluationException {
 		if (firstEvaluation == null) {
 			this.firstEvaluation = Instant.now();
 		}
@@ -245,7 +246,12 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 			throw new InterruptedException();
 		}
 		// order them according to dyad ranking
-		List<ComponentInstance> allRankedPaths = getDyadRankedPaths(randomPaths);
+		List<ComponentInstance> allRankedPaths;
+		try {
+			allRankedPaths = getDyadRankedPaths(randomPaths);
+		} catch (PredictionException e1) {
+			throw new NodeEvaluationException(e1, "Could not rank nodes");
+		}
 
 		// random search failed to find anything here
 		if (allRankedPaths.isEmpty())
@@ -324,7 +330,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 		return completedPaths;
 	}
 
-	private List<ComponentInstance> getDyadRankedPaths(List<List<T>> randomPaths) {
+	private List<ComponentInstance> getDyadRankedPaths(List<List<T>> randomPaths) throws PredictionException {
 		Map<Vector, ComponentInstance> pipelineToCharacterization = new HashMap<>();
 		// extract componentInstances that we can rank
 		for (List<T> randomPath : randomPaths) {
@@ -386,23 +392,18 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 		return new DenseDoubleVector(yPrime);
 	}
 
-	private List<ComponentInstance> rankRandomPipelines(Map<Vector, ComponentInstance> randomPipelines) {
+	private List<ComponentInstance> rankRandomPipelines(Map<Vector, ComponentInstance> randomPipelines) throws PredictionException {
 		List<Vector> alternatives = new ArrayList<>(randomPipelines.keySet());
 
 		/* Use a sparse instance for ranking */
 		SparseDyadRankingInstance toRank = new SparseDyadRankingInstance(new DenseDoubleVector(datasetMetaFeatures), alternatives);
 		IDyadRankingInstance rankedInstance;
-		try {
-			rankedInstance = dyadRanker.predict(toRank);
-			List<ComponentInstance> rankedPipelines = new ArrayList<>();
-			for (Dyad dyad : rankedInstance) {
-				rankedPipelines.add(randomPipelines.get(dyad.getAlternative()));
-			}
-			return rankedPipelines;
-		} catch (PredictionException e) {
-			logger.error("Couldn't rank charaterized pipelines.", e);
-			throw new RuntimeException(e);
+		rankedInstance = dyadRanker.predict(toRank);
+		List<ComponentInstance> rankedPipelines = new ArrayList<>();
+		for (Dyad dyad : rankedInstance) {
+			rankedPipelines.add(randomPipelines.get(dyad.getAlternative()));
 		}
+		return rankedPipelines;
 	}
 
 	/**

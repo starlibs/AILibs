@@ -3,6 +3,7 @@ package de.upb.crc901.mlplan.metamining.pipelinecharacterizing;
 import java.util.Map;
 
 import de.upb.isys.linearalgebra.Vector;
+import jaicore.ml.core.exception.TrainingException;
 
 /**
  * A feature generator that is based on a decision tree. Generates new features
@@ -25,7 +26,7 @@ public interface IPerformanceDecisionTreeBasedFeatureGenerator {
 	 * @throws Exception
 	 *             if something goes wrong while constructing the tree
 	 */
-	void train(Map<Vector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws Exception;
+	void train(Map<Vector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws TrainingException;
 
 	/**
 	 * Predicts a feature vector based on a path in the constructed decision tree:

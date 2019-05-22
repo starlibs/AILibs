@@ -111,29 +111,36 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance, INumeric
 		builder.append(alternatives);
 		return builder.toString();
 	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (!(o instanceof IDyadRankingInstance)) {
-			return false;
-		}
-
-		IDyadRankingInstance drInstance = (IDyadRankingInstance) o;
-
-		for (int i = 0; i < drInstance.length(); i++) {
-			if (!(drInstance.getDyadAtPosition(i)).equals(this.getDyadAtPosition(i)))
-				return false;
-		}
-
-		return true;
-	}
 	
 	@Override
 	public int hashCode() {
-		int result = super.hashCode();
-		result = 31 * result + instance.hashCode();
-		result = 31 * result + alternatives.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
+		result = prime * result + ((instance == null) ? 0 : instance.hashCode());
 		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SparseDyadRankingInstance other = (SparseDyadRankingInstance) obj;
+		if (alternatives == null) {
+			if (other.alternatives != null)
+				return false;
+		} else if (!alternatives.equals(other.alternatives))
+			return false;
+		if (instance == null) {
+			if (other.instance != null)
+				return false;
+		} else if (!instance.equals(other.instance))
+			return false;
+		return true;
 	}
 
 	@Override
