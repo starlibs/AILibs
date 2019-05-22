@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
@@ -24,12 +25,17 @@ import de.upb.crc901.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanMekaBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
+import de.upb.crc901.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.TimeOut;
 import jaicore.concurrent.GlobalTimer;
+import jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
@@ -44,6 +50,7 @@ import jaicore.ml.core.evaluation.measure.singlelabel.PrecisionAsLoss;
 import jaicore.ml.core.evaluation.measure.singlelabel.RootMeanSquaredErrorLoss;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import javafx.application.Platform;
@@ -296,12 +303,18 @@ public class MLPlanCLI {
 		if (commandLine.hasOption(visualizeOption)) {
 			new JFXPanel();
 			AlgorithmVisualizationWindow window;
+
+			NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
+			List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer,
+					new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
+					new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new WekaClassifierSolutionCandidateRepresenter()));
+
 			if (commandLine.hasOption(testOption)) {
-				window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-						new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(trainData, testData));
+				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
+						new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(trainData, testData));
 			} else {
-				window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-						new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+				window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(), new SolutionPerformanceTimelinePlugin(),
+						new HASCOModelStatisticsPlugin());
 			}
 			Platform.runLater(window);
 		}

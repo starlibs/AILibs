@@ -1,8 +1,10 @@
 package de.upb.crc901.mlplan.multiclass.wekamlplan;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -10,17 +12,23 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
+import de.upb.crc901.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import hasco.model.Component;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
+import jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.evaluation.IInstancesClassifier;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import javafx.application.Platform;
@@ -35,11 +43,9 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 
 /**
- * A WEKA classifier wrapping the functionality of ML-Plan where the constructed
- * object is a WEKA classifier.
+ * A WEKA classifier wrapping the functionality of ML-Plan where the constructed object is a WEKA classifier.
  *
- * It implements the algorithm interface with itself (with modified state) as an
- * output
+ * It implements the algorithm interface with itself (with modified state) as an output
  *
  * @author wever, fmohr
  *
@@ -79,7 +85,13 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 
 		if (this.visualizationEnabled) {
 			new JFXPanel();
-			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+
+			NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
+			List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer,
+					new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
+					new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new WekaClassifierSolutionCandidateRepresenter()));
+
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(),
 					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
 			Platform.runLater(window);
 		}
@@ -171,10 +183,10 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	}
 
 	/**
-	 * Enables the GUI of the MLPlanWekaClassifier if set to true. By default the visualization is deactivated.
-	 * The flag needs to be set before buildClassifier is called.
+	 * Enables the GUI of the MLPlanWekaClassifier if set to true. By default the visualization is deactivated. The flag needs to be set before buildClassifier is called.
 	 *
-	 * @param visualizationEnabled Flag whether the visualization is enabled or not.
+	 * @param visualizationEnabled
+	 *            Flag whether the visualization is enabled or not.
 	 */
 	public void setVisualizationEnabled(final boolean visualizationEnabled) {
 		this.visualizationEnabled = visualizationEnabled;

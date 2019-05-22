@@ -2,6 +2,7 @@ package de.upb.crc901.mlplan.examples;
 
 import java.io.File;
 import java.io.FileReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -11,11 +12,16 @@ import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
+import de.upb.crc901.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import jaicore.basic.TimeOut;
+import jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
+import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.WekaUtil;
@@ -23,6 +29,7 @@ import jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.infiles.stratified.sampling.ClassStratiFileAssigner;
 import jaicore.ml.core.dataset.sampling.infiles.stratified.sampling.StratifiedFileSampling;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import javafx.application.Platform;
@@ -60,7 +67,13 @@ public class MLPlanSubsamplingExample {
 		mlplan.setLoggerName("mlplan");
 
 		new JFXPanel();
-		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
+
+		NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
+		List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer,
+				new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
+				new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new WekaClassifierSolutionCandidateRepresenter()));
+
+		AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(),
 				new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
 		Platform.runLater(window);
 
