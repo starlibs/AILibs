@@ -1,11 +1,11 @@
 package jaicore.search.algorithms.standard.lds;
 
-import jaicore.search.algorithms.GraphSearchTester;
+import jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import jaicore.search.core.interfaces.IGraphSearch;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 
-public class BestFirstLimitedDiscrepancySearchTester extends GraphSearchTester {
+public class BestFirstLimitedDiscrepancySearchTester extends GraphSearchSolutionIteratorTester {
 
 	@Override
 	public <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(GraphSearchInput<N, A> problem) {

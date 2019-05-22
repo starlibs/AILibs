@@ -51,6 +51,52 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((components == null) ? 0 : components.hashCode());
+		result = prime * result + ((compositionEvaluator == null) ? 0 : compositionEvaluator.hashCode());
+		result = prime * result + ((requiredInterface == null) ? 0 : requiredInterface.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		SoftwareConfigurationProblem other = (SoftwareConfigurationProblem) obj;
+		if (components == null) {
+			if (other.components != null) {
+				return false;
+			}
+		} else if (!components.equals(other.components)) {
+			return false;
+		}
+		if (compositionEvaluator == null) {
+			if (other.compositionEvaluator != null) {
+				return false;
+			}
+		} else if (!compositionEvaluator.equals(other.compositionEvaluator)) {
+			return false;
+		}
+		if (requiredInterface == null) {
+			if (other.requiredInterface != null) {
+				return false;
+			}
+		} else if (!requiredInterface.equals(other.requiredInterface)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("components", this.components);

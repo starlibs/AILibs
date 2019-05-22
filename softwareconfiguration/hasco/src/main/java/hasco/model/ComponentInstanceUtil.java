@@ -25,7 +25,7 @@ public class ComponentInstanceUtil {
 	 * @return Returns true iff all dependency conditions hold.
 	 */
 	public static boolean isValidComponentInstantiation(final ComponentInstance ci) {
-		Map<Parameter, ParameterDomain> refinedDomainMap = new HashMap<>();
+		Map<Parameter, IParameterDomain> refinedDomainMap = new HashMap<>();
 
 		for (Parameter param : ci.getComponent().getParameters()) {
 			if (param.getDefaultDomain() instanceof NumericParameterDomain) {

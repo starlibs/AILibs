@@ -1,0 +1,62 @@
+{
+	"repository": "WEKA Regressors Meta",
+	"include": [
+	],
+	"parameters": [
+	],
+	"components": [
+		{
+			"name": "weka.classifiers.meta.AdditiveRegression",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"MetaRegressor",
+				"Regressor",
+				"BaseClassifier"
+			],
+			"parameter": [
+				{
+					"name": "sActivator",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1"
+					]
+				},
+				{
+					"name": "S",
+					"type": "double",
+					"default": "1",
+					"values": [
+						"1"
+					],
+					"min": 1.0,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "I",
+					"type": "int",
+					"default": 10.0,
+					"min": 2.0,
+					"max": 128.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				}
+			],
+			"dependencies": [
+				{
+					"pre": "sActivator in {0}",
+					"post": "S in {1}"
+				},
+				{
+					"pre": "sActivator in {1}",
+					"post": "S in [0.0,1.0]"
+				}
+			]
+		}
+	]
+}

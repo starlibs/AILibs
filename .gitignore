@@ -1,6 +1,9 @@
 
 # Created by https://www.gitignore.io/api/java,linux,macos,gradle,windows,eclipse,intellij
 
+### VS Code ###
+.vscode/
+
 ### Eclipse ###
 
 .metadata
@@ -250,6 +253,4 @@ gradle-app.setting
 # Generated files by running skikitwrapper
 JAICore/jaicore-ml/tmp/
 JAICore/jaicore-ml/model_dumps/
-
-
-softwareconfiguration/autofe/testres/
+JAICore/jaicore-ml/testsrc/ml/scikitwrapper/importfolder_test/__pycache__/

@@ -1,0 +1,10 @@
+
+
+# stan generated executable
+LearningCurve.exe
+# stan generated c++ file
+LearningCurve.hpp
+# stan test output
+output_*.csv
+# python cache from plot.py
+__pycache__/*
