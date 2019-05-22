@@ -1,12 +1,8 @@
 package jaicore.ml.dyadranking.dataset;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.dyadranking.Dyad;
 
@@ -19,7 +15,7 @@ import jaicore.ml.dyadranking.Dyad;
  * @author Helena Graf
  *
  */
-public class DyadRankingInstance implements IDyadRankingInstance {
+public class DyadRankingInstance extends ADyadRankingInstance {
 
 	/* the ordering of dyads kept by this instance */
 	private List<Dyad> dyads;
@@ -78,18 +74,6 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 		builder.append("DyadRankingInstance: ");
 		builder.append(dyads);
 		return builder.toString();
-	}
-
-	@Override
-	public INDArray toMatrix() {
-		List<INDArray> dyadList = new ArrayList<>(this.length());
-		for (Dyad dyad : this) {
-			INDArray dyadVector = dyad.toVector();
-			dyadList.add(dyadVector);
-		}
-		INDArray dyadMatrix;
-		dyadMatrix = Nd4j.vstack(dyadList);
-		return dyadMatrix;
 	}
 
 	@Override

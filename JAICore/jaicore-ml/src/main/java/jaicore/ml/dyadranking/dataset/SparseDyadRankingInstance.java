@@ -1,13 +1,9 @@
 package jaicore.ml.dyadranking.dataset;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
@@ -25,7 +21,7 @@ import jaicore.ml.dyadranking.Dyad;
  * @author Helena Graf, Mirko Jürgens
  *
  */
-public class SparseDyadRankingInstance implements IDyadRankingInstance, INumericArrayInstance {
+public class SparseDyadRankingInstance extends ADyadRankingInstance implements INumericArrayInstance {
 
 	/* The 'x' value for this instance */
 	private Vector instance;
@@ -37,9 +33,9 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance, INumeric
 	 * Construct a new sparse dyad ranking instance containing the given instance
 	 * vector and ordering of alternatives.
 	 * 
-	 * @param instance     the instance for all of the alternatives
+	 * @param instance the instance for all of the alternatives
 	 * @param alternatives the ordering of alternatives that, when combined with the
-	 *                     instances is an ordering of dyads
+	 *            instances is an ordering of dyads
 	 */
 	public SparseDyadRankingInstance(Vector instance, List<Vector> alternatives) {
 		this.instance = instance;
@@ -50,7 +46,7 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance, INumeric
 	@Override
 	public <T> IAttributeValue<T> getAttributeValueAtPosition(int position, Class<T> type) {
 		if (type.equals(Double.class)) {
-			return (IAttributeValue<T>)getAttributeValue(position);
+			return (IAttributeValue<T>) getAttributeValue(position);
 		} else {
 			throw new IllegalArgumentException("Sparse dyad ranking instances only have attributes of type double.");
 		}
@@ -63,8 +59,7 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance, INumeric
 
 	@Override
 	public double[] getAsDoubleVector() throws ContainsNonNumericAttributesException {
-		throw new UnsupportedOperationException(
-				"Sparse dyad ranking instances cannot be converted to a double vector since the target type is an ordering of dyads.");
+		throw new UnsupportedOperationException("Sparse dyad ranking instances cannot be converted to a double vector since the target type is an ordering of dyads.");
 	}
 
 	@Override
@@ -111,7 +106,7 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance, INumeric
 		builder.append(alternatives);
 		return builder.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -141,18 +136,6 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance, INumeric
 		} else if (!instance.equals(other.instance))
 			return false;
 		return true;
-	}
-
-	@Override
-	public INDArray toMatrix() {
-		List<INDArray> dyadList = new ArrayList<>(this.length());
-		for (Dyad dyad : this) {
-			INDArray dyadVector = dyad.toVector();
-			dyadList.add(dyadVector);
-		}
-		INDArray dyadMatrix;
-		dyadMatrix = Nd4j.vstack(dyadList);
-		return dyadMatrix;
 	}
 
 	@Override
