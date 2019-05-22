@@ -19,9 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
-import jaicore.ml.core.dataset.attribute.IAttributeType;
+import jaicore.ml.core.dataset.IOrderedLabeledDataset;
 import jaicore.ml.dyadranking.Dyad;
 
 /**
@@ -33,7 +31,7 @@ import jaicore.ml.dyadranking.Dyad;
  * @author Helena Graf, Mirko Jürgens, Michael Braun, Jonas Hanselle
  *
  */
-public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset<IInstance> {
+public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implements IOrderedLabeledDataset<IDyadRankingInstance,IDyadRankingInstance> {
 	
 	private Logger logger = LoggerFactory.getLogger(DyadRankingDataset.class);
 
@@ -52,7 +50,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	 * 
 	 * @param c {@link Collection} containing {@link IInstance} objects
 	 */
-	public DyadRankingDataset(Collection<IInstance> c) {
+	public DyadRankingDataset(Collection<IDyadRankingInstance> c) {
 		super(c);
 	}
 
@@ -69,32 +67,12 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		super(dyadRankingInstances);
 	}
 
-	@Override
-	public IAttributeType<?> getTargetType() {
-		throw new UnsupportedOperationException("Dyad rankings have no target type.");
-	}
-
-	@Override
-	public List<IAttributeType<?>> getAttributeTypes() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getNumberOfAttributes() {
-		if (this.size() == 0) {
-			return 0;
-		}
-		Dyad firstDyad = this.get(0).getDyadAtPosition(0);
-		return firstDyad.getInstance().length() + firstDyad.getAlternative().length();
-	}
-
 	public void serialize(OutputStream out) {
 		// currently, this always creates a dense dyad representation of the dyad
 		// ranking dataset
 		try {
-			for (IInstance instance : this) {
-				IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-				for (Dyad dyad : drInstance) {
+			for (IDyadRankingInstance instance : this) {
+				for (Dyad dyad : instance) {
 					out.write(dyad.getInstance().toString().getBytes());
 					out.write(";".getBytes());
 					out.write(dyad.getAlternative().toString().getBytes());
@@ -168,7 +146,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	public int hashCode() {
 		int result = 17;
 		
-		for (IInstance instance : this) {
+		for (IDyadRankingInstance instance : this) {
 			result = result * 31 + instance.hashCode();
 		}
 		
@@ -180,11 +158,6 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		return (IDyadRankingInstance) super.get(index);
 	}
 
-	@Override
-	public <T> IAttributeType<T> getTargetType(Class<T> clazz) {
-		throw new UnsupportedOperationException("Dyad rankings have no target type.");
-	}
-	
 	/**
 	 * Converts this data set to a list of ND4j {@link INDArray}s. 
 	 * Each dyad ranking is represented by a 2D-matrix where a row is a dyad.
@@ -192,7 +165,7 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 	 */
 	public List<INDArray> toND4j() {
 		List<INDArray> ndList = new ArrayList<>();
-		for (IInstance instance : this) {
+		for (IDyadRankingInstance instance : this) {
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
 			ndList.add(dyadRankingToMatrix(drInstance));
 		}

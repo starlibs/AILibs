@@ -1,6 +1,8 @@
 package jaicore.ml.dyadranking.algorithm;
 
+import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.predictivemodel.IBatchLearner;
+import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
@@ -19,13 +21,13 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  * attributes."
  * 
  * <p>
- * SchÃ¤fer, D., & HÃ¼llermeier, E. (2018). Dyad ranking using Plackett--Luce
+ * Schäfer, D., & Hüllermeier, E. (2018). Dyad ranking using Plackett--Luce
  * models based on joint feature representations. Machine Learning, 107(5),
  * 903â€“941. https://doi.org/10.1007/s10994-017-5694-9
  * 
  * @author Helena Graf
  *
  */
-public interface IDyadRanker extends IBatchLearner<IDyadRankingInstance> {
+public interface IDyadRanker extends IBatchLearner<IDyadRankingInstance, IDyadRankingInstance, DyadRankingDataset> {
 
 }

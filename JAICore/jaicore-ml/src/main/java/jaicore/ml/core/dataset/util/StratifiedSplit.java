@@ -6,38 +6,39 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSplit<I extends IInstance> {
+public class StratifiedSplit<I extends INumericLabeledAttributeArrayInstance<L>, L, D extends IOrderedLabeledAttributeArrayDataset<I, L>> {
 
-	private final IDataset<I> dataset;
+	private final D dataset;
 
-	private IDataset<I> trainingData;
+	private D trainingData;
 
-	private IDataset<I> testData;
+	private D testData;
 
 	private final long seed;
 
-	public StratifiedSplit(IDataset<I> dataset, long seed) {
+	public StratifiedSplit(D dataset, long seed) {
 		super();
 		this.dataset = dataset;
 		this.seed = seed;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void doSplit(double trainPortion) throws AlgorithmException {
 		Random r = new Random(seed);
 		List<Integer> attributeIndices = Collections.singletonList(dataset.getNumberOfAttributes());
-		AttributeBasedStratiAmountSelectorAndAssigner<I> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(attributeIndices, DiscretizationStrategy.EQUAL_SIZE, 10);
-		StratifiedSampling<I> stratifiedSampling = new StratifiedSampling<>(selectorAndAssigner, selectorAndAssigner, r, dataset);
+		AttributeBasedStratiAmountSelectorAndAssigner<I, D> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(attributeIndices, DiscretizationStrategy.EQUAL_SIZE, 10);
+		StratifiedSampling<I, D> stratifiedSampling = new StratifiedSampling<>(selectorAndAssigner, selectorAndAssigner, r, dataset);
 		int sampleSize = (int) (trainPortion * dataset.size());
 		stratifiedSampling.setSampleSize(sampleSize);
 		try {
 			this.trainingData = stratifiedSampling.call();
-			this.testData = dataset.createEmpty();
+			this.testData = (D)dataset.createEmpty();
 			testData.addAll(dataset);
 			testData.removeAll(trainingData);
 		} catch (AlgorithmExecutionCanceledException e) {
@@ -47,11 +48,11 @@ public class StratifiedSplit<I extends IInstance> {
 		}
 	}
 
-	public IDataset<I> getTrainingData() {
+	public D getTrainingData() {
 		return trainingData;
 	}
 
-	public IDataset<I> getTestData() {
+	public D getTestData() {
 		return testData;
 	}
 

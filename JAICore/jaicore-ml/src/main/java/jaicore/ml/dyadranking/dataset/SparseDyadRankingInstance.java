@@ -11,6 +11,7 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
+import jaicore.ml.core.dataset.INumericArrayInstance;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
@@ -24,7 +25,7 @@ import jaicore.ml.dyadranking.Dyad;
  * @author Helena Graf, Mirko Jürgens
  *
  */
-public class SparseDyadRankingInstance implements IDyadRankingInstance {
+public class SparseDyadRankingInstance implements IDyadRankingInstance, INumericArrayInstance {
 
 	/* The 'x' value for this instance */
 	private Vector instance;
@@ -47,19 +48,17 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> IAttributeValue<T> getAttributeValue(int position, Class<T> type) {
+	public <T> IAttributeValue<T> getAttributeValueAtPosition(int position, Class<T> type) {
 		if (type.equals(Double.class)) {
-			return (IAttributeValue<T>) new NumericAttributeValue(new NumericAttributeType(),
-					instance.getValue(position));
+			return (IAttributeValue<T>)getAttributeValue(position);
 		} else {
 			throw new IllegalArgumentException("Sparse dyad ranking instances only have attributes of type double.");
 		}
 	}
 
 	@Override
-	public <T> IAttributeValue<T> getTargetValue(Class<T> type) {
-		throw new UnsupportedOperationException(
-				"Cannot get the target value of a sparse dyad ranking instance as the target is the ordering of the dyads.");
+	public SparseDyadRankingInstance getTargetValue() {
+		return this;
 	}
 
 	@Override
@@ -147,6 +146,21 @@ public class SparseDyadRankingInstance implements IDyadRankingInstance {
 		INDArray dyadMatrix;
 		dyadMatrix = Nd4j.vstack(dyadList);
 		return dyadMatrix;
+	}
+
+	@Override
+	public IAttributeValue<?>[] getAllAttributeValues() {
+		throw new UnsupportedOperationException("Currently not implemented!");
+	}
+
+	@Override
+	public int getNumberOfAttributes() {
+		return instance.length();
+	}
+
+	@Override
+	public IAttributeValue<Double> getAttributeValue(int position) {
+		return new NumericAttributeValue(new NumericAttributeType(), instance.getValue(position));
 	}
 
 }

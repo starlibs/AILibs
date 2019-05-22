@@ -25,13 +25,24 @@ dependencies {
 	compile group: 'com.github.fracpete', name: 'multisearch-weka-package', version: '2017.10.1'
 	
 	compile ('net.sf.meka.thirdparty:mulan:1.4.0')
+	
+	// deep learning
+	compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
+	
+	// linear algebra
+  compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
 
 	// end dependencies for meka
 	
-	compile ('de.upb.isys:interruptable-weka:0.0.16') {
+	// weka dependencies
+	compile ('de.upb.isys:interruptable-weka:0.0.17') {
 		  	exclude group: 'log4j'
 	    	exclude group: 'org.slf4j'
 	}
+	compile ('nz.ac.waikato.cms.weka:rotationForest:1.0.3') {
+		exclude group: 'weka-dev'
+	}
+	
 	
     // d4j dependencies: https://deeplearning4j.org/docs/latest/deeplearning4j-config-buildtools
     compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"

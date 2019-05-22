@@ -8,16 +8,15 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeDiscretizationPolicy;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.Interval;
 
-public class DiscretizationHelperTester<I extends IInstance> {
+public class DiscretizationHelperTester {
 
 	private static final int NUMBER_OF_CATEGORIES = 2;
 
-	private DiscretizationHelper<I> discretizationHelper = new DiscretizationHelper<>();
+	private DiscretizationHelper<?> discretizationHelper = new DiscretizationHelper<>();
 
 	@Test
 	public void testEqualSizePolicyEven() {

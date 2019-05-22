@@ -1,0 +1,8 @@
+{
+  "repository" : "Auto-WEKA",
+  "include": ["./weka-singlelabel-base.json", "./weka-singlelabel-meta.json"],
+  "components" : [ {
+  	"name": "ml",
+  	"requiredInterface": [ {"id": "x", "name": "AbstractClassifier" }]
+  } ]
+}

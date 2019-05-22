@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -47,7 +46,7 @@ public interface IDyadFeatureTransform {
 	 */
 	default Map<IDyadRankingInstance, Map<Dyad, Vector>> getPreComputedFeatureTransforms(DyadRankingDataset dataset) {
 		Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms = new HashMap<>();
-		for (IInstance instance : dataset) {
+		for (IDyadRankingInstance instance : dataset) {
 			IDyadRankingInstance rankingInstance = (IDyadRankingInstance) instance;
 			Map<Dyad, Vector> transforms = new HashMap<>();
 			for (int i = 0; i < rankingInstance.length(); i++) {

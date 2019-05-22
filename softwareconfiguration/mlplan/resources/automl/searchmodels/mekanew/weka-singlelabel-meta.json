@@ -1,0 +1,274 @@
+{
+  "repository" : "Auto-WEKA",
+  "components" : [ {
+    "name" : "weka.classifiers.meta.AdaBoostM1",
+    "requiredInterface" : [ {"id": "W", "name": "BoostableBaseClassifier"} ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "parameter" : [ {
+      "name" : "pActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    },  {
+      "name" : "P",
+      "type" : "int",
+      "default" : 100.0,
+      "min" : 10.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 5
+    }, {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 128.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "Q",
+      "type" : "boolean",
+      "default" : "false"
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ {
+      "pre" : "pActivator in {0}",
+      "post" : "P in {100}"
+    }, {
+      "pre" : "pActivator in {1}",
+      "post" : "P in [50.0,100.0]"
+    } ]
+  },  {
+    "name" : "weka.classifiers.meta.Vote",
+    "requiredInterface" : [ {"id": "B", "name": "MultipleBaseLearnerList" } ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier"],
+    "parameter" : [ {
+      "name" : "R",
+      "type" : "cat",
+      "default" : "AVG",
+      "values" : [ "AVG", "PROD", "MAJ", "MIN", "MAX" ]
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  },  {
+    "name" : "weka.classifiers.meta.Stacking",
+    "requiredInterface" : [ {"id": "B", "name": "MultipleBaseLearnerList"} ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "X",
+      "type" : "cat",
+      "default" : "10",
+      "values" : [ "10" ]
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  },{
+    "name" : "MultipleBaseLearnerListElement",
+    "requiredInterface" : [ {"id": "classifier", "name": "BaseClassifier"} ],
+    "providedInterface" : [ "ModelHelper", "MultipleBaseLearnerList" ],
+    "parameter" : [],
+    "dependencies" : [ ]
+  },{
+    "name" : "REMOVED_MultipleBaseLearnerListChain",
+    "requiredInterface" : [ {"id": "classifier", "name": "BaseClassifier"}, {"id": "chain", "name": "MultipleBaseLearnerList"} ],
+    "providedInterface" : [ "ModelHelper", "REMOVED_MultipleBaseLearnerList" ],
+    "parameter" : [],
+    "dependencies" : [ ]
+  },
+  {
+    "name" : "weka.classifiers.lazy.LWL",
+    "requiredInterface" : [ {"id": "W", "name":"WeightedInstancesHandler" } ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier" ],
+    "parameter" : [ {
+      "name" : "K",
+      "type" : "cat",
+      "default" : "-1",
+	  "values": ["-1","10","30","60","90","120"]
+    }, {
+      "name" : "U",
+      "type" : "int",
+      "default" : 0,
+      "min" : 0,
+      "max" : 4,
+      "refineSplits" : 5,
+      "minInterval" : 1
+    } ],
+    "dependencies" : [ ]
+  },{
+    "name" : "weka.classifiers.meta.RandomSubSpace",
+    "requiredInterface" : [  {"id": "W", "name": "BaseClassifier" } ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "parameter" : [ {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 1
+    }, {
+      "name" : "P",
+      "type" : "double",
+      "default" : 0.5,
+      "min" : 0.1,
+      "max" : 1.0,
+      "refineSplits" : 8,
+      "minInterval" : 0.05
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  },{
+    "name" : "weka.classifiers.meta.Bagging",
+    "requiredInterface" : [ {"id": "W", "name": "BaseClassifier"} ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler"],
+    "parameter" : [ {
+      "name" : "P",
+      "type" : "int",
+      "default" : 100.0,
+      "min" : 10.0,
+      "max" : 100.0,
+      "refineSplits" : 8,
+      "minInterval" : 5
+    }, {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 128.0,
+      "refineSplits" : 8,
+      "minInterval" : 5
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    }, {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "false"
+    } ],
+    "dependencies" : [ {
+      "pre" : "O in {true}",
+      "post" : "P in {100}"
+    } ]
+  },
+  {
+    "name" : "weka.classifiers.meta.RandomCommittee",
+    "requiredInterface" : [ {"id": "W", "name": "RandomizableBaseClassifier" } ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "parameter" : [ {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "S",
+      "type" : "cat",
+      "default" : "1",
+      "values" : [ "1" ]
+    } ],
+    "dependencies" : [ ]
+  }, 
+  
+  {
+	"name": "weka.classifiers.meta.AttributeSelectedClassifier",
+	"requiredInterface": [],
+	"providedInterface": ["AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+	"parameter": [ {
+		"name": "E",
+		"type": "cat",
+		"default": "weka.attributeSelection.CfsSubsetEval",
+		"values": ["weka.attributeSelection.CfsSubsetEval", "weka.attributeSelection.CfsSubsetEval -L"]
+	}, {
+		"name": "S",
+		"type": "cat",
+		"default": "weka.attributeSelection.BestFirst",
+		"values": ["weka.attributeSelection.BestFirst", "weka.attributeSelection.BestFirst -D 1", "weka.attributeSelection.GreedyStepWise" ]
+	}],
+	"dependencies": []
+  },
+  
+  {
+    "name" : "weka.classifiers.meta.AdditiveRegression",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "Regressor", "WeightedInstancesHandler" ],
+    "parameter" : [ {
+      "name" : "sActivator",
+      "type" : "cat",
+      "default" : "0",
+      "values" : [ "0", "1" ]
+    }, {
+      "name" : "S",
+      "type" : "double",
+      "default" : "1",
+      "values" : [ "1" ],
+      "min" : 1.0,
+      "max" : 1.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    }, {
+      "name" : "I",
+      "type" : "int",
+      "default" : 10.0,
+      "min" : 2.0,
+      "max" : 128.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ {
+      "pre" : "sActivator in {0}",
+      "post" : "S in {1}"
+    }, {
+      "pre" : "sActivator in {1}",
+      "post" : "S in [0.0,1.0]"
+    } ]
+  },  {
+    "name" : "weka.classifiers.meta.ClassificationViaRegression",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "BaseClassifier" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.LogitBoost",
+    "requiredInterface" : [ {"id": "W", "name": "BaseClassifier" } ],
+    "providedInterface" : [ "AbstractClassifier", "MetaClassifier", "WeightedInstancesHandler" ],
+    "parameter" : [ ],
+    "dependencies" : [ ]
+  }, {
+    "name" : "weka.classifiers.meta.MultiClassClassifier",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier",  "MetaClassifier", "BaseClassifier" ],
+    "parameter" : [ {
+    	"name": "M",
+    	"comment": "Sets the method to use. Valid values are 0 (1-against-all),  1 (random codes), 2 (exhaustive code), and 3 (1-against-1). (default 0)",
+    	"type": "cat",
+    	"values": [ "0", "1", "2", "3" ],
+    	"default": "0"
+    }, {
+    	"name": "P",
+    	"comment": "Use pairwise coupling (only has an effect for 1-against1)",
+    	"type": "boolean",
+    	"default": "false"
+    }  ],
+    "dependencies" : [ {"pre": "M in {1,2,3}", "post": "P in {false}"} ]
+  }]
+}

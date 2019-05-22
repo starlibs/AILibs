@@ -12,7 +12,6 @@ import java.util.Set;
 import org.nd4j.linalg.primitives.Pair;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
@@ -34,7 +33,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	private HashMap<Vector, Set<Dyad>> dyadsByAlternatives;
 	private HashMap<Vector, IDyadRankingInstance> dyadRankingsByInstances;
 	private HashMap<Vector, IDyadRankingInstance> dyadRankingsByAlternatives;
-	private List<IInstance> pool;
+	private List<IDyadRankingInstance> pool;
 	private boolean removeDyadsWhenQueried;
 	private HashSet<IDyadRankingInstance> queriedRankings;
 	private int numberQueries;
@@ -47,20 +46,19 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 		dyadRankingsByInstances = new HashMap<>();
 		dyadRankingsByAlternatives = new HashMap<>();
 		pool = new ArrayList<>(dataset.size());
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			this.addDyadRankingInstance(drInstance);
+		for (IDyadRankingInstance instance : dataset) {
+			this.addDyadRankingInstance(instance);
 		}
 		this.queriedRankings = new HashSet<>();
 	}
 
 	@Override
-	public Collection<IInstance> getPool() {
+	public Collection<IDyadRankingInstance> getPool() {
 		return pool;
 	}
 
 	@Override
-	public IInstance query(IInstance queryInstance) {
+	public IDyadRankingInstance query(IDyadRankingInstance queryInstance) {
 		numberQueries++;
 		if (!(queryInstance instanceof SparseDyadRankingInstance)) {
 			throw new IllegalArgumentException("Currently only supports SparseDyadRankingInstances!");

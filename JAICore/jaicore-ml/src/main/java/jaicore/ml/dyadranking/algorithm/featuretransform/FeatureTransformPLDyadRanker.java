@@ -12,8 +12,6 @@ import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import edu.stanford.nlp.optimization.QNMinimizer;
 import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
@@ -83,54 +81,49 @@ public class FeatureTransformPLDyadRanker implements IPLDyadRanker {
 	}
 
 	@Override
-	public IDyadRankingInstance predict(IInstance instance) throws PredictionException {
-		if (!(instance instanceof IDyadRankingInstance)) {
-			throw new IllegalArgumentException(
-					"FeatureTransformDyadRanker can only be used with IDyadRankingInstances.");
-		}
+	public IDyadRankingInstance predict(IDyadRankingInstance instance) throws PredictionException {
 		if (w == null) {
 			throw new PredictionException("The Ranker has not been trained yet.");
 		}
 		log.debug("Training ranker with instance {}", instance);
-		IDyadRankingInstance dyadRankingInstance = (IDyadRankingInstance) instance;
 		List<Pair<Double, Dyad>> skillForDyads = new ArrayList<>();
-		
-		for (Dyad d : dyadRankingInstance) {
+
+		for (Dyad d : instance) {
 			double skill = computeSkillForDyad(d);
 			skillForDyads.add(new Pair<Double, Dyad>(skill, d));
 		}
-		
 		return new DyadRankingInstance(skillForDyads.stream().sorted((p1, p2) -> Double.compare(p1.getX(), p2.getX())).map(Pair::getY).collect(Collectors.toList()));
-		
+	}
+
+
+	@Override
+	public List<IDyadRankingInstance> predict(DyadRankingDataset dataset) throws PredictionException {
+		List<IDyadRankingInstance> predictions = new ArrayList<>();
+		for (IDyadRankingInstance i : dataset) {
+			predictions.add(predict(i));
+		}
+		return predictions;
 	}
 
 	private double computeSkillForDyad(Dyad dyad) {
 		Vector featureTransformVector = featureTransform.transform(dyad);
 		double dot = w.dotProduct(featureTransformVector);
 		double val = Math.exp(dot);
-		log.debug("Feature transform for dyad {} is {}. \n Dot-Product is {} and skill is {}", dyad,
-				featureTransformVector, dot, val);
+		log.debug("Feature transform for dyad {} is {}. \n Dot-Product is {} and skill is {}", dyad, featureTransformVector, dot, val);
 		return val;
 	}
 
 	@Override
-	public void train(@SuppressWarnings("rawtypes") IDataset dataset) throws TrainingException {
-		if (!(dataset instanceof DyadRankingDataset)) {
-			throw new IllegalArgumentException(
-					"Can only train the feature transform Placket-Luce dyad ranker with a dyad ranking dataset!");
-		}
-		DyadRankingDataset dRDataset = (DyadRankingDataset) dataset;
-		
-		Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms = featureTransform.getPreComputedFeatureTransforms(dRDataset);
-		negativeLogLikelihood.initialize(dRDataset, featureTransforms);
-		negativeLogLikelihoodDerivative.initialize(dRDataset, featureTransforms);
-		
-		int alternativeLength = dRDataset.get(0).getDyadAtPosition(0).getAlternative().length();
-		int instanceLength = dRDataset.get(0).getDyadAtPosition(0).getInstance().length();
-		w = new DenseDoubleVector(
-				featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), 0.3);
-		log.debug("Likelihood of the randomly filled w is {}", likelihoodOfParameter(w, dRDataset));
-		BilinFunction fun = new BilinFunction(featureTransforms , dRDataset, featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
+	public void train(DyadRankingDataset dataset) throws TrainingException {
+		Map<IDyadRankingInstance, Map<Dyad, Vector>> featureTransforms = featureTransform.getPreComputedFeatureTransforms(dataset);
+		negativeLogLikelihood.initialize(dataset, featureTransforms);
+		negativeLogLikelihoodDerivative.initialize(dataset, featureTransforms);
+
+		int alternativeLength = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
+		int instanceLength = dataset.get(0).getDyadAtPosition(0).getInstance().length();
+		w = new DenseDoubleVector(featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), 0.3);
+		log.debug("Likelihood of the randomly filled w is {}", likelihoodOfParameter(w, dataset));
+		BilinFunction fun = new BilinFunction(featureTransforms, dataset, featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));
 		QNMinimizer minimizer = new QNMinimizer();
 		w = new DenseDoubleVector(minimizer.minimize(fun, 0.01, w.asArray()));
 		log.debug("Finished optimizing, the final w is {}", w);

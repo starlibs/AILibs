@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
@@ -70,7 +69,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 			// For the first query steps, sample randomly
 			if (iteration < numberRandomQueriesAtStart) {
 
-				Set<IInstance> minibatch = new HashSet<>();
+				Set<IDyadRankingInstance> minibatch = new HashSet<>();
 				for (int batchIndex = 0; batchIndex < this.minibatchSize; batchIndex++) {
 					// get random instance
 					Collections.shuffle(instanceFeatures, random);
@@ -108,7 +107,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 			else {
 
-				Set<IInstance> minibatch = new HashSet<>();
+				Set<IDyadRankingInstance> minibatch = new HashSet<>();
 				for (int minibatchIndex = 0; minibatchIndex < minibatchSize; minibatchIndex++) {
 
 					// randomly choose dataset to sample from
@@ -137,7 +136,7 @@ public class UCBPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 					SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(d1.getInstance(), alts);
 
-					IInstance groundTruthPair = poolProvider.query(sparseQueryPair);
+					IDyadRankingInstance groundTruthPair = poolProvider.query(sparseQueryPair);
 
 					// add it to the minibatch
 					minibatch.add(groundTruthPair);

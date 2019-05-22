@@ -4,6 +4,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -25,13 +27,16 @@ import java.util.ListIterator;
  */
 public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> implements List<D> {
 	private final L list;
-	private final Class<E> typeOfDecoratedItems = (Class<E>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[1];
-	private final Class<D> typeOfDecoratingItems = (Class<D>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[2];
+	private final Class<E> typeOfDecoratedItems;
+	private final Class<D> typeOfDecoratingItems;
 	private final Constructor<D> constructorForDecoratedItems;
 
-	public ListDecorator(final L list) {
+	public ListDecorator(final L list) throws ClassNotFoundException {
 		super();
 		this.list = list;
+		Type[] genericTypes = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+		typeOfDecoratedItems = (Class<E>) getClassWithoutGenerics(genericTypes[1].getTypeName());
+		typeOfDecoratingItems = (Class<D>) getClassWithoutGenerics(genericTypes[2].getTypeName());
 		Constructor<D> constructorForDecoratedItems = null;
 		try {
 			constructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
@@ -274,5 +279,9 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 
 	public L getList() {
 		return this.list;
+	}
+	
+	private Class<?> getClassWithoutGenerics(final String className) throws ClassNotFoundException {
+		return Class.forName(className.replaceAll("(<.*>)", ""));
 	}
 }

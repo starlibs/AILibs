@@ -5,33 +5,31 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import jaicore.basic.algorithm.IAlgorithm;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.KmeansSamplingFactory;
 
-public class KMeansSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
+public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 
-	private static long SEED = 1;
+	private static final long SEED = 1;
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
-	private static int K = 100;
+	private static final int K = 100;
 
 	@Override
-	public void testSampleSizeLargeProblem() throws Exception {
+	public void testSampleSizeLargeProblem() {
 		// Sample Size is not supported for KMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
-	public void testSampleSizeSmallProblem() throws Exception {
+	public void testSampleSizeSmallProblem() {
 		// Sample Size is not supported for KMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
-		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
-		KmeansSamplingFactory<I> factory = new KmeansSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number> dataset) {
+		KmeansSamplingFactory<INumericLabeledAttributeArrayInstance<Number>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number>> factory = new KmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			factory.setK(K);

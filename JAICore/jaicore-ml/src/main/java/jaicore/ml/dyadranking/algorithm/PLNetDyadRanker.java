@@ -29,8 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.basic.FileUtil;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.ConfigurationException;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
@@ -57,7 +55,7 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
  *
  */
 public class PLNetDyadRanker
-		implements IPLDyadRanker, IOnlineLearner<IDyadRankingInstance>, ICertaintyProvider<IDyadRankingInstance> {
+		implements IPLDyadRanker, IOnlineLearner<IDyadRankingInstance, IDyadRankingInstance, DyadRankingDataset>, ICertaintyProvider<IDyadRankingInstance, IDyadRankingInstance, DyadRankingDataset> {
 
 	private static final Logger log = LoggerFactory.getLogger(PLNetDyadRanker.class);
 
@@ -86,15 +84,9 @@ public class PLNetDyadRanker
 		this.configuration = config;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public void train(IDataset dataset) throws TrainingException {
-		if (!(dataset instanceof DyadRankingDataset)) {
-			throw new IllegalArgumentException(
-					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking dataset!");
-		}
-		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
-		train(drDataset.toND4j());
+	public void train(DyadRankingDataset dataset) throws TrainingException {
+		train(dataset.toND4j());
 	}
 
 	public void train(List<INDArray> dataset) {
@@ -201,28 +193,22 @@ public class PLNetDyadRanker
 	 * @return The gradient for the given instance, multiplied by the updater's
 	 *         learning rate.
 	 */
-	private INDArray computeScaledGradient(IInstance instance) {
-		if (!(instance instanceof IDyadRankingInstance)) {
-			throw new IllegalArgumentException(
-					"Can only update the Plackett-Luce net dyad ranker with a dyad ranking instance!");
-		}
-
-		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+	private INDArray computeScaledGradient(IDyadRankingInstance instance) {
 		// init weight update vector
 		INDArray dyadMatrix;
-		List<INDArray> dyadList = new ArrayList<>(drInstance.length());
-		for (Dyad dyad : drInstance) {
+		List<INDArray> dyadList = new ArrayList<>(instance.length());
+		for (Dyad dyad : instance) {
 			INDArray dyadVector = dyadToVector(dyad);
 			dyadList.add(dyadVector);
 		}
-		dyadMatrix = dyadRankingToMatrix(drInstance);
+		dyadMatrix = dyadRankingToMatrix(instance);
 		List<INDArray> activations = plNet.feedForward(dyadMatrix);
 		INDArray output = activations.get(activations.size() - 1);
 		output = output.transpose();
 		INDArray deltaW = Nd4j.zeros(plNet.params().length());
 		Gradient deltaWk = null;
 		MultiLayerNetwork plNetClone = plNet.clone();
-		for (int k = 0; k < drInstance.length(); k++) {
+		for (int k = 0; k < instance.length(); k++) {
 			// compute derivative of loss w.r.t. k
 			plNetClone.setInput(dyadList.get(k));
 			plNetClone.feedForward(true, false);
@@ -268,15 +254,10 @@ public class PLNetDyadRanker
 	 *             If something fails during the update process.
 	 */
 	@Override
-	public void update(IInstance instance) throws TrainingException {
-		if (!(instance instanceof IDyadRankingInstance)) {
-			throw new IllegalArgumentException(
-					"Can only train the Plackett-Luce net dyad ranker with a dyad ranking instances!");
-		}
-		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
+	public void update(IDyadRankingInstance instance) throws TrainingException {
 		if (this.plNet == null) {
-			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
-					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			int dyadSize = (instance.getDyadAtPosition(0).getInstance().length())
+					+ (instance.getDyadAtPosition(0).getAlternative().length());
 			this.plNet = createNetwork(dyadSize);
 			this.plNet.init();
 		}
@@ -286,44 +267,32 @@ public class PLNetDyadRanker
 	}
 
 	@Override
-	public void update(Set<IInstance> instances) throws TrainingException {
+	public void update(Set<IDyadRankingInstance> instances) throws TrainingException {
 
 		List<INDArray> minibatch = new ArrayList<>(instances.size());
-		for (IInstance instance : instances) {
-			if (!(instance instanceof IDyadRankingInstance)) {
-				throw new IllegalArgumentException(
-						"Can only train the Plackett-Luce net dyad ranker with dyad ranking instances!");
-			}
-			IDyadRankingInstance drInstance = ((IDyadRankingInstance) instance);
+		for (IDyadRankingInstance instance : instances) {
 			if (this.plNet == null) {
-				int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
-						+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+				int dyadSize = (instance.getDyadAtPosition(0).getInstance().length())
+						+ (instance.getDyadAtPosition(0).getAlternative().length());
 				this.plNet = createNetwork(dyadSize);
 				this.plNet.init();
 			}
-			minibatch.add(drInstance.toMatrix());
+			minibatch.add(instance.toMatrix());
 		}
 		this.updateWithMinibatch(minibatch);
 	}
 
 	@Override
-	public IDyadRankingInstance predict(IInstance instance) throws PredictionException {
-		if (!(instance instanceof IDyadRankingInstance)) {
-			throw new IllegalArgumentException(
-					"Can only make prediction for dyad ranking instances using the Plackett-Luce net dyad ranker!");
-		}
-
-		IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-
+	public IDyadRankingInstance predict(IDyadRankingInstance instance) throws PredictionException {
 		if (this.plNet == null) {
-			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())
-					+ (drInstance.getDyadAtPosition(0).getAlternative().length());
+			int dyadSize = (instance.getDyadAtPosition(0).getInstance().length())
+					+ (instance.getDyadAtPosition(0).getAlternative().length());
 			this.plNet = createNetwork(dyadSize);
 			this.plNet.init();
 		}
 
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
-		for (Dyad dyad : drInstance) {
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(instance.length());
+		for (Dyad dyad : instance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
@@ -337,16 +306,10 @@ public class PLNetDyadRanker
 		return new DyadRankingInstance(ranking);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	public List<IDyadRankingInstance> predict(IDataset dataset) throws PredictionException {
-		if (!(dataset instanceof DyadRankingDataset)) {
-			throw new IllegalArgumentException(
-					"Can only make predictions for dyad ranking datasets using the Plackett-Luce net dyad ranker!");
-		}
-		DyadRankingDataset drDataset = (DyadRankingDataset) dataset;
+	public List<IDyadRankingInstance> predict(DyadRankingDataset dataset) throws PredictionException {
 		List<IDyadRankingInstance> results = new ArrayList<>(dataset.size());
-		for (IInstance instance : drDataset) {
+		for (IDyadRankingInstance instance : dataset) {
 			results.add(this.predict(instance));
 		}
 		return results;
@@ -520,17 +483,12 @@ public class PLNetDyadRanker
 	}
 
 	@Override
-	public double getCertainty(IInstance queryInstance) {
-		if (!(queryInstance instanceof IDyadRankingInstance)) {
-			throw new IllegalArgumentException("Can only provide certainty for dyad ranking instances!");
-		}
-		IDyadRankingInstance drInstance = (IDyadRankingInstance) queryInstance;
-
-		if (drInstance.length() != 2) {
+	public double getCertainty(IDyadRankingInstance queryInstance) {
+		if (queryInstance.length() != 2) {
 			throw new IllegalArgumentException("Can only provide certainty for pairs of dyads!");
 		}
-		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(drInstance.length());
-		for (Dyad dyad : drInstance) {
+		List<Pair<Dyad, Double>> dyadUtilityPairs = new ArrayList<>(queryInstance.length());
+		for (Dyad dyad : queryInstance) {
 			INDArray plNetInput = dyadToVector(dyad);
 			double plNetOutput = plNet.output(plNetInput).getDouble(0);
 			dyadUtilityPairs.add(new Pair<Dyad, Double>(dyad, plNetOutput));
@@ -545,7 +503,7 @@ public class PLNetDyadRanker
 	 *            Ranking for which certainty should be assessed.
 	 * @return The pair of {@link Dyad}s for which the model is least certain.
 	 */
-	public DyadRankingInstance getPairWithLeastCertainty(IDyadRankingInstance drInstance) {
+	public IDyadRankingInstance getPairWithLeastCertainty(IDyadRankingInstance drInstance) {
 
 		if (this.plNet == null) {
 			int dyadSize = (drInstance.getDyadAtPosition(0).getInstance().length())

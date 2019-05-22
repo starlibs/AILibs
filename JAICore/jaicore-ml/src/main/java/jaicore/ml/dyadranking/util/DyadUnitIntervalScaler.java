@@ -3,7 +3,6 @@ package jaicore.ml.dyadranking.util;
 import java.util.List;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -46,9 +45,8 @@ public class DyadUnitIntervalScaler  extends AbstractDyadScaler {
 	@Override
 	public void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
 		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
+		for (IDyadRankingInstance instance : dataset) {
+			for (Dyad dyad : instance) {
 				for (int i = 0; i < lengthX; i++) {
 					double value = dyad.getInstance().getValue(i);
 					if (value != 0.0d)
@@ -62,9 +60,8 @@ public class DyadUnitIntervalScaler  extends AbstractDyadScaler {
 	@Override
 	public void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
 		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
+		for (IDyadRankingInstance instance : dataset) {
+			for (Dyad dyad : instance) {
 				for (int i = 0; i < lengthY; i++) {
 					double value = dyad.getAlternative().getValue(i);
 					if (value != 0.0d)

@@ -5,8 +5,8 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericArrayInstance;
+import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**
@@ -15,10 +15,10 @@ import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  * 
  * @author Lukas Brandt
  */
-public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
+public class SystematicSampling<I extends INumericArrayInstance, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Random random;
-	private IDataset<I> sortedDataset = null;
+	private D sortedDataset = null;
 	private int k;
 	private int startIndex;
 	private int index;
@@ -42,7 +42,7 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	 * @param random
 	 *            Random Object for determining the sampling start point.
 	 */
-	public SystematicSampling(Random random, IDataset<I> input) {
+	public SystematicSampling(Random random, D input) {
 		super(input);
 		this.random = random;
 	}
@@ -55,7 +55,7 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 	 * @param datapointComparator
 	 *            Comparator to sort the dataset.
 	 */
-	public SystematicSampling(Random random, Comparator<I> datapointComparator, IDataset<I> input) {
+	public SystematicSampling(Random random, Comparator<I> datapointComparator, D input) {
 		super(input);
 		this.random = random;
 		this.datapointComparator = datapointComparator;
@@ -66,9 +66,9 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 		switch (this.getState()) {
 		case created:
 			// Initialize variables and sort dataset.
-			this.sample = this.getInput().createEmpty();
+			this.sample = (D)this.getInput().createEmpty();
 			if (this.sortedDataset == null) {
-				this.sortedDataset = this.getInput().createEmpty();
+				this.sortedDataset = (D)this.getInput().createEmpty();
 				this.sortedDataset.addAll(this.getInput());
 				this.sortedDataset.sort(this.datapointComparator);
 			}
@@ -95,11 +95,11 @@ public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<
 		return null;
 	}
 
-	public IDataset<I> getSortedDataset() {
+	public D getSortedDataset() {
 		return sortedDataset;
 	}
 
-	public void setSortedDataset(IDataset<I> sortedDataset) {
+	public void setSortedDataset(D sortedDataset) {
 		this.sortedDataset = sortedDataset;
 	}
 

@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
@@ -84,7 +83,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 			// For the first query steps, sample randomly
 			if (iteration < numberRandomQueriesAtStart) {
 
-				Set<IInstance> minibatch = new HashSet<>();
+				Set<IDyadRankingInstance> minibatch = new HashSet<>();
 				for (int batchIndex = 0; batchIndex < this.minibatchSize; batchIndex++) {
 					// get random instance
 					Collections.shuffle(instanceFeatures, random);
@@ -124,7 +123,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDya
 
 				PriorityQueue<List<Dyad>> clusterQueue = new PriorityQueue<>(new ListComparator());
 
-				Set<IInstance> minibatch = new HashSet<>();
+				Set<IDyadRankingInstance> minibatch = new HashSet<>();
 
 				for (Vector inst : instanceFeatures) {
 					// Create instances for clustering

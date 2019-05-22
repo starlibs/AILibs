@@ -11,8 +11,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 
@@ -25,7 +24,7 @@ import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
  * @param <I>
  *            The instance type
  */
-public class DiscretizationHelper<I extends IInstance> {
+public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
 
@@ -56,7 +55,7 @@ public class DiscretizationHelper<I extends IInstance> {
 	 *            assigned
 	 * @return
 	 */
-	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(IDataset<I> dataset,
+	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(D dataset,
 			List<Integer> indices, Map<Integer, Set<Object>> attributeValues,
 			DiscretizationStrategy discretizationStrategy, int numberOfCategories) {
 		Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies = new HashMap<>();
@@ -174,7 +173,7 @@ public class DiscretizationHelper<I extends IInstance> {
 	 * @param dataset
 	 * @return
 	 */
-	private Set<Integer> getNumericIndicesFromDataset(IDataset<I> dataset) {
+	private Set<Integer> getNumericIndicesFromDataset(D dataset) {
 		Set<Integer> numericAttributes = new HashSet<>();
 		List<IAttributeType<?>> attributeTypes = new ArrayList<>(dataset.getAttributeTypes());
 		attributeTypes.add(dataset.getTargetType());

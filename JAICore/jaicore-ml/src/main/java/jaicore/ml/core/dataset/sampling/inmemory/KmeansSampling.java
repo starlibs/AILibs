@@ -6,8 +6,9 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 
 /**
  * Implementation of a sampling method using kmeans-clustering. This algorithm
@@ -20,7 +21,7 @@ import jaicore.ml.core.dataset.IInstance;
  * @author jnowack
  *
  */
-public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
+public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ClusterSampling<I, D> {
 	/* number of clusters, if -1 use sample size */
 	private int k;
 
@@ -32,7 +33,7 @@ public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 	 * @param k
 	 *            number of clusters
 	 */
-	public KmeansSampling(long seed, int k, IDataset<I> input) {
+	public KmeansSampling(long seed, int k, D input) {
 		super(seed, input);
 		this.k = k;
 	}
@@ -46,7 +47,7 @@ public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(long seed, DistanceMeasure dist, IDataset<I> input) {
+	public KmeansSampling(long seed, DistanceMeasure dist, D input) {
 		super(seed, dist, input);
 		this.k = -1;
 
@@ -62,7 +63,7 @@ public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(long seed, int k, DistanceMeasure dist, IDataset<I> input) {
+	public KmeansSampling(long seed, int k, DistanceMeasure dist, D input) {
 		super(seed, dist, input);
 		this.k = k;
 
@@ -73,7 +74,7 @@ public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables
-			this.sample = getInput().createEmpty();
+			this.sample = (D)getInput().createEmpty();
 
 			// create cluster
 			JDKRandomGenerator r = new JDKRandomGenerator();

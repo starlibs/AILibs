@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.SimpleRandomSampling;
@@ -22,14 +22,14 @@ import jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEvent;
  * 
  * @author Lukas Brandt
  */
-public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
+public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Logger logger = LoggerFactory.getLogger(StratifiedSampling.class);
-	private IStratiAmountSelector<I> stratiAmountSelector;
-	private IStratiAssigner<I> stratiAssigner;
+	private IStratiAmountSelector<D> stratiAmountSelector;
+	private IStratiAssigner<I, D> stratiAssigner;
 	private Random random;
-	private IDataset<I>[] strati = null;
-	private IDataset<I> datasetCopy;
+	private IDataset[] strati = null;
+	private D datasetCopy;
 	private ExecutorService executorService;
 	private boolean allDatapointsAssigned = false;
 	private boolean simpleRandomSamplingStarted;
@@ -44,8 +44,8 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	 * @param random
 	 *            Random object for sampling inside of the strati.
 	 */
-	public StratifiedSampling(IStratiAmountSelector<I> stratiAmountSelector, IStratiAssigner<I> stratiAssigner,
-			Random random, IDataset<I> input) {
+	public StratifiedSampling(IStratiAmountSelector<D> stratiAmountSelector, IStratiAssigner<I, D> stratiAssigner,
+			Random random, D input) {
 		super(input);
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
@@ -56,15 +56,15 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.sample = getInput().createEmpty();
+			this.sample = (D)getInput().createEmpty();
 			if (!allDatapointsAssigned) {
-				this.datasetCopy = getInput().createEmpty();
+				this.datasetCopy = (D)getInput().createEmpty();
 				this.datasetCopy.addAll(this.getInput());
 				this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
 				this.stratiAssigner.setNumCPUs(this.getNumCPUs());
 				this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
 				for (int i = 0; i < this.strati.length; i++) {
-					this.strati[i] = getInput().createEmpty();
+					this.strati[i] = (D)getInput().createEmpty();
 				}
 				this.stratiAssigner.init(this.datasetCopy, this.strati.length);
 			}
@@ -136,7 +136,7 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 		for (int i = 0; i < this.strati.length; i++) {
 			int index = i;
 			this.executorService.execute(() -> {
-				SimpleRandomSampling<I> simpleRandomSampling = new SimpleRandomSampling<>(random, strati[index]);
+				SimpleRandomSampling<I, D> simpleRandomSampling = new SimpleRandomSampling<>(random, (D)strati[index]);
 				simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
 				try {
 					synchronized (sample) {
@@ -152,13 +152,11 @@ public class StratifiedSampling<I extends IInstance> extends ASamplingAlgorithm<
 		this.executorService.shutdown();
 	}
 
-	public IDataset<I>[] getStrati() {
+	public IDataset[] getStrati() {
 		return strati;
 	}
 
-	public void setStrati(IDataset<I>[] strati) {
+	public void setStrati(IDataset[] strati) {
 		this.strati = strati;
-		this.allDatapointsAssigned = true;
 	}
-
 }

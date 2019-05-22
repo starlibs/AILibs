@@ -2,7 +2,7 @@ package jaicore.ml.dyadranking.dataset;
 
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledInstance;
 import jaicore.ml.dyadranking.Dyad;
 
 /**
@@ -12,7 +12,7 @@ import jaicore.ml.dyadranking.Dyad;
  * @author Helena Graf
  *
  */
-public interface IDyadRankingInstance extends IInstance, Iterable<Dyad> {
+public interface IDyadRankingInstance extends ILabeledInstance<IDyadRankingInstance>, Iterable<Dyad> {
 
 	/**
 	 * Get the dyad at the specified position in the ordering contained in this

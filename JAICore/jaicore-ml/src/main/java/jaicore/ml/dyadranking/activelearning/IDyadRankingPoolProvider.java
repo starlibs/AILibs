@@ -7,6 +7,7 @@ import de.upb.isys.linearalgebra.Vector;
 import jaicore.ml.activelearning.IActiveLearningPoolProvider;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
+import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * Interface for an active learning pool provider in the context of dyad
@@ -16,7 +17,7 @@ import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
  * @author Jonas Hanselle
  *
  */
-public interface IDyadRankingPoolProvider extends IActiveLearningPoolProvider {
+public interface IDyadRankingPoolProvider extends IActiveLearningPoolProvider<IDyadRankingInstance> {
 
 	/**
 	 * Returns the set of all {@link Dyad}s with the given {@link Vector} of

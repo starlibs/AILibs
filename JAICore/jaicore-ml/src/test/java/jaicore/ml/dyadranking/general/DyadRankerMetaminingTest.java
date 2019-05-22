@@ -19,7 +19,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
@@ -84,12 +83,12 @@ public class DyadRankerMetaminingTest {
 		DyadRankingDataset testData = new DyadRankingDataset(dataset.subList((int) (0.7 * dataset.size()), dataset.size()));
 
 		// standardize data
-//		scaler.fit(trainData);
-//		scaler.transformAlternatives(trainData);
-//		scaler.transformAlternatives(testData);
+		// scaler.fit(trainData);
+		// scaler.transformAlternatives(trainData);
+		// scaler.transformAlternatives(testData);
 
-//		trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
-//		testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
+		// trainData = randomlyTrimSparseDyadRankingInstances(trainData, 2);
+		// testData = randomlyTrimSparseDyadRankingInstances(testData, 5);
 		try {
 
 			// train the ranker
@@ -100,9 +99,9 @@ public class DyadRankerMetaminingTest {
 			assertTrue(avgKendallTau > 0.5d);
 			IDyadRankingInstance drInstance = (IDyadRankingInstance) testData.get(0);
 			List<Dyad> dyads = new LinkedList<Dyad>();
-//			for(int i = 0; i < drInstance.length(); i++) {
-//				dyads.add(drInstance.getDyadAtPosition(i));
-//			}
+			// for(int i = 0; i < drInstance.length(); i++) {
+			// dyads.add(drInstance.getDyadAtPosition(i));
+			// }
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
 		}
@@ -113,14 +112,14 @@ public class DyadRankerMetaminingTest {
 	public static List<PLNetDyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
 		// Use a simple config such that the test finishes quickly
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
-//		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "10");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
+		// plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
 		return Arrays.asList(plNetRanker);
 	}
 
@@ -133,28 +132,25 @@ public class DyadRankerMetaminingTest {
 	 * @param seed
 	 * @return
 	 */
-	private static DyadRankingDataset randomlyTrimSparseDyadRankingInstances(DyadRankingDataset dataset,
-			int dyadRankingLength) {
+	private static DyadRankingDataset randomlyTrimSparseDyadRankingInstances(DyadRankingDataset dataset, int dyadRankingLength) {
 		DyadRankingDataset trimmedDataset = new DyadRankingDataset();
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			if (drInstance.length() < dyadRankingLength)
+		for (IDyadRankingInstance instance : dataset) {
+			if (instance.length() < dyadRankingLength)
 				continue;
-			ArrayList<Boolean> flagVector = new ArrayList<Boolean>(drInstance.length());
+			ArrayList<Boolean> flagVector = new ArrayList<>(instance.length());
 			for (int i = 0; i < dyadRankingLength; i++) {
 				flagVector.add(Boolean.TRUE);
 			}
-			for (int i = dyadRankingLength; i < drInstance.length(); i++) {
+			for (int i = dyadRankingLength; i < instance.length(); i++) {
 				flagVector.add(Boolean.FALSE);
 			}
 			Collections.shuffle(flagVector);
 			List<Vector> trimmedAlternatives = new ArrayList<Vector>(dyadRankingLength);
-			for (int i = 0; i < drInstance.length(); i++) {
+			for (int i = 0; i < instance.length(); i++) {
 				if (flagVector.get(i))
-					trimmedAlternatives.add(drInstance.getDyadAtPosition(i).getAlternative());
+					trimmedAlternatives.add(instance.getDyadAtPosition(i).getAlternative());
 			}
-			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(
-					drInstance.getDyadAtPosition(0).getInstance(), trimmedAlternatives);
+			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(instance.getDyadAtPosition(0).getInstance(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;

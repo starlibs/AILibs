@@ -6,20 +6,19 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.KmeansSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class KmeansSamplingFactory<I extends IInstance>
-		implements IRerunnableSamplingAlgorithmFactory<I, KmeansSampling<I>> {
+public class KmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, KmeansSampling<I, D>> {
 
-	private KmeansSampling<I> previousRun;
+	private KmeansSampling<I, D> previousRun;
 	private int k = -1;
 	private long clusterSeed = System.currentTimeMillis();
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
 
 	@Override
-	public void setPreviousRun(KmeansSampling<I> previousRun) {
+	public void setPreviousRun(KmeansSampling<I, D> previousRun) {
 		this.previousRun = previousRun;
 	}
 
@@ -54,12 +53,12 @@ public class KmeansSamplingFactory<I extends IInstance>
 	}
 
 	@Override
-	public KmeansSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
+	public KmeansSampling<I, D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
 		int kValue = sampleSize;
 		if (this.k > 0) {
 			kValue = k;
 		}
-		KmeansSampling<I> kmeansSampling = new KmeansSampling<>(this.clusterSeed, kValue, inputDataset);
+		KmeansSampling<I, D> kmeansSampling = new KmeansSampling<>(this.clusterSeed, kValue, inputDataset);
 		kmeansSampling.setSampleSize(sampleSize);
 		kmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (previousRun != null && previousRun.getClusterResults() != null) {

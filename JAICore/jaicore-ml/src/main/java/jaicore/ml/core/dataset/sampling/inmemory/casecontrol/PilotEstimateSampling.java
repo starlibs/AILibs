@@ -10,7 +10,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.classifiers.Classifier;
@@ -20,15 +20,17 @@ import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 
-public abstract class PilotEstimateSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
+public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
 
 	protected int preSampleSize;
 	private I chosenInstance = null;
 
-	protected PilotEstimateSampling(final IDataset<I> input) {
+	protected PilotEstimateSampling(final D input) {
 		super(input);
+		if (!(input instanceof WekaInstances))
+			throw new IllegalArgumentException("Pilot Estimate Sampling currently only works with WekaInstances. The signature is kept general to avoid refactoring later on.");
 	}
 
 	public I getChosenInstance() {
@@ -75,7 +77,7 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 	}
 
 	private AlgorithmEvent doInitStep() {
-		this.sample = this.getInput().createEmpty();
+		this.sample = (D) this.getInput().createEmpty();
 		if (this.probabilityBoundaries == null || this.chosenInstance == null) {
 			Classifier pilotEstimator = new Logistic();
 			// set preSampleSize to |Dataset|/2 as default value, if preSampleSize would be
@@ -83,8 +85,8 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 			if (this.preSampleSize < 1) {
 				this.preSampleSize = this.getInput().size() / 2;
 			}
-			IDataset<I> pilotEstimateSample = this.getInput().createEmpty();
-			IDataset<I> sampleCopy = this.getInput().createEmpty();
+			D pilotEstimateSample = (D) this.getInput().createEmpty();
+			D sampleCopy = (D) this.getInput().createEmpty();
 
 			for (I instance : this.getInput()) {
 				sampleCopy.add(instance);
@@ -117,7 +119,7 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 				} while (pilotEstimateSample.contains(choosenInstance));
 				pilotEstimateSample.add(choosenInstance);
 			}
-			Instances pilotEstimateInstances = ((WekaInstances) pilotEstimateSample).getList();
+			Instances pilotEstimateInstances = ((WekaInstances<?>) pilotEstimateSample).getList();
 
 			NumericToNominal numericToNominal = new NumericToNominal();
 			String[] options = new String[2];
@@ -158,10 +160,10 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 				this.logger.error("Cannot build classifier", e);
 				this.terminate();
 			}
-			this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(((WekaInstances) sampleCopy).getList(), pilotEstimator);
+			this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 		}
 		return this.activate();
 	}
 
-	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator);
+	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(D instances, Classifier pilotEstimator);
 }

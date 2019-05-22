@@ -1,6 +1,5 @@
 package jaicore.ml.evaluation.evaluators.weka.factory;
 
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import jaicore.ml.core.dataset.weka.WekaInstances;
@@ -12,11 +11,11 @@ import weka.core.Instances;
 public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEvaluatorFactory {
 
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<WekaInstances<Object>, ? extends ASamplingAlgorithm<WekaInstances<Object>>> subsamplingAlgorithmFactory;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 
-	public LearningCurveExtrapolationEvaluatorFactory(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> subsamplingAlgorithmFactory, final double trainSplitForAnchorpointsMeasurement,
+	public LearningCurveExtrapolationEvaluatorFactory(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstances<Object>, ? extends ASamplingAlgorithm<WekaInstances<Object>>> subsamplingAlgorithmFactory, final double trainSplitForAnchorpointsMeasurement,
 			final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -26,7 +25,11 @@ public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEv
 	}
 
 	@Override
-	public IClassifierEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) {
-		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, new WekaInstances(dataset), this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed);
+	public IClassifierEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) throws ClassifierEvaluatorConstructionFailedException {
+		try {
+			return new LearningCurveExtrapolationEvaluator<>(this.anchorpoints, this.subsamplingAlgorithmFactory, new WekaInstances<>(dataset), this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed);
+		} catch (ClassNotFoundException e) {
+			throw new ClassifierEvaluatorConstructionFailedException(e);
+		}
 	}
 }

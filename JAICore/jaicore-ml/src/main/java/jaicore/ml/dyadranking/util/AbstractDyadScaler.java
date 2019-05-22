@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
@@ -56,9 +55,8 @@ public abstract class AbstractDyadScaler implements Serializable {
 		for (int i = 0; i < lengthY; i++) {
 			statsY[i] = new SummaryStatistics();
 		}
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
+		for (IDyadRankingInstance instance : dataset) {
+			for (Dyad dyad : instance) {
 				for (int i = 0; i < lengthX; i++) {
 					statsX[i].addValue(dyad.getInstance().getValue(i));
 				}
@@ -198,7 +196,7 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 *                       the scaler.
 	 */
 	public void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
-		for (IInstance instance : dataset) {
+		for (IDyadRankingInstance instance : dataset) {
 			if (instance instanceof SparseDyadRankingInstance) {
 				SparseDyadRankingInstance drSparseInstance = (SparseDyadRankingInstance) instance;
 				this.transformInstances(drSparseInstance, ignoredIndices);
@@ -224,9 +222,8 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 *                       the scaler.
 	 */
 	public void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			this.transformAlternatives(drInstance, ignoredIndices);
+		for (IDyadRankingInstance instance : dataset) {
+			this.transformAlternatives(instance, ignoredIndices);
 		}
 	}
 

@@ -5,30 +5,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 
-public class SimpleDataset extends LinkedList<SimpleInstance> implements IDataset<SimpleInstance> {
+public class SimpleDataset<L> extends LinkedList<SimpleInstance<L>> implements IOrderedLabeledAttributeArrayDataset<SimpleInstance<L>, L> {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -404523661106060818L;
 
-	private final InstanceSchema instanceSchema;
+	private final InstanceSchema<L> instanceSchema;
 
-	public SimpleDataset(final InstanceSchema instanceSchema) {
+	public SimpleDataset(final InstanceSchema<L> instanceSchema) {
 		this.instanceSchema = instanceSchema;
 	}
 
 	@Override
-	public <T> IAttributeType<T> getTargetType(final Class<T> clazz) {
-		return this.instanceSchema.getTargetType(clazz);
-	}
-
-	@Override
-	public IAttributeType<?> getTargetType() {
+	public IAttributeType<L> getTargetType() {
 		return this.instanceSchema.getTargetType();
 	}
 
@@ -43,8 +38,7 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 	}
 
 	@Override
-	public boolean add(final SimpleInstance instance) {
-		instance.setSchema(this.instanceSchema);
+	public boolean add(final SimpleInstance<L> instance) {
 		return super.add(instance);
 	}
 
@@ -56,7 +50,7 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 		sb.append("\n");
 		sb.append("%instances");
 		sb.append("\n");
-		for (SimpleInstance inst : this) {
+		for (SimpleInstance<L> inst : this) {
 			sb.append(inst);
 			sb.append("\n");
 		}
@@ -66,7 +60,7 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 	public String printDoubleRepresentation() throws ContainsNonNumericAttributesException {
 		StringBuilder sb = new StringBuilder();
 
-		for (SimpleInstance inst : this) {
+		for (SimpleInstance<L> inst : this) {
 			sb.append(Arrays.toString(inst.getAsDoubleVector()));
 			sb.append("\n");
 		}
@@ -75,8 +69,8 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 	}
 	
 	@Override
-	public SimpleDataset createEmpty() {
-		return new SimpleDataset(instanceSchema);
+	public SimpleDataset<L> createEmpty() {
+		return new SimpleDataset<>(instanceSchema);
 	}
 
 	@Override
@@ -95,7 +89,7 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SimpleDataset other = (SimpleDataset) obj;
+		SimpleDataset<L> other = (SimpleDataset<L>) obj;
 		if (instanceSchema == null) {
 			if (other.instanceSchema != null)
 				return false;

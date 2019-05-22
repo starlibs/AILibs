@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
@@ -48,9 +47,8 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param dataset
 	 */
 	public void untransformInstances(DyadRankingDataset dataset) {
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
+		for (IDyadRankingInstance instance : dataset) {
+			for (Dyad dyad : instance) {
 				untransformInstance(dyad);
 			}
 		}
@@ -63,9 +61,8 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param decimals number of decimal places for rounding
 	 */
 	public void untransformInstances(DyadRankingDataset dataset, int decimals) {
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
+		for (IDyadRankingInstance instance : dataset) {
+			for (Dyad dyad : instance) {
 				untransformInstance(dyad, decimals);
 			}
 		}
@@ -121,9 +118,8 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param dataset
 	 */
 	public void untransformAlternatives(DyadRankingDataset dataset) {
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
+		for (IDyadRankingInstance instance : dataset) {
+			for (Dyad dyad : instance) {
 				untransformAlternative(dyad);
 			}
 		}
@@ -136,9 +132,8 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param decimals number of de
 	 */
 	public void untransformAlternatives(DyadRankingDataset dataset, int decimals) {
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			for (Dyad dyad : drInstance) {
+		for (IDyadRankingInstance instance : dataset) {
+			for (Dyad dyad : instance) {
 				untransformAlternative(dyad, decimals);
 			}
 		}

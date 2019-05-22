@@ -41,6 +41,8 @@ public abstract class TimedComputation {
 			output = callable.call();
 		} catch (Exception e) {
 			caughtException = e;
+		} finally {
+			task.cancel();
 		}
 
 		/* several circumstances define the state at this point:
@@ -82,12 +84,6 @@ public abstract class TimedComputation {
 			else if (task.isTriggered()) {
 				interrupter.avoidInterrupt(Thread.currentThread(), task);
 				logger.info("Interrupt is external, black-listed \"{}\" for interrupts on {} and re-throwing the exception.", task, Thread.currentThread());
-			}
-
-			/* if the task has not been triggered yet, cancel it */
-			else {
-				logger.debug("Canceling task {}", task);
-				task.cancel();
 			}
 			assert !interrupter.hasCurrentThreadBeenInterruptedWithReason(task);
 		}

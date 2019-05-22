@@ -20,7 +20,6 @@ import org.junit.runners.Parameterized.Parameters;
 
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
 import jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
@@ -226,25 +225,24 @@ public class DyadRankerGATSPTest {
 	private static DyadRankingDataset randomlyTrimSparseDyadRankingInstances(DyadRankingDataset dataset,
 			int dyadRankingLength) {
 		DyadRankingDataset trimmedDataset = new DyadRankingDataset();
-		for (IInstance instance : dataset) {
-			IDyadRankingInstance drInstance = (IDyadRankingInstance) instance;
-			if (drInstance.length() < dyadRankingLength)
+		for (IDyadRankingInstance instance : dataset) {
+			if (instance.length() < dyadRankingLength)
 				continue;
-			ArrayList<Boolean> flagVector = new ArrayList<>(drInstance.length());
+			ArrayList<Boolean> flagVector = new ArrayList<>(instance.length());
 			for (int i = 0; i < dyadRankingLength; i++) {
 				flagVector.add(Boolean.TRUE);
 			}
-			for (int i = dyadRankingLength; i < drInstance.length(); i++) {
+			for (int i = dyadRankingLength; i < instance.length(); i++) {
 				flagVector.add(Boolean.FALSE);
 			}
 			Collections.shuffle(flagVector);
 			List<Vector> trimmedAlternatives = new ArrayList<>(dyadRankingLength);
-			for (int i = 0; i < drInstance.length(); i++) {
+			for (int i = 0; i < instance.length(); i++) {
 				if (flagVector.get(i))
-					trimmedAlternatives.add(drInstance.getDyadAtPosition(i).getAlternative());
+					trimmedAlternatives.add(instance.getDyadAtPosition(i).getAlternative());
 			}
 			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(
-					drInstance.getDyadAtPosition(0).getInstance(), trimmedAlternatives);
+					instance.getDyadAtPosition(0).getInstance(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -84,7 +85,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSearchPhase = null;
 	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSelectionPhase = null;
 
-	private Collection<Component> components;
+	private Collection<Component> components = new LinkedList<>();
 	private String performanceMeasureName;
 
 	/* Use caching */
@@ -199,7 +200,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 		} else {
 			ordering = FileUtil.readFileAsList(preferredComponentsFile);
 		}
-		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(new ComponentLoader(this.searchSpaceFile).getComponents(), ordering));
+		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
 	}
 
 	/**
@@ -232,6 +233,8 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	public AbstractMLPlanBuilder withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
 		FileUtil.requireFileExists(searchSpaceConfig);
 		this.searchSpaceFile = searchSpaceConfig;
+		this.components.clear();
+		this.components.addAll(new ComponentLoader(this.searchSpaceFile).getComponents());
 		return this;
 	}
 

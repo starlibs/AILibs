@@ -46,15 +46,12 @@ public class InversePowerLearningCurveModelTrainer {
 		removeFilter.setInvertSelection(true);
 		removeFilter.setInputFormat(data);
 		Instances newData = Filter.useFilter(data, removeFilter);
-		ScikitLearnWrapper slw = new ScikitLearnWrapper(
-				"MLPRegressor(activation='logistic', solver='lbfgs', max_iter=1000)",
-				"from sklearn.neural_network import MLPRegressor");
+		ScikitLearnWrapper slw = new ScikitLearnWrapper("MLPRegressor(activation='logistic', solver='lbfgs', max_iter=1000)", "from sklearn.neural_network import MLPRegressor");
 		slw.setIsRegression(true);
 		slw.setModelPath(modelPath);
 		int s = newData.numAttributes();
 		slw.setTargets(s - 3, s - 2, s - 1);
 		slw.buildClassifier(newData);
-
 		return slw;
 	}
 

@@ -4,12 +4,12 @@ import java.util.List;
 
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 
-public class InstanceSchema {
+public class InstanceSchema<L> {
 
 	private final List<IAttributeType<?>> attributeTypeList;
-	private final IAttributeType<?> targetType;
+	private final IAttributeType<L> targetType;
 
-	public InstanceSchema(final List<IAttributeType<?>> attributeTypeList, final IAttributeType<?> targetType) {
+	public InstanceSchema(final List<IAttributeType<?>> attributeTypeList, final IAttributeType<L> targetType) {
 		this.attributeTypeList = attributeTypeList;
 		this.targetType = targetType;
 	}
@@ -22,11 +22,7 @@ public class InstanceSchema {
 		return this.attributeTypeList.get(index);
 	}
 
-	public <T> IAttributeType<T> getTargetType(final Class<T> type) {
-		return (IAttributeType<T>) this.targetType;
-	}
-
-	public IAttributeType<?> getTargetType() {
+	public IAttributeType<L> getTargetType() {
 		return this.targetType;
 	}
 

@@ -8,13 +8,13 @@ import java.util.List;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.dyadranking.Dyad;
 
 /**
  * A general implementation of a dyad ranking instance that contains an
  * immutable list of dyad to represent the ordering of dyads.
+ * 
+ * The order is assumed to represent the ground truth (i.e., the label of the instance)
  * 
  * @author Helena Graf
  *
@@ -32,24 +32,6 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 	 */
 	public DyadRankingInstance(List<Dyad> dyads) {
 		this.dyads = Collections.unmodifiableList(dyads);
-	}
-
-	@Override
-	public <T> IAttributeValue<T> getAttributeValue(int position, Class<T> type) {
-		throw new UnsupportedOperationException(
-				"Cannot get the attribute value for a dyad ranking instance since each dyad has separate attributes.");
-	}
-
-	@Override
-	public <T> IAttributeValue<T> getTargetValue(Class<T> type) {
-		throw new UnsupportedOperationException(
-				"Cannot get the target value of a dyad ranking instance since the target is an ordering of dyads.");
-	}
-
-	@Override
-	public double[] getAsDoubleVector() throws ContainsNonNumericAttributesException {
-		throw new UnsupportedOperationException(
-				"Dyad ranking instances cannot be converted to a double vector since the target type is an ordering of dyads.");
 	}
 
 	@Override
@@ -72,7 +54,7 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 		if (!(o instanceof IDyadRankingInstance)) {
 			return false;
 		}
-
+		
 		IDyadRankingInstance drInstance = (IDyadRankingInstance) o;
 
 		for (int i = 0; i < drInstance.length(); i++) {
@@ -110,4 +92,8 @@ public class DyadRankingInstance implements IDyadRankingInstance {
 		return dyadMatrix;
 	}
 
+	@Override
+	public DyadRankingInstance getTargetValue() {
+		return this;
+	}
 }

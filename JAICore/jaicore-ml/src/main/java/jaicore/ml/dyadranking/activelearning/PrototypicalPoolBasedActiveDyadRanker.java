@@ -13,11 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 
@@ -37,7 +35,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	
 	private static final Logger log = LoggerFactory.getLogger(PrototypicalPoolBasedActiveDyadRanker.class);
 
-	private ArrayList<IInstance> seenInstances;
+	private ArrayList<IDyadRankingInstance> seenInstances;
 	private int maxBatchSize;
 	private double ratioOfOldInstancesForMinibatch;
 	private int lengthOfTopRankingToConsider;
@@ -63,7 +61,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 		if (iteration < numberRandomQueriesAtStart) {
 
 			for (int i = 0; i < numberOfQueries; i++) {
-				Set<IInstance> minibatch = new HashSet<>();
+				Set<IDyadRankingInstance> minibatch = new HashSet<>();
 				for (int batchIndex = 0; batchIndex < maxBatchSize; batchIndex++) {
 					// get random instance
 					List<Vector> instanceFeatures = new ArrayList<>(poolProvider.getInstanceFeatures());
@@ -101,7 +99,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 
 				// get the instance feature vector for which the top ranking has the lowest
 				// probability, d^star in the paper
-				Set<IInstance> minibatch = new HashSet<>();
+				Set<IDyadRankingInstance> minibatch = new HashSet<>();
 				List<Pair<Vector, Double>> dStarWithProbability = new ArrayList<>(maxBatchSize);
 				for (Vector instanceFeatures : poolProvider.getInstanceFeatures()) {
 					dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, 54d));
@@ -126,7 +124,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 					SparseDyadRankingInstance queryRanking = new SparseDyadRankingInstance(instance, alternatives);
 
 					// get the alternatives pair for which the PLNet is most uncertain
-					DyadRankingInstance queryPair = ranker.getPairWithLeastCertainty(queryRanking);
+					IDyadRankingInstance queryPair = ranker.getPairWithLeastCertainty(queryRanking);
 
 					// convert to SparseDyadRankingInstance
 					List<Vector> alternativePair = new ArrayList<>(queryPair.length());
@@ -144,7 +142,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 				// Select a portion of random instances that have already been queried and add
 				// them to the minibatch
 				Collections.shuffle(seenInstances);
-				List<IInstance> oldInstances = seenInstances.subList(0, numberOfOldInstances);
+				List<IDyadRankingInstance> oldInstances = seenInstances.subList(0, numberOfOldInstances);
 				minibatch.addAll(oldInstances);
 
 				try {

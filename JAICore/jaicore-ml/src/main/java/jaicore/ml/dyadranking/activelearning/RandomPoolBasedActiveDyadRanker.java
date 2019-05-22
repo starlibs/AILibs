@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.isys.linearalgebra.Vector;
-import jaicore.ml.core.dataset.IInstance;
 import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.Dyad;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
@@ -45,7 +44,7 @@ public class RandomPoolBasedActiveDyadRanker extends ActiveDyadRanker {
 	@Override
 	public void activelyTrain(int numberOfQueries) {
 		for (int i = 0; i < numberOfQueries; i++) {
-			Set<IInstance> minibatch = new HashSet<>();
+			Set<IDyadRankingInstance> minibatch = new HashSet<>();
 			for (int batchIndex = 0; batchIndex < maxBatchSize; batchIndex++) {
 				// get random instance
 				List<Vector> instanceFeatures = new ArrayList<>(poolProvider.getInstanceFeatures());

@@ -1,6 +1,6 @@
 package jaicore.ml.core.predictivemodel;
 
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.IDataset;
 
 /**
  * The {@link ICertaintyProvider} models an {@link IPredictiveModel} that
@@ -11,7 +11,7 @@ import jaicore.ml.core.dataset.IInstance;
  * @param <T> TARGET: The type of the target that this {@link ICertaintyProvider}
  *        provides certainty for.
  */
-public interface ICertaintyProvider<T> extends IPredictiveModel<T> {
+public interface ICertaintyProvider<T, I, D extends IDataset<I>> extends IPredictiveModel<T, I, D> {
 
 	/**
 	 * Returns the certainty for a given {@link IInstance}.
@@ -19,6 +19,6 @@ public interface ICertaintyProvider<T> extends IPredictiveModel<T> {
 	 * @param queryInstance {@link IInstance} for which certainty shall be obtained.
 	 * @return Certainty of the model for the given {@link IInstance}
 	 */
-	public double getCertainty(IInstance queryInstance);
+	public double getCertainty(I queryInstance);
 
 }

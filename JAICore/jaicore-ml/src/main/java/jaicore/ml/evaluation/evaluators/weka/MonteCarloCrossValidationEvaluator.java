@@ -100,7 +100,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 				if (this.hasListeners) {
 					this.eventBus.post(new MCCVSplitEvaluationEvent(pl, split.get(0).size(), split.get(1).size(), (int)(System.currentTimeMillis() - startTimeForSplitEvaluation), score));
 				}
-				this.logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl, i + 1, this.repeats, score, (System.currentTimeMillis() - startTimestamp));
+				this.logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl.getClass().getName(), i + 1, this.repeats, score, (System.currentTimeMillis() - startTimestamp));
 				stats.addValue(score);
 			} catch (InterruptedException e) {
 				throw e;
@@ -109,8 +109,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 			}
 		}
 		Double score = stats.getMean();
-		System.err.println(pl.toString() + " " + score + " " + (System.currentTimeMillis() - startTimestamp));
-		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl, (System.currentTimeMillis() - startTimestamp));
+		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl.getClass().getName(), (System.currentTimeMillis() - startTimestamp));
 		return score;
 	}
 
