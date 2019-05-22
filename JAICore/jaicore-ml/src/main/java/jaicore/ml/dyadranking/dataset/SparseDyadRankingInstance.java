@@ -128,13 +128,15 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance implements I
 		if (alternatives == null) {
 			if (other.alternatives != null)
 				return false;
-		} else if (!alternatives.equals(other.alternatives))
+		} else if (!alternatives.equals(other.alternatives)) {
 			return false;
+		}
 		if (instance == null) {
 			if (other.instance != null)
 				return false;
-		} else if (!instance.equals(other.instance))
+		} else if (!instance.equals(other.instance)) {
 			return false;
+		}
 		return true;
 	}
 

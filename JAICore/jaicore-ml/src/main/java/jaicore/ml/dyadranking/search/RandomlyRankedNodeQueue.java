@@ -21,7 +21,7 @@ import jaicore.search.model.travesaltree.Node;
 public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedList<Node<N, V>> {
 
 	private Random random;
-	private Logger logger = LoggerFactory.getLogger(RandomlyRankedNodeQueue.class);
+	private transient Logger logger = LoggerFactory.getLogger(RandomlyRankedNodeQueue.class);
 
 	public RandomlyRankedNodeQueue(int seed) {
 		this.random = new Random(seed);
@@ -41,5 +41,32 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedL
 	@Override
 	public void add(int position, Node<N, V> e) {
 		throw new UnsupportedOperationException("Cannot place items at a specific position wihtin a randomly ranked queue!");
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((random == null) ? 0 : random.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		@SuppressWarnings("rawtypes")
+		RandomlyRankedNodeQueue other = (RandomlyRankedNodeQueue) obj;
+		if (random == null) {
+			if (other.random != null)
+				return false;
+		} else if (!random.equals(other.random)) {
+			return false;
+		}
+		return true;
 	}
 }
