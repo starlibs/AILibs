@@ -41,7 +41,6 @@ public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPlugi
 					logger.debug("Added solution to model.");
 				} catch (NumberFormatException exception) {
 					logger.warn("Received processed SolutionCandidateFoundEvent, but the score {} cannot be parsed to a double.", scoredSolutionCandidateInfo.getScore());
-					return;
 				}
 			}
 		}

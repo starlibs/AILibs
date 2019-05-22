@@ -52,8 +52,7 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 			}
 		}
 
-		PropertyProcessedAlgorithmEvent serializableAlgorithmEvent = new DefaultPropertyProcessedAlgorithmEvent(algorithmEvent.getClass().getSimpleName(), properties, algorithmEvent, algorithmEvent.getTimestamp());
-		return serializableAlgorithmEvent;
+		return new DefaultPropertyProcessedAlgorithmEvent(algorithmEvent.getClass().getSimpleName(), properties, algorithmEvent, algorithmEvent.getTimestamp());
 	}
 
 	public AlgorithmEventHistory getHistory() {

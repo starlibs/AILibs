@@ -1,5 +1,6 @@
 package jaicore.graphvisualizer.events.recorder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +12,9 @@ import org.slf4j.LoggerFactory;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 
-public class AlgorithmEventHistory implements ILoggingCustomizable {
+public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable {
+
+	private static final long serialVersionUID = 8500970353937357648L;
 
 	private transient Logger logger = LoggerFactory.getLogger(AlgorithmEventHistory.class);
 	private transient String loggerName;
@@ -40,8 +43,7 @@ public class AlgorithmEventHistory implements ILoggingCustomizable {
 	}
 
 	private long getCurrentReceptionTime() {
-		long currentTime = System.currentTimeMillis();
-		return currentTime;
+		return System.currentTimeMillis();
 	}
 
 	public AlgorithmEventHistoryEntry getEntryAtTimeStep(final int timestep) {

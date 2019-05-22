@@ -10,6 +10,8 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 
 public class DefaultPropertyProcessedAlgorithmEvent implements PropertyProcessedAlgorithmEvent {
 
+	private static final long serialVersionUID = -6645533957593455739L;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPropertyProcessedAlgorithmEvent.class);
 
 	private String eventName;
@@ -83,8 +85,7 @@ public class DefaultPropertyProcessedAlgorithmEvent implements PropertyProcessed
 
 	private Class<?> getClassOfOriginalEvent() {
 		try {
-			Class<?> classOfOriginalEvent = Class.forName(getCompleteOriginalEventName());
-			return classOfOriginalEvent;
+			return Class.forName(getCompleteOriginalEventName());
 		} catch (ClassNotFoundException e) {
 			LOGGER.warn("Cannot find class with name {}.", getCompleteOriginalEventName(), e);
 			return null;

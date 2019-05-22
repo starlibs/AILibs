@@ -46,9 +46,8 @@ public class AlgorithmEventHistorySerializer {
 
 	public AlgorithmEventHistory deserializeAlgorithmEventHistory(String serializedAlgorithmEventHistory) throws JsonParseException, JsonMappingException, IOException {
 		PropertyProcessedAlgorithmEventHistory serializableAlgorithmEventHistory = objectMapper.readValue(serializedAlgorithmEventHistory, PropertyProcessedAlgorithmEventHistory.class);
-		AlgorithmEventHistory algorithmEventHistory = new AlgorithmEventHistory(serializableAlgorithmEventHistory.getEntries());
 
-		return algorithmEventHistory;
+		return new AlgorithmEventHistory(serializableAlgorithmEventHistory.getEntries());
 	}
 
 }

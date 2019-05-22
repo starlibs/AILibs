@@ -23,8 +23,7 @@ public class HASCOSolutionCandidateRepresenter implements SolutionCandidateRepre
 		if (solutionCandidate instanceof HASCOSolutionCandidate) {
 			HASCOSolutionCandidate<?> hascoSolutionCandidate = (HASCOSolutionCandidate<?>) solutionCandidate;
 			try {
-				String serializedComponentInstance = componentInstanceSerializer.serializeComponentInstance(hascoSolutionCandidate.getComponentInstance());
-				return serializedComponentInstance;
+				return componentInstanceSerializer.serializeComponentInstance(hascoSolutionCandidate.getComponentInstance());
 			} catch (JsonProcessingException e) {
 				LOGGER.error("Cannot compute String representation of solution candidate {} using {}.", solutionCandidate, ComponentInstanceSerializer.class.getSimpleName(), e);
 			}

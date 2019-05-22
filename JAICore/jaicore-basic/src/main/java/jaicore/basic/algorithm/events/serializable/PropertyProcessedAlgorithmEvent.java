@@ -1,8 +1,10 @@
 package jaicore.basic.algorithm.events.serializable;
 
+import java.io.Serializable;
+
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 
-public interface PropertyProcessedAlgorithmEvent {
+public interface PropertyProcessedAlgorithmEvent extends Serializable {
 
 	public String getEventName();
 

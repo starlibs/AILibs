@@ -18,8 +18,7 @@ public class ComponentInstanceSerializer {
 	}
 
 	public String serializeComponentInstance(ComponentInstance componentInstance) throws JsonProcessingException {
-		String serializedComponentInstance = objectMapper.writeValueAsString(componentInstance);
-		return serializedComponentInstance;
+		return objectMapper.writeValueAsString(componentInstance);
 	}
 
 	public ComponentInstance deserializeComponentInstance(String serializedComponentInstance) throws IOException {
