@@ -13,6 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import jaicore.ml.WekaUtil;
 import jaicore.ml.scikitwrapper.ScikitLearnWrapper.ProblemType;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
@@ -44,6 +45,23 @@ public class ScikitLearnWrapperTest {
 		slw.buildClassifier(dataset);
 		assertNotNull(MSG_MODELPATH_NOT_NULL, slw.getModelPath());
 		assertTrue(slw.getModelPath().exists());
+	}
+
+	@Test
+	public void buildAndPredict() throws Exception {
+		List<String> imports = Arrays.asList("sklearn", "sklearn.ensemble");
+		String constructInstruction = "sklearn.ensemble.RandomForestClassifier(n_estimators=100)";
+		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction, ScikitLearnWrapper.getImportString(imports), false);
+		Instances dataset = this.loadARFF(CLASSIFICATION_ARFF);
+		List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(dataset, 0, .7);
+
+		long startTrain = System.currentTimeMillis();
+		slw.buildClassifier(stratifiedSplit.get(0));
+		System.out.println("Build took: " + (System.currentTimeMillis() - startTrain));
+
+		long startVal = System.currentTimeMillis();
+		slw.classifyInstances(stratifiedSplit.get(1));
+		System.out.println("Validation took: " + (System.currentTimeMillis() - startVal));
 	}
 
 	@Test

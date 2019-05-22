@@ -6,8 +6,14 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
+
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import jaicore.basic.events.IEvent;
+import jaicore.basic.events.IEventEmitter;
+import jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationEvent;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
 import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
@@ -24,8 +30,10 @@ import weka.core.Instances;
  * @author fmohr, joshua
  *
  */
-public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator, ILoggingCustomizable {
+public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
 
+	private final EventBus eventBus = new EventBus();
+	private boolean hasListeners;
 	private Logger logger = LoggerFactory.getLogger(MonteCarloCrossValidationEvaluator.class);
 	private boolean canceled = false;
 	private final IDatasetSplitter datasetSplitter;
@@ -37,7 +45,8 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	/* Can either compute the loss or cache it */
 	private final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator;
 
-	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion, final long seed) {
+	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion,
+			final long seed) {
 		super();
 		if (data == null) {
 			throw new IllegalArgumentException("Cannot work with NULL data");
@@ -48,13 +57,16 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;
 		this.splitBasedEvaluator = splitBasedEvaluator;
+		if (this.splitBasedEvaluator instanceof IEventEmitter) {
+			((IEventEmitter)splitBasedEvaluator).registerListener(this);
+		}
 		this.data = data;
 		this.trainingPortion = trainingPortion;
 		this.seed = seed;
 	}
 
 	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final int repeats, final Instances data, final double trainingPortion, final long seed) {
-		this (splitBasedEvaluator, new MulticlassClassStratifiedSplitter(), repeats, data, trainingPortion, seed);
+		this(splitBasedEvaluator, new MulticlassClassStratifiedSplitter(), repeats, data, trainingPortion, seed);
 	}
 
 	public void cancel() {
@@ -83,8 +95,12 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 			}
 			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 			try {
+				long startTimeForSplitEvaluation = System.currentTimeMillis();
 				double score = this.splitBasedEvaluator.evaluateSplit(pl, split.get(0), split.get(1));
-				this.logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl, i + 1, this.repeats, score, (System.currentTimeMillis() - startTimestamp));
+				if (this.hasListeners) {
+					this.eventBus.post(new MCCVSplitEvaluationEvent(pl, split.get(0).size(), split.get(1).size(), (int)(System.currentTimeMillis() - startTimeForSplitEvaluation), score));
+				}
+				this.logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl.getClass().getName(), i + 1, this.repeats, score, (System.currentTimeMillis() - startTimestamp));
 				stats.addValue(score);
 			} catch (InterruptedException e) {
 				throw e;
@@ -93,7 +109,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 			}
 		}
 		Double score = stats.getMean();
-		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl, (System.currentTimeMillis() - startTimestamp));
+		this.logger.info("Obtained score of {} for classifier {} in {}ms.", score, pl.getClass().getName(), (System.currentTimeMillis() - startTimestamp));
 		return score;
 	}
 
@@ -111,5 +127,17 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 		this.logger.info("Switching logger of {} from {} to {}", this, this.logger.getName(), name);
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Switched logger of {} to {}", this, name);
+	}
+
+	@Override
+	public void registerListener(final Object listener) {
+		this.hasListeners = true;
+		this.eventBus.register(listener);
+	}
+
+	/* forward all events potentially coming in from the split evaluator */
+	@Subscribe
+	public void receiveEvent(final IEvent event) {
+		this.eventBus.post(event);
 	}
 }

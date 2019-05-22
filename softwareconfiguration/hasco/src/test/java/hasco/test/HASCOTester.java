@@ -47,15 +47,21 @@ public abstract class HASCOTester<S extends GraphSearchInput<N, A>, N, A> extend
 	}
 
 	private HASCO<S, N, A, Double> getHASCOForSimpleProblem() throws AlgorithmTestProblemSetCreationException {
-		return this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes());
+		HASCO<S, N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes());
+		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		return hasco;
 	}
 
 	private HASCO<S, N, A, Double> getHASCOForDifficultProblem() throws AlgorithmTestProblemSetCreationException {
-		return this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDifficultProblemInputForGeneralTestPurposes());
+		HASCO<S, N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDifficultProblemInputForGeneralTestPurposes());
+		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		return hasco;
 	}
 
 	private HASCO<S, N, A, Double> getHASCOForProblemWithDependencies() throws AlgorithmTestProblemSetCreationException {
-		return this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDependencyProblemInput());
+		HASCO<S, N, A, Double> hasco = this.getAlgorithmForSoftwareConfigurationProblem(this.getProblemSet().getDependencyProblemInput());
+		hasco.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		return hasco;
 	}
 
 	private Collection<Pair<HASCO<S, N, A, Double>, Integer>> getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems() throws AlgorithmTestProblemSetCreationException {
@@ -124,6 +130,7 @@ public abstract class HASCOTester<S extends GraphSearchInput<N, A>, N, A> extend
 		for (Pair<HASCO<S, N, A, Double>, Integer> pairOfHASCOAndExpectedNumberOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
 			HASCO<S, N, A, Double> hasco = pairOfHASCOAndExpectedNumberOfSolutions.getX();
 			int numberOfExpectedSolutions = pairOfHASCOAndExpectedNumberOfSolutions.getY();
+			this.logger.info("Starting HASCO on problem {} with {} solutions.", hasco, numberOfExpectedSolutions);
 			if (numberOfExpectedSolutions < 0) {
 				continue;
 			}
@@ -134,6 +141,7 @@ public abstract class HASCOTester<S extends GraphSearchInput<N, A>, N, A> extend
 					this.logger.info("Found solution {}", CompositionSerializer.serializeComponentInstance(((HASCOSolutionEvent<Double>) e).getSolutionCandidate().getComponentInstance()));
 				}
 			}
+			this.logger.info("Finished HASCO, now evaluating numbers of found solutions.");
 			Set<Object> uniqueSolutions = new HashSet<>(solutions);
 			assertEquals("Only found " + uniqueSolutions.size() + "/" + numberOfExpectedSolutions + " solutions", numberOfExpectedSolutions, uniqueSolutions.size());
 			assertEquals("All " + numberOfExpectedSolutions + " solutions were found, but " + solutions.size() + " solutions were returned in total, i.e. there are solutions returned twice", numberOfExpectedSolutions, solutions.size());

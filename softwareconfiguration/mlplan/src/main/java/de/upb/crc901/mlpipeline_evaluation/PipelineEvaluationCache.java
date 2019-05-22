@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import hasco.model.ComponentInstance;
 import hasco.serialization.CompositionSerializer;
 import jaicore.ml.openml.OpenMLHelper;
+import weka.classifiers.Classifier;
 import weka.core.converters.ConverterUtils.DataSource;
 
 /**
@@ -134,7 +134,7 @@ public class PipelineEvaluationCache {
 
 	private double evaluate(final ComponentInstance cI) throws Exception {
 		// Get dataset
-		MLPipeline classifier = new WEKAPipelineFactory().getComponentInstantiation(cI);
+		Classifier classifier = new WEKAPipelineFactory().getComponentInstantiation(cI);
 		if (this.doNotValidate()) {
 			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.config.getTestSplitTechnique(), this.config.getTestEvaluationTechnique(), this.config.getTestSeed(), this.config.getData(), classifier);
 		} else {

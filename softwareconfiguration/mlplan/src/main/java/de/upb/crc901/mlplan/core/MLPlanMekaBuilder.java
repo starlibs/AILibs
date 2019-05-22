@@ -8,7 +8,7 @@ import de.upb.crc901.mlplan.multilabel.MekaPipelineFactory;
 import jaicore.basic.FileUtil;
 import jaicore.ml.core.evaluation.measure.IMeasure;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
-import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
 import jaicore.ml.evaluation.evaluators.weka.factory.MonteCarloCrossValidationEvaluatorFactory;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
 import jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
@@ -27,7 +27,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 	private static final double SEARCH_TRAIN_FOLD_SIZE = 0.7;
 	private static final int SELECTION_NUM_MC_ITERATIONS = 5;
 	private static final double SELECTION_TRAIN_FOLD_SIZE = 0.7;
-	private static final IMeasure<double[], Double> LOSS_FUNCTION = new F1MacroAverageDLoss();
+	private static final IMeasure<double[], Double> LOSS_FUNCTION = new InstanceWiseF1AsLoss();
 
 	/* Default configurations */
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "MLClassifier";

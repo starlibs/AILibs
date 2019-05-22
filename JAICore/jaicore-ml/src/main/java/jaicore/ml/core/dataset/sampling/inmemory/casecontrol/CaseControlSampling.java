@@ -2,10 +2,12 @@ package jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 
 import java.util.HashMap;
 import java.util.Random;
-import jaicore.ml.core.dataset.*;
-import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
+
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.ILabeledInstance;
+import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**
  * Case control sampling. Might be used as sampling algorithm or as subroutine
@@ -15,7 +17,7 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
  * @param <I>
  *
  */
-public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
+public class CaseControlSampling<I extends ILabeledInstance, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	/**
 	 * Constructor
@@ -23,7 +25,7 @@ public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSam
 	 * @param rand
 	 *            RandomObject for reproducibility
 	 */
-	public CaseControlSampling(Random rand, IDataset<I> input) {
+	public CaseControlSampling(Random rand, D input) {
 		super(input);
 		this.rand = rand;
 	}
@@ -32,7 +34,7 @@ public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSam
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.sample = getInput().createEmpty();
+			this.sample = (D)getInput().createEmpty();
 
 			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
 

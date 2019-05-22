@@ -285,16 +285,15 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 					groupedTask.put(valueEntry.getKey() + "_min", StatisticsUtil.min(valueList));
 					groupedTask.put(valueEntry.getKey() + "_var", StatisticsUtil.variance(valueList));
 					groupedTask.put(valueEntry.getKey() + "_sum", StatisticsUtil.sum(valueList));
+					groupedTask.put(valueEntry.getKey() + "_list", SetUtil.implode(valueList, ","));
 					value = StatisticsUtil.mean(valueList);
 					break;
 				case MIN:
 					value = StatisticsUtil.min(valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList()));
 					break;
-
 				case MAX:
 					value = StatisticsUtil.max(valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList()));
 					break;
-
 				case MINORITY:
 					value = this.frequentObject(valueEntry.getValue(), false);
 					break;
@@ -352,7 +351,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 		}
 	}
 
-	public void projectRemove(final String[] removeKeys) {
+	public void projectRemove(final String... removeKeys) {
 		this.metaData.removeAll(removeKeys);
 		for (KVStore t : this) {
 			t.removeAll(removeKeys);
@@ -406,8 +405,8 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 		}
 	}
 
-	public void group(final String... groupingKeys) {
-		this.group(groupingKeys, new HashMap<>());
+	public KVStoreCollection group(final String... groupingKeys) {
+		return this.group(groupingKeys, new HashMap<>());
 	}
 
 }

@@ -3,18 +3,17 @@ package jaicore.ml.core.dataset.sampling.inmemory.factories;
 import java.util.Random;
 
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.casecontrol.LocalCaseControlSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class LocalCaseControlSamplingFactory<I extends IInstance>
-		implements IRerunnableSamplingAlgorithmFactory<I, LocalCaseControlSampling<I>> {
+public class LocalCaseControlSamplingFactory<I extends ILabeledAttributeArrayInstance, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, LocalCaseControlSampling<I, D>> {
 
-	private LocalCaseControlSampling<I> previousRun = null;
+	private LocalCaseControlSampling<I, D> previousRun = null;
 	private int preSampleSize = -1;
 
 	@Override
-	public void setPreviousRun(LocalCaseControlSampling<I> previousRun) {
+	public void setPreviousRun(LocalCaseControlSampling<I, D> previousRun) {
 		this.previousRun = previousRun;
 	}
 
@@ -29,9 +28,8 @@ public class LocalCaseControlSamplingFactory<I extends IInstance>
 	}
 
 	@Override
-	public LocalCaseControlSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
-		LocalCaseControlSampling<I> localCaseControlSampling = new LocalCaseControlSampling<>(random,
-				this.preSampleSize, inputDataset);
+	public LocalCaseControlSampling<I, D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
+		LocalCaseControlSampling<I, D> localCaseControlSampling = new LocalCaseControlSampling<>(random, this.preSampleSize, inputDataset);
 		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null) {
 			localCaseControlSampling.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
 			localCaseControlSampling.setChosenInstance(previousRun.getChosenInstance());

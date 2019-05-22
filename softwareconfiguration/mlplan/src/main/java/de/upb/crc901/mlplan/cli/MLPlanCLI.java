@@ -34,9 +34,9 @@ import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerform
 import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.ExactMatchLoss;
-import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageDLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
+import jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.JaccardLoss;
 import jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
 import jaicore.ml.core.evaluation.measure.singlelabel.MeanSquaredErrorLoss;
@@ -229,7 +229,7 @@ public class MLPlanCLI {
 				mekaBuilder.withPerformanceMeasure(new ExactMatchLoss());
 				break;
 			case "F1_MACRO_AVG_D":
-				mekaBuilder.withPerformanceMeasure(new F1MacroAverageDLoss());
+				mekaBuilder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
 				break;
 			case "F1_MACRO_AVG_L":
 				mekaBuilder.withPerformanceMeasure(new F1MacroAverageLLoss());

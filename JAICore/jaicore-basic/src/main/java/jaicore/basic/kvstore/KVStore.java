@@ -150,6 +150,8 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 			return (Double) value;
 		} else if (value instanceof String) {
 			return Double.valueOf((String) value);
+		} else if (value instanceof Integer) {
+			return Double.parseDouble(value + "");
 		} else {
 			throw new IllegalStateException("Tried to get non-double value as double from KVStore.");
 		}
@@ -299,6 +301,22 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	}
 
 	/**
+	 * Returns a value as a File object.
+	 * @param key Key for which the value shall be returned.
+	 * @return The value for the given key as a file.
+	 */
+	public File getAsFile(final String key) {
+		Object value = this.get(key);
+		if (value instanceof File) {
+			return (File) value;
+		} else if (value instanceof String) {
+			return new File((String) value);
+		} else {
+			throw new IllegalStateException("Cannot return value as a file if it is not of that type.");
+		}
+	}
+
+	/**
 	 * Reads a KVStore from a string description.
 	 *
 	 * @param kvDescription
@@ -411,6 +429,9 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 *            The filter for applying to the value of the given {@code key}.
 	 */
 	public void filter(final String key, final IKVFilter filter) {
+		if (!this.containsKey(key)) {
+			return;
+		}
 		this.put(key, filter.filter(this.get(key)));
 	}
 

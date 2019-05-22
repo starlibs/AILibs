@@ -5,11 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 
-public class SimpleDataset extends LinkedList<SimpleInstance> implements IDataset<SimpleInstance> {
+public class SimpleDataset extends LinkedList<SimpleInstance> implements IOrderedLabeledAttributeArrayDataset<SimpleInstance> {
 
 	/**
 	 *
@@ -20,11 +20,6 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 
 	public SimpleDataset(final InstanceSchema instanceSchema) {
 		this.instanceSchema = instanceSchema;
-	}
-
-	@Override
-	public <T> IAttributeType<T> getTargetType(final Class<T> clazz) {
-		return this.instanceSchema.getTargetType(clazz);
 	}
 
 	@Override

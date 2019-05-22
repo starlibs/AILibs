@@ -5,8 +5,9 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.clustering.GMeans;
+import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 
 /**
  * Implementation of a sampling method using gmeans-clustering. This algorithm
@@ -19,13 +20,13 @@ import jaicore.ml.core.dataset.IInstance;
  * @author jnowack
  *
  */
-public class GmeansSampling<I extends IInstance> extends ClusterSampling<I> {
+public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance, D extends IDataset<I>> extends ClusterSampling<I, D> {
 
-	public GmeansSampling(long seed, DistanceMeasure dist, IDataset<I> input) {
+	public GmeansSampling(long seed, DistanceMeasure dist, D input) {
 		super(seed, dist, input);
 	}
 
-	public GmeansSampling(long seed, IDataset<I> input) {
+	public GmeansSampling(long seed, D input) {
 		super(seed, input);
 	}
 
@@ -34,7 +35,7 @@ public class GmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 		switch (this.getState()) {
 		case created:
 			// Initialize variables
-			this.sample = getInput().createEmpty();
+			this.sample = (D)getInput().createEmpty();
 
 			if (this.clusterResults == null) {
 				// create cluster

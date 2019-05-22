@@ -6,12 +6,10 @@ import de.upb.crc901.mlpipeline_evaluation.PerformanceDBAdapter;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import hasco.core.HASCOFactory;
-import hasco.model.ComponentInstance;
 import jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.timing.TimedObjectEvaluator;
 import weka.core.Instances;
 
 /**
@@ -26,9 +24,9 @@ public interface IMLPlanBuilder {
 
 	public IDatasetSplitter getSearchSelectionDatasetSplitter();
 
-	public TimedObjectEvaluator<ComponentInstance, Double> getClassifierEvaluationInSearchPhase(Instances dataShownToSearch, int randomSeed, int size) throws ClassifierEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(Instances dataShownToSearch, int randomSeed, int size) throws ClassifierEvaluatorConstructionFailedException;
 
-	public TimedObjectEvaluator<ComponentInstance, Double> getClassifierEvaluationInSelectionPhase(Instances dataShownToSearch, int randomSeed) throws ClassifierEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(Instances dataShownToSearch, int randomSeed) throws ClassifierEvaluatorConstructionFailedException;
 
 	public String getPerformanceMeasureName();
 

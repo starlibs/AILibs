@@ -8,9 +8,10 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.IDataset;
+import jaicore.ml.core.dataset.INumericArrayInstance;
 
-public abstract class ClusterStratiAssigner<I extends IInstance> implements IStratiAssigner<I> {
+public abstract class ClusterStratiAssigner<I extends INumericArrayInstance, D extends IDataset<I>> implements IStratiAssigner<I, D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClusterStratiAssigner.class);
 
@@ -19,7 +20,7 @@ public abstract class ClusterStratiAssigner<I extends IInstance> implements IStr
 	protected List<CentroidCluster<I>> clusters;
 
 	@Override
-	public int assignToStrati(IInstance datapoint) {
+	public int assignToStrati(I datapoint) {
 		// Search for the cluster that contains the datapoint.
 		for (int i = 0; i < this.clusters.size(); i++) {
 			List<I> clusterPoints = this.clusters.get(i).getPoints();

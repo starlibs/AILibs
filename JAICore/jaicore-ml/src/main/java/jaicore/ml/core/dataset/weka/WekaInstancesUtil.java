@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
+import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.core.dataset.standard.SimpleDataset;
@@ -70,7 +71,7 @@ public class WekaInstancesUtil {
 		return dataset;
 	}
 
-	public static Instances datasetToWekaInstances(final IDataset<? extends IInstance> dataset) throws UnsupportedAttributeTypeException {
+	public static Instances datasetToWekaInstances(final IOrderedLabeledAttributeArrayDataset<?> dataset) throws UnsupportedAttributeTypeException {
 		List<Attribute> attributes = new LinkedList<>();
 		Attribute classAttribute;
 
@@ -100,27 +101,27 @@ public class WekaInstancesUtil {
 		Instances wekaInstances = new Instances("weka-instances", attributeList, 0);
 		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
 
-		for (IInstance inst : dataset) {
+		for (ILabeledAttributeArrayInstance inst : dataset) {
 			DenseInstance iNew = new DenseInstance(attributeList.size());
 			iNew.setDataset(wekaInstances);
 
 			for (int i = 0; i < dataset.getNumberOfAttributes(); i++) {
 				if (dataset.getAttributeTypes().get(i) instanceof NumericAttributeType) {
-					IAttributeValue<Double> val = inst.getAttributeValue(i, Double.class);
+					IAttributeValue<Double> val = inst.getAttributeValueAtPosition(i, Double.class);
 					iNew.setValue(i, val.getValue());
 				} else if (dataset.getAttributeTypes().get(i) instanceof CategoricalAttributeType) {
-					IAttributeValue<String> val = inst.getAttributeValue(i, String.class);
+					IAttributeValue<String> val = inst.getAttributeValueAtPosition(i, String.class);
 					iNew.setValue(i, val.getValue());
 				}
 			}
 
-			if (dataset.getTargetType() instanceof NumericAttributeType) {
-				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
-				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
-				IAttributeValue<String> val = inst.getTargetValue(String.class);
-				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-			}
+//			if (dataset.getTargetType() instanceof NumericAttributeType) {
+//				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
+//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
+//			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
+//				IAttributeValue<String> val = inst.getTargetValue(String.class);
+//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
+//			}
 
 			wekaInstances.add(iNew);
 		}
@@ -136,7 +137,7 @@ public class WekaInstancesUtil {
 			for (int i = 0; i < att.numValues(); i++) {
 				domain.add(att.value(i));
 			}
-			return new CategoricalAttributeType(domain);
+			return att.numValues() == 2 ? new BooleanAttributeType() : new CategoricalAttributeType(domain);
 		}
 		throw new IllegalArgumentException("Can only transform numeric or categorical attributes");
 	}

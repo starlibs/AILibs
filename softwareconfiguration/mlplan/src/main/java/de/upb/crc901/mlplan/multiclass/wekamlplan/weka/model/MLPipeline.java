@@ -13,6 +13,7 @@ import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.Classifier;
+import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -23,12 +24,11 @@ import weka.core.Instances;
  *
  */
 @SuppressWarnings("serial")
-public class MLPipeline implements Classifier, Serializable {
+public class MLPipeline extends SingleClassifierEnhancer implements Classifier, Serializable {
 
 	private static final Logger logger = LoggerFactory.getLogger(MLPipeline.class);
 
 	private final List<SupervisedFilterSelector> preprocessors = new ArrayList<>();
-	private final Classifier baseClassifier;
 
 	private boolean trained = false;
 
@@ -44,7 +44,7 @@ public class MLPipeline implements Classifier, Serializable {
 			throw new IllegalArgumentException("Base classifier must not be null!");
 		}
 		this.preprocessors.addAll(preprocessors);
-		this.baseClassifier = baseClassifier;
+		super.setClassifier(baseClassifier);
 	}
 
 	public MLPipeline(final ASSearch searcher, final ASEvaluation evaluator, final Classifier baseClassifier) {
@@ -58,7 +58,7 @@ public class MLPipeline implements Classifier, Serializable {
 			selector.setEvaluator(evaluator);
 			this.preprocessors.add(new SupervisedFilterSelector(searcher, evaluator, selector));
 		}
-		this.baseClassifier = baseClassifier;
+		super.setClassifier(baseClassifier);
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class MLPipeline implements Classifier, Serializable {
 
 		/* build classifier based on reduced data */
 		start = System.currentTimeMillis();
-		this.baseClassifier.buildClassifier(data);
+		super.getClassifier().buildClassifier(data);
 		this.timeForTrainingClassifier = (int) (System.currentTimeMillis() - start);
 		this.trained = true;
 		this.timeForExecutingPreprocessors = new DescriptiveStatistics();
@@ -120,7 +120,7 @@ public class MLPipeline implements Classifier, Serializable {
 			logger.info("Reduced number of attributes from {} to {}", numAttributesBefore, arg0.numAttributes());
 		}
 		long start = System.currentTimeMillis();
-		double result = this.baseClassifier.classifyInstance(arg0);
+		double result = super.getClassifier().classifyInstance(arg0);
 		this.timeForExecutingClassifier.addValue((System.currentTimeMillis() - start));
 		return result;
 	}
@@ -147,18 +147,18 @@ public class MLPipeline implements Classifier, Serializable {
 			throw new IllegalStateException("The filter has turned the instance into NULL");
 		}
 		long start = System.currentTimeMillis();
-		double[] result = this.baseClassifier.distributionForInstance(arg0);
+		double[] result = super.getClassifier().distributionForInstance(arg0);
 		this.timeForExecutingClassifier.addValue((int) (System.currentTimeMillis() - start));
 		return result;
 	}
 
 	@Override
 	public Capabilities getCapabilities() {
-		return this.baseClassifier.getCapabilities();
+		return super.getClassifier().getCapabilities();
 	}
 
 	public Classifier getBaseClassifier() {
-		return this.baseClassifier;
+		return super.getClassifier();
 	}
 
 	public List<SupervisedFilterSelector> getPreprocessors() {

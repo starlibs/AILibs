@@ -8,25 +8,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jaicore.basic.sets.SetUtil.Pair;
 
 public class Dependency {
-	private final Collection<Collection<Pair<Parameter, ParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)
-	private final Collection<Pair<Parameter, ParameterDomain>> conclusion;
+	private final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)
+	private final Collection<Pair<Parameter, IParameterDomain>> conclusion;
 
-//<<<<<<< HEAD
-//	public Dependency(final Collection<Collection<Pair<Parameter, ParameterDomain>>> premise, final Collection<Pair<Parameter, ParameterDomain>> conclusion) {
-//=======
 	@JsonCreator
-	public Dependency(@JsonProperty("premise") Collection<Collection<Pair<Parameter, ParameterDomain>>> premise, @JsonProperty("conclusion") Collection<Pair<Parameter, ParameterDomain>> conclusion) {
-//>>>>>>> master
+	public Dependency(@JsonProperty("premise") Collection<Collection<Pair<Parameter, IParameterDomain>>> premise, @JsonProperty("conclusion") Collection<Pair<Parameter, IParameterDomain>> conclusion) {
 		super();
 		this.premise = premise;
 		this.conclusion = conclusion;
 	}
 
-	public Collection<Collection<Pair<Parameter, ParameterDomain>>> getPremise() {
+	public Collection<Collection<Pair<Parameter, IParameterDomain>>> getPremise() {
 		return this.premise;
 	}
 
-	public Collection<Pair<Parameter, ParameterDomain>> getConclusion() {
+	public Collection<Pair<Parameter, IParameterDomain>> getConclusion() {
 		return this.conclusion;
 	}
 

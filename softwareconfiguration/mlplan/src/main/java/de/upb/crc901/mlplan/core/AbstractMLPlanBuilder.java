@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,6 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import hasco.core.HASCOFactory;
 import hasco.model.Component;
-import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
@@ -40,7 +40,6 @@ import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluato
 import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import jaicore.search.probleminputs.GraphSearchInput;
 import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
-import jaicore.timing.TimedObjectEvaluator;
 import weka.core.Instances;
 
 /**
@@ -84,7 +83,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSearchPhase = null;
 	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSelectionPhase = null;
 
-	private Collection<Component> components;
+	private Collection<Component> components = new LinkedList<>();
 	private String performanceMeasureName;
 
 	/* Use caching */
@@ -198,7 +197,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 		} else {
 			ordering = FileUtil.readFileAsList(preferredComponentsFile);
 		}
-		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(new ComponentLoader(this.searchSpaceFile).getComponents(), ordering));
+		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
 	}
 
 	/**
@@ -229,6 +228,8 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	public AbstractMLPlanBuilder withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
 		FileUtil.requireFileExists(searchSpaceConfig);
 		this.searchSpaceFile = searchSpaceConfig;
+		this.components.clear();
+		this.components.addAll(new ComponentLoader(this.searchSpaceFile).getComponents());
 		return this;
 	}
 
@@ -310,7 +311,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	}
 
 	@Override
-	public TimedObjectEvaluator<ComponentInstance, Double> getClassifierEvaluationInSearchPhase(final Instances data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final Instances data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
 
 		IClassifierEvaluator evaluator = this.factoryForPipelineEvaluationInSearchPhase.getIClassifierEvaluator(data, seed);
@@ -322,7 +323,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	}
 
 	@Override
-	public TimedObjectEvaluator<ComponentInstance, Double> getClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}
