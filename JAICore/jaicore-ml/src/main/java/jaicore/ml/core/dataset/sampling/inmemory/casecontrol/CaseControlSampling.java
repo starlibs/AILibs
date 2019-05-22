@@ -17,7 +17,7 @@ import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  * @param <I>
  *
  */
-public class CaseControlSampling<I extends ILabeledInstance, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
+public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	/**
 	 * Constructor
