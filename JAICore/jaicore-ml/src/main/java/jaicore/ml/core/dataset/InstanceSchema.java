@@ -1,10 +1,12 @@
 package jaicore.ml.core.dataset;
 
+import java.io.Serializable;
 import java.util.List;
 
 import jaicore.ml.core.dataset.attribute.IAttributeType;
 
-public class InstanceSchema<L> {
+@SuppressWarnings("serial")
+public class InstanceSchema<L> implements Serializable {
 
 	private final List<IAttributeType<?>> attributeTypeList;
 	private final IAttributeType<L> targetType;

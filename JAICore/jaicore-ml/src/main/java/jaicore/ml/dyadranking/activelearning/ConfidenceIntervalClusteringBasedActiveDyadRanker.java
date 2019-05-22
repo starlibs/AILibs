@@ -1,12 +1,11 @@
 package jaicore.ml.dyadranking.activelearning;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
@@ -44,198 +43,125 @@ import weka.core.Instances;
  * @author Jonas Hanselle
  *
  */
-public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ActiveDyadRanker {
-	
+public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomlyInitializingDyadRanker {
+
 	private static final Logger log = LoggerFactory.getLogger(ConfidenceIntervalClusteringBasedActiveDyadRanker.class);
 
-	private HashMap<Dyad, SummaryStatistics> dyadStats;
-	private List<Vector> instanceFeatures;
-	private Random random;
-	private int numberRandomQueriesAtStart;
-	private int iteration;
-	private int minibatchSize;
 	private Clusterer clusterer;
 
-	public ConfidenceIntervalClusteringBasedActiveDyadRanker(PLNetDyadRanker ranker,
-			IDyadRankingPoolProvider poolProvider, int seed, int numberRandomQueriesAtStart, int minibatchSize,
-			Clusterer clusterer) {
-		super(ranker, poolProvider);
-		this.dyadStats = new HashMap<>();
-		this.instanceFeatures = new ArrayList<>(poolProvider.getInstanceFeatures());
-		this.numberRandomQueriesAtStart = numberRandomQueriesAtStart;
-		this.minibatchSize = minibatchSize;
-		this.iteration = 0;
+	public ConfidenceIntervalClusteringBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider, int seed, int numberRandomQueriesAtStart, int minibatchSize, Clusterer clusterer) {
+		super(ranker, poolProvider, seed, numberRandomQueriesAtStart, minibatchSize);
 		this.clusterer = clusterer;
-		for (Vector instance : instanceFeatures) {
-			for (Dyad dyad : poolProvider.getDyadsByInstance(instance)) {
-				this.dyadStats.put(dyad, new SummaryStatistics());
-			}
-		}
-		this.random = new Random(seed);
-
 	}
 
 	@Override
-	public void activelyTrain(int numberOfQueries) {
+	public void activelyTrainWithOneInstance() {
 
-		for (int i = 0; i < numberOfQueries; i++) {
+		PriorityQueue<List<Dyad>> clusterQueue = new PriorityQueue<>(new ListComparator());
 
-			// For the first query steps, sample randomly
-			if (iteration < numberRandomQueriesAtStart) {
+		Set<IDyadRankingInstance> minibatch = new HashSet<>();
+		Map<Dyad, SummaryStatistics> dyadStats = getDyadStats();
 
-				Set<IDyadRankingInstance> minibatch = new HashSet<>();
-				for (int batchIndex = 0; batchIndex < this.minibatchSize; batchIndex++) {
-					// get random instance
-					Collections.shuffle(instanceFeatures, random);
-					if (instanceFeatures.isEmpty())
-						break;
-					Vector instance = instanceFeatures.get(0);
+		for (Vector inst : getInstanceFeatures()) {
+			// Create instances for clustering
+			Attribute upperAttr = new Attribute("upper_bound");
+			Attribute lowerAttr = new Attribute("lower_bound");
+			ArrayList<Attribute> attributes = new ArrayList<>();
+			attributes.add(upperAttr);
+			attributes.add(lowerAttr);
+			Instances intervalInstances = new Instances("confidence_intervalls", attributes, poolProvider.getDyadsByInstance(inst).size());
+			for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
+				double skill = ranker.getSkillForDyad(dyad);
+				dyadStats.get(dyad).addValue(skill);
+				double[] attValues = new double[2];
+				attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
+				attValues[1] = skill - dyadStats.get(dyad).getStandardDeviation();
+				Instance intervalInstance = new DenseInstance(1.0d, attValues);
+				intervalInstances.add(intervalInstance);
+			}
 
-					// get random pair of dyads
-					List<Dyad> dyads = new ArrayList<>(poolProvider.getDyadsByInstance(instance));
-					Collections.shuffle(dyads, random);
+			try {
+				clusterer.buildClusterer(intervalInstances);
 
-					// query them
-					LinkedList<Vector> alternatives = new LinkedList<>();
-					alternatives.add(dyads.get(0).getAlternative());
-					alternatives.add(dyads.get(1).getAlternative());
-					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(),
-							alternatives);
-					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
-					minibatch.add(trueRanking);
+				List<List<Dyad>> instanceClusters = new ArrayList<>();
+				int numClusters = clusterer.numberOfClusters();
+				for (int clusterIndex = 0; clusterIndex < numClusters; clusterIndex++) {
+					instanceClusters.add(new ArrayList<Dyad>());
 				}
-				// feed it to the ranker
-				try {
-					ranker.update(minibatch);
-					// update variances (confidence)
-					for (Vector inst : instanceFeatures) {
-						for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
-							double skill = ranker.getSkillForDyad(dyad);
-							dyadStats.get(dyad).addValue(skill);
-						}
+
+				for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
+					double skill = ranker.getSkillForDyad(dyad);
+					double[] attValues = new double[2];
+					attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
+					attValues[1] = skill - dyadStats.get(dyad).getStandardDeviation();
+					Instance intervalInstance = new DenseInstance(1.0d, attValues);
+					int cluster = clusterer.clusterInstance(intervalInstance);
+					instanceClusters.get(cluster).add(dyad);
+				}
+
+				for (int j = 0; j < instanceClusters.size(); j++) {
+					clusterQueue.add(instanceClusters.get(j));
+				}
+			} catch (Exception e1) {
+				log.error(e1.getMessage());
+			}
+		}
+
+		Random random = getRandom();
+		for (int minibatchIndex = 0; minibatchIndex < getMinibatchSize(); minibatchIndex++) {
+			// get the largest cluster
+			List<Dyad> curDyads = clusterQueue.poll();
+			if (curDyads.size() < 2) {
+				continue;
+			}
+			// check overlap for all pairs of dyads in the current cluster
+			double curMax = -1;
+			int[] curPair = { 0, 1 };
+			boolean changed = false;
+			for (int j = 1; j < curDyads.size(); j++) {
+				for (int k = 0; k < j; k++) {
+					Dyad dyad1 = curDyads.get(j);
+					Dyad dyad2 = curDyads.get(k);
+					double overlap = getConfidenceIntervalOverlapForDyads(dyad1, dyad2);
+					if (overlap > curMax) {
+						curPair[0] = j;
+						curPair[1] = k;
+						curMax = overlap;
+						changed = true;
 					}
-				} catch (TrainingException e) {
-					log.error(e.getMessage());
+
+				}
+			}
+			// if the pair hasn't changed, i.e. there are no overlapping intervals, sample a random pair
+			if (!changed) {
+				curPair[0] = random.nextInt(curDyads.size());
+				curPair[1] = random.nextInt(curDyads.size());
+				while (curPair[0] == curPair[1]) {
+					curPair[1] = random.nextInt(curDyads.size());
 				}
 			}
 
-			else {
+			// query them
+			LinkedList<Vector> alternatives = new LinkedList<>();
+			alternatives.add(curDyads.get(curPair[0]).getAlternative());
+			alternatives.add(curDyads.get(curPair[1]).getAlternative());
+			SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(curDyads.get(curPair[0]).getInstance(), alternatives);
+			IDyadRankingInstance trueRanking = poolProvider.query(queryInstance);
+			minibatch.add(trueRanking);
+		}
 
-				PriorityQueue<List<Dyad>> clusterQueue = new PriorityQueue<>(new ListComparator());
-
-				Set<IDyadRankingInstance> minibatch = new HashSet<>();
-
-				for (Vector inst : instanceFeatures) {
-					// Create instances for clustering
-					Attribute upperAttr = new Attribute("upper_bound");
-					Attribute lowerAttr = new Attribute("lower_bound");
-					ArrayList<Attribute> attributes = new ArrayList<>();
-					attributes.add(upperAttr);
-					attributes.add(lowerAttr);
-					Instances intervalInstances = new Instances("confidence_intervalls", attributes,
-							poolProvider.getDyadsByInstance(inst).size());
-
-					for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
-						double skill = ranker.getSkillForDyad(dyad);
-						dyadStats.get(dyad).addValue(skill);
-						double[] attValues = new double[2];
-						attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
-						attValues[1] = skill - dyadStats.get(dyad).getStandardDeviation();
-						Instance intervalInstance = new DenseInstance(1.0d, attValues);
-						intervalInstances.add(intervalInstance);
-					}
-
-					try {
-						clusterer.buildClusterer(intervalInstances);
-
-						List<List<Dyad>> instanceClusters = new ArrayList<>();
-						int numClusters = clusterer.numberOfClusters();
-						for (int clusterIndex = 0; clusterIndex < numClusters; clusterIndex++) {
-							instanceClusters.add(new ArrayList<Dyad>());
-						}
-
-						for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
-							double skill = ranker.getSkillForDyad(dyad);
-							double[] attValues = new double[2];
-							attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
-							attValues[1] = skill - dyadStats.get(dyad).getStandardDeviation();
-							Instance intervalInstance = new DenseInstance(1.0d, attValues);
-							int cluster = clusterer.clusterInstance(intervalInstance);
-							instanceClusters.get(cluster).add(dyad);
-						}
-
-						for (int j = 0; j < instanceClusters.size(); j++) {
-							clusterQueue.add(instanceClusters.get(j));
-						}
-					} catch (Exception e1) {
-						log.error(e1.getMessage());
-					}
-				}
-				for (int minibatchIndex = 0; minibatchIndex < minibatchSize; minibatchIndex++) {
-//					get the largest cluster
-					List<Dyad> curDyads = clusterQueue.poll();
-					if (curDyads.size() < 2) {
-						continue;
-					}
-//					check overlap for all pairs of dyads in the current cluster
-					double curMax = -1;
-					int[] curPair = { 0, 1 };
-					boolean changed = false;
-					for (int j = 1; j < curDyads.size(); j++) {
-						for (int k = 0; k < j; k++) {
-							Dyad dyad1 = curDyads.get(j);
-							Dyad dyad2 = curDyads.get(k);
-							double overlap = getConfidenceIntervalOverlapForDyads(dyad1, dyad2);
-							if (overlap > curMax) {
-								curPair[0] = j;
-								curPair[1] = k;
-								curMax = overlap;
-								changed = true;
-							}
-
-						}
-					}
-//					if the pair hasn't changed, i.e. there are no overlapping intervals, sample a random pair
-					if (!changed) {
-						curPair[0] = random.nextInt(curDyads.size());
-						curPair[1] = random.nextInt(curDyads.size());
-						while (curPair[0] == curPair[1]) {
-							curPair[1] = random.nextInt(curDyads.size());
-						}
-					}
-
-					// query them
-					LinkedList<Vector> alternatives = new LinkedList<>();
-					alternatives.add(curDyads.get(curPair[0]).getAlternative());
-					alternatives.add(curDyads.get(curPair[1]).getAlternative());
-					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(
-							curDyads.get(curPair[0]).getInstance(), alternatives);
-					IDyadRankingInstance trueRanking = (IDyadRankingInstance) poolProvider.query(queryInstance);
-					minibatch.add(trueRanking);
-				}
-
-
-				// update the ranker
-				try {
-					ranker.update(minibatch);
-//					update variances (confidence)
-					for (Vector inst : instanceFeatures) {
-						for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
-							double skill = ranker.getSkillForDyad(dyad);
-							dyadStats.get(dyad).addValue(skill);
-						}
-					}
-				} catch (TrainingException e) {
-					log.error(e.getMessage());
-				}
-			}
-			iteration++;
+		// update the ranker
+		try {
+			updateRanker(minibatch);
+		} catch (TrainingException e) {
+			log.error(e.getMessage());
 		}
 	}
 
 	private double getConfidenceIntervalOverlapForDyads(Dyad dyad1, Dyad dyad2) {
 		double skill1 = ranker.getSkillForDyad(dyad1);
 		double skill2 = ranker.getSkillForDyad(dyad2);
+		Map<Dyad, SummaryStatistics> dyadStats = getDyadStats();
 		double lower1 = skill1 - dyadStats.get(dyad1).getStandardDeviation();
 		double upper1 = skill1 + dyadStats.get(dyad1).getStandardDeviation();
 		double lower2 = skill2 - dyadStats.get(dyad2).getStandardDeviation();

@@ -1,5 +1,6 @@
 package jaicore.ml.dyadranking.activelearning;
 
+import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 
 /**
@@ -29,8 +30,15 @@ public abstract class ActiveDyadRanker {
 	 * Actively trains the ranker for a certain number of queries.
 	 * 
 	 * @param numberOfQueries Number of queries the ranker conducts
+	 * @throws TrainingException 
 	 */
-	public abstract void activelyTrain(int numberOfQueries);
+	public void activelyTrain(int numberOfQueries) throws TrainingException {
+		for (int i = 0; i < numberOfQueries; i++) {
+			activelyTrainWithOneInstance();
+		}
+	}
+	
+	public abstract void activelyTrainWithOneInstance() throws TrainingException;
 
 	public PLNetDyadRanker getRanker() {
 		return ranker;

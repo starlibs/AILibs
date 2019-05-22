@@ -55,7 +55,6 @@ public class WekaInstancesUtil {
 					}
 					attIx++;
 				} else {
-					IAttributeType<?> type = schema.getTargetType();
 					targetValue = inst.stringValue(i);
 				}
 			}
@@ -110,14 +109,6 @@ public class WekaInstancesUtil {
 					iNew.setValue(i, val.getValue());
 				}
 			}
-
-//			if (dataset.getTargetType() instanceof NumericAttributeType) {
-//				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
-//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-//			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
-//				IAttributeValue<String> val = inst.getTargetValue(String.class);
-//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-//			}
 
 			wekaInstances.add(iNew);
 		}

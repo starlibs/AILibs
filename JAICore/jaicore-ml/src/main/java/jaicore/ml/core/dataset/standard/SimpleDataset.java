@@ -38,11 +38,6 @@ public class SimpleDataset<L> extends LinkedList<SimpleInstance<L>> implements I
 	}
 
 	@Override
-	public boolean add(final SimpleInstance<L> instance) {
-		return super.add(instance);
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.instanceSchema.toString());
