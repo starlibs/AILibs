@@ -3,7 +3,6 @@ package jaicore.basic;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 
 /**
@@ -29,11 +28,11 @@ public class PartiallyFailingObjectEvaluator<T, V extends Comparable<V>> impleme
 
 
 	@Override
-	public V evaluate(final T object) throws AlgorithmTimeoutedException, InterruptedException, ObjectEvaluationFailedException {
+	public V evaluate(final T object) throws InterruptedException, ObjectEvaluationFailedException {
 		if (this.successfullInvocations.contains(this.numCalls.incrementAndGet())) {
 			return this.valueToReturn;
 		}
-		throw new ObjectEvaluationFailedException(null, "Exception for test purposes.");
+		throw new ObjectEvaluationFailedException("Exception for test purposes.", null);
 	}
 
 }

@@ -12,6 +12,7 @@ public class HASCOViaFDAndBlindBestFirstTester extends HASCOTester<GraphSearchWi
 	public HASCO<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getAlgorithmForSoftwareConfigurationProblem(final RefinementConfiguredSoftwareConfigurationProblem<Double> problem) {
 		HASCOViaFDAndBestFirstFactory<Double> factory = new HASCOViaFDAndBestFirstFactory<>();
 		factory.setNodeEvaluator(n -> 0.0);
+		factory.withDefaultAlgorithmConfig();
 		return factory.getAlgorithm(problem);
 	}
 }

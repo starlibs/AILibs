@@ -7,7 +7,7 @@ public class ObjectEvaluationFailedException extends Exception {
 		super(message);
 	}
 	
-	public ObjectEvaluationFailedException(Throwable cause, String message) {
+	public ObjectEvaluationFailedException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

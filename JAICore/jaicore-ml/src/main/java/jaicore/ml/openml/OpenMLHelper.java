@@ -53,19 +53,7 @@ public class OpenMLHelper {
 		return dataSets;
 	}
 
-	/**
-	 * Downloads the data set with the given id and returns the Instances file for
-	 * it. Will save the {@link org.openml.apiconnector.xml.DataSetDescription} and
-	 * the Instances to the location specified in the
-	 * {@link org.openml.apiconnector.settings.Settings} Class.
-	 *
-	 * @param dataId
-	 * @return
-	 * @throws IOException if something goes wrong while loading Instances from openml
-	 */
-	public static Instances getInstancesById(final int dataId) throws IOException {
-		Instances dataset = null;
-
+	public static DataSource getDataSourceById(final int dataId) throws IOException {
 		if (API_KEY == null) {
 			try (BufferedReader reader = Files.newBufferedReader(Paths.get(API_KEY), StandardCharsets.UTF_8)) {
 				apiKey = reader.readLine();
@@ -80,9 +68,30 @@ public class OpenMLHelper {
 			DataSetDescription description = client.dataGet(dataId);
 			File file = description.getDataset(OpenMLHelper.apiKey);
 			// Instances convert
-			DataSource source = new DataSource(file.getCanonicalPath());
+			return new DataSource(file.getCanonicalPath());
+		} catch (Exception e) {
+			// These are IOExceptions anyways in the extended sense of this method
+			throw new IOException(e.getMessage());
+		}
+	}
+
+	/**
+	 * Downloads the data set with the given id and returns the Instances file for
+	 * it. Will save the {@link org.openml.apiconnector.xml.DataSetDescription} and
+	 * the Instances to the location specified in the
+	 * {@link org.openml.apiconnector.settings.Settings} Class.
+	 *
+	 * @param dataId
+	 * @return
+	 * @throws IOException if something goes wrong while loading Instances from openml
+	 */
+	public static Instances getInstancesById(final int dataId) throws IOException {
+		Instances dataset = null;
+		try {
+			OpenmlConnector client = new OpenmlConnector();
+			DataSetDescription description = client.dataGet(dataId);
+			DataSource source = getDataSourceById(dataId);
 			dataset = source.getDataSet();
-			dataset.setClassIndex(dataset.numAttributes() - 1);
 			Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
 			dataset.setClassIndex(targetAttribute.index());
 		} catch (Exception e) {

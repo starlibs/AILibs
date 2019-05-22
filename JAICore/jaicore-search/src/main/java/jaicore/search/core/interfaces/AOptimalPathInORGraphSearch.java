@@ -39,7 +39,7 @@ implements IOptimalPathInORGraphSearch<I, N, A, V> {
 		super(problem);
 	}
 
-	protected AOptimalPathInORGraphSearch( final IAlgorithmConfig config,final I problem) {
+	protected AOptimalPathInORGraphSearch(final IAlgorithmConfig config,final I problem) {
 		super(config,problem);
 	}
 
@@ -52,7 +52,8 @@ implements IOptimalPathInORGraphSearch<I, N, A, V> {
 	protected EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> registerSolution(final EvaluatedSearchGraphPath<N, A, V> path) {
 		this.updateBestSeenSolution(path);
 		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), path);
-		this.logger.info("Identified solution with score {}. Actions: {}", path.getScore(), path.getEdges());
+		this.logger.info("Identified solution with score {}. Enable DEBUG to see the concrete nodes and actions.", path.getScore());
+		this.logger.debug("Nodes: {}. Actions: {}", path.getNodes(), path.getEdges());
 		this.post(event);
 		return event;
 	}

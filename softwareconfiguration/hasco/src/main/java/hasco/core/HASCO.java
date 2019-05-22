@@ -19,6 +19,7 @@ import com.google.common.eventbus.Subscribe;
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import hasco.model.ComponentUtil;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import hasco.model.UnparametrizedComponentInstance;
@@ -82,7 +83,13 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
 			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory,
 			final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
-		super(ConfigFactory.create(HASCOConfig.class), configurationProblem);
+		this(ConfigFactory.create(HASCOConfig.class), configurationProblem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
+	}
+
+	public HASCO(final HASCOConfig algorithmConfig, final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver,
+			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory,
+			final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
+		super(algorithmConfig, configurationProblem);
 		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
 		}
@@ -105,7 +112,8 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 		this.logger.debug("Deriving search problem");
 		RefinementConfiguredSoftwareConfigurationProblem<V> refConfigSoftwareConfigurationProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
 				new SoftwareConfigurationProblem<V>(this.getInput().getComponents(), this.getInput().getRequiredInterface(), this.timeGrabbingEvaluationWrapper), this.getInput().getParamRefinementConfig());
-		this.planningProblem = new HASCOReduction<V>().encodeProblem(refConfigSoftwareConfigurationProblem);
+		HASCOReduction<V> hascoReduction = new HASCOReduction<>(() -> this.getBestSeenSolution());
+		this.planningProblem = hascoReduction.encodeProblem(refConfigSoftwareConfigurationProblem);
 		if (this.logger.isDebugEnabled()) {
 			String operations = this.planningProblem.getCorePlanningProblem().getDomain().getOperations().stream()
 					.map(o -> "\n\t\t" + o.getName() + "(" + o.getParams() + ")\n\t\t\tPre: " + o.getPrecondition() + "\n\t\t\tAdd List: " + o.getAddLists() + "\n\t\t\tDelete List: " + o.getDeleteLists()).collect(Collectors.joining());
@@ -135,7 +143,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			AlgorithmInitializedEvent event = this.activate();
 
 			/* analyze problem */
-			this.numUnparametrizedSolutions = Util.getNumberOfUnparametrizedCompositions(this.getInput().getComponents(), this.getInput().getRequiredInterface());
+			this.numUnparametrizedSolutions = ComponentUtil.getNumberOfUnparametrizedCompositions(this.getInput().getComponents(), this.getInput().getRequiredInterface());
 			this.logger.info("Search space contains {} unparametrized solutions.", this.numUnparametrizedSolutions);
 
 			/* setup search algorithm */
@@ -147,7 +155,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			} else {
 				this.logger.info("Not setting the logger name of the search. Logger name of HASCO is {}. Search loggingCustomizable: {}", this.loggerName, (this.search instanceof ILoggingCustomizable));
 			}
-			
+
 			/* register a listener on the search that will forward all events to HASCO's event bus */
 			this.search.registerListener(new Object() {
 
@@ -174,7 +182,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 							score = HASCO.this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
 						}
 					} catch (ObjectEvaluationFailedException e) {
-						throw new AlgorithmException(e, "Could not evaluator component instance");
+						throw new AlgorithmException(e, "Could not evaluate component instance");
 					}
 					HASCO.this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score,
 							HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);
@@ -198,8 +206,11 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			return event;
 
 		case active:
+
 			/* step search */
+			this.logger.debug("Stepping search algorithm.");
 			AlgorithmEvent searchEvent = this.search.nextWithException();
+			this.logger.debug("Search step completed, observed {}.", searchEvent.getClass().getName());
 			if (searchEvent instanceof AlgorithmFinishedEvent) {
 				this.logger.info("The search algorithm has finished. Terminating HASCO.");
 				return this.terminate();
@@ -213,6 +224,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 						this.returnedUnparametrizedComponentInstances.size(), this.numUnparametrizedSolutions);
 				return hascoSolutionEvent;
 			} else {
+				this.logger.debug("Ignoring irrelevant search event {}", searchEvent);
 				return searchEvent;
 			}
 

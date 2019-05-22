@@ -9,7 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.ComponentInstance;
@@ -24,7 +24,7 @@ import weka.classifiers.Classifier;
  *
  * @author wever
  */
-public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCustomizable {
+public class SKLearnClassifierFactory implements IClassifierFactory, ILoggingCustomizable {
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 
@@ -42,7 +42,7 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 		importSet.forEach(imports::append);
 
 		try {
-			return new ScikitLearnWrapper(constructInstruction.toString(), imports.toString());
+			return new ScikitLearnWrapper(constructInstruction.toString(), imports.toString(), true);
 		} catch (IOException e) {
 			this.logger.error("Could not create sklearn wrapper for construction {} and imports {}.", constructInstruction, imports);
 			return null;
@@ -51,7 +51,6 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 
 	public String extractSKLearnConstructInstruction(final ComponentInstance groundComponent, final Set<String> importSet) {
 		StringBuilder sb = new StringBuilder();
-
 		if (groundComponent.getComponent().getName().startsWith("mlplan.util.model.make_forward")) {
 			sb.append(this.extractSKLearnConstructInstruction(groundComponent.getSatisfactionOfRequiredInterfaces().get("source"), importSet));
 			sb.append(",");
@@ -68,6 +67,11 @@ public class SKLearnClassifierFactory implements ClassifierFactory, ILoggingCust
 		String className = packagePathSplit[packagePathSplit.length - 1];
 
 		importSet.add("from " + fromSB.toString() + " import " + className + "\n");
+
+		if (groundComponent.getComponent().getName().startsWith("sklearn.feature_selection.f_classif")) {
+			sb.append("sklearn.feature_selection.f_classif(features, targets)");
+			return sb.toString();
+		}
 
 		sb.append(className);
 		sb.append("(");

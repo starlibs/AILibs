@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jaicore.basic.ObjectSizeFetcher;
 import jaicore.logging.ToJSONStringUtil;
 import jaicore.logic.fol.structure.ConstantParam;
 import jaicore.logic.fol.structure.Monom;
@@ -106,10 +105,6 @@ public class Action implements Serializable {
 		fields.put("operation", this.operation);
 		fields.put("grounding", this.grounding);
 		return ToJSONStringUtil.toJSONString(fields);
-		// return "Action [operation=" + this.operation + ", grounding=" + this.grounding + "]";
 	}
 
-	public long getMemory() {
-		return ObjectSizeFetcher.getObjectSize(this) + ObjectSizeFetcher.getObjectSize(this.grounding);
-	}
 }

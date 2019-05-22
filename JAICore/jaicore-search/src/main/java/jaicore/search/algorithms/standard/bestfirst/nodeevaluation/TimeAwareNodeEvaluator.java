@@ -1,14 +1,15 @@
 package jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ExecutionException;
 
-import jaicore.concurrent.TimeoutTimer;
-import jaicore.concurrent.TimeoutTimer.TimeoutSubmitter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jaicore.basic.ILoggingCustomizable;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.timing.TimedComputation;
 
 /**
  * This class can be used to create node evaluators with a time limit for the evaluation of each node.
@@ -21,13 +22,13 @@ import jaicore.search.model.travesaltree.Node;
  * @param <T>
  * @param <V>
  */
-public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V> {
+public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V>, ILoggingCustomizable {
 
+	private Logger logger = LoggerFactory.getLogger(TimeAwareNodeEvaluator.class);
 	private final int timeoutForNodeEvaluationInMS;
 	private long totalDeadline = -1; // this deadline can be set to guarantee that there will be no activity after this timestamp
 	private final INodeEvaluator<T, V> fallbackNodeEvaluator;
-	private final List<TimerTask> activeTimerTasks = new ArrayList<>();
-	
+
 	public TimeAwareNodeEvaluator(final int pTimeoutInMS) {
 		this(pTimeoutInMS, n -> null);
 	}
@@ -58,32 +59,16 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 		int interruptionTime = remainingTime + 150;
 
 		/* execute evaluation */
-		AtomicBoolean controlledInterrupt = new AtomicBoolean(false);
-		TimeoutSubmitter ts = TimeoutTimer.getInstance().getSubmitter();
-		TimerTask timerTask = ts.interruptMeAfterMS(interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + ")", () -> controlledInterrupt.set(true));
-		activeTimerTasks.add(timerTask);
 		try {
-			V result = this.fTimeouted(node, grantedTime);
-			timerTask.cancel();
-			activeTimerTasks.remove(timerTask);
-			ts.close();
-			return result;
-		} catch (InterruptedException e) {
-			timerTask.cancel();
-			activeTimerTasks.remove(timerTask);
-			Thread.interrupted(); // clear interrupted field
-			if (controlledInterrupt.get()) {
-				return this.fallbackNodeEvaluator.f(node);
-			} else {
-				throw e;
-			}
+			return TimedComputation.compute(() -> this.fTimeouted(node, grantedTime), interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")");
+		} catch (AlgorithmTimeoutedException e) {
+			logger.warn("Computation of f-value for {} failed due to exception {} with message {}", node, e.getClass().getName(), e.getMessage());
+			return this.fallbackNodeEvaluator.f(node);
 		}
-	}
-	
-	public void cancelActiveTasks() {
-		while (!activeTimerTasks.isEmpty()) {
-			TimerTask tt = activeTimerTasks.remove(0);
-			tt.cancel();
+		catch (ExecutionException e) {
+			if (e.getCause() instanceof NodeEvaluationException)
+				throw (NodeEvaluationException)e.getCause();
+			else throw new NodeEvaluationException(e.getCause(), "Could not evaluate path.");
 		}
 	}
 
@@ -104,9 +89,22 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 	}
 
 	protected void checkInterruption() throws InterruptedException {
-		if (Thread.currentThread().isInterrupted()) {
+		boolean interrupted = Thread.currentThread().isInterrupted();
+		logger.debug("Checking interruption of RCNE: {}", interrupted);
+		if (interrupted) {
 			Thread.interrupted(); // reset flag
 			throw new InterruptedException("Node evaluation of " + this.getClass().getName() + " has been interrupted.");
 		}
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Switched logger name to {}", name);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }
