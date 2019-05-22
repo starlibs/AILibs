@@ -8,22 +8,22 @@ import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.ml.core.dataset.IDataset;
-import jaicore.ml.core.dataset.IInstance;
+import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
-public abstract class ClusterSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
+public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayInstance, D extends IDataset<I>> extends ASamplingAlgorithm<D> {
 
 	protected List<CentroidCluster<I>> clusterResults = null;
 	protected int currentCluster = 0;
 	protected DistanceMeasure distanceMeassure = new ManhattanDistance();
 	protected long seed;
 
-	protected ClusterSampling(long seed, IDataset<I> input) {
+	protected ClusterSampling(long seed, D input) {
 		super(input);
 		this.seed = seed;
 	}
 
-	protected ClusterSampling(long seed, DistanceMeasure dist, IDataset<I> input) {
+	protected ClusterSampling(long seed, DistanceMeasure dist, D input) {
 		super(input);
 		this.seed = seed;
 		this.distanceMeassure = dist;
@@ -46,8 +46,7 @@ public abstract class ClusterSampling<I extends IInstance> extends ASamplingAlgo
 			CentroidCluster<I> cluster = clusterResults.get(currentCluster++);
 			boolean same = true;
 			for (int i = 1; i < cluster.getPoints().size(); i++) {
-				if (!cluster.getPoints().get(i - 1).getTargetValue(Double.class)
-						.equals(cluster.getPoints().get(i).getTargetValue(Double.class))) {
+				if (!cluster.getPoints().get(i - 1).getTargetValue(Double.class).equals(cluster.getPoints().get(i).getTargetValue(Double.class))) {
 					same = false;
 					break;
 				}
