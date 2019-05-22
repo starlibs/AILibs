@@ -234,4 +234,9 @@ public class DyadRankingDataset extends ArrayList<IInstance> implements IDataset
 		dyadMatrix = Nd4j.vstack(dyadList);
 		return dyadMatrix;
 	}
+
+	@Override
+	public DyadRankingDataset createEmpty() {
+		return new DyadRankingDataset();
+	}
 }

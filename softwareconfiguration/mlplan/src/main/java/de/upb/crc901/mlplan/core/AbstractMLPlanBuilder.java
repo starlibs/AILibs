@@ -21,11 +21,13 @@ import hasco.core.HASCOFactory;
 import hasco.model.Component;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import jaicore.ml.dyadranking.search.ADyadRankedNodeQueueConfig;
 import jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
@@ -183,6 +185,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Creates a preferred node evaluator that can be used to prefer components over other components.
+	 * 
 	 * @param preferredComponentsFile The file containing a priority list of component names.
 	 * @return The builder object.
 	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
@@ -201,6 +204,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Sets the name of the performance measure that is used.
+	 * 
 	 * @param name The name of the performance measure.
 	 */
 	public void setPerformanceMeasureName(final String name) {
@@ -209,6 +213,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Set the data for which ML-Plan is supposed to find the best pipeline.
+	 * 
 	 * @param dataset The dataset for which ML-Plan is to be run.
 	 * @return The builder object.
 	 */
@@ -243,6 +248,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Set the dataset splitter that is used for generating the holdout data portion that is put aside during search.
+	 * 
 	 * @param datasetSplitter The dataset splitter to be used.
 	 * @return The builder obect.
 	 */
@@ -329,6 +335,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Sets the evaluator factory for the search phase.
+	 * 
 	 * @param evaluatorFactory The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
@@ -345,6 +352,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Sets the evaluator factory for the selection phase.
+	 * 
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
@@ -355,6 +363,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Sets the number of cpus that may be used by ML-Plan.
+	 * 
 	 * @param numCpus The number of cpus to use.
 	 * @return The builder object.
 	 */
@@ -471,6 +480,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Builds an ML-Plan object for the given dataset as input.
+	 * 
 	 * @param dataset The dataset for which an ML-Plan object is to be built.
 	 * @return The ML-Plan object configured with this builder.
 	 */
@@ -481,6 +491,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Builds an ML-Plan object with the dataset provided earlier to this builder.
+	 * 
 	 * @return The ML-Plan object configured with this builder.
 	 */
 	public MLPlan build() {

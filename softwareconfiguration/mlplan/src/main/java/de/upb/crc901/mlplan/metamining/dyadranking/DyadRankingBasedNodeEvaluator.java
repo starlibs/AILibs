@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import de.upb.crc901.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.ClassifierFactory;
+import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import de.upb.isys.linearalgebra.DenseDoubleVector;
 import de.upb.isys.linearalgebra.Vector;
 import hasco.core.Util;
@@ -152,7 +152,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 	 * Used to create landmarker values for pipelines where no such landmarker has
 	 * yet been evaluated.
 	 */
-	private ClassifierFactory classifierFactory;
+	private IClassifierFactory classifierFactory;
 
 	/*
 	 * Defines if a landmarking based approach is used for defining the meta
@@ -172,7 +172,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 	private DyadMinMaxScaler scaler = null;
 
-	public void setClassifierFactory(ClassifierFactory classifierFactory) {
+	public void setClassifierFactory(IClassifierFactory classifierFactory) {
 		this.classifierFactory = classifierFactory;
 	}
 
@@ -233,14 +233,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>>
 
 		if (!randomPathCompleter.knowsNode(node.getPoint())) {
 			synchronized (randomPathCompleter) {
-				try {
-					randomPathCompleter.appendPathToNode(node.externalPath());
-				} catch (InterruptedException e) {
-					logger.error("Interrupted in path completion!");
-					Thread.currentThread().interrupt();
-					Thread.interrupted();
-					throw new InterruptedException();
-				}
+				randomPathCompleter.appendPathToNode(node.externalPath());
 			}
 		}
 		// draw N paths at random

@@ -1,6 +1,7 @@
 package jaicore.ml.dyadranking.general;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,8 +69,8 @@ public class SimpleDyadDatasetDyadRankerTester {
 				Arrays.asList(alternative2, alternative1));
 		IDyadRankingInstance predict = ranker.predict(test);
 
-		assertArrayEquals(new double[] { 1.0 }, predict.getDyadAtPosition(0).getAlternative().asArray());
-		assertArrayEquals(new double[] { 0.0 }, predict.getDyadAtPosition(1).getAlternative().asArray());
+		assertEquals(new double[] { 1.0 }, predict.getDyadAtPosition(0).getAlternative().asArray());
+		assertEquals(new double[] { 0.0 }, predict.getDyadAtPosition(1).getAlternative().asArray());
 	}
 
 	@Test
@@ -81,8 +82,8 @@ public class SimpleDyadDatasetDyadRankerTester {
 				Arrays.asList(alternative2, alternative1));
 		IDyadRankingInstance predict = ranker.predict(test);
 
-		assertArrayEquals(new double[] { 0.0 }, predict.getDyadAtPosition(0).getAlternative().asArray());
-		assertArrayEquals(new double[] { 1.0 }, predict.getDyadAtPosition(1).getAlternative().asArray());
+		assertEquals(new double[] { 0.0 }, predict.getDyadAtPosition(0).getAlternative().asArray());
+		assertEquals(new double[] { 1.0 }, predict.getDyadAtPosition(1).getAlternative().asArray());
 	}
 
 	@Parameters
