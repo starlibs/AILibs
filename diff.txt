@@ -1,0 +1,380 @@
+diff --git a/JAICore/build.gradle b/JAICore/build.gradle
+index 5c64544..3e9d97a 100644
+--- a/JAICore/build.gradle
++++ b/JAICore/build.gradle
+@@ -44,7 +44,7 @@ configure(subprojects.findAll()) {
+ 
+ 		// Weka and MEKA
+ 		compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
+-		compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
++		compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
+ 
+ 		// Basics
+ 		compile 'com.google.guava:guava:18.0'
+diff --git a/JAICore/jaicore-ml/build.gradle b/JAICore/jaicore-ml/build.gradle
+index 2f47678..4b2f847 100644
+--- a/JAICore/jaicore-ml/build.gradle
++++ b/JAICore/jaicore-ml/build.gradle
+@@ -16,6 +16,6 @@ dependencies {
+ 	compile project(":JAICore:jaicore-graphvisualizer")
+ 	compile project(":JAICore:jaicore-experiments")
+ 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
+-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
++	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
+ 	compile 'de.upb.isys:omlwebapp:0.0.1'
+ }
+diff --git a/build.gradle b/build.gradle
+index 41f3f71..121c28d 100644
+--- a/build.gradle
++++ b/build.gradle
+@@ -74,9 +74,9 @@ configure(subprojects.findAll()) {
+ 		testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+ 		testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+ 
+-		//Basics
+-		compile group: 'com.google.guava', name: 'guava', version: '18.0'
+-		compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
++    //Basics
++    compile group: 'com.google.guava', name: 'guava', version: '23.0'
++    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.6'
+ 	}
+ 
+ 	//Always check for updates in SNAPSHOT versions, do not cache
+diff --git a/softwareconfiguration/hasco/src/hasco/core/HASCOFD.java b/softwareconfiguration/hasco/src/hasco/core/HASCOFD.java
+index f123789..d28a9e5 100644
+--- a/softwareconfiguration/hasco/src/hasco/core/HASCOFD.java
++++ b/softwareconfiguration/hasco/src/hasco/core/HASCOFD.java
+@@ -49,4 +49,4 @@ public class HASCOFD<T,V extends Comparable<V>> extends HASCO<T, TFDNode, String
+ 		this(components, paramRefinementConfig, new UncertaintyORGraphSearchFactory<>(oversearchAvoidanceConfig, new CEOCTFDPathUnifier()), converter, nameOfRequiredInterface, benchmark);
+ 		((UncertaintyORGraphSearchFactory<TFDNode,String,V>)getSearchFactory()).setSolutionEvaluator(getSolutionEvaluator());
+ 	}
+-}
++}
+\ No newline at end of file
+diff --git a/softwareconfiguration/hasco/src/hasco/core/Util.java b/softwareconfiguration/hasco/src/hasco/core/Util.java
+index 4128cb0..e593c99 100644
+--- a/softwareconfiguration/hasco/src/hasco/core/Util.java
++++ b/softwareconfiguration/hasco/src/hasco/core/Util.java
+@@ -1,3 +1,4 @@
++
+ package hasco.core;
+ 
+ import java.util.ArrayDeque;
+@@ -271,6 +272,32 @@ public class Util {
+ 		return components;
+ 	}
+ 
++	/**
++	 * Computes a list of all component instances of the given composition.
++	 * 
++	 * @param composition
++	 * @return List of components in right to left depth-first order
++	 */
++	public static List<ComponentInstance> getComponentInstancesOfComposition(ComponentInstance composition) {
++		List<ComponentInstance> components = new LinkedList<ComponentInstance>();
++		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
++		componentInstances.push(composition);
++		ComponentInstance curInstance;
++		while (!componentInstances.isEmpty()) {
++			curInstance = componentInstances.pop();
++			components.add(curInstance);
++			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
++			// This set should be ordered
++			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
++			for (String requiredInterfaceName : requiredInterfaceNames) {
++				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces()
++						.get(requiredInterfaceName);
++				componentInstances.push(instance);
++			}
++		}
++		return components;
++	}
++
+   public static Map<Parameter, ParameterDomain> getUpdatedDomainsOfComponentParameters(final Monom state, final Component component, final String objectIdentifierInState) {
+     Map<String, String> parameterContainerMap = new HashMap<>();
+     Map<String, String> parameterContainerMapInv = new HashMap<>();
+diff --git a/softwareconfiguration/hasco/src/hasco/core/isNotRefinable.java b/softwareconfiguration/hasco/src/hasco/core/isNotRefinable.java
+index 5e87183..8b5060e 100644
+--- a/softwareconfiguration/hasco/src/hasco/core/isNotRefinable.java
++++ b/softwareconfiguration/hasco/src/hasco/core/isNotRefinable.java
+@@ -1,5 +1,6 @@
+ package hasco.core;
+ 
++import java.util.Arrays;
+ import java.util.Collection;
+ import java.util.List;
+ import java.util.Map;
+@@ -19,7 +20,9 @@ public class isNotRefinable implements EvaluablePredicate {
+ 		super();
+ 		this.p = new isValidParameterRangeRefinementPredicate(components, refinementConfiguration);
+ 	}
++
+ 	
++
+ 	@Override
+ 	public Collection<List<ConstantParam>> getParamsForPositiveEvaluation(Monom state, ConstantParam... partialGrounding) {
+ 		throw new UnsupportedOperationException();
+@@ -40,4 +43,4 @@ public class isNotRefinable implements EvaluablePredicate {
+ 		return p.getParamsForPositiveEvaluation(state, params[0], params[1], params[2], params[3], params[4], null).isEmpty();
+ 	}
+ 
+-}
++}
+\ No newline at end of file
+diff --git a/softwareconfiguration/hasco/src/hasco/core/isValidParameterRangeRefinementPredicate.java b/softwareconfiguration/hasco/src/hasco/core/isValidParameterRangeRefinementPredicate.java
+index a81cea4..112a75e 100644
+--- a/softwareconfiguration/hasco/src/hasco/core/isValidParameterRangeRefinementPredicate.java
++++ b/softwareconfiguration/hasco/src/hasco/core/isValidParameterRangeRefinementPredicate.java
+@@ -28,6 +28,7 @@ import hasco.model.ParameterRefinementConfiguration;
+ 
+ public class isValidParameterRangeRefinementPredicate implements EvaluablePredicate {
+ 
++
+ 	private final Collection<Component> components;
+ 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> refinementConfiguration;
+ 	private final Map<ComponentInstance, Double> knownCompositionsAndTheirScore = new HashMap<>();
+diff --git a/softwareconfiguration/hasco/src/hasco/model/ComponentInstance.java b/softwareconfiguration/hasco/src/hasco/model/ComponentInstance.java
+index b0e222d..df0d423 100644
+--- a/softwareconfiguration/hasco/src/hasco/model/ComponentInstance.java
++++ b/softwareconfiguration/hasco/src/hasco/model/ComponentInstance.java
+@@ -2,68 +2,78 @@ package hasco.model;
+ 
+ import java.util.Map;
+ 
++import com.fasterxml.jackson.annotation.JsonCreator;
++import com.fasterxml.jackson.annotation.JsonProperty;
++
+ /**
+- * For a given component, a composition defines all parameter values and the required interfaces
+- * (recursively)
++ * For a given component, a composition defines all parameter values and the
++ * required interfaces (recursively)
+  *
+  * @author fmohr
+  *
+  */
+ public class ComponentInstance {
+-  private final Component component;
+-  private final Map<String, String> parameterValues;
+-  /** The satisfactionOfRequiredInterfaces map maps from Interface IDs to ComopnentInstances */
+-  private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
++	private final Component component;
++	private final Map<String, String> parameterValues;
++	/**
++	 * The satisfactionOfRequiredInterfaces map maps from Interface IDs to
++	 * ComopnentInstances
++	 */
++	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
++
++	@JsonCreator
++	public ComponentInstance(@JsonProperty("component") final Component component,
++			@JsonProperty("parameterValues") final Map<String, String> parameterValues,
++			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
++		super();
++		this.component = component;
++		this.parameterValues = parameterValues;
++		this.satisfactionOfRequiredInterfaces = satisfactionOfRequiredInterfaces;
++	}
++
++	public Component getComponent() {
++		return this.component;
++	}
+ 
+-  public ComponentInstance(final Component component, final Map<String, String> parameterValues, final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
+-    super();
+-    this.component = component;
+-    this.parameterValues = parameterValues;
+-    this.satisfactionOfRequiredInterfaces = satisfactionOfRequiredInterfaces;
+-  }
++	public Map<String, String> getParameterValues() {
++		return this.parameterValues;
++	}
+ 
+-  public Component getComponent() {
+-    return this.component;
+-  }
++	/**
++	 * @return This method returns a mapping of interface IDs to component
++	 *         instances.
++	 */
++	public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
++		return this.satisfactionOfRequiredInterfaces;
++	}
+ 
+-  public Map<String, String> getParameterValues() {
+-    return this.parameterValues;
+-  }
++	@Override
++	public String toString() {
++		StringBuilder sb = new StringBuilder();
+ 
+-  /**
+-   * @return This method returns a mapping of interface IDs to component instances.
+-   */
+-  public Map<String, ComponentInstance> getSatisfactionOfRequiredInterfaces() {
+-    return this.satisfactionOfRequiredInterfaces;
+-  }
++		sb.append(this.component);
++		sb.append(this.parameterValues);
+ 
+-  @Override
+-  public String toString() {
+-    StringBuilder sb = new StringBuilder();
++		return sb.toString();
++	}
+ 
+-    sb.append(this.component);
+-    sb.append(this.parameterValues);
++	public String getPrettyPrint() {
++		return getPrettyPrint(0);
++	}
+ 
+-    return sb.toString();
+-  }
+-  
+-  public String getPrettyPrint() {
+-	  return getPrettyPrint(0);
+-  }
+-  
+-  private String getPrettyPrint(int offset) {
+-	  StringBuilder sb = new StringBuilder();
+-	  sb.append(component.getName() + "\n");
+-	  for (String requiredInterface : component.getRequiredInterfaces().keySet()) {
+-		  for (int i = 0; i < offset + 1; i++)
+-			  sb.append("\t");
+-		  sb.append(requiredInterface);
+-		  sb.append(": ");
+-		  if (satisfactionOfRequiredInterfaces.containsKey(requiredInterface))
+-			  sb.append(satisfactionOfRequiredInterfaces.get(requiredInterface).getPrettyPrint(offset + 1));
+-		  else
+-			  sb.append("null\n");
+-	  }
+-	  return sb.toString();
+-  }
++	private String getPrettyPrint(int offset) {
++		StringBuilder sb = new StringBuilder();
++		sb.append(component.getName() + "\n");
++		for (String requiredInterface : component.getRequiredInterfaces().keySet()) {
++			for (int i = 0; i < offset + 1; i++)
++				sb.append("\t");
++			sb.append(requiredInterface);
++			sb.append(": ");
++			if (satisfactionOfRequiredInterfaces.containsKey(requiredInterface))
++				sb.append(satisfactionOfRequiredInterfaces.get(requiredInterface).getPrettyPrint(offset + 1));
++			else
++				sb.append("null\n");
++		}
++		return sb.toString();
++	}
+ }
+diff --git a/softwareconfiguration/hasco/src/hasco/serialization/ComponentLoader.java b/softwareconfiguration/hasco/src/hasco/serialization/ComponentLoader.java
+index 48cf0bd..0f66567 100644
+--- a/softwareconfiguration/hasco/src/hasco/serialization/ComponentLoader.java
++++ b/softwareconfiguration/hasco/src/hasco/serialization/ComponentLoader.java
+@@ -186,7 +186,7 @@ public class ComponentLoader {
+               break;
+             case "cat":
+               if (parameter.get("values") != null && parameter.get("values").isTextual()) {
+-                p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParams[2]);
++                p = new Parameter(name, new CategoricalParameterDomain(Arrays.stream(stringParamValues[1].split(",")).collect(Collectors.toList())), stringParamValues[2]);
+               } else {
+                 List<String> values = new LinkedList<>();
+ 
+@@ -201,7 +201,7 @@ public class ComponentLoader {
+                 } else {
+                   System.err.println("Warning: Categorical parameter " + name + " in component " + c.getName() + " without value list.");
+                 }
+-                p = new Parameter(name, new CategoricalParameterDomain(values), stringParams[2]);
++                p = new Parameter(name, new CategoricalParameterDomain(values), stringParamValues[2]);
+               }
+               break;
+             default:
+diff --git a/softwareconfiguration/mlplan/build.gradle b/softwareconfiguration/mlplan/build.gradle
+index fdb24c5..1e0943e 100644
+--- a/softwareconfiguration/mlplan/build.gradle
++++ b/softwareconfiguration/mlplan/build.gradle
+@@ -54,7 +54,7 @@ dependencies {
+ 
+ 	// wrapped library dependencies
+ 	//compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
+-	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.1'
++	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.2'
+ 
+ 	// OWL API
+ 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
+diff --git a/softwareconfiguration/mlplan/conf/log4j.xml b/softwareconfiguration/mlplan/conf/log4j.xml
+index 3475ffa..6651f5b 100644
+--- a/softwareconfiguration/mlplan/conf/log4j.xml
++++ b/softwareconfiguration/mlplan/conf/log4j.xml
+@@ -48,30 +48,32 @@
+ 
+ 	<logger name="jaicore">
+ 		<level value="warn" />
+-		<appender-ref ref="console" />
++<!-- 		<appender-ref ref="console" />
+ 		<appender-ref ref="infoFileAppender" />
+-		<appender-ref ref="warnFileAppender" />
+-		<appender-ref ref="errFileAppender" />
++ -->		<appender-ref ref="warnFileAppender" />
++<!-- 		<appender-ref ref="errFileAppender" />
+ 		<appender-ref ref="traceFileAppender" />
+-	</logger>
++ -->	</logger>
+ 
+ 	<logger name="de.upb.crc901">
+ 		<level value="warn" />
+ 		<appender-ref ref="console" />
+-		<appender-ref ref="infoFileAppender" />
+-		<appender-ref ref="warnFileAppender" />
+-		<appender-ref ref="errFileAppender" />
+-		<appender-ref ref="traceFileAppender" />
++<!-- 		<appender-ref ref="infoFileAppender" />
++ -->		<appender-ref ref="warnFileAppender" />
++<!-- 		<appender-ref ref="errFileAppender" />
++		<appender-ref ref="traceFileAppender" /> -->
+ 	</logger>
+ 	
+ 	<logger name="hasco">
+ 		<level value="warn" />
+ 		<appender-ref ref="console" />
++		<appender-ref ref="infoFileAppender"/>
+ 	</logger>
+ 	
+ 	<logger name="mlplan">
+ 		<level value="info" />
+ 		<appender-ref ref="console" />
++		<appender-ref ref="infoFileAppender"/>
+ 	</logger>
+ 	
+ 	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
+diff --git a/softwareconfiguration/mlplan/examples/de/upb/crc901/mlplan/examples/MLPlanExample.java b/softwareconfiguration/mlplan/examples/de/upb/crc901/mlplan/examples/MLPlanExample.java
+index 0edcd70..15053f3 100644
+--- a/softwareconfiguration/mlplan/examples/de/upb/crc901/mlplan/examples/MLPlanExample.java
++++ b/softwareconfiguration/mlplan/examples/de/upb/crc901/mlplan/examples/MLPlanExample.java
+@@ -37,12 +37,13 @@ public class MLPlanExample {
+ 		List<Instances> split = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
+ 
+ 		/* initialize mlplan, and let it run for 30 seconds */
+-		int timeoutInSeconds = 30;
++		int timeoutInSeconds = 300;
+ 		MLPlanWEKAClassifier mlplan = new MLPlanWEKAClassifier();
+ 		mlplan.setLoggerName("mlplan");
++
+ 		mlplan.setTimeout(timeoutInSeconds);
+ 		mlplan.setPortionOfDataForPhase2(.3f);
+-		mlplan.enableVisualization();
++//		mlplan.enableVisualization();
+ 		mlplan.buildClassifier(split.get(0));
+ 
+ 		/* evaluate solution produced by mlplan */
+diff --git a/softwareconfiguration/mlplan/src/de/upb/crc901/automl/hascowekaml/HASCOForMEKA.java b/softwareconfiguration/mlplan/src/de/upb/crc901/automl/hascowekaml/HASCOForMEKA.java
+index cc6c635..e0a39b9 100644
+--- a/softwareconfiguration/mlplan/src/de/upb/crc901/automl/hascowekaml/HASCOForMEKA.java
++++ b/softwareconfiguration/mlplan/src/de/upb/crc901/automl/hascowekaml/HASCOForMEKA.java
+@@ -235,4 +235,4 @@ public class HASCOForMEKA implements IObservableGraphAlgorithm<TFDNode, String>
+ 	public void setNumberOfCPUs(int numberOfCPUs) {
+ 		this.numberOfCPUs = numberOfCPUs;
+ 	}
+-}
++}
+\ No newline at end of file

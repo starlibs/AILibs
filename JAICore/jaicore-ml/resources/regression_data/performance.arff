@@ -1,0 +1,76 @@
+@relation performance_samples
+
+@attribute weka.classifiers.trees.RandomForest::depthActivator {0,1}
+@attribute weka.classifiers.trees.RandomForest::featuresActivator {0,1}
+@attribute weka.classifiers.trees.RandomForest::depth numeric
+@attribute weka.classifiers.trees.RandomForest::I numeric
+@attribute weka.classifiers.trees.RandomForest::K numeric
+@attribute weka.attributeSelection.AttributeSelection::M {true,false}
+@attribute weka.attributeSelection.BestFirst::D {0,1,2}
+@attribute weka.attributeSelection.CfsSubsetEval::L {true,false}
+@attribute weka.attributeSelection.CfsSubsetEval::M {true,false}
+@attribute performance_score numeric
+
+@data
+1,0,9,71,0,true,0,true,true,0.040282
+1,0,9,71,0,true,0,true,true,0.035247
+1,1,9,71,1,true,0,true,true,0.053374
+0,1,0,71,1,true,0,true,true,0.040282
+0,1,0,71,1,true,0,true,true,0.041289
+0,1,0,6,1,true,0,true,true,0.066465
+0,0,0,6,0,true,0,true,true,0.04431
+0,0,0,6,0,true,0,true,true,0.046324
+0,0,0,6,0,true,0,true,true,0.043303
+0,0,0,6,0,true,0,true,true,0.040282
+0,0,0,6,0,true,1,true,true,0.046324
+0,0,0,20,0,true,1,true,true,0.048338
+0,0,0,14,0,true,1,true,true,0.04431
+0,0,0,40,0,true,0,true,true,0.04431
+0,0,0,132,0,true,0,true,true,0.043303
+0,0,0,11,0,true,1,true,true,0.045317
+0,0,0,35,0,true,0,true,true,0.036254
+0,0,0,71,0,true,0,true,true,0.049345
+0,0,0,35,0,true,0,true,true,0.041289
+0,0,0,35,0,true,0,true,true,0.043303
+0,0,0,132,0,true,0,true,true,0.038268
+0,0,0,35,0,true,0,true,true,0.033233
+0,0,0,132,0,true,0,true,true,0.02719
+0,0,0,35,0,true,0,true,true,0.040282
+0,0,0,132,0,true,0,true,true,0.036254
+0,0,0,35,0,true,0,true,true,0.05136
+0,0,0,132,0,true,0,true,true,0.031219
+0,0,0,14,0,true,1,true,true,0.053374
+0,0,0,132,0,true,0,true,true,0.043303
+0,0,0,40,0,true,0,true,true,0.040282
+0,0,0,132,0,true,0,true,true,0.048338
+0,0,0,40,0,true,0,true,true,0.040282
+0,0,0,11,0,true,1,true,true,0.04431
+0,0,0,40,0,true,0,true,true,0.037261
+0,0,0,11,0,true,1,true,true,0.04431
+0,0,0,40,0,true,0,true,true,0.035247
+0,0,0,11,0,true,1,true,true,0.039275
+0,0,0,40,0,true,0,true,true,0.032226
+0,0,0,11,0,true,1,true,true,0.048338
+0,0,0,40,0,true,0,true,true,0.043303
+0,0,0,40,0,true,0,true,true,0.04431
+0,0,0,40,0,true,0,true,true,0.037261
+0,0,0,6,0,true,1,true,true,0.041289
+0,0,0,40,0,true,0,true,true,0.042296
+0,0,0,6,0,true,1,true,true,0.050352
+0,0,0,40,0,true,0,true,true,0.053374
+0,0,0,11,0,true,1,true,true,0.036254
+0,0,0,11,0,true,1,false,true,0.036254
+0,0,0,11,0,true,2,false,true,0.032226
+0,0,0,11,0,true,0,false,true,0.032226
+0,0,0,11,0,true,2,false,true,0.032226
+0,0,0,11,0,true,0,false,true,0.030211
+0,0,0,11,0,true,2,false,true,0.048338
+0,0,0,11,0,true,0,false,true,0.042296
+0,0,0,11,0,true,1,false,true,0.04431
+0,0,0,11,0,true,0,false,true,0.037261
+0,0,0,11,0,true,1,false,true,0.035247
+0,0,0,11,0,true,0,false,false,0.032226
+0,0,0,11,0,true,0,true,false,0.052367
+0,0,0,11,0,true,0,false,false,0.026183
+0,0,0,11,0,true,1,false,true,0.042296
+0,0,0,11,0,false,0,false,false,0.024169

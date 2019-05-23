@@ -18,7 +18,6 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 
-
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
 	// TreeMiner

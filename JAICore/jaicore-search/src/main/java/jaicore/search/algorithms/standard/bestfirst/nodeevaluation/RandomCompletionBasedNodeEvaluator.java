@@ -36,6 +36,7 @@ import jaicore.search.algorithms.standard.bestfirst.events.NodeAnnotationEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
 import jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
 import jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import jaicore.search.algorithms.standard.random.RandomSearch;
 import jaicore.search.algorithms.standard.uncertainty.IUncertaintySource;
@@ -73,7 +74,8 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 
 	/* algorithm parameters */
 	protected final Random random;
-	protected int samples;
+	protected final int desiredNumberOfSuccesfulSamples;
+	protected final int maxSamples;
 	private final Predicate<T> priorityPredicateForRDFS;
 
 	private RandomSearch<T, ?> completer;
@@ -85,21 +87,24 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	private boolean visualizeSubSearch;
 
 	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final IObjectEvaluator<SearchGraphPath<T, A>, V> solutionEvaluator) {
-		this(random, samples, solutionEvaluator, -1, -1);
+		this(random, samples, samples, solutionEvaluator, -1, -1);
+	}
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<SearchGraphPath<T, A>, V> solutionEvaluator) {
+		this(random, desiredNumberOfSuccessfulSamples, maxSamples, solutionEvaluator, -1, -1);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final IObjectEvaluator<SearchGraphPath<T, A>, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<SearchGraphPath<T, A>, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
 			final int timeoutForNodeEvaluationInMS) {
-		this(random, samples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
+		this(random, desiredNumberOfSuccessfulSamples, maxSamples, solutionEvaluator, timeoutForSingleCompletionEvaluationInMS, timeoutForNodeEvaluationInMS, null);
 	}
 
-	public RandomCompletionBasedNodeEvaluator(final Random random, final int samples, final IObjectEvaluator<SearchGraphPath<T, A>, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
+	public RandomCompletionBasedNodeEvaluator(final Random random, final int desiredNumberOfSuccessfulSamples, final int maxSamples, final IObjectEvaluator<SearchGraphPath<T, A>, V> solutionEvaluator, final int timeoutForSingleCompletionEvaluationInMS,
 			final int timeoutForNodeEvaluationInMS, final Predicate<T> priorityPredicateForRDFS) {
 		super(timeoutForNodeEvaluationInMS);
 		if (random == null) {
 			throw new IllegalArgumentException("Random source must not be null!");
 		}
-		if (samples <= 0) {
+		if (desiredNumberOfSuccessfulSamples <= 0) {
 			throw new IllegalArgumentException("Sample size must be greater than 0!");
 		}
 		if (solutionEvaluator == null) {
@@ -107,7 +112,8 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		}
 
 		this.random = random;
-		this.samples = samples;
+		this.desiredNumberOfSuccesfulSamples = desiredNumberOfSuccessfulSamples;
+		this.maxSamples = maxSamples;
 		this.solutionEvaluator = solutionEvaluator;
 		this.timeoutForSingleCompletionEvaluationInMS = timeoutForSingleCompletionEvaluationInMS;
 		this.priorityPredicateForRDFS = priorityPredicateForRDFS;
@@ -136,7 +142,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		assert this.generator != null : "Cannot compute f as no generator has been set!";
 		this.eventBus.post(new NodeAnnotationEvent<>(ALGORITHM_ID, n.getPoint(), "f-computing thread", Thread.currentThread().getName()));
 		this.logger.info("Received request for f-value of node with hashCode {}. Number of subsamples will be {}, timeout for node evaluation is {}ms and for a single candidate is {}ms. Enable DEBUG for node details.", n.hashCode(),
-				this.samples, this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
+				this.desiredNumberOfSuccesfulSamples, this.getTimeoutForNodeEvaluationInMS(), this.timeoutForSingleCompletionEvaluationInMS);
 		this.logger.debug("Node details: {}", n);
 
 		long startOfComputation = System.currentTimeMillis();
@@ -170,7 +176,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					if (path.size() > 1 && !nodeHasSibling && parentHasFValue) {
 						V score = this.fValues.get(n.getParent());
 						this.fValues.put(n, score);
-						this.logger.debug("Score {} of parent is used since the last action did not affect the performance.", score);
+						this.logger.debug("Score {} of parent can be used since the last action did not affect the performance.", score);
 						if (score == null) {
 							this.logger.warn("Returning score NULL inherited from parent, this should not happen.");
 						}
@@ -178,28 +184,14 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					}
 				}
 
-				/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
-				if (!this.completer.knowsNode(n.getPoint())) {
-					synchronized (this.completer) {
-						this.completer.appendPathToNode(n.externalPath());
-					}
-					Node<T, ?> current = n.getParent();
-					while (current != null && !this.fValues.containsKey(current)) {
-						this.fValues.put(current, (V)current.getInternalLabel());
-						this.logger.debug("Filling up the f-value of {} with {}", current.hashCode(), current.getInternalLabel());
-						current = current.getParent();
-					}
-				}
-
 				/* draw random completions and determine best solution */
 				AtomicInteger drawnSamples = new AtomicInteger();
 				AtomicInteger successfulSamples = new AtomicInteger();
 				int countedExceptions = 0;
-				final int maxSamples = this.samples * 2;
 				List<V> evaluations = new ArrayList<>();
 				List<List<T>> completedPaths = new ArrayList<>();
-				this.logger.debug("Now drawing {} successful examples but no more than {}", this.samples, maxSamples);
-				while (successfulSamples.get() < this.samples) {
+				this.logger.debug("Now drawing {} successful examples but no more than {}", this.desiredNumberOfSuccesfulSamples, maxSamples);
+				while (successfulSamples.get() < this.desiredNumberOfSuccesfulSamples) {
 					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
 					this.checkInterruption();
 					if (deadline > 0 && deadline < System.currentTimeMillis()) {
@@ -221,33 +213,17 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					}
 
 					/* complete the current path by the dfs-solution; we assume that this goes quickly */
-					List<T> pathCompletion = null;
-					final List<T> completedPath = new ArrayList<>(n.externalPath());
-					synchronized (this.completer) {
-						long startCompletion = System.currentTimeMillis();
-						if (this.completer.isCanceled()) {
-							this.logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling sampling.");
-							break;
+					List<T> tmpCompletedPath = null;
+					try {
+						tmpCompletedPath = getNextRandomPathCompletionForNode(n);
+					} catch (RCNEPathCompletionFailedException e1) {
+						if (e1.getCause() instanceof InterruptedException) {
+							throw (InterruptedException)e1.getCause();
 						}
-						this.logger.debug("Starting search for next solution ...");
-						SearchGraphPath<T, ?> solutionPathFromN = null;
-						try {
-							solutionPathFromN = this.completer.nextSolutionUnderNode(n.getPoint());
-						} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
-							this.logger.info("Completer has been canceled or timeouted. Returning control.");
-							break;
-						}
-						if (solutionPathFromN == null) {
-							this.logger.info("No completion was found for path {}.", path);
-							break;
-						}
-						long finishedCompletion = System.currentTimeMillis();
-						this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.", solutionPathFromN.getNodes().size(), finishedCompletion - startCompletion);
-						this.logger.trace("Solution path is {}", solutionPathFromN);
-						pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
-						pathCompletion.remove(0);
-						completedPath.addAll(pathCompletion);
+						logger.info("Stopping sampling.");
+						break;
 					}
+					final List<T> completedPath = tmpCompletedPath; 
 					completedPaths.add(completedPath);
 
 					/* evaluate the found solution and update internal value model */
@@ -338,6 +314,52 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		V f = this.fValues.get(n);
 		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation("uncertainty"));
 		return f;
+	}
+	
+	public List<T> getNextRandomPathCompletionForNode(Node<T, ?> n) throws InterruptedException, RCNEPathCompletionFailedException {
+		
+		/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
+		if (!this.completer.knowsNode(n.getPoint())) {
+			synchronized (this.completer) {
+				this.completer.appendPathToNode(n.externalPath());
+			}
+			Node<T, ?> current = n.getParent();
+			while (current != null && !this.fValues.containsKey(current)) {
+				this.fValues.put(current, (V)current.getInternalLabel());
+				this.logger.debug("Filling up the f-value of {} with {}", current.hashCode(), current.getInternalLabel());
+				current = current.getParent();
+			}
+		}
+		
+		/* now draw random completion */
+		List<T> pathCompletion = null;
+		final List<T> completedPath = new ArrayList<>(n.externalPath());
+		synchronized (this.completer) {
+			long startCompletion = System.currentTimeMillis();
+			if (this.completer.isCanceled()) {
+				this.logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling sampling.");
+				throw new RCNEPathCompletionFailedException("Completer has been canceled.");
+			}
+			this.logger.debug("Starting search for next solution ...");
+			SearchGraphPath<T, ?> solutionPathFromN = null;
+			try {
+				solutionPathFromN = this.completer.nextSolutionUnderNode(n.getPoint());
+			} catch (AlgorithmExecutionCanceledException | TimeoutException e) {
+				this.logger.info("Completer has been canceled or timeouted. Returning control.");
+				throw new RCNEPathCompletionFailedException(e);
+			}
+			if (solutionPathFromN == null) {
+				this.logger.info("No completion was found for path {}.", n.externalPath());
+				throw new RCNEPathCompletionFailedException("No completion found for path " + n.externalPath());
+			}
+			long finishedCompletion = System.currentTimeMillis();
+			this.logger.debug("Found solution of length {} in {}ms. Enable TRACE for details.", solutionPathFromN.getNodes().size(), finishedCompletion - startCompletion);
+			this.logger.trace("Solution path is {}", solutionPathFromN);
+			pathCompletion = new ArrayList<>(solutionPathFromN.getNodes());
+			pathCompletion.remove(0);
+			completedPath.addAll(pathCompletion);
+		}
+		return completedPath;
 	}
 
 	private void updateMapOfBestScoreFoundSoFar(final List<T> nodeInCompleterGraph, final V scoreOnOriginalBenchmark) {
@@ -473,10 +495,6 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 	public void cancelActiveTasks() {
 		this.logger.info("Receive cancel signal. Canceling the completer.");
 		this.completer.cancel();
-	}
-
-	public void setNumberOfRandomCompletions(final int randomCompletions) {
-		this.samples = randomCompletions;
 	}
 
 	@Override

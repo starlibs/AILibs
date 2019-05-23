@@ -8,7 +8,7 @@ public class NumericParameterDomain implements IParameterDomain {
 	private final double min, max;
 
 	@JsonCreator
-	public NumericParameterDomain(@JsonProperty("integer") final boolean isInteger, @JsonProperty("min") final double min, @JsonProperty("maxf") final double max) {
+	public NumericParameterDomain(@JsonProperty("integer") final boolean isInteger, @JsonProperty("min") final double min, @JsonProperty("max") final double max) {
 		super();
 		this.isInteger = isInteger;
 		this.min = min;
