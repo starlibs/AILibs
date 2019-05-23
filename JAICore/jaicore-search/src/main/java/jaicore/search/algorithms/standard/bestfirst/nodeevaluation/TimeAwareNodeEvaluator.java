@@ -65,6 +65,10 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 			logger.warn("Computation of f-value for {} failed due to exception {} with message {}", node, e.getClass().getName(), e.getMessage());
 			return this.fallbackNodeEvaluator.f(node);
 		}
+		catch (InterruptedException e) {
+			logger.warn("Got interrupted during node evaluation. Throwing an InterruptedException");
+			throw e;
+		}
 		catch (ExecutionException e) {
 			if (e.getCause() instanceof NodeEvaluationException)
 				throw (NodeEvaluationException)e.getCause();
