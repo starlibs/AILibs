@@ -104,7 +104,6 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			instances = finalizeInstances(instances);
 
 		} catch (Exception e) {
-			LOGGER.error("Cannot get instances from database", e);
 			throw new RetrieveInstancesFromDatabaseFailedException("Cannot get instances from database", e);
 		}
 		return instances;

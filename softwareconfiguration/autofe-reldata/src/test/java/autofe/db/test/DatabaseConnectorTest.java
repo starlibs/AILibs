@@ -52,8 +52,8 @@ public class DatabaseConnectorTest {
 		// Check correctness for first instance
 		Instance i = instances.get(0);
 		Attribute a = i.attribute(0);
-		assertEquals(a.value((int) i.value(0)), "Alina");
-		assertEquals(i.value(1), 15000, 0);
+		assertEquals("Alina", a.value((int) i.value(0)));
+		assertEquals(15000, i.value(1), 0);
 	}
 
 }

@@ -2,7 +2,7 @@ package autofe.db.search;
 
 import java.util.NoSuchElementException;
 import java.util.Random;
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,9 +153,9 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 	}
 
 	private double evaluateInstances(Instances instances) {
-		Function<Instances, Double> benchmarkFunction = EvaluationUtils.getBenchmarkFunctionByName(evaluationFunctionName);
+		ToDoubleFunction<Instances> benchmarkFunction = EvaluationUtils.getBenchmarkFunctionByName(evaluationFunctionName);
 		try {
-			return benchmarkFunction.apply(instances);
+			return benchmarkFunction.applyAsDouble(instances);
 		} catch (Exception e) {
 			throw new DatasetEvaluationFailedException("Cannot evaluate instances", e);
 		}

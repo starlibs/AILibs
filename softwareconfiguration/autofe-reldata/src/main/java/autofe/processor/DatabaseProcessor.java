@@ -24,7 +24,7 @@ import weka.core.Instances;
 
 public class DatabaseProcessor {
 
-	private static Logger LOG = LoggerFactory.getLogger(DatabaseProcessor.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseProcessor.class);
 
 	private static final int TIMEOUT_F_COMPUTATION_MS = 10000;
 
@@ -46,17 +46,15 @@ public class DatabaseProcessor {
 		this.database = database;
 	}
 
-	public void doFeatureSelection() {
+	public void doFeatureSelection() throws InterruptedException {
 		long timeout = System.currentTimeMillis() + configuration.getTimeoutInMs();
 
 		// Setup
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(database);
-		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator,
-				configuration.getRandomCompletionPathLength(), configuration.getSeed(),
-				configuration.getEvaluationFunction());
-		
+		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator, configuration.getRandomCompletionPathLength(), configuration.getSeed(), configuration.getEvaluationFunction());
+
 		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, evaluator);
-		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>,DatabaseNode, String, Double> search = new BestFirst<>(tree);
+		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(tree);
 		search.setTimeoutForComputationOfF(TIMEOUT_F_COMPUTATION_MS, node -> 100.0);
 
 		// Do search
@@ -64,31 +62,29 @@ public class DatabaseProcessor {
 		while (search.hasNext() && System.currentTimeMillis() < timeout) {
 			try {
 				solution = search.nextSolutionCandidate();
-			} catch (InterruptedException e) {
-				LOG.warn("Search has been interrupted!");
 			} catch (NoSuchElementException e) {
-				LOG.error("An error occured in the search!",e);
+				LOGGER.error("An error occured in the search!", e);
 			} catch (AlgorithmExecutionCanceledException e) {
-				LOG.error("Search algorithm has been canceled!",e);
+				LOGGER.error("Search algorithm has been canceled!", e);
 			} catch (AlgorithmTimeoutedException e) {
-				LOG.error("Search algorithm has timeouted!", e);
+				LOGGER.error("Search algorithm has timeouted!", e);
 			} catch (AlgorithmException e) {
-				LOG.error("An exception occurred while searching!", e);
+				LOGGER.error("An exception occurred while searching!", e);
 			}
 		}
 
 		if (solution == null) {
-			throw new RuntimeException("No solution found!");
+			throw new NoSolutionFoundException("No solution found!");
 		}
-		
+
 		search.cancel();
 
 		DatabaseNode goal = solution.getNodes().get(solution.getNodes().size() - 1);
-		
-		if(goal.getSelectedFeatures().isEmpty()) {
-			throw new RuntimeException("Found a solution, but the feature list is empty!");
+
+		if (goal.getSelectedFeatures().isEmpty()) {
+			throw new NoSolutionFoundException("Found a solution, but the feature list is empty!");
 		}
-		
+
 		DatabaseConnector databaseConnector = evaluator.getDatabaseConnector();
 		this.instancesWithSelectedFeatures = databaseConnector.getInstances(goal.getSelectedFeatures());
 		this.selectedFeatures = goal.getSelectedFeatures();
