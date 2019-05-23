@@ -2,23 +2,6 @@ plugins {
 	id 'eclipse-wtp'
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir 'src'
-        }
-        resources {
-        	srcDir 'conf'
-    	}
-    }
-    test {
-	   	java {
-	   		srcDir 'test'
-	   		srcDir 'experiments'
-	   	}
-    }
-}
-
 dependencies {
     compile project(':hasco')
     compile project(':mlplan')
