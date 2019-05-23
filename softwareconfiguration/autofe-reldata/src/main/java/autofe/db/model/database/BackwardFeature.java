@@ -89,8 +89,9 @@ public class BackwardFeature extends AbstractFeature {
 		if (path == null) {
 			if (other.path != null)
 				return false;
-		} else if (!path.equals(other.path))
+		} else if (!path.equals(other.path)) {
 			return false;
+		}
 		return true;
 	}
 

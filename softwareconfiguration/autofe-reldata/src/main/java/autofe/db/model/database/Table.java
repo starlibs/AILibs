@@ -56,15 +56,19 @@ public class Table {
 		if (columns == null) {
 			if (other.columns != null)
 				return false;
-		} else if (!columns.equals(other.columns))
+		} else if (!columns.equals(other.columns)) {
 			return false;
-		if (isTarget != other.isTarget)
+		}
+		if (isTarget != other.isTarget) {
 			return false;
+		}
 		if (name == null) {
-			if (other.name != null)
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!name.equals(other.name)) {
 			return false;
+		}
 		return true;
 	}
 

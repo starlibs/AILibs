@@ -116,43 +116,51 @@ public class Database {
 		if (backwards == null) {
 			if (other.backwards != null)
 				return false;
-		} else if (!backwards.equals(other.backwards))
+		} else if (!backwards.equals(other.backwards)) {
 			return false;
-		if (forwards == null) {
+		} if (forwards == null) {
 			if (other.forwards != null)
 				return false;
-		} else if (!forwards.equals(other.forwards))
+		} else if (!forwards.equals(other.forwards)) {
 			return false;
-		if (jdbcDatabase == null) {
+		} if (jdbcDatabase == null) {
 			if (other.jdbcDatabase != null)
 				return false;
-		} else if (!jdbcDatabase.equals(other.jdbcDatabase))
+		} else if (!jdbcDatabase.equals(other.jdbcDatabase)) {
 			return false;
-		if (jdbcDriver == null) {
-			if (other.jdbcDriver != null)
+		} if (jdbcDriver == null) {
+			if (other.jdbcDriver != null) {
 				return false;
-		} else if (!jdbcDriver.equals(other.jdbcDriver))
+			}
+		} else if (!jdbcDriver.equals(other.jdbcDriver)) {
 			return false;
+		}
 		if (jdbcPassword == null) {
-			if (other.jdbcPassword != null)
+			if (other.jdbcPassword != null) {
 				return false;
-		} else if (!jdbcPassword.equals(other.jdbcPassword))
+			}
+		} else if (!jdbcPassword.equals(other.jdbcPassword)) {
 			return false;
-		if (jdbcUrl == null) {
-			if (other.jdbcUrl != null)
+		} if (jdbcUrl == null) {
+			if (other.jdbcUrl != null) {
 				return false;
-		} else if (!jdbcUrl.equals(other.jdbcUrl))
+			}
+		} else if (!jdbcUrl.equals(other.jdbcUrl)) {
 			return false;
+		}
 		if (jdbcUsername == null) {
 			if (other.jdbcUsername != null)
 				return false;
-		} else if (!jdbcUsername.equals(other.jdbcUsername))
+		} else if (!jdbcUsername.equals(other.jdbcUsername)) {
 			return false;
+		}
 		if (tables == null) {
-			if (other.tables != null)
+			if (other.tables != null) {
 				return false;
-		} else if (!tables.equals(other.tables))
+			}
+		} else if (!tables.equals(other.tables)) {
 			return false;
+		}
 		return true;
 	}
 

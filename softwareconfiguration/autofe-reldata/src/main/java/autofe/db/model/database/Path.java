@@ -66,8 +66,9 @@ public class Path {
 		if (pathElements == null) {
 			if (other.pathElements != null)
 				return false;
-		} else if (!pathElements.equals(other.pathElements))
+		} else if (!pathElements.equals(other.pathElements)) {
 			return false;
+		}
 		return true;
 	}
 

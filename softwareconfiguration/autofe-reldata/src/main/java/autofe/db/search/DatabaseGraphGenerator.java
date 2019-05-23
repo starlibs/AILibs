@@ -17,14 +17,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 	@Override
 	public SingleRootGenerator<DatabaseNode> getRootGenerator() {
-		return new SingleRootGenerator<DatabaseNode>() {
-
-			@Override
-			public DatabaseNode getRoot() {
-				return new DatabaseNode();
-			}
-
-		};
+		return () -> new DatabaseNode();
 	}
 
 	@Override
@@ -34,25 +27,17 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 	@Override
 	public NodeGoalTester<DatabaseNode> getGoalTester() {
-		return new NodeGoalTester<DatabaseNode>() {
-
-			@Override
-			public boolean isGoal(DatabaseNode node) {
-				return node.isFinished();
-			}
-		};
+		return node -> node.isFinished();
 	}
 
 	@Override
 	public boolean isSelfContained() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void setNodeNumbering(boolean nodenumbering) {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("This operation is not implemented yet.");
 	}
 
 	public Database getDatabase() {

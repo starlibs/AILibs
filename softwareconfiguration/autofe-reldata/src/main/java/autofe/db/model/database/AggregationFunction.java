@@ -5,5 +5,4 @@ public enum AggregationFunction {
 	MAX,
 	MIN,
 	AVG;
-
 }

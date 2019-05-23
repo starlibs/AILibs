@@ -41,8 +41,9 @@ public abstract class AbstractFeature implements Comparable<AbstractFeature> {
 		if (parent == null) {
 			if (other.parent != null)
 				return false;
-		} else if (!parent.equals(other.parent))
+		} else if (!parent.equals(other.parent)) {
 			return false;
+		}
 		return true;
 	}
 

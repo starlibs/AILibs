@@ -1,5 +1,8 @@
 package autofe.db.model.relation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import autofe.db.model.database.Attribute;
 import autofe.db.model.database.Database;
 import autofe.db.model.database.Table;
@@ -7,16 +10,20 @@ import autofe.db.util.DBUtils;
 
 public abstract class AbstractRelationship {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRelationship.class);
+
+	private static final String LOG_CONTEXT_NOT_SET = "Context not set!";
+
 	protected String fromTableName;
 
 	protected String toTableName;
 
 	protected String commonAttributeName;
 
-	protected transient Database context;
+	protected Database context;
 
 	public AbstractRelationship() {
-		// TODO Auto-generated constructor stub
+		// nothing to do here
 	}
 
 	public AbstractRelationship(String fromTableName, String toTableName, String commonAttributeName) {
@@ -56,24 +63,24 @@ public abstract class AbstractRelationship {
 
 	public Table getFrom() {
 		if (context == null) {
-			throw new IllegalStateException("Context not set!");
+			throw new IllegalStateException(LOG_CONTEXT_NOT_SET);
 		}
 		if (DBUtils.getTableByName(fromTableName, context) == null) {
-			System.out.println(fromTableName + " is null!");
+			LOGGER.warn("{} is null!", fromTableName);
 		}
 		return DBUtils.getTableByName(fromTableName, context);
 	}
 
 	public Table getTo() {
 		if (context == null) {
-			throw new IllegalStateException("Context not set!");
+			throw new IllegalStateException(LOG_CONTEXT_NOT_SET);
 		}
 		return DBUtils.getTableByName(toTableName, context);
 	}
 
 	public Attribute getCommonAttribute() {
 		if (context == null) {
-			throw new IllegalStateException("Context not set!");
+			throw new IllegalStateException(LOG_CONTEXT_NOT_SET);
 		}
 		return DBUtils.getAttributeByName(commonAttributeName, DBUtils.getTableByName(fromTableName, context));
 	}
@@ -90,35 +97,43 @@ public abstract class AbstractRelationship {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		AbstractRelationship other = (AbstractRelationship) obj;
 		if (commonAttributeName == null) {
-			if (other.commonAttributeName != null)
+			if (other.commonAttributeName != null) {
 				return false;
-		} else if (!commonAttributeName.equals(other.commonAttributeName))
+			}
+		} else if (!commonAttributeName.equals(other.commonAttributeName)) {
 			return false;
+		}
 		if (fromTableName == null) {
-			if (other.fromTableName != null)
+			if (other.fromTableName != null) {
 				return false;
-		} else if (!fromTableName.equals(other.fromTableName))
+			}
+		} else if (!fromTableName.equals(other.fromTableName)) {
 			return false;
+		}
 		if (toTableName == null) {
-			if (other.toTableName != null)
+			if (other.toTableName != null) {
 				return false;
-		} else if (!toTableName.equals(other.toTableName))
+			}
+		} else if (!toTableName.equals(other.toTableName)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "AbstractRelationship [fromTableName=" + fromTableName + ", toTableName=" + toTableName
-				+ ", commonAttributeName=" + commonAttributeName + "]";
+		return "AbstractRelationship [fromTableName=" + fromTableName + ", toTableName=" + toTableName + ", commonAttributeName=" + commonAttributeName + "]";
 	}
 
 }

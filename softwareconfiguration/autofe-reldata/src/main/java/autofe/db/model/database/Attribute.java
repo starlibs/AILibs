@@ -41,7 +41,7 @@ public class Attribute implements Comparable<Attribute> {
 	public String getName() {
 		String[] split = fullName.split("\\.");
 		if (split.length != 2) {
-			throw new RuntimeException("Invalid attribute full name: " + fullName);
+			throw new InvalidAttributeNameException("Invalid attribute full name: " + fullName);
 		}
 		return split[1];
 	}
@@ -110,11 +110,10 @@ public class Attribute implements Comparable<Attribute> {
 		if (fullName == null) {
 			if (other.fullName != null)
 				return false;
-		} else if (!fullName.equals(other.fullName))
+		} else if (!fullName.equals(other.fullName)) {
 			return false;
-		if (type != other.type)
-			return false;
-		return true;
+		}
+		return type == other.type;
 	}
 
 	@Override
