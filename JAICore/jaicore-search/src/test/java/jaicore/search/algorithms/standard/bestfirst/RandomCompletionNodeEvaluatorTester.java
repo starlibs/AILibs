@@ -11,11 +11,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.apache.commons.math.util.MathUtils;
+import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,7 +163,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 						assertFalse("Solution has been found twice!", completionsFoundSoFar.contains(completion));
 						completionsFoundSoFar.add(completion);
 					} catch (RCNEPathCompletionFailedException ex) {
-						assertEquals(MathUtils.factorial(CITIES - 1), (long) completionsFoundSoFar.size());
+						assertEquals(CombinatoricsUtils.factorial(CITIES - 1), (long) completionsFoundSoFar.size());
 					}
 				}
 			}
