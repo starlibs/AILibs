@@ -56,3 +56,24 @@ Then open Eclipse and go to the import menu, e.g., in the package manager. Choos
 
 * [HASCO](https://javadoc.io/doc/ai.libs/hasco/)
 * [ML-Plan](https://javadoc.io/doc/ai.libs/mlplan/)
+
+
+## Troubleshooting
+
+### Maven dependency resolvement problems
+
+In some cases, Maven is not able to import referenced dependencies on repositories different from the central Maven repositories, resulting in a build failure. 
+To solve this problem, one might add the following repositories to the ```pom.xml``` to be able to properly execute ```maven compile``` or similar:
+
+```
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+    <repository>
+        <id>nexus.cs.upb</id>
+        <url>https://nexus.cs.upb.de/repository/maven-releases/</url>
+    </repository>
+</repositories>
+```
