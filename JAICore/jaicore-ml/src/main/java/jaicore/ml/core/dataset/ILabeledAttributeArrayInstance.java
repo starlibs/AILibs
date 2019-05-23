@@ -6,6 +6,6 @@ package jaicore.ml.core.dataset;
  * @author fmohr
  *
  */
-public interface ILabeledAttributeArrayInstance extends IAttributeArrayInstance, ILabeledInstance {
+public interface ILabeledAttributeArrayInstance<L> extends IAttributeArrayInstance, ILabeledInstance<L> {
 
 }

@@ -9,6 +9,7 @@ import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.basic.events.IEventEmitter;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
@@ -30,7 +31,7 @@ import weka.classifiers.Classifier;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArrayInstance, D extends IOrderedLabeledAttributeArrayDataset<I>> implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
+public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
@@ -83,10 +84,10 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArra
 
 		// Create the learning curve extrapolator with the given configuration.
 		this.logger.info("Receive request to evaluate classifier {}", classifier);
-		LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
-		extrapolator.setLoggerName(this.getLoggerName() + ".extrapolator");
-
 		try {
+			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
+			extrapolator.setLoggerName(this.getLoggerName() + ".extrapolator");
+			
 			/* Create the extrapolator and calculate the accuracy the classifier would have if it was trained on the complete dataset. */
 			this.logger.debug("Extrapolating learning curve.");
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();
@@ -103,7 +104,7 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArra
 			Double val = EVALUATE_ACCURACY ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
 			this.logger.info("Estimate for performance on full dataset is {}", val);
 			return val;
-		} catch (AlgorithmException | InvalidAnchorPointsException e) {
+		} catch (AlgorithmException | InvalidAnchorPointsException | DatasetCreationException e) {
 			throw new ObjectEvaluationFailedException("Could not compute a score based on the learning curve.", e);
 		}
 	}

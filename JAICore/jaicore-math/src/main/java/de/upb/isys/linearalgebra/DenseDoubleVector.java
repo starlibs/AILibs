@@ -194,5 +194,9 @@ public class DenseDoubleVector extends AbstractVector {
 	public SparseDoubleVector toSparseVector() {
 		return new SparseDoubleVector(asArray());
 	}
-
+	
+	@Override
+	public Vector kroneckerProduct(double[] vectorAsArray) {
+		return new DenseDoubleVector(kroneckerProductInternal(vectorAsArray));
+	}
 }

@@ -10,7 +10,7 @@ import jaicore.ml.core.dataset.weka.WekaInstance;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 
-public class OSMAC<I extends ILabeledAttributeArrayInstance, D extends IDataset<I>> extends PilotEstimateSampling<I, D> {
+public class OSMAC<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> extends PilotEstimateSampling<I, D> {
 
 	public OSMAC(Random rand, int preSampleSize, D input) {
 		super(input);
@@ -27,7 +27,7 @@ public class OSMAC<I extends ILabeledAttributeArrayInstance, D extends IDataset<
 		int vectorLength;
 		double loss;
 		for (I instance : instances) {
-			Instance wekaInstance = ((WekaInstance)instance).getElement();
+			Instance wekaInstance = ((WekaInstance<?>)instance).getElement();
 			vectorLength = 0;
 			for (double dimensionLength : wekaInstance.toDoubleArray()) {
 				vectorLength += dimensionLength;
@@ -40,7 +40,7 @@ public class OSMAC<I extends ILabeledAttributeArrayInstance, D extends IDataset<
 			sumOfDistributionLosses += loss * vectorLength;
 		}
 		for (I instance : instances) {
-			Instance wekaInstance = ((WekaInstance)instance).getElement();
+			Instance wekaInstance = ((WekaInstance<?>)instance).getElement();
 			vectorLength = 0;
 			for (double dimensionLength : wekaInstance.toDoubleArray()) {
 				vectorLength += dimensionLength;

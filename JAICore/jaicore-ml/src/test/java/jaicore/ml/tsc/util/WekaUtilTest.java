@@ -9,6 +9,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import jaicore.ml.core.dataset.TimeSeriesDataset;
+import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import junit.framework.Assert;
 import weka.core.Instances;
 
@@ -24,10 +25,8 @@ public class WekaUtilTest {
 	 */
 	@Test
 	public void timeSeriesDatasetToWekaInstancesTest() {
-		final List<INDArray> valueMatrix = Arrays
-				.asList(Nd4j.create(new double[][] { { 1, 2, 3, 4 }, { 1, 2, 2, 2 } }));
-		TimeSeriesDataset dataset = new TimeSeriesDataset(valueMatrix, new ArrayList<>(),
-				Nd4j.create(new double[] { 1, 2 }));
+		final List<INDArray> valueMatrix = Arrays.asList(Nd4j.create(new double[][] { { 1, 2, 3, 4 }, { 1, 2, 2, 2 } }));
+		TimeSeriesDataset<Double> dataset = new TimeSeriesDataset<>(valueMatrix, new ArrayList<>(), Nd4j.create(new double[] { 1, 2 }), new NumericAttributeType());
 
 		Instances actResult = WekaUtil.timeSeriesDatasetToWekaInstances(dataset);
 

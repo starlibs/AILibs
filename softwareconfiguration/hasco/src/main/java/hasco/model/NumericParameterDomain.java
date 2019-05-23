@@ -37,7 +37,7 @@ public class NumericParameterDomain implements IParameterDomain {
 		if (!(item instanceof Number)) {
 			return false;
 		}
-		Double n = (Double)item;
+		Double n = (Double) item;
 		return n >= this.min && n <= this.max;
 	}
 
@@ -46,7 +46,7 @@ public class NumericParameterDomain implements IParameterDomain {
 		if (!(otherDomain instanceof NumericParameterDomain)) {
 			return false;
 		}
-		NumericParameterDomain otherNumericDomain = (NumericParameterDomain)otherDomain;
+		NumericParameterDomain otherNumericDomain = (NumericParameterDomain) otherDomain;
 		if (this.isInteger && !otherNumericDomain.isInteger) {
 			return false;
 		}

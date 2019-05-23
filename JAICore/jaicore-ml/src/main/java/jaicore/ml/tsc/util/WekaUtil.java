@@ -70,7 +70,7 @@ public class WekaUtil {
 	 *         class information.
 	 */
 	// TODO: Add meta attribute support
-	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance instance) {
+	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance<?> instance) {
 		IAttributeValue<?>[] attValues = instance.getAllAttributeValues();
 		List<INDArray> indArrays = new ArrayList<>();
 
@@ -83,7 +83,7 @@ public class WekaUtil {
 		INDArray combinedMatrix = hstackINDArrays(indArrays);
 
 		final Instance finalInstance = new DenseInstance(1, Nd4j.toFlattened(combinedMatrix).toDoubleVector());
-		finalInstance.setClassValue(instance.getTargetValue(String.class).getValue());
+		finalInstance.setClassValue(jaicore.ml.WekaUtil.getIntValOfClassName(finalInstance, (String)instance.getTargetValue()));
 		return finalInstance;
 	}
 

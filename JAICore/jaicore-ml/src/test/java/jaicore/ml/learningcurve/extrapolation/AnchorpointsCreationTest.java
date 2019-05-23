@@ -9,6 +9,7 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import jaicore.ml.core.dataset.weka.WekaInstance;
 import jaicore.ml.core.dataset.weka.WekaInstances;
@@ -21,7 +22,7 @@ public class AnchorpointsCreationTest {
 
 	@Test
 	public void anchorpointsAreCreatedAndHaveTheValues()
-			throws IOException, InvalidAnchorPointsException, AlgorithmException, InterruptedException {
+			throws IOException, InvalidAnchorPointsException, AlgorithmException, InterruptedException, ClassNotFoundException, DatasetCreationException {
 		int[] xValues = new int[] { 2, 4, 8, 16, 32, 64 };
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
@@ -37,8 +38,8 @@ public class AnchorpointsCreationTest {
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
 
-		WekaInstances simpleDataset = new WekaInstances(dataset);
-		LearningCurveExtrapolator<WekaInstance, WekaInstances> extrapolator = new LearningCurveExtrapolator<>((x, y, ds) -> {
+		WekaInstances<Object> simpleDataset = new WekaInstances<>(dataset);
+		LearningCurveExtrapolator<WekaInstance<Object>, WekaInstances<Object>> extrapolator = new LearningCurveExtrapolator<>((x, y, ds) -> {
 			Assert.assertArrayEquals(x, xValues);
 			for (int i = 0; i < y.length; i++) {
 				Assert.assertTrue(y[i] > 0.0d);

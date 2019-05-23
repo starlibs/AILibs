@@ -5,6 +5,7 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.INumericArrayInstance;
 import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
@@ -66,11 +67,15 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 		switch (this.getState()) {
 		case created:
 			// Initialize variables and sort dataset.
-			this.sample = (D)this.getInput().createEmpty();
-			if (this.sortedDataset == null) {
-				this.sortedDataset = (D)this.getInput().createEmpty();
-				this.sortedDataset.addAll(this.getInput());
-				this.sortedDataset.sort(this.datapointComparator);
+			try {
+				this.sample = (D) this.getInput().createEmpty();
+				if (this.sortedDataset == null) {
+					this.sortedDataset = (D) this.getInput().createEmpty();
+					this.sortedDataset.addAll(this.getInput());
+					this.sortedDataset.sort(this.datapointComparator);
+				}
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
 			this.startIndex = this.random.nextInt(this.sortedDataset.size());
 			this.k = this.sortedDataset.size() / this.sampleSize;

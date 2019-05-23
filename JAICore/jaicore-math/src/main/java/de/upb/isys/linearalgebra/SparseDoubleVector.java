@@ -290,7 +290,12 @@ public class SparseDoubleVector extends AbstractVector {
 	private void setUnchanged() {
 		isChanged = false;
 	}
-
+	
+	@Override
+	public Vector kroneckerProduct(double[] vectorAsArray) {
+		return new SparseDoubleVector(kroneckerProductInternal(vectorAsArray));
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -318,5 +323,7 @@ public class SparseDoubleVector extends AbstractVector {
 		}
 		return Arrays.equals(this.asArray(), other.asArray());
 	}
+
+
 
 }

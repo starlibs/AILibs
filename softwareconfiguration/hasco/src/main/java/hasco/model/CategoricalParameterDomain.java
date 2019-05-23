@@ -69,7 +69,7 @@ public class CategoricalParameterDomain implements IParameterDomain {
 		if (!(otherDomain instanceof CategoricalParameterDomain)) {
 			return false;
 		}
-		CategoricalParameterDomain otherCategoricalDomain = (CategoricalParameterDomain)otherDomain;
+		CategoricalParameterDomain otherCategoricalDomain = (CategoricalParameterDomain) otherDomain;
 		return Arrays.asList(this.values).containsAll(Arrays.asList(otherCategoricalDomain.getValues()));
 	}
 

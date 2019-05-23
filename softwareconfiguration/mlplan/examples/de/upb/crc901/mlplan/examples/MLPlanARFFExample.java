@@ -19,7 +19,7 @@ public class MLPlanARFFExample {
 	public static void main(final String[] args) throws Exception {
 
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("../../../../../datasets/classification/multi-class/car.arff"));
+		Instances data = new Instances(new FileReader("datasets/dataset_31_credit-g(1).arff"));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 0, .7f);
 
@@ -28,10 +28,10 @@ public class MLPlanARFFExample {
 		mlplan.setPortionOfDataForPhase2(0.3f);
 		mlplan.setLoggerName("mlplan");
 		mlplan.setTimeout(300);
-		mlplan.setTimeoutForNodeEvaluation(15);
+		mlplan.setTimeoutForNodeEvaluation(90);
 		mlplan.setTimeoutForSingleSolutionEvaluation(15);
-		mlplan.setNumCPUs(8);
-		mlplan.activateVisualization();
+		mlplan.setNumCPUs(1);
+		//mlplan.activateVisualization();
 		try {
 			long start = System.currentTimeMillis();
 			mlplan.buildClassifier(split.get(0));
