@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
@@ -56,6 +57,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
 		switch (this.getState()) {
 		case created:
+			try {
 			this.sample = (D)getInput().createEmpty();
 			if (!allDatapointsAssigned) {
 				this.datasetCopy = (D)getInput().createEmpty();
@@ -70,6 +72,10 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 			}
 			this.simpleRandomSamplingStarted = false;
 			this.executorService = Executors.newCachedThreadPool();
+			}
+			catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			}
 			return this.activate();
 		case active:
 			if (this.sample.size() < this.sampleSize) {

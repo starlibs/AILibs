@@ -42,7 +42,7 @@ public class WekaInstancesUtil {
 
 		for (Instance inst : data) {
 			ArrayList<IAttributeValue<?>> attributeValuesList = new ArrayList<>();
-			IAttributeValue<?> targetValue = null;
+			String targetValue = null;
 
 			int attIx = 0;
 			for (int i = 0; i < inst.numAttributes(); i++) {
@@ -55,12 +55,7 @@ public class WekaInstancesUtil {
 					}
 					attIx++;
 				} else {
-					IAttributeType<?> type = schema.getTargetType();
-					if (type instanceof NumericAttributeType) {
-						targetValue = new NumericAttributeValue((NumericAttributeType) type, inst.value(i));
-					} else if (type instanceof CategoricalAttributeType) {
-						targetValue = new CategoricalAttributeValue((CategoricalAttributeType) type, inst.classAttribute().value((int) inst.value(i)));
-					}
+					targetValue = inst.stringValue(i);
 				}
 			}
 
@@ -71,7 +66,7 @@ public class WekaInstancesUtil {
 		return dataset;
 	}
 
-	public static Instances datasetToWekaInstances(final IOrderedLabeledAttributeArrayDataset<?> dataset) throws UnsupportedAttributeTypeException {
+	public static Instances datasetToWekaInstances(final IOrderedLabeledAttributeArrayDataset<?, ?> dataset) throws UnsupportedAttributeTypeException {
 		List<Attribute> attributes = new LinkedList<>();
 		Attribute classAttribute;
 
@@ -115,21 +110,12 @@ public class WekaInstancesUtil {
 				}
 			}
 
-//			if (dataset.getTargetType() instanceof NumericAttributeType) {
-//				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
-//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-//			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
-//				IAttributeValue<String> val = inst.getTargetValue(String.class);
-//				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
-//			}
-
 			wekaInstances.add(iNew);
 		}
 		return wekaInstances;
 	}
 
-	@SuppressWarnings("rawtypes")
-	public static IAttributeType transformWEKAAttributeToAttributeType(final Attribute att) {
+	public static IAttributeType<?> transformWEKAAttributeToAttributeType(final Attribute att) {
 		if (att.isNumeric()) {
 			return new NumericAttributeType();
 		} else if (att.isNominal()) {

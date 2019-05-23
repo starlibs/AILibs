@@ -7,15 +7,15 @@ import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 
-public class SystematicSamplingTester extends GeneralSamplingTester {
+public class SystematicSamplingTester extends GeneralSamplingTester<Object> {
 
 	private static final long RANDOM_SEED = 1;
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance> dataset) {
-		SystematicSamplingFactory<INumericLabeledAttributeArrayInstance, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance>> factory = new SystematicSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Object>, Object> dataset) {
+		SystematicSamplingFactory<INumericLabeledAttributeArrayInstance<Object>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Object>, Object>> factory = new SystematicSamplingFactory<>();
 		if (dataset != null) {
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) dataset.size());
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));

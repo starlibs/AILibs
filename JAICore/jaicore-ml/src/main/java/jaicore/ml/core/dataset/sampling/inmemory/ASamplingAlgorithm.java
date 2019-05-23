@@ -12,6 +12,7 @@ import jaicore.basic.algorithm.AlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.IDataset;
 
 /**
@@ -57,7 +58,11 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		}
 		if (sampleSize == 0) {
 			LOG.warn("Sample size is 0, so an empty data set is returned!");
-			return (D)getInput().createEmpty();
+			try {
+				return (D)getInput().createEmpty();
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			}
 		}
 		D dataset = this.getInput();
 		if (dataset == null || dataset.isEmpty()) {

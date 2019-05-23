@@ -19,8 +19,7 @@ import jaicore.ml.core.exception.TrainingException;
  * @param <DATASET>
  *            The type of the data set used to learn from and predict batches.
  */
-public interface IBatchLearner<TARGET, INSTANCE, DATASET extends IDataset<INSTANCE>>
-		extends IPredictiveModel<TARGET, INSTANCE, DATASET> {
+public interface IBatchLearner<TARGET, INSTANCE, DATASET extends IDataset<INSTANCE>> extends IPredictiveModel<TARGET, INSTANCE, DATASET> {
 
 	/**
 	 * Trains this {@link IBatchLearner} using the given {@link AILabeledAttributeArrayDataset}.
