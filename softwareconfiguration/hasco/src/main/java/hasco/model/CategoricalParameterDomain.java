@@ -15,7 +15,8 @@ public class CategoricalParameterDomain implements IParameterDomain {
 		this.values = values;
 	}
 
-	public CategoricalParameterDomain(final Collection<String> values) {
+	@JsonCreator
+	public CategoricalParameterDomain(@JsonProperty("values") final Collection<String> values) {
 		this(values.toArray(new String[] {}));
 	}
 

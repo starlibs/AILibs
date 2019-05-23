@@ -1,0 +1,39 @@
+{
+  "repository" : "Auto-WEKA",
+  "components" : [ {
+    "name" : "weka.classifiers.trees.J48",
+    "requiredInterface" : [ ],
+    "providedInterface" : [ "AbstractClassifier", "WekaBaseClassifier", "BaseClassifier" ],
+    "parameter" : [ {
+      "name" : "O",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "U",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "B",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "J",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "A",
+      "type" : "boolean",
+      "default" : "true"
+    }, {
+      "name" : "M",
+      "type" : "int",
+      "default" : 2.0,
+      "min" : 1.0,
+      "max" : 64.0,
+      "refineSplits" : 8,
+      "minInterval" : 10
+    } ],
+    "dependencies" : [ ]
+  }
+   ]
+}
