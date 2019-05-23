@@ -24,7 +24,7 @@ import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
  * @param <I>
  *            The instance type
  */
-public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?>> {
+public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
 

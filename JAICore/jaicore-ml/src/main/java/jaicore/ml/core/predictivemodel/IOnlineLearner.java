@@ -20,8 +20,7 @@ import jaicore.ml.core.exception.TrainingException;
  * @param <DATASET>
  *            The type of the data set used to learn from and predict batches.
  */
-public interface IOnlineLearner<TARGET, INSTANCE, DATASET extends IDataset<INSTANCE>>
-		extends IBatchLearner<TARGET, INSTANCE, DATASET> {
+public interface IOnlineLearner<TARGET, INSTANCE, DATASET extends IDataset<INSTANCE>> extends IBatchLearner<TARGET, INSTANCE, DATASET> {
 
 	/**
 	 * Updates this {@link IOnlineLearner} based on the given {@link Set} of

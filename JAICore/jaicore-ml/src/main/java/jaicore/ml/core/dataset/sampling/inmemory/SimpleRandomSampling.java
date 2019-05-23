@@ -4,6 +4,7 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.IOrderedDataset;
 import jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
@@ -22,9 +23,13 @@ public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamp
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
 		case created:
-			this.sample = (D)getInput().createEmpty();
-			this.copyDataset = (D)this.getInput().createEmpty();
-			this.copyDataset.addAll(this.getInput());
+			try {
+				this.sample = (D) getInput().createEmpty();
+				this.copyDataset = (D) this.getInput().createEmpty();
+				this.copyDataset.addAll(this.getInput());
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			}
 			return this.activate();
 		case active:
 			if (this.sample.size() < this.sampleSize) {

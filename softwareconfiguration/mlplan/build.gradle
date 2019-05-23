@@ -20,7 +20,7 @@ dependencies {
 
 
 	// OWL API
-	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
+	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:df764c7b13'
 	// linear algebra
@@ -41,6 +41,10 @@ dependencies {
 
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
+	
+	compile group: 'org.apache.commons', name: 'commons-math', version: '2.1'
+	
+	compile group: 'org.apache.commons', name: 'commons-math', version: '2.1'
 	
 }
 

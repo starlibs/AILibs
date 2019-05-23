@@ -6,6 +6,7 @@ import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.clustering.GMeans;
 import jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 
@@ -20,7 +21,7 @@ import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
  * @author jnowack
  *
  */
-public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance, D extends IDataset<I>> extends ClusterSampling<I, D> {
+public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ClusterSampling<I, D> {
 
 	public GmeansSampling(long seed, DistanceMeasure dist, D input) {
 		super(seed, dist, input);
@@ -35,7 +36,11 @@ public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance, D e
 		switch (this.getState()) {
 		case created:
 			// Initialize variables
-			this.sample = (D)getInput().createEmpty();
+			try {
+				this.sample = (D)getInput().createEmpty();
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			}
 
 			if (this.clusterResults == null) {
 				// create cluster

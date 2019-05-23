@@ -36,7 +36,7 @@ import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.Discretizat
  * @author Felix Weiland
  *
  */
-public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLabeledAttributeArrayInstance, D extends IOrderedLabeledAttributeArrayDataset<I>> implements IStratiAmountSelector<D>, IStratiAssigner<I, D> {
+public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> implements IStratiAmountSelector<D>, IStratiAssigner<I, D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
 
@@ -289,14 +289,14 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 			if (toBeDiscretized(attributeIndex)) {
 				Object raw;
 				if (attributeIndex == dataset.getNumberOfAttributes()) {
-					raw = datapoint.getTargetValue(Object.class).getValue();
+					raw = datapoint.getTargetValue();
 				} else {
 					raw = datapoint.getAttributeValueAtPosition(attributeIndex, Object.class).getValue();
 				}
 				value = discretizationHelper.discretize((double) raw, discretizationPolicies.get(attributeIndex));
 			} else {
 				if (attributeIndex == dataset.getNumberOfAttributes()) {
-					value = datapoint.getTargetValue(Object.class).getValue();
+					value = datapoint.getTargetValue();
 				} else {
 					value = datapoint.getAttributeValueAtPosition(attributeIndex, Object.class).getValue();
 				}
@@ -333,7 +333,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
  * @author Felix Weiland
  *
  */
-class ListProcessor<I extends ILabeledAttributeArrayInstance, D extends AILabeledAttributeArrayDataset<I>> implements Callable<Map<Integer, Set<Object>>> {
+class ListProcessor<I extends ILabeledAttributeArrayInstance<?>, D extends AILabeledAttributeArrayDataset<I, ?>> implements Callable<Map<Integer, Set<Object>>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ListProcessor.class);
 
@@ -370,7 +370,7 @@ class ListProcessor<I extends ILabeledAttributeArrayInstance, D extends AILabele
 
 				if (attributeIndex == dataset.getNumberOfAttributes()) {
 					// Attribute index describes target attribute
-					attributeValues.get(attributeIndex).add(instance.getTargetValue(Object.class).getValue());
+					attributeValues.get(attributeIndex).add(instance.getTargetValue());
 
 				} else {
 					attributeValues.get(attributeIndex).add(instance.getAttributeValueAtPosition(attributeIndex, Object.class).getValue());

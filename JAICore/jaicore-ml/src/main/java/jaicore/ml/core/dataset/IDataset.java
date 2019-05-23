@@ -9,5 +9,5 @@ public interface IDataset<I> extends Collection<I> {
 	 *
 	 * @return The newly created dataset.
 	 */
-	public IDataset<I> createEmpty();
+	public IDataset<I> createEmpty() throws DatasetCreationException;
 }

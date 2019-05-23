@@ -1,5 +1,5 @@
 package jaicore.ml.core.dataset;
 
-public interface AINumericLabeledAttributeArrayDataset<I extends INumericLabeledAttributeArrayInstance> extends AILabeledAttributeArrayDataset<I> {
+public interface AINumericLabeledAttributeArrayDataset<I extends INumericLabeledAttributeArrayInstance<L>, L> extends AILabeledAttributeArrayDataset<I, L> {
 
 }
