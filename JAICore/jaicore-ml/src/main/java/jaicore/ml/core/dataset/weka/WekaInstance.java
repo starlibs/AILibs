@@ -14,7 +14,7 @@ import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import weka.core.Attribute;
 import weka.core.Instance;
 
-public class WekaInstance extends ElementDecorator<Instance> implements INumericLabeledAttributeArrayInstance {
+public class WekaInstance<L> extends ElementDecorator<Instance> implements INumericLabeledAttributeArrayInstance<L> {
 
 	public WekaInstance(final Instance instance) {
 		super(instance);
@@ -41,8 +41,9 @@ public class WekaInstance extends ElementDecorator<Instance> implements INumeric
 	}
 
 	@Override
-	public <T> IAttributeValue<T> getTargetValue(final Class<T> type) {
-		return this.getAttributeValue(this.getElement().classAttribute(), type);
+	public L getTargetValue() {
+		IAttributeType<L> t = (IAttributeType<L>)WekaInstancesUtil.transformWEKAAttributeToAttributeType(getElement().classAttribute());
+		return t.buildAttributeValue(this.getElement().classValue()).getValue();
 	}
 
 	@Override

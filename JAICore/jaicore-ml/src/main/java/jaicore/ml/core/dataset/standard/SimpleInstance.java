@@ -1,38 +1,29 @@
 package jaicore.ml.core.dataset.standard;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
 import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
-import jaicore.ml.core.dataset.InstanceSchema;
 import jaicore.ml.core.dataset.attribute.IAttributeValue;
 import jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import jaicore.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
 
-public class SimpleInstance implements INumericLabeledAttributeArrayInstance {
+public class SimpleInstance<L> implements INumericLabeledAttributeArrayInstance<L> {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -6945848041078727475L;
 
-	private InstanceSchema schema;
-
 	private final OneHotEncodingTransformer oneHotEncoder = new OneHotEncodingTransformer();
 
-	private final ArrayList<IAttributeValue<?>> attributeValues;
-	private final IAttributeValue<?> targetValue;
+	private final List<IAttributeValue<?>> attributeValues;
+	private final L targetValue;
 
-	public SimpleInstance(final ArrayList<IAttributeValue<?>> attributeValues, final IAttributeValue<?> targetValue) {
+	public SimpleInstance(final List<IAttributeValue<?>> attributeValues, final L targetValue) {
 		this.attributeValues = attributeValues;
 		this.targetValue = targetValue;
-	}
-
-	public SimpleInstance(final InstanceSchema schema, final ArrayList<IAttributeValue<?>> attributeValues, final IAttributeValue<?> targetValue) {
-		this(attributeValues, targetValue);
-		this.schema = schema;
 	}
 
 	@Override
@@ -41,12 +32,8 @@ public class SimpleInstance implements INumericLabeledAttributeArrayInstance {
 	}
 
 	@Override
-	public <T> IAttributeValue<T> getTargetValue(final Class<T> type) {
-		return (IAttributeValue<T>) this.targetValue;
-	}
-
-	public void setSchema(final InstanceSchema schema) {
-		this.schema = schema;
+	public L getTargetValue() {
+		return this.targetValue;
 	}
 
 	@Override
@@ -74,7 +61,7 @@ public class SimpleInstance implements INumericLabeledAttributeArrayInstance {
 			sb.append(val.getValue());
 			sb.append(";");
 		}
-		sb.append(this.targetValue.getValue());
+		sb.append(this.targetValue);
 		return sb.toString();
 	}
 

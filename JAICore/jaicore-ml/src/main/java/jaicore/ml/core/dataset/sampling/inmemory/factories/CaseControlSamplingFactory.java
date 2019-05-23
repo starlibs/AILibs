@@ -7,7 +7,7 @@ import jaicore.ml.core.dataset.ILabeledInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.casecontrol.CaseControlSampling;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class CaseControlSamplingFactory<I extends ILabeledInstance, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, CaseControlSampling<I, D>> {
+public class CaseControlSamplingFactory<I extends ILabeledInstance<?>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, CaseControlSampling<I, D>> {
 
 	private CaseControlSampling<I, D> previousRun = null;
 

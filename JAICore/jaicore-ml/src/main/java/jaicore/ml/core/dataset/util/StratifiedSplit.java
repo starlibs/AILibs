@@ -6,13 +6,14 @@ import java.util.Random;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.ml.core.dataset.DatasetCreationException;
 import jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 import jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSplit<I extends INumericLabeledAttributeArrayInstance, D extends IOrderedLabeledAttributeArrayDataset<I>> {
+public class StratifiedSplit<I extends INumericLabeledAttributeArrayInstance<L>, L, D extends IOrderedLabeledAttributeArrayDataset<I, L>> {
 
 	private final D dataset;
 
@@ -28,6 +29,7 @@ public class StratifiedSplit<I extends INumericLabeledAttributeArrayInstance, D 
 		this.seed = seed;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void doSplit(double trainPortion) throws AlgorithmException {
 		Random r = new Random(seed);
 		List<Integer> attributeIndices = Collections.singletonList(dataset.getNumberOfAttributes());
@@ -44,6 +46,8 @@ public class StratifiedSplit<I extends INumericLabeledAttributeArrayInstance, D 
 			throw new AlgorithmException("Stratified split has been cancelled");
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
+		} catch (DatasetCreationException e) {
+			throw new AlgorithmException("Could not create an empty copy of the given dataset.");
 		}
 	}
 

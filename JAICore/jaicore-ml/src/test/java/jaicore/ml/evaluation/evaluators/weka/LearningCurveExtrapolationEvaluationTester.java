@@ -32,8 +32,8 @@ public class LearningCurveExtrapolationEvaluationTester {
 		dataset.setClassIndex(targetAttribute.index());
 
 		// Test classifier evaluation by learning curve extrapolation
-		LearningCurveExtrapolationEvaluator<WekaInstance, WekaInstances> evaluator = new LearningCurveExtrapolationEvaluator<>(
-				new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), new WekaInstances(dataset), 0.8d,
+		LearningCurveExtrapolationEvaluator<WekaInstance<Object>, WekaInstances<Object>> evaluator = new LearningCurveExtrapolationEvaluator<>(
+				new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), new WekaInstances<>(dataset), 0.8d,
 				new InversePowerLawExtrapolationMethod(), 123l);
 		double evaluationResult = evaluator.evaluate(new SMO());
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);

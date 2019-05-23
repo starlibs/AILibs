@@ -7,7 +7,7 @@ import jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.casecontrol.OSMAC;
 import jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class OSMACSamplingFactory<I extends ILabeledAttributeArrayInstance, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, OSMAC<I, D>> {
+public class OSMACSamplingFactory<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, OSMAC<I, D>> {
 
 	private OSMAC<I, D> previousRun;
 	private int preSampleSize = -1;

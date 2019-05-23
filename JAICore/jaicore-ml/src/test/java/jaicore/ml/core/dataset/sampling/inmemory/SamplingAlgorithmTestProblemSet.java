@@ -14,7 +14,7 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
-public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<IOrderedLabeledAttributeArrayDataset<?>> {
+public class SamplingAlgorithmTestProblemSet<L> extends AAlgorithmTestProblemSet<IOrderedLabeledAttributeArrayDataset<?, L>> {
 
 	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 
@@ -23,26 +23,26 @@ public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<IO
 	}
 
 	@Override
-	public IOrderedLabeledAttributeArrayDataset<?> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
+	public IOrderedLabeledAttributeArrayDataset<?, L> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		// Load whine quality data set
 		try {
 			return loadDatasetFromOpenML(287);
-		} catch (IOException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
 	}
 
 	@Override
-	public IOrderedLabeledAttributeArrayDataset<?> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
+	public IOrderedLabeledAttributeArrayDataset<?, L> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		// Load higgs data set
 		try {
 			return loadDatasetFromOpenML(23512);
-		} catch (IOException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
 	}
 
-	private IOrderedLabeledAttributeArrayDataset<?> loadDatasetFromOpenML(int id) throws IOException {
+	private IOrderedLabeledAttributeArrayDataset<?, L> loadDatasetFromOpenML(int id) throws IOException, ClassNotFoundException {
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
 		try {
@@ -57,7 +57,7 @@ public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<IO
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
 
-		return new WekaInstances(dataset);
+		return new WekaInstances<>(dataset);
 	}
 
 }
