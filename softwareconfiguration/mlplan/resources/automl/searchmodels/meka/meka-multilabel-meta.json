@@ -1,19 +1,25 @@
 {
 	"repository": "MEKA_META",
-	"include": [
-		"./mlplan-multilabel.json"
-	],
+	"include": [],
 	"parameters": [
 	],
 	"components": [
 		{
 			"name": "meka.classifiers.multilabel.meta.BaggingML",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_I",
 					"comment": "Sets the number of models (default 10)",
+					"name": "I",
 					"type": "int",
 					"default": 10,
 					"min": 2,
@@ -22,8 +28,8 @@
 					"minInterval": 1
 				},
 				{
-					"name": "_P",
 					"comment": "Size of each bag, as a percentage of total training size (default 67)",
+					"name": "P",
 					"type": "int",
 					"default": 67,
 					"min": 40,
@@ -34,13 +40,128 @@
 			]
 		},
 		{
-			"name": "meka.classifiers.multilabel.meta.BaggingMLdup",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"name": "meka.classifiers.multilabel.DBPNN",
+			"providedInterface": [
+				"MLClassifier",
+				"BasicMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "meka.classifiers.multilabel.BPNN"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_I",
+					"name": "N",
+					"type": "int",
+					"default": 2,
+					"min": 1,
+					"max": 10,
+					"minInterval": 1,
+					"refineSplits": 2
+				},
+				{
+					"name": "H",
+					"comment": "Sets the number of hidden units default: 10",
+					"type": "cat",
+					"default": 10,
+					"values": [
+						5,
+						10,
+						20,
+						50
+					]
+				},
+				{
+					"name": "E",
+					"comment": "Sets the maximum number of epochs default: 1000 (auto_cut_out)",
+					"type": "int",
+					"default": 1000,
+					"min": 100,
+					"max": 10000,
+					"refineSplits": 2,
+					"minInterval": 100
+				},
+				{
+					"name": "r",
+					"comment": "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 1E-5,
+					"max": 0.1,
+					"refineSplits": 2,
+					"minInterval": 1E-5
+				},
+				{
+					"name": "m",
+					"comment": "Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 0.1,
+					"max": 0.9,
+					"refineSplits": 2,
+					"minInterval": 0.05
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.Maniac",
+			"providedInterface": [
+				"MLClassifier",
+				"BasicMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+				{
+					"name": "compression",
+					"comment": "Compression factor of the autoencoders, each level of autoencoders will compress the labels to factor times previous layer size. (default: 0.85)",
+					"type": "double",
+					"default": 0.85,
+					"min": 0.01,
+					"max": 0.99,
+					"minInterval": 0.05,
+					"refineSplits": 2
+				},
+				{
+					"name": "numberAutoencoders",
+					"comment": "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+					"type": "int",
+					"default": 4,
+					"min": 1,
+					"max": 10,
+					"minInterval": 1,
+					"refineSplits": 2
+				},
+				{
+					"name": "optimizeAE",
+					"comment": "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+					"type": "boolean",
+					"default": "false"
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.BaggingMLdup",
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+				{
 					"comment": "Sets the number of models (default 10)",
+					"name": "I",
 					"type": "int",
 					"default": 10,
 					"min": 2,
@@ -49,8 +170,8 @@
 					"minInterval": 1
 				},
 				{
-					"name": "_P",
 					"comment": "Size of each bag, as a percentage of total training size (default 67)",
+					"name": "P",
 					"type": "int",
 					"default": 67,
 					"min": 40,
@@ -62,12 +183,20 @@
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.CM",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_I",
 					"comment": "The number of iterations of EM to carry out (default: 10)",
+					"name": "I",
 					"type": "int",
 					"default": 10,
 					"min": 2,
@@ -76,8 +205,8 @@
 					"minInterval": 1
 				},
 				{
-					"name": "_P",
 					"comment": "Size of each bag, as a percentage of total training size (default 67)",
+					"name": "P",
 					"type": "int",
 					"default": 67,
 					"min": 40,
@@ -89,12 +218,20 @@
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.DeepML",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_N",
 					"comment": "Sets the number of RBMs default: 2",
+					"name": "N",
 					"type": "int",
 					"default": 2,
 					"min": 2,
@@ -103,8 +240,8 @@
 					"minInterval": 1
 				},
 				{
-					"name": "_H",
 					"comment": "Sets the number of hidden units default: 10",
+					"name": "H",
 					"type": "int",
 					"default": 10,
 					"min": 5,
@@ -113,8 +250,8 @@
 					"minInterval": 5
 				},
 				{
-					"name": "_E",
 					"comment": "Sets the maximum number of epochs default: 1000 (auto_cut_out)",
+					"name": "E",
 					"type": "int",
 					"default": 1000,
 					"min": 100,
@@ -123,8 +260,8 @@
 					"minInterval": 100
 				},
 				{
-					"name": "_r",
 					"comment": "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+					"name": "r",
 					"type": "double",
 					"default": 0.1,
 					"min": 1E-5,
@@ -133,24 +270,32 @@
 					"minInterval": 1E-5
 				},
 				{
-					"name": "_m",
+					"name": "m",
 					"comment": "Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1",
 					"type": "double",
 					"default": 0.1,
 					"min": 0.1,
 					"max": 0.9,
 					"refineSplits": 2,
-					"minInterval": 0.05	
+					"minInterval": 0.05
 				}
 			]
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.EM",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_I",
+					"name": "I",
 					"comment": "The number of iterations of EM to carry out (default: 10)",
 					"type": "int",
 					"default": 10,
@@ -163,11 +308,19 @@
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.EnsembleML",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_I",
+					"name": "I",
 					"comment": "The number of iterations of EM to carry out (default: 10)",
 					"type": "int",
 					"default": 10,
@@ -177,7 +330,7 @@
 					"minInterval": 1
 				},
 				{
-					"name": "_P",
+					"name": "P",
 					"comment": "Size of each bag, as a percentage of total training size (default 67)",
 					"type": "int",
 					"default": 67,
@@ -190,46 +343,58 @@
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.FilteredClassifier",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_F",
+					"name": "F",
 					"comment": "The number of iterations of EM to carry out (default: 10). REMARK: Here we could also use a subcomponent for filters!",
 					"type": "cat",
-					"default": "weka.filters.supervised.attribute.Discretize _R first_last _precision 6",
-					"values": ["weka.filters.supervised.attribute.Discretize _R first_last _precision 6"]
+					"default": "weka.filters.supervised.attribute.Discretize -R first_last -precision 6",
+					"values": [
+						"weka.filters.supervised.attribute.Discretize -R first_last -precision 6"
+					]
 				}
 			]
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.MBR",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
-			"parameter": [ ]
-		},
-		{
-			"name": "meka.classifiers.multilabel.meta.MultiSearch",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
-			"comment": "LEFT OUT: _search, _algorithm",
-			"parameter": [
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
 				{
-					"name": "_F",
-					"comment": "Determines the parameter used for evaluation: ACC = Accuracy JIDX = Jaccard index HSCORE = Hamming score EM = Exact match JDIST = Jaccard distance HLOSS = Hamming loss ZOLOSS = ZeroOne loss HARSCORE = Harmonic score OE = One error RLOSS = Rank loss AVGPREC = Avg precision LOGLOSSL = Log Loss (lim. L) LOGLOSSD = Log Loss (lim. D) F1MICRO = F1 (micro averaged) F1MACROEX = F1 (macro averaged by example) F1MACROLBL = F1 (macro averaged by label) AUPRC = AUPRC (macro averaged) AUROC = AUROC (macro averaged) LCARD = Label cardinality (predicted) LDIST = Levenshtein distance (default: ACC)",
-					"type": "cat",
-					"default": "ACC",
-					"values": ["ACC","JIDX","HSCORE","EM","JDIST","HLOSS","ZOLOSS","HARSCORE","OE","RLOSS","AVGPREC","LOGLOSSL","LOGLOSSD","F1MICRO","F1MACROEX","F1MACROLBL","AUPRC","AUROC","LCARD","LDIST"]
+					"id": "W",
+					"name": "BasicMLClassifier"
 				}
+			],
+			"parameter": [
 			]
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.RandomSubspaceML",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_A",
+					"name": "A",
 					"comment": "Size of attribute space, as a percentage of total attribute space size (must be between 1 and 100, default: 50)",
 					"type": "int",
 					"default": 50,
@@ -239,7 +404,7 @@
 					"refineSplits": 2
 				},
 				{
-					"name": "_I",
+					"name": "I",
 					"comment": "The number of models (default: 10)",
 					"type": "int",
 					"default": 10,
@@ -249,7 +414,7 @@
 					"minInterval": 1
 				},
 				{
-					"name": "_P",
+					"name": "P",
 					"comment": "Size of each bag, as a percentage of total training size (default 67)",
 					"type": "int",
 					"default": 67,
@@ -262,17 +427,34 @@
 		},
 		{
 			"name": "meka.classifiers.multilabel.meta.SubsetMapper",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
-			"parameter": [ ]
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+			]
 		},
 		{
 			"name": "meka.classifiers.multilabel.MLCBMaD",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMLClassifier"],
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
 			"parameter": [
 				{
-					"name": "_size",
+					"name": "size",
 					"comment": "Size of the compressed matrix. Should be less than the number of labels and more than 1. (default: 20)",
 					"type": "int",
 					"min": 1,
@@ -282,7 +464,7 @@
 					"refineSplits": 2
 				},
 				{
-					"name": "_threshold",
+					"name": "threshold",
 					"comment": "Threshold for the matrix decompositon, what is considered frequent. Between 0 and 1. (default: 0.5)",
 					"type": "double",
 					"min": 0,
@@ -291,7 +473,6 @@
 					"minInterval": 0.1,
 					"refineSplits": 2
 				}
-				
 			]
 		}
 	]

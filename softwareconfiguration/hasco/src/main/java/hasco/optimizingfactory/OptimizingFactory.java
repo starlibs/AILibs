@@ -10,6 +10,7 @@ import com.google.common.eventbus.Subscribe;
 
 import hasco.core.SoftwareConfigurationProblem;
 import hasco.exceptions.ComponentInstantiationFailedException;
+import hasco.model.ComponentInstance;
 import hasco.model.EvaluatedSoftwareConfigurationSolution;
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -29,6 +30,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	private final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm;
 	private T constructedObject;
 	private V performanceOfObject;
+	private ComponentInstance componentInstanceOfObject;
 	private final SoftwareConfigurationAlgorithm<P, C, V> optimizer;
 
 	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
@@ -65,6 +67,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 			try {
 				this.constructedObject = this.getInput().getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());
 				this.performanceOfObject = solutionModel.getScore();
+				this.componentInstanceOfObject = solutionModel.getComponentInstance();
 				return this.terminate();
 			} catch (ComponentInstantiationFailedException e) {
 				throw new AlgorithmException(e, "Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
@@ -102,6 +105,10 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 
 	public V getPerformanceOfObject() {
 		return this.performanceOfObject;
+	}
+
+	public ComponentInstance getComponentInstanceOfObject() {
+		return this.componentInstanceOfObject;
 	}
 
 	@Override

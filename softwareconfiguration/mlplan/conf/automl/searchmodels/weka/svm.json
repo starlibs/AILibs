@@ -1,0 +1,87 @@
+{
+	"repository": "Support Vector Classification",
+	"components": [
+		{
+			"name": "weka.classifiers.functions.supportVector.NormalizedPolyKernel",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"K"
+			],
+			"parameter": [
+			]
+		},
+		{
+			"name": "weka.classifiers.functions.supportVector.PolyKernel",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"K"
+			],
+			"parameter": [
+			]
+		},
+		{
+			"name": "weka.classifiers.functions.supportVector.RBFKernel",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"K"
+			],
+			"parameter": [
+			]
+		},
+		{
+			"name": "weka.classifiers.functions.SMO",
+			"requiredInterface": [
+				{
+					"id": "K",
+					"name": "K"
+				}
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"WekaBaseClassifier",
+				"BaseClassifier"
+			],
+			"parameter": [
+				{
+					"name": "C",
+					"type": "double",
+					"default": 1.0,
+					"min": 0.5,
+					"max": 1.5,
+					"refineSplits": 80,
+					"minInterval": 1
+				},
+				{
+					"name": "N",
+					"type": "cat",
+					"default": "0",
+					"values": [
+						"0",
+						"1",
+						"2"
+					]
+				},
+				{
+					"name": "M",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": [
+			]
+		},
+		{
+			"name": "weka.classifiers.functions.supportVector.Puk",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"K"
+			],
+			"parameter": [
+			]
+		}
+	]
+}

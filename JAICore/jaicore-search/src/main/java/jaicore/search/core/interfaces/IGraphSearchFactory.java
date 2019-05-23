@@ -7,4 +7,7 @@ public interface IGraphSearchFactory<I extends GraphSearchInput<N, A>, O, N, A> 
 
 	@Override
 	public IGraphSearch<I, O, N, A> getAlgorithm();
+	
+	@Override
+	public IGraphSearch<I, O, N, A> getAlgorithm(I problem);
 }

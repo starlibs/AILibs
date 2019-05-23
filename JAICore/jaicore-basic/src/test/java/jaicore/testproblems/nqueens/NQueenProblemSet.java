@@ -44,6 +44,6 @@ public class NQueenProblemSet extends AAlgorithmTestProblemSet<NQueensProblem> i
 
 	@Override
 	public NQueensProblem getDifficultProblemInputForGeneralTestPurposes() {
-		return new NQueensProblem(1000000);
+		return new NQueensProblem(10000);
 	}
 }

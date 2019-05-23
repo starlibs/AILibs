@@ -1,16 +1,17 @@
 package hasco.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonPropertyOrder({"name", "defaultDomain", "defaultValue"})
 public class Parameter {
 	private final String name;
-	private final ParameterDomain defaultDomain;
+	private final IParameterDomain defaultDomain;
 	private final Object defaultValue;
 
-	
-	public Parameter(@JsonProperty("name") String name, @JsonProperty("defaultDomain")ParameterDomain defaultDomain,@JsonProperty("defaultValue") Object defaultValue) {
+	@JsonCreator
+	public Parameter(@JsonProperty("name") final String name, @JsonProperty("defaultDomain") final IParameterDomain defaultDomain,@JsonProperty("defaultValue") final Object defaultValue) {
 		super();
 		this.name = name;
 		this.defaultDomain = defaultDomain;
@@ -18,64 +19,73 @@ public class Parameter {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
-	public ParameterDomain getDefaultDomain() {
-		return defaultDomain;
+	public IParameterDomain getDefaultDomain() {
+		return this.defaultDomain;
 	}
 
 	public Object getDefaultValue() {
-		return defaultValue;
+		return this.defaultValue;
 	}
-	
+
 	public boolean isNumeric() {
-		return defaultDomain instanceof NumericParameterDomain;
+		return this.defaultDomain instanceof NumericParameterDomain;
 	}
-	
+
 	public boolean isCategorical() {
-		return defaultDomain instanceof CategoricalParameterDomain;
+		return this.defaultDomain instanceof CategoricalParameterDomain;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((defaultDomain == null) ? 0 : defaultDomain.hashCode());
-		result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((this.defaultDomain == null) ? 0 : this.defaultDomain.hashCode());
+		result = prime * result + ((this.defaultValue == null) ? 0 : this.defaultValue.hashCode());
+		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		Parameter other = (Parameter) obj;
-		if (defaultDomain == null) {
-			if (other.defaultDomain != null)
+		if (this.defaultDomain == null) {
+			if (other.defaultDomain != null) {
 				return false;
-		} else if (!defaultDomain.equals(other.defaultDomain))
+			}
+		} else if (!this.defaultDomain.equals(other.defaultDomain)) {
 			return false;
-		if (defaultValue == null) {
-			if (other.defaultValue != null)
+		}
+		if (this.defaultValue == null) {
+			if (other.defaultValue != null) {
 				return false;
-		} else if (!defaultValue.equals(other.defaultValue))
+			}
+		} else if (!this.defaultValue.equals(other.defaultValue)) {
 			return false;
-		if (name == null) {
-			if (other.name != null)
+		}
+		if (this.name == null) {
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!this.name.equals(other.name)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return name;
+		return this.name;
 	}
 }

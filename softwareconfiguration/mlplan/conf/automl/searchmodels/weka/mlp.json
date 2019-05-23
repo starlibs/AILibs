@@ -1,0 +1,76 @@
+{
+	"repository": "Multi Layer Perceptron",
+	"components": [
+		{
+			"name": "weka.classifiers.functions.MultilayerPerceptron",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractClassifier",
+				"WekaBaseClassifier",
+				"BaseClassifier"
+			],
+			"parameter": [
+				{
+					"name": "L",
+					"type": "double",
+					"default": 0.3,
+					"min": 0.1,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "M",
+					"type": "double",
+					"default": 0.2,
+					"min": 0.1,
+					"max": 1.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "B",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "H",
+					"type": "cat",
+					"default": "a",
+					"values": [
+						"a",
+						"i",
+						"o",
+						"t"
+					]
+				},
+				{
+					"name": "C",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "R",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "D",
+					"type": "boolean",
+					"default": "false"
+				},
+				{
+					"name": "S",
+					"type": "cat",
+					"default": "1",
+					"values": [
+						"1"
+					]
+				}
+			],
+			"dependencies": [
+			]
+		}
+	]
+}

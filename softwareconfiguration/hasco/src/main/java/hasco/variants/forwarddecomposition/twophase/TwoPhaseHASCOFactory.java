@@ -45,6 +45,7 @@ public class TwoPhaseHASCOFactory<S extends GraphSearchInput<N, A>, N, A> implem
 	@Override
 	public TwoPhaseHASCO<S, N, A> getAlgorithm(final TwoPhaseSoftwareConfigurationProblem problem) {
 		this.hascoFactory.setProblemInput(problem);
+		this.hascoFactory.withAlgorithmConfig(this.config);
 		HASCO<S, N, A, Double> hasco = this.hascoFactory.getAlgorithm();
 		return new TwoPhaseHASCO<>(problem, this.config, hasco);
 	}
