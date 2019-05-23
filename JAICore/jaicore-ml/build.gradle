@@ -35,7 +35,7 @@ dependencies {
 	// end dependencies for meka
 	
 	// weka dependencies
-	compile ('ai.libs.thirdparty:interruptible-weka:0.1.1') {
+	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
 		  	exclude group: 'log4j'
 	    	exclude group: 'org.slf4j'
 	}

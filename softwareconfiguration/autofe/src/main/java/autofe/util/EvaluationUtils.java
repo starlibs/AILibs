@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import org.bytedeco.javacpp.opencv_core.LDA;
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
@@ -29,13 +29,13 @@ import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import fantail.core.Correlation;
 import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.model.travesaltree.Node;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.Evaluation;
+import weka.classifiers.functions.LDA;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RBFKernel;
@@ -613,7 +613,7 @@ public final class EvaluationUtils {
 		return new AbstractHASCOFENodeEvaluator(maxPipelineSize) {
 
 			@Override
-			public Double f(final Node<TFDNode, ?> node) throws Throwable {
+			public Double f(final Node<TFDNode, ?> node)  {
 				if (node.getParent() == null) {
 					return null;
 				}
@@ -630,7 +630,8 @@ public final class EvaluationUtils {
 	}
 
 	public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
-		return Correlation.rankKendallTauBeta(ranking1, ranking2);
+		KendallsCorrelation kr = new KendallsCorrelation();
+		return kr.correlation(ranking1, ranking2);
 	}
 
 	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test, final int seed, final Logger logger, final boolean enableVisualization, final int numCores) throws Exception {

@@ -251,8 +251,9 @@ public final class DataSetUtils {
 		// If ref shape is not null, the shape has been preserved
 		if (refShape != null) {
 			result = Nd4j.zeros(refShape);
-			for (int i = 0; i < instance.numAttributes() - 1; i++)
+			for (int i = 0; i < instance.numAttributes() - 1; i++) {
 				result.putScalar(i, instance.value(i));
+			}
 		} else {
 			double[] data = instance.toDoubleArray();
 			// Get data without last element
@@ -358,13 +359,15 @@ public final class DataSetUtils {
 
 				fileBitmapMapping.put(imageFile, fb);
 				if (fb.getWidth() < minWidth) {
-					if (minWidth != Integer.MAX_VALUE)
+					if (minWidth != Integer.MAX_VALUE) {
 						croppingNecessary = true;
+					}
 					minWidth = fb.getWidth();
 				}
 				if (fb.getHeight() < minHeight) {
-					if (minHeight != Integer.MAX_VALUE)
+					if (minHeight != Integer.MAX_VALUE) {
 						croppingNecessary = true;
+					}
 					minHeight = fb.getHeight();
 				}
 			}
@@ -421,7 +424,7 @@ public final class DataSetUtils {
 			// height is X, width is Y
 			cropFilter.setY((mapping.getValue().getWidth() - width) / 2);
 			cropFilter.setX((mapping.getValue().getHeight() - height) / 2);
-			cropFilter.ApplyInPlace(mapping.getValue());
+			cropFilter.applyInPlace(mapping.getValue());
 		}
 		logger.debug("Performed cropping.");
 	}
@@ -477,7 +480,7 @@ public final class DataSetUtils {
 	 * Utility function for subsampling with a fixed factor 1 multiplied to the
 	 * subsampling ratio. See
 	 * {@link #subsample(DataSet, double, int, Random, double)} for details.
-	 * 
+	 *
 	 * @param originalData
 	 *            Original data set
 	 * @param subsampleRatio
@@ -499,7 +502,7 @@ public final class DataSetUtils {
 	 * <code>subsampleRatio</code> together with <code>factor</code> (used e. g. for
 	 * ML-Plan requiring bigger samples than for AutoFE) determines the subsampled
 	 * dataset size.
-	 * 
+	 *
 	 * @param originalData
 	 *            Original data set
 	 * @param subsampleRatio
@@ -512,7 +515,7 @@ public final class DataSetUtils {
 	 *            Factor multiplied to the subsampling ratio to determine final size
 	 * @return Returns the subsampled data set
 	 */
-	public static DataSet subsample(DataSet originalData, final double subsampleRatio, final int minInstances,
+	public static DataSet subsample(final DataSet originalData, final double subsampleRatio, final int minInstances,
 			final Random random, final double factor) {
 
 		if (subsampleRatio >= 1d || minInstances >= originalData.getInstances().numInstances()) {
@@ -539,7 +542,7 @@ public final class DataSetUtils {
 	/**
 	 * Functions which reduces the dimensionality of the given <code>dataset</code>
 	 * by applying max pooling with kernel size and stride of 8.
-	 * 
+	 *
 	 * @param dataset
 	 *            Dataset to be reduced in place
 	 */
@@ -554,25 +557,30 @@ public final class DataSetUtils {
 		boolean permute = shape.length > 2 && shape[2] > 1;
 		for (int i = 0; i < dataset.getIntermediateInstances().size(); i++) {
 			INDArray matrix = dataset.getIntermediateInstances().get(i);
-			if (permute)
+			if (permute) {
 				matrix = matrix.permute(2, 0, 1);
+			}
 
-			if (shape.length > 2)
+			if (shape.length > 2) {
 				matrix = matrix.reshape(new long[] { 1, shape[2], shape[0], shape[1] });
-			else
+			} else {
 				matrix = matrix.reshape(new long[] { 1, 1, shape[0], shape[1] });
+			}
 			matrix = ImageUtils.applyMLNToMatrix(matrix, mln);
 
-			if (resultingShape == null)
+			if (resultingShape == null) {
 				resultingShape = matrix.shape();
+			}
 
 			// Reverse
-			if (permute)
+			if (permute) {
 				matrix = matrix.permute(0, 2, 3, 1);
-			if (shape.length > 2)
+			}
+			if (shape.length > 2) {
 				matrix = matrix.reshape(new long[] { resultingShape[2], resultingShape[3], resultingShape[1] });
-			else
+			} else {
 				matrix = matrix.reshape(new long[] { resultingShape[2], resultingShape[3] });
+			}
 
 			dataset.getIntermediateInstances().set(i, matrix);
 		}
