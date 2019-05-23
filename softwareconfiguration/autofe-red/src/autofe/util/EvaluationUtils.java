@@ -6,8 +6,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
@@ -15,12 +17,15 @@ import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
+import de.upb.crc901.mlplan.core.MLPlan;
+import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
+import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import fantail.core.Correlation;
+import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import weka.attributeSelection.ReliefFAttributeEval;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LDA;
 import weka.classifiers.functions.supportVector.Kernel;
@@ -96,7 +101,7 @@ public final class EvaluationUtils {
 	public static double performKernelClustering(final Instances instances) throws Exception {
 		logger.debug("Starting kernelized cluster evaluation...");
 
-		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), KERNEL_SPLIT_PORTION);
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, KERNEL_SPLIT_PORTION);
 
 		double maxScore = performClustering(new Instances(split.get(0)));
 		for (Map.Entry<Kernel, Instances> entry : getKernelsWithInstances(split.get(0))) {
@@ -138,7 +143,7 @@ public final class EvaluationUtils {
 		logger.debug("Starting kernelized LDA evaluation...");
 
 		// TODO: Again splitting?
-		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), KERNEL_SPLIT_PORTION);
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, KERNEL_SPLIT_PORTION);
 
 		double maxScore = performLDA(new Instances(split.get(0)));
 
@@ -384,7 +389,7 @@ public final class EvaluationUtils {
 	}
 
 	public static double performLDA(final Instances instances) throws Exception {
-		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, .7f);
 
 		LDA lda = new LDA();
 		// FLDA lda = new FLDA();
@@ -397,7 +402,7 @@ public final class EvaluationUtils {
 	}
 
 	public static double performEnsemble(Instances instances) throws Exception {
-		List<Instances> subsample = WekaUtil.getStratifiedSplit(instances, new Random(42), .05f);
+		List<Instances> subsample = WekaUtil.getStratifiedSplit(instances, 42, .05f);
 		instances = subsample.get(0);
 
 		/* Relief */
@@ -422,7 +427,7 @@ public final class EvaluationUtils {
 		varianceMean /= totalNumericCount;
 
 		/* KNN */
-		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(42), .7f);
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, .7f);
 		IBk knn = new IBk(10);
 		knn.buildClassifier(split.get(0));
 		Evaluation eval = new Evaluation(split.get(0));
@@ -502,20 +507,20 @@ public final class EvaluationUtils {
 				+ training.numAttributes() + " attributes.");
 
 		/* Initialize MLPlan using WEKA components */
-		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier();
-		mlplan.setRandomSeed(seed);
-		mlplan.setNumCPUs(numCores);
-		mlplan.setLoggerName("mlplan");
-		// Timeout in seconds
-		mlplan.setTimeout(timeout);
-		mlplan.setPortionOfDataForPhase2(.1f);
-		if (enableVisualization) {
-			mlplan.activateVisualization();
-		}
-		mlplan.buildClassifier(training);
+		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
+		MLPlanClassifierConfig config = ConfigFactory.create(MLPlanClassifierConfig.class);
+		config.setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, seed+"");
+		config.setProperty(MLPlanClassifierConfig.K_CPUS, numCores+"");
+		config.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.1");
+		builder.withAlgorithmConfig(config);
+		builder.withTimeOut(new TimeOut(timeout, TimeUnit.SECONDS));
+		builder.withDataset(training);
 
-		if (mlplan.getSelectedClassifier() == null
-				|| ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier() == null) {
+		MLPlan mlplan = builder.build();
+		mlplan.setLoggerName("mlplan");
+		Classifier c = mlplan.call();
+
+		if (c == null) {
 			logger.warn("Could not find a model using ML-Plan. Returning -1...");
 			return -1;
 		}
@@ -526,7 +531,7 @@ public final class EvaluationUtils {
 
 		/* evaluate solution produced by mlplan */
 		Evaluation eval = new Evaluation(training);
-		eval.evaluateModel(mlplan, test);
+		eval.evaluateModel(c, test);
 
 		return eval.pctCorrect();
 	}
@@ -540,7 +545,7 @@ public final class EvaluationUtils {
 			final int seed, final Logger logger, final boolean enableVisualization, final int numCores)
 			throws Exception {
 
-		List<Instances> split = WekaUtil.getStratifiedSplit(instances, new Random(seed), trainRatio);
+		List<Instances> split = WekaUtil.getStratifiedSplit(instances, seed, trainRatio);
 
 		return evaluateMLPlan(timeout, split.get(0), split.get(1), seed, logger, enableVisualization, numCores);
 	}

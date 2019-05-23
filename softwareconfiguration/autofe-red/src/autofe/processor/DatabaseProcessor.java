@@ -15,9 +15,11 @@ import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.sql.DatabaseConnector;
 import autofe.db.util.DBUtils;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import weka.core.Instances;
 
 public class DatabaseProcessor {
@@ -53,21 +55,25 @@ public class DatabaseProcessor {
 				configuration.getRandomCompletionPathLength(), configuration.getSeed(),
 				configuration.getEvaluationFunction());
 		
-		GeneralEvaluatedTraversalTree<DatabaseNode, String, Double> tree = new GeneralEvaluatedTraversalTree<>(generator, evaluator);
-		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>,DatabaseNode, String, Double> search = new BestFirst<>(tree);
+		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, evaluator);
+		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>,DatabaseNode, String, Double> search = new BestFirst<>(tree);
 		search.setTimeoutForComputationOfF(TIMEOUT_F_COMPUTATION_MS, node -> 100.0);
 
 		// Do search
 		SearchGraphPath<DatabaseNode, String> solution = null;
 		while (search.hasNext() && System.currentTimeMillis() < timeout) {
 			try {
-				solution = search.nextSolution();
+				solution = search.nextSolutionCandidate();
 			} catch (InterruptedException e) {
 				LOG.warn("Search has been interrupted!");
 			} catch (NoSuchElementException e) {
 				LOG.error("An error occured in the search!",e);
 			} catch (AlgorithmExecutionCanceledException e) {
 				LOG.error("Search algorithm has been canceled!",e);
+			} catch (AlgorithmTimeoutedException e) {
+				LOG.error("Search algorithm has timeouted!", e);
+			} catch (AlgorithmException e) {
+				LOG.error("An exception occurred while searching!", e);
 			}
 		}
 

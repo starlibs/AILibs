@@ -16,14 +16,16 @@ import autofe.db.sql.DatabaseConnectorImpl;
 import autofe.db.util.DBUtils;
 import autofe.util.EvaluationUtils;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
+import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import jaicore.search.core.interfaces.GraphGenerator;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
-import jaicore.search.model.probleminputs.GraphSearchInput;
 import jaicore.search.model.travesaltree.Node;
+import jaicore.search.probleminputs.GraphSearchInput;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.structure.graphgenerator.GoalTester;
 import jaicore.search.structure.graphgenerator.NodeGoalTester;
 import jaicore.search.structure.graphgenerator.RootGenerator;
@@ -149,14 +151,20 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 					}
 				});
 
-		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>, DatabaseNode, String, Double> randomCompletionSearch = new RandomizedDepthFirstSearch<>(
+		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> randomCompletionSearch = new RandomizedDepthFirstSearch<>(
 				problem, this.random);
 
 		SearchGraphPath<DatabaseNode, String> solution = null;
 		try {
-			solution = randomCompletionSearch.nextSolution();
+			solution = randomCompletionSearch.nextSolutionCandidate();
 		} catch (NoSuchElementException | InterruptedException | AlgorithmExecutionCanceledException e) {
 			LOG.error("Error in random completion!", e);
+		} catch (AlgorithmTimeoutedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (AlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		if (solution == null) {

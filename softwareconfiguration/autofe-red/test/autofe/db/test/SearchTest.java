@@ -24,14 +24,11 @@ import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.util.DBUtils;
-import jaicore.graphvisualizer.gui.VisualizationWindow;
-import jaicore.planning.graphgenerators.task.tfd.TFDTooltipGenerator;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.probleminputs.GeneralEvaluatedTraversalTree;
 import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
-import jaicore.search.model.travesaltree.NodeTooltipGenerator;
+import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class SearchTest {
@@ -44,10 +41,10 @@ public class SearchTest {
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator);
 
-		GeneralEvaluatedTraversalTree<DatabaseNode, String, Double> tree = new GeneralEvaluatedTraversalTree<>(
+		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(
 				generator, evaluator);
 
-		BestFirst<GeneralEvaluatedTraversalTree<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(
+		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(
 				tree);
 		search.setTimeoutForComputationOfF(60000, node -> 100.0);
 
@@ -56,7 +53,7 @@ public class SearchTest {
 		// window.setTooltipGenerator(new NodeTooltipGenerator<>(new
 		// TFDTooltipGenerator<>()));
 		SearchGraphPath<DatabaseNode, String> solution = null;
-		while ((solution = search.nextSolution()) != null) {
+		while ((solution = search.nextSolutionCandidate()) != null) {
 			System.out.println(solution.getNodes().get(solution.getNodes().size() - 1));
 		}
 	}

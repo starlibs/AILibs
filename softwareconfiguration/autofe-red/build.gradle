@@ -2,22 +2,6 @@ plugins {
 	id 'eclipse-wtp'
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir 'src'
-        }
-        resources {
-        	srcDir 'conf'
-    	}
-    }
-    test {
-	   	java {
-	   		srcDir 'test'
-	   	}
-    }
-}
-
 dependencies {
     compile project(':mlplan')
     
