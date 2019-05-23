@@ -13,8 +13,9 @@ import autofe.util.DataSet;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.MulticlassEvaluator;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -25,6 +26,7 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 	private final Random rand;
 	private final int repeats;
 	private final double trainingPortion;
+	private final IObjectEvaluator<Classifier, Double> internalEvaluator;
 
 	private SQLAdapter adapter;
 	private int experimentID;
@@ -59,13 +61,13 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 		rand = new Random(seed);
 		this.repeats = repeats;
 		this.trainingPortion = trainingPortion;
+		internalEvaluator = new MonteCarloCrossValidationEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), repeats, data.getInstances(), trainingPortion, seed);
 	}
 
 	@Override
 	public Double evaluate(final AutoFEWekaPipeline object) throws InterruptedException, ObjectEvaluationFailedException {
 		long startTimestamp = System.currentTimeMillis();
 		Instances wekaInstances = object.transformData(data);
-		IObjectEvaluator<Classifier, Double> internalEvaluator = new MonteCarloCrossValidationEvaluator(new MulticlassEvaluator(rand), repeats, wekaInstances, (float) trainingPortion);
 		Double evalScore = internalEvaluator.evaluate(object);
 		logger.info("Eval score of AUtoFEWekaPipeline " + object.toString() + " was " + evalScore);
 

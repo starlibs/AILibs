@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.EvaluationUtils;
+import hasco.exceptions.ComponentInstantiationFailedException;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import jaicore.search.model.travesaltree.Node;
 import weka.core.Instances;
 
 /**
@@ -28,7 +30,7 @@ public class COCONodeEvaluator extends AbstractHASCOFENodeEvaluator {
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> node) throws Throwable {
+	public Double f(final Node<TFDNode, ?> node) throws NodeEvaluationException  {
 		if (node.getParent() == null) {
 			return null;
 		}
@@ -38,7 +40,12 @@ public class COCONodeEvaluator extends AbstractHASCOFENodeEvaluator {
 			return MAX_EVAL_VALUE;
 		}
 
-		FilterPipeline pipe = getPipelineFromNode(node);
+		FilterPipeline pipe;
+		try {
+			pipe = getPipelineFromNode(node);
+		} catch (ComponentInstantiationFailedException e1) {
+			throw new NodeEvaluationException(e1, "Could not evaluate pipeline.");
+		}
 		if (pipe != null && pipe.getFilters() != null) {
 			try {
 				logger.debug("Applying and evaluating pipeline " + pipe.toString());

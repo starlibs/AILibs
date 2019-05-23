@@ -1,17 +1,13 @@
 package autofe.util.test;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import autofe.algorithm.hasco.filter.generic.WEKAFilter;
-import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import weka.core.Attribute;
@@ -39,15 +35,6 @@ public class DataSetUtilsTest {
 	}
 
 	// @Test
-	public void croppingTest() throws IOException, InterruptedException {
-		File datasetFolder = new File("testres/" + File.separator + "caltech101_subset");
-		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
-		System.out.println("Loaded data.");
-		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
-		filter.applyFilter(data, true);
-	}
-
-	// @Test
 	public void subsamplingTest() throws Exception {
 		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.MNIST_ID);
 
@@ -68,34 +55,6 @@ public class DataSetUtilsTest {
 		System.out.println("Start subsampling with MLPlan factor...");
 		result = DataSetUtils.subsample(data, 0.01, 200, new Random(10), 10);
 		System.out.println("Done. " + result.getInstances().numInstances());
-	}
-
-	// @Test
-	public void caltech101Test() throws IOException, InterruptedException {
-		File datasetFolder = new File("testres/" + File.separator + "caltech101");
-		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
-		System.out.println("Loaded data.");
-		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
-		filter.applyFilter(data, true);
-	}
-
-	@Test
-	public void leafBwTest() throws IOException, InterruptedException {
-		File datasetFolder = new File("testres/" + File.separator + "leaf_bw");
-		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
-		System.out.println("Loaded data.");
-		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
-		DataSet result = filter.applyFilter(data, true);
-		System.out.println(result.getIntermediateInstances().get(0).shapeInfoToString());
-	}
-
-	// @Test
-	public void leafRgbTest() throws IOException, InterruptedException {
-		File datasetFolder = new File("testres/" + File.separator + "leaf_rgb");
-		DataSet data = DataSetUtils.loadDatasetFromImageFolder(datasetFolder);
-		System.out.println("Loaded data.");
-		CatalanoInPlaceFilter filter = new CatalanoInPlaceFilter("GaussianBlur");
-		filter.applyFilter(data, true);
 	}
 
 	// @Test

@@ -49,9 +49,10 @@ import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import jaicore.ml.WekaUtil;
-import jaicore.ml.evaluation.BasicMLEvaluator;
-import jaicore.ml.evaluation.MonteCarloCrossValidationEvaluator;
-import jaicore.ml.evaluation.MulticlassEvaluator;
+import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
+import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import weka.classifiers.Classifier;
@@ -88,7 +89,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 	private MLPlanFEWekaClassifierConfig config;
 	private TwoPhaseHASCOFactory hascoFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, AutoFEWekaPipeline, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
-	private final BasicMLEvaluator benchmark;
+	private final ISplitBasedClassifierEvaluator<Double> benchmark;
 	private final AutoFEWekaPipelineFactory factory;
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
 
@@ -110,7 +111,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		this.minInstances = minInstances;
 
 		this.config = config;
-		benchmark = new MulticlassEvaluator(rand);
+		benchmark = new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss());
 		this.factory = factory;
 		preferredNodeEvaluator = new PreferenceBasedNodeEvaluator(getComponents(), FileUtil.readFileAsList(this.config.preferredComponents()));
 
@@ -298,7 +299,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 			logger.info("Using the following preferred node evaluator: {}", preferredNodeEvaluator);
 
 			/* create HASCO problem */
-			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(benchmark, NUMBER_OF_MC_ITERATIONS_IN_SEARCH, dataShownToSearch, NUMBER_OF_MC_FOLDS_IN_SEARCH);
+			IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(benchmark, NUMBER_OF_MC_ITERATIONS_IN_SEARCH, dataShownToSearch, NUMBER_OF_MC_FOLDS_IN_SEARCH, config.seed());
 			IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
 				try {
 					return searchBenchmark.evaluate(factory.getComponentInstantiation(c));
@@ -314,7 +315,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 					logger.info("Evaluating object " + object.toString() + "...");
 
 					/* first conduct MCCV */
-					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(benchmark, NUMBER_OF_MC_ITERATIONS_IN_selection, dataForComplete.getInstances(), NUMBER_OF_MC_FOLDS_IN_SELECTION);
+					MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(benchmark, NUMBER_OF_MC_ITERATIONS_IN_selection, dataForComplete.getInstances(), NUMBER_OF_MC_FOLDS_IN_SELECTION, config.seed());
 					double score;
 					try {
 						score = mccv.evaluate(object);

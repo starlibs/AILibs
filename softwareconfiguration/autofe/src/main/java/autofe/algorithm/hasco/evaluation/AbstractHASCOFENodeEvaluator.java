@@ -4,12 +4,13 @@ import java.util.Collection;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import hasco.core.Util;
+import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.BaseFactory;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.algorithms.standard.core.INodeEvaluator;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import jaicore.search.model.travesaltree.Node;
 
 public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvaluator implements INodeEvaluator<TFDNode, Double> {
 
@@ -39,7 +40,7 @@ public abstract class AbstractHASCOFENodeEvaluator extends AbstractHASCOFEEvalua
 		return factory;
 	}
 
-	public FilterPipeline getPipelineFromNode(final Node<TFDNode, ?> node) throws Exception {
+	public FilterPipeline getPipelineFromNode(final Node<TFDNode, ?> node) throws ComponentInstantiationFailedException {
 		if (components == null || factory == null) {
 			throw new IllegalArgumentException("Collection of components and factory need to be set to make node evaluators work.");
 		}

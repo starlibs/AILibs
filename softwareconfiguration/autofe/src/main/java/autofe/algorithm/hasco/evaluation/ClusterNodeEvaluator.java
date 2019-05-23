@@ -5,8 +5,10 @@ import org.slf4j.LoggerFactory;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.EvaluationUtils;
+import hasco.exceptions.ComponentInstantiationFailedException;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.structure.core.Node;
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import jaicore.search.model.travesaltree.Node;
 
 /**
  * Evaluator used for node evaluation to guide the search using a simple clustering benchmark function.
@@ -22,12 +24,17 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 	private static final Logger logger = LoggerFactory.getLogger(ClusterNodeEvaluator.class);
 
 	@Override
-	public Double f(final Node<TFDNode, ?> node) throws Throwable {
+	public Double f(final Node<TFDNode, ?> node) throws NodeEvaluationException {
 		if (node.getParent() == null) {
 			return 0.0;
 		}
 
-		FilterPipeline pipe = getPipelineFromNode(node);
+		FilterPipeline pipe;
+		try {
+			pipe = getPipelineFromNode(node);
+		} catch (ComponentInstantiationFailedException e1) {
+			throw new NodeEvaluationException(e1, "Could not evaluate pipeline");
+		}
 
 		if (pipe != null && pipe.getFilters() != null) {
 			// If pipeline is too deep, assign worst value
