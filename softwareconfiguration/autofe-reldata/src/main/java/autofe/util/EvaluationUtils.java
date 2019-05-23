@@ -5,15 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.ops.transforms.Transforms;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,6 @@ import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import fantail.core.Correlation;
 import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import weka.attributeSelection.ReliefFAttributeEval;
@@ -35,7 +33,6 @@ import weka.classifiers.lazy.IBk;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.FilteredClusterer;
 import weka.clusterers.SimpleKMeans;
-import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
@@ -51,9 +48,8 @@ import weka.filters.unsupervised.attribute.Remove;
 public final class EvaluationUtils {
 	private static final Logger logger = LoggerFactory.getLogger(EvaluationUtils.class);
 
-	private static double DOUBLE_ZERO_PREC = 0.0001;
-
-	private static double KERNEL_SPLIT_PORTION = .3;
+	private static final double DOUBLE_ZERO_PREC = 0.0001;
+	private static final double KERNEL_SPLIT_PORTION = .3;
 
 	private EvaluationUtils() {
 		// Utility class
@@ -69,23 +65,8 @@ public final class EvaluationUtils {
 		filter.setInputFormat(insts);
 		Instances removedClassInstances = Filter.useFilter(insts, filter);
 
-		// TODO: Kernel
-		// // Nystroem kernelFilter = new Nystroem();
-		// // Initialize kernel? (using data, cache size 250007, gamma 0.01)? =>
-		// // Defaults
-		//
-		// // kernelFilter.setKernel(new RBFKernel(insts, 250007, 0.01)); // insts,
-		// 250007,
-		// // 0.01
-		// // clusterer.setFilter(kernelFilter);
 		((SimpleKMeans) clusterer.getClusterer())
 				.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
-
-		// ((SimpleKMeans)
-		// clusterer.getClusterer()).setNumClusters(insts.classAttribute().numValues());
-		// ((weka.core.EuclideanDistance) ((SimpleKMeans)
-		// clusterer.getClusterer()).getDistanceFunction())
-		// .setDontNormalize(true);
 
 		clusterer.buildClusterer(removedClassInstances);
 
@@ -93,9 +74,7 @@ public final class EvaluationUtils {
 		clusterEval.setClusterer(clusterer);
 		clusterEval.evaluateClusterer(insts);
 
-		double acc = predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
-
-		return acc;
+		return predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
 	}
 
 	public static double performKernelClustering(final Instances instances) throws Exception {
@@ -133,16 +112,13 @@ public final class EvaluationUtils {
 			maxScore = Math.max(maxScore, currAcc);
 		}
 
-		logger.debug("Kernelized cluster evaluation result: " + maxScore);
+		logger.debug("Kernelized cluster evaluation result: {}", maxScore);
 
 		return maxScore;
 	}
 
 	public static double performKernelLDA(final Instances instances) throws Exception {
-
 		logger.debug("Starting kernelized LDA evaluation...");
-
-		// TODO: Again splitting?
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, KERNEL_SPLIT_PORTION);
 
 		double maxScore = performLDA(new Instances(split.get(0)));
@@ -197,7 +173,11 @@ public final class EvaluationUtils {
 				correct++;
 			}
 		}
-		return correct / total;
+		if(total > 0) {
+			return correct / total;
+		} else {
+			return 0.0;
+		}
 	}
 
 	/**
@@ -208,12 +188,10 @@ public final class EvaluationUtils {
 	 * @return
 	 */
 	public static double calculateAttributeCountPenalty(final Instances instances) {
-		// TODO: Which attribute number to use?
-		return instances.numAttributes() / 15000;
+		return (double) instances.numAttributes() / 15000;
 	}
 
 	public static double calculateCOCOForBatch(final Instances batch) {
-
 		batch.setClassIndex(batch.numAttributes() - 1);
 
 		final int D = batch.numAttributes() - 1;
@@ -245,25 +223,22 @@ public final class EvaluationUtils {
 		for (int i = 0; i < batch.numInstances(); i++) {
 			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
 					batch.get(i).toDoubleArray().length - 1);
-			INDArray f_i = Nd4j.create(instValues);
-			f_i.muli(alpha);
-			if (f_i.norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
-					&& f_i.norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
-				f_i.divi(f_i.norm2Number());
+			INDArray fi = Nd4j.create(instValues);
+			fi.muli(alpha);
+			if (fi.norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
+					&& fi.norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
+				fi.divi(fi.norm2Number());
 			}
 
 			double lowerSum = 0;
 			for (int j = 0; j < classes; j++) {
 
-				// TODO: In paper, the case i != j is NOT excluded!
-				// if (i != j) {
-				INDArray tmp = f_i.mmul(c.getRow(j).transpose());
+				INDArray tmp = fi.mmul(c.getRow(j).transpose());
 				lowerSum += Math.exp(tmp.getDouble(0));
-				// }
 
 			}
-			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));
-			INDArray result = f_i.mmul(c_k.transpose());
+			INDArray ck = c.getRow((int) Math.round(batch.get(i).classValue()));
+			INDArray result = fi.mmul(ck.transpose());
 
 			double expExpr = Math.exp(result.getDouble(0));
 
@@ -278,17 +253,11 @@ public final class EvaluationUtils {
 		return (-1) * loss;
 	}
 
-	private static double calculateCosSim(final INDArray f1, final INDArray f2) {
-		return Transforms.cosineSim(f1, f2);
-	}
-
 	public static double calculateCOEDForBatch(final Instances batch) {
 		batch.setClassIndex(batch.numAttributes() - 1);
 
 		final int D = batch.numAttributes() - 1;
 		final int classes = batch.classAttribute().numValues();
-
-		// final double alpha = 10;
 
 		INDArray features = Nd4j.zeros(batch.numInstances(), D);
 		INDArray labels = Nd4j.zeros(batch.numInstances(), 1);
@@ -296,19 +265,14 @@ public final class EvaluationUtils {
 		for (int i = 0; i < batch.numInstances(); i++) {
 			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
 					batch.get(i).toDoubleArray().length - 1);
-			INDArray f_i = Nd4j.create(instValues);
-			// org.nd4j.linalg.dataset.DataSet tmpDataSet = new
-			// org.nd4j.linalg.dataset.DataSet();
-			// tmpDataSet.setFeatures(f_i);
-			// dataSet.addRow(tmpDataSet, i);
-			features.getRow(i).addiRowVector(f_i);
+			INDArray fi = Nd4j.create(instValues);
+			features.getRow(i).addiRowVector(fi);
 			labels.putScalar(i, batch.get(i).classValue());
 		}
 		org.nd4j.linalg.dataset.DataSet dataSet = new org.nd4j.linalg.dataset.DataSet(features, labels);
 		dataSet.setFeatures(features);
 		NormalizerStandardize scaler = new NormalizerStandardize();
 		scaler.fit(dataSet);
-		// scaler.transform(dataSet);
 		scaler.preProcess(dataSet);
 
 		// Calculate centroids
@@ -317,8 +281,6 @@ public final class EvaluationUtils {
 		for (int i = 0; i < classes; i++) {
 			for (Instance inst : batch) {
 				if (Math.round(inst.classValue()) == i) {
-					// double[] instValues = Arrays.copyOfRange(inst.toDoubleArray(), 0,
-					// inst.toDoubleArray().length - 1);
 					c.getRow(i).addiRowVector(dataSet.get(i).getFeatures());
 					classCounts[i]++;
 				}
@@ -326,28 +288,22 @@ public final class EvaluationUtils {
 		}
 		for (int i = 0; i < classes; i++) {
 			c.getRow(i).divi(classCounts[i] + 1);
-			// c.getRow(i).divi(c.getRow(i).norm2Number());
 		}
 
 		double loss = 0;
 		for (int i = 0; i < batch.numInstances(); i++) {
-			// double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
-			// batch.get(i).toDoubleArray().length - 1);
-			INDArray f_i = dataSet.get(i).getFeatures();
-			// f_i.muli(alpha);
-			// f_i.divi(f_i.norm2Number());
+			INDArray fi = dataSet.get(i).getFeatures();
 
 			double lowerSum = 0;
 			for (int j = 0; j < classes; j++) {
 
 				if (i != j) {
-					// lowerSum += Math.exp(calculateEuclideanImageDistance(f_i, c.getRow(j)));
-					lowerSum += Math.exp(calculateEuclideanImageDistance(f_i, c.getRow(j)));
+					lowerSum += Math.exp(calculateEuclideanImageDistance(fi, c.getRow(j)));
 				}
 			}
 
-			INDArray c_k = c.getRow((int) Math.round(batch.get(i).classValue()));
-			double upperExp = Math.exp(calculateEuclideanImageDistance(f_i, c_k));
+			INDArray ck = c.getRow((int) Math.round(batch.get(i).classValue()));
+			double upperExp = Math.exp(calculateEuclideanImageDistance(fi, ck));
 
 			loss += Math.log(upperExp / (lowerSum + 1));
 
@@ -361,38 +317,13 @@ public final class EvaluationUtils {
 	}
 
 	private static double calculateEuclideanImageDistance(final INDArray inst1, final INDArray inst2) {
-		// double sum = 0;
-		// for (int i = 0; i < inst1.length(); i++) {
-		// sum += Math.pow((inst1.getDouble(i) - inst2.getDouble(i)), 2);
-		// }
-		// return sum / inst1.length();
 		return inst1.distance2(inst2) / inst1.length();
-	}
-
-	// private static double calculateExpEuclideanImageDistance(final INDArray
-	// inst1, final INDArray inst2) {
-	//// double sum = 1;
-	//// for (int i = 0; i < inst1.length(); i++) {
-	//// sum *= Math.exp(Math.pow((inst1.getDouble(i) - inst2.getDouble(i)), 2));
-	//// }
-	//// return sum; // / inst1.length();
-	// }
-
-	private static double calculateEuclideanImageDistance(final Instance inst1, final Instance inst2) {
-		// double sum = 0;
-		// for (int i = 0; i < inst1.numAttributes() - 1; i++) {
-		// sum += Math.pow((inst1.value(i) - inst2.value(i)), 2);
-		// }
-		// return sum;
-		EuclideanDistance euclDist = new EuclideanDistance();
-		return euclDist.distance(inst1, inst2);
 	}
 
 	public static double performLDA(final Instances instances) throws Exception {
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, .7f);
 
 		LDA lda = new LDA();
-		// FLDA lda = new FLDA();
 		lda.buildClassifier(split.get(0));
 
 		Evaluation eval = new Evaluation(split.get(0));
@@ -424,7 +355,10 @@ public final class EvaluationUtils {
 				totalNumericCount++;
 			}
 		}
-		varianceMean /= totalNumericCount;
+		
+		if(totalNumericCount != 0) {
+			varianceMean /= totalNumericCount;
+		}
 
 		/* KNN */
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, .7f);
@@ -444,7 +378,7 @@ public final class EvaluationUtils {
 				try {
 					return 1 - performClustering(data);
 				} catch (Exception e1) {
-					logger.error("Could not perform clustering benchmark. Reason: " + e1.getMessage());
+					logger.error("Could not perform clustering benchmark.", e1);
 					return 1d;
 				}
 			};
@@ -453,7 +387,7 @@ public final class EvaluationUtils {
 				try {
 					return 1 - performKernelClustering(data);
 				} catch (Exception e1) {
-					logger.error("Could not perform kernel clustering benchmark. Reason: " + e1.getMessage());
+					logger.error("Could not perform kernel clustering benchmark.", e1);
 					return 1d;
 				}
 			};
@@ -466,7 +400,7 @@ public final class EvaluationUtils {
 				try {
 					return 1 - performLDA(data);
 				} catch (Exception e) {
-					logger.error("Could not perform LDA benchmark. Reason: " + e.getMessage());
+					logger.error("Could not perform LDA benchmark.", e);
 					return 1d;
 				}
 			};
@@ -475,7 +409,7 @@ public final class EvaluationUtils {
 				try {
 					return 1 - performKernelLDA(data);
 				} catch (Exception e) {
-					logger.error("Could not perform cluster LDA benchmark. Reason: " + e.getMessage());
+					logger.error("Could not perform cluster LDA benchmark.", e);
 					return 1d;
 				}
 			};
@@ -484,11 +418,10 @@ public final class EvaluationUtils {
 				try {
 					return 1 - performEnsemble(data);
 				} catch (Exception e) {
-					logger.error("Could not perform ensemble benchmark. Reason: " + e.getMessage());
+					logger.error("Could not perform ensemble benchmark.", e);
 					return 1d;
 				}
 			};
-		// case "Random":
 		default:
 			throw new RuntimeException("Invalid evaluation function: " + name);
 		}
@@ -496,15 +429,14 @@ public final class EvaluationUtils {
 
 
 	public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
-		return Correlation.rankKendallTauBeta(ranking1, ranking2);
+		return new KendallsCorrelation().correlation(ranking1, ranking2);
 	}
 
 	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
-			final int seed, final Logger logger, final boolean enableVisualization, final int numCores)
+			final int seed, final Logger logger, final int numCores)
 			throws Exception {
 
-		logger.debug("Starting ML-Plan execution. Training on " + training.numInstances() + " instances with "
-				+ training.numAttributes() + " attributes.");
+		logger.debug("Starting ML-Plan execution. Training on {} instances with {} attributes.", training.numInstances(), training.numAttributes());
 
 		/* Initialize MLPlan using WEKA components */
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
@@ -527,7 +459,7 @@ public final class EvaluationUtils {
 
 		String solutionString = ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier().getClass().getName()
 				+ " | " + ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors();
-		logger.debug("Selected classifier: " + solutionString);
+		logger.debug("Selected classifier: {}", solutionString);
 
 		/* evaluate solution produced by mlplan */
 		Evaluation eval = new Evaluation(training);
@@ -537,17 +469,17 @@ public final class EvaluationUtils {
 	}
 
 	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
-			final int seed, final Logger logger, final boolean enableVisualization) throws Exception {
-		return evaluateMLPlan(timeout, training, test, seed, logger, enableVisualization, 1);
+			final int seed, final Logger logger) throws Exception {
+		return evaluateMLPlan(timeout, training, test, seed, logger,  1);
 	}
 
 	public static double evaluateMLPlan(final int timeout, final Instances instances, final double trainRatio,
-			final int seed, final Logger logger, final boolean enableVisualization, final int numCores)
+			final int seed, final Logger logger, final int numCores)
 			throws Exception {
 
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, seed, trainRatio);
 
-		return evaluateMLPlan(timeout, split.get(0), split.get(1), seed, logger, enableVisualization, numCores);
+		return evaluateMLPlan(timeout, split.get(0), split.get(1), seed, logger, numCores);
 	}
 
 	private static List<Map.Entry<Kernel, Instances>> getKernelsWithInstances(final Instances insts) throws Exception {
