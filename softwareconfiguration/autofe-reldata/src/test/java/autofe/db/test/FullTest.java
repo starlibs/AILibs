@@ -25,10 +25,9 @@ public class FullTest {
 	public static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
 	@Test
-	public void doFullTest() {
+	public void doFullTest() throws InterruptedException {
 		// Phase 1: Select features
-		DatabaseAutoFeConfiguration config = new DatabaseAutoFeConfiguration(RC_PATHLENGTH, EVALUATION_FUNCTION, SEED,
-				(int) (TIMEOUT_IN_MS * FE_FRACTION));
+		DatabaseAutoFeConfiguration config = new DatabaseAutoFeConfiguration(RC_PATHLENGTH, EVALUATION_FUNCTION, SEED, (int) (TIMEOUT_IN_MS * FE_FRACTION));
 		DatabaseProcessor dbProcessor = new DatabaseProcessor(config, DATABASE_MODEL_FILE);
 		dbProcessor.doFeatureSelection();
 
