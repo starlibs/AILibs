@@ -56,7 +56,7 @@ public class WekaInstancesTester {
 	public void testConversionToWekaInstances() throws Exception {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
-		WekaInstances wrapped = new WekaInstances(data);
+		WekaInstances<Object> wrapped = new WekaInstances<>(data);
 		int n = data.size();
 
 		/* check that attribute types coincide */
@@ -77,26 +77,26 @@ public class WekaInstancesTester {
 		/* check that data is transferred correctly */
 		assertEquals(n, wrapped.size());
 		for (int i = 0; i < n; i++) {
-			WekaInstance inst = wrapped.get(i);
+			WekaInstance<Object> inst = wrapped.get(i);
 			assertNotNull(inst.getElement());
 			assertEquals(inst.getElement(), data.get(i)); // instance has not changed
 
 			/* check for each value that the contained information is correct */
 			for (int j = 0; j <= numAttributes; j++) {
-				IAttributeValue<?> value = j < numAttributes ? inst.getAttributeValueAtPosition(j, Object.class) : inst.getTargetValue(Object.class);
+				Object value = j < numAttributes ? inst.getAttributeValueAtPosition(j, Object.class) : inst.getTargetValue();
 				if (value instanceof NumericAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), (Double)value.getValue(), 0.0);
+					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), (double)value, 0.0);
 				}
 				else if (value instanceof BooleanAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + (data.get(i).value(j) == 1.0), data.get(i).value(j) == 1.0, value.getValue());
+					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + (data.get(i).value(j) == 1.0), data.get(i).value(j) == 1.0, value);
 				}
 				else if (value instanceof CategoricalAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).stringValue(j), data.get(i).stringValue(j), value.getValue());
+					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).stringValue(j), data.get(i).stringValue(j), value);
 				} else {
 					fail("Unsupported attribute value type " + value.getClass());
 				}
 			}
-			assertNotNull(i + "-th instance has target value null!", inst.getTargetValue(Object.class));
+			assertNotNull(i + "-th instance has target value null!", inst.getTargetValue());
 		}
 	}
 
@@ -104,9 +104,9 @@ public class WekaInstancesTester {
 	public void testCreateEmpty() throws Exception {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
-		WekaInstances wrapped = new WekaInstances(data);
+		WekaInstances<Object> wrapped = new WekaInstances<>(data);
 		int size = wrapped.size();
-		AILabeledAttributeArrayDataset<?> emptyCopy = wrapped.createEmpty();
+		WekaInstances<Object> emptyCopy = wrapped.createEmpty();
 
 		/* check that the empty copy indeed IS empty and that the original list is unchanged */
 		assertTrue(emptyCopy.isEmpty());
@@ -129,8 +129,8 @@ public class WekaInstancesTester {
 	public void testIterability() throws Exception {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
-		WekaInstances wrapped = new WekaInstances(data);
-		for (WekaInstance wi : wrapped) {
+		WekaInstances<Object> wrapped = new WekaInstances<>(data);
+		for (WekaInstance<Object> wi : wrapped) {
 			assertTrue(data.contains(wi.getElement()));
 		}
 	}
@@ -139,7 +139,7 @@ public class WekaInstancesTester {
 	public void testArraysCorrespondToListViaEquals() throws Exception {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
-		WekaInstances wrapped = new WekaInstances(data);
+		WekaInstances<Object> wrapped = new WekaInstances<>(data);
 
 		/* check object array */
 		Object[] dataAsArray = wrapped.toArray();
@@ -150,7 +150,7 @@ public class WekaInstancesTester {
 		}
 
 		/* check Instance array */
-		WekaInstance[] dataAsSpecificArray = wrapped.toArray(new WekaInstance[0]);
+		WekaInstance<Object>[] dataAsSpecificArray = wrapped.toArray(new WekaInstance[0]);
 		n = dataAsSpecificArray.length;
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {

@@ -86,14 +86,18 @@
   </logger>
   
   <logger name="jaicore.interrupt">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="jaicore.timing">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="jaicore.concurrent">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.search.algorithms.standard.bestfirst.RandomCompletionNodeEvaluatorTester">
     <level value="debug" />
   </logger>
   

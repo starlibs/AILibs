@@ -10,7 +10,7 @@ import jaicore.ml.core.dataset.IDataset;
 import jaicore.ml.core.dataset.ILabeledInstance;
 import jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
-public abstract class CaseControlLikeSampling<I extends ILabeledInstance, D extends IDataset<I>> extends ASamplingAlgorithm<D> {
+public abstract class CaseControlLikeSampling<I extends ILabeledInstance<?>, D extends IDataset<I>> extends ASamplingAlgorithm<D> {
 
 	protected Random rand;
 	protected List<Pair<I, Double>> probabilityBoundaries = null;
@@ -41,15 +41,15 @@ public abstract class CaseControlLikeSampling<I extends ILabeledInstance, D exte
 		for (I instance : dataset) {
 			boolean classExists = false;
 			for (Object clazz : classOccurrences.keySet()) {
-				if (clazz.equals(instance.getTargetValue(Object.class).getValue())) {
+				if (clazz.equals(instance.getTargetValue())) {
 					classExists = true;
 				}
 			}
 			if (classExists) {
-				classOccurrences.put(instance.getTargetValue(Object.class).getValue(),
-						classOccurrences.get(instance.getTargetValue(Object.class).getValue()).intValue() + 1);
+				classOccurrences.put(instance.getTargetValue(),
+						classOccurrences.get(instance.getTargetValue()).intValue() + 1);
 			} else {
-				classOccurrences.put(instance.getTargetValue(Object.class).getValue(), 0);
+				classOccurrences.put(instance.getTargetValue(), 0);
 			}
 		}
 		return classOccurrences;
@@ -61,7 +61,7 @@ public abstract class CaseControlLikeSampling<I extends ILabeledInstance, D exte
 		List<Pair<I, Double>> boundaries = new ArrayList<>();
 		for (I instance : this.getInput()) {
 			boundaryOfCurrentInstance += ((double) 1
-					/ classOccurrences.get(instance.getTargetValue(Object.class).getValue()).intValue())
+					/ classOccurrences.get(instance.getTargetValue()).intValue())
 					/ numberOfClasses;
 			boundaries.add(new Pair<I, Double>(instance, boundaryOfCurrentInstance));
 		}

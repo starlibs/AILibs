@@ -18,21 +18,20 @@ import jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
  * 
  * @author Julian Lienen
  *
- * @param <TARGETTYPE>
+ * @param <L>
  *            The attribute type of the target.
- * @param <TARGETVALUETYPE>
+ * @param <V>
  *            The value type of the target attribute.
- * @param <DATASET>
+ * @param <D>
  *            The type of the time series data set used to learn from and
  *            predict batches.
  */
-public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends TimeSeriesDataset>
-		extends ABatchLearner<TARGETTYPE, TARGETVALUETYPE, TimeSeriesInstance, DATASET> {
+public abstract class TSClassifier<L, V, D extends TimeSeriesDataset<L>> extends ABatchLearner<L, V, TimeSeriesInstance<L>, D> {
 
 	/**
 	 * The algorithm object used for the training of the classifier.
 	 */
-	protected ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>> algorithm;
+	protected ATSCAlgorithm<L, V, D, ? extends TSClassifier<L, V, D>> algorithm;
 
 	/**
 	 * Constructor for a time series classifier.
@@ -40,8 +39,7 @@ public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends 
 	 * @param algorithm
 	 *            The algorithm object used for the training of the classifier
 	 */
-	public TSClassifier(
-			ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET>> algorithm) {
+	public TSClassifier(ATSCAlgorithm<L, V, D, ? extends TSClassifier<L, V, D>> algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -49,7 +47,7 @@ public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends 
 	 * {@inheritDoc ABatchLearner#train(jaicore.ml.core.dataset.IDataset)}
 	 */
 	@Override
-	public void train(DATASET dataset) throws TrainingException {
+	public void train(D dataset) throws TrainingException {
 		// Set model which is trained
 		this.algorithm.setModel(this);
 
@@ -68,7 +66,7 @@ public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends 
 	 * 
 	 * @return The model's training algorithm
 	 */
-	public ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends IBatchLearner<TARGETVALUETYPE, TimeSeriesInstance, DATASET>> getAlgorithm() {
+	public ATSCAlgorithm<L, V, D, ? extends IBatchLearner<V, TimeSeriesInstance<L>, D>> getAlgorithm() {
 		return algorithm;
 	}
 
@@ -78,8 +76,7 @@ public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends 
 	 * @param algorithm
 	 *            The algorithm object used to maintain the model's parameters.
 	 */
-	public void setAlgorithm(
-			ATSCAlgorithm<TARGETTYPE, TARGETVALUETYPE, DATASET, ? extends IBatchLearner<TARGETVALUETYPE, TimeSeriesInstance, DATASET>> algorithm) {
+	public void setAlgorithm(ATSCAlgorithm<L, V, D, ? extends IBatchLearner<V, TimeSeriesInstance<L>, D>> algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -87,9 +84,9 @@ public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends 
 	 * {@inheritDoc ABatchLearner#predict(jaicore.ml.core.dataset.IDataset)}
 	 */
 	@Override
-	public List<TARGETVALUETYPE> predict(DATASET dataset) throws PredictionException {
-		final List<TARGETVALUETYPE> result = new ArrayList<>();
-		for (TimeSeriesInstance inst : dataset) {
+	public List<V> predict(D dataset) throws PredictionException {
+		final List<V> result = new ArrayList<>();
+		for (TimeSeriesInstance<L> inst : dataset) {
 			result.add(this.predict(inst));
 		}
 		return result;
@@ -100,8 +97,7 @@ public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends 
 	 */
 	@Override
 	public IPredictiveModelConfiguration getConfiguration() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -109,7 +105,6 @@ public abstract class TSClassifier<TARGETTYPE, TARGETVALUETYPE, DATASET extends 
 	 */
 	@Override
 	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException();
 	}
 }
