@@ -54,10 +54,10 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 			// pick the next node to process
 			Entry<Interval[], Tree> toProcess = stack.pop();
 			Tree nextTree = toProcess.getValue();
-			double threshold = nextTree.getSplitPoint();
-			int attribute = nextTree.getAttribute();
-			Tree[] children = nextTree.getSuccessors();
-			double[] classDistribution = nextTree.getClassDistribution();
+			double threshold = nextTree.getM_SplitPoint();
+			int attribute = nextTree.getM_Attribute();
+			Tree[] children = nextTree.getM_Successors();
+			double[] classDistribution = nextTree.getM_Classdistribution();
 			// process node
 			if (attribute == -1) {
 				// node is a leaf
