@@ -65,8 +65,7 @@ public final class EvaluationUtils {
 		filter.setInputFormat(insts);
 		Instances removedClassInstances = Filter.useFilter(insts, filter);
 
-		((SimpleKMeans) clusterer.getClusterer())
-				.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
+		((SimpleKMeans) clusterer.getClusterer()).setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
 
 		clusterer.buildClusterer(removedClassInstances);
 
@@ -98,8 +97,7 @@ public final class EvaluationUtils {
 
 			kernelFilter.setKernel(kernel);
 			clusterer.setFilter(kernelFilter);
-			((SimpleKMeans) clusterer.getClusterer())
-					.setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
+			((SimpleKMeans) clusterer.getClusterer()).setOptions(new String[] { "-N", String.valueOf(insts.classAttribute().numValues()) });
 
 			clusterer.buildClusterer(removedClassInstances);
 
@@ -107,8 +105,7 @@ public final class EvaluationUtils {
 			clusterEval.setClusterer(clusterer);
 			clusterEval.evaluateClusterer(insts);
 
-			double currAcc = predictAccuracy(insts, clusterEval.getClassesToClusters(),
-					clusterEval.getClusterAssignments());
+			double currAcc = predictAccuracy(insts, clusterEval.getClassesToClusters(), clusterEval.getClusterAssignments());
 			maxScore = Math.max(maxScore, currAcc);
 		}
 
@@ -136,9 +133,7 @@ public final class EvaluationUtils {
 			try {
 				maxScore = Math.max(maxScore, performLDA(insts));
 			} catch (Exception e) {
-				logger.warn("Could not calculate the LDA score for kernel " + kernel.getClass().getSimpleName()
-						+ " due to the following exception: " + e.getMessage() + " in (" + e.getClass().getSimpleName()
-						+ ").");
+				logger.warn("Could not calculate the LDA score for kernel " + kernel.getClass().getSimpleName() + " due to the following exception: " + e.getMessage() + " in (" + e.getClass().getSimpleName() + ").");
 				maxScore = Math.max(maxScore, 0d);
 			}
 		}
@@ -158,8 +153,7 @@ public final class EvaluationUtils {
 	 *            Assignments of the instances to the clusters
 	 * @return
 	 */
-	public static double predictAccuracy(final Instances instances, final int[] classesToClusters,
-			final double[] clusterAssignments) {
+	public static double predictAccuracy(final Instances instances, final int[] classesToClusters, final double[] clusterAssignments) {
 		if (instances.numInstances() != clusterAssignments.length) {
 			throw new IllegalArgumentException("Amount of instances must be equal to cluster assignments.");
 		}
@@ -173,7 +167,7 @@ public final class EvaluationUtils {
 				correct++;
 			}
 		}
-		if(total > 0) {
+		if (total > 0) {
 			return correct / total;
 		} else {
 			return 0.0;
@@ -213,20 +207,17 @@ public final class EvaluationUtils {
 		}
 		for (int i = 0; i < classes; i++) {
 			c.getRow(i).divi(classCounts[i] + 1);
-			if (c.getRow(i).norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
-					&& c.getRow(i).norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
+			if (c.getRow(i).norm2Number().doubleValue() >= DOUBLE_ZERO_PREC && c.getRow(i).norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
 				c.getRow(i).divi(c.getRow(i).norm2Number());
 			}
 		}
 
 		double loss = 0;
 		for (int i = 0; i < batch.numInstances(); i++) {
-			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
-					batch.get(i).toDoubleArray().length - 1);
+			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0, batch.get(i).toDoubleArray().length - 1);
 			INDArray fi = Nd4j.create(instValues);
 			fi.muli(alpha);
-			if (fi.norm2Number().doubleValue() >= DOUBLE_ZERO_PREC
-					&& fi.norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
+			if (fi.norm2Number().doubleValue() >= DOUBLE_ZERO_PREC && fi.norm2Number().doubleValue() >= -DOUBLE_ZERO_PREC) {
 				fi.divi(fi.norm2Number());
 			}
 
@@ -263,8 +254,7 @@ public final class EvaluationUtils {
 		INDArray labels = Nd4j.zeros(batch.numInstances(), 1);
 
 		for (int i = 0; i < batch.numInstances(); i++) {
-			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0,
-					batch.get(i).toDoubleArray().length - 1);
+			double[] instValues = Arrays.copyOfRange(batch.get(i).toDoubleArray(), 0, batch.get(i).toDoubleArray().length - 1);
 			INDArray fi = Nd4j.create(instValues);
 			features.getRow(i).addiRowVector(fi);
 			labels.putScalar(i, batch.get(i).classValue());
@@ -322,7 +312,6 @@ public final class EvaluationUtils {
 
 	public static double performLDA(final Instances instances) throws Exception {
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, .7f);
-
 		LDA lda = new LDA();
 		lda.buildClassifier(split.get(0));
 
@@ -355,8 +344,8 @@ public final class EvaluationUtils {
 				totalNumericCount++;
 			}
 		}
-		
-		if(totalNumericCount != 0) {
+
+		if (totalNumericCount != 0) {
 			varianceMean /= totalNumericCount;
 		}
 
@@ -374,7 +363,7 @@ public final class EvaluationUtils {
 	public static Function<Instances, Double> getBenchmarkFunctionByName(final String name) {
 		switch (name) {
 		case "Cluster":
-			return (data) -> {
+			return data -> {
 				try {
 					return 1 - performClustering(data);
 				} catch (Exception e1) {
@@ -392,11 +381,11 @@ public final class EvaluationUtils {
 				}
 			};
 		case "COCO":
-			return (data) -> calculateCOCOForBatch(data);
+			return data -> calculateCOCOForBatch(data);
 		case "COED":
-			return (data) -> calculateCOEDForBatch(data);
+			return data -> calculateCOEDForBatch(data);
 		case "LDA":
-			return (data) -> {
+			return data -> {
 				try {
 					return 1 - performLDA(data);
 				} catch (Exception e) {
@@ -427,22 +416,19 @@ public final class EvaluationUtils {
 		}
 	}
 
-
 	public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
 		return new KendallsCorrelation().correlation(ranking1, ranking2);
 	}
 
-	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
-			final int seed, final Logger logger, final int numCores)
-			throws Exception {
+	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test, final int seed, final Logger logger, final int numCores) throws Exception {
 
 		logger.debug("Starting ML-Plan execution. Training on {} instances with {} attributes.", training.numInstances(), training.numAttributes());
 
 		/* Initialize MLPlan using WEKA components */
 		MLPlanWekaBuilder builder = new MLPlanWekaBuilder();
 		MLPlanClassifierConfig config = ConfigFactory.create(MLPlanClassifierConfig.class);
-		config.setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, seed+"");
-		config.setProperty(MLPlanClassifierConfig.K_CPUS, numCores+"");
+		config.setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, seed + "");
+		config.setProperty(MLPlanClassifierConfig.K_CPUS, numCores + "");
 		config.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.1");
 		builder.withAlgorithmConfig(config);
 		builder.withTimeOut(new TimeOut(timeout, TimeUnit.SECONDS));
@@ -457,8 +443,7 @@ public final class EvaluationUtils {
 			return -1;
 		}
 
-		String solutionString = ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier().getClass().getName()
-				+ " | " + ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors();
+		String solutionString = ((MLPipeline) mlplan.getSelectedClassifier()).getBaseClassifier().getClass().getName() + " | " + ((MLPipeline) mlplan.getSelectedClassifier()).getPreprocessors();
 		logger.debug("Selected classifier: {}", solutionString);
 
 		/* evaluate solution produced by mlplan */
@@ -468,33 +453,32 @@ public final class EvaluationUtils {
 		return eval.pctCorrect();
 	}
 
-	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,
-			final int seed, final Logger logger) throws Exception {
-		return evaluateMLPlan(timeout, training, test, seed, logger,  1);
+	public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test, final int seed, final Logger logger) throws Exception {
+		return evaluateMLPlan(timeout, training, test, seed, logger, 1);
 	}
 
-	public static double evaluateMLPlan(final int timeout, final Instances instances, final double trainRatio,
-			final int seed, final Logger logger, final int numCores)
-			throws Exception {
+	public static double evaluateMLPlan(final int timeout, final Instances instances, final double trainRatio, final int seed, final Logger logger, final int numCores) throws Exception {
 
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, seed, trainRatio);
 
 		return evaluateMLPlan(timeout, split.get(0), split.get(1), seed, logger, numCores);
 	}
 
-	private static List<Map.Entry<Kernel, Instances>> getKernelsWithInstances(final Instances insts) throws Exception {
-		ArrayList<Map.Entry<Kernel, Instances>> result = new ArrayList<>();
-		Instances rbfInsts = new Instances(insts);
-		result.add(new AbstractMap.SimpleEntry<Kernel, Instances>(new RBFKernel(rbfInsts, 250007, 0.01), rbfInsts));
+	private static List<Map.Entry<Kernel, Instances>> getKernelsWithInstances(final Instances insts) throws ListKernelsFailedException {
+		try {
+			ArrayList<Map.Entry<Kernel, Instances>> result = new ArrayList<>();
+			Instances rbfInsts = new Instances(insts);
+			result.add(new AbstractMap.SimpleEntry<Kernel, Instances>(new RBFKernel(rbfInsts, 250007, 0.01), rbfInsts));
 
-		Instances poly2Insts = new Instances(insts);
-		result.add(new AbstractMap.SimpleEntry<Kernel, Instances>(new PolyKernel(poly2Insts, 250007, 2, false),
-				poly2Insts));
+			Instances poly2Insts = new Instances(insts);
+			result.add(new AbstractMap.SimpleEntry<Kernel, Instances>(new PolyKernel(poly2Insts, 250007, 2, false), poly2Insts));
 
-		Instances poly3Insts = new Instances(insts);
-		result.add(new AbstractMap.SimpleEntry<Kernel, Instances>(new PolyKernel(poly3Insts, 250007, 2, false),
-				poly3Insts));
+			Instances poly3Insts = new Instances(insts);
+			result.add(new AbstractMap.SimpleEntry<Kernel, Instances>(new PolyKernel(poly3Insts, 250007, 2, false), poly3Insts));
 
-		return result;
+			return result;
+		} catch (Exception e) {
+			throw new ListKernelsFailedException("Could not list all the kernels for the given dataset.", e);
+		}
 	}
 }

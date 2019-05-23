@@ -31,14 +31,12 @@ import weka.filters.unsupervised.attribute.StringToNominal;
 
 public class DatabaseConnectorImpl implements DatabaseConnector {
 
-	private static boolean TABLE_EXISTS_WORKAROUND = true;
+	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConnectorImpl.class);
 
-	private static Logger LOG = LoggerFactory.getLogger(DatabaseConnectorImpl.class);
+	private static final boolean TABLE_EXISTS_WORKAROUND = true;
 
 	private Database db;
-
 	private SQLAdapter sqlAdapter;
-
 	private Set<String> createdTableNames;
 
 	public DatabaseConnectorImpl(Database db) {
@@ -67,16 +65,15 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			// Create feature tables (if not already existent)
 			for (AbstractFeature feature : features) {
 				if (TABLE_EXISTS_WORKAROUND) {
-					LOG.debug("Skip check whether Feature table for {} exists", feature);
+					LOGGER.debug("Skip check whether Feature table for {} exists", feature);
 					createFeatureTable(feature);
 					continue;
 				}
 				if (!featureTableExists(feature)) {
-					LOG.debug("Feature table for {} does not exist => Creating", feature);
+					LOGGER.debug("Feature table for {} does not exist => Creating", feature);
 					createFeatureTable(feature);
 				} else {
-					LOG.debug("Feature table for {} with name {} already exists", feature,
-							SqlUtils.getTableNameForFeature(feature));
+					LOGGER.debug("Feature table for {} with name {} already exists", feature, SqlUtils.getTableNameForFeature(feature));
 				}
 			}
 
@@ -92,13 +89,12 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			}
 			// join with target table to get the target attribute
 			Table targetTable = DBUtils.getTargetTable(db);
-			autofe.db.model.database.Attribute primaryKey = DBUtils.getPrimaryKey(targetTable, db);
+			autofe.db.model.database.Attribute primaryKey = DBUtils.getPrimaryKey(targetTable);
 			autofe.db.model.database.Attribute target = DBUtils.getTargetAttribute(db);
-			sql.append(String.format(" NATURAL JOIN (SELECT %1$s, %2$s FROM %3$s) TARGET", primaryKey.getName(),
-					target.getName(), targetTable.getName()));
+			sql.append(String.format(" NATURAL JOIN (SELECT %1$s, %2$s FROM %3$s) TARGET", primaryKey.getName(), target.getName(), targetTable.getName()));
 
 			instances = setupInstances(features, target);
-			LOG.debug("Loading instances from DB using sql: {}", sql);
+			LOGGER.debug("Loading instances from DB using sql: {}", sql);
 			ResultSet rs = sqlAdapter.getResultsOfQuery(sql.toString());
 			while (rs.next()) {
 				Instance instance = createInstance(rs, features, target, instances);
@@ -108,8 +104,8 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			instances = finalizeInstances(instances);
 
 		} catch (Exception e) {
-			LOG.error("Cannot get instances from database", e);
-			throw new RuntimeException("Cannot get instances from database", e);
+			LOGGER.error("Cannot get instances from database", e);
+			throw new RetrieveInstancesFromDatabaseFailedException("Cannot get instances from database", e);
 		}
 		return instances;
 	}
@@ -136,7 +132,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			numericToNominal.setOptions(options);
 			toReturn = Filter.useFilter(toReturn, numericToNominal);
 		}
-		
+
 		return toReturn;
 	}
 
@@ -152,7 +148,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		Table targetTable = DBUtils.getTargetTable(db);
 		Table featureTable = DBUtils.getAttributeTable(feature.getParent(), db);
 		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, featureTable, db);
-		LOG.debug("Join relations from {} to {} are {}", targetTable.getName(), featureTable.getName(), joinRelations);
+		LOGGER.debug("Join relations from {} to {} are {}", targetTable.getName(), featureTable.getName(), joinRelations);
 		String featureSql = SqlUtils.generateForwardSql(joinRelations, feature, db);
 		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}
@@ -161,14 +157,14 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		Table targetTable = DBUtils.getTargetTable(db);
 		Table toTable = DBUtils.getTableByName(feature.getPath().getLastTableName(), db);
 		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, toTable, db);
-		LOG.debug("Join relations from {} to {} are {}", targetTable.getName(), toTable.getName(), joinRelations);
+		LOGGER.debug("Join relations from {} to {} are {}", targetTable.getName(), toTable.getName(), joinRelations);
 		String featureSql = SqlUtils.generateBackwardSql(joinRelations, feature, db);
 		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}
 
 	private void createTable(String tableName, String featureSql) throws SQLException {
 		String sql = String.format("CREATE TABLE IF NOT EXISTS `%s` AS %s", tableName, featureSql);
-		LOG.debug("Creating feature table using statement {}", sql);
+		LOGGER.debug("Creating feature table using statement {}", sql);
 		sqlAdapter.update(sql, Collections.emptyList());
 		createdTableNames.add(tableName);
 	}
@@ -191,7 +187,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			try {
 				deleteTable(tableName);
 			} catch (SQLException e) {
-				LOG.error("Cannot delete table {}", tableName);
+				LOGGER.error("Cannot delete table {}", tableName);
 			}
 		}
 
@@ -210,7 +206,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			} else if (feature.getType() == AttributeType.NUMERIC) {
 				wekaAttributes.add(new Attribute(feature.getName(), false));
 			} else {
-				throw new RuntimeException("Unsupported attribute type " + feature.getType());
+				throw new UnsupportedAttributeTypeException("Unsupported attribute type " + feature.getType());
 			}
 		}
 
@@ -220,18 +216,16 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		} else if (target.getType() == AttributeType.NUMERIC) {
 			wekaAttributes.add(new Attribute(target.getName(), false));
 		} else {
-			throw new RuntimeException("Unsupported attribute type for target: " + target.getType());
+			throw new UnsupportedAttributeTypeException("Unsupported attribute type for target " + target.getType());
 		}
 
-		// TODO: How to set name and capacity?
-		Instances instances = new Instances("Name", wekaAttributes, 1000);
+		Instances instances = new Instances("Name", wekaAttributes, 0);
 		instances.setClassIndex(wekaAttributes.size() - 1);
 
 		return instances;
 	}
 
-	private Instance createInstance(ResultSet rs, List<AbstractFeature> features,
-			autofe.db.model.database.Attribute target, Instances instances) throws SQLException {
+	private Instance createInstance(ResultSet rs, List<AbstractFeature> features, autofe.db.model.database.Attribute target, Instances instances) throws SQLException {
 		Instance instance = new DenseInstance(features.size() + 1);
 		instance.setDataset(instances);
 		for (int i = 0; i < features.size(); i++) {
@@ -247,7 +241,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 					instance.setValue(i, value);
 				}
 			} else {
-				throw new RuntimeException("Unsupoorted attribute type " + feature.getType());
+				throw new UnsupportedAttributeTypeException("Unsupported attribute type " + feature.getType());
 			}
 		}
 
@@ -259,7 +253,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		} else if (target.getType() == AttributeType.NUMERIC) {
 			instance.setClassValue(rs.getDouble(features.size() + 2));
 		} else {
-			throw new RuntimeException("Unsupoorted attribute type for target: " + target.getType());
+			throw new UnsupportedAttributeTypeException("Unsupported attribute type for target " + target.getType());
 		}
 
 		return instance;

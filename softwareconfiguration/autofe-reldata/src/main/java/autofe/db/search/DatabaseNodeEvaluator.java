@@ -157,8 +157,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		try {
 			return benchmarkFunction.apply(instances);
 		} catch (Exception e) {
-
-			throw new RuntimeException("Cannot evaluate instances", e);
+			throw new DatasetEvaluationFailedException("Cannot evaluate instances", e);
 		}
 	}
 

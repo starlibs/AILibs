@@ -1,7 +1,6 @@
 package autofe.db.search;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +28,7 @@ import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNode, String> {
 
-	private static Logger LOG = LoggerFactory.getLogger(DatabaseSuccessorGenerator.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseSuccessorGenerator.class);
 
 	private Database db;
 
@@ -79,19 +78,15 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		// One successor node for each forward feature
 		for (Attribute att : forwardAttributes) {
-			if (node.containsAttribute(att)) {
-				continue;
-			}
 			// Do not select target attribute
-			if (att.isTarget()) {
+			if (node.containsAttribute(att) || att.isTarget()) {
 				continue;
 			}
 			if ((addOnlyLargerFeatures && att.compareTo(maxForwardAttribute) > 0) || !addOnlyLargerFeatures) {
 				List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
 				extended.add(new ForwardFeature(att));
 				DatabaseNode to = new DatabaseNode(extended, false);
-				toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Forward: " + att.getName(),
-						NodeType.OR));
+				toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Forward: " + att.getName(), NodeType.OR));
 			}
 		}
 
@@ -112,15 +107,14 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 				allFeatures.add(bf);
 			}
 			if (node.getSelectedFeatures().containsAll(allFeatures)) {
-				LOG.debug("Node already contains all possible features => Skip successor");
+				LOGGER.debug("Node already contains all possible features => Skip successor");
 				continue;
 			}
 
 			List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
 			extended.add(new BackwardFeature(att));
 			DatabaseNode to = new DatabaseNode(extended, false);
-			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Backward: " + att.getName(),
-					NodeType.OR));
+			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Backward: " + att.getName(), NodeType.OR));
 		}
 
 		// Exit edge
@@ -134,6 +128,9 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
 
 		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
+		if (intermediateFeature == null) {
+			throw new IllegalArgumentException("Intermediate feature must not be null.");
+		}
 
 		// Get last table
 		Table lastTable = DBUtils.getTableByName(intermediateFeature.getPath().getLastTableName(), db);
@@ -142,8 +139,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		}
 
 		// Compute possible next path elements
-		List<Tuple<AbstractRelationship, AggregationFunction>> nextPathElements = nextIntermediatePathElements(
-				lastTable);
+		List<Tuple<AbstractRelationship, AggregationFunction>> nextPathElements = nextIntermediatePathElements(lastTable);
 
 		List<Tuple<AbstractRelationship, AggregationFunction>> validNextPathElements = new ArrayList<>();
 
@@ -165,7 +161,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			}
 
 			if (node.getSelectedFeatures().containsAll(allFeatures)) {
-				LOG.info("Node already contains all possible features => Skip successor");
+				LOGGER.info("Node already contains all possible features => Skip successor");
 			} else {
 				validNextPathElements.add(nextPathElement);
 			}
@@ -183,10 +179,8 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			extendedintermediateFeature.setPath(extendedPath);
 			DatabaseNode extendedNode = new DatabaseNode(extendedFeatures, false);
 			AbstractRelationship ar = nextPathElement.getT();
-			String description = String.format("Intermediate: <[%s -> %s], %s>", ar.getFrom().getName(),
-					ar.getTo().getName(), nextPathElement.getU());
-			toReturn.add(
-					new NodeExpansionDescription<DatabaseNode, String>(node, extendedNode, description, NodeType.OR));
+			String description = String.format("Intermediate: <[%s -> %s], %s>", ar.getFrom().getName(), ar.getTo().getName(), nextPathElement.getU());
+			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, extendedNode, description, NodeType.OR));
 		}
 
 		return toReturn;
@@ -200,19 +194,15 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		Set<BackwardRelationship> backwards = DBUtils.getBackwardsTo(lastTable, db);
 		Set<ForwardRelationship> forwards = DBUtils.getForwardsTo(lastTable, db);
 
-		// TODO: Add constraint that distance to target must not increase
-
 		for (BackwardRelationship br : backwards) {
 			for (AggregationFunction af : AggregationFunction.values()) {
-				Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<AbstractRelationship, AggregationFunction>(
-						br, af);
+				Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<>(br, af);
 				toReturn.add(toAdd);
 			}
 		}
 
 		for (ForwardRelationship fr : forwards) {
-			Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<AbstractRelationship, AggregationFunction>(
-					fr, null);
+			Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<>(fr, null);
 			toReturn.add(toAdd);
 		}
 
@@ -221,8 +211,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 	private BackwardFeature getIntermediateFeature(List<AbstractFeature> features) {
 		for (AbstractFeature feature : features) {
-			if (feature instanceof BackwardFeature
-					&& DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
+			if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
 				return (BackwardFeature) feature;
 			}
 		}

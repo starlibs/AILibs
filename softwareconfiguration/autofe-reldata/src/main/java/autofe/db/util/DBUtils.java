@@ -30,7 +30,11 @@ import autofe.db.model.relation.ForwardRelationship;
 
 public class DBUtils {
 
-	private static Logger LOG = LoggerFactory.getLogger(DBUtils.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DBUtils.class);
+
+	private DBUtils() {
+		// prevent instantiation of this util class.
+	}
 
 	public static Table getTargetTable(Database db) {
 		for (Table t : db.getTables()) {
@@ -123,8 +127,7 @@ public class DBUtils {
 			fw.flush();
 			fw.close();
 		} catch (JsonIOException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("An error occured while serializing the database to a file", e);
 		}
 	}
 
@@ -134,20 +137,17 @@ public class DBUtils {
 		try {
 			db = gson.fromJson(new FileReader(path), Database.class);
 		} catch (JsonSyntaxException | JsonIOException | FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("An error occured while deserializing the database from a file", e);
 		}
 		return db;
 	}
 
 	public static String serializeToString(Database db) {
-		System.out.println(db);
 		Gson gson = initGson();
 		try {
 			return gson.toJson(db);
 		} catch (JsonIOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("An error occured while serializing the database to a String", e);
 		}
 		return null;
 	}
@@ -158,16 +158,13 @@ public class DBUtils {
 		try {
 			db = gson.fromJson(serialized, Database.class);
 		} catch (JsonSyntaxException | JsonIOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("An error occured while deserializing the database from a string", e);
 		}
 		return db;
 	}
 
 	private static Gson initGson() {
-		Gson gson = new GsonBuilder().registerTypeAdapter(AbstractRelationship.class, new InterfaceAdapter<>())
-				.create();
-		return gson;
+		return new GsonBuilder().registerTypeAdapter(AbstractRelationship.class, new InterfaceAdapter<>()).create();
 	}
 
 	public static Database clone(Database db) {
@@ -214,14 +211,10 @@ public class DBUtils {
 		relationship.setContext(db);
 		Table lastTable = relationship.getFrom();
 		Set<Table> forwardReachable = getForwardReachableTables(getTargetTable(db), db);
-		if ((!lastTable.isTarget()) && !(forwardReachable.contains(lastTable))) {
-			return true;
-		}
-
-		return false;
+		return ((!lastTable.isTarget()) && !(forwardReachable.contains(lastTable)));
 	}
 
-	public static Attribute getPrimaryKey(Table table, Database db) {
+	public static Attribute getPrimaryKey(Table table) {
 		for (Attribute attribute : table.getColumns()) {
 			if (attribute.isPrimaryKey()) {
 				return attribute;
@@ -232,6 +225,10 @@ public class DBUtils {
 
 	public static Attribute getTargetAttribute(Database db) {
 		Table targetTable = getTargetTable(db);
+		if (targetTable == null) {
+			throw new IllegalArgumentException("The target table must not be null");
+		}
+
 		for (Attribute attribute : targetTable.getColumns()) {
 			if (attribute.isTarget()) {
 				return attribute;
@@ -241,7 +238,6 @@ public class DBUtils {
 	}
 
 	public static List<ForwardRelationship> getJoinTables(Table from, Table to, Database db) {
-		// TODO: Avoid cycles!
 		Map<Table, List<ForwardRelationship>> paths = new HashMap<>();
 		for (ForwardRelationship fr : getForwardsFrom(from, db)) {
 			addJoinTable(new ArrayList<>(), fr, db, paths);
@@ -249,8 +245,7 @@ public class DBUtils {
 		return paths.get(to);
 	}
 
-	private static void addJoinTable(List<ForwardRelationship> currentPath, ForwardRelationship currentRelationship,
-			Database db, Map<Table, List<ForwardRelationship>> paths) {
+	private static void addJoinTable(List<ForwardRelationship> currentPath, ForwardRelationship currentRelationship, Database db, Map<Table, List<ForwardRelationship>> paths) {
 		currentRelationship.setContext(db);
 		List<ForwardRelationship> extendedPath = new ArrayList<>(currentPath);
 		extendedPath.add(currentRelationship);
