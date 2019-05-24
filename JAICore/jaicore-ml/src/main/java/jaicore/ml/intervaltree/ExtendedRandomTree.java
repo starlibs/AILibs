@@ -346,32 +346,26 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 		int attribute = node.getM_Attribute();
 		Tree[] children = node.getM_Successors();
 
-		// check if any child is leaf and has empty class distribution, if so add
-		// the current node
-
+		// check if any child is leaf and has empty class distribution, if so add the current node
 		// if node is leaf add partition to the map or
 		if (attribute == -1) {
 			this.leaves.add(node);
 			this.partitioning.put(node, subSpace);
 		}
-		// if the split attribute is categorical, remove all but one from the
-		// feature space and continue
+		// if the split attribute is categorical, remove all but one from the feature space and continue
 		else if (subSpace.getFeatureDomain(attribute) instanceof CategoricalFeatureDomain) {
 			for (int i = 0; i < children.length; i++) {
 				if (children[i].getM_Classdistribution() == null && children[i].getM_Attribute() == -1) {
 					this.mapForEmptyLeaves.put(children[i], node.getM_Classdistribution()[0]);
 				}
-				// important! if the children are leaves and do not contain a class
-				// distribution, treat this node as a leaf. If the split that leads
-				// a leaf happens on a categorical feature, the leaf does not contain
-				// a class distribution in the WEKA RandomTree
+				// important! if the children are leaves and do not contain a class distribution, treat this node as a leaf. If the split that leads
+				// a leaf happens on a categorical feature, the leaf does not contain a class distribution in the WEKA RandomTree
 				FeatureSpace childSubSpace = new FeatureSpace(subSpace);
 				((CategoricalFeatureDomain) childSubSpace.getFeatureDomain(attribute)).setValues(new double[] { i });
 				this.computePartitioning(childSubSpace, children[i]);
 			}
 		}
-		// if the split attribute is numeric, set the new interval ranges of the
-		// resulting feature space accordingly and continue
+		// if the split attribute is numeric, set the new interval ranges of the resulting feature space accordingly and continue
 		else if (subSpace.getFeatureDomain(attribute) instanceof NumericFeatureDomain) {
 			FeatureSpace leftSubSpace = new FeatureSpace(subSpace);
 			((NumericFeatureDomain) leftSubSpace.getFeatureDomain(attribute)).setMax(splitPoint);
