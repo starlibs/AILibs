@@ -26,7 +26,6 @@ import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.util.DBUtils;
 import jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.travesaltree.Node;
 import jaicore.search.model.travesaltree.NodeExpansionDescription;
 import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -41,17 +40,11 @@ public class SearchTest {
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator);
 
-		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(
-				generator, evaluator);
+		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, evaluator);
 
-		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(
-				tree);
+		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(tree);
 		search.setTimeoutForComputationOfF(60000, node -> 100.0);
 
-		// TODO: Add graph visualizer
-		// VisualizationWindow<?, ?> window = new VisualizationWindow<>(search);
-		// window.setTooltipGenerator(new NodeTooltipGenerator<>(new
-		// TFDTooltipGenerator<>()));
 		SearchGraphPath<DatabaseNode, String> solution = null;
 		while ((solution = search.nextSolutionCandidate()) != null) {
 			System.out.println(solution.getNodes().get(solution.getNodes().size() - 1));
@@ -67,7 +60,7 @@ public class SearchTest {
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(6, successors.size());
 
-		String descriptions = concatExpansionDescriptions(successors);
+		String descriptions = this.concatExpansionDescriptions(successors);
 
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
@@ -100,7 +93,7 @@ public class SearchTest {
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(4, successors.size());
 
-		String descriptions = concatExpansionDescriptions(successors);
+		String descriptions = this.concatExpansionDescriptions(successors);
 
 		// Forward features
 		assertFalse(descriptions.contains("Forward: Balance"));
@@ -138,7 +131,7 @@ public class SearchTest {
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(6, successors.size());
 
-		String descriptions = concatExpansionDescriptions(successors);
+		String descriptions = this.concatExpansionDescriptions(successors);
 
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));
@@ -158,7 +151,7 @@ public class SearchTest {
 
 	}
 
-	private String concatExpansionDescriptions(Collection<NodeExpansionDescription<DatabaseNode, String>> successors) {
+	private String concatExpansionDescriptions(final Collection<NodeExpansionDescription<DatabaseNode, String>> successors) {
 		StringBuilder sb = new StringBuilder();
 		for (NodeExpansionDescription<DatabaseNode, String> description : successors) {
 			sb.append(description.getAction());
@@ -182,7 +175,7 @@ public class SearchTest {
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(4, successors.size());
 
-		String descriptions = concatExpansionDescriptions(successors);
+		String descriptions = this.concatExpansionDescriptions(successors);
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], SUM>"));
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MIN>"));
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
@@ -216,7 +209,7 @@ public class SearchTest {
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(4, successors.size());
 
-		String descriptions = concatExpansionDescriptions(successors);
+		String descriptions = this.concatExpansionDescriptions(successors);
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], SUM>"));
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MIN>"));
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
@@ -234,7 +227,7 @@ public class SearchTest {
 		successors = sg.generateSuccessors(nextNode);
 
 		assertEquals(3, successors.size());
-		descriptions = concatExpansionDescriptions(successors);
+		descriptions = this.concatExpansionDescriptions(successors);
 		assertTrue(descriptions.contains("Intermediate: <[Customer -> Orders], SUM>"));
 		assertTrue(descriptions.contains("Intermediate: <[Customer -> Orders], MIN>"));
 		assertTrue(descriptions.contains("Intermediate: <[Customer -> Orders], MAX>"));
@@ -269,7 +262,7 @@ public class SearchTest {
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(3, successors.size());
 
-		String descriptions = concatExpansionDescriptions(successors);
+		String descriptions = this.concatExpansionDescriptions(successors);
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], SUM>"));
 		assertTrue(descriptions.contains("Intermediate: <[Orders -> Product], MIN>"));
 		assertFalse(descriptions.contains("Intermediate: <[Orders -> Product], MAX>"));
@@ -326,7 +319,7 @@ public class SearchTest {
 		Collection<NodeExpansionDescription<DatabaseNode, String>> successors = sg.generateSuccessors(node);
 		assertEquals(5, successors.size());
 
-		String descriptions = concatExpansionDescriptions(successors);
+		String descriptions = this.concatExpansionDescriptions(successors);
 
 		// Forward features
 		assertTrue(descriptions.contains("Forward: Balance"));

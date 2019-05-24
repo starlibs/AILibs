@@ -1,44 +1,24 @@
 package autofe.db.configuration;
 
-public class DatabaseAutoFeConfiguration {
+import org.aeonbits.owner.Mutable;
 
-	private final int randomCompletionPathLength;
+public interface DatabaseAutoFeConfiguration extends Mutable {
 
-	private final String evaluationFunction;
+	public static final String K_RANDOM_COMPLETION_PATH_LENGTH = "randomcompletion_pathlength";
+	public static final String K_EVALUATION_FUNCTION = "evaluationfunction";
+	public static final String K_SEED = "seed";
+	public static final String K_TIMEOUT = "timeout";
 
-	private final long seed;
+	@Key(K_RANDOM_COMPLETION_PATH_LENGTH)
+	public int getRandomCompletionPathLength();
 
-	private final int timeoutInMs;
+	@Key(K_EVALUATION_FUNCTION)
+	public String getEvaluationFunction();
 
-	public DatabaseAutoFeConfiguration(int randomCompletionPathLength, String evaluationFunction, long seed,
-			int timeoutInMs) {
-		this.randomCompletionPathLength = randomCompletionPathLength;
-		this.evaluationFunction = evaluationFunction;
-		this.seed = seed;
-		this.timeoutInMs = timeoutInMs;
-	}
+	@Key(K_SEED)
+	public long getSeed();
 
-	public int getRandomCompletionPathLength() {
-		return randomCompletionPathLength;
-	}
-
-	public String getEvaluationFunction() {
-		return evaluationFunction;
-	}
-
-	public long getSeed() {
-		return seed;
-	}
-
-	public int getTimeoutInMs() {
-		return timeoutInMs;
-	}
-
-	@Override
-	public String toString() {
-		return "DatabaseAutoFeConfiguration [randomCompletionPathLength=" + randomCompletionPathLength
-				+ ", evaluationFunction=" + evaluationFunction + ", seed=" + seed + ", timeoutInMs=" + timeoutInMs
-				+ "]";
-	}
+	@Key(K_TIMEOUT)
+	public int getTimeoutInMs();
 
 }

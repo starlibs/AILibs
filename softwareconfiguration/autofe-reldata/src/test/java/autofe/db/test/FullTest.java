@@ -2,8 +2,11 @@ package autofe.db.test;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
 import autofe.db.configuration.DatabaseAutoFeConfiguration;
@@ -27,7 +30,13 @@ public class FullTest {
 	@Test
 	public void doFullTest() throws InterruptedException {
 		// Phase 1: Select features
-		DatabaseAutoFeConfiguration config = new DatabaseAutoFeConfiguration(RC_PATHLENGTH, EVALUATION_FUNCTION, SEED, (int) (TIMEOUT_IN_MS * FE_FRACTION));
+		Map<String, Object> props = new HashMap<>();
+		props.put(DatabaseAutoFeConfiguration.K_EVALUATION_FUNCTION, EVALUATION_FUNCTION);
+		props.put(DatabaseAutoFeConfiguration.K_SEED, SEED);
+		props.put(DatabaseAutoFeConfiguration.K_RANDOM_COMPLETION_PATH_LENGTH, RC_PATHLENGTH);
+		props.put(DatabaseAutoFeConfiguration.K_TIMEOUT, TIMEOUT_IN_MS);
+		DatabaseAutoFeConfiguration config = ConfigFactory.create(DatabaseAutoFeConfiguration.class, props);
+
 		DatabaseProcessor dbProcessor = new DatabaseProcessor(config, DATABASE_MODEL_FILE);
 		dbProcessor.doFeatureSelection();
 
