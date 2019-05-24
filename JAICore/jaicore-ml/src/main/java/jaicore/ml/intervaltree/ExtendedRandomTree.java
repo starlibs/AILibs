@@ -1,7 +1,5 @@
 package jaicore.ml.intervaltree;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -325,7 +323,7 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 					LOGGER.warn("No prediction found anywhere!");
 					prediction = Double.NaN;
 				}
-				assertTrue(prediction != Double.NaN);
+				assert prediction != Double.NaN : "Prediction must not be NaN";
 				result += prediction * fractionOfSpaceForThisLeaf;
 				consistentWithAnyLeaf = true;
 			}
