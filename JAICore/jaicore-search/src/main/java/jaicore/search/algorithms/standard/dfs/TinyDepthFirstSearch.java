@@ -19,37 +19,37 @@ public class TinyDepthFirstSearch<N, A> {
 	private final N root;
 	private final Deque<N> path = new LinkedList<>();
 
-	public TinyDepthFirstSearch(GraphSearchInput<N, A> problem) {
+	public TinyDepthFirstSearch(final GraphSearchInput<N, A> problem) {
 		super();
 		this.root = ((SingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
 		this.goalTester = (NodeGoalTester<N>) problem.getGraphGenerator().getGoalTester();
 		this.successorGenerator = problem.getGraphGenerator().getSuccessorGenerator();
-		this.path.add(root);
+		this.path.add(this.root);
 	}
 
 	public void run() throws InterruptedException {
-		dfs(root);
+		this.dfs(this.root);
 	}
 
-	public void dfs(N head) throws InterruptedException {
-		if (goalTester.isGoal(head)) {
-			solutionPaths.add(new SearchGraphPath<>(new ArrayList<>(path)));
+	public void dfs(final N head) throws InterruptedException {
+		if (this.goalTester.isGoal(head)) {
+			this.solutionPaths.add(new SearchGraphPath<>(new ArrayList<>(this.path)));
 		}
 		else {
-			
+
 			/* expand node and invoke dfs for each child in order */
-			List<NodeExpansionDescription<N,A>> successors = successorGenerator.generateSuccessors(head);
+			List<NodeExpansionDescription<N,A>> successors = this.successorGenerator.generateSuccessors(head);
 			for (NodeExpansionDescription<N,A> succ : successors) {
 				N to = succ.getTo();
-				path.addFirst(to);
-				dfs(to);
-				N removed = path.removeFirst();
+				this.path.addFirst(to);
+				this.dfs(to);
+				N removed = this.path.removeFirst();
 				assert removed == to : "Expected " + to + " but removed " + removed;
 			}
 		}
 	}
 
 	public List<SearchGraphPath<N, A>> getSolutionPaths() {
-		return solutionPaths;
+		return this.solutionPaths;
 	}
 }

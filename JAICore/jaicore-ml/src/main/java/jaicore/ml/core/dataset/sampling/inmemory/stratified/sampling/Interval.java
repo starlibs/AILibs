@@ -6,30 +6,30 @@ public class Interval {
 
 	private double upperBound;
 
-	public Interval(double lowerBound, double upperBound) {
+	public Interval(final double lowerBound, final double upperBound) {
 		super();
 		this.lowerBound = lowerBound;
 		this.upperBound = upperBound;
 	}
 
 	public double getLowerBound() {
-		return lowerBound;
+		return this.lowerBound;
 	}
 
-	public void setLowerBound(double lowerBound) {
+	public void setLowerBound(final double lowerBound) {
 		this.lowerBound = lowerBound;
 	}
 
 	public double getUpperBound() {
-		return upperBound;
+		return this.upperBound;
 	}
 
-	public void setUpperBound(double upperBound) {
+	public void setUpperBound(final double upperBound) {
 		this.upperBound = upperBound;
 	}
 
-	public boolean contains(double d) {
-		return (d >= lowerBound && d <= upperBound);
+	public boolean contains(final double d) {
+		return (d >= this.lowerBound && d <= this.upperBound);
 	}
 
 	@Override
@@ -37,32 +37,34 @@ public class Interval {
 		final int prime = 31;
 		int result = 1;
 		long temp;
-		temp = Double.doubleToLongBits(lowerBound);
+		temp = Double.doubleToLongBits(this.lowerBound);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(upperBound);
+		temp = Double.doubleToLongBits(this.upperBound);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		Interval other = (Interval) obj;
-		if (Double.doubleToLongBits(lowerBound) != Double.doubleToLongBits(other.lowerBound))
+		if (Double.doubleToLongBits(this.lowerBound) != Double.doubleToLongBits(other.lowerBound)) {
 			return false;
-		if (Double.doubleToLongBits(upperBound) != Double.doubleToLongBits(other.upperBound))
-			return false;
-		return true;
+		}
+		return Double.doubleToLongBits(this.upperBound) == Double.doubleToLongBits(other.upperBound);
 	}
 
 	@Override
 	public String toString() {
-		return "[" + lowerBound + ";" + upperBound + "]";
+		return "[" + this.lowerBound + ";" + this.upperBound + "]";
 	}
 
 }

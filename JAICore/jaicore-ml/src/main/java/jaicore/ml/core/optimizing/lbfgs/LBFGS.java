@@ -8,20 +8,20 @@ package jaicore.ml.core.optimizing.lbfgs;
  *
  * @mainpage libLBFGS: a library of Limited-memory
  *           Broyden-Fletcher-Goldfarb-Shanno (L-BFGS)
- * 
+ *
  * @section intro Introduction
- * 
+ *
  *          This library is a C port of the implementation of Limited-memory
  *          Broyden-Fletcher-Goldfarb-Shanno (L-BFGS) method written by Jorge
  *          Nocedal. The original FORTRAN source code is available at:
  *          http://www.ece.northwestern.edu/~nocedal/lbfgs.html
- * 
+ *
  *          The L-BFGS method solves the unconstrainted minimization problem,
- * 
+ *
  *          <pre>
     minimize F(x), x = (x1, x2, ..., xN),
  *          </pre>
- * 
+ *
  *          only if the objective function F(x) and its gradient G(x) are
  *          computable. The well-known Newton's method requires computation of
  *          the inverse of the hessian matrix of the objective function.
@@ -31,7 +31,7 @@ package jaicore.ml.core.optimizing.lbfgs;
  *          by approximating the inverse hessian matrix by information from last
  *          m iterations. This innovation saves the memory storage and
  *          computational time drastically for large-scaled problems.
- * 
+ *
  *          Among the various ports of L-BFGS, this library provides several
  *          features: - <b>Optimization with L1-norm (Orthant-Wise
  *          Limited-memory Quasi-Newton (OWL-QN) method)</b>: In addition to
@@ -62,7 +62,7 @@ package jaicore.ml.core.optimizing.lbfgs;
  *          vector arithmetic operations on Intel/AMD processors. The library
  *          uses SSE for float values and SSE2 for double values. The SSE/SSE2
  *          optimization routine is disabled by default.
- * 
+ *
  *          This library is used by: -
  *          <a href="http://www.chokkan.org/software/crfsuite/">CRFsuite: A fast
  *          implementation of Conditional Random Fields (CRFs)</a> -
@@ -76,18 +76,18 @@ package jaicore.ml.core.optimizing.lbfgs;
  *          - Perl extension for L-BFGS</a> -
  *          <a href="http://www.cs.kuleuven.be/~bernd/yap-lbfgs/">YAP-LBFGS (an
  *          interface to call libLBFGS from YAP Prolog)</a>
- * 
+ *
  * @section download Download
- * 
+ *
  *          - <a href=
  *          "https://github.com/downloads/chokkan/liblbfgs/liblbfgs-1.10.tar.gz">Source
  *          code</a> - <a href="https://github.com/chokkan/liblbfgs">GitHub
  *          repository</a>
- * 
+ *
  *          libLBFGS is distributed under the term of the
  *          <a href="http://opensource.org/licenses/mit-license.php">MIT
  *          license</a>.
- * 
+ *
  * @section changelog History - Version 1.10 (2010-12-22): - Fixed compiling
  *          errors on Mac OS X; this patch was kindly submitted by Nic
  *          Schraudolph. - Reduced compiling warnings on Mac OS X; this patch
@@ -159,24 +159,24 @@ package jaicore.ml.core.optimizing.lbfgs;
  *          orthant-wise L-BFGS. - Implemented lbfgs_parameter_init() function.
  *          - Fixed several bugs. - API documentation. - Version 1.0
  *          (2007-09-20): - Initial release.
- * 
+ *
  * @section api Documentation
- * 
+ *
  *          - @ref liblbfgs_api "libLBFGS API"
- * 
+ *
  * @section sample Sample code
- * 
+ *
  * @include sample.c
- * 
+ *
  * @section ack Acknowledgements
- * 
+ *
  *          The L-BFGS algorithm is described in: - Jorge Nocedal. Updating
  *          Quasi-Newton Matrices with Limited Storage. <i>Mathematics of
  *          Computation</i>, Vol. 35, No. 151, pp. 773--782, 1980. - Dong C. Liu
  *          and Jorge Nocedal. On the limited memory BFGS method for large scale
  *          optimization. <i>Mathematical Programming</i> B, Vol. 45, No. 3, pp.
  *          503-528, 1989.
- * 
+ *
  *          The line search algorithms used in this implementation are described
  *          in: - John E. Dennis and Robert B. Schnabel. <i>Numerical Methods
  *          for Unconstrained Optimization and Nonlinear Equations</i>,
@@ -184,24 +184,24 @@ package jaicore.ml.core.optimizing.lbfgs;
  *          search algorithm with guaranteed sufficient decrease. <i>ACM
  *          Transactions on Mathematical Software (TOMS)</i>, Vol. 20, No. 3,
  *          pp. 286-307, 1994.
- * 
+ *
  *          This library also implements Orthant-Wise Limited-memory
  *          Quasi-Newton (OWL-QN) method presented in: - Galen Andrew and
  *          Jianfeng Gao. Scalable training of L1-regularized log-linear models.
  *          In <i>Proceedings of the 24th International Conference on Machine
  *          Learning (ICML 2007)</i>, pp. 33-40, 2007.
- * 
+ *
  *          Special thanks go to: - Yoshimasa Tsuruoka and Daisuke Okanohara for
  *          technical information about OWL-QN - Takashi Imamichi for the useful
  *          enhancements of the backtracking method - Kevin S. Van Horn, Nic
  *          Schraudolph, and Tamas Nepusz for bug fixes
- * 
+ *
  *          Finally I would like to thank the original author, Jorge Nocedal,
  *          who has been distributing the effieicnt and explanatory
  *          implementation in an open source licence.
- * 
+ *
  * @section reference Reference
- * 
+ *
  *          - <a href=
  *          "http://www.ece.northwestern.edu/~nocedal/lbfgs.html">L-BFGS</a> by
  *          Jorge Nocedal. - <a href=
@@ -220,7 +220,7 @@ public class LBFGS {
 
 	/**
 	 * Return values of lbfgs().
-	 * 
+	 *
 	 * Roughly speaking, a negative value indicates an error.
 	 */
 	public enum Status {
@@ -365,9 +365,9 @@ public class LBFGS {
 	 * function and its gradients when needed. A client program must implement this
 	 * function to evaluate the values of the objective function and its gradients,
 	 * given current values of variables.
-	 * 
+	 *
 	 * Protocol: receive x, fill in g, return objective.
-	 * 
+	 *
 	 * @param x
 	 *            The current values of variables.
 	 * @param g
@@ -392,15 +392,15 @@ public class LBFGS {
 	 * variables, function value, ||G||, etc) and to cancel the iteration process if
 	 * necessary. Implementation of a progress callback is optional: a user can pass
 	 * \c NULL if progress notification is not necessary.
-	 * 
+	 *
 	 * In addition, a user must preserve two requirements: - The number of variables
 	 * must be multiples of 16 (this is not 4). - The memory block of variable array
 	 * ::x must be aligned to 16.
-	 * 
+	 *
 	 * This algorithm terminates an optimization when:
-	 * 
+	 *
 	 * ||G|| < \epsilon \cdot \max(1, ||x||) .
-	 * 
+	 *
 	 * In this formula, ||.|| denotes the Euclidean norm.
 	 */
 
@@ -409,40 +409,41 @@ public class LBFGS {
 		private int additionalStatus;
 		private double objective = Double.MAX_VALUE;
 
-		public Result(Status s) {
-			status = s;
+		public Result(final Status s) {
+			this.status = s;
 		}
 
+		@Override
 		public String toString() {
-			return String.format("status=%s obj=%g", status, objective);
+			return String.format("status=%s obj=%g", this.status, this.objective);
 		}
 
 		public Status getStatus() {
-			return status;
+			return this.status;
 		}
 
-		public void setStatus(Status status) {
+		public void setStatus(final Status status) {
 			this.status = status;
 		}
 
 		public int getAdditionalStatus() {
-			return additionalStatus;
+			return this.additionalStatus;
 		}
 
-		public void setAdditionalStatus(int additionalStatus) {
+		public void setAdditionalStatus(final int additionalStatus) {
 			this.additionalStatus = additionalStatus;
 		}
 
 		public double getObjective() {
-			return objective;
+			return this.objective;
 		}
 
-		public void setObjective(double objective) {
+		public void setObjective(final double objective) {
 			this.objective = objective;
 		}
 	}
 
-	static double max3(double a, double b, double c) {
+	static double max3(final double a, final double b, final double c) {
 		return Math.max(Math.max(a, b), c);
 	}
 
@@ -463,7 +464,7 @@ public class LBFGS {
 	 * Use default parameters. See
 	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LBFGSParameters)}
 	 */
-	public static Result lbfgs(double[] init, Function procEvaluate) {
+	public static Result lbfgs(final double[] init, final Function procEvaluate) {
 		return lbfgs(init, procEvaluate, new LBFGSParameters());
 	}
 
@@ -471,7 +472,7 @@ public class LBFGS {
 	 * Use debug-friendly parameters & callback. See
 	 * {@link LBFGS#lfbgs(double[], Function, ProgressCallback, LBFGSParameters)}
 	 */
-	public static Result lbfgs(double[] init, int maxIter, Function procEvaluate) {
+	public static Result lbfgs(final double[] init, final int maxIter, final Function procEvaluate) {
 		LBFGSParameters p = new LBFGSParameters();
 		p.setMaxIterations(maxIter);
 		return lbfgs(init, procEvaluate, p);
@@ -502,7 +503,7 @@ public class LBFGS {
 	 *            use the default parameters.
 	 * @retval Result The status code and final objective.
 	 */
-	public static Result lbfgs(double[] x, Function procEvaluate, LBFGSParameters param) {
+	public static Result lbfgs(final double[] x, final Function procEvaluate, final LBFGSParameters param) {
 		int n = x.length;
 
 		Result ret = new Result(null);
@@ -671,8 +672,9 @@ public class LBFGS {
 		} else {
 			gnorm = LBFGSArrayUtils.vec2norm(pg);
 		}
-		if (xnorm < 1.0)
+		if (xnorm < 1.0) {
 			xnorm = 1.0;
+		}
 		if (gnorm / xnorm <= param.getEpsilon()) {
 			return new Result(Status.LBFGS_ALREADY_MINIMIZED);
 		}
@@ -717,8 +719,9 @@ public class LBFGS {
 			 * Convergence test. The criterion is given by the following formula: |g(x)| /
 			 * \max(1, |x|) < \epsilon
 			 */
-			if (xnorm < 1.0)
+			if (xnorm < 1.0) {
 				xnorm = 1.0;
+			}
 			if (gnorm / xnorm <= param.getEpsilon()) {
 				/* Convergence. */
 				ret.status = Status.LBFGS_SUCCESS;
@@ -831,10 +834,11 @@ public class LBFGS {
 
 	static class LineSearchBacktracking implements LineSearchProc {
 
-		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, // BTO: um i think this is
-																								// supposed to be a
-																								// singleton
-				final double[] xp, final double[] gp, double[] wp, CallbackDataT cd, LBFGSParameters param) {
+		@Override
+		public Status go(final int n, final double[] x, final double[] f, final double[] g, final double[] s, final double[] stp, // BTO: um i think this is
+				// supposed to be a
+				// singleton
+				final double[] xp, final double[] gp, final double[] wp, final CallbackDataT cd, final LBFGSParameters param) {
 			int count = 0;
 			double width;
 			double dg;
@@ -920,8 +924,9 @@ public class LBFGS {
 
 	static class LineSearchBacktrackingOwlqn implements LineSearchProc {
 
-		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, final double[] xp,
-				final double[] gp, double[] wp, CallbackDataT cd, LBFGSParameters param) {
+		@Override
+		public Status go(final int n, final double[] x, final double[] f, final double[] g, final double[] s, final double[] stp, final double[] xp,
+				final double[] gp, final double[] wp, final CallbackDataT cd, final LBFGSParameters param) {
 			int i = 0;
 			int count = 0;
 			double width = 0.5;
@@ -987,16 +992,16 @@ public class LBFGS {
 	static class LineSearchMorethuente implements LineSearchProc {
 
 		@Override
-		public Status go(int n, double[] x, double[] f, double[] g, double[] s, double[] stp, double[] xp, double[] gp,
-				double[] wa, CallbackDataT cd, LBFGSParameters param) {
+		public Status go(final int n, final double[] x, final double[] f, final double[] g, final double[] s, final double[] stp, final double[] xp, final double[] gp,
+				final double[] wa, final CallbackDataT cd, final LBFGSParameters param) {
 			assert false : "unimplemented";
-			return null;
+		return null;
 		}
 	}
 
 	/**
 	 * Find a minimizer of an interpolated cubic function.
-	 * 
+	 *
 	 * @param cm
 	 *            The minimizer of the interpolated cubic. BTO REMOVED, return
 	 *            instead
@@ -1013,7 +1018,7 @@ public class LBFGS {
 	 * @param du
 	 *            The value of f'(v).
 	 */
-	static double cubicMinimizer(double u, double fu, double du, double v, double fv, double dv) {
+	static double cubicMinimizer(final double u, final double fu, final double du, final double v, final double fv, final double dv) {
 		// #define CUBIC_MINIMIZER(cm, u, fu, du, v, fv, dv) \
 		double d = (v) - (u);
 		double theta = ((fu) - (fv)) * 3 / d + (du) + (dv);
@@ -1024,8 +1029,9 @@ public class LBFGS {
 		/* gamma = s*sqrt((theta/s)**2 - (du/s) * (dv/s)) */
 		double a = theta / s;
 		double gamma = s * Math.sqrt(a * a - ((du) / s) * ((dv) / s));
-		if ((v) < (u))
+		if ((v) < (u)) {
 			gamma = -gamma;
+		}
 		p = gamma - (du) + theta;
 		q = gamma - (du) + gamma + (dv);
 		r = p / q;
@@ -1034,7 +1040,7 @@ public class LBFGS {
 
 	/**
 	 * Find a minimizer of an interpolated cubic function.
-	 * 
+	 *
 	 * @param cm
 	 *            The minimizer of the interpolated cubic.
 	 * @param u
@@ -1055,8 +1061,8 @@ public class LBFGS {
 	 *            The minimum value.
 	 */
 	// #define CUBIC_MINIMIZER2(cm, u, fu, du, v, fv, dv, xmin, xmax) \
-	static double cubicMinimizer2(double u, double fu, double du, double v, double fv, double dv, double xmin,
-			double xmax) {
+	static double cubicMinimizer2(final double u, final double fu, final double du, final double v, final double fv, final double dv, final double xmin,
+			final double xmax) {
 		double d = (v) - (u);
 		double theta = ((fu) - (fv)) * 3 / d + (du) + (dv);
 		double p = Math.abs(theta);
@@ -1066,8 +1072,9 @@ public class LBFGS {
 		/* gamma = s*sqrt((theta/s)**2 - (du/s) * (dv/s)) */
 		double a = theta / s;
 		double gamma = s * Math.sqrt(Math.max(0, a * a - ((du) / s) * ((dv) / s)));
-		if ((u) < (v))
+		if ((u) < (v)) {
 			gamma = -gamma;
+		}
 		p = gamma - (dv) + theta;
 		q = gamma - (dv) + gamma + (du);
 		r = p / q;
@@ -1084,7 +1091,7 @@ public class LBFGS {
 
 	/**
 	 * Find a minimizer of an interpolated quadratic function.
-	 * 
+	 *
 	 * @return The minimizer of the interpolated quadratic.
 	 * @param u
 	 *            The value of one point, u.
@@ -1097,7 +1104,7 @@ public class LBFGS {
 	 * @param fv
 	 *            The value of f(v).
 	 */
-	static double quardMinimizer(double u, double fu, double du, double v, double fv) {
+	static double quardMinimizer(final double u, final double fu, final double du, final double v, final double fv) {
 		// #define QUARD_MINIMIZER(qm, u, fu, du, v, fv) \
 		double a = (v) - (u);
 		return (u) + (du) / (((fu) - (fv)) / a + (du)) / 2 * a;
@@ -1105,7 +1112,7 @@ public class LBFGS {
 
 	/**
 	 * Find a minimizer of an interpolated quadratic function.
-	 * 
+	 *
 	 * @param qm
 	 *            The minimizer of the interpolated quadratic.
 	 * @param u
@@ -1118,7 +1125,7 @@ public class LBFGS {
 	 *            The value of f'(v).
 	 */
 	// #define QUARD_MINIMIZER2(qm, u, du, v, dv) \
-	static double quardMinimizer2(double u, double du, double v, double dv) {
+	static double quardMinimizer2(final double u, final double du, final double v, final double dv) {
 		double a = (u) - (v);
 		return (v) + (dv) / ((dv) - (du)) * a;
 	}
@@ -1134,7 +1141,7 @@ public class LBFGS {
 		return norm;
 	}
 
-	static void owlqnPseudoGradient(double[] pg, final double[] x, final double[] g, final int n, final double c,
+	static void owlqnPseudoGradient(final double[] pg, final double[] x, final double[] g, final int n, final double c,
 			final int start, final int end) {
 		int i;
 
@@ -1169,7 +1176,7 @@ public class LBFGS {
 		}
 	}
 
-	static void owlqnProject(double[] d, final double[] sign, final int start, final int end) {
+	static void owlqnProject(final double[] d, final double[] sign, final int start, final int end) {
 		int i;
 
 		for (i = start; i < end; ++i) {

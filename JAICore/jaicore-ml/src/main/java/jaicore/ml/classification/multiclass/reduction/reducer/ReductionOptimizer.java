@@ -2,15 +2,19 @@ package jaicore.ml.classification.multiclass.reduction.reducer;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
-import java.util.Stack;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import jaicore.basic.MathExt;
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.WekaUtil;
 import jaicore.ml.classification.multiclass.reduction.EMCNodeType;
 import jaicore.ml.classification.multiclass.reduction.MCTreeNode;
@@ -30,28 +34,19 @@ public class ReductionOptimizer implements Classifier {
 
 	private final long seed;
 	private MCTreeNode root;
+	private Logger logger = LoggerFactory.getLogger(ReductionOptimizer.class);
 
-	public ReductionOptimizer(long seed) {
+	public ReductionOptimizer(final long seed) {
 		super();
 		this.seed = seed;
 	}
 
 	@Override
-	public void buildClassifier(Instances data) throws Exception {
-		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, seed, .6f);
+	public void buildClassifier(final Instances data) throws Exception {
+		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, this.seed, .6f);
 		Instances train = dataSplit.get(0);
-		Instances validate = dataSplit.get(1);
-		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<RestProblem, Decision, Double>(new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(seed), train), n -> getLossForClassifier(getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
-		, 0.1, false);
-
-//		VisualizationWindow<Node<RestProblem, Double>,Decision> window = new VisualizationWindow<>(search);
-//		window.setTooltipGenerator(new TooltipGenerator<Node<RestProblem, Double>>() {
-//
-//			@Override
-//			public String getTooltip(Node<RestProblem, Double> node) {
-//				return search.getFValue(node) + "<pre>" + getTreeFromSolution(node.externalPath(), data, false).toStringWithOffset() + "</pre>";
-//			}
-//		});
+		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<>(new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(this.seed), train), n -> this.getLossForClassifier(this.getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
+				, 0.1, false);
 
 		/* get best 20 solutions */
 		int i = 0;
@@ -59,27 +54,29 @@ public class ReductionOptimizer implements Classifier {
 		EvaluatedSearchGraphPath<RestProblem,Decision,Double> solution;
 		while ((solution = search.nextSolutionCandidate()) != null) {
 			solutions.add(solution);
-			if (i++ > 100)
+			if (i++ > 100) {
 				break;
+			}
 		}
-		System.out.println(solutions.size());
 
 		/* select */
-		EvaluatedSearchGraphPath<RestProblem,Decision,Double> bestSolution = solutions.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore())).get();
-		root = getTreeFromSolution(bestSolution.getNodes(), data, true);
-		root.buildClassifier(data);
-		System.out.println(root.toStringWithOffset());
-		System.out.println(bestSolution.getScore());
+		Optional<EvaluatedSearchGraphPath<RestProblem,Decision,Double>> bestSolution = solutions.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore()));
+		if (!bestSolution.isPresent()) {
+			this.logger.error("No solution found");
+			return;
+		}
+		this.root = this.getTreeFromSolution(bestSolution.get().getNodes(), data, true);
+		this.root.buildClassifier(data);
 	}
 
 	@Override
-	public double classifyInstance(Instance instance) throws Exception {
-		return root.classifyInstance(instance);
+	public double classifyInstance(final Instance instance) throws Exception {
+		return this.root.classifyInstance(instance);
 	}
 
 	@Override
-	public double[] distributionForInstance(Instance instance) throws Exception {
-		return root.distributionForInstance(instance);
+	public double[] distributionForInstance(final Instance instance) throws Exception {
+		return this.root.distributionForInstance(instance);
 	}
 
 	@Override
@@ -87,66 +84,67 @@ public class ReductionOptimizer implements Classifier {
 		return null;
 	}
 
-	private void completeTree(MCTreeNode tree) {
+	private void completeTree(final MCTreeNode tree) {
 
 		/* if the tree is not ready yet, complete it. The completion strategy is now just to set the node to "direct" with a random forest */
 		if (!tree.isCompletelyConfigured()) {
 			for (MCTreeNode node : tree) {
-				if (!node.getChildren().isEmpty())
+				if (!node.getChildren().isEmpty()) {
 					continue;
-				if (node.getContainedClasses().size() == 1)
+				}
+				if (node.getContainedClasses().size() == 1) {
 					continue;
+				}
 				node.setNodeType(EMCNodeType.DIRECT);
 				node.setBaseClassifier(new OneR());
 				for (int openClass : node.getContainedClasses()) {
 					try {
 						node.addChild(new MCTreeNodeLeaf(openClass));
 					} catch (Exception e) {
-						e.printStackTrace();
+						this.logger.error(LoggerUtil.getExceptionInfo(e));
 					}
 				}
 			}
 		}
 	}
 
-	private int getLossForClassifier(MCTreeNode tree, Instances data) {
+	private int getLossForClassifier(final MCTreeNode tree, final Instances data) {
 
-		completeTree(tree);
+		this.completeTree(tree);
 
 		synchronized (this) {
 			/* now eval the tree */
 			try {
 				DescriptiveStatistics stats = new DescriptiveStatistics();
 				for (int i = 0; i < 2; i++) {
-					List<Instances> split = (WekaUtil.getStratifiedSplit(data, seed + i, .6f));
+					List<Instances> split = (WekaUtil.getStratifiedSplit(data, this.seed + i, .6f));
 					tree.buildClassifier(split.get(0));
 
 					Evaluation eval = new Evaluation(data);
 					eval.evaluateModel(tree, split.get(1));
 					stats.addValue(eval.pctIncorrect());
 				}
-				int score = (int) Math.round((stats.getMean() * 100));
-				System.out.println(score);
-				return score;
+				return (int) Math.round((stats.getMean() * 100));
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				this.logger.error(LoggerUtil.getExceptionInfo(e));
 				return Integer.MAX_VALUE;
 			}
 		}
 
 	}
 
-	private MCTreeNode getTreeFromSolution(List<RestProblem> solution, Instances data, boolean mustBeComplete) {
-		List<Decision> decisions = solution.stream().filter(n -> n.getEdgeToParent() != null).map(n -> n.getEdgeToParent()).collect(Collectors.toList());
-		Stack<MCTreeNode> open = new Stack<>();
+	private MCTreeNode getTreeFromSolution(final List<RestProblem> solution, final Instances data, final boolean mustBeComplete) {
+		List<Decision> decisions = solution.stream().filter(n -> n.getEdgeToParent() != null).map(RestProblem::getEdgeToParent).collect(Collectors.toList());
+		Deque<MCTreeNode> open = new LinkedList<>();
 		Attribute classAttribute = data.classAttribute();
-		MCTreeNode root = new MCTreeNode(IntStream.range(0, classAttribute.numValues()).mapToObj(i -> i).collect(Collectors.toList()));
-		open.push(root);
+		MCTreeNode localRoot = new MCTreeNode(IntStream.range(0, classAttribute.numValues()).mapToObj(i -> i).collect(Collectors.toList()));
+		open.addFirst(localRoot);
 		for (Decision decision : decisions) {
-			MCTreeNode nodeToRefine = open.pop(); // by construction of the search space, this node should belong to the decision
-			if (nodeToRefine == null)
+			MCTreeNode nodeToRefine = open.removeFirst(); // by construction of the search space, this node should belong to the decision
+			if (nodeToRefine == null) {
 				throw new IllegalStateException("No node to apply the decision to! Apparently, there are more decisions for nodes than there are inner nodes.");
+			}
 
 			/* insert decision to the node */
 			nodeToRefine.setNodeType(decision.getClassificationType());
@@ -159,7 +157,7 @@ public class ReductionOptimizer implements Classifier {
 					try {
 						nodeToRefine.addChild(new MCTreeNodeLeaf(c));
 					} catch (Exception e) {
-						e.printStackTrace();
+						this.logger.error(LoggerUtil.getExceptionInfo(e));
 					}
 				}
 			} else {
@@ -171,10 +169,10 @@ public class ReductionOptimizer implements Classifier {
 					try {
 						nodeToRefine.addChild(new MCTreeNodeLeaf(classAttribute.indexOfValue(classesLft.get(0))));
 					} catch (Exception e) {
-						e.printStackTrace();
+						this.logger.error(LoggerUtil.getExceptionInfo(e));
 					}
 				} else {
-					MCTreeNode lft = new MCTreeNode(classesLft.stream().map(c -> classAttribute.indexOfValue(c)).collect(Collectors.toList()));
+					MCTreeNode lft = new MCTreeNode(classesLft.stream().map(classAttribute::indexOfValue).collect(Collectors.toList()));
 					nodeToRefine.addChild(lft);
 					addedLeftChild = true;
 					open.push(lft);
@@ -186,32 +184,25 @@ public class ReductionOptimizer implements Classifier {
 					try {
 						nodeToRefine.addChild(new MCTreeNodeLeaf(data.classAttribute().indexOfValue(classesRgt.get(0))));
 					} catch (Exception e) {
-						e.printStackTrace();
+						this.logger.error(LoggerUtil.getExceptionInfo(e));
 					}
 				} else {
-					MCTreeNode rgt = new MCTreeNode(classesRgt.stream().map(c -> classAttribute.indexOfValue(c)).collect(Collectors.toList()));
+					MCTreeNode rgt = new MCTreeNode(classesRgt.stream().map(classAttribute::indexOfValue).collect(Collectors.toList()));
 					nodeToRefine.addChild(rgt);
 					if (addedLeftChild) {
 						MCTreeNode lft = open.pop();
 						open.push(rgt);
 						open.push(lft);
-					} else
+					} else {
 						open.push(rgt);
+					}
 				}
 			}
 		}
 
-		if (mustBeComplete && !open.isEmpty())
+		if (mustBeComplete && !open.isEmpty()) {
 			throw new IllegalStateException("Not all nodes have been equipped with decisions!");
-		return root;
-	}
-
-	private double getAccuracy(Classifier c, Instances test) throws Exception {
-		int mistakes = 0;
-		for (Instance i : test) {
-			if (c.classifyInstance(i) != i.classValue())
-				mistakes++;
 		}
-		return MathExt.round(100 * (1 - mistakes * 1f / test.size()), 2);
+		return localRoot;
 	}
 }

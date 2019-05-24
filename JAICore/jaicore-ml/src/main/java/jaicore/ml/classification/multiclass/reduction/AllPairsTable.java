@@ -21,7 +21,7 @@ public class AllPairsTable {
 	private final Map<String, Map<String, Double>> separabilities = new HashMap<>();
 	private final int sum;
 
-	public AllPairsTable(Instances training, Instances validation, Classifier c) {
+	public AllPairsTable(final Instances training, final Instances validation, final Classifier c) {
 		Collection<String> classes = WekaUtil.getClassesActuallyContainedInDataset(training);
 		for (Collection<String> set : SetUtil.getAllPossibleSubsetsWithSize(classes, 2)) {
 			try {
@@ -37,59 +37,61 @@ public class AllPairsTable {
 				validationData.addAll(WekaUtil.getInstancesOfClass(validation, b));
 				Evaluation eval = new Evaluation(trainingData);
 				eval.evaluateModel(c, validationData);
-				
-				
-				if (!separabilities.containsKey(a))
-					separabilities.put(a, new HashMap<>());
-				separabilities.get(a).put(b, eval.pctCorrect() / 100);
+
+
+				if (!this.separabilities.containsKey(a)) {
+					this.separabilities.put(a, new HashMap<>());
+				}
+				this.separabilities.get(a).put(b, eval.pctCorrect() / 100);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		this.classCount = WekaUtil.getNumberOfInstancesPerClass(training);
-		sum = training.size();
-		System.out.println(separabilities);
+		this.sum = training.size();
 	}
-	
-	public double getSeparability(String c1, String c2) {
-		if (c1.equals(c2))
+
+	public double getSeparability(final String c1, final String c2) {
+		if (c1.equals(c2)) {
 			throw new IllegalArgumentException("Cannot separate a class from itself.");
-		if (c1.compareTo(c2) > 0)
-			return getSeparability(c2, c1);
-		return separabilities.get(c1).get(c2);
+		}
+		if (c1.compareTo(c2) > 0) {
+			return this.getSeparability(c2, c1);
+		}
+		return this.separabilities.get(c1).get(c2);
 	}
-	
-	public double getUpperBoundOnSeparability(Collection<String> classes) {
+
+	public double getUpperBoundOnSeparability(final Collection<String> classes) {
 		double max = 0;
 		for (Collection<String> pair : SetUtil.getAllPossibleSubsetsWithSize(classes, 2)) {
 			Iterator<String> i = pair.iterator();
 			String a = i.next();
 			String b = i.next();
-			double expectedContributionToError = (1 - getSeparability(a, b));
-			double relativeExpectedContributionToError = expectedContributionToError * (classCount.get(a) + classCount.get(b)) / (1f * sum);
+			double expectedContributionToError = (1 - this.getSeparability(a, b));
+			double relativeExpectedContributionToError = expectedContributionToError * (this.classCount.get(a) + this.classCount.get(b)) / (1f * this.sum);
 			max = Math.max(max, relativeExpectedContributionToError);
 		}
 		return 1 - max;
 	}
 
-	public double getAverageSeparability(Collection<String> classes) {
+	public double getAverageSeparability(final Collection<String> classes) {
 		DescriptiveStatistics stats = new DescriptiveStatistics();
 		for (Collection<String> pair : SetUtil.getAllPossibleSubsetsWithSize(classes, 2)) {
 			Iterator<String> i = pair.iterator();
 			String a = i.next();
 			String b = i.next();
-			stats.addValue(getSeparability(a, b));
+			stats.addValue(this.getSeparability(a, b));
 		}
 		return stats.getMean();
 	}
-	
-	public double getMultipliedSeparability(Collection<String> classes) {
+
+	public double getMultipliedSeparability(final Collection<String> classes) {
 		double seperability = 1;
 		for (Collection<String> pair : SetUtil.getAllPossibleSubsetsWithSize(classes, 2)) {
 			Iterator<String> i = pair.iterator();
 			String a = i.next();
 			String b = i.next();
-			seperability *= getSeparability(a, b);
+			seperability *= this.getSeparability(a, b);
 		}
 		return seperability;
 	}

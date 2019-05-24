@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import jaicore.basic.algorithm.IAlgorithmConfig;
 import org.aeonbits.owner.ConfigCache;
 
+import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.sets.SetUtil.Pair;
 import jaicore.ml.core.exception.PredictionException;
 import jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;

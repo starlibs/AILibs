@@ -30,10 +30,10 @@ import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProblem<T>, List<List<T>>> {
 
 	private class Node {
-		Node parent;
-		int defficiency;
-		int indexOfSet;
-		int indexOfValue;
+		private Node parent;
+		private int defficiency;
+		private int indexOfSet;
+		private int indexOfValue;
 
 		public Node() { }
 
@@ -102,12 +102,12 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case created: {
+		case created:
 			this.open.add(new Node(null, -1, 0, 0));
 			this.numCreatedNodes++;
 			return this.activate();
-		}
-		case active: {
+
+		case active:
 			this.checkAndConductTermination();
 			if (this.open.isEmpty()) {
 				return this.terminate();
@@ -167,7 +167,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			List<T> tuple = new ArrayList<>(this.currentTuple);
 			assert this.currentTuple.size() == this.numSets : "Tuple " + this.currentTuple + " should contain " + this.numSets + " elements but has " + this.currentTuple.size();
 			return new TupleOfCartesianProductFoundEvent<>(this.getId(), tuple);
-		}
+
 		default:
 			throw new IllegalStateException();
 		}
@@ -179,7 +179,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		while (this.hasNext()) {
 			AlgorithmEvent e = this.nextWithException();
 			if (e instanceof AlgorithmFinishedEvent) {
-				return null;
+				return new ArrayList<>();
 			} else if (e instanceof TupleOfCartesianProductFoundEvent) {
 				return ((TupleOfCartesianProductFoundEvent<T>) e).getTuple();
 			} else if (!(e instanceof AlgorithmInitializedEvent)) {

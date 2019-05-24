@@ -3,35 +3,42 @@ package jaicore.ml.core;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import jaicore.logging.LoggerUtil;
 import jaicore.ml.interfaces.LabeledInstance;
 
 @SuppressWarnings("serial")
 public class SimpleLabeledInstanceImpl extends ArrayList<Double> implements LabeledInstance<String> {
 
 	private String label;
+	private static final Logger logger = LoggerFactory.getLogger(SimpleLabeledInstanceImpl.class);
 
 	public SimpleLabeledInstanceImpl() {
 		super();
 	}
-	
-	public SimpleLabeledInstanceImpl(String json) throws IOException {
+
+	public SimpleLabeledInstanceImpl(final String json) throws IOException {
 		this(new ObjectMapper().readTree(json));
 	}
 
-	public SimpleLabeledInstanceImpl(JsonNode jsonNode) {
+	public SimpleLabeledInstanceImpl(final JsonNode jsonNode) {
 		this();
-		if (!jsonNode.has("attributes"))
+		if (!jsonNode.has("attributes")) {
 			throw new IllegalArgumentException("JSON representation has no attribute \"attributes\".");
-		if (!jsonNode.has("label"))
+		}
+		if (!jsonNode.has("label")) {
 			throw new IllegalArgumentException("JSON representation has no attribute \"label\".");
+		}
 		for (JsonNode val : jsonNode.get("attributes")) {
-			add(val.asDouble());
+			this.add(val.asDouble());
 		}
 		this.label = jsonNode.get("label").asText();
 	}
@@ -42,12 +49,13 @@ public class SimpleLabeledInstanceImpl extends ArrayList<Double> implements Labe
 		ObjectNode root = om.createObjectNode();
 		ArrayNode attributes = root.putArray("attributes");
 		root.put("label", this.label);
-		for (double d : this)
+		for (double d : this) {
 			attributes.add(d);
+		}
 		try {
 			return om.writeValueAsString(root);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			logger.error(LoggerUtil.getExceptionInfo(e));
 			return null;
 		}
 	}
@@ -76,24 +84,29 @@ public class SimpleLabeledInstanceImpl extends ArrayList<Double> implements Labe
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((label == null) ? 0 : label.hashCode());
+		result = prime * result + ((this.label == null) ? 0 : this.label.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		SimpleLabeledInstanceImpl other = (SimpleLabeledInstanceImpl) obj;
-		if (label == null) {
-			if (other.label != null)
+		if (this.label == null) {
+			if (other.label != null) {
 				return false;
-		} else if (!label.equals(other.label))
+			}
+		} else if (!this.label.equals(other.label)) {
 			return false;
+		}
 		return true;
 	}
 }

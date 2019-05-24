@@ -223,13 +223,13 @@ public class SetUtil {
 			}
 			i++;
 		}
-		Collection<Collection<T>> subsets = powerset(restList);
-		Collection<Collection<T>> toAdd = new ArrayList<Collection<T>>();
+		Collection<Collection<T>> toAdd = new ArrayList<>();
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException("Interrupted during calculation of power set");
 		}
+		Collection<Collection<T>> subsets = powerset(restList);
 		for (Collection<T> existingSubset : subsets) {
-			Collection<T> additionalList = new ArrayList<T>();
+			Collection<T> additionalList = new ArrayList<>();
 			additionalList.addAll(existingSubset);
 			additionalList.add(baseElement);
 			toAdd.add(additionalList);

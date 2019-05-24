@@ -4,7 +4,7 @@ package jaicore.ml.learningcurve.extrapolation.lcnet;
  * This class handles the connection to a server that runs pybnn.
  * This way we can use the LCNet from pybnn to get pointwise estimates
  * of learning curves for certain classifiers and configurations of a classifier.
- * 
+ *
  * @author noni4
  */
 
@@ -32,11 +32,13 @@ public class LCNetClient {
 	// TODO Should not be hardcoded like this
 	private static final String SERVER_ADDRESS = "http://localhost:5001/";
 
-	public void train(int[] xValues, double[] yValues, int dataSetSize, double[][] configurations, String identifier) {
-		if (xValues.length != yValues.length)
+	public void train(final int[] xValues, final double[] yValues, final int dataSetSize, final double[][] configurations, final String identifier) {
+		if (xValues.length != yValues.length) {
 			throw new RuntimeException("xValues must contain the same number of values as yValues");
-		if (xValues.length != configurations.length)
+		}
+		if (xValues.length != configurations.length) {
 			throw new RuntimeException("xValues must contain as much numbers as configurations configurations");
+		}
 		HttpURLConnection httpCon = this.establishHttpCon("train", identifier);
 
 		JSONObject jsonData = new JSONObject();
@@ -58,11 +60,11 @@ public class LCNetClient {
 			out.close();
 			httpCon.getInputStream();
 		} catch (IOException e) {
-			logger.error("Unexpected exception", e);
+			this.logger.error("Unexpected exception", e);
 		}
 	}
 
-	public double predict(int xValue, double[] configurations, String identifier) {
+	public double predict(final int xValue, final double[] configurations, final String identifier) {
 		HttpURLConnection httpCon = this.establishHttpCon("predict", identifier);
 
 		JSONObject jsonData = new JSONObject();
@@ -105,7 +107,7 @@ public class LCNetClient {
 		return entireInput.get("prediction").doubleValue();
 	}
 
-	public void deleteNet(String identifier) {
+	public void deleteNet(final String identifier) {
 		HttpURLConnection httpCon = this.establishHttpCon("delete", identifier);
 
 		OutputStreamWriter out;
@@ -118,7 +120,7 @@ public class LCNetClient {
 		}
 	}
 
-	private HttpURLConnection establishHttpCon(String urlParameter, String identifier) {
+	private HttpURLConnection establishHttpCon(final String urlParameter, final String identifier) {
 		URL url = null;
 		try {
 			url = new URL(SERVER_ADDRESS + urlParameter + "/" + identifier);
@@ -135,7 +137,7 @@ public class LCNetClient {
 		try {
 			httpCon.setRequestMethod("PUT");
 		} catch (ProtocolException e) {
-			logger.error("Unexpected exception", e);
+			this.logger.error("Unexpected exception", e);
 		}
 		return httpCon;
 	}

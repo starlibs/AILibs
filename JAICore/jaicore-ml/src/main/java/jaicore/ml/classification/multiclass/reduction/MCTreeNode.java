@@ -198,9 +198,9 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
 
-		double[] classDistribution = new double[this.containedClasses.size()];
-		this.distributionForInstance(instance, classDistribution);
-		return classDistribution;
+	double[] classDistribution = new double[this.containedClasses.size()];
+	this.distributionForInstance(instance, classDistribution);
+	return classDistribution;
 	}
 
 	@Override
