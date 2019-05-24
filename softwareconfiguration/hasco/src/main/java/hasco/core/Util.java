@@ -378,10 +378,10 @@ public class Util {
 	}
 
 	private static String getParamValue(final Parameter p, final String assignedValue, final boolean resolveIntervals) {
-		String interpretedValue = "";
 		if (assignedValue == null) {
 			throw new IllegalArgumentException("Cannot determine true value for assigned param value " + assignedValue + " for parameter " + p.getName());
 		}
+		String interpretedValue = "";
 		if (p.isNumeric()) {
 			if (resolveIntervals) {
 				NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
@@ -463,15 +463,15 @@ public class Util {
 
 	public static boolean isDependencyConditionSatisfied(final Collection<Pair<Parameter, IParameterDomain>> condition, final Map<Parameter, IParameterDomain> values) {
 		for (Pair<Parameter, IParameterDomain> conditionItem : condition) {
-			IParameterDomain requiredDomain = conditionItem.getY();
 			Parameter param = conditionItem.getX();
-			IParameterDomain actualDomain = values.get(param);
 			if (!values.containsKey(param)) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values);
 			}
 			if (values.get(param) == null) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is NULL in " + values);
 			}
+			IParameterDomain requiredDomain = conditionItem.getY();
+			IParameterDomain actualDomain = values.get(param);
 			if (!requiredDomain.subsumes(actualDomain)) {
 				return false;
 			}

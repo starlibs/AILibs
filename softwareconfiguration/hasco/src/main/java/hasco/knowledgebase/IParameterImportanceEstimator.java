@@ -11,7 +11,7 @@ public interface IParameterImportanceEstimator {
 	/**
 	 * Extracts the parameters of a composition that reach the given threshold
 	 * w.r.t. importance
-	 * 
+	 *
 	 * @param composition
 	 * @param importanceThreshold
 	 * @param sizeOfLargestSubsetsToConsider
@@ -19,11 +19,11 @@ public interface IParameterImportanceEstimator {
 	 * @return
 	 * @throws Exception
 	 */
-	public Set<String> extractImportantParameters(ComponentInstance composition, boolean recompute) throws Exception;
+	public Set<String> extractImportantParameters(ComponentInstance composition, boolean recompute) throws ExtractionOfImportantParametersFailedException;
 
 	/**
 	 * Computes importance values for an individual component
-	 * 
+	 *
 	 * @param component
 	 * @return
 	 */
@@ -32,29 +32,29 @@ public interface IParameterImportanceEstimator {
 	/**
 	 * Checks whether the estimator is ready to estimate parameter importance for
 	 * the composition
-	 * 
+	 *
 	 * @param composition
 	 * @return true if the estimator is ready, false otherwise
 	 */
 	public boolean readyToEstimateImportance(ComponentInstance composition);
-	
+
 	/**
 	 * Set the performance knowledge base used for parameter importance estimation
 	 * @param performanceKB
 	 */
 	public void setPerformanceKnowledgeBase(PerformanceKnowledgeBase performanceKB);
-	
+
 	/**
 	 * Get the performance knowledge base used for parameter importance estimation
 	 */
 	public PerformanceKnowledgeBase getPerformanceKnowledgeBase();
-	
+
 	/**
 	 * Returns the number of parameters that have been pruned
 	 * @return number of pruned parameters
 	 */
 	public int getNumberPrunedParameters();
-	
+
 	public Set<String> getPrunedParameters();
 
 }

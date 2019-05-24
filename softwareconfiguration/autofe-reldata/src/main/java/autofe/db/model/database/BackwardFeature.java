@@ -2,6 +2,9 @@ package autofe.db.model.database;
 
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import autofe.db.model.relation.AbstractRelationship;
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
@@ -9,17 +12,17 @@ import autofe.db.util.Tuple;
 
 public class BackwardFeature extends AbstractFeature {
 
-	public BackwardFeature(Attribute parent) {
+	public BackwardFeature(final Attribute parent) {
 		super(parent);
-		path = new Path();
+		this.path = new Path();
 	}
 
-	public BackwardFeature(BackwardFeature toClone) {
+	public BackwardFeature(final BackwardFeature toClone) {
 		super(toClone.parent);
 		this.path = new Path(toClone.getPath());
 	}
 
-	public BackwardFeature(Attribute parent, Path path) {
+	public BackwardFeature(final Attribute parent, final Path path) {
 		super(parent);
 		this.path = path;
 	}
@@ -31,24 +34,24 @@ public class BackwardFeature extends AbstractFeature {
 	private Path path;
 
 	public Path getPath() {
-		return path;
+		return this.path;
 	}
 
-	public void setPath(Path path) {
+	public void setPath(final Path path) {
 		this.path = path;
 	}
 
 	@Override
 	public String getName() {
-		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = path.getPathElements();
+		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = this.path.getPathElements();
 
 		String name;
 
 		if (pathElements == null || pathElements.isEmpty()) {
-			name = parent.getFullName();
+			name = this.parent.getFullName();
 		} else {
 			String parentTableName = pathElements.get(0).getT().getToTableName();
-			name = String.format("%s.%s", parentTableName, parent.getName());
+			name = String.format("%s.%s", parentTableName, this.parent.getName());
 
 			for (Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
 				if (pathElement.getT() instanceof BackwardRelationship) {
@@ -71,33 +74,22 @@ public class BackwardFeature extends AbstractFeature {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((path == null) ? 0 : path.hashCode());
-		return result;
+		return new HashCodeBuilder().append(this.path).toHashCode();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		BackwardFeature other = (BackwardFeature) obj;
-		if (path == null) {
-			if (other.path != null)
-				return false;
-		} else if (!path.equals(other.path)) {
+	public boolean equals(final Object obj) {
+		if (!(obj instanceof BackwardFeature)) {
 			return false;
 		}
-		return true;
+
+		BackwardFeature other = (BackwardFeature) obj;
+		return new EqualsBuilder().append(this.path, other.path).isEquals();
 	}
 
 	@Override
 	public String toString() {
-		return "[B:" + getName() + "]";
+		return "[B:" + this.getName() + "]";
 	}
 
 }

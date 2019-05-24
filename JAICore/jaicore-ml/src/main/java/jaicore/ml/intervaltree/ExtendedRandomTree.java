@@ -178,17 +178,19 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 		}
 		// as we use a set as a key, we should at least make it immutable
 		features = Collections.unmodifiableSet(features);
-		double vU;
 		if (this.totalVariance == 0.0d) {
 			LOGGER.warn(LOG_WARN_VARIANCE_ZERO);
 			return Double.NaN;
 		}
+
+		double vU;
 		if (this.varianceOfSubsetTotal.containsKey(features)) {
 			vU = this.varianceOfSubsetTotal.get(features);
 		} else {
 			vU = this.computeTotalVarianceOfSubset(features);
 		}
 		LOGGER.trace(LOG_TOTAL_VAR, features, vU);
+
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
@@ -219,18 +221,21 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 			LOGGER.warn(LOG_WARN_NOT_PREPARED);
 			this.preprocess();
 		}
+
 		features = Collections.unmodifiableSet(features);
-		double vU;
 		if (this.totalVariance == 0.0d) {
 			LOGGER.warn(LOG_WARN_VARIANCE_ZERO);
 			return Double.NaN;
 		}
+
+		double vU;
 		if (this.varianceOfSubsetTotal.containsKey(features)) {
 			vU = this.varianceOfSubsetTotal.get(features);
 		} else {
 			vU = this.computeTotalVarianceOfSubset(features);
 		}
 		LOGGER.trace(LOG_TOTAL_VAR, features, vU);
+
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
@@ -260,18 +265,21 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 			LOGGER.warn(LOG_WARN_NOT_PREPARED);
 			this.preprocess();
 		}
+
 		features = Collections.unmodifiableSet(features);
-		double vU;
 		if (this.totalVariance == 0.0d) {
 			LOGGER.warn(LOG_WARN_VARIANCE_ZERO);
 			return Double.NaN;
 		}
+
+		double vU;
 		if (this.varianceOfSubsetTotal.containsKey(features)) {
 			vU = this.varianceOfSubsetTotal.get(features);
 		} else {
 			vU = this.computeTotalVarianceOfSubset(features);
 		}
 		LOGGER.trace(LOG_TOTAL_VAR, features, vU);
+
 		for (int k = 1; k < features.size(); k++) {
 			// generate all subsets of size k
 			Set<Set<Integer>> subsets = Sets.combinations(features, k);
@@ -308,7 +316,8 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 			obsList.add(obs.midPoint);
 		}
 		boolean consistentWithAnyLeaf = false;
-		for (Tree leaf : this.partitioning.keySet()) {
+		for (Entry<Tree, FeatureSpace> leafEntry : this.partitioning.entrySet()) {
+			Tree leaf = leafEntry.getKey();
 			if (this.partitioning.get(leaf).containsPartialInstance(indices, obsList)) {
 				double sizeOfLeaf = this.partitioning.get(leaf).getRangeSizeOfAllButSubset(subset);
 				double sizeOfDomain = this.featureSpace.getRangeSizeOfAllButSubset(subset);
@@ -544,8 +553,8 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 	public void printSizeOfFeatureSpaceAndPartitioning() {
 		LOGGER.debug("Size of feature space: {}", this.featureSpace.getRangeSize());
 		double sizeOfPartitioning = 0.0d;
-		for (Tree leaf : this.partitioning.keySet()) {
-			sizeOfPartitioning += this.partitioning.get(leaf).getRangeSize();
+		for (Entry<Tree, FeatureSpace> leafEntry : this.partitioning.entrySet()) {
+			sizeOfPartitioning += this.partitioning.get(leafEntry.getKey()).getRangeSize();
 		}
 		LOGGER.debug("Complete size of partitioning: {}", sizeOfPartitioning);
 		double sizeOfIntervals = 1.0d;

@@ -1,6 +1,6 @@
 package hasco.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,18 +18,17 @@ import hasco.model.ComponentInstance;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
-
 public class FANOVAParameterImportanceEstimatorTest {
-	
+
 	private static String testFile = "testrsc/regression_data/performance2.arff";
-	
+
 	@Test
 	public void testImportanceEstimation() {
 		PerformanceKnowledgeBase pkb = new PerformanceKnowledgeBase();
 		try (BufferedReader reader = Files.newBufferedReader(Paths.get(testFile), StandardCharsets.UTF_8)) {
 			ArffReader arffReader = new ArffReader(reader);
 			Instances data = arffReader.getData();
-			data.setClassIndex(data.numAttributes()-1);
+			data.setClassIndex(data.numAttributes() - 1);
 			Component component = new Component("Component");
 			ComponentInstance composition = new ComponentInstance(component, null, null);
 			pkb.setPerformanceSamples(data, composition, "test");
@@ -45,6 +44,6 @@ public class FANOVAParameterImportanceEstimatorTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+		assertTrue(true);
 	}
 }

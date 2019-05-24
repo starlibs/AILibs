@@ -10,39 +10,38 @@ public class UnparametrizedComponentInstance {
 	private final String componentName;
 	private final Map<String, UnparametrizedComponentInstance> satisfactionOfRequiredInterfaces;
 
-	public UnparametrizedComponentInstance(String componentName,
-			Map<String, UnparametrizedComponentInstance> satisfactionOfRequiredInterfaces) {
+	public UnparametrizedComponentInstance(final String componentName, final Map<String, UnparametrizedComponentInstance> satisfactionOfRequiredInterfaces) {
 		super();
 		this.componentName = componentName;
 		this.satisfactionOfRequiredInterfaces = satisfactionOfRequiredInterfaces;
 	}
 
-	public UnparametrizedComponentInstance(ComponentInstance composition) {
+	public UnparametrizedComponentInstance(final ComponentInstance composition) {
 		Map<String, ComponentInstance> resolvedRequiredInterfaces = composition.getSatisfactionOfRequiredInterfaces();
-		satisfactionOfRequiredInterfaces = new HashMap<>();
+		this.satisfactionOfRequiredInterfaces = new HashMap<>();
 		resolvedRequiredInterfaces.keySet().forEach(r -> {
-			satisfactionOfRequiredInterfaces.put(r,
-					new UnparametrizedComponentInstance(resolvedRequiredInterfaces.get(r)));
+			this.satisfactionOfRequiredInterfaces.put(r, new UnparametrizedComponentInstance(resolvedRequiredInterfaces.get(r)));
 		});
 		this.componentName = composition.getComponent().getName();
 	}
 
 	public String getComponentName() {
-		return componentName;
+		return this.componentName;
 	}
 
 	public Map<String, UnparametrizedComponentInstance> getSatisfactionOfRequiredInterfaces() {
-		return satisfactionOfRequiredInterfaces;
+		return this.satisfactionOfRequiredInterfaces;
 	}
-	
+
 	/**
 	 * Determines the sub-composition under a path of required interfaces
 	 **/
-	public UnparametrizedComponentInstance getSubComposition(List<String> path) {
+	public UnparametrizedComponentInstance getSubComposition(final List<String> path) {
 		UnparametrizedComponentInstance current = this;
 		for (String requiredInterface : path) {
-			if (!current.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface))
+			if (!current.getSatisfactionOfRequiredInterfaces().containsKey(requiredInterface)) {
 				throw new IllegalArgumentException("Invalid path " + path + " (size " + path.size() + "). The component " + current.getComponentName() + " does not have a required interface with id \"" + requiredInterface + "\"");
+			}
 			current = current.getSatisfactionOfRequiredInterfaces().get(requiredInterface);
 		}
 		return current;
@@ -52,31 +51,37 @@ public class UnparametrizedComponentInstance {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((componentName == null) ? 0 : componentName.hashCode());
-		result = prime * result
-				+ ((satisfactionOfRequiredInterfaces == null) ? 0 : satisfactionOfRequiredInterfaces.hashCode());
+		result = prime * result + ((this.componentName == null) ? 0 : this.componentName.hashCode());
+		result = prime * result + ((this.satisfactionOfRequiredInterfaces == null) ? 0 : this.satisfactionOfRequiredInterfaces.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		UnparametrizedComponentInstance other = (UnparametrizedComponentInstance) obj;
-		if (componentName == null) {
-			if (other.componentName != null)
+		if (this.componentName == null) {
+			if (other.componentName != null) {
 				return false;
-		} else if (!componentName.equals(other.componentName))
+			}
+		} else if (!this.componentName.equals(other.componentName)) {
 			return false;
-		if (satisfactionOfRequiredInterfaces == null) {
-			if (other.satisfactionOfRequiredInterfaces != null)
+		}
+		if (this.satisfactionOfRequiredInterfaces == null) {
+			if (other.satisfactionOfRequiredInterfaces != null) {
 				return false;
-		} else if (!satisfactionOfRequiredInterfaces.equals(other.satisfactionOfRequiredInterfaces))
+			}
+		} else if (!this.satisfactionOfRequiredInterfaces.equals(other.satisfactionOfRequiredInterfaces)) {
 			return false;
+		}
 		return true;
 	}
 

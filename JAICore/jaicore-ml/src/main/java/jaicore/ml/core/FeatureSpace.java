@@ -3,7 +3,6 @@ package jaicore.ml.core;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
@@ -14,16 +13,16 @@ import weka.core.Instances;
 public class FeatureSpace implements Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -4130427099174860007L;
 	private List<FeatureDomain> featureDomains;
 
 	public FeatureSpace() {
-		featureDomains = new ArrayList<>();
+		this.featureDomains = new ArrayList<>();
 	}
 
-	public FeatureSpace(Instances data) {
+	public FeatureSpace(final Instances data) {
 		this();
 		for (int i = 0; i < data.numAttributes(); i++) {
 			Attribute attr = data.attribute(i);
@@ -31,8 +30,9 @@ public class FeatureSpace implements Serializable {
 				continue;
 			}
 			if (attr.isNumeric()) {
-				double min, max;
-				if (attr.getLowerNumericBound() < attr.getLowerNumericBound()) {
+				double min;
+				double max;
+				if (attr.getLowerNumericBound() < attr.getUpperNumericBound()) {
 					min = attr.getLowerNumericBound();
 					max = attr.getUpperNumericBound();
 				}
@@ -41,21 +41,21 @@ public class FeatureSpace implements Serializable {
 					min = data.attributeStats(i).numericStats.min;
 					max = data.attributeStats(i).numericStats.max;
 				}
-					
+
 				NumericFeatureDomain domain = new NumericFeatureDomain(true, min, max);
 
 				domain.setName(attr.name());
-				featureDomains.add(domain);
+				this.featureDomains.add(domain);
 			} else if (attr.isNominal()) {
 				String[] attrVals = new String[attr.numValues()];
 				double[] internalVals = new double[attr.numValues()];
 				for (int valIndex = 0; valIndex < attr.numValues(); valIndex++) {
 					attrVals[valIndex] = attr.value(valIndex);
-					internalVals[valIndex] = (double) valIndex;
+					internalVals[valIndex] = valIndex;
 				}
 				CategoricalFeatureDomain domain = new CategoricalFeatureDomain(internalVals);
 				domain.setName(attr.name());
-				featureDomains.add(domain);
+				this.featureDomains.add(domain);
 			} else {
 				throw new IllegalArgumentException("Attribute type not supported!");
 			}
@@ -64,89 +64,91 @@ public class FeatureSpace implements Serializable {
 
 	/**
 	 * copy constructor
-	 * 
+	 *
 	 * @param domains
 	 */
-	public FeatureSpace(List<FeatureDomain> domains) {
-		featureDomains = new ArrayList<FeatureDomain>();
+	public FeatureSpace(final List<FeatureDomain> domains) {
+		this.featureDomains = new ArrayList<>();
 		for (FeatureDomain domain : domains) {
 			if (domain instanceof NumericFeatureDomain) {
 				NumericFeatureDomain numDomain = (NumericFeatureDomain) domain;
-				featureDomains.add(new NumericFeatureDomain(numDomain));
+				this.featureDomains.add(new NumericFeatureDomain(numDomain));
 			} else if (domain instanceof CategoricalFeatureDomain) {
 				CategoricalFeatureDomain catDomain = (CategoricalFeatureDomain) domain;
-				featureDomains.add(new CategoricalFeatureDomain(catDomain));
+				this.featureDomains.add(new CategoricalFeatureDomain(catDomain));
 			}
 		}
 	}
 
-	public FeatureSpace(FeatureSpace space) {
+	public FeatureSpace(final FeatureSpace space) {
 		this(Arrays.asList(space.getFeatureDomains()));
 	}
 
-	public FeatureSpace(FeatureDomain[] domains) {
+	public FeatureSpace(final FeatureDomain[] domains) {
 		this(Arrays.asList(domains));
 	}
 
 	public FeatureDomain[] toArray() {
-		return (FeatureDomain[]) featureDomains.toArray();
+		return this.featureDomains.toArray(new FeatureDomain[0]);
 	}
 
-	public void add(FeatureDomain domain) {
-		featureDomains.add(domain);
+	public void add(final FeatureDomain domain) {
+		this.featureDomains.add(domain);
 	}
 
 	public FeatureDomain[] getFeatureDomains() {
-		return featureDomains.toArray(new FeatureDomain[featureDomains.size()]);
+		return this.featureDomains.toArray(new FeatureDomain[this.featureDomains.size()]);
 	}
 
 	public double getRangeSize() {
 		double size = 1.0d;
-		for (FeatureDomain domain : featureDomains)
+		for (FeatureDomain domain : this.featureDomains) {
 			size *= domain.getRangeSize();
+		}
 		return size;
 	}
 
-	public double getRangeSizeOfFeatureSubspace(Set<Integer> featureIndices) {
+	public double getRangeSizeOfFeatureSubspace(final Set<Integer> featureIndices) {
 		double size = 1.0d;
-		for (int featureIndex : featureIndices)
-			size *= featureDomains.get(featureIndex).getRangeSize();
+		for (int featureIndex : featureIndices) {
+			size *= this.featureDomains.get(featureIndex).getRangeSize();
+		}
 		return size;
 	}
 
-	public double getRangeSizeOfAllButSubset(Set<Integer> featureIndices) {
+	public double getRangeSizeOfAllButSubset(final Set<Integer> featureIndices) {
 		double size = 1.0d;
 		for (int i = 0; i < this.getDimensionality(); i++) {
-			if (featureIndices.contains(i))
-				continue;
-			else
-				size *= featureDomains.get(i).getRangeSize();
+			if (!featureIndices.contains(i)) {
+				size *= this.featureDomains.get(i).getRangeSize();
+			}
 		}
 		return size;
 	}
 
 	public int getDimensionality() {
-		return featureDomains.size();
+		return this.featureDomains.size();
 	}
 
-	public FeatureDomain getFeatureDomain(int index) {
-		return featureDomains.get(index);
+	public FeatureDomain getFeatureDomain(final int index) {
+		return this.featureDomains.get(index);
 	}
 
-	public boolean containsPartialInstance(List<Integer> indices, List<Double> values) {
-		for(int i = 0; i < indices.size(); i++) {
+	public boolean containsPartialInstance(final List<Integer> indices, final List<Double> values) {
+		for (int i = 0; i < indices.size(); i++) {
 			int featureIndex = indices.get(i);
 			double value = values.get(i);
-			if(!featureDomains.get(featureIndex).containsInstance(value))
+			if (!this.featureDomains.get(featureIndex).containsInstance(value)) {
 				return false;
+			}
 		}
 		return true;
 	}
-	
-	public boolean containsInstance(Instance instance) {
+
+	public boolean containsInstance(final Instance instance) {
 		boolean val = true;
-		for (int i = 0; i < featureDomains.size(); i++) {
-			FeatureDomain domain = featureDomains.get(i);
+		for (int i = 0; i < this.featureDomains.size(); i++) {
+			FeatureDomain domain = this.featureDomains.get(i);
 			val &= domain.contains(instance.value(i));
 		}
 		return val;

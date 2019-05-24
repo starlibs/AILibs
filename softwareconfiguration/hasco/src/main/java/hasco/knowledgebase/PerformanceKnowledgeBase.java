@@ -415,10 +415,10 @@ public class PerformanceKnowledgeBase {
 	 * @return
 	 */
 	public boolean kDistinctAttributeValuesAvailable(final String benchmarkName, final ComponentInstance composition, final int minNum) {
-		String identifier = Util.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}
+		String identifier = Util.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			return false;
 		}
@@ -434,7 +434,7 @@ public class PerformanceKnowledgeBase {
 					return false;
 				}
 			} else if (instances.attribute(i).getUpperNumericBound() <= instances.attribute(i).getLowerNumericBound()) {
-				continue;
+				// nothing to do here
 			} else if (instances.numDistinctValues(i) < minNum) {
 				return false;
 			}
@@ -453,10 +453,10 @@ public class PerformanceKnowledgeBase {
 	 * @return
 	 */
 	public boolean kCompletelyDistinctSamplesAvailable(final String benchmarkName, final ComponentInstance composition, final int minNum) {
-		String identifier = Util.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.containsKey(benchmarkName)) {
 			return false;
 		}
+		String identifier = Util.getComponentNamesOfComposition(composition);
 		if (!this.performanceInstancesByIdentifier.get(benchmarkName).containsKey(identifier)) {
 			return false;
 		}
@@ -464,10 +464,10 @@ public class PerformanceKnowledgeBase {
 		if (instances.numInstances() == 0) {
 			return false;
 		}
-		int count = 0;
 		if (minNum == 1 && instances.numInstances() > 0) {
 			return true;
 		}
+		int count = 0;
 		for (int i = 0; i < instances.numInstances(); i++) {
 			boolean distinctFromAll = true;
 			for (int j = 0; j < i; j++) {

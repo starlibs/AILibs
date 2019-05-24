@@ -65,14 +65,14 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 * @throws Exception
 	 */
 	@Override
-	public Set<String> extractImportantParameters(final ComponentInstance composition, final boolean recompute) throws Exception {
-		Set<String> importantParameters = new HashSet<>();
+	public Set<String> extractImportantParameters(final ComponentInstance composition, final boolean recompute) throws ExtractionOfImportantParametersFailedException {
 		String pipelineIdentifier = Util.getComponentNamesOfComposition(composition);
 		if (this.importantParameterMap.containsKey(pipelineIdentifier)) {
 			return this.importantParameterMap.get(pipelineIdentifier);
 		}
 		Instances data = this.performanceKnowledgeBase.getPerformanceSamples(this.benchmarkName, composition);
 		FeatureSpace space = new FeatureSpace(data);
+		Set<String> importantParameters = new HashSet<>();
 		if (space.getDimensionality() < 2) {
 			for (FeatureDomain domain : space.getFeatureDomains()) {
 				importantParameters.add(domain.getName());
@@ -85,7 +85,11 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		}
 		ExtendedRandomForest forest = new ExtendedRandomForest();
 		// forest.setMinNumSamples
-		forest.buildClassifier(data);
+		try {
+			forest.buildClassifier(data);
+		} catch (Exception e) {
+			throw new ExtractionOfImportantParametersFailedException("Could not build model", e);
+		}
 		if (!this.importanceDictionary.containsKey(pipelineIdentifier)) {
 			this.importanceDictionary.put(pipelineIdentifier, new HashMap<Set<Integer>, Double>());
 		}
@@ -135,12 +139,12 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 	 */
 	@Override
 	public Map<String, Double> computeImportanceForSingleComponent(final Component component) {
-		HashMap<String, Double> result = new HashMap<>();
 		Instances data = this.performanceKnowledgeBase.getPerformanceSamplesForIndividualComponent(this.benchmarkName, component);
 		if (data == null) {
 			return null;
 		}
 		ExtendedRandomForest forest = new ExtendedRandomForest();
+		HashMap<String, Double> result = new HashMap<>();
 		try {
 			forest.buildClassifier(data);
 			for (int i = 0; i < data.numAttributes() - 1; i++) {
