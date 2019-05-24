@@ -15,7 +15,7 @@ import hasco.core.IsRefinementCompletedPredicate;
 import hasco.core.IsValidParameterRangeRefinementPredicate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
-import hasco.core.isNotRefinable;
+import hasco.core.IsNotRefinable;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.NumericParameterDomain;
@@ -259,7 +259,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	public CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		evaluablePredicates.put("isValidParameterRangeRefinement", new IsValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
-		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("notRefinable", new IsNotRefinable(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("refinementCompleted", new IsRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
 	}
