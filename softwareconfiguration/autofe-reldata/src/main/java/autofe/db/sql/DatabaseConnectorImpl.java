@@ -39,24 +39,24 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 	private SQLAdapter sqlAdapter;
 	private Set<String> createdTableNames;
 
-	public DatabaseConnectorImpl(Database db) {
+	public DatabaseConnectorImpl(final Database db) {
 		super();
 		this.db = db;
 		this.createdTableNames = new HashSet<>();
-		setupSqlAdapter();
+		this.setupSqlAdapter();
 	}
 
 	private void setupSqlAdapter() {
-		String driver = db.getJdbcDriver();
-		String host = db.getJdbcUrl() != null ? db.getJdbcUrl() : "";
-		String user = db.getJdbcUsername() != null ? db.getJdbcUsername() : "";
-		String password = db.getJdbcPassword() != null ? db.getJdbcPassword() : "";
-		String database = db.getJdbcDatabase() != null ? db.getJdbcDatabase() : "";
+		String driver = this.db.getJdbcDriver();
+		String host = this.db.getJdbcUrl() != null ? this.db.getJdbcUrl() : "";
+		String user = this.db.getJdbcUsername() != null ? this.db.getJdbcUsername() : "";
+		String password = this.db.getJdbcPassword() != null ? this.db.getJdbcPassword() : "";
+		String database = this.db.getJdbcDatabase() != null ? this.db.getJdbcDatabase() : "";
 		this.sqlAdapter = new SQLAdapter(driver, host, user, password, database, null, false);
 	}
 
 	@Override
-	public Instances getInstances(List<AbstractFeature> features) {
+	public Instances getInstances(final List<AbstractFeature> features) throws RetrieveInstancesFromDatabaseFailedException {
 		if (features == null || features.isEmpty()) {
 			throw new IllegalArgumentException("Empty feature list provided!");
 		}
@@ -66,12 +66,12 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 			for (AbstractFeature feature : features) {
 				if (TABLE_EXISTS_WORKAROUND) {
 					LOGGER.debug("Skip check whether Feature table for {} exists", feature);
-					createFeatureTable(feature);
+					this.createFeatureTable(feature);
 					continue;
 				}
-				if (!featureTableExists(feature)) {
+				if (!this.featureTableExists(feature)) {
 					LOGGER.debug("Feature table for {} does not exist => Creating", feature);
-					createFeatureTable(feature);
+					this.createFeatureTable(feature);
 				} else {
 					LOGGER.debug("Feature table for {} with name {} already exists", feature, SqlUtils.getTableNameForFeature(feature));
 				}
@@ -88,20 +88,20 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 				}
 			}
 			// join with target table to get the target attribute
-			Table targetTable = DBUtils.getTargetTable(db);
+			Table targetTable = DBUtils.getTargetTable(this.db);
 			autofe.db.model.database.Attribute primaryKey = DBUtils.getPrimaryKey(targetTable);
-			autofe.db.model.database.Attribute target = DBUtils.getTargetAttribute(db);
+			autofe.db.model.database.Attribute target = DBUtils.getTargetAttribute(this.db);
 			sql.append(String.format(" NATURAL JOIN (SELECT %1$s, %2$s FROM %3$s) TARGET", primaryKey.getName(), target.getName(), targetTable.getName()));
 
-			instances = setupInstances(features, target);
+			instances = this.setupInstances(features, target);
 			LOGGER.debug("Loading instances from DB using sql: {}", sql);
-			ResultSet rs = sqlAdapter.getResultsOfQuery(sql.toString());
+			ResultSet rs = this.sqlAdapter.getResultsOfQuery(sql.toString());
 			while (rs.next()) {
-				Instance instance = createInstance(rs, features, target, instances);
+				Instance instance = this.createInstance(rs, features, target, instances);
 				instances.add(instance);
 			}
 			rs.close();
-			instances = finalizeInstances(instances);
+			instances = this.finalizeInstances(instances);
 
 		} catch (Exception e) {
 			throw new RetrieveInstancesFromDatabaseFailedException("Cannot get instances from database", e);
@@ -109,7 +109,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		return instances;
 	}
 
-	private Instances finalizeInstances(Instances toFinalize) throws Exception {
+	private Instances finalizeInstances(final Instances toFinalize) throws Exception {
 		Instances toReturn = toFinalize;
 
 		// Convert string attributes to nominal attributes
@@ -135,44 +135,44 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		return toReturn;
 	}
 
-	private void createFeatureTable(AbstractFeature feature) throws SQLException {
+	private void createFeatureTable(final AbstractFeature feature) throws SQLException {
 		if (feature instanceof ForwardFeature) {
-			createForwardFeatureTable((ForwardFeature) feature);
+			this.createForwardFeatureTable((ForwardFeature) feature);
 		} else {
-			createBackwardFeatureTable((BackwardFeature) feature);
+			this.createBackwardFeatureTable((BackwardFeature) feature);
 		}
 	}
 
-	private void createForwardFeatureTable(ForwardFeature feature) throws SQLException {
-		Table targetTable = DBUtils.getTargetTable(db);
-		Table featureTable = DBUtils.getAttributeTable(feature.getParent(), db);
-		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, featureTable, db);
+	private void createForwardFeatureTable(final ForwardFeature feature) throws SQLException {
+		Table targetTable = DBUtils.getTargetTable(this.db);
+		Table featureTable = DBUtils.getAttributeTable(feature.getParent(), this.db);
+		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, featureTable, this.db);
 		LOGGER.debug("Join relations from {} to {} are {}", targetTable.getName(), featureTable.getName(), joinRelations);
-		String featureSql = SqlUtils.generateForwardSql(joinRelations, feature, db);
-		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
+		String featureSql = SqlUtils.generateForwardSql(joinRelations, feature, this.db);
+		this.createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}
 
-	private void createBackwardFeatureTable(BackwardFeature feature) throws SQLException {
-		Table targetTable = DBUtils.getTargetTable(db);
-		Table toTable = DBUtils.getTableByName(feature.getPath().getLastTableName(), db);
-		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, toTable, db);
+	private void createBackwardFeatureTable(final BackwardFeature feature) throws SQLException {
+		Table targetTable = DBUtils.getTargetTable(this.db);
+		Table toTable = DBUtils.getTableByName(feature.getPath().getLastTableName(), this.db);
+		List<ForwardRelationship> joinRelations = DBUtils.getJoinTables(targetTable, toTable, this.db);
 		LOGGER.debug("Join relations from {} to {} are {}", targetTable.getName(), toTable.getName(), joinRelations);
-		String featureSql = SqlUtils.generateBackwardSql(joinRelations, feature, db);
-		createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
+		String featureSql = SqlUtils.generateBackwardSql(joinRelations, feature, this.db);
+		this.createTable(SqlUtils.getTableNameForFeature(feature), featureSql);
 	}
 
-	private void createTable(String tableName, String featureSql) throws SQLException {
+	private void createTable(final String tableName, final String featureSql) throws SQLException {
 		String sql = String.format("CREATE TABLE IF NOT EXISTS `%s` AS %s", tableName, featureSql);
 		LOGGER.debug("Creating feature table using statement {}", sql);
-		sqlAdapter.update(sql, Collections.emptyList());
-		createdTableNames.add(tableName);
+		this.sqlAdapter.update(sql, Collections.emptyList());
+		this.createdTableNames.add(tableName);
 	}
 
-	private boolean featureTableExists(AbstractFeature feature) throws SQLException {
+	private boolean featureTableExists(final AbstractFeature feature) throws SQLException {
 		boolean exists = false;
 		String tableName = SqlUtils.getTableNameForFeature(feature);
 		String sql = String.format("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'", tableName);
-		ResultSet rs = sqlAdapter.getResultsOfQuery(sql);
+		ResultSet rs = this.sqlAdapter.getResultsOfQuery(sql);
 		if (rs.next()) {
 			exists = true;
 		}
@@ -182,9 +182,9 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 	@Override
 	public void cleanup() {
-		for (String tableName : createdTableNames) {
+		for (String tableName : this.createdTableNames) {
 			try {
-				deleteTable(tableName);
+				this.deleteTable(tableName);
 			} catch (SQLException e) {
 				LOGGER.error("Cannot delete table {}", tableName);
 			}
@@ -192,12 +192,12 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 	}
 
-	private void deleteTable(String tableName) throws SQLException {
+	private void deleteTable(final String tableName) throws SQLException {
 		String sql = String.format("DROP TABLE `%s`", tableName);
-		sqlAdapter.update(sql, Collections.emptyList());
+		this.sqlAdapter.update(sql, Collections.emptyList());
 	}
 
-	private Instances setupInstances(List<AbstractFeature> features, autofe.db.model.database.Attribute target) {
+	private Instances setupInstances(final List<AbstractFeature> features, final autofe.db.model.database.Attribute target) throws UnsupportedAttributeTypeException {
 		ArrayList<Attribute> wekaAttributes = new ArrayList<>();
 		for (AbstractFeature feature : features) {
 			if (feature.getType() == AttributeType.TEXT) {
@@ -224,7 +224,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		return instances;
 	}
 
-	private Instance createInstance(ResultSet rs, List<AbstractFeature> features, autofe.db.model.database.Attribute target, Instances instances) throws SQLException {
+	private Instance createInstance(final ResultSet rs, final List<AbstractFeature> features, final autofe.db.model.database.Attribute target, final Instances instances) throws SQLException, UnsupportedAttributeTypeException {
 		Instance instance = new DenseInstance(features.size() + 1);
 		instance.setDataset(instances);
 		for (int i = 0; i < features.size(); i++) {

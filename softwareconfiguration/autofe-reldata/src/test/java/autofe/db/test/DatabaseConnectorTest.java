@@ -17,6 +17,7 @@ import autofe.db.model.database.Table;
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.sql.DatabaseConnector;
 import autofe.db.sql.DatabaseConnectorImpl;
+import autofe.db.sql.RetrieveInstancesFromDatabaseFailedException;
 import autofe.db.util.DBUtils;
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -27,7 +28,7 @@ public class DatabaseConnectorTest {
 	private static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
 	@Test
-	public void testGetInstances() {
+	public void testGetInstances() throws RetrieveInstancesFromDatabaseFailedException {
 		Database db = DBUtils.deserializeFromFile(DATABASE_MODEL_FILE);
 		Table customer = DBUtils.getTableByName("Customer", db);
 		Table product = DBUtils.getTableByName("Product", db);

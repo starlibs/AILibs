@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hasco.knowledgebase.FANOVAParameterImportanceEstimator;
 import hasco.knowledgebase.PerformanceKnowledgeBase;
@@ -21,6 +23,8 @@ import weka.core.converters.ArffLoader.ArffReader;
 public class FANOVAParameterImportanceEstimatorTest {
 
 	private static String testFile = "testrsc/regression_data/performance2.arff";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(FANOVAParameterImportanceEstimatorTest.class);
 
 	@Test
 	public void testImportanceEstimation() {
@@ -36,9 +40,8 @@ public class FANOVAParameterImportanceEstimatorTest {
 			importanceEstimator.setPerformanceKnowledgeBase(pkb);
 			try {
 				Set<String> importantParams = importanceEstimator.extractImportantParameters(composition, false);
-				System.out.println(importantParams);
+				LOGGER.info("important parameters: {}", importantParams);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} catch (IOException e) {

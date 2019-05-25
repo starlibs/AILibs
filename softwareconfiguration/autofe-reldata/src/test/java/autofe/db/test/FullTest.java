@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import autofe.db.configuration.DatabaseAutoFeConfiguration;
 import autofe.db.model.database.AbstractFeature;
+import autofe.db.sql.RetrieveInstancesFromDatabaseFailedException;
 import autofe.processor.DatabaseProcessor;
 
 public class FullTest {
@@ -28,7 +29,7 @@ public class FullTest {
 	public static final String DATABASE_MODEL_FILE = "model/db/bankaccount_toy_database.json";
 
 	@Test
-	public void doFullTest() throws InterruptedException {
+	public void doFullTest() throws InterruptedException, RetrieveInstancesFromDatabaseFailedException {
 		// Phase 1: Select features
 		Map<String, Object> props = new HashMap<>();
 		props.put(DatabaseAutoFeConfiguration.K_EVALUATION_FUNCTION, EVALUATION_FUNCTION);

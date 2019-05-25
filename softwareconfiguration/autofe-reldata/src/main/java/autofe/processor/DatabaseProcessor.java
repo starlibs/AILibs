@@ -13,6 +13,7 @@ import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.sql.DatabaseConnector;
+import autofe.db.sql.RetrieveInstancesFromDatabaseFailedException;
 import autofe.db.util.DBUtils;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
@@ -36,22 +37,22 @@ public class DatabaseProcessor {
 
 	private List<AbstractFeature> selectedFeatures;
 
-	public DatabaseProcessor(DatabaseAutoFeConfiguration configuration, String databaseModelFile) {
+	public DatabaseProcessor(final DatabaseAutoFeConfiguration configuration, final String databaseModelFile) {
 		this.configuration = configuration;
 		this.database = DBUtils.deserializeFromFile(databaseModelFile);
 	}
 
-	public DatabaseProcessor(DatabaseAutoFeConfiguration configuration, Database database) {
+	public DatabaseProcessor(final DatabaseAutoFeConfiguration configuration, final Database database) {
 		this.configuration = configuration;
 		this.database = database;
 	}
 
-	public void doFeatureSelection() throws InterruptedException {
-		long timeout = System.currentTimeMillis() + configuration.getTimeoutInMs();
+	public void doFeatureSelection() throws InterruptedException, RetrieveInstancesFromDatabaseFailedException {
+		long timeout = System.currentTimeMillis() + this.configuration.getTimeoutInMs();
 
 		// Setup
-		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(database);
-		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator, configuration.getRandomCompletionPathLength(), configuration.getSeed(), configuration.getEvaluationFunction());
+		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(this.database);
+		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator, this.configuration.getRandomCompletionPathLength(), this.configuration.getSeed(), this.configuration.getEvaluationFunction());
 
 		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, evaluator);
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(tree);
@@ -96,17 +97,17 @@ public class DatabaseProcessor {
 	}
 
 	public Instances getInstancesWithSelectedFeatures() {
-		if (instancesWithSelectedFeatures == null) {
+		if (this.instancesWithSelectedFeatures == null) {
 			throw new IllegalStateException("Instances have not been loaded yet!");
 		}
-		return instancesWithSelectedFeatures;
+		return this.instancesWithSelectedFeatures;
 	}
 
 	public List<AbstractFeature> getSelectedFeatures() {
-		if (selectedFeatures == null) {
+		if (this.selectedFeatures == null) {
 			throw new IllegalStateException("Features have not been selected yet!");
 		}
-		return selectedFeatures;
+		return this.selectedFeatures;
 	}
 
 }

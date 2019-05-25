@@ -87,6 +87,7 @@ public class FANOVAParameterImportanceEstimator implements IParameterImportanceE
 		// forest.setMinNumSamples
 		try {
 			forest.buildClassifier(data);
+			forest.prepareForest(data);
 		} catch (Exception e) {
 			throw new ExtractionOfImportantParametersFailedException("Could not build model", e);
 		}

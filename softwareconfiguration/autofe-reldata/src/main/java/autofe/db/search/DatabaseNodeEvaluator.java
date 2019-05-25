@@ -12,6 +12,7 @@ import autofe.db.model.database.BackwardFeature;
 import autofe.db.model.database.Database;
 import autofe.db.sql.DatabaseConnector;
 import autofe.db.sql.DatabaseConnectorImpl;
+import autofe.db.sql.RetrieveInstancesFromDatabaseFailedException;
 import autofe.db.util.DBUtils;
 import autofe.util.EvaluationUtils;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -45,42 +46,47 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 	private Database db;
 	private Random random;
 
-	public DatabaseNodeEvaluator(DatabaseGraphGenerator generator) {
+	public DatabaseNodeEvaluator(final DatabaseGraphGenerator generator) {
 		// Only use this constructor for test purposes
 		this.generator = generator;
 		this.randomCompletionPathLength = RANDOM_COMPLETION_PATH_LENGTH;
 		this.seed = DEFAULT_SEED;
 		this.db = generator.getDatabase();
-		this.databaseConnector = new DatabaseConnectorImpl(db);
-		this.random = new Random(seed);
+		this.databaseConnector = new DatabaseConnectorImpl(this.db);
+		this.random = new Random(this.seed);
 		this.evaluationFunctionName = "COCO";
 	}
 
-	public DatabaseNodeEvaluator(DatabaseGraphGenerator generator, int randomCompletionPathLength, long seed, String evaluationFunction) {
+	public DatabaseNodeEvaluator(final DatabaseGraphGenerator generator, final int randomCompletionPathLength, final long seed, final String evaluationFunction) {
 		this.generator = generator;
 		this.randomCompletionPathLength = randomCompletionPathLength;
 		this.seed = seed;
 		this.db = generator.getDatabase();
-		this.databaseConnector = new DatabaseConnectorImpl(db);
+		this.databaseConnector = new DatabaseConnectorImpl(this.db);
 		this.random = new Random(seed);
 		this.evaluationFunctionName = evaluationFunction;
 	}
 
 	@Override
-	public Double f(Node<DatabaseNode, ?> node) throws InterruptedException {
+	public Double f(final Node<DatabaseNode, ?> node) throws InterruptedException, NoSolutionFromRandomCompletionException, DatasetEvaluationFailedException {
 		if (node.getPoint().getSelectedFeatures().isEmpty()) {
 			LOGGER.warn("Return default value (0) for empty node");
 			return 0.0;
 		}
 		if (node.getPoint().isFinished()) {
 			LOGGER.warn("Skip random completion for finished node!");
-			Instances instances = databaseConnector.getInstances(node.getPoint().getSelectedFeatures());
-			double result = evaluateInstances(instances);
+			Instances instances;
+			try {
+				instances = this.databaseConnector.getInstances(node.getPoint().getSelectedFeatures());
+			} catch (RetrieveInstancesFromDatabaseFailedException e) {
+				throw new DatasetEvaluationFailedException("Could not get instances from database connector.", e);
+			}
+			double result = this.evaluateInstances(instances);
 			LOGGER.debug("Evaluation result (without random completion) is {}", result);
 			return result;
 		}
 		LOGGER.info("Evaluation node with features : {}", node.getPoint().getSelectedFeatures());
-		int requiredNumberOfFeatures = node.getPoint().getSelectedFeatures().size() + randomCompletionPathLength;
+		int requiredNumberOfFeatures = node.getPoint().getSelectedFeatures().size() + this.randomCompletionPathLength;
 		LOGGER.debug("Required features : {}", requiredNumberOfFeatures);
 
 		GraphSearchInput<DatabaseNode, String> problem = new GraphSearchInput<>(new GraphGenerator<DatabaseNode, String>() {
@@ -91,7 +97,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 
 			@Override
 			public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
-				return generator.getSuccessorGenerator();
+				return DatabaseNodeEvaluator.this.generator.getSuccessorGenerator();
 			}
 
 			@Override
@@ -104,7 +110,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 					} else {
 						// Check whether node contains intermediate features
 						for (AbstractFeature feature : node.getSelectedFeatures()) {
-							if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
+							if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), DatabaseNodeEvaluator.this.db)) {
 								return false;
 							}
 						}
@@ -119,7 +125,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 			}
 
 			@Override
-			public void setNodeNumbering(boolean nodenumbering) {
+			public void setNodeNumbering(final boolean nodenumbering) {
 				// intentionally left blank
 			}
 		});
@@ -146,14 +152,19 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 		// Terminate search
 		randomCompletionSearch.cancel();
 
-		Instances instances = databaseConnector.getInstances(goalNode.getSelectedFeatures());
-		double result = evaluateInstances(instances);
+		Instances instances;
+		try {
+			instances = this.databaseConnector.getInstances(goalNode.getSelectedFeatures());
+		} catch (RetrieveInstancesFromDatabaseFailedException e) {
+			throw new DatasetEvaluationFailedException("Could not get instances for selected features from database connector.", e);
+		}
+		double result = this.evaluateInstances(instances);
 		LOGGER.info("Evaluation result is {}", result);
 		return result;
 	}
 
-	private double evaluateInstances(Instances instances) {
-		ToDoubleFunction<Instances> benchmarkFunction = EvaluationUtils.getBenchmarkFunctionByName(evaluationFunctionName);
+	private double evaluateInstances(final Instances instances) throws DatasetEvaluationFailedException {
+		ToDoubleFunction<Instances> benchmarkFunction = EvaluationUtils.getBenchmarkFunctionByName(this.evaluationFunctionName);
 		try {
 			return benchmarkFunction.applyAsDouble(instances);
 		} catch (Exception e) {
@@ -162,7 +173,7 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 	}
 
 	public DatabaseConnector getDatabaseConnector() {
-		return databaseConnector;
+		return this.databaseConnector;
 	}
 
 }
