@@ -1,22 +1,20 @@
 package autofe.db.search;
 
-public class NoSolutionFromRandomCompletionException extends RuntimeException {
+import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+
+public class NoSolutionFromRandomCompletionException extends NodeEvaluationException {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -1006432360208247761L;
 
-	public NoSolutionFromRandomCompletionException() {
-		super();
-	}
-
-	public NoSolutionFromRandomCompletionException(String msg) {
+	public NoSolutionFromRandomCompletionException(final String msg) {
 		super(msg);
 	}
 
-	public NoSolutionFromRandomCompletionException(String msg, Throwable cause) {
-		super(msg, cause);
+	public NoSolutionFromRandomCompletionException(final String msg, final Throwable cause) {
+		super(cause, msg);
 	}
 
 }

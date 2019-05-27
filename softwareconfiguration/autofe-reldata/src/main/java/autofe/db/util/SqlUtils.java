@@ -17,6 +17,8 @@ import autofe.db.model.relation.ForwardRelationship;
 
 public class SqlUtils {
 
+	private static final String PATTERN_TABLE_ATTRIBUTE = "%s.%s";
+
 	private static final String GENERAL_PREFIX = "FE_";
 	private static final String FORWARD_PREFIX = "FWD";
 	private static final String BACKWARD_PREFIX = "BWD";
@@ -24,18 +26,16 @@ public class SqlUtils {
 	private static final String TEMP_FEATURE = "TEMPFEATURE";
 	protected static final String TEMP_TABLE = "TEMPTABLE";
 
-	private static final String LOG_MSG = "%s.%s";
-
 	private SqlUtils() {
 		// prevent instantiation of this util class.
 	}
 
-	public static String replacePlaceholder(String in, int index, String replacement) {
+	public static String replacePlaceholder(final String in, final int index, final String replacement) {
 		String placeholder = "$" + index;
 		return in.replace(placeholder, replacement);
 	}
 
-	public static String getTableNameForFeature(AbstractFeature feature) {
+	public static String getTableNameForFeature(final AbstractFeature feature) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(GENERAL_PREFIX);
 		if (feature instanceof ForwardFeature) {
@@ -71,7 +71,7 @@ public class SqlUtils {
 		return sb.toString().toUpperCase();
 	}
 
-	public static String generateForwardSql(List<ForwardRelationship> joins, ForwardFeature feature, Database db) {
+	public static String generateForwardSql(final List<ForwardRelationship> joins, final ForwardFeature feature, final Database db) {
 		String startTableName;
 		String toTableName;
 
@@ -103,7 +103,7 @@ public class SqlUtils {
 		return sb.toString();
 	}
 
-	public static String generateBackwardSql(List<ForwardRelationship> joins, BackwardFeature feature, Database db) {
+	public static String generateBackwardSql(final List<ForwardRelationship> joins, final BackwardFeature feature, final Database db) {
 		Path path = new Path(feature.getPath());
 
 		// Add joins to path
@@ -117,40 +117,34 @@ public class SqlUtils {
 			Tuple<AbstractRelationship, AggregationFunction> pathElement = path.getPathElements().get(i);
 			AbstractRelationship ar = pathElement.getT();
 			ar.setContext(db);
-			SelectPart sp = new SelectPart();
-			sp.commonAttribute = escape(ar.getCommonAttributeName());
-			sp.counter = i;
-			sp.fromTable = escape(ar.getFromTableName());
-			sp.joinTable = escape(ar.getToTableName());
-
+			SelectPart sp = new SelectPart(escape(ar.getCommonAttributeName()), i, escape(ar.getFromTableName()), escape(ar.getToTableName()));
 			List<String> selectedColumns = new ArrayList<>();
 
 			// Join attribute
 			if (i != path.length() - 1) {
-				selectedColumns.add(String.format(LOG_MSG, escape(ar.getFromTableName()), escape(ar.getCommonAttributeName())));
+				selectedColumns.add(String.format(PATTERN_TABLE_ATTRIBUTE, escape(ar.getFromTableName()), escape(ar.getCommonAttributeName())));
 			}
 
 			// Join attribute for next join
 			if (i != path.length() - 1) {
 				Tuple<AbstractRelationship, AggregationFunction> nextPathElement = path.getPathElements().get(i + 1);
-				String joinAttribute = String.format(LOG_MSG, escape(ar.getFromTableName()), escape(nextPathElement.getT().getCommonAttributeName()));
+				String joinAttribute = String.format(PATTERN_TABLE_ATTRIBUTE, escape(ar.getFromTableName()), escape(nextPathElement.getT().getCommonAttributeName()));
 				if (!selectedColumns.contains(joinAttribute)) {
 					selectedColumns.add(joinAttribute);
 				}
 			}
 
 			if (ar instanceof BackwardRelationship) {
-
 				// Aggregated attribute
 				if (i != 0 && i != path.length() - 1) {
 					selectedColumns.add(String.format("%s(%s) AS %s", pathElement.getU(), escape(TEMP_FEATURE + (i - 1)), TEMP_FEATURE + i));
 				} else if (i == path.length() - 1) {
 					selectedColumns.add(String.format("%s(%s) AS '%s'", pathElement.getU(), escape(TEMP_FEATURE + (i - 1)), feature.getName()));
 				} else {
-					selectedColumns.add(String.format("%s(%s.%s) AS %s", pathElement.getU(), escape(ar.getToTableName()), escape(feature.getParent().getName()), TEMP_FEATURE + i));
+					selectedColumns.add(String.format("%s(" + PATTERN_TABLE_ATTRIBUTE + ") AS %s", pathElement.getU(), escape(ar.getToTableName()), escape(feature.getParent().getName()), TEMP_FEATURE + i));
 				}
 
-				sp.groupBy = String.format(LOG_MSG, escape(ar.getFromTableName()), escape(ar.getCommonAttributeName()));
+				sp.setGroupBy(String.format(PATTERN_TABLE_ATTRIBUTE, escape(ar.getFromTableName()), escape(ar.getCommonAttributeName())));
 
 			} else if (ar instanceof ForwardRelationship) {
 				if (i != path.length() - 1) {
@@ -164,13 +158,13 @@ public class SqlUtils {
 			if (i == path.length() - 1) {
 				Table firstTable = ar.getFrom();
 				Attribute primaryKey = DBUtils.getPrimaryKey(firstTable);
-				String primaryKeySelect = String.format(LOG_MSG, escape(firstTable.getName()), escape(primaryKey.getName()));
+				String primaryKeySelect = String.format(PATTERN_TABLE_ATTRIBUTE, escape(firstTable.getName()), escape(primaryKey.getName()));
 				if (!selectedColumns.contains(primaryKeySelect)) {
 					selectedColumns.add(primaryKeySelect);
 				}
 			}
 
-			sp.selectedColumns = selectedColumns;
+			sp.setSelectedColumns(selectedColumns);
 			selectParts.add(sp);
 		}
 
@@ -188,62 +182,8 @@ public class SqlUtils {
 		return sql;
 	}
 
-	static String escape(String toEscape) {
+	static String escape(final String toEscape) {
 		return "`" + toEscape + "`";
 	}
 
-}
-
-class SelectPart {
-	List<String> selectedColumns;
-	String fromTable;
-	String joinTable;
-	String commonAttribute;
-	int counter;
-	String groupBy;
-
-	String part1() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT ");
-		for (int i = 0; i < selectedColumns.size(); i++) {
-			sb.append(selectedColumns.get(i));
-			if (i != selectedColumns.size() - 1) {
-				sb.append(", ");
-			}
-		}
-		sb.append(" FROM ");
-		sb.append(fromTable);
-		sb.append(" LEFT OUTER JOIN");
-		return sb.toString();
-	}
-
-	String part2() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(SqlUtils.TEMP_TABLE + counter);
-		sb.append(String.format(" ON (%1$s.%2$s = %3$s.%2$s)", fromTable, commonAttribute, SqlUtils.escape(SqlUtils.TEMP_TABLE + counter)));
-		if (groupBy != null && !groupBy.isEmpty()) {
-			sb.append(String.format(" GROUP BY %s", groupBy));
-		}
-		return sb.toString();
-	}
-
-	String getInitalSelect() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT ");
-		for (int i = 0; i < selectedColumns.size(); i++) {
-			sb.append(selectedColumns.get(i));
-			if (i != selectedColumns.size() - 1) {
-				sb.append(", ");
-			}
-		}
-		sb.append(" FROM ");
-		sb.append(fromTable);
-		sb.append(" LEFT OUTER JOIN ");
-		sb.append(joinTable);
-		sb.append(String.format(" ON (%1$s.%2$s = %3$s.%2$s)", fromTable, commonAttribute, joinTable));
-		if (groupBy != null && !groupBy.isEmpty()) {
-			sb.append(String.format(" GROUP BY %s", groupBy));
-		}
-		return sb.toString();
-	}
 }

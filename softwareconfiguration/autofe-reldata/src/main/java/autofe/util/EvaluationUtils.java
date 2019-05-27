@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
@@ -46,7 +46,7 @@ import weka.filters.unsupervised.attribute.Remove;
  *
  */
 public final class EvaluationUtils {
-	private static final Logger logger = LoggerFactory.getLogger(EvaluationUtils.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(EvaluationUtils.class);
 
 	private static final double DOUBLE_ZERO_PREC = 0.0001;
 	private static final double KERNEL_SPLIT_PORTION = .3;
@@ -56,7 +56,7 @@ public final class EvaluationUtils {
 	}
 
 	public static double performClustering(final Instances insts) throws Exception {
-		logger.debug("Starting cluster evaluation...");
+		LOGGER.debug("Starting cluster evaluation...");
 
 		FilteredClusterer clusterer = new FilteredClusterer();
 
@@ -77,7 +77,7 @@ public final class EvaluationUtils {
 	}
 
 	public static double performKernelClustering(final Instances instances) throws Exception {
-		logger.debug("Starting kernelized cluster evaluation...");
+		LOGGER.debug("Starting kernelized cluster evaluation...");
 
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, KERNEL_SPLIT_PORTION);
 
@@ -109,13 +109,13 @@ public final class EvaluationUtils {
 			maxScore = Math.max(maxScore, currAcc);
 		}
 
-		logger.debug("Kernelized cluster evaluation result: {}", maxScore);
+		LOGGER.debug("Kernelized cluster evaluation result: {}", maxScore);
 
 		return maxScore;
 	}
 
 	public static double performKernelLDA(final Instances instances) throws Exception {
-		logger.debug("Starting kernelized LDA evaluation...");
+		LOGGER.debug("Starting kernelized LDA evaluation...");
 		List<Instances> split = WekaUtil.getStratifiedSplit(instances, 42, KERNEL_SPLIT_PORTION);
 
 		double maxScore = performLDA(new Instances(split.get(0)));
@@ -133,7 +133,7 @@ public final class EvaluationUtils {
 			try {
 				maxScore = Math.max(maxScore, performLDA(insts));
 			} catch (Exception e) {
-				logger.warn("Could not calculate the LDA score for kernel " + kernel.getClass().getSimpleName() + " due to the following exception: " + e.getMessage() + " in (" + e.getClass().getSimpleName() + ").");
+				LOGGER.warn("Could not calculate the LDA score for kernel {}.", kernel.getClass().getSimpleName(), e);
 				maxScore = Math.max(maxScore, 0d);
 			}
 		}
@@ -236,7 +236,7 @@ public final class EvaluationUtils {
 			loss += Math.log(expExpr / (lowerSum + 1));
 
 			if (Double.isNaN(loss)) {
-				logger.warn("Got NaN value for COCO batch score.");
+				LOGGER.warn("Got NaN value for COCO batch score.");
 				break;
 			}
 		}
@@ -298,7 +298,7 @@ public final class EvaluationUtils {
 			loss += Math.log(upperExp / (lowerSum + 1));
 
 			if (Double.isNaN(loss)) {
-				logger.warn("Got NaN value for COED batch score.");
+				LOGGER.warn("Got NaN value for COED batch score.");
 				break;
 			}
 		}
@@ -360,59 +360,73 @@ public final class EvaluationUtils {
 		return 1 - (0.33 * attEvalSum + 0.33 * knnResult + 0.33 * varianceMean);
 	}
 
-	public static Function<Instances, Double> getBenchmarkFunctionByName(final String name) {
+	public static ToDoubleFunction<Instances> getBenchmarkFunctionByName(final String name) {
 		switch (name) {
 		case "Cluster":
 			return data -> {
 				try {
 					return 1 - performClustering(data);
 				} catch (Exception e1) {
-					logger.error("Could not perform clustering benchmark.", e1);
+					LOGGER.error("Could not perform clustering benchmark.", e1);
 					return 1d;
 				}
 			};
 		case "KernelCluster":
-			return (data) -> {
+			return data -> {
 				try {
 					return 1 - performKernelClustering(data);
 				} catch (Exception e1) {
-					logger.error("Could not perform kernel clustering benchmark.", e1);
+					LOGGER.error("Could not perform kernel clustering benchmark.", e1);
 					return 1d;
 				}
 			};
 		case "COCO":
-			return data -> calculateCOCOForBatch(data);
+			return data -> {
+				try {
+					return calculateCOCOForBatch(data);
+				} catch (Exception e1) {
+					LOGGER.error("Could not calculate COCO.", e1);
+					return 1d;
+				}
+			};
 		case "COED":
-			return data -> calculateCOEDForBatch(data);
+			return data -> {
+				try {
+					return calculateCOEDForBatch(data);
+				} catch (Exception e1) {
+					LOGGER.error("Could not calculate COED.", e1);
+					return 1d;
+				}
+			};
 		case "LDA":
 			return data -> {
 				try {
 					return 1 - performLDA(data);
 				} catch (Exception e) {
-					logger.error("Could not perform LDA benchmark.", e);
+					LOGGER.error("Could not perform LDA benchmark.", e);
 					return 1d;
 				}
 			};
 		case "KernelLDA":
-			return (data) -> {
+			return data -> {
 				try {
 					return 1 - performKernelLDA(data);
 				} catch (Exception e) {
-					logger.error("Could not perform cluster LDA benchmark.", e);
+					LOGGER.error("Could not perform cluster LDA benchmark.", e);
 					return 1d;
 				}
 			};
 		case "Ensemble":
-			return (data) -> {
+			return data -> {
 				try {
 					return 1 - performEnsemble(data);
 				} catch (Exception e) {
-					logger.error("Could not perform ensemble benchmark.", e);
+					LOGGER.error("Could not perform ensemble benchmark.", e);
 					return 1d;
 				}
 			};
 		default:
-			throw new RuntimeException("Invalid evaluation function: " + name);
+			throw new InvalidEvaluationFunctionException("Invalid evaluation function: " + name);
 		}
 	}
 

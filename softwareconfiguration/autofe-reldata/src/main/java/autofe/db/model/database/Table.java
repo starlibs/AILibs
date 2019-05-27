@@ -2,6 +2,9 @@ package autofe.db.model.database;
 
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class Table {
 
 	private String name;
@@ -36,40 +39,16 @@ public class Table {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((columns == null) ? 0 : columns.hashCode());
-		result = prime * result + (isTarget ? 1231 : 1237);
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
+		return new HashCodeBuilder().append(columns).append(isTarget).append(name).toHashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
+		if (!(obj instanceof Table)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		Table other = (Table) obj;
-		if (columns == null) {
-			if (other.columns != null)
-				return false;
-		} else if (!columns.equals(other.columns)) {
-			return false;
-		}
-		if (isTarget != other.isTarget) {
-			return false;
-		}
-		if (name == null) {
-			if (other.name != null) {
-				return false;
-			}
-		} else if (!name.equals(other.name)) {
-			return false;
-		}
-		return true;
+		return new EqualsBuilder().append(columns, other.columns).append(isTarget, other.isTarget).append(name, other.name).isEquals();
 	}
 
 	@Override

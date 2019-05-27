@@ -7,10 +7,10 @@ import weka.core.Instances;
 
 public interface DatabaseConnector {
 
-	Instances getInstances(List<AbstractFeature> features);
-	
+	Instances getInstances(List<AbstractFeature> features) throws RetrieveInstancesFromDatabaseFailedException;
+
 	void cleanup();
-	
+
 	void close();
 
 }

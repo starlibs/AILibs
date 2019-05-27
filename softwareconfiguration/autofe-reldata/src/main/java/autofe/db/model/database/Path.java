@@ -14,31 +14,31 @@ public class Path {
 		this.pathElements = new ArrayList<>();
 	}
 
-	public Path(List<Tuple<AbstractRelationship, AggregationFunction>> pathElements) {
+	public Path(final List<Tuple<AbstractRelationship, AggregationFunction>> pathElements) {
 		this.pathElements = new ArrayList<>(pathElements);
 	}
 
-	public Path(Path toClone) {
+	public Path(final Path toClone) {
 		this(toClone.pathElements);
 	}
 
 	public List<Tuple<AbstractRelationship, AggregationFunction>> getPathElements() {
-		return pathElements;
+		return this.pathElements;
 	}
 
-	public void addPathElement(Tuple<AbstractRelationship, AggregationFunction> toAdd) {
-		pathElements.add(toAdd);
+	public void addPathElement(final Tuple<AbstractRelationship, AggregationFunction> toAdd) {
+		this.pathElements.add(toAdd);
 	}
 
-	public void addPathElement(AbstractRelationship ar, AggregationFunction af) {
-		pathElements.add(new Tuple<AbstractRelationship, AggregationFunction>(ar, af));
+	public void addPathElement(final AbstractRelationship ar, final AggregationFunction af) {
+		this.pathElements.add(new Tuple<AbstractRelationship, AggregationFunction>(ar, af));
 	}
 
 	public String getLastTableName() {
-		if (pathElements.isEmpty()) {
+		if (this.pathElements.isEmpty()) {
 			return null;
 		}
-		Tuple<AbstractRelationship, AggregationFunction> lastPathElement = pathElements.get(pathElements.size() - 1);
+		Tuple<AbstractRelationship, AggregationFunction> lastPathElement = this.pathElements.get(this.pathElements.size() - 1);
 		return lastPathElement.getT().getFromTableName();
 	}
 
@@ -50,23 +50,21 @@ public class Path {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((pathElements == null) ? 0 : pathElements.hashCode());
+		result = prime * result + ((this.pathElements == null) ? 0 : this.pathElements.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
+	public boolean equals(final Object obj) {
+		if (!(obj instanceof Path)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		Path other = (Path) obj;
-		if (pathElements == null) {
-			if (other.pathElements != null)
+		if (this.pathElements == null) {
+			if (other.pathElements != null) {
 				return false;
-		} else if (!pathElements.equals(other.pathElements)) {
+			}
+		} else if (!this.pathElements.equals(other.pathElements)) {
 			return false;
 		}
 		return true;
@@ -74,11 +72,11 @@ public class Path {
 
 	@Override
 	public String toString() {
-		if (pathElements.isEmpty()) {
+		if (this.pathElements.isEmpty()) {
 			return "[{}]";
 		}
 		StringBuilder sb = new StringBuilder();
-		for (Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
+		for (Tuple<AbstractRelationship, AggregationFunction> pathElement : this.pathElements) {
 			sb.append(pathElement.getT().getFromTableName());
 			sb.append("<-(" + pathElement.getU() + ")-");
 			sb.append(pathElement.getT().getToTableName());

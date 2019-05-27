@@ -32,24 +32,24 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 	private Database db;
 
-	public DatabaseSuccessorGenerator(Database db) {
+	public DatabaseSuccessorGenerator(final Database db) {
 		super();
 		this.db = db;
 	}
 
 	@Override
-	public List<NodeExpansionDescription<DatabaseNode, String>> generateSuccessors(DatabaseNode node) {
+	public List<NodeExpansionDescription<DatabaseNode, String>> generateSuccessors(final DatabaseNode node) {
 		// Check whether node contains intermediate feature
-		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
+		BackwardFeature intermediateFeature = this.getIntermediateFeature(node.getSelectedFeatures());
 
 		if (intermediateFeature == null) {
-			return computeForNonIntermediateNode(node);
+			return this.computeForNonIntermediateNode(node);
 		} else {
-			return computeForIntermediateNode(node);
+			return this.computeForIntermediateNode(node);
 		}
 	}
 
-	private List<NodeExpansionDescription<DatabaseNode, String>> computeForNonIntermediateNode(DatabaseNode node) {
+	private List<NodeExpansionDescription<DatabaseNode, String>> computeForNonIntermediateNode(final DatabaseNode node) {
 		// Finished nodes do not have successors
 		if (node.isFinished()) {
 			return Collections.emptyList();
@@ -57,9 +57,9 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
 
-		Set<Attribute> forwardAttributes = db.getForwardAttributes();
+		Set<Attribute> forwardAttributes = this.db.getForwardAttributes();
 
-		Set<Attribute> backwardAttributes = db.getBackwardAttributes();
+		Set<Attribute> backwardAttributes = this.db.getBackwardAttributes();
 
 		List<AbstractFeature> currentFeatures = node.getSelectedFeatures();
 		List<ForwardFeature> currentForwardFeatures = new ArrayList<>();
@@ -83,7 +83,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 				continue;
 			}
 			if ((addOnlyLargerFeatures && att.compareTo(maxForwardAttribute) > 0) || !addOnlyLargerFeatures) {
-				List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
+				List<AbstractFeature> extended = this.cloneFeatureList(currentFeatures);
 				extended.add(new ForwardFeature(att));
 				DatabaseNode to = new DatabaseNode(extended, false);
 				toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Forward: " + att.getName(), NodeType.OR));
@@ -99,7 +99,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			BackwardFeature candidate = new BackwardFeature(att);
 
 			// Check whether all variants of the backward feature are already chosen
-			Set<Path> allPaths = getAllPathsFrom(candidate.getPath(), candidate);
+			Set<Path> allPaths = this.getAllPathsFrom(candidate.getPath(), candidate);
 			// Generate feature for each path
 			List<BackwardFeature> allFeatures = new ArrayList<>();
 			for (Path path : allPaths) {
@@ -111,7 +111,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 				continue;
 			}
 
-			List<AbstractFeature> extended = cloneFeatureList(currentFeatures);
+			List<AbstractFeature> extended = this.cloneFeatureList(currentFeatures);
 			extended.add(new BackwardFeature(att));
 			DatabaseNode to = new DatabaseNode(extended, false);
 			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Backward: " + att.getName(), NodeType.OR));
@@ -124,22 +124,21 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		return toReturn;
 	}
 
-	private List<NodeExpansionDescription<DatabaseNode, String>> computeForIntermediateNode(DatabaseNode node) {
-		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
+	private List<NodeExpansionDescription<DatabaseNode, String>> computeForIntermediateNode(final DatabaseNode node) {
 
-		BackwardFeature intermediateFeature = getIntermediateFeature(node.getSelectedFeatures());
+		BackwardFeature intermediateFeature = this.getIntermediateFeature(node.getSelectedFeatures());
 		if (intermediateFeature == null) {
 			throw new IllegalArgumentException("Intermediate feature must not be null.");
 		}
 
 		// Get last table
-		Table lastTable = DBUtils.getTableByName(intermediateFeature.getPath().getLastTableName(), db);
+		Table lastTable = DBUtils.getTableByName(intermediateFeature.getPath().getLastTableName(), this.db);
 		if (lastTable == null) {
-			lastTable = DBUtils.getAttributeTable(intermediateFeature.getParent(), db);
+			lastTable = DBUtils.getAttributeTable(intermediateFeature.getParent(), this.db);
 		}
 
 		// Compute possible next path elements
-		List<Tuple<AbstractRelationship, AggregationFunction>> nextPathElements = nextIntermediatePathElements(lastTable);
+		List<Tuple<AbstractRelationship, AggregationFunction>> nextPathElements = this.nextIntermediatePathElements(lastTable);
 
 		List<Tuple<AbstractRelationship, AggregationFunction>> validNextPathElements = new ArrayList<>();
 
@@ -147,10 +146,10 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		for (Tuple<AbstractRelationship, AggregationFunction> nextPathElement : nextPathElements) {
 			// Compute all possible path from there
 			AbstractRelationship ar = nextPathElement.getT();
-			ar.setContext(db);
+			ar.setContext(this.db);
 			Path prefix = new Path(intermediateFeature.getPath());
 			prefix.addPathElement(nextPathElement);
-			Set<Path> allPaths = getAllPathsFrom(prefix, intermediateFeature);
+			Set<Path> allPaths = this.getAllPathsFrom(prefix, intermediateFeature);
 
 			// Generate feature for each path
 			List<BackwardFeature> allFeatures = new ArrayList<>();
@@ -168,9 +167,10 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		}
 
+		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
 		for (Tuple<AbstractRelationship, AggregationFunction> nextPathElement : validNextPathElements) {
-			List<AbstractFeature> extendedFeatures = cloneFeatureList(node.getSelectedFeatures());
-			BackwardFeature extendedintermediateFeature = getIntermediateFeature(extendedFeatures);
+			List<AbstractFeature> extendedFeatures = this.cloneFeatureList(node.getSelectedFeatures());
+			BackwardFeature extendedintermediateFeature = this.getIntermediateFeature(extendedFeatures);
 			if (extendedintermediateFeature == null) {
 				throw new IllegalStateException("The intermediate feature must not be null in the current state!");
 			}
@@ -187,12 +187,12 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 	}
 
-	private List<Tuple<AbstractRelationship, AggregationFunction>> nextIntermediatePathElements(Table lastTable) {
+	private List<Tuple<AbstractRelationship, AggregationFunction>> nextIntermediatePathElements(final Table lastTable) {
 		List<Tuple<AbstractRelationship, AggregationFunction>> toReturn = new ArrayList<>();
 
 		// Find all possible next tables
-		Set<BackwardRelationship> backwards = DBUtils.getBackwardsTo(lastTable, db);
-		Set<ForwardRelationship> forwards = DBUtils.getForwardsTo(lastTable, db);
+		Set<BackwardRelationship> backwards = DBUtils.getBackwardsTo(lastTable, this.db);
+		Set<ForwardRelationship> forwards = DBUtils.getForwardsTo(lastTable, this.db);
 
 		for (BackwardRelationship br : backwards) {
 			for (AggregationFunction af : AggregationFunction.values()) {
@@ -209,16 +209,16 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		return toReturn;
 	}
 
-	private BackwardFeature getIntermediateFeature(List<AbstractFeature> features) {
+	private BackwardFeature getIntermediateFeature(final List<AbstractFeature> features) {
 		for (AbstractFeature feature : features) {
-			if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), db)) {
+			if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), this.db)) {
 				return (BackwardFeature) feature;
 			}
 		}
 		return null;
 	}
 
-	private List<AbstractFeature> cloneFeatureList(List<AbstractFeature> featureList) {
+	private List<AbstractFeature> cloneFeatureList(final List<AbstractFeature> featureList) {
 		List<AbstractFeature> toReturn = new ArrayList<>();
 		for (AbstractFeature feature : featureList) {
 			if (feature instanceof ForwardFeature) {
@@ -230,33 +230,33 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		return toReturn;
 	}
 
-	public Set<Path> getAllPathsFrom(Path prefix, BackwardFeature feature) {
+	public Set<Path> getAllPathsFrom(final Path prefix, final BackwardFeature feature) {
 		Set<Path> allPaths = new HashSet<>();
 
 		// Start recursion
-		addPaths(prefix, feature, allPaths);
+		this.addPaths(prefix, feature, allPaths);
 
 		return allPaths;
 	}
 
-	private void addPaths(Path prefix, BackwardFeature feature, Set<Path> allPaths) {
-		if (!DBUtils.isIntermediate(prefix, db)) {
+	private void addPaths(final Path prefix, final BackwardFeature feature, final Set<Path> allPaths) {
+		if (!DBUtils.isIntermediate(prefix, this.db)) {
 			allPaths.add(prefix);
 			return;
 		}
-		Table from = DBUtils.getTableByName(prefix.getLastTableName(), db);
+		Table from = DBUtils.getTableByName(prefix.getLastTableName(), this.db);
 		if (from == null) {
-			from = DBUtils.getAttributeTable(feature.getParent(), db);
+			from = DBUtils.getAttributeTable(feature.getParent(), this.db);
 		}
-		List<Tuple<AbstractRelationship, AggregationFunction>> nextElements = nextIntermediatePathElements(from);
+		List<Tuple<AbstractRelationship, AggregationFunction>> nextElements = this.nextIntermediatePathElements(from);
 		for (Tuple<AbstractRelationship, AggregationFunction> nextElement : nextElements) {
 			Path extended = new Path(prefix);
 			extended.addPathElement(nextElement);
 			// Found complete path
-			if (!DBUtils.isIntermediate(extended, db)) {
+			if (!DBUtils.isIntermediate(extended, this.db)) {
 				allPaths.add(extended);
 			} else {
-				addPaths(extended, feature, allPaths);
+				this.addPaths(extended, feature, allPaths);
 			}
 		}
 	}

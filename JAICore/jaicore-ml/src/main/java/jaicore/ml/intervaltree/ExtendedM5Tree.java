@@ -17,7 +17,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
+public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor {
 
 	/**
 	 * For serialization purposes.
@@ -30,7 +30,7 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
 		this(new AggressiveAggregator());
 	}
 
-	public ExtendedM5Tree(IntervalAggregator intervalAggregator) {
+	public ExtendedM5Tree(final IntervalAggregator intervalAggregator) {
 		super();
 		try {
 			this.setOptions(new String[] { "-U" });
@@ -40,8 +40,8 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
 		this.intervalAggregator = intervalAggregator;
 	}
 
-
-	public Interval predictInterval(IntervalAndHeader intervalAndHeader) {
+	@Override
+	public Interval predictInterval(final IntervalAndHeader intervalAndHeader) {
 		Interval[] queriedInterval = intervalAndHeader.getIntervals();
 		// the stack of elements that still have to be processed.
 		Deque<Entry<Interval[], RuleNode>> stack = new ArrayDeque<>();
@@ -58,7 +58,7 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
 			int attribute = nextTree.splitAtt();
 			// process node
 			if (nextTree.isLeaf()) {
-				predictLeaf(list, toProcess, nextTree, intervalAndHeader.getHeaderInformation());
+				this.predictLeaf(list, toProcess, nextTree, intervalAndHeader.getHeaderInformation());
 			} else {
 				Interval intervalForAttribute = queriedInterval[attribute];
 				// no leaf node...
@@ -72,11 +72,9 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
 						// scenario: x_min <= threshold <= x_max
 						// query [x_min, threshold] on the left child
 						// query [threshold, x_max] on the right child
-						Interval[] leftInterval = RQPHelper.substituteInterval(toProcess.getKey(),
-								new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
+						Interval[] leftInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
 						stack.push(RQPHelper.getEntry(leftInterval, leftChild));
-						Interval[] rightInterval = RQPHelper.substituteInterval(toProcess.getKey(),
-								new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
+						Interval[] rightInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
 						stack.push(RQPHelper.getEntry(rightInterval, rightChild));
 					} else {
 						// scenario: x_min <= x_max < threshold
@@ -88,11 +86,10 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
 				}
 			}
 		}
-		return intervalAggregator.aggregate(list);
+		return this.intervalAggregator.aggregate(list);
 	}
 
-	private void predictLeaf(ArrayList<Double> list, Entry<Interval[], RuleNode> toProcess, RuleNode nextTree,
-			Instances header) {
+	private void predictLeaf(final ArrayList<Double> list, final Entry<Interval[], RuleNode> toProcess, final RuleNode nextTree, final Instances header) {
 		Interval[] usedBounds = toProcess.getKey();
 		PreConstructedLinearModel model = nextTree.getModel();
 		// calculate the values at the edges of the interval
@@ -122,7 +119,7 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor{
 			list.add(predictionLower);
 			list.add(predictionUpper);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new PredictionFailedException(e);
 		}
 	}
 }

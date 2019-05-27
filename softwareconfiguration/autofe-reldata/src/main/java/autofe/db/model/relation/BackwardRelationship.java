@@ -6,14 +6,13 @@ public class BackwardRelationship extends AbstractRelationship {
 		super();
 	}
 
-	public BackwardRelationship(String fromTableName, String toTableName, String commonAttributeName) {
+	public BackwardRelationship(final String fromTableName, final String toTableName, final String commonAttributeName) {
 		super(fromTableName, toTableName, commonAttributeName);
 	}
 
 	@Override
 	public String toString() {
-		return "BackwardRelationship [fromTableName=" + fromTableName + ", toTableName=" + toTableName
-				+ ", commonAttributeName=" + commonAttributeName + "]";
+		return "BackwardRelationship [fromTableName=" + this.fromTableName + ", toTableName=" + this.toTableName + ", commonAttributeName=" + this.commonAttributeName + "]";
 	}
 
 }
