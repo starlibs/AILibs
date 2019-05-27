@@ -30,8 +30,9 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 
 	protected PilotEstimateSampling(final D input) {
 		super(input);
-		if (!(input instanceof WekaInstances))
+		if (!(input instanceof WekaInstances)) {
 			throw new IllegalArgumentException("Pilot Estimate Sampling currently only works with WekaInstances. The signature is kept general to avoid refactoring later on.");
+		}
 	}
 
 	public I getChosenInstance() {

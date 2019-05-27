@@ -33,11 +33,11 @@ public class TimeSeriesTreeClassifier extends ASimplifiedTSClassifier<Integer> {
 	 * Decision information for a tree node within a <code>TimeSeriesTree</code>.
 	 */
 	static class TimeSeriesTreeNodeDecisionFunction {
-		TimeSeriesFeature.FeatureType f;
-		int t1;
-		int t2;
-		double threshold;
-		int classPrediction = -1;
+		protected TimeSeriesFeature.FeatureType f;
+		protected int t1;
+		protected int t2;
+		protected double threshold;
+		protected int classPrediction = -1;
 
 		@Override
 		public String toString() {

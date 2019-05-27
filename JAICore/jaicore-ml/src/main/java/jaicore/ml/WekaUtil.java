@@ -785,7 +785,7 @@ public class WekaUtil {
 			}
 			return result;
 		}
-		Random rand = new Random(seed);
+
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
 		for (double p : portions) {
@@ -796,6 +796,7 @@ public class WekaUtil {
 		}
 
 		Instances shuffledData = new Instances(data);
+		Random rand = new Random(seed);
 		shuffledData.randomize(rand);
 		List<Instances> instances = new ArrayList<>();
 		Instances emptyInstances = new Instances(shuffledData);
@@ -871,7 +872,7 @@ public class WekaUtil {
 	 *         will be updated to track the split
 	 */
 	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double... portions) {
-		Random rand = new Random(seed);
+
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
 		for (double p : portions) {
@@ -882,6 +883,7 @@ public class WekaUtil {
 		}
 
 		Instances shuffledData = new Instances(data);
+		Random rand = new Random(seed);
 		shuffledData.randomize(rand);
 		List<ReproducibleInstances> instances = new ArrayList<>();
 		ReproducibleInstances emptyInstances = new ReproducibleInstances(data);
