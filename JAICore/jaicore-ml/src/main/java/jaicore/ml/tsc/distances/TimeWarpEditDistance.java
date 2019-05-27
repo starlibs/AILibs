@@ -65,12 +65,12 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
 	}
 
 	@Override
-	public double distance(final double[] A, final double[] tA, final double[] B, final double[] tB) {
-		int n = A.length;
-		int m = B.length;
+	public double distance(final double[] a, final double[] tA, final double[] b, final double[] tB) {
+		int n = a.length;
+		int m = b.length;
 
 		// DP[0..n, 0..m]
-		double[][] DP = new double[n + 1][m + 1];
+		double[][] dp = new double[n + 1][m + 1];
 
 		// declare A[0] := 0, tA[0] := 0
 		// declare B[0] := 0, tB[0] := 0
@@ -79,12 +79,12 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
 
 		// Dynamic Programming initialization.
 		for (int i = 1; i <= n; i++) {
-			DP[i][0] = Double.MAX_VALUE;
+			dp[i][0] = Double.MAX_VALUE;
 		}
 		for (int i = 1; i <= m; i++) {
-			DP[0][i] = Double.MAX_VALUE;
+			dp[0][i] = Double.MAX_VALUE;
 		}
-		DP[0][0] = 0d;
+		dp[0][0] = 0d;
 
 		// Dynamic programming.
 		for (int i = 1; i <= n; i++) {
@@ -99,36 +99,36 @@ public class TimeWarpEditDistance implements ITimeSeriesDistanceWithTimestamps {
 
 				if (i == 1 && j == 1) {
 					// Substitute A[i-2] with 0 and B[j-2] with 0.
-					c1 = DP[i - 1][j] + this.d.distance(0, A[i - 1]) + this.nu * tA[i - 1] + this.lambda;
-					c2 = DP[i][j - 1] + this.d.distance(0, B[j - 1]) + this.nu * tB[j - 1] + this.lambda;
-					c3 = DP[i - 1][j - 1] + this.d.distance(A[i - 1], B[i - 1]) + this.nu * Math.abs(tA[i - 1] - tB[j - 1]);
+					c1 = dp[i - 1][j] + this.d.distance(0, a[i - 1]) + this.nu * tA[i - 1] + this.lambda;
+					c2 = dp[i][j - 1] + this.d.distance(0, b[j - 1]) + this.nu * tB[j - 1] + this.lambda;
+					c3 = dp[i - 1][j - 1] + this.d.distance(a[i - 1], b[i - 1]) + this.nu * Math.abs(tA[i - 1] - tB[j - 1]);
 				} else if (i == 1) {
 					// Substitute A[i-2] with 0.
-					c1 = DP[i - 1][j] + this.d.distance(0, A[i - 1]) + this.nu * tA[i - 1] + this.lambda;
-					c2 = DP[i][j - 1] + this.d.distance(B[j - 2], B[j - 1]) + this.nu * (tB[j - 1] - tB[j - 2]) + this.lambda;
-					c3 = DP[i - 1][j - 1] + this.d.distance(A[i - 1], B[i - 1]) + this.d.distance(0, B[j - 2])
+					c1 = dp[i - 1][j] + this.d.distance(0, a[i - 1]) + this.nu * tA[i - 1] + this.lambda;
+					c2 = dp[i][j - 1] + this.d.distance(b[j - 2], b[j - 1]) + this.nu * (tB[j - 1] - tB[j - 2]) + this.lambda;
+					c3 = dp[i - 1][j - 1] + this.d.distance(a[i - 1], b[i - 1]) + this.d.distance(0, b[j - 2])
 					+ this.nu * (Math.abs(tA[i - 1] - tB[j - 1]) + tB[j - 2]);
 				} else if (j == 1) {
 					// Substitute B[j-2] with 0.
-					c1 = DP[i - 1][j] + this.d.distance(A[i - 2], A[i - 1]) + this.nu * (tA[i - 1] - tA[i - 2]) + this.lambda;
-					c2 = DP[i][j - 1] + this.d.distance(0, B[j - 1]) + this.nu * tB[j - 1] + this.lambda;
-					c3 = DP[i - 1][j - 1] + this.d.distance(A[i - 1], B[i - 1]) + this.d.distance(A[i - 2], 0)
+					c1 = dp[i - 1][j] + this.d.distance(a[i - 2], a[i - 1]) + this.nu * (tA[i - 1] - tA[i - 2]) + this.lambda;
+					c2 = dp[i][j - 1] + this.d.distance(0, b[j - 1]) + this.nu * tB[j - 1] + this.lambda;
+					c3 = dp[i - 1][j - 1] + this.d.distance(a[i - 1], b[i - 1]) + this.d.distance(a[i - 2], 0)
 					+ this.nu * (Math.abs(tA[i - 1] - tB[j - 1]) + tA[i - 2]);
 				} else {
 					// No substitution.
-					c1 = DP[i - 1][j] + this.d.distance(A[i - 2], A[i - 1]) + this.nu * (tA[i - 1] - tA[i - 2]) + this.lambda;
-					c2 = DP[i][j - 1] + this.d.distance(B[j - 2], B[j - 1]) + this.nu * (tB[j - 1] - tB[j - 2]) + this.lambda;
-					c3 = DP[i - 1][j - 1] + this.d.distance(A[i - 1], B[i - 1]) + this.d.distance(A[i - 2], B[j - 2])
+					c1 = dp[i - 1][j] + this.d.distance(a[i - 2], a[i - 1]) + this.nu * (tA[i - 1] - tA[i - 2]) + this.lambda;
+					c2 = dp[i][j - 1] + this.d.distance(b[j - 2], b[j - 1]) + this.nu * (tB[j - 1] - tB[j - 2]) + this.lambda;
+					c3 = dp[i - 1][j - 1] + this.d.distance(a[i - 1], b[i - 1]) + this.d.distance(a[i - 2], b[j - 2])
 					+ this.nu * (Math.abs(tA[i - 1] - tB[j - 1]) + Math.abs(tA[i - 2] - tB[j - 2]));
 				}
 
 				// Minimum cost.
 				double minimum = Math.min(c1, Math.min(c2, c3));
-				DP[i][j] = minimum;
+				dp[i][j] = minimum;
 			}
 		}
 
-		return DP[n][m];
+		return dp[n][m];
 	}
 
 }

@@ -46,12 +46,12 @@ public class ComplexityInvariantDistance implements ITimeSeriesDistance {
 	}
 
 	@Override
-	public double distance(final double[] A, final double[] B) {
-		double complexityA = this.complexityMeasure.complexity(A);
-		double complexityB = this.complexityMeasure.complexity(B);
+	public double distance(final double[] a, final double[] b) {
+		double complexityA = this.complexityMeasure.complexity(a);
+		double complexityB = this.complexityMeasure.complexity(b);
 		double complexityCorrectionFactor = Math.max(complexityA, complexityB) / Math.min(complexityA, complexityB);
 
-		return this.distanceMeasure.distance(A, B) * complexityCorrectionFactor;
+		return this.distanceMeasure.distance(a, b) * complexityCorrectionFactor;
 	}
 
 }

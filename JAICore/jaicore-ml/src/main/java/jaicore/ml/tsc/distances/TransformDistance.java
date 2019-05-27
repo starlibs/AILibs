@@ -146,11 +146,11 @@ public class TransformDistance implements ITimeSeriesDistance {
 	}
 
 	@Override
-	public double distance(final double[] A, final double[] B) {
-		double[] transformA = this.transform.transform(A);
-		double[] transformB = this.transform.transform(B);
+	public double distance(final double[] a, final double[] b) {
+		double[] transformA = this.transform.transform(a);
+		double[] transformB = this.transform.transform(b);
 
-		return this.a * this.timeSeriesDistance.distance(A, B) + this.b * this.transformDistance.distance(transformA, transformB);
+		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.transformDistance.distance(transformA, transformB);
 	}
 
 	/**

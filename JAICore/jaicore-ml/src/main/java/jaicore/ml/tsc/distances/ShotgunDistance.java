@@ -2,7 +2,7 @@ package jaicore.ml.tsc.distances;
 
 import java.util.Arrays;
 
-import jaicore.ml.tsc.util.TimeSeriesUtil;;
+import jaicore.ml.tsc.util.TimeSeriesUtil;
 
 /**
  * Implementation of Shotgun Distance measure as published in "Towards Time
@@ -42,9 +42,9 @@ public class ShotgunDistance implements ITimeSeriesDistance {
 	/**
 	 * Constructor for the Shotgun Distance.
 	 *
-	 * @param windowLength      The window length.
+	 * @param windowLength The window length.
 	 * @param meanNormalization Mean normalization. If false, no mean substraction
-	 *                          at vertical alignment of windows.
+	 *            at vertical alignment of windows.
 	 */
 	public ShotgunDistance(final int windowLength, final boolean meanNormalization) {
 		// Parameter checks.
@@ -57,18 +57,17 @@ public class ShotgunDistance implements ITimeSeriesDistance {
 	}
 
 	@Override
-	public double distance(final double[] A, final double[] B) {
+	public double distance(final double[] a, final double[] b) {
 		// Assure that max(A.length, B.length) <= windowLength, otherwise
 		// the result is undefined.
 
 		double totalDistance = 0;
 
 		// For each disjoint query window with lenth this.windowLength.
-		int numberOfDisjointWindows = A.length / this.windowLength;
+		int numberOfDisjointWindows = a.length / this.windowLength;
 		for (int i = 0; i < numberOfDisjointWindows; i++) {
 			int startOfDisjointWindow = i * this.windowLength;
-			double[] disjointWindow = Arrays.copyOfRange(A, startOfDisjointWindow,
-					startOfDisjointWindow + this.windowLength);
+			double[] disjointWindow = Arrays.copyOfRange(a, startOfDisjointWindow, startOfDisjointWindow + this.windowLength);
 
 			// Vertical alignment.
 			if (this.meanNormalization) {
@@ -82,11 +81,10 @@ public class ShotgunDistance implements ITimeSeriesDistance {
 			double windowDistance = Double.MAX_VALUE;
 
 			// Slide window with length windowLength and stride 1 over the time series B.
-			int numberOfSlidingWindows = B.length - this.windowLength + 1;
+			int numberOfSlidingWindows = b.length - this.windowLength + 1;
 			for (int j = 0; j < numberOfSlidingWindows; j++) {
 				int startOfSlidingWindow = j;
-				double[] slidingWindow = Arrays.copyOfRange(B, startOfSlidingWindow,
-						startOfSlidingWindow + this.windowLength);
+				double[] slidingWindow = Arrays.copyOfRange(b, startOfSlidingWindow, startOfSlidingWindow + this.windowLength);
 
 				// Vertical alignment.
 				if (this.meanNormalization) {

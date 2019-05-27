@@ -149,7 +149,7 @@ public class SimplifiedTimeSeriesLoader {
 			}
 
 			// Check for same instance length
-			if (matrices.size() != 0 && ((double[][]) tsTargetClassNames[0]).length != matrices.get(0).length) {
+			if (!matrices.isEmpty() && ((double[][]) tsTargetClassNames[0]).length != matrices.get(0).length) {
 				throw new TimeSeriesLoadingException(
 						"All time series must have the same first dimensionality (number of instances).");
 			}

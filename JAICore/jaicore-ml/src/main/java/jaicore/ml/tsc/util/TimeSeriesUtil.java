@@ -79,7 +79,7 @@ public class TimeSeriesUtil {
 	 * @param array
 	 * @throws IllegalArgumentException
 	 */
-	public static void isTimeSeriesOrException(final INDArray... array) throws IllegalArgumentException {
+	public static void isTimeSeriesOrException(final INDArray... array) {
 		for (INDArray a : array) {
 			if (!isTimeSeries(array)) {
 				String message = String.format(
@@ -97,7 +97,7 @@ public class TimeSeriesUtil {
 	 * @param length
 	 * @throws IllegalArgumentException
 	 */
-	public static void isTimeSeriesOrException(final int length, final INDArray... array) throws IllegalArgumentException {
+	public static void isTimeSeriesOrException(final int length, final INDArray... array) {
 		for (INDArray a : array) {
 			if (!isTimeSeries(array)) {
 				String message = String.format(
@@ -120,7 +120,7 @@ public class TimeSeriesUtil {
 	 * @param length
 	 * @throws IllegalArgumentException
 	 */
-	public static void isTimeSeriesOrException(final int length, final double[]... array) throws IllegalArgumentException {
+	public static void isTimeSeriesOrException(final int length, final double[]... array) {
 		for (double[] a : array) {
 			if (!isTimeSeries(length, a)) {
 				String message = String.format("The given time series should length 7, but has a length of %d.",
@@ -170,8 +170,7 @@ public class TimeSeriesUtil {
 	 * @param timeSeries2
 	 * @throws TimeSeriesLengthException
 	 */
-	public static void isSameLengthOrException(final INDArray timeSeries1, final INDArray... timeSeries)
-			throws TimeSeriesLengthException {
+	public static void isSameLengthOrException(final INDArray timeSeries1, final INDArray... timeSeries) {
 		for (INDArray t : timeSeries) {
 			if (!isSameLength(timeSeries1, t)) {
 				String message = String.format(
@@ -190,8 +189,7 @@ public class TimeSeriesUtil {
 	 * @param timeSeries2
 	 * @throws TimeSeriesLengthException
 	 */
-	public static void isSameLengthOrException(final double[] timeSeries1, final double[]... timeSeries)
-			throws TimeSeriesLengthException {
+	public static void isSameLengthOrException(final double[] timeSeries1, final double[]... timeSeries) {
 		for (double[] t : timeSeries) {
 			if (!isSameLength(timeSeries1, t)) {
 				String message = String.format(
@@ -225,8 +223,7 @@ public class TimeSeriesUtil {
 	 */
 	public static double[] createEquidistantTimestamps(final double[] timeSeries) {
 		int n = timeSeries.length;
-		double[] timestamps = IntStream.range(0, n).mapToDouble(t -> (double) t).toArray();
-		return timestamps;
+		return IntStream.range(0, n).mapToDouble(t -> (double) t).toArray();
 	}
 
 	/**
@@ -295,8 +292,7 @@ public class TimeSeriesUtil {
 			}
 		}
 
-		int maxKey = getMaximumKeyByValue(statistics) != null ? getMaximumKeyByValue(statistics) : -1;
-		return maxKey;
+		return getMaximumKeyByValue(statistics) != null ? getMaximumKeyByValue(statistics) : -1;
 	}
 
 	/**
@@ -691,14 +687,14 @@ public class TimeSeriesUtil {
 	 * Pazzani (2001).
 	 * <code>f'(n) = \frac{ f(n) - f(n-1) + /frac{f(i+1) - f(i-1)}{2} }{2}</code>
 	 *
-	 * @param T
+	 * @param t
 	 * @return
 	 */
-	public static double[] keoghDerivate(final double[] T) {
-		double[] derivate = new double[T.length - 2];
+	public static double[] keoghDerivate(final double[] t) {
+		double[] derivate = new double[t.length - 2];
 
-		for (int i = 1; i < T.length - 1; i++) {
-			derivate[i - 1] = ((T[i] - T[i - 1]) + (T[i + 1] - T[i - 1]) / 2) / 2;
+		for (int i = 1; i < t.length - 1; i++) {
+			derivate[i - 1] = ((t[i] - t[i - 1]) + (t[i + 1] - t[i - 1]) / 2) / 2;
 		}
 
 		return derivate;
@@ -709,18 +705,18 @@ public class TimeSeriesUtil {
 	 * Pazzani (2001).
 	 * <code>f'(n) = \frac{ f(n) - f(n-1) + /frac{f(i+1) - f(i-1)}{2} }{2}</code>
 	 *
-	 * @param T
+	 * @param t
 	 * @return
 	 */
-	public static double[] keoghDerivateWithBoundaries(final double[] T) {
-		double[] derivate = new double[T.length];
+	public static double[] keoghDerivateWithBoundaries(final double[] t) {
+		double[] derivate = new double[t.length];
 
-		for (int i = 1; i < T.length - 1; i++) {
-			derivate[i] = ((T[i] - T[i - 1]) + (T[i + 1] - T[i - 1]) / 2) / 2;
+		for (int i = 1; i < t.length - 1; i++) {
+			derivate[i] = ((t[i] - t[i - 1]) + (t[i + 1] - t[i - 1]) / 2) / 2;
 		}
 
 		derivate[0] = derivate[1];
-		derivate[T.length - 1] = derivate[T.length - 2];
+		derivate[t.length - 1] = derivate[t.length - 2];
 
 		return derivate;
 	}
@@ -728,14 +724,14 @@ public class TimeSeriesUtil {
 	/**
 	 * Calclualtes f'(n) = f(n-1) - f(n)
 	 *
-	 * @param T Time series.
+	 * @param t Time series.
 	 * @return
 	 */
-	public static double[] backwardDifferenceDerivate(final double[] T) {
-		double[] derivate = new double[T.length - 1];
+	public static double[] backwardDifferenceDerivate(final double[] t) {
+		double[] derivate = new double[t.length - 1];
 
-		for (int i = 1; i < T.length; i++) {
-			derivate[i - 1] = T[i] - T[i - 1];
+		for (int i = 1; i < t.length; i++) {
+			derivate[i - 1] = t[i] - t[i - 1];
 		}
 
 		return derivate;
@@ -744,14 +740,14 @@ public class TimeSeriesUtil {
 	/**
 	 * Calclualtes f'(n) = f(n-1) - f(n)
 	 *
-	 * @param T Time series.
+	 * @param t Time series.
 	 * @return
 	 */
-	public static double[] backwardDifferenceDerivateWithBoundaries(final double[] T) {
-		double[] derivate = new double[T.length];
+	public static double[] backwardDifferenceDerivateWithBoundaries(final double[] t) {
+		double[] derivate = new double[t.length];
 
-		for (int i = 1; i < T.length; i++) {
-			derivate[i] = T[i] - T[i - 1];
+		for (int i = 1; i < t.length; i++) {
+			derivate[i] = t[i] - t[i - 1];
 		}
 
 		derivate[0] = derivate[1];
@@ -761,14 +757,14 @@ public class TimeSeriesUtil {
 	/**
 	 * f'(n) = f(n+1) - f(n)
 	 *
-	 * @param T
+	 * @param t
 	 * @return
 	 */
-	public static double[] forwardDifferenceDerivate(final double[] T) {
-		double[] derivate = new double[T.length - 1];
+	public static double[] forwardDifferenceDerivate(final double[] t) {
+		double[] derivate = new double[t.length - 1];
 
-		for (int i = 0; i < T.length - 1; i++) {
-			derivate[i] = T[i + 1] - T[i];
+		for (int i = 0; i < t.length - 1; i++) {
+			derivate[i] = t[i + 1] - t[i];
 		}
 
 		return derivate;
@@ -777,17 +773,17 @@ public class TimeSeriesUtil {
 	/**
 	 * f'(n) = f(n+1) - f(n)
 	 *
-	 * @param T
+	 * @param t
 	 * @return
 	 */
-	public static double[] forwardDifferenceDerivateWithBoundaries(final double[] T) {
-		double[] derivate = new double[T.length];
+	public static double[] forwardDifferenceDerivateWithBoundaries(final double[] t) {
+		double[] derivate = new double[t.length];
 
-		for (int i = 0; i < T.length - 1; i++) {
-			derivate[i] = T[i + 1] - T[i];
+		for (int i = 0; i < t.length - 1; i++) {
+			derivate[i] = t[i + 1] - t[i];
 		}
 
-		derivate[T.length - 1] = derivate[T.length - 2];
+		derivate[t.length - 1] = derivate[t.length - 2];
 		return derivate;
 	}
 
@@ -795,14 +791,14 @@ public class TimeSeriesUtil {
 	 * Calculates the derivative of a timeseries as described first by Gullo et. al
 	 * (2009).
 	 *
-	 * @param T
+	 * @param t
 	 * @return
 	 */
-	public static double[] gulloDerivate(final double[] T) {
-		double[] derivate = new double[T.length - 1];
+	public static double[] gulloDerivate(final double[] t) {
+		double[] derivate = new double[t.length - 1];
 
-		for (int i = 1; i < T.length; i++) {
-			derivate[i - 1] = T[i + 1] - T[i - 1] / 2;
+		for (int i = 1; i < t.length; i++) {
+			derivate[i - 1] = t[i + 1] - t[i - 1] / 2;
 		}
 
 		return derivate;
@@ -811,76 +807,76 @@ public class TimeSeriesUtil {
 	/**
 	 * f'(n) = \frac{f(i+1)-f(i-1)}{2}
 	 *
-	 * @param T
+	 * @param t
 	 * @return
 	 */
-	public static double[] gulloDerivateWithBoundaries(final double[] T) {
-		double[] derivate = new double[T.length];
+	public static double[] gulloDerivateWithBoundaries(final double[] t) {
+		double[] derivate = new double[t.length];
 
-		for (int i = 1; i < T.length; i++) {
-			derivate[i] = T[i + 1] - T[i - 1] / 2;
+		for (int i = 1; i < t.length; i++) {
+			derivate[i] = t[i + 1] - t[i - 1] / 2;
 		}
 
 		derivate[0] = derivate[1];
 		return derivate;
 	}
 
-	public static double sum(final double[] T) {
+	public static double sum(final double[] t) {
 		double sum = 0;
-		for (int i = 0; i < T.length; i++) {
-			sum += T[i];
+		for (int i = 0; i < t.length; i++) {
+			sum += t[i];
 		}
 		return sum;
 	}
 
-	public static double mean(final double[] T) {
-		return sum(T) / T.length;
+	public static double mean(final double[] t) {
+		return sum(t) / t.length;
 	}
 
 	/**
 	 * Calculates the (population) variance of the values of a times series.
 	 */
-	public static double variance(final double T[]) {
-		double mean = mean(T);
+	public static double variance(final double[] t) {
+		double mean = mean(t);
 		double squaredDeviations = 0;
-		for (int i = 0; i < T.length; i++) {
-			squaredDeviations += (T[i] - mean) * (T[i] - mean);
+		for (int i = 0; i < t.length; i++) {
+			squaredDeviations += (t[i] - mean) * (t[i] - mean);
 		}
-		return squaredDeviations / T.length;
+		return squaredDeviations / t.length;
 	}
 
 	/**
 	 * Calculates the (population) standard deviation of the values of a times
 	 * series.
 	 */
-	public static double standardDeviation(final double[] T) {
-		return Math.sqrt(variance(T));
+	public static double standardDeviation(final double[] t) {
+		return Math.sqrt(variance(t));
 	}
 
 	public static double EPSILON = 0.0000001;
 
-	public static double[] zTransform(final double[] T) {
-		double mean = mean(T);
-		double standardDeviation = standardDeviation(T);
+	public static double[] zTransform(final double[] t) {
+		double mean = mean(t);
+		double standardDeviation = standardDeviation(t);
 		// TODO: How to handle zero standard deviation properly.
 		if ((-EPSILON < standardDeviation) && (standardDeviation < EPSILON)) {
-			return new double[T.length]; // All zeros.
+			return new double[t.length]; // All zeros.
 		}
-		double[] zTransformedT = new double[T.length];
-		for (int i = 0; i < T.length; i++) {
-			zTransformedT[i] = (T[i] - mean) / standardDeviation;
+		double[] zTransformedT = new double[t.length];
+		for (int i = 0; i < t.length; i++) {
+			zTransformedT[i] = (t[i] - mean) / standardDeviation;
 		}
 		return zTransformedT;
 	}
 
-	public static double[] normalizeByStandardDeviation(final double[] T) {
-		double standardDeviation = standardDeviation(T);
+	public static double[] normalizeByStandardDeviation(final double[] t) {
+		double standardDeviation = standardDeviation(t);
 		if (standardDeviation == 0) {
-			return new double[T.length];
+			return new double[t.length];
 		}
-		double[] normalizedT = new double[T.length];
-		for (int i = 0; i < T.length; i++) {
-			normalizedT[i] = T[i] / standardDeviation;
+		double[] normalizedT = new double[t.length];
+		for (int i = 0; i < t.length; i++) {
+			normalizedT[i] = t[i] / standardDeviation;
 		}
 		return normalizedT;
 

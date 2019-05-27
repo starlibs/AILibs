@@ -1,5 +1,8 @@
 package jaicore.ml.learningcurve.extrapolation.lcnet;
 
+import java.io.IOException;
+
+import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.interfaces.LearningCurve;
 import jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
@@ -40,12 +43,12 @@ public class LCNetExtrapolationMethod implements LearningCurveExtrapolationMetho
 	}
 
 	//It is not clarified yet if this method should be called from this class
-	public void deleteNet() {
+	public void deleteNet() throws IOException {
 		this.lcNet.deleteNet(this.identifier);
 	}
 
 	//It is not clarified yet if this method should be called from this class
-	public void trainNet(final int[] xValues, final double[] yValues, final int dataSetSize, final double[][] configurations) {
+	public void trainNet(final int[] xValues, final double[] yValues, final int dataSetSize, final double[][] configurations) throws TrainingException {
 		this.lcNet.train(xValues, yValues, dataSetSize, configurations, this.identifier);
 	}
 }

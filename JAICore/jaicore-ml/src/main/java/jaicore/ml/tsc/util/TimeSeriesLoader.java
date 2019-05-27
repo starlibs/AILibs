@@ -142,7 +142,7 @@ public class TimeSeriesLoader {
 			}
 
 			// Check for same instance length
-			if (matrices.size() != 0 && ((INDArray) tsTargetClassNames[0]).shape()[0] != matrices.get(0).shape()[0]) {
+			if (!matrices.isEmpty() && ((INDArray) tsTargetClassNames[0]).shape()[0] != matrices.get(0).shape()[0]) {
 				throw new TimeSeriesLoadingException(
 						"All time series must have the same first dimensionality (number of instances).");
 			}
