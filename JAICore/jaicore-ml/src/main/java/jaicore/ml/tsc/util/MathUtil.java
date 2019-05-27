@@ -4,14 +4,14 @@ import java.util.stream.DoubleStream;
 
 /**
  * Utility class consisting of mathematical utility functions.
- * 
+ *
  * @author Julian Lienen
  *
  */
 public class MathUtil {
 	/**
 	 * Function to calculate the sigmoid for the given value <code>z</code>.
-	 * 
+	 *
 	 * @param z
 	 *            Parameter z
 	 * @return Returns the sigmoid for the parameter <code>z</code>.
@@ -22,18 +22,18 @@ public class MathUtil {
 
 	/**
 	 * Sums the values of the given <code>array</code>.
-	 * 
+	 *
 	 * @param array
 	 *            The array to be summed
 	 * @return Returns the sum of the values
 	 */
-	public static double sum(double[] array) {
+	public static double sum(final double[] array) {
 		return DoubleStream.of(array).sum();
 	}
 
 	/**
 	 * Computes the single squared Euclidean distance between two vectors.
-	 * 
+	 *
 	 * @param vector1
 	 *            First argument vector
 	 * @param vector2
@@ -41,8 +41,9 @@ public class MathUtil {
 	 * @return Returns the single squared Euclidean distance between two vectors
 	 */
 	public static double singleSquaredEuclideanDistance(final double[] vector1, final double[] vector2) {
-		if (vector1.length != vector2.length)
+		if (vector1.length != vector2.length) {
 			throw new IllegalArgumentException("The lengths of of both vectors must match!");
+		}
 
 		double distance = 0;
 		for (int i = 0; i < vector1.length; i++) {
@@ -55,7 +56,7 @@ public class MathUtil {
 	/**
 	 * Simple Manhattan distance (sum of the absolute differences between the
 	 * vectors' elements) implementation for arrays of Integer.
-	 * 
+	 *
 	 * @param A
 	 *            First argument vector
 	 * @param B
@@ -73,7 +74,7 @@ public class MathUtil {
 	/**
 	 * Function calculating the mean of the interval [t1, t2 (inclusive)] of the
 	 * given <code>vector</code>.
-	 * 
+	 *
 	 * @param vector
 	 *            Vector which is used for the calculation
 	 * @param t1
@@ -95,7 +96,7 @@ public class MathUtil {
 	/**
 	 * Function calculating the standard deviation of the interval [t1, t2
 	 * (inclusive)] of the given <code>vector</code>.
-	 * 
+	 *
 	 * @param vector
 	 *            Vector which is used for the calculation
 	 * @param t1
@@ -109,8 +110,9 @@ public class MathUtil {
 	 */
 	public static double stddev(final double[] vector, final int t1, final int t2, final boolean useBiasCorrection) {
 		checkIntervalParameters(vector, t1, t2);
-		if (t1 == t2)
+		if (t1 == t2) {
 			return 0.0d;
+		}
 
 		double mean = mean(vector, t1, t2);
 
@@ -119,13 +121,13 @@ public class MathUtil {
 			result += Math.pow(vector[i] - mean, 2);
 		}
 
-		return Math.sqrt(result / (double) (t2 - t1 + (useBiasCorrection ? 0 : 1)));
+		return Math.sqrt(result / (t2 - t1 + (useBiasCorrection ? 0 : 1)));
 	}
 
 	/**
 	 * Function calculating the slope of the interval [t1, t2 (inclusive)] of the
 	 * given <code>vector</code>.
-	 * 
+	 *
 	 * @param vector
 	 *            Vector which is used for the calculation
 	 * @param t1
@@ -137,8 +139,9 @@ public class MathUtil {
 	public static double slope(final double[] vector, final int t1, final int t2) {
 		checkIntervalParameters(vector, t1, t2);
 
-		if (t2 == t1)
+		if (t2 == t1) {
 			return 0d;
+		}
 
 		double xx = 0;
 		double x = 0;
@@ -160,7 +163,7 @@ public class MathUtil {
 	/**
 	 * Checks the parameters <code>t1</code> and </code>t2</code> for validity given
 	 * the <code>vector</code>
-	 * 
+	 *
 	 * @param vector
 	 *            Value vector
 	 * @param t1
@@ -169,23 +172,26 @@ public class MathUtil {
 	 *            Interval end (inclusive)
 	 */
 	private static void checkIntervalParameters(final double[] vector, final int t1, final int t2) {
-		if (t1 >= vector.length || t2 >= vector.length)
+		if (t1 >= vector.length || t2 >= vector.length) {
 			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector!");
-		if (t2 < t1)
+		}
+		if (t2 < t1) {
 			throw new IllegalArgumentException("End index t2 of the interval must be greater equals start index t1!");
+		}
 	}
 
 	/**
 	 * Calculates the index of the maximum value in the given <code>array</code>
 	 * (argmax).
-	 * 
+	 *
 	 * @param array
 	 *            Array to be checked. Must not be null or empty
 	 * @return Returns the index of the maximum value
 	 */
 	public static int argmax(final int[] array) {
-		if (array == null || array.length == 0)
+		if (array == null || array.length == 0) {
 			throw new IllegalArgumentException("Given parameter 'array' must not be null or empty for argmax.");
+		}
 
 		int maxValue = array[0];
 		int index = 0;

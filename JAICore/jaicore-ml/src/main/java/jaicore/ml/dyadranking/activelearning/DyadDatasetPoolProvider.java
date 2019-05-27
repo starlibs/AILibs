@@ -23,7 +23,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  * {@link SparseDyadRankingInstance} or {@link DyadRankingInstance} of the
  * {@link DyadRankingDataset} must represent a full ranking. Only queries of
  * rankings over the same instance features can be answered.
- * 
+ *
  * @author Jonas Hanselle
  *
  */
@@ -38,14 +38,14 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	private HashSet<IDyadRankingInstance> queriedRankings;
 	private int numberQueries;
 
-	public DyadDatasetPoolProvider(DyadRankingDataset dataset) {
-		numberQueries = 0;
-		removeDyadsWhenQueried = false;
-		dyadsByInstances = new HashMap<>();
-		dyadsByAlternatives = new HashMap<>();
-		dyadRankingsByInstances = new HashMap<>();
-		dyadRankingsByAlternatives = new HashMap<>();
-		pool = new ArrayList<>(dataset.size());
+	public DyadDatasetPoolProvider(final DyadRankingDataset dataset) {
+		this.numberQueries = 0;
+		this.removeDyadsWhenQueried = false;
+		this.dyadsByInstances = new HashMap<>();
+		this.dyadsByAlternatives = new HashMap<>();
+		this.dyadRankingsByInstances = new HashMap<>();
+		this.dyadRankingsByAlternatives = new HashMap<>();
+		this.pool = new ArrayList<>(dataset.size());
 		for (IDyadRankingInstance instance : dataset) {
 			this.addDyadRankingInstance(instance);
 		}
@@ -54,12 +54,12 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 
 	@Override
 	public Collection<IDyadRankingInstance> getPool() {
-		return pool;
+		return this.pool;
 	}
 
 	@Override
-	public IDyadRankingInstance query(IDyadRankingInstance queryInstance) {
-		numberQueries++;
+	public IDyadRankingInstance query(final IDyadRankingInstance queryInstance) {
+		this.numberQueries++;
 		if (!(queryInstance instanceof SparseDyadRankingInstance)) {
 			throw new IllegalArgumentException("Currently only supports SparseDyadRankingInstances!");
 		}
@@ -77,68 +77,71 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 		}
 		DyadRankingInstance trueRanking = new DyadRankingInstance(dyadList);
 		if (this.removeDyadsWhenQueried) {
-			for (Dyad dyad : dyadList)
+			for (Dyad dyad : dyadList) {
 				this.removeDyadFromPool(dyad);
+			}
 		}
-		queriedRankings.add(trueRanking);
+		this.queriedRankings.add(trueRanking);
 		return trueRanking;
 	}
 
 	@Override
-	public Set<Dyad> getDyadsByInstance(Vector instanceFeatures) {
-		if (!dyadsByInstances.containsKey(instanceFeatures))
+	public Set<Dyad> getDyadsByInstance(final Vector instanceFeatures) {
+		if (!this.dyadsByInstances.containsKey(instanceFeatures)) {
 			return new HashSet<>();
-		return dyadsByInstances.get(instanceFeatures);
+		}
+		return this.dyadsByInstances.get(instanceFeatures);
 	}
 
 	@Override
-	public Set<Dyad> getDyadsByAlternative(Vector alternativeFeatures) {
-		if (!dyadsByAlternatives.containsKey(alternativeFeatures))
+	public Set<Dyad> getDyadsByAlternative(final Vector alternativeFeatures) {
+		if (!this.dyadsByAlternatives.containsKey(alternativeFeatures)) {
 			return new HashSet<>();
-		return dyadsByAlternatives.get(alternativeFeatures);
+		}
+		return this.dyadsByAlternatives.get(alternativeFeatures);
 	}
 
 	/**
 	 * Adds a {@link IDyadRankingInstance} instance to the pool.
-	 * 
+	 *
 	 * @param instance
 	 */
-	private void addDyadRankingInstance(IDyadRankingInstance instance) {
+	private void addDyadRankingInstance(final IDyadRankingInstance instance) {
 		// Add the dyad ranking instance to the pool
-		pool.add(instance);
+		this.pool.add(instance);
 
 		// Add the dyad ranking instances to the hash maps
-		dyadRankingsByInstances.put(instance.getDyadAtPosition(0).getInstance(), instance);
-		dyadRankingsByAlternatives.put(instance.getDyadAtPosition(0).getAlternative(), instance);
+		this.dyadRankingsByInstances.put(instance.getDyadAtPosition(0).getInstance(), instance);
+		this.dyadRankingsByAlternatives.put(instance.getDyadAtPosition(0).getAlternative(), instance);
 
 		for (Dyad dyad : instance) {
 			// Add all dyads to the HashMap with instance features as key
-			if (!dyadsByInstances.containsKey(dyad.getInstance())) {
-				dyadsByInstances.put(dyad.getInstance(), new HashSet<Dyad>());
+			if (!this.dyadsByInstances.containsKey(dyad.getInstance())) {
+				this.dyadsByInstances.put(dyad.getInstance(), new HashSet<Dyad>());
 			}
-			dyadsByInstances.get(dyad.getInstance()).add(dyad);
+			this.dyadsByInstances.get(dyad.getInstance()).add(dyad);
 
 			// Add all dyads to the HashMap with alternative features as key
-			if (!dyadsByAlternatives.containsKey(dyad.getAlternative())) {
-				dyadsByAlternatives.put(dyad.getAlternative(), new HashSet<Dyad>());
+			if (!this.dyadsByAlternatives.containsKey(dyad.getAlternative())) {
+				this.dyadsByAlternatives.put(dyad.getAlternative(), new HashSet<Dyad>());
 			}
-			dyadsByAlternatives.get(dyad.getAlternative()).add(dyad);
+			this.dyadsByAlternatives.get(dyad.getAlternative()).add(dyad);
 		}
 	}
 
 	/**
 	 * Returns the position of a dyad in the ranking over the same instance
 	 * features. Returns -1 if the ranking does not contain the dyad.
-	 * 
+	 *
 	 * @param dyad
 	 * @return Position of the dyad in the ranking, -1 if the ranking does not
 	 *         contain the dyad.
 	 */
-	private int getPositionInRankingByInstanceFeatures(Dyad dyad) {
-		if (!dyadRankingsByInstances.containsKey(dyad.getInstance())) {
+	private int getPositionInRankingByInstanceFeatures(final Dyad dyad) {
+		if (!this.dyadRankingsByInstances.containsKey(dyad.getInstance())) {
 			return -1;
 		} else {
-			IDyadRankingInstance ranking = dyadRankingsByInstances.get(dyad.getInstance());
+			IDyadRankingInstance ranking = this.dyadRankingsByInstances.get(dyad.getInstance());
 			boolean found = false;
 			int curPos = 0;
 			while (curPos < ranking.length() && !found) {
@@ -155,47 +158,50 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 
 	@Override
 	public Collection<Vector> getInstanceFeatures() {
-		return dyadsByInstances.keySet();
+		return this.dyadsByInstances.keySet();
 	}
 
-	private void removeDyadFromPool(Dyad dyad) {
-		if (dyadsByInstances.containsKey(dyad.getInstance())) {
-			dyadsByInstances.get(dyad.getInstance()).remove(dyad);
-			if (dyadsByInstances.get(dyad.getInstance()).size() < 2)
-				dyadsByInstances.remove(dyad.getInstance());
+	private void removeDyadFromPool(final Dyad dyad) {
+		if (this.dyadsByInstances.containsKey(dyad.getInstance())) {
+			this.dyadsByInstances.get(dyad.getInstance()).remove(dyad);
+			if (this.dyadsByInstances.get(dyad.getInstance()).size() < 2) {
+				this.dyadsByInstances.remove(dyad.getInstance());
+			}
 		}
-		if (dyadsByAlternatives.containsKey(dyad.getAlternative())) {
-			dyadsByAlternatives.get(dyad.getAlternative()).remove(dyad);
-			if (dyadsByAlternatives.get(dyad.getAlternative()).size() < 2)
-				dyadsByAlternatives.remove(dyad.getAlternative());
+		if (this.dyadsByAlternatives.containsKey(dyad.getAlternative())) {
+			this.dyadsByAlternatives.get(dyad.getAlternative()).remove(dyad);
+			if (this.dyadsByAlternatives.get(dyad.getAlternative()).size() < 2) {
+				this.dyadsByAlternatives.remove(dyad.getAlternative());
+			}
 		}
 	}
 
 	@Override
-	public void setRemoveDyadsWhenQueried(boolean flag) {
+	public void setRemoveDyadsWhenQueried(final boolean flag) {
 		this.removeDyadsWhenQueried = flag;
 	}
 
 	@Override
 	public int getPoolSize() {
 		int size = 0;
-		for (Set<Dyad> set : dyadsByInstances.values())
+		for (Set<Dyad> set : this.dyadsByInstances.values()) {
 			size += set.size();
+		}
 		return size;
 	}
 
 	/**
 	 * Returns the number of queries the pool provider has answered so far.
-	 * 
+	 *
 	 * @return Number of queries this pool provider has answered.
 	 */
 	public int getNumberQueries() {
-		return numberQueries;
+		return this.numberQueries;
 	}
 
 	@Override
 	public DyadRankingDataset getQueriedRankings() {
-		return new DyadRankingDataset(new ArrayList<IDyadRankingInstance>(queriedRankings));
+		return new DyadRankingDataset(new ArrayList<IDyadRankingInstance>(this.queriedRankings));
 	}
 
 }

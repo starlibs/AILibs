@@ -5,9 +5,9 @@ import jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 
 /**
  * Calculates the kendalls-tau loss only for the top k dyads.
- * 
+ *
  * https://researcher.watson.ibm.com/researcher/files/us-fagin/topk.pdf
- * 
+ *
  * @author Mirko Jürgens
  *
  */
@@ -16,19 +16,19 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 
 	private double p;
 
-	public KendallsTauOfTopK(int k, double p) {
+	public KendallsTauOfTopK(final int k, final double p) {
 		this.k = k;
 		this.p = p;
 	}
 
 	@Override
-	public double loss(IDyadRankingInstance actual, IDyadRankingInstance predicted) {
+	public double loss(final IDyadRankingInstance actual, final IDyadRankingInstance predicted) {
 
-		double kendallsDistance = 0;
-		if (k <= 1) {
+		if (this.k <= 1) {
 			throw new IllegalArgumentException("Dyad rankings must have length greater than 1.");
 		}
-		
+
+		double kendallsDistance = 0;
 		for (int actualI = 0; actualI < actual.length() - 1; actualI++) {
 			Dyad actualDyad = actual.getDyadAtPosition(actualI);
 			int predictedI = -1;
@@ -48,36 +48,36 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 						break;
 					}
 				}
-				
+
 
 				double penalty = 0;
 
-				boolean iAndJAreBothInPredictedTopK = predictedI < k && predictedJ < k;
-				boolean iAndJAreBothInActualTopK = actualI < k && actualJ < k;
-				
-				// case 1: i,j are both in the top k list of the predicted and actual ranking
-				penalty = checkCase1(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
-						iAndJAreBothInActualTopK);
-				
-				boolean justIIsInPredictedTopK = predictedI < k && predictedJ >= k;
-				boolean justJIsInPredictedTopK = predictedJ < k && predictedI >= k;
+				boolean iAndJAreBothInPredictedTopK = predictedI < this.k && predictedJ < this.k;
+				boolean iAndJAreBothInActualTopK = actualI < this.k && actualJ < this.k;
 
-				boolean justIIsInActualTopK = actualI < k && actualJ >= k;
-				boolean justJIsInActualTopK = actualJ < k && actualI >= k;
+				// case 1: i,j are both in the top k list of the predicted and actual ranking
+				penalty = this.checkCase1(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
+						iAndJAreBothInActualTopK);
+
+				boolean justIIsInPredictedTopK = predictedI < this.k && predictedJ >= this.k;
+				boolean justJIsInPredictedTopK = predictedJ < this.k && predictedI >= this.k;
+
+				boolean justIIsInActualTopK = actualI < this.k && actualJ >= this.k;
+				boolean justJIsInActualTopK = actualJ < this.k && actualI >= this.k;
 
 				// case 2: i,j are both in one top k ranking but for the other ranking just one
 				// is in the top k
-				penalty = checkCase2(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
+				penalty = this.checkCase2(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
 						iAndJAreBothInActualTopK, justIIsInPredictedTopK, justJIsInPredictedTopK, justIIsInActualTopK,
 						justJIsInActualTopK);
-				
+
 				// case 3: i, but not j, appears in one top k list , and j, but not i, appears
 				// in the other top k list
-				penalty = checkCase3(penalty, justIIsInPredictedTopK, justJIsInPredictedTopK, justIIsInActualTopK,
+				penalty = this.checkCase3(penalty, justIIsInPredictedTopK, justJIsInPredictedTopK, justIIsInActualTopK,
 						justJIsInActualTopK);
 
 				// case 4:
-				penalty = checkCase4(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
+				penalty = this.checkCase4(actualI, predictedI, actualJ, predictedJ, penalty, iAndJAreBothInPredictedTopK,
 						iAndJAreBothInActualTopK);
 
 				kendallsDistance += penalty;
@@ -87,8 +87,8 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 		return kendallsDistance;
 	}
 
-	private double checkCase1(int actualI, int predictedI, int actualJ, int predictedJ, double penalty,
-			boolean iAndJAreBothInPredictedTopK, boolean iAndJAreBothInActualTopK) {
+	private double checkCase1(final int actualI, final int predictedI, final int actualJ, final int predictedJ, double penalty,
+			final boolean iAndJAreBothInPredictedTopK, final boolean iAndJAreBothInActualTopK) {
 		if (iAndJAreBothInActualTopK && iAndJAreBothInPredictedTopK) {
 			// case 1.1: if they are ranked the same in both topk lists: 0 penalty
 			boolean iIsBetterThanJInPredictedAndActualRanking = predictedI < predictedJ && actualI < actualJ;
@@ -99,19 +99,19 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 			// case 1.2 ranking mismatch in one of them
 			boolean iIsBetterThanJInPredictedButNotInActualRanking = predictedI < predictedJ
 					&& actualI > actualJ;
-			boolean jIsBetterThanIInPredictedButNotInActualRanking = predictedI > predictedJ
-					&& actualI < actualJ;
-			if (iIsBetterThanJInPredictedButNotInActualRanking
-					|| jIsBetterThanIInPredictedButNotInActualRanking) {
-				penalty = 1;
-			}
+					boolean jIsBetterThanIInPredictedButNotInActualRanking = predictedI > predictedJ
+							&& actualI < actualJ;
+					if (iIsBetterThanJInPredictedButNotInActualRanking
+							|| jIsBetterThanIInPredictedButNotInActualRanking) {
+						penalty = 1;
+					}
 		}
 		return penalty;
 	}
 
-	private double checkCase2(int actualI, int predictedI, int actualJ, int predictedJ, double penalty,
-			boolean iAndJAreBothInPredictedTopK, boolean iAndJAreBothInActualTopK, boolean justIIsInPredictedTopK,
-			boolean justJIsInPredictedTopK, boolean justIIsInActualTopK, boolean justJIsInActualTopK) {
+	private double checkCase2(final int actualI, final int predictedI, final int actualJ, final int predictedJ, double penalty,
+			final boolean iAndJAreBothInPredictedTopK, final boolean iAndJAreBothInActualTopK, final boolean justIIsInPredictedTopK,
+			final boolean justJIsInPredictedTopK, final boolean justIIsInActualTopK, final boolean justJIsInActualTopK) {
 		boolean bothPredictedAreInTopKButJustOneActual = (iAndJAreBothInPredictedTopK && justIIsInActualTopK)
 				|| (iAndJAreBothInPredictedTopK && justJIsInPredictedTopK);
 		boolean bothActualAreInTopKButJustOnePredicted = (iAndJAreBothInActualTopK && justIIsInPredictedTopK)
@@ -158,8 +158,8 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 		return penalty;
 	}
 
-	private double checkCase3(double penalty, boolean justIIsInPredictedTopK, boolean justJIsInPredictedTopK,
-			boolean justIIsInActualTopK, boolean justJIsInActualTopK) {
+	private double checkCase3(double penalty, final boolean justIIsInPredictedTopK, final boolean justJIsInPredictedTopK,
+			final boolean justIIsInActualTopK, final boolean justJIsInActualTopK) {
 		if (justIIsInActualTopK && justJIsInPredictedTopK) {
 			penalty = 1;
 		}
@@ -169,16 +169,16 @@ public class KendallsTauOfTopK implements DyadRankingLossFunction {
 		return penalty;
 	}
 
-	private double checkCase4(int actualI, int predictedI, int actualJ, int predictedJ, double penalty,
-			boolean iAndJAreBothInPredictedTopK, boolean iAndJAreBothInActualTopK) {
-		boolean neitherIOrJAreInPredictedTopK = predictedI >= k && predictedJ >= k;
-		boolean neitherIOrJAreInActualTopK = actualI >= k && actualJ >= k;
+	private double checkCase4(final int actualI, final int predictedI, final int actualJ, final int predictedJ, double penalty,
+			final boolean iAndJAreBothInPredictedTopK, final boolean iAndJAreBothInActualTopK) {
+		boolean neitherIOrJAreInPredictedTopK = predictedI >= this.k && predictedJ >= this.k;
+		boolean neitherIOrJAreInActualTopK = actualI >= this.k && actualJ >= this.k;
 
 		if (iAndJAreBothInActualTopK && neitherIOrJAreInPredictedTopK) {
-			penalty = p;
+			penalty = this.p;
 		}
 		if (iAndJAreBothInPredictedTopK && neitherIOrJAreInActualTopK) {
-			penalty = p;
+			penalty = this.p;
 		}
 		return penalty;
 	}

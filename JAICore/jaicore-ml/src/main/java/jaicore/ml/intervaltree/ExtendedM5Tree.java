@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Map.Entry;
 
-import jaicore.ml.core.Interval;
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+
 import jaicore.ml.intervaltree.aggregation.AggressiveAggregator;
 import jaicore.ml.intervaltree.aggregation.IntervalAggregator;
 import jaicore.ml.intervaltree.util.RQPHelper;
@@ -66,15 +67,15 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor {
 				RuleNode rightChild = nextTree.rightNode();
 				// traverse the tree
 
-				if (intervalForAttribute.getLowerBound() <= threshold) {
+				if (intervalForAttribute.getInf() <= threshold) {
 
-					if (threshold <= intervalForAttribute.getUpperBound()) {
+					if (threshold <= intervalForAttribute.getSup()) {
 						// scenario: x_min <= threshold <= x_max
 						// query [x_min, threshold] on the left child
 						// query [threshold, x_max] on the right child
-						Interval[] leftInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
+						Interval[] leftInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(intervalForAttribute.getInf(), threshold), attribute);
 						stack.push(RQPHelper.getEntry(leftInterval, leftChild));
-						Interval[] rightInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
+						Interval[] rightInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(threshold, intervalForAttribute.getSup()), attribute);
 						stack.push(RQPHelper.getEntry(rightInterval, rightChild));
 					} else {
 						// scenario: x_min <= x_max < threshold
@@ -102,11 +103,11 @@ public class ExtendedM5Tree extends M5Base implements RangeQueryPredictor {
 		for (int i = 0; i < usedBounds.length; i++) {
 			double coefficient = coefficients[i];
 			if (coefficient < 0) {
-				instanceLower.setValue(i + 1, usedBounds[i].getLowerBound());
-				instanceUpper.setValue(i + 1, usedBounds[i].getUpperBound());
+				instanceLower.setValue(i + 1, usedBounds[i].getInf());
+				instanceUpper.setValue(i + 1, usedBounds[i].getSup());
 			} else {
-				instanceLower.setValue(i + 1, usedBounds[i].getUpperBound());
-				instanceUpper.setValue(i + 1, usedBounds[i].getLowerBound());
+				instanceLower.setValue(i + 1, usedBounds[i].getSup());
+				instanceUpper.setValue(i + 1, usedBounds[i].getInf());
 			}
 		}
 		instanceLower.setValue(0, 1);

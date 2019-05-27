@@ -39,7 +39,7 @@ import weka.core.Instances;
  * clusters and then selects the two dyads for which the confidence intervals
  * overlap the most within the cluster for pairwise comparison, until a
  * minibatch of constant size is filled.
- * 
+ *
  * @author Jonas Hanselle
  *
  */
@@ -49,7 +49,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 
 	private Clusterer clusterer;
 
-	public ConfidenceIntervalClusteringBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider, int seed, int numberRandomQueriesAtStart, int minibatchSize, Clusterer clusterer) {
+	public ConfidenceIntervalClusteringBasedActiveDyadRanker(final PLNetDyadRanker ranker, final IDyadRankingPoolProvider poolProvider, final int seed, final int numberRandomQueriesAtStart, final int minibatchSize, final Clusterer clusterer) {
 		super(ranker, poolProvider, seed, numberRandomQueriesAtStart, minibatchSize);
 		this.clusterer = clusterer;
 	}
@@ -60,18 +60,18 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 		PriorityQueue<List<Dyad>> clusterQueue = new PriorityQueue<>(new ListComparator());
 
 		Set<IDyadRankingInstance> minibatch = new HashSet<>();
-		Map<Dyad, SummaryStatistics> dyadStats = getDyadStats();
+		Map<Dyad, SummaryStatistics> dyadStats = this.getDyadStats();
 
-		for (Vector inst : getInstanceFeatures()) {
+		for (Vector inst : this.getInstanceFeatures()) {
 			// Create instances for clustering
 			Attribute upperAttr = new Attribute("upper_bound");
 			Attribute lowerAttr = new Attribute("lower_bound");
 			ArrayList<Attribute> attributes = new ArrayList<>();
 			attributes.add(upperAttr);
 			attributes.add(lowerAttr);
-			Instances intervalInstances = new Instances("confidence_intervalls", attributes, poolProvider.getDyadsByInstance(inst).size());
-			for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
-				double skill = ranker.getSkillForDyad(dyad);
+			Instances intervalInstances = new Instances("confidence_intervalls", attributes, this.poolProvider.getDyadsByInstance(inst).size());
+			for (Dyad dyad : this.poolProvider.getDyadsByInstance(inst)) {
+				double skill = this.ranker.getSkillForDyad(dyad);
 				dyadStats.get(dyad).addValue(skill);
 				double[] attValues = new double[2];
 				attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
@@ -81,21 +81,21 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 			}
 
 			try {
-				clusterer.buildClusterer(intervalInstances);
+				this.clusterer.buildClusterer(intervalInstances);
 
 				List<List<Dyad>> instanceClusters = new ArrayList<>();
-				int numClusters = clusterer.numberOfClusters();
+				int numClusters = this.clusterer.numberOfClusters();
 				for (int clusterIndex = 0; clusterIndex < numClusters; clusterIndex++) {
 					instanceClusters.add(new ArrayList<Dyad>());
 				}
 
-				for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
-					double skill = ranker.getSkillForDyad(dyad);
+				for (Dyad dyad : this.poolProvider.getDyadsByInstance(inst)) {
+					double skill = this.ranker.getSkillForDyad(dyad);
 					double[] attValues = new double[2];
 					attValues[0] = skill + dyadStats.get(dyad).getStandardDeviation();
 					attValues[1] = skill - dyadStats.get(dyad).getStandardDeviation();
 					Instance intervalInstance = new DenseInstance(1.0d, attValues);
-					int cluster = clusterer.clusterInstance(intervalInstance);
+					int cluster = this.clusterer.clusterInstance(intervalInstance);
 					instanceClusters.get(cluster).add(dyad);
 				}
 
@@ -107,8 +107,8 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 			}
 		}
 
-		Random random = getRandom();
-		for (int minibatchIndex = 0; minibatchIndex < getMinibatchSize(); minibatchIndex++) {
+		Random random = this.getRandom();
+		for (int minibatchIndex = 0; minibatchIndex < this.getMinibatchSize(); minibatchIndex++) {
 			// get the largest cluster
 			List<Dyad> curDyads = clusterQueue.poll();
 			if (curDyads.size() < 2) {
@@ -122,7 +122,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 				for (int k = 0; k < j; k++) {
 					Dyad dyad1 = curDyads.get(j);
 					Dyad dyad2 = curDyads.get(k);
-					double overlap = getConfidenceIntervalOverlapForDyads(dyad1, dyad2);
+					double overlap = this.getConfidenceIntervalOverlapForDyads(dyad1, dyad2);
 					if (overlap > curMax) {
 						curPair[0] = j;
 						curPair[1] = k;
@@ -146,22 +146,22 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 			alternatives.add(curDyads.get(curPair[0]).getAlternative());
 			alternatives.add(curDyads.get(curPair[1]).getAlternative());
 			SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(curDyads.get(curPair[0]).getInstance(), alternatives);
-			IDyadRankingInstance trueRanking = poolProvider.query(queryInstance);
+			IDyadRankingInstance trueRanking = this.poolProvider.query(queryInstance);
 			minibatch.add(trueRanking);
 		}
 
 		// update the ranker
 		try {
-			updateRanker(minibatch);
+			this.updateRanker(minibatch);
 		} catch (TrainingException e) {
 			log.error(e.getMessage());
 		}
 	}
 
-	private double getConfidenceIntervalOverlapForDyads(Dyad dyad1, Dyad dyad2) {
-		double skill1 = ranker.getSkillForDyad(dyad1);
-		double skill2 = ranker.getSkillForDyad(dyad2);
-		Map<Dyad, SummaryStatistics> dyadStats = getDyadStats();
+	private double getConfidenceIntervalOverlapForDyads(final Dyad dyad1, final Dyad dyad2) {
+		double skill1 = this.ranker.getSkillForDyad(dyad1);
+		double skill2 = this.ranker.getSkillForDyad(dyad2);
+		Map<Dyad, SummaryStatistics> dyadStats = this.getDyadStats();
 		double lower1 = skill1 - dyadStats.get(dyad1).getStandardDeviation();
 		double upper1 = skill1 + dyadStats.get(dyad1).getStandardDeviation();
 		double lower2 = skill2 - dyadStats.get(dyad2).getStandardDeviation();
@@ -181,11 +181,13 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 	private class ListComparator implements Comparator<List<Dyad>> {
 
 		@Override
-		public int compare(List<Dyad> o1, List<Dyad> o2) {
-			if (o1.size() > o2.size())
+		public int compare(final List<Dyad> o1, final List<Dyad> o2) {
+			if (o1.size() > o2.size()) {
 				return -1;
-			if (o1.size() < o2.size())
+			}
+			if (o1.size() < o2.size()) {
 				return 1;
+			}
 			return 0;
 		}
 

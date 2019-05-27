@@ -14,6 +14,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,6 @@ import com.google.common.collect.Sets;
 import jaicore.ml.core.CategoricalFeatureDomain;
 import jaicore.ml.core.FeatureDomain;
 import jaicore.ml.core.FeatureSpace;
-import jaicore.ml.core.Interval;
 import jaicore.ml.core.NumericFeatureDomain;
 import jaicore.ml.intervaltree.aggregation.AggressiveAggregator;
 import jaicore.ml.intervaltree.aggregation.IntervalAggregator;
@@ -132,14 +132,14 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 				Tree rightChild = children[1];
 				// traverse the tree
 
-				if (intervalForAttribute.getLowerBound() <= threshold) {
+				if (intervalForAttribute.getInf() <= threshold) {
 
-					if (threshold <= intervalForAttribute.getUpperBound()) {
+					if (threshold <= intervalForAttribute.getSup()) {
 						// scenario: x_min <= threshold <= x_max
 						// query [x_min, threshold] on the left child
 						// query [threshold, x_max] right
-						Interval[] newInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(intervalForAttribute.getLowerBound(), threshold), attribute);
-						Interval[] newMaxInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(threshold, intervalForAttribute.getUpperBound()), attribute);
+						Interval[] newInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(intervalForAttribute.getInf(), threshold), attribute);
+						Interval[] newMaxInterval = RQPHelper.substituteInterval(toProcess.getKey(), new Interval(threshold, intervalForAttribute.getSup()), attribute);
 						stack.push(RQPHelper.getEntry(newInterval, leftChild));
 						stack.push(RQPHelper.getEntry(newMaxInterval, rightChild));
 					} else {
@@ -149,7 +149,7 @@ public class ExtendedRandomTree extends RandomTree implements RangeQueryPredicto
 					}
 				}
 				// analogously...
-				if (intervalForAttribute.getUpperBound() > threshold) {
+				if (intervalForAttribute.getSup() > threshold) {
 					stack.push(RQPHelper.getEntry(toProcess.getKey(), rightChild));
 				}
 			}

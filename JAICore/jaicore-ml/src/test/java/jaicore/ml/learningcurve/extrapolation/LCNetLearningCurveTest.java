@@ -6,6 +6,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.learningcurve.extrapolation.lcnet.LCNetExtrapolationMethod;
 import jaicore.ml.learningcurve.extrapolation.lcnet.PointWiseLearningCurve;
 
@@ -28,7 +29,7 @@ public class LCNetLearningCurveTest {
 	}
 
 	@Test
-	public void aTrainNet() {
+	public void aTrainNet() throws TrainingException {
 		String identifier = "abc";
 		int dataSetSize = 10;
 		int[] xValues = new int[20];

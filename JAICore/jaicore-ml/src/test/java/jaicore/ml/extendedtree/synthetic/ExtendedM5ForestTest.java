@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.junit.Before;
 import org.junit.Test;
 
-import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.ExtendedM5Forest;
 import junit.framework.Assert;
 import weka.core.DenseInstance;
@@ -43,8 +43,8 @@ public class ExtendedM5ForestTest {
 					Instances data = arffReader.getData();
 					for (int seed = 0; seed < seedNum; seed++) {
 						data.setClassIndex(data.numAttributes() - 1);
-						classifier[dataset_index][noise_index][seed] = new ExtendedM5Forest(seed);
-						classifier[dataset_index][noise_index][seed].buildClassifier(data);
+						this.classifier[dataset_index][noise_index][seed] = new ExtendedM5Forest(seed);
+						this.classifier[dataset_index][noise_index][seed].buildClassifier(data);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -54,7 +54,7 @@ public class ExtendedM5ForestTest {
 		}
 	}
 
-	private static String getDatasetNameForIndex(int dataset_index, int noise_index) {
+	private static String getDatasetNameForIndex(final int dataset_index, final int noise_index) {
 		String dataset_name = datasets[dataset_index];
 		double noise_val = noise[noise_index];
 		String noise_str = "";
@@ -74,7 +74,7 @@ public class ExtendedM5ForestTest {
 		for (int dataset_index = 0; dataset_index < dataset_count; dataset_index++) {
 			for (int noise_index = 0; noise_index < noise_count; noise_index++) {
 				for (int seed = 0; seed < seedNum; seed++) {
-					String testfile_name = getTestFileName(dataset_index);
+					String testfile_name = this.getTestFileName(dataset_index);
 					try (BufferedReader reader = Files.newBufferedReader(Paths.get(testfile_name),
 							StandardCharsets.UTF_8)) {
 						ArffReader arffReader = new ArffReader(reader);
@@ -91,13 +91,13 @@ public class ExtendedM5ForestTest {
 							for (int i = 0; i < data.numAttributes() - 2; i++) {
 								strippedInstance.setValue(i, instance.value(i));
 							}
-							Interval predictedInterval = classifier[dataset_index][noise_index][seed]
+							Interval predictedInterval = this.classifier[dataset_index][noise_index][seed]
 									.predictInterval(strippedInstance);
 							// System.out.println(
 							// "Actual interval: " + actualInterval + ", predicted Interval " +
 							// predictedInterval);
-							predictedLowers.add(predictedInterval.getLowerBound());
-							predictedUppers.add(predictedInterval.getUpperBound());
+							predictedLowers.add(predictedInterval.getInf());
+							predictedUppers.add(predictedInterval.getSup());
 							actualLowers.add(lower);
 							actualUppers.add(upper);
 						}
@@ -127,12 +127,12 @@ public class ExtendedM5ForestTest {
 		}
 	}
 
-	private String getTestFileName(int dataset_index) {
+	private String getTestFileName(final int dataset_index) {
 		String dataset_name = datasets[dataset_index];
 		return String.format("resources/regression_data/%s_RQPtest.arff", dataset_name);
 	}
 
-	private static final double L1Loss(List<Double> predicted, List<Double> actual) {
+	private static final double L1Loss(final List<Double> predicted, final List<Double> actual) {
 		double accumulated = 0;
 		for (int i = 0; i < predicted.size(); i++) {
 			accumulated += Math.abs(predicted.get(i) - actual.get(i));
@@ -140,7 +140,7 @@ public class ExtendedM5ForestTest {
 		return (accumulated / predicted.size());
 	}
 
-	private static final double r2Loss(List<Double> predicted, List<Double> actual) {
+	private static final double r2Loss(final List<Double> predicted, final List<Double> actual) {
 		double actualAvg = actual.stream().mapToDouble((s) -> s).average().orElseThrow(IllegalStateException::new);
 		double ssTot = actual.stream().mapToDouble((s) -> Math.pow(s - actualAvg, 2)).sum();
 		double ssRes = 0;

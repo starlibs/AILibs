@@ -23,7 +23,7 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  * which the difference of the skill values is minimal, as these are the pairs
  * the Plackett Luce model is least certain about. This procedure is repeated a
  * constant number of times to create a minibatch for updating the model.
- * 
+ *
  * @author Jonas Hanselle
  *
  */
@@ -33,10 +33,10 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ARandomlyInitializing
 	private double ratioOfOldInstancesForMinibatch;
 	private int lengthOfTopRankingToConsider;
 
-	public PrototypicalPoolBasedActiveDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider, int maxBatchSize, int lengthOfTopRankingToConsider, double ratioOfOldInstancesForMinibatch, int numberRandomQueriesAtStart,
-			int seed) {
+	public PrototypicalPoolBasedActiveDyadRanker(final PLNetDyadRanker ranker, final IDyadRankingPoolProvider poolProvider, final int maxBatchSize, final int lengthOfTopRankingToConsider, final double ratioOfOldInstancesForMinibatch, final int numberRandomQueriesAtStart,
+			final int seed) {
 		super(ranker, poolProvider, seed, numberRandomQueriesAtStart, maxBatchSize);
-		seenInstances = new ArrayList<>(poolProvider.getPool().size());
+		this.seenInstances = new ArrayList<>(poolProvider.getPool().size());
 		this.ratioOfOldInstancesForMinibatch = ratioOfOldInstancesForMinibatch;
 		this.lengthOfTopRankingToConsider = lengthOfTopRankingToConsider;
 	}
@@ -47,64 +47,67 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ARandomlyInitializing
 		// get the instance feature vector for which the top ranking has the lowest
 		// probability, d^star in the paper
 		Set<IDyadRankingInstance> minibatch = new HashSet<>();
-		List<Pair<Vector, Double>> dStarWithProbability = new ArrayList<>(getMinibatchSize());
-		for (Vector instanceFeatures : poolProvider.getInstanceFeatures()) {
+		List<Pair<Vector, Double>> dStarWithProbability = new ArrayList<>(this.getMinibatchSize());
+		for (Vector instanceFeatures : this.poolProvider.getInstanceFeatures()) {
 			dStarWithProbability.add(new Pair<Vector, Double>(instanceFeatures, 54d));
 		}
 
 		Collections.shuffle(dStarWithProbability);
 
-		int numberOfOldInstances = Integer.min((int) (ratioOfOldInstancesForMinibatch * getMinibatchSize()), seenInstances.size());
-		int numberOfNewInstances = getMinibatchSize() - numberOfOldInstances;
+		int numberOfOldInstances = Integer.min((int) (this.ratioOfOldInstancesForMinibatch * this.getMinibatchSize()), this.seenInstances.size());
+		int numberOfNewInstances = this.getMinibatchSize() - numberOfOldInstances;
 
 		for (int batchIndex = 0; batchIndex < numberOfNewInstances; batchIndex++) {
 			Vector curDStar = dStarWithProbability.get(batchIndex).getFirst();
-			List<Dyad> dyads = new ArrayList<>(poolProvider.getDyadsByInstance(curDStar));
-			if (dyads.size() < 2)
+			List<Dyad> dyads = new ArrayList<>(this.poolProvider.getDyadsByInstance(curDStar));
+			if (dyads.size() < 2) {
 				break;
+			}
 			Vector instance = dyads.get(0).getInstance();
 			List<Vector> alternatives = new ArrayList<>(dyads.size());
-			for (Dyad dyad : dyads)
+			for (Dyad dyad : dyads) {
 				alternatives.add(dyad.getAlternative());
+			}
 
 			SparseDyadRankingInstance queryRanking = new SparseDyadRankingInstance(instance, alternatives);
 
 			// get the alternatives pair for which the PLNet is most uncertain
-			IDyadRankingInstance queryPair = ranker.getPairWithLeastCertainty(queryRanking);
+			IDyadRankingInstance queryPair = this.ranker.getPairWithLeastCertainty(queryRanking);
 
 			// convert to SparseDyadRankingInstance
 			List<Vector> alternativePair = new ArrayList<>(queryPair.length());
-			for (Dyad dyad : queryPair)
+			for (Dyad dyad : queryPair) {
 				alternativePair.add(dyad.getAlternative());
+			}
 			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(queryPair.getDyadAtPosition(0).getInstance(), alternativePair);
 
 			// query the pool provider to get the ground truth ranking for the pair
-			IDyadRankingInstance groundTruthPair = poolProvider.query(sparseQueryPair);
-			seenInstances.add(groundTruthPair);
+			IDyadRankingInstance groundTruthPair = this.poolProvider.query(sparseQueryPair);
+			this.seenInstances.add(groundTruthPair);
 			minibatch.add(groundTruthPair);
 		}
 
 		// Select a portion of random instances that have already been queried and add
 		// them to the minibatch
-		Collections.shuffle(seenInstances);
-		List<IDyadRankingInstance> oldInstances = seenInstances.subList(0, numberOfOldInstances);
+		Collections.shuffle(this.seenInstances);
+		List<IDyadRankingInstance> oldInstances = this.seenInstances.subList(0, numberOfOldInstances);
 		minibatch.addAll(oldInstances);
-		updateRanker(minibatch);
+		this.updateRanker(minibatch);
 	}
 
 	public double getRatioOfOldInstancesForMinibatch() {
-		return ratioOfOldInstancesForMinibatch;
+		return this.ratioOfOldInstancesForMinibatch;
 	}
 
-	public void setRatioOfOldInstancesForMinibatch(double ratioOfOldInstancesForMinibatch) {
+	public void setRatioOfOldInstancesForMinibatch(final double ratioOfOldInstancesForMinibatch) {
 		this.ratioOfOldInstancesForMinibatch = ratioOfOldInstancesForMinibatch;
 	}
 
 	public int getLengthOfTopRankingToConsider() {
-		return lengthOfTopRankingToConsider;
+		return this.lengthOfTopRankingToConsider;
 	}
 
-	public void setLengthOfTopRankingToConsider(int lengthOfTopRankingToConsider) {
+	public void setLengthOfTopRankingToConsider(final int lengthOfTopRankingToConsider) {
 		this.lengthOfTopRankingToConsider = lengthOfTopRankingToConsider;
 	}
 

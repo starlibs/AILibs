@@ -26,7 +26,7 @@ import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 /**
  * Time series loader class which provides functionality to read datasets from
  * files.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -67,7 +67,7 @@ public class TimeSeriesLoader {
 	/**
 	 * Loads a univariate time series dataset from the given arff file. Assumes the
 	 * class attribute to be the last among the declared attributes in the file.
-	 * 
+	 *
 	 * @param arffFile
 	 *            The arff file which is read
 	 * @return Returns an univariate TimeSeriesDataset object
@@ -77,8 +77,9 @@ public class TimeSeriesLoader {
 	 */
 	@SuppressWarnings("unchecked")
 	public static TimeSeriesDataset<String> loadArff(final File arffFile) throws TimeSeriesLoadingException {
-		if (arffFile == null)
+		if (arffFile == null) {
 			throw new IllegalArgumentException("Parameter 'arffFile' must not be null!");
+		}
 
 		Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
@@ -91,7 +92,7 @@ public class TimeSeriesLoader {
 	 * one series). The arff files must share the same targets among all series.
 	 * Assumes the class attribute to be the last among the declared attributes in
 	 * the file.
-	 * 
+	 *
 	 * @param arffFiles
 	 *            A sequence of arff files each containing one time series per
 	 *            instance
@@ -102,8 +103,9 @@ public class TimeSeriesLoader {
 	 */
 	@SuppressWarnings("unchecked")
 	public static TimeSeriesDataset<String> loadArffs(final File... arffFiles) throws TimeSeriesLoadingException {
-		if (arffFiles == null)
+		if (arffFiles == null) {
 			throw new IllegalArgumentException("Parameter 'arffFiles' must not be null!");
+		}
 
 		final List<INDArray> matrices = new ArrayList<>();
 		INDArray target = null;
@@ -114,20 +116,21 @@ public class TimeSeriesLoader {
 			// loadTimeSeriesWithTargetFromArffFile(arffFile);
 			Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-			if (classNames == null)
+			if (classNames == null) {
 				classNames = (List<String>) tsTargetClassNames[2];
-			else {
+			} else {
 				// Check whether the same class names are used among all of the time series
 				List<String> furtherClassNames = (List<String>) tsTargetClassNames[2];
-				if (furtherClassNames == null || !furtherClassNames.equals(classNames))
+				if (furtherClassNames == null || !furtherClassNames.equals(classNames)) {
 					throw new TimeSeriesLoadingException(
 							"Could not load multivariate time series with different targets. Target values have to be stored in each "
 									+ "time series arff file and must be equal!");
+				}
 			}
 
-			if (target == null)
+			if (target == null) {
 				target = (INDArray) tsTargetClassNames[1];
-			else {
+			} else {
 				// Check whether the same targets are used among all of the time series
 				INDArray furtherTarget = (INDArray) tsTargetClassNames[1];
 				if (furtherTarget == null || target.length() != furtherTarget.length()
@@ -139,9 +142,10 @@ public class TimeSeriesLoader {
 			}
 
 			// Check for same instance length
-			if (matrices.size() != 0 && ((INDArray) tsTargetClassNames[0]).shape()[0] != matrices.get(0).shape()[0])
+			if (!matrices.isEmpty() && ((INDArray) tsTargetClassNames[0]).shape()[0] != matrices.get(0).shape()[0]) {
 				throw new TimeSeriesLoadingException(
 						"All time series must have the same first dimensionality (number of instances).");
+			}
 
 			matrices.add((INDArray) tsTargetClassNames[0]);
 		}
@@ -152,7 +156,7 @@ public class TimeSeriesLoader {
 	 * Extracting the time series and target matrices from a given arff file.
 	 * Assumes the class attribute to be the last among the declared attributes in
 	 * the file.
-	 * 
+	 *
 	 * @param arffFile
 	 *            The arff file to be parsed
 	 * @return Returns an object consisting of three elements: 1. The time series
@@ -199,8 +203,9 @@ public class TimeSeriesLoader {
 					}
 
 					// Count attributes
-					if (line.startsWith(ARFF_ATTRIBUTE_PREFIX))
+					if (line.startsWith(ARFF_ATTRIBUTE_PREFIX)) {
 						attributeCount++;
+					}
 
 					if (line.startsWith(ARFF_DATA_FLAG)) {
 						readData = true;
@@ -209,8 +214,9 @@ public class TimeSeriesLoader {
 						targetMatrix = Nd4j.create(numInstances);
 						lineCounter = 0;
 
-						if (!targetSet)
+						if (!targetSet) {
 							LOGGER.warn("No target has been set before reading data.");
+						}
 					}
 				} else {
 					if (!line.equals("")) {
@@ -219,16 +225,19 @@ public class TimeSeriesLoader {
 						double[] dValues = new double[targetSet ? values.length - 1 : values.length];
 						for (int i = 0; i < values.length - 1; i++) {
 							String actValue = values[i];
-							if (actValue.startsWith("'"))
+							if (actValue.startsWith("'")) {
 								actValue = actValue.substring(1);
-							if (actValue.endsWith("'"))
+							}
+							if (actValue.endsWith("'")) {
 								actValue = actValue.substring(0, actValue.length() - 1);
+							}
 							dValues[i] = Double.parseDouble(actValue);
 						}
 						matrix.putRow(lineCounter, Nd4j.create(dValues));
 
-						if (targetSet)
+						if (targetSet) {
 							targetMatrix.putScalar(lineCounter, targetValues.indexOf(values[values.length - 1]));
+						}
 					}
 
 					lineCounter++;
@@ -242,7 +251,7 @@ public class TimeSeriesLoader {
 
 		} catch (
 
-		UnsupportedEncodingException e) {
+				UnsupportedEncodingException e) {
 			throw new TimeSeriesLoadingException("Could not load time series dataset due to unsupported encoding.", e);
 		} catch (FileNotFoundException e) {
 			throw new TimeSeriesLoadingException(
@@ -271,14 +280,14 @@ public class TimeSeriesLoader {
 	/**
 	 * Counts the lines of the given File object in a very efficient way (thanks to
 	 * https://stackoverflow.com/a/453067).
-	 * 
+	 *
 	 * @param filename
 	 *            File which lines of code are counted
 	 * @return Returns the number of file lines
 	 * @throws IOException
 	 *             Throws exception when the given file could not be read
 	 */
-	public static int countFileLines(File file) throws IOException {
+	public static int countFileLines(final File file) throws IOException {
 		InputStream is = new BufferedInputStream(new FileInputStream(file));
 		try {
 			byte[] c = new byte[1024];

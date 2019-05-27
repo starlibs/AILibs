@@ -92,11 +92,12 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	 * Removes the time series variable at a given index.
 	 *
 	 * @param index
-	 * @return 
+	 * @return
 	 * @throws IndexOutOfBoundsException
 	 */
+	@Override
 	public TimeSeriesInstance<L> remove(final int index) {
-		TimeSeriesInstance<L> instance = get(index);
+		TimeSeriesInstance<L> instance = this.get(index);
 		this.valueMatrices.remove(index);
 		this.timestampMatrices.remove(index);
 		this.attributeTypes.remove(index);
@@ -153,6 +154,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 		return this.timestampMatrices != null && this.timestampMatrices.size() > index ? this.timestampMatrices.get(index) : null;
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return this.valueMatrices.isEmpty();
 	}
@@ -189,7 +191,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	 */
 	class TimeSeriesDatasetIterator implements Iterator<TimeSeriesInstance<L>> {
 
-		int current = 0;
+		private int current = 0;
 
 		@Override
 		public boolean hasNext() {
@@ -202,12 +204,12 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 				throw new NoSuchElementException();
 			}
 
-			return get(this.current++);
+			return TimeSeriesDataset.this.get(this.current++);
 		}
 	}
 
 	@Override
-	public TimeSeriesInstance<L> get(int index) {
+	public TimeSeriesInstance<L> get(final int index) {
 
 		// Build attribute value as view on the row of the attribute matrix.
 		List<IAttributeValue<?>> attributeValues = new ArrayList<>();
@@ -219,7 +221,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 		}
 		// Build target value.
 		double target = TimeSeriesDataset.this.targets.getDouble(index);
-		return new TimeSeriesInstance<>(attributeValues, targetType.buildAttributeValue(target).getValue());
+		return new TimeSeriesInstance<>(attributeValues, this.targetType.buildAttributeValue(target).getValue());
 	}
 
 	@Override
@@ -248,12 +250,12 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	}
 
 	@Override
-	public boolean add(TimeSeriesInstance<L> e) {
+	public boolean add(final TimeSeriesInstance<L> e) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends TimeSeriesInstance<L>> c) {
+	public boolean addAll(final Collection<? extends TimeSeriesInstance<L>> c) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -263,27 +265,27 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	}
 
 	@Override
-	public boolean contains(Object o) {
+	public boolean contains(final Object o) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean containsAll(Collection<?> c) {
+	public boolean containsAll(final Collection<?> c) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean remove(Object o) {
+	public boolean remove(final Object o) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean removeAll(Collection<?> c) {
+	public boolean removeAll(final Collection<?> c) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
+	public boolean retainAll(final Collection<?> c) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -298,27 +300,27 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
+	public <T> T[] toArray(final T[] a) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public void add(int arg0, TimeSeriesInstance<L> arg1) {
+	public void add(final int arg0, final TimeSeriesInstance<L> arg1) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean addAll(int arg0, Collection<? extends TimeSeriesInstance<L>> arg1) {
+	public boolean addAll(final int arg0, final Collection<? extends TimeSeriesInstance<L>> arg1) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public int indexOf(Object arg0) {
+	public int indexOf(final Object arg0) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public int lastIndexOf(Object arg0) {
+	public int lastIndexOf(final Object arg0) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -328,17 +330,17 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	}
 
 	@Override
-	public ListIterator<TimeSeriesInstance<L>> listIterator(int arg0) {
+	public ListIterator<TimeSeriesInstance<L>> listIterator(final int arg0) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public TimeSeriesInstance<L> set(int arg0, TimeSeriesInstance<L> arg1) {
+	public TimeSeriesInstance<L> set(final int arg0, final TimeSeriesInstance<L> arg1) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public List<TimeSeriesInstance<L>> subList(int arg0, int arg1) {
+	public List<TimeSeriesInstance<L>> subList(final int arg0, final int arg1) {
 		throw new UnsupportedOperationException();
 	}
 }

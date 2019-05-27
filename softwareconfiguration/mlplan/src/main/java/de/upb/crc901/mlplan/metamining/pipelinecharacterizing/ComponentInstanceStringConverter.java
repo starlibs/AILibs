@@ -34,50 +34,49 @@ public class ComponentInstanceStringConverter extends Thread {
 	 */
 	private String pipelineTreeName = "0";
 
-	IOntologyConnector ontologyConnector;
+	private IOntologyConnector ontologyConnector;
 
-	List<ComponentInstance> cIs;
+	private List<ComponentInstance> cIs;
 
-	Properties wekaLabels;
+	private Properties wekaLabels;
 
-	List<String> convertedPipelines;
+	private List<String> convertedPipelines;
 
 	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters;
 
-	public ComponentInstanceStringConverter(IOntologyConnector ontologyConnector, List<ComponentInstance> cIs,
-			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
+	public ComponentInstanceStringConverter(final IOntologyConnector ontologyConnector, final List<ComponentInstance> cIs, final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
 		this.ontologyConnector = ontologyConnector;
 		this.cIs = cIs;
 		this.convertedPipelines = new ArrayList<>(cIs.size());
 		this.componentParameters = componentParameters;
-		InputStream fis = getClass().getClassLoader().getResourceAsStream(WEKA_LABEL_FILE);
-		wekaLabels = new Properties();
+		InputStream fis = this.getClass().getClassLoader().getResourceAsStream(WEKA_LABEL_FILE);
+		this.wekaLabels = new Properties();
 		try {
-			wekaLabels.load(fis);
+			this.wekaLabels.load(fis);
 		} catch (IOException e) {
 			log.warn("Could not load weka labels.");
-			throw new ComponentInstanceStringConverterIntializeException(e);		
+			throw new ComponentInstanceStringConverterIntializeException(e);
 		}
 	}
 
 	@Override
 	public void run() {
-		for (ComponentInstance cI : cIs) {
-			String pipeline = makeStringTreeRepresentation(cI);
-			convertedPipelines.add(pipeline);
+		for (ComponentInstance cI : this.cIs) {
+			String pipeline = this.makeStringTreeRepresentation(cI);
+			this.convertedPipelines.add(pipeline);
 		}
 	}
 
 	/**
 	 * Converts the given MLPipeline to a String representation of its components
 	 * using the ontology.
-	 * 
+	 *
 	 * @param pipeline
 	 *            The pipeline to convert
 	 * @return The string representation of the tree deduced from the pipeline
-	 * 
+	 *
 	 */
-	public String makeStringTreeRepresentation(ComponentInstance pipeline) {
+	public String makeStringTreeRepresentation(final ComponentInstance pipeline) {
 		List<String> pipelineBranches = new ArrayList<>();
 		ComponentInstance classifierCI;
 
@@ -92,12 +91,10 @@ public class ComponentInstanceStringConverter extends Thread {
 
 			if (preprocessorCI != null) {
 				// Characterize searcher
-				addCharacterizationOfPipelineElement(pipelineBranches,
-						preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search"));
+				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("search"));
 
 				// Characterize evaluator
-				addCharacterizationOfPipelineElement(pipelineBranches,
-						preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval"));
+				this.addCharacterizationOfPipelineElement(pipelineBranches, preprocessorCI.getSatisfactionOfRequiredInterfaces().get("eval"));
 			}
 
 			classifierCI = pipeline.getSatisfactionOfRequiredInterfaces().get("classifier");
@@ -108,19 +105,18 @@ public class ComponentInstanceStringConverter extends Thread {
 		}
 
 		// Characterize classifier
-		addCharacterizationOfPipelineElement(pipelineBranches, classifierCI);
+		this.addCharacterizationOfPipelineElement(pipelineBranches, classifierCI);
 
 		// Put tree together
-		String toReturn = TreeRepresentationUtils.addChildrenToNode(pipelineTreeName, pipelineBranches);
+		String toReturn = TreeRepresentationUtils.addChildrenToNode(this.pipelineTreeName, pipelineBranches);
 		// if we have a properties file which maps our weka label to integers; use it
-		if (wekaLabels != null) {
+		if (this.wekaLabels != null) {
 			Pattern p = Pattern.compile(" ");
-			return p.splitAsStream(toReturn).filter(s -> !"".equals(s)).map(s ->wekaLabels.getProperty(s, s))
-					.collect(Collectors.joining(" "));
+			return p.splitAsStream(toReturn).filter(s -> !"".equals(s)).map(s -> this.wekaLabels.getProperty(s, s)).collect(Collectors.joining(" "));
 		} else {
 			log.error("Did not find label property mapper.");
 			throw new IllegalStateException();
-		} 
+		}
 	}
 
 	/**
@@ -128,23 +124,20 @@ public class ComponentInstanceStringConverter extends Thread {
 	 * ComponentInstance and adds its characterization (the branch of a tree that is
 	 * the current pipeline) to the pipeline tree by adding its branch
 	 * representation as a last element of the list of branches.
-	 * 
+	 *
 	 * @param pipelineBranches
 	 *            The current branches of the pipeline.
 	 * @param componentInstance
 	 *            The pipeline element to be characterized
 	 */
-	protected void addCharacterizationOfPipelineElement(List<String> pipelineBranches,
-			ComponentInstance componentInstance) {
+	protected void addCharacterizationOfPipelineElement(final List<String> pipelineBranches, final ComponentInstance componentInstance) {
 		if (componentInstance != null) {
 			String wekaName = componentInstance.getComponent().getName();
 			// Get generalization
-			List<String> branchComponents = ontologyConnector.getAncestorsOfAlgorithm(wekaName);
-			
+			List<String> branchComponents = this.ontologyConnector.getAncestorsOfAlgorithm(wekaName);
+
 			// Get parameters
-			branchComponents.set(branchComponents.size() - 1,
-					TreeRepresentationUtils.addChildrenToNode(branchComponents.get(branchComponents.size() - 1),
-							getParametersForComponentInstance(componentInstance)));
+			branchComponents.set(branchComponents.size() - 1, TreeRepresentationUtils.addChildrenToNode(branchComponents.get(branchComponents.size() - 1), this.getParametersForComponentInstance(componentInstance)));
 
 			// Serialize
 			String branch = TreeRepresentationUtils.makeRepresentationForBranch(branchComponents);
@@ -155,25 +148,22 @@ public class ComponentInstanceStringConverter extends Thread {
 	/**
 	 * Get String representations of the parameters of the given ComponentInstance
 	 * (representing a pipeline element). Numerical parameters are refined.
-	 * 
+	 *
 	 * @param componentInstance
 	 *            The ComponentInstance for which to get the parameters
 	 * @return A list of parameter descriptions represented as Strings
 	 */
-	protected List<String> getParametersForComponentInstance(ComponentInstance componentInstance) {
+	protected List<String> getParametersForComponentInstance(final ComponentInstance componentInstance) {
 		List<String> parameters = new ArrayList<>();
 
 		// Get Parameters of base classifier if this is a meta classifier
-		if (componentInstance.getSatisfactionOfRequiredInterfaces() != null
-				&& componentInstance.getSatisfactionOfRequiredInterfaces().size() > 0) {
+		if (componentInstance.getSatisfactionOfRequiredInterfaces() != null && componentInstance.getSatisfactionOfRequiredInterfaces().size() > 0) {
 			componentInstance.getSatisfactionOfRequiredInterfaces().forEach((requiredInterface, component) -> {
 				// so far, only have the "K" interface & this has no param so can directly get
 				List<String> kernelFunctionCharacterisation = new ArrayList<>();
 				kernelFunctionCharacterisation.add(requiredInterface);
-				kernelFunctionCharacterisation
-						.addAll(ontologyConnector.getAncestorsOfAlgorithm(component.getComponent().getName()));
-				parameters.add(TreeRepresentationUtils.addChildrenToNode(requiredInterface, Arrays
-						.asList(TreeRepresentationUtils.makeRepresentationForBranch(kernelFunctionCharacterisation))));
+				kernelFunctionCharacterisation.addAll(this.ontologyConnector.getAncestorsOfAlgorithm(component.getComponent().getName()));
+				parameters.add(TreeRepresentationUtils.addChildrenToNode(requiredInterface, Arrays.asList(TreeRepresentationUtils.makeRepresentationForBranch(kernelFunctionCharacterisation))));
 			});
 		}
 
@@ -192,7 +182,7 @@ public class ComponentInstanceStringConverter extends Thread {
 
 			// Numeric parameter - needs to be refined
 			if (parameter.isNumeric()) {
-				resolveNumericParameter(componentInstance, parameter, parameterName, parameterRefinement);
+				this.resolveNumericParameter(componentInstance, parameter, parameterName, parameterRefinement);
 
 				// Categorical parameter
 			} else {
@@ -202,14 +192,12 @@ public class ComponentInstanceStringConverter extends Thread {
 			}
 			parameters.add(TreeRepresentationUtils.makeRepresentationForBranch(parameterRefinement));
 		}
-		
+
 		return parameters;
 	}
 
-	private void resolveNumericParameter(ComponentInstance componentInstance, Parameter parameter, String parameterName,
-			List<String> parameterRefinement) {
-		ParameterRefinementConfiguration parameterRefinementConfiguration = componentParameters
-				.get(componentInstance.getComponent()).get(parameter);
+	private void resolveNumericParameter(final ComponentInstance componentInstance, final Parameter parameter, final String parameterName, final List<String> parameterRefinement) {
+		ParameterRefinementConfiguration parameterRefinementConfiguration = this.componentParameters.get(componentInstance.getComponent()).get(parameter);
 		NumericParameterDomain parameterDomain = ((NumericParameterDomain) parameter.getDefaultDomain());
 		Interval currentInterval = null;
 		Interval nextInterval = new Interval(parameterDomain.getMin(), parameterDomain.getMax());
@@ -218,18 +206,16 @@ public class ComponentInstanceStringConverter extends Thread {
 
 		while (true) {
 			currentInterval = nextInterval;
-			parameterRefinement.add(serializeInterval(currentInterval));
+			parameterRefinement.add(this.serializeInterval(currentInterval));
 
-			List<Interval> refinement = Util.getNumericParameterRefinement(nextInterval, parameterValue,
-					parameterDomain.isInteger(), parameterRefinementConfiguration);
+			List<Interval> refinement = Util.getNumericParameterRefinement(nextInterval, parameterValue, parameterDomain.isInteger(), parameterRefinementConfiguration);
 
 			if (refinement.isEmpty()) {
 				break;
 			}
 
 			for (Interval interval : refinement) {
-				if (interval.checkPoint(parameterValue, precision) == Location.INSIDE
-						|| interval.checkPoint(parameterValue, precision) == Location.BOUNDARY) {
+				if (interval.checkPoint(parameterValue, precision) == Location.INSIDE || interval.checkPoint(parameterValue, precision) == Location.BOUNDARY) {
 					nextInterval = interval;
 					break;
 				}
@@ -242,12 +228,12 @@ public class ComponentInstanceStringConverter extends Thread {
 	/**
 	 * Helper method for serializing an interval so that it can be used in String
 	 * representations of parameters of pipeline elements.
-	 * 
+	 *
 	 * @param interval
 	 *            The interval to be serialized
 	 * @return The String representation of the interval
 	 */
-	protected String serializeInterval(Interval interval) {
+	protected String serializeInterval(final Interval interval) {
 		StringBuilder builder = new StringBuilder();
 		builder.append("[");
 		builder.append(interval.getInf());
@@ -258,6 +244,6 @@ public class ComponentInstanceStringConverter extends Thread {
 	}
 
 	public List<String> getConvertedPipelines() {
-		return convertedPipelines;
+		return this.convertedPipelines;
 	}
 }

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  * The parameter of a literal.
- * 
+ *
  * @author mbunse
  */
 @SuppressWarnings("serial")
@@ -17,7 +17,7 @@ public abstract class LiteralParam implements Serializable {
 	 * @param name
 	 *            The name of this parameter;
 	 */
-	public LiteralParam(String name) {
+	public LiteralParam(final String name) {
 		this.name = name;
 	}
 
@@ -25,7 +25,7 @@ public abstract class LiteralParam implements Serializable {
 	 * @param name
 	 *            The name of this parameter;
 	 */
-	public LiteralParam(String name, Type type) {
+	public LiteralParam(final String name, final Type type) {
 		this(name);
 		this.setType(type);
 	}
@@ -34,7 +34,7 @@ public abstract class LiteralParam implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
 		return result;
 	}
 
@@ -42,34 +42,39 @@ public abstract class LiteralParam implements Serializable {
 	 * It is with intention that the equals method does NOT check the type.
 	 * We assume that the name of a parameter is sufficient to identify it.
 	 * The type is rather optional to enable efficient processing in some contexts.
-	 *  
+	 *
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		LiteralParam other = (LiteralParam) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (this.name == null) {
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!this.name.equals(other.name)) {
 			return false;
+		}
 		return true;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public Type getType() {
-		return type;
+		return this.type;
 	}
 
-	public void setType(Type type) {
+	public void setType(final Type type) {
 		this.type = type;
 	}
 
