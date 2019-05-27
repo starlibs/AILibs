@@ -189,7 +189,7 @@ public class GMeans<C extends Clusterable> {
 		return this.gmeansCluster;
 	}
 
-	private void mergeCluster(final Map<double[], List<C>> currentPoints) {
+	protected void mergeCluster(final Map<double[], List<C>> currentPoints) {
 		ArrayList<double[]> toMergeCenter = new ArrayList<>();
 		for (Entry<double[], List<C>> entry : currentPoints.entrySet()) {
 			if (currentPoints.get(entry.getKey()).size() <= 2) {
@@ -214,7 +214,7 @@ public class GMeans<C extends Clusterable> {
 		}
 	}
 
-	private boolean andersonDarlingTest(final double[] d) {
+	protected boolean andersonDarlingTest(final double[] d) {
 		// sorts the Array so that the smallest entrys are the first. Entrys are
 		// negative too !!
 		Arrays.sort(d);
@@ -304,7 +304,7 @@ public class GMeans<C extends Clusterable> {
 		return tmp;
 	}
 
-	private double[] difference(final double[] a, final double[] b) {
+	protected double[] difference(final double[] a, final double[] b) {
 		double[] c = new double[a.length];
 		for (int i = 0; i < a.length; i++) {
 			// TODO Muss das auch normaliziert werden
@@ -317,4 +317,11 @@ public class GMeans<C extends Clusterable> {
 		return c;
 	}
 
+	protected List<double[]> getCentersModifiable() {
+		return this.center;
+	}
+
+	public List<C> getPoints() {
+		return this.points;
+	}
 }

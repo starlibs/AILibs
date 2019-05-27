@@ -13,7 +13,7 @@ public class ModifiedISACGroupBuilder implements IGroupBuilder<double[], Instanc
 	@Override
 	public List<Group<double[], Instance>> buildGroup(final List<ProblemInstance<Instance>> allInstances) {
 		ModifiedISACgMeans groupBuilder = new ModifiedISACgMeans(this.points, allInstances);
-		return new ArrayList<>(groupBuilder.gmeanscluster());
+		return new ArrayList<>(groupBuilder.clusterDeprecated());
 	}
 
 	public void setPoints(final List<double[]> toSetPoints) {
