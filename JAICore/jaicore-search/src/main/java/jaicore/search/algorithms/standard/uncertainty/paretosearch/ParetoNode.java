@@ -9,12 +9,12 @@ import jaicore.search.model.travesaltree.Node;
  */
 public class ParetoNode<T, V extends Comparable<V>> {
 
-	final Node<T, V> node;
+	private final Node<T, V> node;
 
 	/* Number of creation of this pareto node. */
-	final int n;
-	final HashSet<ParetoNode<T,V>> dominates;
-	final HashSet<ParetoNode<T,V>> dominatedBy;
+	private final int n;
+	private final HashSet<ParetoNode<T,V>> dominates;
+	private final HashSet<ParetoNode<T,V>> dominatedBy;
 
 
 	public ParetoNode(final Node<T, V> node, final int n) {

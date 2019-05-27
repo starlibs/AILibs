@@ -58,9 +58,6 @@ public class Literal implements Serializable {
 	 */
 	public Literal(final String property, final List<? extends LiteralParam> parameters) {
 		this(property);
-		if (parameters.contains(null)) {
-			throw new IllegalArgumentException("Literal parameters must not be null!");
-		}
 		this.parameters.addAll(parameters);
 	}
 
@@ -88,7 +85,7 @@ public class Literal implements Serializable {
 		else {
 
 			boolean isPositive = true;
-			String propertyWithParams = new String(pPropertyWithParams);
+			String propertyWithParams = "" +  pPropertyWithParams;
 			if (pPropertyWithParams.startsWith("!")) {
 				isPositive = false;
 				propertyWithParams = pPropertyWithParams.substring(1);
