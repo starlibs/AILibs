@@ -47,9 +47,6 @@ class RestProblem extends ArrayList<Set<String>> {
 		} else if (!this.edgeToParent.equals(other.edgeToParent)) {
 			return false;
 		}
-		if (this.id != other.id) {
-			return false;
-		}
-		return true;
+		return this.id == other.id;
 	}
 }

@@ -25,7 +25,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract class Instruction {
 
 	public Instruction() {
-		this.inputs = new HashMap<String, String>();
+		this.inputs = new HashMap<>();
 	}
 
 	@JsonProperty

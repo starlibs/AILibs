@@ -2,6 +2,8 @@ package jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 
 import java.util.List;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+
 public class AttributeDiscretizationPolicy {
 
 	private List<Interval> intervals;

@@ -34,7 +34,7 @@ public class ReductionOptimizer implements Classifier {
 
 	private final long seed;
 	private MCTreeNode root;
-	private Logger logger = LoggerFactory.getLogger(ReductionOptimizer.class);
+	private transient Logger logger = LoggerFactory.getLogger(ReductionOptimizer.class);
 
 	public ReductionOptimizer(final long seed) {
 		super();

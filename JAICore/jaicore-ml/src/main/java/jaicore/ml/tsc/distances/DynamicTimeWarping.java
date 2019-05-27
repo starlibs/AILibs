@@ -46,33 +46,33 @@ public class DynamicTimeWarping implements ITimeSeriesDistance {
 	}
 
 	@Override
-	public double distance(final double[] A, final double[] B) {
+	public double distance(final double[] a, final double[] b) {
 		// Care in the most algorithm descriptions, the time series are 1-indexed.
 
-		int n = A.length;
-		int m = B.length;
-		double[][] M = new double[n + 1][m + 1]; // from 0 to n+1 incl. and 0 to m+1 incl.
+		int n = a.length;
+		int m = b.length;
+		double[][] matrix = new double[n + 1][m + 1]; // from 0 to n+1 incl. and 0 to m+1 incl.
 
 		// Initialize first row and column to infinity (except [0][0]).
 		for (int i = 1; i <= n; i++) {
-			M[i][0] = Double.MAX_VALUE;
+			matrix[i][0] = Double.MAX_VALUE;
 		}
 		for (int j = 1; j <= m; j++) {
-			M[0][j] = Double.MAX_VALUE;
+			matrix[0][j] = Double.MAX_VALUE;
 		}
 		// Initialize [0][0] with 0.
-		M[0][0] = 0d;
+		matrix[0][0] = 0d;
 
 		// Dynamic programming.
 		for (int i = 1; i <= n; i++) {
 			for (int j = 1; j <= m; j++) {
-				double cost = this.delta.distance(A[i - 1], B[j - 1]); // 1 indexed in algo.
-				double mini = Math.min(M[i - 1][j], Math.min(M[i][j - 1], M[i - 1][j - 1]));
-				M[i][j] = cost + mini;
+				double cost = this.delta.distance(a[i - 1], b[j - 1]); // 1 indexed in algo.
+				double mini = Math.min(matrix[i - 1][j], Math.min(matrix[i][j - 1], matrix[i - 1][j - 1]));
+				matrix[i][j] = cost + mini;
 			}
 		}
 
-		return M[n][m];
+		return matrix[n][m];
 	}
 
 	public double distanceWithWindow(final double[] A, final double[] B, int w) {

@@ -23,7 +23,7 @@ import jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 /**
  * Time series loader class which provides functionality to read datasets from
  * files storing into simplified, more efficient time series datasets.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -63,7 +63,7 @@ public class SimplifiedTimeSeriesLoader {
 	/**
 	 * Loads a univariate time series dataset from the given arff file. Assumes the
 	 * class attribute to be the last among the declared attributes in the file.
-	 * 
+	 *
 	 * @param arffFile
 	 *            The arff file which is read
 	 * @return Returns a pair consisting of an univariate TimeSeriesDataset object
@@ -74,8 +74,9 @@ public class SimplifiedTimeSeriesLoader {
 	 */
 	@SuppressWarnings("unchecked")
 	public static Pair<TimeSeriesDataset, ClassMapper> loadArff(final File arffFile) throws TimeSeriesLoadingException {
-		if (arffFile == null)
+		if (arffFile == null) {
 			throw new IllegalArgumentException("Parameter 'arffFile' must not be null!");
+		}
 
 		Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
@@ -96,7 +97,7 @@ public class SimplifiedTimeSeriesLoader {
 	 * one series). The arff files must share the same targets among all series.
 	 * Assumes the class attribute to be the last among the declared attributes in
 	 * the file.
-	 * 
+	 *
 	 * @param arffFiles
 	 *            A sequence of arff files each containing one time series per
 	 *            instance
@@ -108,8 +109,9 @@ public class SimplifiedTimeSeriesLoader {
 	@SuppressWarnings("unchecked")
 	public static Pair<TimeSeriesDataset, ClassMapper> loadArffs(final File... arffFiles)
 			throws TimeSeriesLoadingException {
-		if (arffFiles == null)
+		if (arffFiles == null) {
 			throw new IllegalArgumentException("Parameter 'arffFiles' must not be null!");
+		}
 
 		final List<double[][]> matrices = new ArrayList<>();
 		int[] target = null;
@@ -120,21 +122,22 @@ public class SimplifiedTimeSeriesLoader {
 			// loadTimeSeriesWithTargetFromArffFile(arffFile);
 			Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
-			if (classNames == null && tsTargetClassNames[2] != null)
+			if (classNames == null && tsTargetClassNames[2] != null) {
 				classNames = (List<String>) tsTargetClassNames[2];
-			else {
+			} else {
 				// Check whether the same class names are used among all of the time series
 				List<String> furtherClassNames = (List<String>) tsTargetClassNames[2];
 				if ((classNames != null && furtherClassNames == null)
-						|| (furtherClassNames != null && !furtherClassNames.equals(classNames)))
+						|| (furtherClassNames != null && !furtherClassNames.equals(classNames))) {
 					throw new TimeSeriesLoadingException(
 							"Could not load multivariate time series with different targets. Target values have to be stored in each "
 									+ "time series arff file and must be equal!");
+				}
 			}
 
-			if (target == null)
+			if (target == null) {
 				target = (int[]) tsTargetClassNames[1];
-			else {
+			} else {
 				// Check whether the same targets are used among all of the time series
 				int[] furtherTarget = (int[]) tsTargetClassNames[1];
 				if (furtherTarget == null || target.length != furtherTarget.length
@@ -146,15 +149,17 @@ public class SimplifiedTimeSeriesLoader {
 			}
 
 			// Check for same instance length
-			if (matrices.size() != 0 && ((double[][]) tsTargetClassNames[0]).length != matrices.get(0).length)
+			if (matrices.size() != 0 && ((double[][]) tsTargetClassNames[0]).length != matrices.get(0).length) {
 				throw new TimeSeriesLoadingException(
 						"All time series must have the same first dimensionality (number of instances).");
+			}
 
 			matrices.add((double[][]) tsTargetClassNames[0]);
 		}
 		ClassMapper cm = null;
-		if (classNames != null)
+		if (classNames != null) {
 			cm = new ClassMapper(classNames);
+		}
 
 		return new Pair<TimeSeriesDataset, ClassMapper>(
 				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), target), cm);
@@ -164,7 +169,7 @@ public class SimplifiedTimeSeriesLoader {
 	 * Extracting the time series and target matrices from a given arff file.
 	 * Assumes the class attribute to be the last among the declared attributes in
 	 * the file.
-	 * 
+	 *
 	 * @param arffFile
 	 *            The arff file to be parsed
 	 * @return Returns an object consisting of three elements: 1. The time series
@@ -221,8 +226,9 @@ public class SimplifiedTimeSeriesLoader {
 					}
 
 					// Count attributes
-					if (line.startsWith(ARFF_ATTRIBUTE_PREFIX))
+					if (line.startsWith(ARFF_ATTRIBUTE_PREFIX)) {
 						attributeCount++;
+					}
 
 					if (line.startsWith(ARFF_DATA_FLAG)) {
 						readData = true;
@@ -231,8 +237,9 @@ public class SimplifiedTimeSeriesLoader {
 						targetMatrix = new int[numInstances];
 						lineCounter = 0;
 
-						if (!targetSet)
+						if (!targetSet) {
 							LOGGER.warn("No target has been set before reading data.");
+						}
 					}
 				} else {
 					if (!line.equals("")) {
@@ -244,8 +251,9 @@ public class SimplifiedTimeSeriesLoader {
 						}
 						matrix[lineCounter] = dValues;
 
-						if (targetSet)
+						if (targetSet) {
 							targetMatrix[lineCounter] = targetValues.indexOf(values[values.length - 1]);
+						}
 					}
 
 					lineCounter++;
@@ -259,7 +267,7 @@ public class SimplifiedTimeSeriesLoader {
 
 		} catch (
 
-		UnsupportedEncodingException e) {
+				UnsupportedEncodingException e) {
 			throw new TimeSeriesLoadingException("Could not load time series dataset due to unsupported encoding.", e);
 		} catch (FileNotFoundException e) {
 			throw new TimeSeriesLoadingException(
@@ -288,7 +296,7 @@ public class SimplifiedTimeSeriesLoader {
 	 * submatrix is specified by the indices <code>begin</code> and
 	 * </code>end</code> (exclusive). Only the rows within this interval are copied
 	 * into the result matrix.
-	 * 
+	 *
 	 * @param matrix
 	 *            The matrix from which the submatrix is extracted
 	 * @param begin
@@ -298,10 +306,12 @@ public class SimplifiedTimeSeriesLoader {
 	 * @return Returns the specified submatrix
 	 */
 	private static double[][] getInterval(final double[][] matrix, final int begin, final int end) {
-		if (begin < 0 || begin > matrix.length - 1)
+		if (begin < 0 || begin > matrix.length - 1) {
 			throw new IllegalArgumentException("The begin index must be valid!");
-		if (end < 1 || end > matrix.length)
+		}
+		if (end < 1 || end > matrix.length) {
 			throw new IllegalArgumentException("The end index must be valid!");
+		}
 
 		final double[][] result = new double[end - begin][];
 		for (int i = 0; i < end - begin; i++) {
@@ -314,7 +324,7 @@ public class SimplifiedTimeSeriesLoader {
 	 * Function returning an interval as subarray of the given <code>array</code>.
 	 * The interval is specified by the indices <code>begin</code> and
 	 * </code>end</code> (exclusive).
-	 * 
+	 *
 	 * @param array
 	 *            The array from which the interval is extracted
 	 * @param begin
@@ -324,10 +334,12 @@ public class SimplifiedTimeSeriesLoader {
 	 * @return Returns the specified interval as a subarray
 	 */
 	private static int[] getInterval(final int[] array, final int begin, final int end) {
-		if (begin < 0 || begin > array.length - 1)
+		if (begin < 0 || begin > array.length - 1) {
 			throw new IllegalArgumentException("The begin index must be valid!");
-		if (end < 1 || end > array.length)
+		}
+		if (end < 1 || end > array.length) {
 			throw new IllegalArgumentException("The end index must be valid!");
+		}
 
 		final int[] result = new int[end - begin];
 		for (int i = 0; i < end - begin; i++) {
@@ -339,14 +351,14 @@ public class SimplifiedTimeSeriesLoader {
 	/**
 	 * Counts the lines of the given File object in a very efficient way (thanks to
 	 * https://stackoverflow.com/a/453067).
-	 * 
+	 *
 	 * @param filename
 	 *            File which lines of code are counted
 	 * @return Returns the number of file lines
 	 * @throws IOException
 	 *             Throws exception when the given file could not be read
 	 */
-	public static int countFileLines(File file) throws IOException {
+	public static int countFileLines(final File file) throws IOException {
 		InputStream is = new BufferedInputStream(new FileInputStream(file));
 		try {
 			byte[] c = new byte[1024];

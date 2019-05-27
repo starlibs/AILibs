@@ -119,10 +119,7 @@ public class MLExperiment {
 		if (this.seed != other.seed) {
 			return false;
 		}
-		if (this.timeoutInSeconds != other.timeoutInSeconds) {
-			return false;
-		}
-		return true;
+		return this.timeoutInSeconds == other.timeoutInSeconds;
 	}
 
 	@Override

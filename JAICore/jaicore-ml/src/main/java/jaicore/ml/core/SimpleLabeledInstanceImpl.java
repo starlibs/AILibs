@@ -18,6 +18,9 @@ import jaicore.ml.interfaces.LabeledInstance;
 @SuppressWarnings("serial")
 public class SimpleLabeledInstanceImpl extends ArrayList<Double> implements LabeledInstance<String> {
 
+	private static final String K_ATTRIBUTES = "attributes";
+	private static final String K_LABEL = "label";
+
 	private String label;
 	private static final Logger logger = LoggerFactory.getLogger(SimpleLabeledInstanceImpl.class);
 
@@ -31,24 +34,24 @@ public class SimpleLabeledInstanceImpl extends ArrayList<Double> implements Labe
 
 	public SimpleLabeledInstanceImpl(final JsonNode jsonNode) {
 		this();
-		if (!jsonNode.has("attributes")) {
+		if (!jsonNode.has(K_ATTRIBUTES)) {
 			throw new IllegalArgumentException("JSON representation has no attribute \"attributes\".");
 		}
-		if (!jsonNode.has("label")) {
+		if (!jsonNode.has(K_LABEL)) {
 			throw new IllegalArgumentException("JSON representation has no attribute \"label\".");
 		}
-		for (JsonNode val : jsonNode.get("attributes")) {
+		for (JsonNode val : jsonNode.get(K_ATTRIBUTES)) {
 			this.add(val.asDouble());
 		}
-		this.label = jsonNode.get("label").asText();
+		this.label = jsonNode.get(K_LABEL).asText();
 	}
 
 	@Override
 	public String toJson() {
 		ObjectMapper om = new ObjectMapper();
 		ObjectNode root = om.createObjectNode();
-		ArrayNode attributes = root.putArray("attributes");
-		root.put("label", this.label);
+		ArrayNode attributes = root.putArray(K_ATTRIBUTES);
+		root.put(K_LABEL, this.label);
 		for (double d : this) {
 			attributes.add(d);
 		}

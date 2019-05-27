@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jaicore.logging.LoggerUtil;
+
 public class LCNetClient {
 
 	private Logger logger = LoggerFactory.getLogger(LCNetClient.class);
@@ -60,7 +62,7 @@ public class LCNetClient {
 			out.close();
 			httpCon.getInputStream();
 		} catch (IOException e) {
-			this.logger.error("Unexpected exception", e);
+			this.logger.error(LoggerUtil.getExceptionInfo(e));
 		}
 	}
 
@@ -116,7 +118,7 @@ public class LCNetClient {
 			out.close();
 			httpCon.getInputStream();
 		} catch (IOException e) {
-			throw new RuntimeException("Unexpected exception", e);
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -137,7 +139,7 @@ public class LCNetClient {
 		try {
 			httpCon.setRequestMethod("PUT");
 		} catch (ProtocolException e) {
-			this.logger.error("Unexpected exception", e);
+			this.logger.error(LoggerUtil.getExceptionInfo(e));
 		}
 		return httpCon;
 	}

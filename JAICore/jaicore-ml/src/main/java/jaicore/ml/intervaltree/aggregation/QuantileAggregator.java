@@ -2,9 +2,8 @@ package jaicore.ml.intervaltree.aggregation;
 
 import java.util.List;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
-
-import jaicore.ml.core.Interval;
 
 /**
  * A {@link IntervalAggregator} that works based on quantiles. That is, if a

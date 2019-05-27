@@ -8,7 +8,7 @@ import jaicore.ml.tsc.util.MathUtil;
  * Class calculating features (e. g. mean, stddev or slope) on given
  * subsequences of time series. Used e. g. for {@link TimeSeriesTreeClassifier}
  * classifier.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -29,7 +29,7 @@ public class TimeSeriesFeature {
 	 * Function calculating all features occurring in {@link FeatureType} at once
 	 * using an online calculation approach for mean, standard deviation and the
 	 * slope.
-	 * 
+	 *
 	 * @param vector
 	 *            The instance's vector which is used to calculate the features
 	 * @param t1
@@ -47,11 +47,13 @@ public class TimeSeriesFeature {
 			final boolean useBiasCorrection) {
 		double[] result = new double[NUM_FEATURE_TYPES];
 
-		if (t1 >= vector.length || t2 >= vector.length)
+		if (t1 >= vector.length || t2 >= vector.length) {
 			throw new IllegalArgumentException("Parameters t1 and t2 must be valid indices of the vector.");
+		}
 
-		if (t1 == t2)
+		if (t1 == t2) {
 			return new double[] { vector[t1], 0d, 0d };
+		}
 
 		// Calculate running sums for mean, stddev and slope
 		double xx = 0;
@@ -73,8 +75,9 @@ public class TimeSeriesFeature {
 
 		// Calculate the standard deviation
 		double stddev = (yy / length - ((y / length) * (y / length)));
-		if (useBiasCorrection)
+		if (useBiasCorrection) {
 			stddev *= length / (length - 1);
+		}
 		stddev = Math.sqrt(stddev);
 		result[1] = stddev;
 
@@ -87,7 +90,7 @@ public class TimeSeriesFeature {
 	 * Function calculating the feature specified by the feature type
 	 * <code>fType</code> for a given instance <code>vector</code> of the interval
 	 * [<code>t1</code>, <code>t2</code>].
-	 * 
+	 *
 	 * @param fType
 	 *            The feature type to be calculated
 	 * @param instance

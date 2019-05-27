@@ -11,7 +11,7 @@ import jaicore.ml.tsc.util.TimeSeriesUtil;
  * Anthony Bagnall. 2012. A shapelet transform for time series classification.
  * In Proceedings of the 18th ACM SIGKDD international conference on Knowledge
  * discovery and data mining (KDD '12). ACM, New York, NY, USA, 289-297.'.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -19,7 +19,7 @@ public class ExhaustiveMinimumDistanceSearchStrategy extends AMinimumDistanceSea
 
 	/**
 	 * Standard constructor.
-	 * 
+	 *
 	 * @param useBiasCorrection
 	 *            See {@link AMinimumDistanceSearchStrategy#useBiasCorrection}
 	 */
@@ -30,7 +30,7 @@ public class ExhaustiveMinimumDistanceSearchStrategy extends AMinimumDistanceSea
 	/**
 	 * Function returning the minimum distance among all subsequences of the given
 	 * <code>timeSeries</code> to the <code>shapelet</code>'s data.
-	 * 
+	 *
 	 * @param shapelet
 	 *            The shapelet to be compared to all subsequences
 	 * @param timeSeries
@@ -39,7 +39,7 @@ public class ExhaustiveMinimumDistanceSearchStrategy extends AMinimumDistanceSea
 	 * @return Return the minimum distance among all subsequences
 	 */
 	@Override
-	public double findMinimumDistance(Shapelet shapelet, double[] timeSeries) {
+	public double findMinimumDistance(final Shapelet shapelet, final double[] timeSeries) {
 		final int l = shapelet.getLength();
 		final int n = timeSeries.length;
 
@@ -53,8 +53,9 @@ public class ExhaustiveMinimumDistanceSearchStrategy extends AMinimumDistanceSea
 			double tmpED = MathUtil.singleSquaredEuclideanDistance(normalizedShapeletData,
 					TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, i, i + l),
 							this.useBiasCorrection));
-			if (tmpED < min)
+			if (tmpED < min) {
 				min = tmpED;
+			}
 		}
 		return min / l;
 	}
