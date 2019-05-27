@@ -241,7 +241,7 @@ public class ModifiedISACEvaluator {
 			double[] difference3 = new double[size];
 
 			HashMap<String, Double> loopoverall = (HashMap<String, Double>) overall.clone();
-			double finishedoverallranking[] = new double[22];
+			double[] finishedoverallranking = new double[22];
 			HashMap<String, Integer> rankingoverall = new HashMap<>();
 			int loopcounter = 0;
 
