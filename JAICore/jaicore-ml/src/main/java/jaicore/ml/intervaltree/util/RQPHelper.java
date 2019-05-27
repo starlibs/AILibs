@@ -12,14 +12,18 @@ import weka.core.Instances;
 
 public class RQPHelper {
 
+	private RQPHelper() {
+		// prevent instantiation of this util class.
+	}
+
 	/**
 	 * Maps the WEKA query to a tree-friendly query while also preserving the header
 	 * information of the query, this is important for M5 trees.
-	 * 
+	 *
 	 * @param data
 	 * @return
 	 */
-	public static final IntervalAndHeader mapWEKAToTree(Instance data) {
+	public static final IntervalAndHeader mapWEKAToTree(final Instance data) {
 		Interval[] mappedData = new Interval[data.numAttributes() / 2];
 		int counter = 0;
 		ArrayList<Attribute> attributes = new ArrayList<>();
@@ -34,54 +38,33 @@ public class RQPHelper {
 		return new IntervalAndHeader(mappedData, header);
 
 	}
-	
-	public static final Interval[] substituteInterval(Interval[] original, Interval toSubstitute, int index) {
+
+	public static final Interval[] substituteInterval(final Interval[] original, final Interval toSubstitute, final int index) {
 		Interval[] copy = Arrays.copyOf(original, original.length);
 		copy[index] = toSubstitute;
 		return copy;
 	}
-	
-	public static final <T> Entry<Interval[], T> getEntry(Interval[] interval, T tree) {
+
+	public static final <T> Entry<Interval[], T> getEntry(final Interval[] interval, final T tree) {
 		return new AbstractMap.SimpleEntry<>(interval, tree);
-	}
-	
-
-	
-
-	/**
-	 * Prunes the range query to the features of this bagged random tree (i.e.
-	 * removes the features that were not selected for this tree)Ï
-	 * 
-	 * @param rangeQuery
-	 * @return
-	 */
-	public Instance pruneIntervals(Instance rangeQuery, Instances header) {
-		System.out.println("Num attr header " + (header.numAttributes() - 1));
-		System.out.println("Num attr range query " + (rangeQuery.numAttributes() / 2));
-		for (int i = 0; i < header.numAttributes(); i++) {
-			weka.core.Attribute attribute = header.attribute(i);
-			// System.out.println("Attribute at pos "+ i + " has header "+
-			// attribute.name());
-		}
-		return rangeQuery;
 	}
 
 	public static class IntervalAndHeader {
 		private final Interval[] intervals;
 		private final Instances headerInformation;
 
-		public IntervalAndHeader(Interval[] intervals, Instances headerInformation) {
+		public IntervalAndHeader(final Interval[] intervals, final Instances headerInformation) {
 			super();
 			this.intervals = intervals;
 			this.headerInformation = headerInformation;
 		}
 
 		public Interval[] getIntervals() {
-			return intervals;
+			return this.intervals;
 		}
 
 		public Instances getHeaderInformation() {
-			return headerInformation;
+			return this.headerInformation;
 		}
 
 	}

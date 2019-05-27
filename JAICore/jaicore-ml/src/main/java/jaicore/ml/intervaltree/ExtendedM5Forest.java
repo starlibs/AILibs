@@ -24,16 +24,16 @@ public class ExtendedM5Forest extends Bagging implements RangeQueryPredictor {
 		this(new QuantileAggregator(0.15), new AggressiveAggregator());
 	}
 
-	public ExtendedM5Forest(IntervalAggregator treeAggregator, IntervalAggregator forestAggregator) {
+	public ExtendedM5Forest(final IntervalAggregator treeAggregator, final IntervalAggregator forestAggregator) {
 		ExtendedM5Tree rTree = new ExtendedM5Tree(treeAggregator);
 		rTree.setDoNotCheckCapabilities(false);
 		super.setClassifier(rTree);
 		super.setRepresentCopiesUsingWeights(false);
-		setNumIterations(defaultNumberOfIterations());
+		this.setNumIterations(this.defaultNumberOfIterations());
 		this.forestAggregator = forestAggregator;
 	}
 
-	public ExtendedM5Forest(int seed) {
+	public ExtendedM5Forest(final int seed) {
 		this();
 		this.setSeed(seed);
 	}
@@ -43,9 +43,10 @@ public class ExtendedM5Forest extends Bagging implements RangeQueryPredictor {
 		return "jaicore.ml.intervaltree.ExtendedM5Tree";
 	}
 
-	public Interval predictInterval(Instance rangeQuery) {
+	@Override
+	public Interval predictInterval(final Instance rangeQuery) {
 		// collect the different predictions
-		List<Double> predictions = new ArrayList<>(m_Classifiers.length * 2);
+		List<Double> predictions = new ArrayList<>(this.m_Classifiers.length * 2);
 		for (int i = 0; i < this.m_Classifiers.length; i++) {
 			ExtendedM5Tree classifier = (ExtendedM5Tree) this.m_Classifiers[i];
 			Interval prediction = classifier.predictInterval(rangeQuery);
@@ -54,13 +55,13 @@ public class ExtendedM5Forest extends Bagging implements RangeQueryPredictor {
 
 		}
 		// aggregate them
-		return forestAggregator.aggregate(predictions);
+		return this.forestAggregator.aggregate(predictions);
 	}
 
 	@Override
-	public Interval predictInterval(IntervalAndHeader intervalAndHeader) {
+	public Interval predictInterval(final IntervalAndHeader intervalAndHeader) {
 		// collect the different predictions
-		List<Double> predictions = new ArrayList<>(m_Classifiers.length * 2);
+		List<Double> predictions = new ArrayList<>(this.m_Classifiers.length * 2);
 		for (int i = 0; i < this.m_Classifiers.length; i++) {
 			ExtendedM5Tree classifier = (ExtendedM5Tree) this.m_Classifiers[i];
 			Interval prediction = classifier.predictInterval(intervalAndHeader);
@@ -69,6 +70,6 @@ public class ExtendedM5Forest extends Bagging implements RangeQueryPredictor {
 
 		}
 		// aggregate them
-		return forestAggregator.aggregate(predictions);
+		return this.forestAggregator.aggregate(predictions);
 	}
 }

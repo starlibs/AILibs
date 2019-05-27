@@ -207,7 +207,8 @@ public class Util {
 			for (Parameter p : object.getComponent().getParameters()) {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
-				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: " + state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: "
+						+ state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);
@@ -251,6 +252,31 @@ public class Util {
 
 	public static ComponentInstance getComponentInstanceFromState(final Collection<Component> components, final Monom state, final String name, final boolean resolveIntervals) {
 		return Util.getGroundComponentsFromState(state, components, resolveIntervals).get(name);
+	}
+
+	/**
+	 * Computes a list of all component instances of the given composition.
+	 *
+	 * @param composition
+	 * @return List of components in right to left depth-first order
+	 */
+	public static List<ComponentInstance> getComponentInstancesOfComposition(final ComponentInstance composition) {
+		List<ComponentInstance> components = new LinkedList<>();
+		Deque<ComponentInstance> componentInstances = new ArrayDeque<>();
+		componentInstances.push(composition);
+		ComponentInstance curInstance;
+		while (!componentInstances.isEmpty()) {
+			curInstance = componentInstances.pop();
+			components.add(curInstance);
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			for (String requiredInterfaceName : requiredInterfaceNames) {
+				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
+				componentInstances.push(instance);
+			}
+		}
+		return components;
 	}
 
 	/**
@@ -352,10 +378,10 @@ public class Util {
 	}
 
 	private static String getParamValue(final Parameter p, final String assignedValue, final boolean resolveIntervals) {
-		String interpretedValue = "";
 		if (assignedValue == null) {
 			throw new IllegalArgumentException("Cannot determine true value for assigned param value " + assignedValue + " for parameter " + p.getName());
 		}
+		String interpretedValue = "";
 		if (p.isNumeric()) {
 			if (resolveIntervals) {
 				NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
@@ -364,7 +390,7 @@ public class Util {
 				if (np.isInteger()) {
 					interpretedValue = String.valueOf((int) Math.round(interval.getBarycenter()));
 				} else {
-					interpretedValue = String.valueOf(interval.checkPoint((double)p.getDefaultValue(), 0.001) == Location.INSIDE ? (double)p.getDefaultValue() : interval.getBarycenter());
+					interpretedValue = String.valueOf(interval.checkPoint((double) p.getDefaultValue(), 0.001) == Location.INSIDE ? (double) p.getDefaultValue() : interval.getBarycenter());
 				}
 			} else {
 				interpretedValue = assignedValue;
@@ -437,15 +463,15 @@ public class Util {
 
 	public static boolean isDependencyConditionSatisfied(final Collection<Pair<Parameter, IParameterDomain>> condition, final Map<Parameter, IParameterDomain> values) {
 		for (Pair<Parameter, IParameterDomain> conditionItem : condition) {
-			IParameterDomain requiredDomain = conditionItem.getY();
 			Parameter param = conditionItem.getX();
-			IParameterDomain actualDomain = values.get(param);
 			if (!values.containsKey(param)) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values);
 			}
 			if (values.get(param) == null) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is NULL in " + values);
 			}
+			IParameterDomain requiredDomain = conditionItem.getY();
+			IParameterDomain actualDomain = values.get(param);
 			if (!requiredDomain.subsumes(actualDomain)) {
 				return false;
 			}
@@ -499,7 +525,7 @@ public class Util {
 		for (Interval proposedRefinement : proposedRefinements) {
 			double epsilon = 1E-7;
 			assert proposedRefinement.getInf() + epsilon >= inf && proposedRefinement.getSup() <= sup + epsilon : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-			+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
+					+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
 			if (proposedRefinement.equals(interval)) {
 				throw new IllegalStateException("No real refinement! Intervals are identical.");
 			}
