@@ -35,8 +35,8 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		super();
 		this.list = list;
 		Type[] genericTypes = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
-		typeOfDecoratedItems = (Class<E>) getClassWithoutGenerics(genericTypes[1].getTypeName());
-		typeOfDecoratingItems = (Class<D>) getClassWithoutGenerics(genericTypes[2].getTypeName());
+		this.typeOfDecoratedItems = (Class<E>) this.getClassWithoutGenerics(genericTypes[1].getTypeName());
+		this.typeOfDecoratingItems = (Class<D>) this.getClassWithoutGenerics(genericTypes[2].getTypeName());
 		Constructor<D> vConstructorForDecoratedItems = null;
 		try {
 			vConstructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
@@ -129,7 +129,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	public Iterator<D> iterator() {
 		return new Iterator<D>() {
 
-			Iterator<E> internalIterator = ListDecorator.this.list.iterator();
+			private Iterator<E> internalIterator = ListDecorator.this.list.iterator();
 
 			@Override
 			public boolean hasNext() {
@@ -158,7 +158,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	public ListIterator<D> listIterator(final int index) {
 		return new ListIterator<D>() {
 
-			ListIterator<E> internalIterator = ListDecorator.this.list.listIterator(index);
+			private ListIterator<E> internalIterator = ListDecorator.this.list.listIterator(index);
 
 			@Override
 			public void add(final D arg0) {
@@ -280,7 +280,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	public L getList() {
 		return this.list;
 	}
-	
+
 	private Class<?> getClassWithoutGenerics(final String className) throws ClassNotFoundException {
 		return Class.forName(className.replaceAll("(<.*>)", ""));
 	}

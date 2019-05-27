@@ -9,7 +9,7 @@ import java.util.List;
  * 3.2 of the original paper. It analyzes the ratio of the variability between
  * the group of instances within a class to the variability within the class
  * groups.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -27,8 +27,9 @@ public class FStat implements IQualityMeasure {
 		// Order class distances
 		HashMap<Integer, List<Double>> classDistances = new HashMap<>();
 		for (int i = 0; i < distances.size(); i++) {
-			if (!classDistances.containsKey(classValues[i]))
+			if (!classDistances.containsKey(classValues[i])) {
 				classDistances.put(classValues[i], new ArrayList<>());
+			}
 
 			classDistances.get(classValues[i]).add(distances.get(i));
 		}

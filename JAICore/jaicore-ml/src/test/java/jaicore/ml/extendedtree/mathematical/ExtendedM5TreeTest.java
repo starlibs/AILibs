@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.ExtendedM5Tree;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -141,7 +141,7 @@ public class ExtendedM5TreeTest {
 			// to 0), or, an upper/lower bound has been reached.
 			double[] randomStart = new double[randomStarts];
 			for (int i = 0; i < randomStarts; i++) {
-				randomStart[i] = Math.random() * (xInterval.getUpperBound() - xInterval.getLowerBound()) + xInterval.getLowerBound();
+				randomStart[i] = Math.random() * (xInterval.getSup() - xInterval.getInf()) + xInterval.getInf();
 			}
 			if (plusMinus == +1) {
 				return Arrays.stream(randomStart).mapToObj(x -> this.singleOptimaRun(plusMinus, x, xInterval)).max(Double::compare).orElseThrow(() -> new IllegalStateException());
@@ -152,8 +152,8 @@ public class ExtendedM5TreeTest {
 		}
 
 		private double singleOptimaRun(final int plusMinus, final double startX, final Interval range) {
-			double lower = range.getLowerBound();
-			double upper = range.getUpperBound();
+			double lower = range.getInf();
+			double upper = range.getSup();
 			double currentX = startX;
 			double currentGrad = this.grad.apply(currentX);
 			double nextX = currentX;
@@ -201,8 +201,8 @@ public class ExtendedM5TreeTest {
 			Interval rangeQuery = new Interval(Double.min(random1, random2), Double.max(random1, random2));
 			Interval minMaxInterval = new Interval(this.getMin(rangeQuery), this.getMax(rangeQuery));
 			Instance testInstance = new DenseInstance(2);
-			testInstance.setValue(0, rangeQuery.getLowerBound());
-			testInstance.setValue(1, rangeQuery.getUpperBound());
+			testInstance.setValue(0, rangeQuery.getInf());
+			testInstance.setValue(1, rangeQuery.getSup());
 			return new AbstractMap.SimpleEntry<Instance, Interval>(testInstance, minMaxInterval);
 		}
 	}

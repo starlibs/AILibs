@@ -17,14 +17,14 @@ import jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
  * A scaler that can be fit to a certain dataset and then be used to standardize
  * datasets, i.e. transform the data to have a mean of 0 and a standard
  * deviation of 1 according to the data it was fit to.
- * 
+ *
  * @author Michael Braun, Jonas Hanselle, Mirko Jürgens, Helena Graf
  *
  */
 public abstract class AbstractDyadScaler implements Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -825893010030419116L;
 
@@ -32,36 +32,36 @@ public abstract class AbstractDyadScaler implements Serializable {
 	protected SummaryStatistics[] statsY;
 
 	public SummaryStatistics[] getStatsX() {
-		return statsX;
+		return this.statsX;
 	}
 
 	public SummaryStatistics[] getStatsY() {
-		return statsY;
+		return this.statsY;
 	}
 
 	/**
 	 * Fits the standard scaler to the dataset.
-	 * 
+	 *
 	 * @param dataset The dataset the scaler should be fit to.
 	 */
-	public void fit(DyadRankingDataset dataset) {
+	public void fit(final DyadRankingDataset dataset) {
 		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
 		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
-		statsX = new SummaryStatistics[lengthX];
-		statsY = new SummaryStatistics[lengthY];
+		this.statsX = new SummaryStatistics[lengthX];
+		this.statsY = new SummaryStatistics[lengthY];
 		for (int i = 0; i < lengthX; i++) {
-			statsX[i] = new SummaryStatistics();
+			this.statsX[i] = new SummaryStatistics();
 		}
 		for (int i = 0; i < lengthY; i++) {
-			statsY[i] = new SummaryStatistics();
+			this.statsY[i] = new SummaryStatistics();
 		}
 		for (IDyadRankingInstance instance : dataset) {
 			for (Dyad dyad : instance) {
 				for (int i = 0; i < lengthX; i++) {
-					statsX[i].addValue(dyad.getInstance().getValue(i));
+					this.statsX[i].addValue(dyad.getInstance().getValue(i));
 				}
 				for (int i = 0; i < lengthY; i++) {
-					statsY[i].addValue(dyad.getAlternative().getValue(i));
+					this.statsY[i].addValue(dyad.getAlternative().getValue(i));
 				}
 			}
 		}
@@ -70,47 +70,48 @@ public abstract class AbstractDyadScaler implements Serializable {
 	/**
 	 * Transforms the entire dataset according to the mean and standard deviation of
 	 * the data the scaler has been fit to.
-	 * 
+	 *
 	 * @param dataset The dataset to be standardized.
 	 */
-	public void transform(DyadRankingDataset dataset) {
+	public void transform(final DyadRankingDataset dataset) {
 		int lengthX = dataset.get(0).getDyadAtPosition(0).getInstance().length();
 		int lengthY = dataset.get(0).getDyadAtPosition(0).getAlternative().length();
 
-		if (lengthX != statsX.length || lengthY != statsY.length)
-			throw new IllegalArgumentException("The scaler was fit to dyads with instances of length " + statsX.length
-					+ " and alternatives of length " + statsY.length + "\n but received instances of length " + lengthX
+		if (lengthX != this.statsX.length || lengthY != this.statsY.length) {
+			throw new IllegalArgumentException("The scaler was fit to dyads with instances of length " + this.statsX.length
+					+ " and alternatives of length " + this.statsY.length + "\n but received instances of length " + lengthX
 					+ " and alternatives of length " + lengthY);
+		}
 
-		transformInstances(dataset);
-		transformAlternatives(dataset);
+		this.transformInstances(dataset);
+		this.transformAlternatives(dataset);
 	}
 
 	/**
 	 * Transforms only the instances of each dyad according to the mean and standard
 	 * of the data the scaler has been fit to.
-	 * 
+	 *
 	 * @param dataset The dataset of which the instances are to be standardized.
 	 */
-	public void transformInstances(DyadRankingDataset dataset) {
-		transformInstances(dataset, new ArrayList<>());
+	public void transformInstances(final DyadRankingDataset dataset) {
+		this.transformInstances(dataset, new ArrayList<>());
 	}
 
 	/**
 	 * Transforms only the alternatives of each dyad according to the mean and
 	 * standard deviation of the data the scaler has been fit to.
-	 * 
+	 *
 	 * @param dataset The dataset of which the alternatives are to be standardized.
 	 */
-	public void transformAlternatives(DyadRankingDataset dataset) {
-		transformAlternatives(dataset, new ArrayList<>());
+	public void transformAlternatives(final DyadRankingDataset dataset) {
+		this.transformAlternatives(dataset, new ArrayList<>());
 	}
 
 	/**
 	 * Transforms only the instances of each dyad according to the mean and standard
 	 * deviation of the data the scaler has been fit to. The attributes with indices
 	 * contained in ignoredIndices are not transformed. {
-	 * 
+	 *
 	 * @param dataset        The dataset of which the alternatives are to be
 	 *                       standardized.
 	 * @param ignoredIndices The {@link List} of indices that are been ignored by
@@ -121,7 +122,7 @@ public abstract class AbstractDyadScaler implements Serializable {
 	/**
 	 * Transforms only the alternatives of each dyad according to the mean and
 	 * standard deviation of the data the scaler has been fit to.
-	 * 
+	 *
 	 * @param dataset        The dataset of which the alternatives are to be
 	 *                       standardized.
 	 * @param ignoredIndices The {@link List} of indices that are been ignored by
@@ -131,7 +132,7 @@ public abstract class AbstractDyadScaler implements Serializable {
 
 	/**
 	 * Transforms an instance feature vector.
-	 * 
+	 *
 	 * @param Instance       vector to be transformed
 	 * @param ignoredIndices
 	 */
@@ -142,14 +143,14 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * {@link SparseDyadRankingInstance} according to the mean and standard
 	 * deviation of the data the scaler has been fit to. The attributes with indices
 	 * contained in ignoredIndices are not transformed. {
-	 * 
+	 *
 	 * @param dataset        The dataset of which the alternatives are to be
 	 *                       standardized.
 	 * @param ignoredIndices The {@link List} of indices that are been ignored by
 	 *                       the scaler.
 	 */
-	public void transformInstances(SparseDyadRankingInstance drInstance, List<Integer> ignoredIndices) {
-		transformInstaceVector(drInstance.getDyadAtPosition(0).getInstance(), ignoredIndices);
+	public void transformInstances(final SparseDyadRankingInstance drInstance, final List<Integer> ignoredIndices) {
+		this.transformInstaceVector(drInstance.getDyadAtPosition(0).getInstance(), ignoredIndices);
 	}
 
 	/**
@@ -157,15 +158,16 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * {@link DyadRankingInstance} according to the mean and standard
 	 * deviation of the data the scaler has been fit to. The attributes with indices
 	 * contained in ignoredIndices are not transformed. {
-	 * 
+	 *
 	 * @param dataset        The dataset of which the alternatives are to be
 	 *                       standardized.
 	 * @param ignoredIndices The {@link List} of indices that are been ignored by
 	 *                       the scaler.
 	 */
-	public void transformInstances(DyadRankingInstance drInstance, List<Integer> ignoredIndices) {
-		for (Dyad dyad : drInstance)
-			transformInstances(dyad, ignoredIndices);
+	public void transformInstances(final DyadRankingInstance drInstance, final List<Integer> ignoredIndices) {
+		for (Dyad dyad : drInstance) {
+			this.transformInstances(dyad, ignoredIndices);
+		}
 	}
 
 	/**
@@ -173,15 +175,16 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * {@link IDyadRankingInstance} according to the mean and standard
 	 * deviation of the data the scaler has been fit to. The attributes with indices
 	 * contained in ignoredIndices are not transformed. {
-	 * 
+	 *
 	 * @param dataset        The dataset of which the alternatives are to be
 	 *                       standardized.
 	 * @param ignoredIndices The {@link List} of indices that are been ignored by
 	 *                       the scaler.
 	 */
-	public void transformAlternatives(IDyadRankingInstance drInstance, List<Integer> ignoredIndices) {
-		for (Dyad dyad : drInstance)
-			transformAlternatives(dyad, ignoredIndices);
+	public void transformAlternatives(final IDyadRankingInstance drInstance, final List<Integer> ignoredIndices) {
+		for (Dyad dyad : drInstance) {
+			this.transformAlternatives(dyad, ignoredIndices);
+		}
 	}
 
 	/**
@@ -189,13 +192,13 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * {@link DyadRankingDataset} according to the mean and standard
 	 * deviation of the data the scaler has been fit to. The attributes with indices
 	 * contained in ignoredIndices are not transformed. {
-	 * 
+	 *
 	 * @param dataset        The dataset of which the alternatives are to be
 	 *                       standardized.
 	 * @param ignoredIndices The {@link List} of indices that are been ignored by
 	 *                       the scaler.
 	 */
-	public void transformInstances(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
+	public void transformInstances(final DyadRankingDataset dataset, final List<Integer> ignoredIndices) {
 		for (IDyadRankingInstance instance : dataset) {
 			if (instance instanceof SparseDyadRankingInstance) {
 				SparseDyadRankingInstance drSparseInstance = (SparseDyadRankingInstance) instance;
@@ -215,13 +218,13 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * {@link DyadRankingDataset} according to the mean and standard
 	 * deviation of the data the scaler has been fit to. The attributes with indices
 	 * contained in ignoredIndices are not transformed. {
-	 * 
+	 *
 	 * @param dataset        The dataset of which the alternatives are to be
 	 *                       standardized.
 	 * @param ignoredIndices The {@link List} of indices that are been ignored by
 	 *                       the scaler.
 	 */
-	public void transformAlternatives(DyadRankingDataset dataset, List<Integer> ignoredIndices) {
+	public void transformAlternatives(final DyadRankingDataset dataset, final List<Integer> ignoredIndices) {
 		for (IDyadRankingInstance instance : dataset) {
 			this.transformAlternatives(instance, ignoredIndices);
 		}
@@ -230,11 +233,11 @@ public abstract class AbstractDyadScaler implements Serializable {
 	/**
 	 * Fits the standard scaler to the dataset and transforms the entire dataset
 	 * according to the mean and standard deviation of the dataset.
-	 * 
+	 *
 	 * @param dataset The dataset to be standardized.
 	 */
 
-	public void fitTransform(DyadRankingDataset dataset) {
+	public void fitTransform(final DyadRankingDataset dataset) {
 		this.fit(dataset);
 		this.transform(dataset);
 	}
@@ -243,26 +246,26 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * Prints the standard devations of all features this scaler has been fit to.
 	 */
 	public String getPrettySTDString() {
-		if (statsX == null || statsY == null) {
+		if (this.statsX == null || this.statsY == null) {
 			throw new IllegalStateException("The scaler must be fit before calling this method!");
 		}
-			
+
 		StringBuilder builder = new StringBuilder();
-		
+
 		builder.append("Standard deviations for instances: ");
-		for (SummaryStatistics stats : statsX) {
+		for (SummaryStatistics stats : this.statsX) {
 			builder.append(stats.getStandardDeviation());
 			builder.append(", ");
 		}
 		builder.append(System.lineSeparator());
-		
+
 		builder.append("Standard deviations for alternatives: ");
-		for (SummaryStatistics stats : statsY) {
+		for (SummaryStatistics stats : this.statsY) {
 			builder.append(stats.getStandardDeviation());
 			builder.append(", ");
 		}
 		builder.append(System.lineSeparator());
-		
+
 		return builder.toString();
 	}
 
@@ -270,26 +273,26 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * Returns a String for the means of all features this scaler has been fit to.
 	 */
 	public String getPrettyMeansString() {
-		if (statsX == null || statsY == null) {
+		if (this.statsX == null || this.statsY == null) {
 			throw new IllegalStateException("The scaler must be fit before calling this method!");
 		}
-		
+
 		StringBuilder builder = new StringBuilder();
-			
+
 		builder.append("Means for instances: ");
-		for (SummaryStatistics stats : statsX) {
+		for (SummaryStatistics stats : this.statsX) {
 			builder.append(stats.getMean());
 			builder.append(", ");
 		}
 		builder.append(System.lineSeparator());
-		
+
 		builder.append("Means for alternatives: ");
-		for (SummaryStatistics stats : statsY) {
+		for (SummaryStatistics stats : this.statsY) {
 			builder.append(stats.getMean());
 			builder.append(", ");
 		}
 		builder.append(System.lineSeparator());
-		
+
 		return builder.toString();
 	}
 }

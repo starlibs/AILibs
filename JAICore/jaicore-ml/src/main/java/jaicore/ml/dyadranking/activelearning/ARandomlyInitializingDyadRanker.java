@@ -29,17 +29,17 @@ public abstract class ARandomlyInitializingDyadRanker extends ActiveDyadRanker {
 	private final List<Vector> instanceFeatures;
 	private final Random random;
 	private final int minibatchSize;
-	
+
 	private int iteration;
 
-	public ARandomlyInitializingDyadRanker(PLNetDyadRanker ranker, IDyadRankingPoolProvider poolProvider, int seed, int numberRandomQueriesAtStart, int minibatchSize) {
+	public ARandomlyInitializingDyadRanker(final PLNetDyadRanker ranker, final IDyadRankingPoolProvider poolProvider, final int seed, final int numberRandomQueriesAtStart, final int minibatchSize) {
 		super(ranker, poolProvider);
 		this.dyadStats = new HashMap<>();
 		this.instanceFeatures = new ArrayList<>(poolProvider.getInstanceFeatures());
 		this.numberRandomQueriesAtStart = numberRandomQueriesAtStart;
 		this.minibatchSize = minibatchSize;
 		this.iteration = 0;
-		for (Vector instance : instanceFeatures) {
+		for (Vector instance : this.instanceFeatures) {
 			for (Dyad dyad : poolProvider.getDyadsByInstance(instance)) {
 				this.dyadStats.put(dyad, new SummaryStatistics());
 			}
@@ -48,77 +48,79 @@ public abstract class ARandomlyInitializingDyadRanker extends ActiveDyadRanker {
 	}
 
 	@Override
-	public void activelyTrain(int numberOfQueries) throws TrainingException {
+	public void activelyTrain(final int numberOfQueries) throws TrainingException {
 		for (int i = 0; i < numberOfQueries; i++) {
-			if (iteration < numberRandomQueriesAtStart) {
+			if (this.iteration < this.numberRandomQueriesAtStart) {
 				Set<IDyadRankingInstance> minibatch = new HashSet<>();
 				for (int batchIndex = 0; batchIndex < this.minibatchSize; batchIndex++) {
 					// get random instance
-					Collections.shuffle(instanceFeatures, random);
-					if (instanceFeatures.isEmpty())
+					Collections.shuffle(this.instanceFeatures, this.random);
+					if (this.instanceFeatures.isEmpty()) {
 						break;
-					Vector instance = instanceFeatures.get(0);
+					}
+					Vector instance = this.instanceFeatures.get(0);
 
 					// get random pair of dyads
-					List<Dyad> dyads = new ArrayList<>(poolProvider.getDyadsByInstance(instance));
-					Collections.shuffle(dyads, random);
+					List<Dyad> dyads = new ArrayList<>(this.poolProvider.getDyadsByInstance(instance));
+					Collections.shuffle(dyads, this.random);
 
 					// query them
 					LinkedList<Vector> alternatives = new LinkedList<>();
 					alternatives.add(dyads.get(0).getAlternative());
 					alternatives.add(dyads.get(1).getAlternative());
 					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getInstance(), alternatives);
-					IDyadRankingInstance trueRanking = poolProvider.query(queryInstance);
+					IDyadRankingInstance trueRanking = this.poolProvider.query(queryInstance);
 					minibatch.add(trueRanking);
 				}
 				// feed it to the ranker
 				try {
-					updateRanker(minibatch);
+					this.updateRanker(minibatch);
 				} catch (TrainingException e) {
-					logger.error(e.getMessage());
+					this.logger.error(e.getMessage());
 				}
 			} else {
-				activelyTrainWithOneInstance();
+				this.activelyTrainWithOneInstance();
 			}
-			iteration ++;
+			this.iteration ++;
 		}
 	}
 
 	public int getNumberRandomQueriesAtStart() {
-		return numberRandomQueriesAtStart;
+		return this.numberRandomQueriesAtStart;
 	}
 
 	public int getIteration() {
-		return iteration;
+		return this.iteration;
 	}
 
 	public Map<Dyad, SummaryStatistics> getDyadStats() {
-		return dyadStats;
+		return this.dyadStats;
 	}
 
 	public List<Vector> getInstanceFeatures() {
-		return instanceFeatures;
+		return this.instanceFeatures;
 	}
 
 	public Random getRandom() {
-		return random;
+		return this.random;
 	}
 
 	public int getMinibatchSize() {
-		return minibatchSize;
+		return this.minibatchSize;
 	}
 
+	@Override
 	public abstract void activelyTrainWithOneInstance() throws TrainingException;
 
-	
-	public void updateRanker(Set<IDyadRankingInstance> minibatch) throws TrainingException {
-		
-		ranker.update(minibatch);
+
+	public void updateRanker(final Set<IDyadRankingInstance> minibatch) throws TrainingException {
+
+		this.ranker.update(minibatch);
 		// update variances (confidence)
-		for (Vector inst : getInstanceFeatures()) {
-			for (Dyad dyad : poolProvider.getDyadsByInstance(inst)) {
-				double skill = ranker.getSkillForDyad(dyad);
-				dyadStats.get(dyad).addValue(skill);
+		for (Vector inst : this.getInstanceFeatures()) {
+			for (Dyad dyad : this.poolProvider.getDyadsByInstance(inst)) {
+				double skill = this.ranker.getSkillForDyad(dyad);
+				this.dyadStats.get(dyad).addValue(skill);
 			}
 		}
 	}

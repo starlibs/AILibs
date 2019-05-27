@@ -45,7 +45,9 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 
 	public ForwardChainer(final ForwardChainingProblem problem) {
 		super(problem);
-		assert !problem.getConclusion().isEmpty() : "Ill-defined forward chaining problem with empty conclusion!";
+		if (problem.getConclusion().isEmpty()) {
+			throw new IllegalArgumentException("Ill-defined forward chaining problem with empty conclusion!");
+		}
 	}
 
 	@Override
@@ -59,7 +61,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 		switch (this.getState()) {
 
 		/* initialize the algorithm for the most promising literal */
-		case created: {
+		case created:
 			this.conclusion = this.getInput().getConclusion();
 			assert !this.conclusion.isEmpty() : "The algorithm should not be invoked with an empty conclusion";
 			this.factbase = this.getInput().getFactbase();
@@ -115,9 +117,8 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 					end - timeToPrepareCWAVersion);
 			this.logger.info("Initialized FC algorithm within {}ms.", end - start);
 			return this.activate();
-		}
 
-		case active: {
+		case active:
 
 			this.checkAndConductTermination();
 
@@ -179,7 +180,6 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 				this.currentlyActiveSubFC = new ForwardChainer(subProblem);
 				return new ForwardChainerRecursionEvent(this.getId(), this.chosenLiteral, this.currentGroundRemainingConclusion);
 			}
-		}
 
 		default:
 			throw new IllegalStateException("Don't know how to behave in state " + this.getState());

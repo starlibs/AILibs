@@ -62,34 +62,39 @@ public class SimpleDataset<L> extends LinkedList<SimpleInstance<L>> implements I
 
 		return sb.toString();
 	}
-	
+
 	@Override
 	public SimpleDataset<L> createEmpty() {
-		return new SimpleDataset<>(instanceSchema);
+		return new SimpleDataset<>(this.instanceSchema);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((instanceSchema == null) ? 0 : instanceSchema.hashCode());
+		result = prime * result + ((this.instanceSchema == null) ? 0 : this.instanceSchema.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		SimpleDataset<L> other = (SimpleDataset<L>) obj;
-		if (instanceSchema == null) {
-			if (other.instanceSchema != null)
+		if (this.instanceSchema == null) {
+			if (other.instanceSchema != null) {
 				return false;
-		} else if (!instanceSchema.equals(other.instanceSchema))
+			}
+		} else if (!this.instanceSchema.equals(other.instanceSchema)) {
 			return false;
+		}
 		return true;
 	}
 }

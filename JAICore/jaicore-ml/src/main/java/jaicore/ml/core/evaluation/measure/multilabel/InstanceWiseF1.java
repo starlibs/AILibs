@@ -23,11 +23,11 @@ public class InstanceWiseF1 extends ADecomposableMultilabelMeasure {
 			throw new IllegalArgumentException("Actual and Expected must be of the same length.");
 		}
 
-		int intersection = IntStream.range(0, actual.length).filter(x -> actual[x] == 1.0 && expected[x] == 1.0).map(x -> 1).sum();
 		int predictedAndExpectedSum = Arrays.stream(actual).mapToInt(x -> (int) x).sum() + Arrays.stream(expected).mapToInt(x -> (int) x).sum();
 		if (predictedAndExpectedSum == 0) {
 			return 0.0;
 		}
+		int intersection = IntStream.range(0, actual.length).filter(x -> actual[x] == 1.0 && expected[x] == 1.0).map(x -> 1).sum();
 		return (2.0 * intersection / predictedAndExpectedSum);
 	}
 

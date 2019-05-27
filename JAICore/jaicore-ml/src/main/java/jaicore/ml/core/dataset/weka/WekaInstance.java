@@ -42,7 +42,7 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 
 	@Override
 	public L getTargetValue() {
-		IAttributeType<L> t = (IAttributeType<L>)WekaInstancesUtil.transformWEKAAttributeToAttributeType(getElement().classAttribute());
+		IAttributeType<L> t = (IAttributeType<L>)WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().classAttribute());
 		return t.buildAttributeValue(this.getElement().classValue()).getValue();
 	}
 
@@ -52,7 +52,7 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 	}
 
 	@Override
-	public IAttributeValue<Double> getAttributeValue(int position) {
+	public IAttributeValue<Double> getAttributeValue(final int position) {
 		// TODO Auto-generated method stub
 		return null;
 	}

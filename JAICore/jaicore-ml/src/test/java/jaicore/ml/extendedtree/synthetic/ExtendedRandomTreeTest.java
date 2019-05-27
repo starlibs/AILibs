@@ -5,10 +5,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.junit.Before;
 import org.junit.Test;
 
-import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.ExtendedRandomTree;
 import junit.framework.Assert;
 import weka.core.DenseInstance;
@@ -17,7 +17,7 @@ import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
 
 public class ExtendedRandomTreeTest {
-	
+
 	private ExtendedRandomTree classifier;
 
 	private static String trainFile = "resources/regression_data/cpu.small.arff_RQPtrain.arff";
@@ -31,8 +31,8 @@ public class ExtendedRandomTreeTest {
 			Instances data = arffReader.getData();
 			data.setClassIndex(data.numAttributes() - 1);
 
-			classifier = new ExtendedRandomTree();
-			classifier.buildClassifier(data);
+			this.classifier = new ExtendedRandomTree();
+			this.classifier.buildClassifier(data);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -57,7 +57,7 @@ public class ExtendedRandomTreeTest {
 					strippedInstance.setValue(i, instance.value(i));
 				}
 				Interval actualInterval = new Interval(upper, lower);
-				Interval predictedInterval = classifier.predictInterval(strippedInstance);
+				Interval predictedInterval = this.classifier.predictInterval(strippedInstance);
 				System.out.println("Actual interval: " + actualInterval + ", predicted Interval " + predictedInterval);
 			}
 

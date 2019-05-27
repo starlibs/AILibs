@@ -1,10 +1,5 @@
 package jaicore.logic.fol.algorithms.resolution;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,86 +12,67 @@ public class ResolutionTree {
 	private Set<ResolutionPair> resolvedPairs = new HashSet<>();
 	private Map<Clause, ResolutionStep> resolventsWithTheirSteps = new HashMap<>();
 
-	public ResolutionTree(Set<Clause> baseClauses) {
+	public ResolutionTree(final Set<Clause> baseClauses) {
 		super();
 		this.baseClauses = baseClauses;
 	}
 
-	public void addResolutionStep(ResolutionStep step) {
+	public void addResolutionStep(final ResolutionStep step) {
 		this.resolventsWithTheirSteps.put(step.getR(), step);
 		this.resolvedPairs.add(step.getPair());
 	}
 
 	public Set<Clause> getBaseClauses() {
-		return baseClauses;
+		return this.baseClauses;
 	}
 
 	public Map<Clause, ResolutionStep> getResolventsWithTheirSteps() {
-		return resolventsWithTheirSteps;
+		return this.resolventsWithTheirSteps;
 	}
 
-	public boolean isClausePairAdmissible(ResolutionPair pair) {
-		if (resolvedPairs.contains(pair))
+	public boolean isClausePairAdmissible(final ResolutionPair pair) {
+		if (this.resolvedPairs.contains(pair)) {
 			return false;
+		}
 		Clause c1 = pair.getC1();
 		Clause c2 = pair.getC2();
-		if (baseClauses.contains(c1) && baseClauses.contains(c2))
+		if (this.baseClauses.contains(c1) && this.baseClauses.contains(c2)) {
 			return false;
-		Set<Clause> parentsOfC1 = getAllClausesUsedToObtainResolvent(c1);
-		if (parentsOfC1.contains(c2))
+		}
+		Set<Clause> parentsOfC1 = this.getAllClausesUsedToObtainResolvent(c1);
+		if (parentsOfC1.contains(c2)) {
 			return false;
-		Set<Clause> parentsOfC2 = getAllClausesUsedToObtainResolvent(c2);
-		if (parentsOfC2.contains(c1))
-			return false;
-		return true;
+		}
+		Set<Clause> parentsOfC2 = this.getAllClausesUsedToObtainResolvent(c2);
+		return !parentsOfC2.contains(c1);
 	}
 
-	public Set<Clause> getAllClausesUsedToObtainResolvent(Clause resolvent) {
+	public Set<Clause> getAllClausesUsedToObtainResolvent(final Clause resolvent) {
 		Set<Clause> clauses = new HashSet<>();
-		for (ResolutionStep step : getAllStepsUsedToObtainResolvent(resolvent)) {
+		for (ResolutionStep step : this.getAllStepsUsedToObtainResolvent(resolvent)) {
 			clauses.add(step.getPair().getC1());
 			clauses.add(step.getPair().getC2());
 		}
 		return clauses;
 	}
 
-	public boolean containsResolvent(Clause resolvent) {
-		return this.baseClauses.contains(resolvent) || resolventsWithTheirSteps.containsKey(resolvent);
+	public boolean containsResolvent(final Clause resolvent) {
+		return this.baseClauses.contains(resolvent) || this.resolventsWithTheirSteps.containsKey(resolvent);
 	}
 
 	public boolean containsEmptyClause() {
-		return containsResolvent(new Clause());
+		return this.containsResolvent(new Clause());
 	}
 
-	public Set<ResolutionStep> getAllStepsUsedToObtainResolvent(Clause resolvent) {
-		if (baseClauses.contains(resolvent))
+	public Set<ResolutionStep> getAllStepsUsedToObtainResolvent(final Clause resolvent) {
+		if (this.baseClauses.contains(resolvent)) {
 			return new HashSet<>();
+		}
 		Set<ResolutionStep> steps = new HashSet<>();
-		ResolutionStep step = resolventsWithTheirSteps.get(resolvent);
+		ResolutionStep step = this.resolventsWithTheirSteps.get(resolvent);
 		steps.add(step);
-		steps.addAll(getAllStepsUsedToObtainResolvent(step.getPair().getC1()));
-		steps.addAll(getAllStepsUsedToObtainResolvent(step.getPair().getC2()));
+		steps.addAll(this.getAllStepsUsedToObtainResolvent(step.getPair().getC1()));
+		steps.addAll(this.getAllStepsUsedToObtainResolvent(step.getPair().getC2()));
 		return steps;
-	}
-
-	public void printAsGraphViz(String filename) {
-		StringBuilder str = new StringBuilder();
-		str.append("digraph {\n");
-		for (Clause c : baseClauses) {
-			str.append("\"" + c.toString() + "\"\n");
-		}
-		for (Clause resolvent : resolventsWithTheirSteps.keySet()) {
-			ResolutionPair pair = resolventsWithTheirSteps.get(resolvent).getPair();
-			str.append("\"" + pair.getC1().toString() + "\" -> \"" + resolvent.toString() + "\"\n");
-			str.append("\"" + pair.getC2().toString() + "\" -> \"" + resolvent.toString() + "\"\n");
-		}
-		str.append("}");
-
-		try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(filename), StandardCharsets.UTF_8)) {
-			writer.write(str.toString());
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 }
