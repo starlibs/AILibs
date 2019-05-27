@@ -182,6 +182,7 @@ allprojects {
 
 dependencies{
 	compile project(":hasco")
+	compile project(":autofe-reldata")
 	compile project(":mlplan")
 	compile project(":JAICore:jaicore-basic")
 	compile (project(":JAICore:jaicore-ea")) {
