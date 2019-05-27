@@ -42,8 +42,6 @@ public class Normalizer {
 			}
 		}
 	}
-	//TODO Auch darauf achten das eine neue Instance größer sein kann als das bisher gefundene Maximum. Gilt nur für neu die anderen sind
-	//Basis für das Setup ist deren globales Maximum.
 
 	/**
 	 * @param vectorToNormalize

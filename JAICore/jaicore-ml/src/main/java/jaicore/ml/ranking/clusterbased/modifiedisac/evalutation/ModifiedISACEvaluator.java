@@ -18,6 +18,11 @@ import weka.core.Instances;
 
 public class ModifiedISACEvaluator {
 
+	private ModifiedISACEvaluator() {
+		/* do nothing */
+	}
+
+	private static final String CN_RANDOMFOREST = "weka.classifiers.trees.RandomForest";
 	private static final Logger logger = LoggerFactory.getLogger(ModifiedISACEvaluator.class);
 
 	private static double[] platz1my;
@@ -212,7 +217,7 @@ public class ModifiedISACEvaluator {
 				} else {
 					if (tmp < size) {
 						top3truth.add(myClassi);
-						if (myClassi.equals("weka.classifiers.trees.RandomForest")) {
+						if (myClassi.equals(CN_RANDOMFOREST)) {
 							randomForestplatz1++;
 						}
 						if (myClassi.equals("weka.classifiers.bayes.NaiveBayesMultinomial")) {
@@ -381,7 +386,7 @@ public class ModifiedISACEvaluator {
 			top3ml[i] = difference1[0] - difference4[difference4.length - 1];
 			top3mymethod[i] = difference1[0] - difference2[difference2.length - 1];
 			top3overall[i] = difference1[0] - difference3[difference3.length - 1];
-			randomForest[i] = positionInRanking.get("weka.classifiers.trees.RandomForest");
+			randomForest[i] = positionInRanking.get(CN_RANDOMFOREST);
 		}
 		return results;
 
@@ -389,7 +394,7 @@ public class ModifiedISACEvaluator {
 
 	private static ArrayList<String> makeStaticRanking() {
 		ArrayList<String> staticranking = new ArrayList<>();
-		staticranking.add("weka.classifiers.trees.RandomForest");
+		staticranking.add(CN_RANDOMFOREST);
 		staticranking.add("weka.classifiers.bayes.NaiveBayesMultinomial");
 		staticranking.add("weka.classifiers.bayes.NaiveBayes");
 		staticranking.add("weka.classifiers.functions.SMO");
