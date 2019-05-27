@@ -29,17 +29,17 @@ public class Rule {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(premise);
+		sb.append(this.premise);
 		sb.append(" => ");
-		sb.append(conclusion);
+		sb.append(this.conclusion);
 
 		return sb.toString();
 	}
 
 	public Set<ConstantParam> getConstantParams() {
 		Set<ConstantParam> constants = new HashSet<>();
-		constants.addAll(premise.getConstantParams());
-		constants.addAll(conclusion.getConstantParams());
+		constants.addAll(this.premise.getConstantParams());
+		constants.addAll(this.conclusion.getConstantParams());
 		return constants;
 	}
 }

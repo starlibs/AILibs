@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jaicore.ml.core.FeatureSpace;
-import jaicore.ml.core.Interval;
 import jaicore.ml.intervaltree.aggregation.AggressiveAggregator;
 import jaicore.ml.intervaltree.aggregation.IntervalAggregator;
 import jaicore.ml.intervaltree.aggregation.QuantileAggregator;
@@ -138,8 +138,8 @@ public class ExtendedRandomForest extends RandomForest implements RangeQueryPred
 		for (int i = 0; i < this.m_Classifiers.length; i++) {
 			ExtendedRandomTree classifier = (ExtendedRandomTree) this.m_Classifiers[i];
 			Interval prediction = classifier.predictInterval(rangeQuery);
-			predictions.add(prediction.getLowerBound());
-			predictions.add(prediction.getUpperBound());
+			predictions.add(prediction.getInf());
+			predictions.add(prediction.getSup());
 
 		}
 		// aggregate them
@@ -153,8 +153,8 @@ public class ExtendedRandomForest extends RandomForest implements RangeQueryPred
 		for (int i = 0; i < this.m_Classifiers.length; i++) {
 			ExtendedRandomTree classifier = (ExtendedRandomTree) this.m_Classifiers[i];
 			Interval prediction = classifier.predictInterval(intervalAndHeader);
-			predictions.add(prediction.getLowerBound());
-			predictions.add(prediction.getUpperBound());
+			predictions.add(prediction.getInf());
+			predictions.add(prediction.getSup());
 		}
 		// aggregate them
 		return this.forestAggregator.aggregate(predictions);

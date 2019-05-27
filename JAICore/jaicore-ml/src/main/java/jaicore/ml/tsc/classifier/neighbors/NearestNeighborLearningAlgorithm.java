@@ -32,12 +32,11 @@ public class NearestNeighborLearningAlgorithm extends ASimplifiedTSCLearningAlgo
 
 		// Retrieve data from dataset.
 		double[][] values = dataset.getValuesOrNull(0);
-		double[][] timestamps = dataset.getTimestampsOrNull(0);
-		int[] targets = dataset.getTargets();
 		// Check data.
 		if (values == null) {
 			throw new AlgorithmException("Empty input data set.");
 		}
+		int[] targets = dataset.getTargets();
 		if (targets == null) {
 			throw new AlgorithmException("Empty targets.");
 		}
@@ -45,7 +44,7 @@ public class NearestNeighborLearningAlgorithm extends ASimplifiedTSCLearningAlgo
 		// Update model.
 		NearestNeighborClassifier model = this.getClassifier();
 		model.setValues(values);
-		model.setTimestamps(timestamps);
+		model.setTimestamps(dataset.getTimestampsOrNull(0));
 		model.setTargets(targets);
 		return model;
 	}

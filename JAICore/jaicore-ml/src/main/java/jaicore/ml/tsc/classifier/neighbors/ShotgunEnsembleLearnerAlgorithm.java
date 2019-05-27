@@ -67,11 +67,11 @@ public class ShotgunEnsembleLearnerAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		// Retrieve data from dataset.
 		double[][] values = dataset.getValuesOrNull(0);
-		int[] targets = dataset.getTargets();
 		// Check data.
 		if (values == null) {
 			throw new AlgorithmException("Empty input data set.");
 		}
+		int[] targets = dataset.getTargets();
 		if (targets == null) {
 			throw new AlgorithmException("Empty targets.");
 		}

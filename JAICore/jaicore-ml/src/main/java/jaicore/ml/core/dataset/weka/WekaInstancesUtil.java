@@ -68,7 +68,6 @@ public class WekaInstancesUtil {
 
 	public static Instances datasetToWekaInstances(final IOrderedLabeledAttributeArrayDataset<?, ?> dataset) throws UnsupportedAttributeTypeException {
 		List<Attribute> attributes = new LinkedList<>();
-		Attribute classAttribute;
 
 		for (int i = 0; i < dataset.getNumberOfAttributes(); i++) {
 			IAttributeType<?> attType = dataset.getAttributeTypes().get(i);
@@ -82,6 +81,7 @@ public class WekaInstancesUtil {
 		}
 
 		IAttributeType<?> classType = dataset.getTargetType();
+		Attribute classAttribute;
 		if (classType instanceof NumericAttributeType) {
 			classAttribute = new Attribute("class");
 		} else if (classType instanceof CategoricalAttributeType) {
