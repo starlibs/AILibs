@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import jaicore.ml.ranking.clusterbased.customdatatypes.GroupIdentifier;
 import jaicore.ml.ranking.clusterbased.customdatatypes.RankingForGroup;
 
+@SuppressWarnings("serial")
 public class ClassifierRankingForGroup extends RankingForGroup<double[],String> {
 
 	/**
@@ -15,7 +16,5 @@ public class ClassifierRankingForGroup extends RankingForGroup<double[],String> 
 	 */
 	ClassifierRankingForGroup(final GroupIdentifier<double[]> identifier, final ArrayList<String> solutionsForGroup) {
 		super(identifier, solutionsForGroup);
-		// TODO Auto-generated constructor stub
 	}
-
 }

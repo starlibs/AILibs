@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import jaicore.basic.sets.SetUtil;
+import jaicore.ml.core.exception.TrainingException;
 import jaicore.ml.ranking.clusterbased.GroupBasedRanker;
 import jaicore.ml.ranking.clusterbased.customdatatypes.Group;
 import jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
@@ -14,15 +17,15 @@ import weka.core.Instance;
 
 /**
  * @author Helen
- *	ModifiedISAC handles the preparation of the data and the clustering of it as well as the
- * 	the search for a cluster for a new instance.
+ *         ModifiedISAC handles the preparation of the data and the clustering of it as well as the
+ *         the search for a cluster for a new instance.
  */
-public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, Double> {
+public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String> {
 	// Saves the position of the points in the original list to save their relation to the corresponding
 	// instance.
-	private HashMap<double[], Integer> positionOfInstance = new HashMap<double[], Integer>();
+	private Map<double[], Integer> positionOfInstance = new HashMap<>();
 	// Saves the rankings for the found cluster in form of the cluster center and the ranking of Classifier by their name.
-	private ArrayList<ClassifierRankingForGroup> rankings = new ArrayList<ClassifierRankingForGroup>();
+	private ArrayList<ClassifierRankingForGroup> rankings = new ArrayList<>();
 	// Saves the found cluster
 	private List<Group<double[], Instance>> foundCluster;
 	// Saves the used normalizer
@@ -32,40 +35,39 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, D
 	 * @see jaicore.Ranker.Ranker#bulidRanker()
 	 */
 	@Override
-	public void buildRanker() {
+	public void buildRanker() throws TrainingException {
+		ModifiedISACInstanceCollector collector;
 		try {
-			ModifiedISACInstanceCollector collector = new ModifiedISACInstanceCollector();
-			ArrayList<ProblemInstance<Instance>> collectedInstances = (ArrayList<ProblemInstance<Instance>>) collector
-					.getProblemInstances();
-			ArrayList<double[]> toClusterpoints = new ArrayList<>();
-
-			this.norm = new Normalizer(collectedInstances);
-			this.norm.setupnormalize();
-
-			for (ProblemInstance<Instance> tmp : collectedInstances) {
-				toClusterpoints.add(this.norm.normalize(tmp.getInstance().toDoubleArray()));
-			}
-
-			ModifiedISACGroupBuilder builder = new ModifiedISACGroupBuilder();
-			builder.setPoints(toClusterpoints);
-
-			int tmp = 0;
-			for (ProblemInstance<Instance> i : collectedInstances) {
-				this.positionOfInstance.put(i.getInstance().toDoubleArray(), tmp);
-				tmp++;
-			}
-
-			this.foundCluster = builder.buildGroup(collectedInstances);
-			this.constructRanking(collector);
-
+			collector = new ModifiedISACInstanceCollector();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new TrainingException("Could not build the ranker.", e);
+		}
+		List<ProblemInstance<Instance>> collectedInstances = collector.getProblemInstances();
+		List<double[]> toClusterpoints = new ArrayList<>();
+
+		this.norm = new Normalizer(collectedInstances);
+		this.norm.setupnormalize();
+
+		for (ProblemInstance<Instance> tmp : collectedInstances) {
+			toClusterpoints.add(this.norm.normalize(tmp.getInstance().toDoubleArray()));
 		}
 
+		ModifiedISACGroupBuilder builder = new ModifiedISACGroupBuilder();
+		builder.setPoints(toClusterpoints);
+
+		int tmp = 0;
+		for (ProblemInstance<Instance> i : collectedInstances) {
+			this.positionOfInstance.put(i.getInstance().toDoubleArray(), tmp);
+			tmp++;
+		}
+
+		this.foundCluster = builder.buildGroup(collectedInstances);
+		this.constructRanking(collector);
 	}
 
-	/** given the collector and the used Classifier it construct a ranking for the found classifer
+	/**
+	 * given the collector and the used Classifier it construct a ranking for the found classifer
+	 *
 	 * @param collector
 	 */
 	private void constructRanking(final ModifiedISACInstanceCollector collector) {
@@ -75,13 +77,13 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, D
 			double[] clusterMean = new double[collector.getNumberOfClassifier()];
 			for (ProblemInstance<Instance> prob : c.getInstances()) {
 				int myIndex = 0;
-				for (double[] d : this.positionOfInstance.keySet()) {
-					if (Arrays.equals(d, prob.getInstance().toDoubleArray())) {
-						myIndex = this.positionOfInstance.get(d);
+				for (Entry<double[], Integer> instancePositionWithNumber : this.positionOfInstance.entrySet()) {
+					if (Arrays.equals(instancePositionWithNumber.getKey(), prob.getInstance().toDoubleArray())) {
+						myIndex = instancePositionWithNumber.getValue();
+						break;
 					}
 				}
-				ArrayList<SetUtil.Pair<String, Double>> solutionsOfPoint = collector
-						.getCollectedClassifierandPerformance().get(myIndex);
+				ArrayList<SetUtil.Pair<String, Double>> solutionsOfPoint = collector.getCollectedClassifierandPerformance().get(myIndex);
 				for (int i = 0; i < solutionsOfPoint.size(); i++) {
 
 					double perfo = solutionsOfPoint.get(i).getY();
@@ -97,7 +99,7 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, D
 			}
 
 			List<String> allClassifier = collector.getAllClassifier();
-			HashMap<String, Double> remainingCandidiates = new HashMap<String, Double>();
+			Map<String, Double> remainingCandidiates = new HashMap<>();
 			for (int i = 0; i < clusterMean.length; i++) {
 				remainingCandidiates.put(allClassifier.get(i), clusterMean[i]);
 			}
@@ -105,19 +107,19 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, D
 			while (!remainingCandidiates.isEmpty()) {
 				double min = Double.MIN_VALUE;
 				String classi = null;
-				for (String str : remainingCandidiates.keySet()) {
-					double candidate = remainingCandidiates.get(str);
-					if(candidate> min) {
-						classi = str;
+				for (Entry<String, Double> nameWithCandidate : remainingCandidiates.entrySet()) {
+					double candidate = nameWithCandidate.getValue();
+					if (candidate > min) {
+						classi = nameWithCandidate.getKey();
 						min = candidate;
 					}
 				}
-				if(classi == null) {
-					for(String str : remainingCandidiates.keySet()) {
+				if (classi == null) {
+					for (String str : remainingCandidiates.keySet()) {
 						ranking.add(str);
 					}
 					remainingCandidiates.clear();
-				}else {
+				} else {
 					ranking.add(classi);
 					remainingCandidiates.remove(classi);
 				}
@@ -134,22 +136,16 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String, D
 	@Override
 	public RankingForGroup<double[], String> getRanking(final Instance prob) {
 		RankingForGroup<double[], String> myRanking = null;
-		try {
-			double[] point = this.norm.normalize( prob.toDoubleArray());
-			L1DistanceMetric dist = new L1DistanceMetric();
-			double minDist = Double.MAX_VALUE;
-			for (RankingForGroup<double[], String> rank : this.rankings) {
-				double computedDist= dist.computeDistance(rank.getIdentifierForGroup().getIdentifier(), point);
+		double[] point = this.norm.normalize(prob.toDoubleArray());
+		L1DistanceMetric dist = new L1DistanceMetric();
+		double minDist = Double.MAX_VALUE;
+		for (RankingForGroup<double[], String> rank : this.rankings) {
+			double computedDist = dist.computeDistance(rank.getIdentifierForGroup().getIdentifier(), point);
 
-				if (computedDist <= minDist) {
-					myRanking = rank;
-					minDist = computedDist;
-				}
+			if (computedDist <= minDist) {
+				myRanking = rank;
+				minDist = computedDist;
 			}
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		return myRanking;
 	}

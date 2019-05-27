@@ -21,4 +21,34 @@ public class RankingForGroup<C,S> extends Ranking<S>{
 	public GroupIdentifier<C> getIdentifierForGroup(){
 		return this.identifierOfGroup;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.identifierOfGroup == null) ? 0 : this.identifierOfGroup.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		RankingForGroup other = (RankingForGroup) obj;
+		if (this.identifierOfGroup == null) {
+			if (other.identifierOfGroup != null) {
+				return false;
+			}
+		} else if (!this.identifierOfGroup.equals(other.identifierOfGroup)) {
+			return false;
+		}
+		return true;
+	}
 }

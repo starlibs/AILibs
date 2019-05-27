@@ -3,47 +3,48 @@ package jaicore.ml.ranking.clusterbased.modifiedisac;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ModifiedISACkMeans extends Kmeans<double[], Double> {
-	private HashMap<double[], Integer> PositionOfPointInList = new HashMap<double[], Integer>();
+	private Map<double[], Integer> positionOfPointInList = new HashMap<>();
 
-	private HashMap<double[], ArrayList<double[]>> pointsInCenter = new HashMap<double[], ArrayList<double[]>>();
-	private HashMap<double[], double[]> CenterOfPoint = new HashMap<double[], double[]>();
-	private ArrayList<double[]> initpoints = new ArrayList<double[]>();
+	private Map<double[], List<double[]>> pointsInCenter = new HashMap<>();
+	private Map<double[], double[]> centerOfPoint = new HashMap<>();
+	private List<double[]> initpoints = new ArrayList<>();
 
-
-	public ModifiedISACkMeans(ArrayList<double[]> toClusterPoints, IDistanceMetric<Double, double[], double[]> dist) {
+	public ModifiedISACkMeans(final List<double[]> toClusterPoints, final IDistanceMetric<Double, double[], double[]> dist) {
 		super(toClusterPoints, dist);
 		for (int i = 0; i < toClusterPoints.size(); i++) {
-			PositionOfPointInList.put(toClusterPoints.get(i), i);
+			this.positionOfPointInList.put(toClusterPoints.get(i), i);
 		}
-		initpoints = (ArrayList<double[]>) toClusterPoints.clone();
+		this.initpoints = new ArrayList<>(toClusterPoints);
 	}
 
 	@Override
-	public HashMap<double[],ArrayList<double[]>> kmeanscluster(int k) {
+	public Map<double[], List<double[]>> kmeanscluster(final int k) {
 		this.k = k;
-		initializeKMeans();
+		this.initializeKMeans();
 		boolean test = true;
 		while (test) {
-			relocateCenter();
-			test = relocatePoints();
+			this.relocateCenter();
+			test = this.relocatePoints();
 		}
-		return pointsInCenter;
+		return this.pointsInCenter;
 	}
 
 	@Override
 	public void initializeKMeans() {
-		initializeFirstCenter();
-		initializeFollowingCenter();
-		locateFirstPoints();
+		this.initializeFirstCenter();
+		this.initializeFollowingCenter();
+		this.locateFirstPoints();
 	}
 
 	private void initializeFirstCenter() {
-		double[] firstCenter = new double[points.get(0).length];
-		for (int i = 0; i < points.get(0).length; i++) {
-			int totalvalue = points.size();
-			for (double[] d : points) {
+		double[] firstCenter = new double[this.points.get(0).length];
+		for (int i = 0; i < this.points.get(0).length; i++) {
+			int totalvalue = this.points.size();
+			for (double[] d : this.points) {
 				if (Double.isNaN(d[i])) {
 					totalvalue--;
 				} else {
@@ -52,68 +53,57 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 			}
 			firstCenter[i] = firstCenter[i] / totalvalue;
 		}
-		center.add(firstCenter);
-		pointsInCenter.put(firstCenter, new ArrayList<double[]>());
+		this.center.add(firstCenter);
+		this.pointsInCenter.put(firstCenter, new ArrayList<double[]>());
 	}
 
 	private void locateFirstPoints() {
-		try {
-			for (double[] point : points) {
-				int indexOfMyCenter = 0;
-				double maxCenterDist = metric.computeDistance(point, center.get(0));
-				for (int i = 1; i < center.size(); i++) {
-					double tmp = metric.computeDistance(point, center.get(i));
-					if (tmp <= maxCenterDist) {
-						indexOfMyCenter = i;
-						maxCenterDist = tmp;
-					}
+		for (double[] point : this.points) {
+			int indexOfMyCenter = 0;
+			double maxCenterDist = this.metric.computeDistance(point, this.center.get(0));
+			for (int i = 1; i < this.center.size(); i++) {
+				double tmp = this.metric.computeDistance(point, this.center.get(i));
+				if (tmp <= maxCenterDist) {
+					indexOfMyCenter = i;
+					maxCenterDist = tmp;
 				}
-				CenterOfPoint.put(point, center.get(indexOfMyCenter));
-				pointsInCenter.get(center.get(indexOfMyCenter)).add(point);
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			this.centerOfPoint.put(point, this.center.get(indexOfMyCenter));
+			this.pointsInCenter.get(this.center.get(indexOfMyCenter)).add(point);
 		}
-
 	}
 
 	private boolean relocatePoints() {
 		boolean hasSomethingChanged = false;
-		for (double[] c : center) {
-			pointsInCenter.get(c).clear();
+		for (double[] c : this.center) {
+			this.pointsInCenter.get(c).clear();
 		}
-		try {
-			for (double[] point : points) {
-				double minDist = metric.computeDistance(point, center.get(0));
-				int indexOfMyCenter = 0;
-				for (int i = 1; i < center.size(); i++) {
-					double tmp = metric.computeDistance(point, center.get(i));
-					if (tmp < minDist) {
-						indexOfMyCenter = i;
-						minDist = tmp;
-					}
+		for (double[] point : this.points) {
+			double minDist = this.metric.computeDistance(point, this.center.get(0));
+			int indexOfMyCenter = 0;
+			for (int i = 1; i < this.center.size(); i++) {
+				double tmp = this.metric.computeDistance(point, this.center.get(i));
+				if (tmp < minDist) {
+					indexOfMyCenter = i;
+					minDist = tmp;
 				}
-				if (!Arrays.equals(CenterOfPoint.get(point), center.get(indexOfMyCenter))) {
-					hasSomethingChanged = true;
-					CenterOfPoint.replace(point, center.get(indexOfMyCenter));
-				}
-				pointsInCenter.get(center.get(indexOfMyCenter)).add(point);
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if (!Arrays.equals(this.centerOfPoint.get(point), this.center.get(indexOfMyCenter))) {
+				hasSomethingChanged = true;
+				this.centerOfPoint.replace(point, this.center.get(indexOfMyCenter));
+			}
+			this.pointsInCenter.get(this.center.get(indexOfMyCenter)).add(point);
 		}
 		return hasSomethingChanged;
 	}
 
 	private void relocateCenter() {
-		for (int i = 0; i < center.size(); i++) {
-			int size = center.get(i).length;
+		for (int i = 0; i < this.center.size(); i++) {
+			int size = this.center.get(i).length;
 			double[] sumarray = new double[size];
 			double[] totalvalue = new double[size];
-			if (!pointsInCenter.get(center.get(i)).isEmpty()) {
-				for (double[] d : pointsInCenter.get(center.get(i))) {
+			if (!this.pointsInCenter.get(this.center.get(i)).isEmpty()) {
+				for (double[] d : this.pointsInCenter.get(this.center.get(i))) {
 					for (int j = 0; j < d.length; j++) {
 						if (!Double.isNaN(d[j])) {
 							sumarray[j] += d[j];
@@ -137,41 +127,37 @@ public class ModifiedISACkMeans extends Kmeans<double[], Double> {
 					}
 				}
 			}
-			ArrayList<double[]> myPoints = pointsInCenter.remove(center.get(i));
-			pointsInCenter.put(sumarray, myPoints);
-			center.set(i, sumarray);
+			List<double[]> myPoints = this.pointsInCenter.remove(this.center.get(i));
+			this.pointsInCenter.put(sumarray, myPoints);
+			this.center.set(i, sumarray);
 		}
 
 	}
 
 	private void initializeFollowingCenter() {
-		for (int i = 1; i < k; i++) {
+		for (int i = 1; i < this.k; i++) {
 			double maxsum = 0;
 			int indexOfnewCenter = 0;
 			int indexofnewCenterinInit = 0;
-			for (int j = 0; j < initpoints.size(); j++) {
+			for (int j = 0; j < this.initpoints.size(); j++) {
 				double tmp = 0;
-				for (double[] c : center) {
-					try {
-						tmp += metric.computeDistance(initpoints.get(j), c);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				for (double[] c : this.center) {
+					tmp += this.metric.computeDistance(this.initpoints.get(j), c);
 				}
 				if (tmp >= maxsum) {
 					maxsum = tmp;
-					indexOfnewCenter = PositionOfPointInList.get(initpoints.get(j));
+					indexOfnewCenter = this.positionOfPointInList.get(this.initpoints.get(j));
 					indexofnewCenterinInit = j;
 				}
 			}
-			initpoints.remove(indexofnewCenterinInit);
-			center.add(points.get(indexOfnewCenter));
-			
-			pointsInCenter.put(points.get(indexOfnewCenter), new ArrayList<double[]>());
+			this.initpoints.remove(indexofnewCenterinInit);
+			this.center.add(this.points.get(indexOfnewCenter));
+
+			this.pointsInCenter.put(this.points.get(indexOfnewCenter), new ArrayList<double[]>());
 		}
 	}
-	public ArrayList<double[]> getCenter(){
-		return center;
+
+	public List<double[]> getCenter() {
+		return this.center;
 	}
 }

@@ -51,7 +51,6 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	public ModifiedISACInstanceCollector(final Instances data, final int startOfClassifierPerformanceValues, final int endOfClassifierPerformanceValues) {
 
 		this.collectedClassifierandPerformance = new ArrayList<>();
-		//TODO änder das
 		this.numberOfClassifier = (((endOfClassifierPerformanceValues+1)-(startOfClassifierPerformanceValues+1))+1);
 
 		for(Instance i : data) {

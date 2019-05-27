@@ -9,15 +9,13 @@ import weka.core.Instance;
 
 public class Cluster extends Group<double[], Instance> {
 
-	/**  Saves a cluster in two components. First, a list of the elements in the cluster 
+	/**  Saves a cluster in two components. First, a list of the elements in the cluster
 	 * 	 here in form of list of problem instnaces. Second, the identifier of the cluster
 	 * 	 in form of the cluster center as a point.
 	 * @param instanlist
 	 * @param id
 	 */
-	Cluster(List<ProblemInstance<Instance>> instanlist, GroupIdentifier<double[]> id) {
+	Cluster(final List<ProblemInstance<Instance>> instanlist, final GroupIdentifier<double[]> id) {
 		super(instanlist, id);
-		// TODO Auto-generated constructor stub
 	}
-
 }

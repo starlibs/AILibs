@@ -9,12 +9,11 @@ import jaicore.ml.ranking.clusterbased.customdatatypes.RankingForGroup;
  * @param <C> The center of the groups that have rankings
  * @param <I> The problem instances that get grouped and used to find good solutions for them
  * @param <S> Solutions that were tested for problem instances and are getting ranked for
- * for groups of them
- * @param <P> The performances of the solution for a given Problem instance.
+ *            for groups of them
  */
-public abstract class GroupBasedRanker<C,I,S,P> implements Ranker<S,I>{
+public abstract class GroupBasedRanker<C, I, S> implements Ranker<S, I> {
 
 	@Override
-	public abstract RankingForGroup<C,S> getRanking(I prob);
+	public abstract RankingForGroup<C, S> getRanking(I prob);
 
 }

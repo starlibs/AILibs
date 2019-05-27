@@ -9,14 +9,14 @@ import jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
 import weka.core.Instance;
 
 public class ModifiedISACGroupBuilder implements IGroupBuilder<double[], Instance> {
-	private ArrayList<double[]> points;
+	private List<double[]> points;
 	@Override
 	public List<Group<double[], Instance>> buildGroup(final List<ProblemInstance<Instance>> allInstances) {
-		ModifiedISACgMeans groupBuilder = new ModifiedISACgMeans(this.points, (ArrayList<ProblemInstance<Instance>>) allInstances);
+		ModifiedISACgMeans groupBuilder = new ModifiedISACgMeans(this.points, allInstances);
 		return new ArrayList<>(groupBuilder.gmeanscluster());
 	}
 
-	public void setPoints(final ArrayList<double[]> toSetPoints) {
+	public void setPoints(final List<double[]> toSetPoints) {
 		this.points = toSetPoints;
 	}
 
