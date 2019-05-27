@@ -28,13 +28,13 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 	private <T> IAttributeValue<T> getAttributeValue(final Attribute a, final Class<T> type) {
 		IAttributeType<?> t = WekaInstancesUtil.transformWEKAAttributeToAttributeType(a);
 		if (t instanceof BooleanAttributeType) {
-			return (IAttributeValue<T>)new BooleanAttributeValue((BooleanAttributeType)t, this.getElement().value(a) == 1.0);
+			return (IAttributeValue<T>) new BooleanAttributeValue((BooleanAttributeType) t, this.getElement().value(a) == 1.0);
 		}
 		if (t instanceof CategoricalAttributeType) {
-			return (IAttributeValue<T>)new CategoricalAttributeValue((CategoricalAttributeType)t, this.getElement().stringValue(a));
+			return (IAttributeValue<T>) new CategoricalAttributeValue((CategoricalAttributeType) t, this.getElement().stringValue(a));
 		}
 		if (t instanceof NumericAttributeType) {
-			return (IAttributeValue<T>)new NumericAttributeValue((NumericAttributeType)t, this.getElement().value(a));
+			return (IAttributeValue<T>) new NumericAttributeValue((NumericAttributeType) t, this.getElement().value(a));
 		}
 		throw new IllegalArgumentException("Type " + type + " is not a valid type!");
 
@@ -42,7 +42,7 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 
 	@Override
 	public L getTargetValue() {
-		IAttributeType<L> t = (IAttributeType<L>)WekaInstancesUtil.transformWEKAAttributeToAttributeType(getElement().classAttribute());
+		IAttributeType<L> t = (IAttributeType<L>) WekaInstancesUtil.transformWEKAAttributeToAttributeType(getElement().classAttribute());
 		return t.buildAttributeValue(this.getElement().classValue()).getValue();
 	}
 
@@ -52,7 +52,7 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 	}
 
 	@Override
-	public IAttributeValue<Double> getAttributeValue(int position) {
+	public IAttributeValue<Double> getAttributeValue(final int position) {
 		// TODO Auto-generated method stub
 		return null;
 	}
