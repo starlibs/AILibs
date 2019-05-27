@@ -1,8 +1,8 @@
 package jaicore.ml.ranking.clusterbased;
 
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.Group;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.RankingForGroup;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.Table;
+import jaicore.ml.ranking.clusterbased.customdatatypes.Group;
+import jaicore.ml.ranking.clusterbased.customdatatypes.RankingForGroup;
+import jaicore.ml.ranking.clusterbased.customdatatypes.Table;
 
 
 /**

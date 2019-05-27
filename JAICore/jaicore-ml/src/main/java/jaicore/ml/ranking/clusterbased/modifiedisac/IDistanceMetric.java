@@ -1,4 +1,4 @@
-package jaicore.ml.ranking.clusterbased.modifiedISAC;
+package jaicore.ml.ranking.clusterbased.modifiedisac;
 
 /**
  * @author Helen

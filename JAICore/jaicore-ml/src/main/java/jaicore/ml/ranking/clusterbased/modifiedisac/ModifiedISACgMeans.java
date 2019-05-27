@@ -1,4 +1,4 @@
-package jaicore.ml.ranking.clusterbased.modifiedISAC;
+package jaicore.ml.ranking.clusterbased.modifiedisac;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,8 +7,8 @@ import java.util.HashMap;
 import weka.core.Instance;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.GroupIdentifier;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.ProblemInstance;
+import jaicore.ml.ranking.clusterbased.customdatatypes.GroupIdentifier;
+import jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
 
 public class ModifiedISACgMeans extends Gmeans<double[], Double> {
 	private ArrayList<Cluster> gmeansCluster;

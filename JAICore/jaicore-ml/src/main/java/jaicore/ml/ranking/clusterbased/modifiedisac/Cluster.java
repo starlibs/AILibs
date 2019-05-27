@@ -1,10 +1,10 @@
-package jaicore.ml.ranking.clusterbased.modifiedISAC;
+package jaicore.ml.ranking.clusterbased.modifiedisac;
 
 import java.util.List;
 
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.Group;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.GroupIdentifier;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.ProblemInstance;
+import jaicore.ml.ranking.clusterbased.customdatatypes.Group;
+import jaicore.ml.ranking.clusterbased.customdatatypes.GroupIdentifier;
+import jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
 import weka.core.Instance;
 
 public class Cluster extends Group<double[], Instance> {

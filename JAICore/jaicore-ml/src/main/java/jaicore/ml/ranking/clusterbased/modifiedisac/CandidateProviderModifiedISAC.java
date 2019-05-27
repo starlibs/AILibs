@@ -1,7 +1,7 @@
-package jaicore.ml.ranking.clusterbased.modifiedISAC;
+package jaicore.ml.ranking.clusterbased.modifiedisac;
 
-import jaicore.ml.ranking.clusterbased.CandidateProvider.IRankedSolutionCandidateProvider;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.ProblemInstance;
+import jaicore.ml.ranking.clusterbased.candidateprovider.IRankedSolutionCandidateProvider;
+import jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 

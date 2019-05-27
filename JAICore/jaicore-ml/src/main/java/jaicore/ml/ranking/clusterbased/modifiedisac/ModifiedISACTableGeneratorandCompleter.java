@@ -1,10 +1,10 @@
-package jaicore.ml.ranking.clusterbased.modifiedISAC;
+package jaicore.ml.ranking.clusterbased.modifiedisac;
 
 import java.util.List;
 
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.ProblemInstance;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.Table;
-import jaicore.ml.ranking.clusterbased.DataManager.ITableGeneratorandCompleter;
+import jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
+import jaicore.ml.ranking.clusterbased.customdatatypes.Table;
+import jaicore.ml.ranking.clusterbased.datamanager.ITableGeneratorandCompleter;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 

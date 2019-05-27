@@ -1,4 +1,4 @@
-package jaicore.ml.ranking.clusterbased.CustomDataTypes;
+package jaicore.ml.ranking.clusterbased.customdatatypes;
 
 public class ProblemInstance<I> {
 	/**

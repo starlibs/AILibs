@@ -1,18 +1,14 @@
-package jaicore.ml.ranking.clusterbased.modifiedISAC.evalutation;
+package jaicore.ml.ranking.clusterbased.modifiedisac.evalutation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Timer;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.RankingForGroup;
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.Solution;
-import jaicore.ml.ranking.clusterbased.modifiedISAC.ModifiedISAC;
-import jaicore.ml.ranking.clusterbased.modifiedISAC.ModifiedISACInstanceCollector;
-import java_cup.symbol;
+import jaicore.ml.ranking.clusterbased.customdatatypes.RankingForGroup;
+import jaicore.ml.ranking.clusterbased.modifiedisac.ModifiedISAC;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -34,7 +30,7 @@ public class modifiedISACEvaluator {
 	private static double[] randomForest;
 	private static double naivebaismulti;
 	private static double naivebais;
-	
+
 	public static double getNaivebais() {
 		return naivebais;
 	}
@@ -80,15 +76,15 @@ public class modifiedISACEvaluator {
 	public static double[] getPlatz1overall() {
 		return platz1overall;
 	}
-	
+
 	public static double[] gettop3mymethod() {
 		return top3mymethod;
 	}
 	public static double[] getTop3overall() {
 		return top3overall;
 	}
-	
-	public static double[] evaluateModifiedISACLeaveOneOut(Instances data) {
+
+	public static double[] evaluateModifiedISACLeaveOneOut(final Instances data) {
 		double[] results = new double[data.numInstances()];
 		platz1my = new double[data.numInstances()];
 		platz1overall= new double[data.numInstances()];
@@ -106,16 +102,16 @@ public class modifiedISACEvaluator {
 		randomForest = new double[data.numInstances()];
 		naivebaismulti = 0;
 		naivebais = 0;
-		
+
 		for (int i = 0; i < data.numInstances(); i++) {
 			HashMap<String, Integer> positionInRanking = new HashMap<String, Integer>();
 			Instances trainingData = new Instances(data);
 			Instances testprep = new Instances(data);
 			Instances tester = new Instances(data);
 			Instance reminder = tester.get(i);
-			
+
 			trainingData.delete(i);
-			
+
 			double[] overallranking = new double[22];
 			int[] totalvalue = new int[22];
 
@@ -125,30 +121,29 @@ public class modifiedISACEvaluator {
 					if(!Double.isNaN(inst.value(l))){
 						overallranking[tmp]+= inst.value(l);
 						totalvalue[tmp]++;
-					}	
+					}
 					tmp++;
 				}
 			}
-			
+
 			for(int o = 0; o<overallranking.length;o++) {
 				overallranking[o] = overallranking[o]/totalvalue[o];
 			}
-			
+
 			HashMap<String,Double> overall = new HashMap<String,Double>();
-			
+
 			int exampel = 0;
 			if(i == 0) {
 				exampel = 1;
 			}
-			
+
 			for(int p = 0; p<overallranking.length;p++) {
 				overall.put(data.get(exampel).attribute((data.numAttributes()-1)-p).name(),overallranking[p]);
 			}
 			StopWatch watch = new StopWatch();
 			watch.start();
-			ModifiedISACInstanceCollector collect = new ModifiedISACInstanceCollector(trainingData, 104, 125);
-			ModifiedISAC isac = new ModifiedISAC(collect, null);
-			isac.bulidRanker();
+			ModifiedISAC isac = new ModifiedISAC();
+			isac.buildRanker();
 			watch.stop();
 			System.out.println(watch.getTime()+" ms");
 			times[i] = watch.getTime();
@@ -161,33 +156,33 @@ public class modifiedISACEvaluator {
 			}
 			testprep.deleteAttributeAt(0);
 			Instance inst = testprep.get(i);
-			
-			
+
+
 			RankingForGroup<double[], String> ranking = isac.getRanking(inst);
 			// get the ground truth ranking as string list
-			
+
 			int size = 3;
-			
-			
+
+
 			double[] rankingTruth = new double[22];
 			int tmp = 0;
 			ArrayList<String> top3truth = new ArrayList<String>();
-			
+
 			while (!ClassandPerfo.isEmpty()) {
-//				System.out.println("size left " + ClassandPerfo.size());
+				//				System.out.println("size left " + ClassandPerfo.size());
 				double maxPerfo = Double.MIN_VALUE;
 				String myClassi = "";
 				for (String classi : ClassandPerfo.keySet()) {
 					if (!ClassandPerfo.get(classi).isNaN()) {
-//						System.out.println("double nicht nan");
+						//						System.out.println("double nicht nan");
 						if (ClassandPerfo.get(classi) >= maxPerfo) {
 							maxPerfo = ClassandPerfo.get(classi);
 							myClassi = classi;
 						}
 					}
-					
+
 				}
-//				System.out.println("myClassi is null " + myClassi == null);
+				//				System.out.println("myClassi is null " + myClassi == null);
 				if (myClassi.isEmpty()) {
 					int nans = tmp;
 					for (String str : ClassandPerfo.keySet()) {
@@ -200,7 +195,7 @@ public class modifiedISACEvaluator {
 					}
 					ClassandPerfo.clear();
 				} else {
-//					System.out.println(tmp);
+					//					System.out.println(tmp);
 					if(tmp< size) {
 						top3truth.add(myClassi);
 						if(myClassi.equals("weka.classifiers.trees.RandomForest")) {
@@ -218,18 +213,18 @@ public class modifiedISACEvaluator {
 					ClassandPerfo.remove(myClassi);
 					tmp++;
 				}
-				
+
 			}
-			
+
 			System.out.println("Ranking truth "+Arrays.toString(rankingTruth));
 
 			double[] difference3 = new double[size];
-			
+
 			HashMap<String,Double> loopoverall = (HashMap<String, Double>) overall.clone();
 			double finishedoverallranking[] = new double[22];
 			HashMap<String,Integer> rankingoverall = new HashMap<String,Integer>();
 			int loopcounter = 0;
-			
+
 			while(!loopoverall.isEmpty()) {
 				double maxPerfo = Double.MIN_VALUE;
 				String myClassifier = "";
@@ -242,7 +237,7 @@ public class modifiedISACEvaluator {
 				if(loopcounter<size) {
 					if(maxPerfo != Double.MIN_VALUE) {
 						difference3[loopcounter]=maxPerfo;
-						
+
 					}
 				}
 				finishedoverallranking[positionInRanking.get(myClassifier)] = loopcounter;
@@ -253,10 +248,10 @@ public class modifiedISACEvaluator {
 			System.out.println("baseline ranking "+Arrays.toString(finishedoverallranking));
 			// get the ranking as string list
 			ArrayList<String> rankingAsStringList = new ArrayList<String>();
-			for (Solution<String> rank : ranking.getRanking()) {
-				rankingAsStringList.add(rank.getSolution());
+			for (String rank : ranking) {
+				rankingAsStringList.add(rank);
 			}
-			
+
 			double[] rankingFromMyMethod = new double[22];
 			ArrayList<String> top3my = new ArrayList<String>();
 			int intermidiate = 0;
@@ -265,17 +260,17 @@ public class modifiedISACEvaluator {
 				if(intermidiate<size) {
 					top3my.add(classi);
 				}
-//				rankingFromMyMethod[intermidiate] = rankingoverall.get(classi);
+				//				rankingFromMyMethod[intermidiate] = rankingoverall.get(classi);
 				intermidiate++;
-				
+
 			}
 			System.out.println("My rnaking "+ Arrays.toString(rankingFromMyMethod));
-//			
+			//
 			ArrayList<String> top3MlPlan = new ArrayList<String>();
 			ArrayList<String> mlPlanranking = makeStaticRanking();
 			double[] mlplanranking = new double[22];
 			intermidiate = 0;
-			
+
 			for(String str : mlPlanranking) {
 				Integer perfo = null;
 				for(String keys : positionInRanking.keySet()) {
@@ -287,32 +282,32 @@ public class modifiedISACEvaluator {
 					if(intermidiate<size) {
 						top3MlPlan.add(str);
 					}
-					int index = (int) perfo;
+					int index = perfo;
 					mlplanranking[index] =intermidiate;
 					intermidiate++;
-				}	
-				
+				}
+
 			}
 			System.out.println("ML-plan ranking "+Arrays.toString(mlplanranking));
-			
+
 			double stpestiloptwouldbereached = 0;
 			double stepstillmlreachopt = 0;
 			stpestiloptwouldbereached = rankingFromMyMethod[0]+1;
 			stepstillmlreachopt = mlplanranking[0]+1;
-		
+
 			double[] difference1 = new double[size];
 			double[] difference2 = new double[size];
 			double[] difference4 = new double[size];
-			
+
 			for(int h = 0; h<size;h++) {
 				String classitruth = top3truth.get(h);
 				String mltruth = top3MlPlan.get(h);
 				String mytruth = top3my.get(h);
-				
+
 				double perfotruth = 0;
-				double perfomy = 0;	
+				double perfomy = 0;
 				double perfoml = 0;
-				
+
 				for(int t = 125; t>=104;t--) {
 					if(reminder.attribute(t).name().equals(classitruth)) {
 						perfotruth = reminder.value(t);
@@ -328,15 +323,15 @@ public class modifiedISACEvaluator {
 				difference2[h] = perfomy;
 				difference4[h] = perfoml;
 			}
-			
-			
-			
+
+
+
 			System.out.println("Das betrachtete Datenset: "+(i+1));
-			
+
 			System.out.println("Die steps die es bräuchte um Platz eins der opt lösung in meiner zu erreichen "+stpestiloptwouldbereached);
 			stepdifference[i] = stpestiloptwouldbereached;
 			stepdifferenceML[i] = stepstillmlreachopt;
-			
+
 			System.out.print("Der Verlust zweichen Platz eins der optimal Lösung und der besten meiner Lösungen: ");
 			System.out.println((Math.rint((1000.0 *(difference1[0]-difference2[0]))))/1000.0);
 			System.out.println("Mein Platz 3: "+difference2[size-1]);
@@ -346,38 +341,38 @@ public class modifiedISACEvaluator {
 			untocedoverall[i] = difference3[0];
 			untouchedml[i] = difference4[0];
 			System.out.println(difference2[0]+" "+difference4[0]);
-			
+
 			System.out.println("Bester in der optimalen Lösung: "+difference1[0]);
 			System.out.println("Mein Platz eins:  "+difference2[0]);
-			
+
 			double platz1 = difference2[0];
 			platz1my[i] = difference1[0]-platz1;
 			platz1ml[i] = difference1[0]-difference4[0];
 			System.out.println("Performance von ML platz 1 "+difference4[0]);
-			
+
 			System.out.println("Platz eins der baseline "+difference3[0]);
 			platz1overall[i] = difference1[0]-difference3[0];
-			
+
 			System.out.println("Das wahre ranking: "+top3truth.toString());
 			System.out.println("Mein ranking: "+top3my.toString());
 			System.out.println("ML-Plan ranking "+ top3MlPlan.toString());
-			
+
 			Arrays.sort(difference2);
 			System.out.println("Beste Performance "+difference2[size-1]);
-			
+
 			System.out.println("Ist die beste Performance Plazt 1 bei meinem ranking? "+(platz1 == difference2[size-1]));
-			
-//			System.out.println(Arrays.toString(rankingtruth));
-//			System.out.println(Arrays.toString(myranking));
-			
+
+			//			System.out.println(Arrays.toString(rankingtruth));
+			//			System.out.println(Arrays.toString(myranking));
+
 			System.out.println(" ");
 			KendallsCorrelation correl = new KendallsCorrelation();
 			KendallsCorrelation correlML = new KendallsCorrelation();
 			results[i] = correl.correlation(rankingTruth, rankingFromMyMethod);
-//			results[i] = correl.correlation(rankingTruth, finishedoverallranking);
+			//			results[i] = correl.correlation(rankingTruth, finishedoverallranking);
 			kendallforML[i] = correlML.correlation(rankingTruth, mlplanranking);
-			
-			
+
+
 			Arrays.sort(difference3);
 			Arrays.sort(difference4);
 			top3ml[i] = difference1[0]- difference4[difference4.length-1];
@@ -386,16 +381,16 @@ public class modifiedISACEvaluator {
 			double place = 0;
 			for(String str : positionInRanking.keySet()) {
 				if(str.equals("weka.classifiers.trees.RandomForest")) {
-					place =positionInRanking.get(str); 
+					place =positionInRanking.get(str);
 				}
-			}	
+			}
 			randomForest[i] = place;
-			
-			//System.out.println("Durchlauf nummer "+i);		
+
+			//System.out.println("Durchlauf nummer "+i);
 		}
 		return results;
 	}
-	
+
 	private static ArrayList<String> makeStaticRanking(){
 		ArrayList<String> staticranking = new ArrayList<String>();
 		staticranking.add("weka.classifiers.trees.RandomForest");
@@ -430,8 +425,8 @@ public class modifiedISACEvaluator {
 		staticranking.add("weka.classifiers.functions.SimpleLinearRegression");
 		staticranking.add("weka.classifiers.rules.M5Rules");
 		staticranking.add("weka.classifiers.trees.M5P");
-		
+
 		return staticranking;
-		
+
 	}
 }

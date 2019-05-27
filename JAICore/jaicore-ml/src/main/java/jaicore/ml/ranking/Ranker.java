@@ -1,9 +1,9 @@
 package jaicore.ml.ranking;
 
-import jaicore.ml.ranking.clusterbased.CustomDataTypes.Ranking;
+import jaicore.ml.ranking.clusterbased.customdatatypes.Ranking;
 
 public interface Ranker<S,P> {
-	public void bulidRanker();
+	public void buildRanker();
 
 	public Ranking<S> getRanking(P problem);
 }

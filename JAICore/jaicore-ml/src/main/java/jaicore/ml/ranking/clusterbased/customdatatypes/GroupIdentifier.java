@@ -1,4 +1,4 @@
-package jaicore.ml.ranking.clusterbased.CustomDataTypes;
+package jaicore.ml.ranking.clusterbased.customdatatypes;
 
 /**
  * @author Helen Beierling
@@ -6,10 +6,10 @@ package jaicore.ml.ranking.clusterbased.CustomDataTypes;
  * @param <C> An identifier of a group
  */
 public class GroupIdentifier<C> {
-	
+
 	private C identifier;
-	
-	public GroupIdentifier(C id){
+
+	public GroupIdentifier(final C id){
 		this.identifier = id;
 	}
 	public C getIdentifier(){
