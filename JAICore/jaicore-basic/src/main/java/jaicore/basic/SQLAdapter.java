@@ -113,8 +113,10 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e1) {
-					this.logger.error("SQLAdapter was interrupted while waiting to try again establishing a database connection", e1);
-					throw new RuntimeException("SQLAdapter was interrupted while trying to establish a database connection", e1);
+					Thread.currentThread().interrupt();
+					this.logger.error(
+							"SQLAdapter got interrupted while trying to establish a connection to the database. NOTE: This will trigger an immediate shutdown as no sql connection could be established. Reason for the interrupt was:", e1);
+					break;
 				}
 			}
 		} while (tries < 3);

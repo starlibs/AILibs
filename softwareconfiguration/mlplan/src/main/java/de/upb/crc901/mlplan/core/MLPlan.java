@@ -73,7 +73,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			this.logger.info("Starting an ML-Plan instance.");
 			AlgorithmInitializedEvent event = this.activate();
 
@@ -195,7 +195,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			this.logger.info("Started and activated ML-Plan.");
 			return event;
 
-		case active:
+		case ACTIVE:
 
 			/* train the classifier returned by the optimizing factory */
 			long startOptimizationTime = System.currentTimeMillis();

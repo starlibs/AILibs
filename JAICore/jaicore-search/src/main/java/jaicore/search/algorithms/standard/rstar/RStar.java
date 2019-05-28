@@ -167,7 +167,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 			this.logger.debug("Performing next step. Current state is {}", this.getState());
 			this.checkAndConductTermination();
 			switch (this.getState()) {
-			case created:
+			case CREATED:
 				AlgorithmInitializedEvent initializationEvent = this.activate();
 
 				/* Lines 14 to 17 */
@@ -190,7 +190,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				assert !this.open.isEmpty() : "OPEN must not be empty after initialization!";
 				return initializationEvent;
 
-			case active:
+			case ACTIVE:
 
 				/* return unreturned solutions if such exist */
 				if (!this.unreturnedSolutionEvents.isEmpty()) {

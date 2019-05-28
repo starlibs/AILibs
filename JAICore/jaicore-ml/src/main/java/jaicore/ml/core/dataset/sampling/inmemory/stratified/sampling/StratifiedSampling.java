@@ -56,7 +56,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			try {
 			this.sample = (D)getInput().createEmpty();
 			if (!allDatapointsAssigned) {
@@ -77,7 +77,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
 			return this.activate();
-		case active:
+		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
 				if (!allDatapointsAssigned) {
 					// Stratify the datapoints one by one.
@@ -114,7 +114,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			if (this.sample.size() < this.sampleSize) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {

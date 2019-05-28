@@ -37,7 +37,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 	public AlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			// Initialize variables.
 			try {
 				this.datapointAmount = ArffUtilities.countDatasetEntries(this.getInput(), true);
@@ -49,7 +49,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Was not able to count the datapoints.");
 			}
-		case active:
+		case ACTIVE:
 			if (this.streamedDatapoints < this.datapointAmount) {
 				try {
 					// Get current datapoint.
@@ -83,7 +83,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 					throw new AlgorithmException(e, "Was not able to write sampled datapoints into output files.");
 				}
 			}
-		case inactive:
+		case INACTIVE:
 			if (this.streamedDatapoints < this.datapointAmount) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");
 			} else {

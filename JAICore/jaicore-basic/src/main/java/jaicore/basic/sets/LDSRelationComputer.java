@@ -102,12 +102,12 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			this.open.add(new Node(null, -1, 0, 0));
 			this.numCreatedNodes++;
 			return this.activate();
 
-		case active:
+		case ACTIVE:
 			this.checkAndConductTermination();
 			if (this.open.isEmpty()) {
 				return this.terminate();

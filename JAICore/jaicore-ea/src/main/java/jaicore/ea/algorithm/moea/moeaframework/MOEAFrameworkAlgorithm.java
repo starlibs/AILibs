@@ -20,7 +20,7 @@ import org.moeaframework.core.spi.OperatorFactory;
 import org.moeaframework.util.TypedProperties;
 
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.EAlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -48,7 +48,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		}
 
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			try {
 				this.numberOfGenerationsEvolved = 0;
 
@@ -70,7 +70,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 				e.printStackTrace();
 				System.exit(0);
 			}
-		case active:
+		case ACTIVE:
 			System.out.println(this.getClass().getName() + " step3");
 			this.algorithm.step();
 
@@ -82,14 +82,14 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 
 			return new MOEAFrameworkAlgorithmResultEvent(this.getId(), this.getCurrentResult());
 		default:
-		case inactive:
+		case INACTIVE:
 			throw new AlgorithmException("The current algorithm state is >inactive<.");
 		}
 
 	}
 
 	public void reset() {
-		this.setState(AlgorithmState.created);
+		this.setState(EAlgorithmState.CREATED);
 	}
 
 	public MOEAFrameworkAlgorithmResult getCurrentResult() {
@@ -118,7 +118,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 
 	@Override
 	public MOEAFrameworkAlgorithmResult call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		while ((this.getState() == AlgorithmState.created || this.getState() == AlgorithmState.active) && (this.getConfig().numberOfGenerations() <= 0 || this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations())
+		while ((this.getState() == EAlgorithmState.CREATED || this.getState() == EAlgorithmState.ACTIVE) && (this.getConfig().numberOfGenerations() <= 0 || this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations())
 				&& (this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations())) {
 			this.nextWithException();
 			System.out.println("=============");
@@ -131,7 +131,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 			this.numberOfGenerationsEvolved++;
 		}
 
-		System.out.println("State: " + (this.getState() == AlgorithmState.created || this.getState() == AlgorithmState.active));
+		System.out.println("State: " + (this.getState() == EAlgorithmState.CREATED || this.getState() == EAlgorithmState.ACTIVE));
 		System.out.println("Generations: " + (this.getConfig().numberOfGenerations() <= 0) + " " + (this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations()));
 		System.out.println("Evaluations: " + (this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations()));
 
@@ -142,7 +142,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 	}
 
 	public boolean terminateEvolution() {
-		boolean condition = this.getState() == AlgorithmState.inactive;
+		boolean condition = this.getState() == EAlgorithmState.INACTIVE;
 		if (this.getConfig().numberOfEvaluations() > 0) {
 			condition = condition || this.getNumberOfEvaluations() >= this.getConfig().numberOfEvaluations();
 		}
