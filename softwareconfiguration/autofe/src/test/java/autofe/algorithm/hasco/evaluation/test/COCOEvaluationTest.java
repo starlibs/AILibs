@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
+import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class COCOEvaluationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(COCOEvaluationTest.class);
 
-	// @Test
+	 @Test
 	public void evaluateTest() throws Exception {
 		logger.info("Starting COCO evaluation test...");
 
@@ -33,23 +34,5 @@ public class COCOEvaluationTest {
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .01f);
 
 		logger.info("Result: " + EvaluationUtils.calculateCOCOForBatch(split.get(0)));
-	}
-
-	// @Test
-	public void evaluateCOCOTest() throws InterruptedException {
-		logger.info("Starting COED evaluation test...");
-
-		/* load dataset */
-		Instances instances = FileUtils.readSingleInstances("C:\\Users\\Julian\\Desktop\\mnist_7_0.arff");
-
-		logger.info("Result: " + EvaluationUtils.calculateCOCOForBatch(instances));
-
-		Instances instances1 = FileUtils.readSingleInstances("C:\\Users\\Julian\\Desktop\\mnist_7_2.arff");
-
-		logger.info("Result: " + EvaluationUtils.calculateCOCOForBatch(instances1));
-
-		Instances instances2 = FileUtils.readSingleInstances("C:\\Users\\Julian\\Desktop\\mnist_7_3.arff");
-
-		logger.info("Result: " + EvaluationUtils.calculateCOCOForBatch(instances2));
 	}
 }

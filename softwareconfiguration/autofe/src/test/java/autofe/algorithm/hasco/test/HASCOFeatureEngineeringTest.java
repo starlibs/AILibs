@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import autofe.util.test.DataSetUtilsTest;
 import org.aeonbits.owner.ConfigFactory;
+import org.junit.Assert;
 import org.junit.Test;
 
 import autofe.algorithm.hasco.HASCOFeatureEngineering;
@@ -21,7 +23,7 @@ public class HASCOFeatureEngineeringTest {
 	public void hascoImageFETest() throws Exception {
 
 		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.FASHION_MNIST_ID);
-		long[] shape = DataSetUtils.FASHION_MNIST_SHAPE;
+		long[] shape = DataSetUtilsTest.FASHION_MNIST_SHAPE;
 
 		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(42), .7);
 
@@ -36,24 +38,6 @@ public class HASCOFeatureEngineeringTest {
 		FilterPipeline pipe = hascoImageFE.build(trainTestSplit.get(0));
 		System.out.println(pipe);
 		System.out.println("Final score: " + hascoImageFE.getInternalValidationErrorOfSelectedClassifier());
-	}
-
-	// @Test
-	public void simpleHASCOFETest() throws Exception {
-
-		// TODO
-		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.SEGMENT_ID);
-		long[] shape = DataSetUtils.SEGMENT_INPUT_SHAPE;
-
-		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
-
-		HASCOFeatureEngineering hascoImageFE = new HASCOFeatureEngineering(new File("model/test.json"),
-				new FilterPipelineFactory(shape), new COCOObjectEvaluator(), config);
-		hascoImageFE.setTimeout(30, TimeUnit.SECONDS);
-		hascoImageFE.setTimeoutForNodeEvaluation(30);
-		hascoImageFE.setTimeoutForSingleSolutionEvaluation(30);
-
-		FilterPipeline pipe = hascoImageFE.build(data);
-		System.out.println(pipe);
+		Assert.assertNotNull(pipe);
 	}
 }

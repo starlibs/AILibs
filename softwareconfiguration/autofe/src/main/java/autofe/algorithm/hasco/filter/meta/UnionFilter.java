@@ -37,7 +37,7 @@ public class UnionFilter implements IFilter, IAbstractFilter, Serializable {
 		}
 	}
 
-	public static DataSet union(final DataSet coll1, final DataSet coll2) {
+	static DataSet union(final DataSet coll1, final DataSet coll2) {
 		if (coll1 == null || coll2 == null) {
 			throw new IllegalArgumentException("Parameters 'coll1' and 'coll2' must not be null!");
 		}
@@ -62,7 +62,7 @@ public class UnionFilter implements IFilter, IAbstractFilter, Serializable {
 
 			// Add class attribute
 			List<String> classValues = IntStream.range(0, instances1.classAttribute().numValues()).asDoubleStream()
-					.mapToObj(d -> String.valueOf(d)).collect(Collectors.toList());
+					.mapToObj(String::valueOf).collect(Collectors.toList());
 			Attribute classAtt = new Attribute("classAtt", classValues);
 			attributes.add(classAtt);
 
@@ -88,7 +88,7 @@ public class UnionFilter implements IFilter, IAbstractFilter, Serializable {
 
 			return new DataSet(unitedInstances, null);
 		} else {
-			if (coll1.getIntermediateInstances().size() == 0 || coll2.getIntermediateInstances().size() == 0) {
+			if (coll1.getIntermediateInstances().isEmpty() || coll2.getIntermediateInstances().isEmpty()) {
 				throw new IllegalArgumentException("There must be intermediate instances if the collection is set.");
 			}
 
@@ -115,6 +115,7 @@ public class UnionFilter implements IFilter, IAbstractFilter, Serializable {
 
 	@Override
 	public UnionFilter clone() throws CloneNotSupportedException {
+		super.clone();
 		return new UnionFilter();
 	}
 }

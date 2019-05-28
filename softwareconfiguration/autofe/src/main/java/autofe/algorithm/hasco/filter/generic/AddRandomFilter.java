@@ -10,41 +10,44 @@ import weka.core.Instances;
 
 /**
  * Simple filter adding noise to each instance value (to deteriorate results).
- * 
- * @author Julian Lienen
  *
+ * @author Julian Lienen
  */
 public class AddRandomFilter implements IFilter {
 
-	private double[] randomValues = null;
+    private double[] randomValues = null;
 
-	@Override
-	public DataSet applyFilter(DataSet inputData, boolean copy) {
-		Random random = new Random();
-		if (this.randomValues == null) {
-			randomValues = new double[inputData.getInstances().numAttributes() - 1];
-			for (int i = 0; i < randomValues.length; i++)
-				randomValues[i] = random.nextDouble() * 1000;
-		}
+    private Random random = new Random();
 
-		Instances transformedInstances;
-		if (copy)
-			transformedInstances = new Instances(inputData.getInstances());
-		else
-			transformedInstances = inputData.getInstances();
-		for (Instance inst : transformedInstances) {
-			for (int i = 0; i < inst.numAttributes() - 1; i++) {
-				Attribute att = inst.attribute(i);
-				if (att.isNumeric())
-					inst.setValue(att, inst.value(att) + this.randomValues[i]);
-			}
-		}
+    @Override
+    public DataSet applyFilter(DataSet inputData, boolean copy) {
+        if (this.randomValues == null) {
+            randomValues = new double[inputData.getInstances().numAttributes() - 1];
+            for (int i = 0; i < randomValues.length; i++) {
+                randomValues[i] = random.nextDouble() * 1000;
+            }
+        }
 
-		return new DataSet(transformedInstances, inputData.getIntermediateInstances());
-	}
+        Instances transformedInstances;
+        if (copy) {
+            transformedInstances = new Instances(inputData.getInstances());
+        } else {
+            transformedInstances = inputData.getInstances();
+        }
+        for (Instance inst : transformedInstances) {
+            for (int i = 0; i < inst.numAttributes() - 1; i++) {
+                Attribute att = inst.attribute(i);
+                if (att.isNumeric())
+                    inst.setValue(att, inst.value(att) + this.randomValues[i]);
+            }
+        }
 
-	@Override
-	public AddRandomFilter clone() throws CloneNotSupportedException {
-		return new AddRandomFilter();
-	}
+        return new DataSet(transformedInstances, inputData.getIntermediateInstances());
+    }
+
+    @Override
+    public AddRandomFilter clone() throws CloneNotSupportedException {
+        super.clone();
+        return new AddRandomFilter();
+    }
 }

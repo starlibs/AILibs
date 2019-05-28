@@ -1,18 +1,17 @@
 package autofe.algorithm.hasco;
 
+import jaicore.ml.core.exception.PredictionException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import com.google.common.eventbus.Subscribe;
-
 import autofe.util.DataSet;
-import hasco.core.HASCOSolutionCandidate;
 import jaicore.basic.SQLAdapter;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import weka.core.Capabilities;
 import weka.core.Instance;
 import weka.core.Instances;
 
 public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
+
+	private static final String CLF_UNINITIALIZED_MESSAGE = "This classifier needs to be built first.";
 
 	protected AutoFEWekaPipeline selectedPipeline;
 
@@ -59,19 +58,19 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	}
 
 	@Override
-	public double classifyInstance(final Instance instance) throws Exception {
+	public double classifyInstance(final Instance instance) throws PredictionException {
 		if (selectedPipeline == null) {
-			throw new IllegalArgumentException("This classifier needs to be built first.");
+			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
 		return selectedPipeline.classifyInstance(instance);
 	}
 
 	@Override
-	public double[] distributionForInstance(final Instance arg0) throws Exception {
+	public double[] distributionForInstance(final Instance arg0) throws PredictionException {
 		if (selectedPipeline == null) {
-			throw new IllegalArgumentException("This classifier needs to be built first.");
+			throw new PredictionException(CLF_UNINITIALIZED_MESSAGE);
 		}
-		return null;
+		return new double[] {};
 	}
 
 	@Override
@@ -84,17 +83,17 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	}
 
 	@Override
-	public double classifyInstance(final INDArray instance, final Instances refInstances) throws Exception {
+	public double classifyInstance(final INDArray instance, final Instances refInstances) throws PredictionException {
 		if (selectedPipeline == null) {
-			throw new IllegalArgumentException("This classifier needs to be built first.");
+			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
 		return selectedPipeline.classifyInstance(instance, refInstances);
 	}
 
 	@Override
-	public double[] distributionForInstance(final INDArray instance, final Instances refInstances) throws Exception {
+	public double[] distributionForInstance(final INDArray instance, final Instances refInstances) throws PredictionException {
 		if (selectedPipeline == null) {
-			throw new IllegalArgumentException("This classifier needs to be built first.");
+			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
 		return selectedPipeline.distributionForInstance(instance, refInstances);
 	}
@@ -102,7 +101,7 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	@Override
 	public Instances transformData(final DataSet data) throws InterruptedException {
 		if (selectedPipeline == null) {
-			throw new IllegalArgumentException("This classifier needs to be built first.");
+			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
 		return selectedPipeline.transformData(data);
 	}
@@ -110,7 +109,7 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 	@Override
 	public Instance transformData(final INDArray instance, final Instances refInstances) throws InterruptedException {
 		if (selectedPipeline == null) {
-			throw new IllegalArgumentException("This classifier needs to be built first.");
+			throw new IllegalArgumentException(CLF_UNINITIALIZED_MESSAGE);
 		}
 		return selectedPipeline.transformData(instance, refInstances);
 	}
@@ -120,31 +119,4 @@ public abstract class AbstractAutoFEMLClassifier implements IFEMLClassifier {
 		this.experimentID = experimentID;
 		this.evalTable = evalTable;
 	}
-
-	// @Subscribe
-	// public void rcvHASCOSolutionEvent(final
-	// SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> e) {
-	// if (this.adapter != null) {
-	// new
-	// AutoFEWeka.getComponentInstantiation(e.getSolutionCandidate().getComponentInstance());
-	// Map<String, Object> eval = new HashMap<>();
-	// eval.put("run_id", this.experimentID);
-	// eval.put("preprocessor", "-");
-	// eval.put("classifier",
-	// WekaUtil.getClassifierDescriptor(pl.getBaseClassifier()));
-	// eval.put("errorRate", e.getSolutionCandidate().getScore());
-	// eval.put("time_train", e.getSolution().getTimeToComputeScore());
-	// eval.put("time_predict", -1);
-	// try {
-	// this.adapter.insert(this.evalTable, eval);
-	// } catch (SQLException e1) {
-	// e1.printStackTrace();
-	// }
-	// }
-	// }
-
-	@Subscribe
-	public abstract void rcvHASCOSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> e)
-			throws Exception;
-
 }

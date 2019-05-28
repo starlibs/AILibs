@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
-import junit.framework.Assert;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -24,7 +24,7 @@ public class EvaluationUtilsTest {
 		// double[] ranking2 = { 0.1, 0.05, 1 };
 		double[] ranking2 = { 0.1, 0.4 };
 
-		Assert.assertEquals(1.0, EvaluationUtils.rankKendallsTau(ranking1, ranking2));
+		Assert.assertEquals(1.0, EvaluationUtils.rankKendallsTau(ranking1, ranking2), 0.0001);
 	}
 
 	// @Test
@@ -45,7 +45,7 @@ public class EvaluationUtilsTest {
 		double[] arr = Arrays.stream(instString.substring(1, instString.length() - 1).split(",")).map(String::trim)
 				.mapToDouble(Double::parseDouble).toArray();
 
-		ArrayList<Attribute> atts = new ArrayList<Attribute>();
+		ArrayList<Attribute> atts = new ArrayList<>();
 		for (int i = 0; i < arr.length - 1; i++) {
 			atts.add(new Attribute("att" + i));
 		}
@@ -63,12 +63,13 @@ public class EvaluationUtilsTest {
 
 	@Test
 	public void evaluationTimingTest() throws Exception {
-		DataSet dataSet = DataSetUtils.getDataSetByID(DataSetUtils.CIFAR10_ID);
+		DataSet dataSet = DataSetUtils.getDataSetByID(DataSetUtilsTest.CIFAR10_ID);
 		DataSet train = DataSetUtils.getStratifiedSplit(dataSet, new Random(42), true, 0.7).get(0);
 
 		long startTimestamp = System.currentTimeMillis();
 
-		System.out.println("Result LDA: " + EvaluationUtils.performKernelLDA(train.getInstances(), 2));
+		double ldaResult = EvaluationUtils.performKernelLDA(train.getInstances(), 2);
+		System.out.println("Result LDA: " + ldaResult);
 
 		System.out.println(
 				"LDA evaluation on complete dataset took " + (System.currentTimeMillis() - startTimestamp) + " ms.");
@@ -77,5 +78,7 @@ public class EvaluationUtilsTest {
 		System.out.println("Result clustering: " + EvaluationUtils.performKernelClustering(train.getInstances(), 2));
 		System.out.println("Cluster evaluation on complete dataset took "
 				+ (System.currentTimeMillis() - startTimestamp) + " ms.");
+
+		Assert.assertTrue(ldaResult > 0);
 	}
 }

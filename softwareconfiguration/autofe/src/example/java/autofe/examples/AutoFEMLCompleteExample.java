@@ -1,13 +1,4 @@
-package autofe.algorithm.hasco.test;
-
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
-import autofe.util.test.DataSetUtilsTest;
-import org.aeonbits.owner.ConfigFactory;
-import org.junit.Assert;
-import org.junit.Test;
+package autofe.examples;
 
 import autofe.algorithm.hasco.AutoFEMLComplete;
 import autofe.algorithm.hasco.AutoFEWekaPipelineFactory;
@@ -15,11 +6,20 @@ import autofe.algorithm.hasco.MLPlanFEWekaClassifierConfig;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
+import autofe.util.test.DataSetUtilsTest;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import org.aeonbits.owner.ConfigFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class AutoFEMLCompleteTest {
-    @Test
-    public void autoFEMLCompleteTest() throws Exception {
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+public class AutoFEMLCompleteExample {
+    private static Logger logger = LoggerFactory.getLogger(AutoFEMLCompleteExample.class);
+
+    public static void main(String[] args) throws Exception {
 
         DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.FASHION_MNIST_ID);
         long[] shape = DataSetUtilsTest.FASHION_MNIST_SHAPE;
@@ -36,14 +36,13 @@ public class AutoFEMLCompleteTest {
         autofeml.setTimeoutForSingleSolutionEvaluation(30);
         autofeml.setTimeout(600, TimeUnit.SECONDS);
         autofeml.setNumCPUs(4);
-        System.out.println("Timeout:"+ autofeml.getTimeout().toString());
+        logger.info("Timeout: {}", autofeml.getTimeout());
 
-        System.out.println("Start building AutoFEML classifier...");
+        logger.info("Start building AutoFEML classifier...");
 
         autofeml.buildClassifier(trainTestSplit.get(0));
 
-        System.out.println("Solution: " + autofeml.getSelectedPipeline());
-        System.out.println("Internal score: " + autofeml.getInternalValidationErrorOfSelectedClassifier());
-        Assert.assertTrue(autofeml.getInternalValidationErrorOfSelectedClassifier() < 1);
+        logger.info("Solution: {}", autofeml.getSelectedPipeline());
+        logger.info("Internal score: {}", autofeml.getInternalValidationErrorOfSelectedClassifier());
     }
 }

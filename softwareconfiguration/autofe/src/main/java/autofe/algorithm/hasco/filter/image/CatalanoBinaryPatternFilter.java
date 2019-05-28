@@ -16,98 +16,84 @@ import autofe.util.ImageUtils;
 
 public class CatalanoBinaryPatternFilter extends AbstractCatalanoFilter<IBinaryPattern> {
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 9139886872471194592L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 9139886872471194592L;
 
-	public CatalanoBinaryPatternFilter(final String name) {
-		super(name);
-	}
+    public CatalanoBinaryPatternFilter(final String name) {
+        super(name);
+    }
 
-	@Override
-	public DataSet applyFilter(final DataSet inputData, final boolean copy) throws InterruptedException {
-		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
-				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
-			throw new IllegalArgumentException(
-					"Intermediate instances must have a rank of at least 2 for image processing.");
-		}
+    @Override
+    public DataSet applyFilter(final DataSet inputData, final boolean copy) throws InterruptedException {
+        ImageUtils.checkInputData(inputData);
 
-		// None filter
-		if (this.getCatalanoFilter() == null) {
-			if (copy) {
-				return inputData.copy();
-			} else {
-				return inputData;
-			}
-		}
+        // None filter
+        if (this.getCatalanoFilter() == null) {
+            prepareData(inputData, copy);
+        }
 
-		ColorSpace colorSpace = ImageUtils.determineColorSpace(inputData.getIntermediateInstances().get(0));
+        ColorSpace colorSpace = sampleColorSpace(inputData);
 
-		// Assume to deal with FastBitmap instances
-		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
-		for (INDArray inst : inputData.getIntermediateInstances()) {
-			if (Thread.currentThread().isInterrupted())
-				throw new InterruptedException("Thread got interrupted, thus, kill filter application.");
+        // Assume to deal with FastBitmap instances
+        List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
+        for (INDArray inst : inputData.getIntermediateInstances()) {
+            checkInterrupt();
 
-			FastBitmap bitmap = ImageUtils.matrixToFastBitmap(inst, colorSpace);
-			if (colorSpace != ColorSpace.Grayscale && this.isRequiresGrayscale()) {
-				bitmap.toGrayscale();
-			}
+            FastBitmap bitmap = ImageUtils.matrixToFastBitmap(inst, colorSpace);
+            if (colorSpace != ColorSpace.Grayscale && this.isRequiresGrayscale()) {
+                bitmap.toGrayscale();
+            }
 
-			ImageHistogram imageHistogram = this.getCatalanoFilter().ComputeFeatures(bitmap);
+            ImageHistogram imageHistogram = this.getCatalanoFilter().ComputeFeatures(bitmap);
 
-			INDArray result = ImageUtils.imageHistorgramToMatrix(imageHistogram);
-			transformedInstances.add(result);
-		}
+            INDArray result = ImageUtils.imageHistorgramToMatrix(imageHistogram);
+            transformedInstances.add(result);
+        }
 
-		return new DataSet(inputData.getInstances(), transformedInstances);
-	}
+        return new DataSet(inputData.getInstances(), transformedInstances);
+    }
 
-	public boolean isRequiresGrayscale() {
-		switch (this.getName()) {
-		/* Binary pattern */
-		case "NoneExtractor":
-			return false;
-		case "UniformLocalBinaryPattern":
-			return true;
-		case "RobustLocalBinaryPattern":
-			return true;
-		// case "ExtractNormalizedRGBChannel":
-		// return new CatalanoExtractFilter(new ExtractNormalizedRGBChannel(), false,
-		// true);
-		default:
-			return false;
-		}
-	}
+    public boolean isRequiresGrayscale() {
+        switch (this.getName()) {
+            /* Binary pattern */
+            case "NoneExtractor":
+                return false;
+            case "UniformLocalBinaryPattern":
+                return true;
+            case "RobustLocalBinaryPattern":
+                return true;
+            default:
+                return false;
+        }
+    }
 
-	public IBinaryPattern getCatalanoFilter() {
-		switch (this.getName()) {
-		/* Binary pattern */
-		case "NoneExtractor":
-			return null;
-		case "UniformLocalBinaryPattern":
-			return new UniformLocalBinaryPattern();
-		case "RobustLocalBinaryPattern":
-			return new RobustLocalBinaryPattern();
-		// case "ExtractNormalizedRGBChannel":
-		// return new CatalanoExtractFilter(new ExtractNormalizedRGBChannel(), false,
-		// true);
-		default:
-			return null;
-		}
-	}
+    public IBinaryPattern getCatalanoFilter() {
+        switch (this.getName()) {
+            /* Binary pattern */
+            case "NoneExtractor":
+                return null;
+            case "UniformLocalBinaryPattern":
+                return new UniformLocalBinaryPattern();
+            case "RobustLocalBinaryPattern":
+                return new RobustLocalBinaryPattern();
+            default:
+                return null;
+        }
+    }
 
-	@Override
-	public String toString() {
-		if (this.getCatalanoFilter() != null) {
-			return "CatalanoBinaryPatternFilter [catalanoFilter=" + this.getName() + "]";
-		} else
-			return "CatalanoBinaryPatternFilter (empty)";
-	}
+    @Override
+    public String toString() {
+        if (this.getCatalanoFilter() != null) {
+            return "CatalanoBinaryPatternFilter [catalanoFilter=" + this.getName() + "]";
+        } else {
+            return "CatalanoBinaryPatternFilter (empty)";
+        }
+    }
 
-	@Override
-	public CatalanoBinaryPatternFilter clone() throws CloneNotSupportedException {
-		return new CatalanoBinaryPatternFilter(this.getName());
-	}
+    @Override
+    public CatalanoBinaryPatternFilter clone() {
+        return new CatalanoBinaryPatternFilter(this.getName());
+    }
 }

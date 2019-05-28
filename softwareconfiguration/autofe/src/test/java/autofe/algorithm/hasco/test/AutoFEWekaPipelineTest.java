@@ -1,5 +1,7 @@
 package autofe.algorithm.hasco.test;
 
+import autofe.util.test.DataSetUtilsTest;
+import org.junit.Assert;
 import org.junit.Test;
 
 import autofe.algorithm.hasco.AutoFEWekaPipeline;
@@ -19,12 +21,13 @@ public class AutoFEWekaPipelineTest {
 
 		Graph<IFilter> graph = new Graph<>();
 		PretrainedNNFilter nnFilter = ImageUtils.getPretrainedNNFilterByName("VGG16", 5,
-				DataSetUtils.CIFAR10_INPUT_SHAPE);
+				DataSetUtilsTest.CIFAR10_INPUT_SHAPE);
 		graph.addItem(nnFilter);
 
 		FilterPipeline fp = new FilterPipeline(null, graph);
 
 		AutoFEWekaPipeline pipeline = new AutoFEWekaPipeline(fp, new RandomForest());
 		Classifier clonedClassifier = WekaUtil.cloneClassifier(pipeline);
+		Assert.assertNotNull(clonedClassifier);
 	}
 }

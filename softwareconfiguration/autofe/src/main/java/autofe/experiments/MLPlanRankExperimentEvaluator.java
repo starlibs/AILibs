@@ -26,8 +26,7 @@ public class MLPlanRankExperimentEvaluator implements IExperimentSetEvaluator {
 	private final IMLPlanRankConfig config = ConfigCache.getOrCreate(IMLPlanRankConfig.class);
 
 	private static final int MAX_PIPELINE_SIZE = 10;
-	private static final int DATASET_GENERATION_TIMEOUT = 600 * 1000; // 360 * 1000;
-	private static final int MLPLAN_TIMEOUT_S = 3600; // 3600;
+	private static final int MLPLAN_TIMEOUT_S = 3600;
 	private static final double MLPLAN_SPLIT_RATIO = 0.75;
 
 	@Override
@@ -43,7 +42,7 @@ public class MLPlanRankExperimentEvaluator implements IExperimentSetEvaluator {
 
 			String variation = description.get("variation");
 			String dataSet = description.get("dataset");
-			int seed = Integer.valueOf(description.get("seed"));
+			int seed = Integer.parseInt(description.get("seed"));
 
 			Map<String, Object> results = new HashMap<>();
 
@@ -54,7 +53,7 @@ public class MLPlanRankExperimentEvaluator implements IExperimentSetEvaluator {
 			if (dsInstances == null) {
 				// Create random
 				int dataSetID = DataSetUtils.getDataSetIDByName(dataSet);
-				List<Instances> dataSetVariations = HASCOFeatureEngineering.generateRandomDataSets(dataSetID, 1, MAX_PIPELINE_SIZE, DATASET_GENERATION_TIMEOUT, seed);
+				List<Instances> dataSetVariations = HASCOFeatureEngineering.generateRandomDataSets(dataSetID, 1, MAX_PIPELINE_SIZE);
 
 				if (dataSetVariations.size() != 1) {
 					throw new IllegalStateException("HASCOFE has not generated the expected amount of data set variations.");
@@ -67,7 +66,7 @@ public class MLPlanRankExperimentEvaluator implements IExperimentSetEvaluator {
 			}
 
 			int numCPUs = Runtime.getRuntime().availableProcessors();
-			double mlPlanScore = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT_S, dsInstances, MLPLAN_SPLIT_RATIO, seed, logger, false, numCPUs);
+			double mlPlanScore = EvaluationUtils.evaluateMLPlan(MLPLAN_TIMEOUT_S, dsInstances, MLPLAN_SPLIT_RATIO, seed, logger, numCPUs);
 
 			results.put("score", mlPlanScore);
 			processor.processResults(results);

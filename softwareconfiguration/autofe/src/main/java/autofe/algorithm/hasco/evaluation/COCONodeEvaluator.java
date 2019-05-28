@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.EvaluationUtils;
-import hasco.exceptions.ComponentInstantiationFailedException;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
@@ -31,38 +30,31 @@ public class COCONodeEvaluator extends AbstractHASCOFENodeEvaluator {
 
 	@Override
 	public Double f(final Node<TFDNode, ?> node) throws NodeEvaluationException  {
-		if (node.getParent() == null) {
+		if(hasNodeEmptyParent(node))
 			return null;
-		}
 
 		// If pipeline is too deep, assign worst value
-		if (node.path().size() > maxPipelineSize) {
+		if (hasPathExceededPipelineSize(node)) {
 			return MAX_EVAL_VALUE;
 		}
 
-		FilterPipeline pipe;
-		try {
-			pipe = getPipelineFromNode(node);
-		} catch (ComponentInstantiationFailedException e1) {
-			throw new NodeEvaluationException(e1, "Could not evaluate pipeline.");
-		}
+		FilterPipeline pipe = extractPipelineFromNode(node);
 		if (pipe != null && pipe.getFilters() != null) {
 			try {
-				logger.debug("Applying and evaluating pipeline " + pipe.toString());
+				logger.debug("Applying and evaluating pipeline {}.", pipe);
 				DataSet dataSet = pipe.applyFilter(data, true);
 
-				// TODO
 				// Get small batch
 				List<Instances> split = WekaUtil.getStratifiedSplit(dataSet.getInstances(), 42, 0.01d);
 				Instances insts = split.get(0);
 
 				double loss = (-1) * EvaluationUtils.calculateCOCOForBatch(insts);
 
-				logger.debug("COCO node evaluation score: " + loss);
+				logger.debug("COCO node evaluation score: {}", loss);
 				return loss;
 			} catch (Exception e) {
-				e.printStackTrace();
-				logger.warn("Could not evaluate pipeline. Reason: " + e.getMessage());
+				logger.warn("Got exception.", e);
+				logger.warn("Could not evaluate pipeline. Reason: {}", e.getMessage());
 				return null;
 			}
 		} else if (pipe == null) {

@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import jaicore.ml.core.exception.PredictionException;
+import jaicore.ml.core.exception.TrainingException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,106 +22,129 @@ import weka.core.Instances;
 
 public class AutoFEWekaPipeline implements IFEMLClassifier, Serializable, Cloneable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AutoFEWekaPipeline.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AutoFEWekaPipeline.class);
 
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1847043351230983666L;
+    private static final String EXCEPTION_MESSAGE = "Could not classify instances due to an exception.";
 
-	private FilterPipeline filterPipeline;
-	private Classifier mlPipeline;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1847043351230983666L;
 
-	public AutoFEWekaPipeline(final FilterPipeline filterPipeline, final Classifier mlPipeline) {
-		this.filterPipeline = filterPipeline;
-		this.mlPipeline = mlPipeline;
-	}
+    private FilterPipeline filterPipeline;
+    private transient Classifier mlPipeline;
 
-	@Override
-	public void buildClassifier(final Instances data) throws Exception {
-		this.mlPipeline.buildClassifier(data);
-	}
+    public AutoFEWekaPipeline(final FilterPipeline filterPipeline, final Classifier mlPipeline) {
+        this.filterPipeline = filterPipeline;
+        this.mlPipeline = mlPipeline;
+    }
 
-	@Override
-	public void buildClassifier(final DataSet data) throws Exception {
-		this.mlPipeline.buildClassifier(this.transformData(data));
-	}
+    @Override
+    public void buildClassifier(final Instances data) throws Exception {
+        this.mlPipeline.buildClassifier(data);
+    }
 
-	@Override
-	public double classifyInstance(final Instance instance) throws Exception {
-		return this.mlPipeline.classifyInstance(instance);
-	}
+    @Override
+    public void buildClassifier(final DataSet data) throws TrainingException {
+        try {
+            this.mlPipeline.buildClassifier(this.transformData(data));
+        } catch (Exception e) {
+            throw new TrainingException(EXCEPTION_MESSAGE, e);
+        }
+    }
 
-	@Override
-	public double classifyInstance(final INDArray instance, final Instances refInstances) throws Exception {
-		return this.classifyInstance(this.transformData(instance, refInstances));
-	}
+    @Override
+    public double classifyInstance(final Instance instance) throws PredictionException {
+        try {
+            return this.mlPipeline.classifyInstance(instance);
+        } catch (Exception e) {
+            throw new PredictionException(EXCEPTION_MESSAGE, e);
+        }
+    }
 
-	@Override
-	public double[] distributionForInstance(final Instance instance) throws Exception {
-		return this.mlPipeline.distributionForInstance(instance);
-	}
+    @Override
+    public double classifyInstance(final INDArray instance, final Instances refInstances) throws PredictionException {
+        try {
+            return this.classifyInstance(this.transformData(instance, refInstances));
+        } catch (Exception e) {
+            throw new PredictionException(EXCEPTION_MESSAGE, e);
+        }
+    }
 
-	@Override
-	public double[] distributionForInstance(final INDArray instance, final Instances refInstances) throws Exception {
-		return this.mlPipeline.distributionForInstance(this.transformData(instance, refInstances));
-	}
+    @Override
+    public double[] distributionForInstance(final Instance instance) throws PredictionException {
+        try {
+            return this.mlPipeline.distributionForInstance(instance);
+        } catch (Exception e) {
+            throw new PredictionException(EXCEPTION_MESSAGE, e);
+        }
+    }
 
-	@Override
-	public Capabilities getCapabilities() {
-		return this.mlPipeline.getCapabilities();
-	}
+    @Override
+    public double[] distributionForInstance(final INDArray instance, final Instances refInstances) throws PredictionException {
+        try {
+            return this.mlPipeline.distributionForInstance(this.transformData(instance, refInstances));
+        } catch (Exception e) {
+            throw new PredictionException(EXCEPTION_MESSAGE, e);
+        }
+    }
 
-	@Override
-	public Instances transformData(final DataSet data) throws InterruptedException {
-		DataSet intermediateData = data;
-		if (this.filterPipeline != null && this.filterPipeline.getFilters() != null
-				&& !this.filterPipeline.getFilters().isEmpty()) {
-			intermediateData = this.filterPipeline.applyFilter(intermediateData, true);
-		}
-		return DataSetUtils.matricesToInstances(intermediateData);
-	}
+    @Override
+    public Capabilities getCapabilities() {
+        return this.mlPipeline.getCapabilities();
+    }
 
-	@Override
-	public Instance transformData(final INDArray instance, final Instances refInstances) throws InterruptedException {
-		List<INDArray> data = new LinkedList<>();
-		data.add(instance);
-		Instances wekaData = this.transformData(new DataSet(refInstances, data));
-		return wekaData.get(0);
-	}
+    @Override
+    public Instances transformData(final DataSet data) throws InterruptedException {
+        DataSet intermediateData = data;
+        if (this.filterPipeline != null && this.filterPipeline.getFilters() != null
+                && !this.filterPipeline.getFilters().isEmpty()) {
+            intermediateData = this.filterPipeline.applyFilter(intermediateData, true);
+        }
+        return DataSetUtils.matricesToInstances(intermediateData);
+    }
 
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
+    @Override
+    public Instance transformData(final INDArray instance, final Instances refInstances) throws InterruptedException {
+        List<INDArray> data = new LinkedList<>();
+        data.add(instance);
+        Instances wekaData = this.transformData(new DataSet(refInstances, data));
+        return wekaData.get(0);
+    }
 
-		sb.append(this.filterPipeline);
-		sb.append("=>");
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
 
-		if (this.mlPipeline instanceof MLPipeline) {
-			sb.append(this.mlPipeline);
-		} else {
-			sb.append(WekaUtil.getClassifierDescriptor(this.mlPipeline));
-		}
+        sb.append(this.filterPipeline);
+        sb.append("=>");
 
-		return sb.toString();
-	}
+        if (this.mlPipeline instanceof MLPipeline) {
+            sb.append(this.mlPipeline);
+        } else {
+            sb.append(WekaUtil.getClassifierDescriptor(this.mlPipeline));
+        }
 
-	public FilterPipeline getFilterPipeline() {
-		return this.filterPipeline;
-	}
+        return sb.toString();
+    }
 
-	public Classifier getMLPipeline() {
-		return this.mlPipeline;
-	}
+    public FilterPipeline getFilterPipeline() {
+        return this.filterPipeline;
+    }
 
-	@Override
-	public AutoFEWekaPipeline clone() throws CloneNotSupportedException {
-		try {
-			return new AutoFEWekaPipeline(this.filterPipeline.clone(), WekaUtil.cloneClassifier(this.mlPipeline));
-		} catch (Exception e) {
-			LOGGER.error("Could not clone AutoFEWekaPipeline due to '" + e.getMessage()
-					+ "'. Returning null object instead.");
-			return null;
-		}
-	}
+    public Classifier getMLPipeline() {
+        return this.mlPipeline;
+    }
+
+    @Override
+    public AutoFEWekaPipeline clone() throws CloneNotSupportedException {
+        super.clone();
+        try {
+            return new AutoFEWekaPipeline(this.filterPipeline.clone(), WekaUtil.cloneClassifier(this.mlPipeline));
+        } catch (Exception e) {
+            LOGGER.error("Could not clone AutoFEWekaPipeline due to '" + e.getMessage()
+                    + "'. Returning null pipeline instead.");
+            return new AutoFEWekaPipeline(null, null);
+        }
+    }
 }

@@ -3,6 +3,7 @@ package autofe.algorithm.hasco.filter.meta.test;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
@@ -19,23 +20,13 @@ public class FilterPipelineTest {
 	public void testPipelineExecution() throws Exception {
 		Graph<IFilter> graph = new Graph<>();
 
-		// UnionFilter union = new UnionFilter();
-		// IdentityFilter ident = new IdentityFilter();
-		// CatalanoInPlaceFilter highBoost = new CatalanoInPlaceFilter("HighBoost");
 		CatalanoBinaryPatternFilter robustLocalBinPattern = new CatalanoBinaryPatternFilter("RobustLocalBinaryPattern");
 		CatalanoInPlaceFilter homogenityEdgeDetector = new CatalanoInPlaceFilter("HomogenityEdgeDetector");
 
-		// graph.addItem(union);
-		// graph.addItem(ident);
-		// graph.addItem(highBoost);
 		graph.addItem(robustLocalBinPattern);
 		graph.addItem(homogenityEdgeDetector);
 
-		// graph.addEdge(union, highBoost);
 		graph.addEdge(robustLocalBinPattern, homogenityEdgeDetector);
-		// graph.addEdge(ident, robustLocalBinPattern);
-
-		// graph.addEdge(highBoost, homogenityEdgeDetector);
 
 		FilterPipeline fp = new FilterPipeline(null, graph);
 
@@ -45,6 +36,8 @@ public class FilterPipelineTest {
 
 		DataSet transformedDataSet = fp.applyFilter(trainTestSplit.get(0), true);
 		FileUtils.saveSingleInstances(transformedDataSet.getInstances(), "generatedOutput_pipeline.arff");
+
+		Assert.assertFalse(transformedDataSet.getIntermediateInstances().isEmpty());
 
 		System.out.println("Transformed data set.");
 	}

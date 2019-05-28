@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.openml.apiconnector.io.OpenmlConnector;
@@ -106,13 +107,6 @@ public class CatalanoFilterTest {
 
 		DataSet transformedDataSet;
 		transformedDataSet = homogenityEdgeDetector.applyFilter(trainTestSplit.get(0), true);
-		transformedDataSet = robustLocalBinPattern.applyFilter(transformedDataSet, false);
-
-		// FileUtils.saveSingleInstances(transformedDataSet.getInstances(),
-		// "generatedOutput_sep.arff");
-
-		// FileUtils.saveSingleInstances(transformedDataSet.copy().getInstances(),
-		// "generatedOutput_sep_copy.arff");
 
 		System.out.println("Transformed data set.");
 	}
@@ -138,7 +132,7 @@ public class CatalanoFilterTest {
 		double[] arr = Arrays.stream(instString.substring(1, instString.length() - 1).split(",")).map(String::trim)
 				.mapToDouble(Double::parseDouble).toArray();
 
-		ArrayList<Attribute> atts = new ArrayList<Attribute>();
+		ArrayList<Attribute> atts = new ArrayList<>();
 		for (int i = 0; i < arr.length - 1; i++) {
 			atts.add(new Attribute("att" + i));
 		}
@@ -157,16 +151,6 @@ public class CatalanoFilterTest {
 		}
 
 		DataSet ds = new DataSet(batch, intermediate);
-
-		// CatalanoInPlaceFilter filter = new
-		// CatalanoInPlaceFilter("HomogenityEdgeDetector");
-		// DataSet transformedData = filter.applyFilter(ds, true);
-		// transformedData.updateInstances();
-		//
-		// CatalanoBinaryPatternFilter filter2 = new
-		// CatalanoBinaryPatternFilter("RobustLocalBinaryPattern");
-		// transformedData = filter2.applyFilter(transformedData, true);
-		// transformedData.updateInstances();
 
 		DataSet transformedData = fp.applyFilter(ds, true);
 
@@ -193,8 +177,9 @@ public class CatalanoFilterTest {
 						Arrays.asList(dataSet.getIntermediateInstances().get(1),
 								dataSet.getIntermediateInstances().get(0), dataSet.getIntermediateInstances().get(2))),
 				false);
-		System.out.println(result.getIntermediateInstances().get(0));
-		System.out.println(result.getIntermediateInstances().get(1));
-		System.out.println(result.getIntermediateInstances().get(2));
+		Assert.assertFalse(result.getIntermediateInstances().isEmpty());
+		logger.debug("Intermediate instance 0: {}", result.getIntermediateInstances().get(0));
+		logger.debug("Intermediate instance 1: {}", result.getIntermediateInstances().get(1));
+		logger.debug("Intermediate instance 2: {}", result.getIntermediateInstances().get(2));
 	}
 }

@@ -13,7 +13,7 @@ public interface IBenchmarkRankConfig extends IExperimentSetConfig {
 	public static final String BENCHMARKS = "benchmarks";
 	public static final String TIMEOUTS_IN_SECONDS = "timeouts";
 	public static final String SEEDS = "seeds";
-	public static final String datasetFolder = "datasetfolder";
+	public static final String DATASET_FOLDER = "datasetfolder";
 
 	@Key(DATASETS)
 	public List<String> getDatasets();
@@ -27,6 +27,6 @@ public interface IBenchmarkRankConfig extends IExperimentSetConfig {
 	@Key(SEEDS)
 	public List<String> getSeeds();
 
-	@Key(datasetFolder)
+	@Key(DATASET_FOLDER)
 	public String getDatasetFolder();
 }
