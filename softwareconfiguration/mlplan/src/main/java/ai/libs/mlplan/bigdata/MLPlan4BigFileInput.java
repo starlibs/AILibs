@@ -58,8 +58,8 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 
 	private File intermediateSizeDownsampledFile = new File("testrsc/sampled/intermediate/" + this.getInput().getName());
 	
-	private static final String serviceHost = "131.234.250.141";
-	private static final String servicePort = "80";
+	private String serviceHost;
+	private String servicePort;
 
 	private final int[] anchorpointsTraining = new int[] { 8, 16, 64, 128 };
 	private Map<Classifier, ComponentInstance> classifier2modelMap = new HashMap<>();
@@ -117,6 +117,10 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 			MLPlanWekaBuilder builder;
 			try {
 				builder = AbstractMLPlanBuilder.forWeka();
+				if (serviceHost == null)
+					throw new IllegalStateException("Service host has not been set, cannot create algorithm!");
+				if (servicePort == null)
+					throw new IllegalStateException("Service port has not been set, cannot create algorithm!");
 				builder.withLearningCurveExtrapolationEvaluation(this.anchorpointsTraining, new SimpleRandomSamplingFactory<>(), .7, new InversePowerLawExtrapolationMethod(serviceHost, servicePort));
 				builder.withNodeEvaluationTimeOut(new TimeOut(15, TimeUnit.MINUTES));
 				builder.withCandidateEvaluationTimeOut(new TimeOut(5, TimeUnit.MINUTES));
@@ -276,5 +280,21 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	@Override
 	public String getLoggerName() {
 		return this.logger.getName();
+	}
+
+	public String getServiceHost() {
+		return serviceHost;
+	}
+
+	public void setServiceHost(String serviceHost) {
+		this.serviceHost = serviceHost;
+	}
+
+	public String getServicePort() {
+		return servicePort;
+	}
+
+	public void setServicePort(String servicePort) {
+		this.servicePort = servicePort;
 	}
 }
