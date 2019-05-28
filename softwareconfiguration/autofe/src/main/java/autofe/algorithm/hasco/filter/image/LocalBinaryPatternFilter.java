@@ -20,24 +20,19 @@ public class LocalBinaryPatternFilter implements IFilter, Serializable {
 	 */
 	private static final long serialVersionUID = 924262565754950582L;
 
-	private LocalBinaryPattern lbp = new LocalBinaryPattern();
+	private transient LocalBinaryPattern lbp = new LocalBinaryPattern();
 
 	@Override
 	public DataSet applyFilter(final DataSet inputData, final boolean copy) throws InterruptedException {
 
-		if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().size() == 0
-				|| inputData.getIntermediateInstances().get(0).rank() < 2) {
-			throw new IllegalArgumentException(
-					"Intermediate instances must have a rank of at least 2 for image processing.");
-		}
+		ImageUtils.checkInputData(inputData);
 
-		ColorSpace colorSpace = ImageUtils.determineColorSpace(inputData.getIntermediateInstances().get(0));
+		ColorSpace colorSpace = AbstractCatalanoFilter.sampleColorSpace(inputData);
 
 		// Assume to deal with FastBitmap instances
 		List<INDArray> transformedInstances = new ArrayList<>(inputData.getIntermediateInstances().size());
 		for (INDArray inst : inputData.getIntermediateInstances()) {
-			if (Thread.currentThread().isInterrupted())
-				throw new InterruptedException("Thread got interrupted, thus, kill filter application.");
+			AbstractCatalanoFilter.checkInterrupt();
 
 			FastBitmap bitmap = ImageUtils.matrixToFastBitmap(inst, colorSpace);
 			if (colorSpace != ColorSpace.Grayscale) {
@@ -59,6 +54,7 @@ public class LocalBinaryPatternFilter implements IFilter, Serializable {
 
 	@Override
 	public LocalBinaryPatternFilter clone() throws CloneNotSupportedException {
+		super.clone();
 		return new LocalBinaryPatternFilter();
 	}
 

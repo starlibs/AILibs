@@ -1,13 +1,15 @@
 package autofe.algorithm.hasco.evaluation;
 
-import java.sql.SQLException;
-
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import jaicore.basic.IObjectEvaluator;
 import jaicore.basic.SQLAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEvaluator
 		implements IObjectEvaluator<FilterPipeline, Double> {
+
+	private Logger logger = LoggerFactory.getLogger(AbstractHASCOFEObjectEvaluator.class);
 
 	private SQLAdapter adapter;
 	private int experimentID;
@@ -37,20 +39,8 @@ public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEval
 		this.evalTable = evalTable;
 	}
 
-	protected void storeResult(final FilterPipeline pipe, final Double score, final long timeToCompute)
-			throws SQLException {
-		// Map<String, Object> data = new HashMap<>();
-		// data.put("run_id", this.experimentID);
-		// if (!score.toString().equals("NaN")) {
-		// data.put("errorRate", score);
-		// } else {
-		// data.put("errorRate", -1);
-		// }
-		// data.put("preprocessor", pipe.toString());
-		// data.put("classifier", "-");
-		// data.put("time_train", (int) timeToCompute);
-		// data.put("time_predict", -1);
-		// this.adapter.insert(this.evalTable, data);
+	protected void storeResult(final FilterPipeline pipe, final Double score, final long timeToCompute) {
+		logger.debug("Currently, the result for the given {} with pipe {} (time to compute: {}) is not stored.", pipe, score, timeToCompute);
 	}
 
 }

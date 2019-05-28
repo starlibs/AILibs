@@ -35,7 +35,6 @@ public class RankingExperimentEvaluator implements IExperimentSetEvaluator {
 
 		Map<String, Object> results = new HashMap<>();
 
-		// int seed = Integer.valueOf(description.get("seed"));
 		String dataSet = description.get("dataset");
 
 		// Load data set

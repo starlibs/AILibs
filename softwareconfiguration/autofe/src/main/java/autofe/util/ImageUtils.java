@@ -80,9 +80,9 @@ public final class ImageUtils {
     }
 
     public static INDArray fastBitmapToMatrix(final FastBitmap bitmap, final ColorSpace colorSpace) {
-        INDArray result = null;
+        INDArray result;
 
-        double[][][] bitmapMatrix = null;
+        double[][][] bitmapMatrix;
 
         switch (colorSpace) {
             case Grayscale:
@@ -284,8 +284,7 @@ public final class ImageUtils {
      */
     public static MultiLayerNetwork getMaxPoolNetwork() {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0).list()
-                .layer(0, new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX).build()).pretrain(false)
-                .build();
+                .layer(0, new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX).build()).build();
         MultiLayerNetwork mln = new MultiLayerNetwork(conf);
         mln.init();
         return mln;
@@ -299,13 +298,13 @@ public final class ImageUtils {
      * @param stride     Stride of the max pooling layer
      * @return Returns the constructed and initialized network
      */
-    public static MultiLayerNetwork getMaxPoolNetworkSymmetricWithCustomKernelStride(final int kernelSize,
+    static MultiLayerNetwork getMaxPoolNetworkSymmetricWithCustomKernelStride(final int kernelSize,
                                                                                      final int stride) {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().seed(0).list()
                 .layer(0,
                         new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
                                 .kernelSize(kernelSize, kernelSize).stride(stride, stride).build())
-                .pretrain(false).build();
+                .build();
         MultiLayerNetwork mln = new MultiLayerNetwork(conf);
         mln.init();
         return mln;
@@ -321,5 +320,13 @@ public final class ImageUtils {
      */
     public static INDArray applyMLNToMatrix(final INDArray matrix, final MultiLayerNetwork mln) {
         return mln.output(matrix);
+    }
+
+    public static void checkInputData(final DataSet inputData) {
+        if (inputData.getIntermediateInstances() == null || inputData.getIntermediateInstances().isEmpty()
+                || inputData.getIntermediateInstances().get(0).rank() < 2) {
+            throw new IllegalArgumentException(
+                    "Intermediate instances must have a rank of at least 2 for image processing.");
+        }
     }
 }

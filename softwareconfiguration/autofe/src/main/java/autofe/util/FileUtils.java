@@ -31,43 +31,6 @@ public final class FileUtils {
         // Utility class
     }
 
-    public static void createDirIfNotExists(final String path) throws IOException {
-        File file = new File(path);
-        if (!file.exists()) {
-            file.mkdirs();
-            file.createNewFile();
-        }
-    }
-
-    public static boolean checkIfFilesWithPrefixExist(final String dirPath, final String prefix) {
-        File file = new File(dirPath);
-        if (file.isDirectory()) {
-            for (String filePath : file.list()) {
-                File tmpFile = new File(filePath);
-                if (tmpFile.getName().startsWith(prefix))
-                    return true;
-
-            }
-            return false;
-        }
-        throw new IllegalArgumentException("Parameter 'dirPath' must specify an existing directory.");
-    }
-
-    public static void saveInstances(final List<Instances> dataSets, final String dirPath, final String dataSetPrefix)
-            throws Exception {
-        for (int i = 0; i < dataSets.size(); i++) {
-            logger.debug("Saving instances with {} instances and {} attributes.", dataSets.get(i).numInstances(),
-                    dataSets.get(i).numAttributes());
-
-            ArffSaver saver = new ArffSaver();
-            saver.setInstances(dataSets.get(i));
-            File destFile = new File(dirPath + File.separator + dataSetPrefix + i + ".arff");
-            saver.setFile(destFile);
-
-            saver.writeBatch();
-        }
-    }
-
     public static void saveSingleInstances(final Instances dataSet, final String filePath)
             throws IOException {
         ArffSaver saver = new ArffSaver();

@@ -9,25 +9,25 @@ import autofe.util.EvaluationUtils;
 import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 
 public class EnsembleObjectEvaluator extends AbstractHASCOFEObjectEvaluator {
-	private static final Logger logger = LoggerFactory.getLogger(EnsembleObjectEvaluator.class);
+    private static final Logger logger = LoggerFactory.getLogger(EnsembleObjectEvaluator.class);
 
-	@Override
-	public Double evaluate(final FilterPipeline pipeline) throws InterruptedException, ObjectEvaluationFailedException {
-		logger.info("Applying and evaluating pipeline " + pipeline.toString());
-		long startTimestamp = System.currentTimeMillis();
-		DataSet dataSet = pipeline.applyFilter(data, false);
+    @Override
+    public Double evaluate(final FilterPipeline pipeline) throws InterruptedException, ObjectEvaluationFailedException {
+        logger.info("Applying and evaluating pipeline {}", pipeline);
+        long startTimestamp = System.currentTimeMillis();
+        DataSet dataSet = pipeline.applyFilter(data, false);
 
-		logger.debug("Applied pipeline. Starting benchmarking...");
-		try {
-			double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
-			double finalScore = ensembleScore - ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(data.getInstances());
+        logger.debug("Applied pipeline. Starting benchmarking...");
+        try {
+            double ensembleScore = EvaluationUtils.performEnsemble(dataSet.getInstances());
+            double finalScore = ensembleScore - ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(data.getInstances());
 
-			logger.debug("Ensemble benchmark result: " + finalScore);
+            logger.debug("Ensemble benchmark result: {}", finalScore);
 
-			storeResult(pipeline, finalScore, (System.currentTimeMillis() - startTimestamp));
-			return 1 - finalScore;
-		} catch (Exception e) {
-			throw new ObjectEvaluationFailedException("Could not evaluate ensemble.", e);
-		}
-	}
+            storeResult(pipeline, finalScore, (System.currentTimeMillis() - startTimestamp));
+            return 1 - finalScore;
+        } catch (Exception e) {
+            throw new ObjectEvaluationFailedException("Could not evaluate ensemble.", e);
+        }
+    }
 }

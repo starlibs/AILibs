@@ -3,7 +3,6 @@ package autofe.algorithm.hasco.evaluation;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,15 +16,10 @@ import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import weka.classifiers.Classifier;
-import weka.core.Instances;
 
 public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipeline, Double> {
 	private static final Logger logger = LoggerFactory.getLogger(AutoFEMLMCCVBenchmark.class);
 
-	private final DataSet data;
-	private final Random rand;
-	private final int repeats;
-	private final double trainingPortion;
 	private final IObjectEvaluator<Classifier, Double> internalEvaluator;
 
 	private SQLAdapter adapter;
@@ -57,19 +51,14 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 	}
 
 	public AutoFEMLMCCVBenchmark(final DataSet data, final long seed, final int repeats, final double trainingPortion) {
-		this.data = data;
-		rand = new Random(seed);
-		this.repeats = repeats;
-		this.trainingPortion = trainingPortion;
 		internalEvaluator = new MonteCarloCrossValidationEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), repeats, data.getInstances(), trainingPortion, seed);
 	}
 
 	@Override
 	public Double evaluate(final AutoFEWekaPipeline object) throws InterruptedException, ObjectEvaluationFailedException {
 		long startTimestamp = System.currentTimeMillis();
-		Instances wekaInstances = object.transformData(data);
 		Double evalScore = internalEvaluator.evaluate(object);
-		logger.info("Eval score of AUtoFEWekaPipeline " + object.toString() + " was " + evalScore);
+		logger.info("Eval score of AutoFEWekaPipeline {} was {}.", object, evalScore);
 
 		if (!evalScore.toString().equals("NaN")) {
 			try {
@@ -82,14 +71,14 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 	}
 
 	protected void storeResult(final AutoFEWekaPipeline pipe, final Double score, final long timeToCompute) throws SQLException {
-		Map<String, Object> data = new HashMap<>();
-		data.put("run_id", experimentID);
-		data.put("errorRate", score);
-		data.put("preprocessor", pipe.getFilterPipeline().toString());
-		data.put("classifier", pipe.getMLPipeline().toString());
-		data.put("time_train", (int) timeToCompute);
-		data.put("time_predict", -1);
-		adapter.insert(evalTable, data);
+		Map<String, Object> resultData = new HashMap<>();
+		resultData.put("run_id", experimentID);
+		resultData.put("errorRate", score);
+		resultData.put("preprocessor", pipe.getFilterPipeline().toString());
+		resultData.put("classifier", pipe.getMLPipeline().toString());
+		resultData.put("time_train", (int) timeToCompute);
+		resultData.put("time_predict", -1);
+		adapter.insert(evalTable, resultData);
 	}
 
 }

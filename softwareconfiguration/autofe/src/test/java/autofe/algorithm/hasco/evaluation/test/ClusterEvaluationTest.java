@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
@@ -24,103 +25,71 @@ import weka.filters.unsupervised.attribute.Remove;
 
 public class ClusterEvaluationTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(ClusterEvaluationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClusterEvaluationTest.class);
 
-	// @Test
-	public void evaluateTest() throws Exception {
-		logger.info("Starting cluster evaluation test...");
+    @Test
+    public void evaluateTest() throws Exception {
+        logger.info("Starting cluster evaluation test...");
 
-		/* load dataset and create a train-test-split */
-		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
-		File file = ds.getDataset(DataSetUtils.API_KEY);
-		Instances data = new Instances(new BufferedReader(new FileReader(file)));
-		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .25f);
+        /* load dataset and create a train-test-split */
+        OpenmlConnector connector = new OpenmlConnector();
+        DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
+        File file = ds.getDataset(DataSetUtils.API_KEY);
+        Instances data = new Instances(new BufferedReader(new FileReader(file)));
+        data.setClassIndex(data.numAttributes() - 1);
+        List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .25f);
 
-		Instances insts = split.get(0);
+        Instances insts = split.get(0);
 
-		long timeStart = System.currentTimeMillis();
+        long timeStart = System.currentTimeMillis();
 
-		FilteredClusterer clusterer = new FilteredClusterer();
+        FilteredClusterer clusterer = new FilteredClusterer();
 
-		Remove filter = new Remove();
-		filter.setAttributeIndices("" + (insts.classIndex() + 1));
-		filter.setInputFormat(insts);
-		Instances removedClassInstances = Filter.useFilter(insts, filter);
+        Remove filter = new Remove();
+        filter.setAttributeIndices("" + (insts.classIndex() + 1));
+        filter.setInputFormat(insts);
+        Instances removedClassInstances = Filter.useFilter(insts, filter);
 
-		((SimpleKMeans) clusterer.getClusterer())
-		.setOptions(new String[] { "-num-slots", String.valueOf(Runtime.getRuntime().availableProcessors()),
-				"-N", String.valueOf(insts.classAttribute().numValues()) });
-		// ((SimpleKMeans)
-		// clusterer.getClusterer()).setNumClusters(insts.classAttribute().numValues());
-		// ((weka.core.EuclideanDistance) ((SimpleKMeans)
-		// clusterer.getClusterer()).getDistanceFunction())
-		// .setDontNormalize(true);
-		SimpleKMeans kMeans = (SimpleKMeans) clusterer.getClusterer();
-		// kMeans.setDistanceFunction(new weka.core.ManhattanDistance());
-		kMeans.setDistanceFunction(new EuclideanDistance());
+        ((SimpleKMeans) clusterer.getClusterer())
+                .setOptions(new String[]{"-num-slots", String.valueOf(Runtime.getRuntime().availableProcessors()),
+                        "-N", String.valueOf(insts.classAttribute().numValues())});
+        SimpleKMeans kMeans = (SimpleKMeans) clusterer.getClusterer();
+        kMeans.setDistanceFunction(new EuclideanDistance());
 
-		// DBSCAN dbScan = new DBSCAN();
-		// dbScan.setEpsilon(1);
-		// dbScan.setMinPoints(5);
-		// clusterer.setClusterer(dbScan);
+        clusterer.buildClusterer(removedClassInstances);
 
-		// EM em = new EM();
-		// em.setNumClusters(insts.classAttribute().numValues());
-		// clusterer.setClusterer(em);
+        long timeStartEval = System.currentTimeMillis();
 
-		/* Kernel */
-		// TODO: Kernel
-		// Nystroem kernelFilter = new Nystroem();
-		// TODO: Initialize kernel? (using data, cache size 250007, gamma 0.01)? =>
-		// Defaults
-		// Kernel kernel = new PolyKernel(insts, 250007, 3, false);
-		// Kernel kernel = new RBFKernel(insts, 250007, 0.1);
-		// Kernel kernel = new RBFKernel();
-		// kernel.buildKernel(insts);
-		//
-		// kernelFilter.setKernel(kernel); // insts, 250007,
-		// 0.01 new RBFKernel(insts, 250007, 0.01)
-		// clusterer.setFilter(kernelFilter);
+        ClusterEvaluation clusterEval = new ClusterEvaluation();
+        clusterEval.setClusterer(clusterer);
+        clusterEval.evaluateClusterer(insts);
 
-		clusterer.buildClusterer(removedClassInstances);
+        long timeTaken = System.currentTimeMillis() - timeStart;
+        long timeTakenEval = System.currentTimeMillis() - timeStartEval;
 
-		long timeStartEval = System.currentTimeMillis();
+        logger.debug("ClusterEvaluator results: " + clusterEval.clusterResultsToString());
 
-		ClusterEvaluation clusterEval = new ClusterEvaluation();
-		clusterEval.setClusterer(clusterer);
-		clusterEval.evaluateClusterer(insts);
+        double acc = EvaluationUtils.predictAccuracy(insts, clusterEval.getClassesToClusters(),
+                clusterEval.getClusterAssignments());
+        Assert.assertTrue(acc > 0);
+        logger.info("Acc: " + acc);
+        logger.debug("Clustering took " + (timeTaken / 1000) + " s.");
+        logger.debug("Clustering eval took " + (timeTakenEval / 1000) + " s.");
+    }
 
-		long timeTaken = System.currentTimeMillis() - timeStart;
-		long timeTakenEval = System.currentTimeMillis() - timeStartEval;
+    @Test
+    public void kernelClusteringTest() throws Exception {
+        logger.info("Starting cluster evaluation test...");
 
-		logger.debug("ClusterEvaluator results: " + clusterEval.clusterResultsToString());
-		// logger.info("Log likelihood:" + clusterEval.getLogLikelihood());
-		// logger.info(Arrays.toString(clusterEval.getClassesToClusters()));
-		// logger.info(Arrays.toString(clusterEval.getClusterAssignments()));
+        /* load dataset and create a train-test-split */
+        OpenmlConnector connector = new OpenmlConnector();
+        DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
+        File file = ds.getDataset(DataSetUtils.API_KEY);
+        Instances data = new Instances(new BufferedReader(new FileReader(file)));
+        data.setClassIndex(data.numAttributes() - 1);
+        List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .05f);
 
-		double acc = EvaluationUtils.predictAccuracy(insts, clusterEval.getClassesToClusters(),
-				clusterEval.getClusterAssignments());
-		logger.debug("Acc: " + acc);
-		logger.debug("Clustering took " + (timeTaken / 1000) + " s.");
-		logger.debug("Clustering eval took " + (timeTakenEval / 1000) + " s.");
-	}
-
-	@Test
-	public void kernelClusteringTest() throws Exception {
-		logger.info("Starting cluster evaluation test...");
-
-		/* load dataset and create a train-test-split */
-		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
-		File file = ds.getDataset(DataSetUtils.API_KEY);
-		Instances data = new Instances(new BufferedReader(new FileReader(file)));
-		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .05f);
-
-		Instances insts = split.get(0);
-
-		System.out.println(EvaluationUtils.performKernelClustering(insts, 1));
-	}
+        Instances insts = split.get(0);
+        Assert.assertTrue(EvaluationUtils.performKernelClustering(insts, 1) > 0);
+    }
 }

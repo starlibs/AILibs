@@ -34,6 +34,7 @@ public class IdentityFilter implements IFilter, Serializable {
 
 	@Override
 	public IdentityFilter clone() throws CloneNotSupportedException {
+		super.clone();
 		return new IdentityFilter();
 	}
 }

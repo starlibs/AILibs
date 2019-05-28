@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
@@ -20,99 +22,81 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Nystroem;
 
 public class LDAEvaluationTest {
-	private static final Logger logger = LoggerFactory.getLogger(LDAEvaluationTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(LDAEvaluationTest.class);
 
-	// @Test
-	public void evaluateTest() throws Exception {
-		logger.info("Starting LDA evaluation test...");
+    @Test
+    public void evaluateTest() throws Exception {
+        logger.info("Starting LDA evaluation test...");
 
-		/* load dataset and create a train-test-split */
-		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(DataSetUtils.CIFAR10_ID);
-		File file = ds.getDataset(DataSetUtils.API_KEY);
-		Instances data = new Instances(new BufferedReader(new FileReader(file)));
-		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, 42, .05f);
-		// logger.info("Calculating intermediates...");
-		// List<INDArray> intermediate = new ArrayList<>();
-		// for (Instance inst : split.get(0)) {
-		// // intermediate.add(DataSetUtils.cifar10InstanceToBitmap(inst));
-		// intermediate.add(DataSetUtils.cifar10InstanceToMatrix(inst));
-		// }
-		// logger.info("Finished intermediate calculations.");
+        /* load dataset and create a train-test-split */
+        OpenmlConnector connector = new OpenmlConnector();
+        DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
+        File file = ds.getDataset(DataSetUtils.API_KEY);
+        Instances data = new Instances(new BufferedReader(new FileReader(file)));
+        data.setClassIndex(data.numAttributes() - 1);
+        List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, 42, .05f);
 
-		Instances insts = dataSplit.get(0);
-		List<Instances> split = WekaUtil.getStratifiedSplit(insts, 42, .7f);
+        Instances insts = dataSplit.get(0);
+        List<Instances> split = WekaUtil.getStratifiedSplit(insts, 42, .7f);
 
-		long timeStart = System.currentTimeMillis();
+        long timeStart = System.currentTimeMillis();
 
-		LDA lda = new LDA();
-		lda.buildClassifier(split.get(0));
+        LDA lda = new LDA();
+        lda.buildClassifier(split.get(0));
 
-		long timeStartEval = System.currentTimeMillis();
+        long timeStartEval = System.currentTimeMillis();
 
-		Evaluation eval = new Evaluation(split.get(0));
-		eval.evaluateModel(lda, split.get(1));
-		logger.debug("LDA pct correct: " + eval.pctCorrect());
+        Evaluation eval = new Evaluation(split.get(0));
+        eval.evaluateModel(lda, split.get(1));
+        logger.debug("LDA pct correct: " + eval.pctCorrect());
+        Assert.assertTrue(eval.pctCorrect() > 0);
 
-		long timeTaken = System.currentTimeMillis() - timeStart;
-		long timeTakenEval = System.currentTimeMillis() - timeStartEval;
+        long timeTaken = System.currentTimeMillis() - timeStart;
+        long timeTakenEval = System.currentTimeMillis() - timeStartEval;
 
-		logger.debug("LDA took " + (timeTaken / 1000) + " s.");
-		logger.debug("LDA eval took " + (timeTakenEval / 1000) + " s.");
-	}
+        logger.debug("LDA took " + (timeTaken / 1000) + " s.");
+        logger.debug("LDA eval took " + (timeTakenEval / 1000) + " s.");
+    }
 
-	// @Test
-	public void evaluateKernelLDA() throws Exception {
-		logger.info("Starting LDA evaluation test...");
+    @Test
+    public void evaluateKernelLDA() throws Exception {
+        logger.info("Starting LDA evaluation test...");
 
-		/* load dataset and create a train-test-split */
-		OpenmlConnector connector = new OpenmlConnector();
-		DataSetDescription ds = connector.dataGet(DataSetUtils.MNIST_ID);
-		File file = ds.getDataset(DataSetUtils.API_KEY);
-		Instances data = new Instances(new BufferedReader(new FileReader(file)));
-		data.setClassIndex(data.numAttributes() - 1);
-		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, 42, .05f);
-		// logger.info("Calculating intermediates...");
-		// List<INDArray> intermediate = new ArrayList<>();
-		// for (Instance inst : split.get(0)) {
-		// // intermediate.add(DataSetUtils.cifar10InstanceToBitmap(inst));
-		// intermediate.add(DataSetUtils.cifar10InstanceToMatrix(inst));
-		// }
-		// logger.info("Finished intermediate calculations.");
+        /* load dataset and create a train-test-split */
+        OpenmlConnector connector = new OpenmlConnector();
+        DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
+        File file = ds.getDataset(DataSetUtils.API_KEY);
+        Instances data = new Instances(new BufferedReader(new FileReader(file)));
+        data.setClassIndex(data.numAttributes() - 1);
+        List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, 42, .05f);
 
-		Instances insts = dataSplit.get(0);
-		List<Instances> split = WekaUtil.getStratifiedSplit(insts, 42, .7f);
-		Instances newInsts = split.get(0);
-		Instances evalInsts = split.get(1);
+        Instances insts = dataSplit.get(0);
+        List<Instances> split = WekaUtil.getStratifiedSplit(insts, 42, .7f);
+        Instances newInsts = split.get(0);
+        Instances evalInsts = split.get(1);
 
-		long timeStart = System.currentTimeMillis();
+        long timeStart = System.currentTimeMillis();
 
-		Nystroem kernelFilter = new Nystroem();
-		kernelFilter.setInputFormat(newInsts);
-		// // Initialize kernel? (using data, cache size 250007, gamma 0.01)? =>
-		// // Defaults
-		//
-		kernelFilter.setKernel(new RBFKernel(newInsts, 250007, 0.01));
-		// kernelFilter.setKernel(new PolyKernel(newInsts, 250007, 2, false));
-		newInsts = Filter.useFilter(newInsts, kernelFilter);
-		// evalInsts = Filter.useFilter(evalInsts, kernelFilter);
+        Nystroem kernelFilter = new Nystroem();
+        kernelFilter.setInputFormat(newInsts);
+        kernelFilter.setKernel(new RBFKernel(newInsts, 250007, 0.01));
+        newInsts = Filter.useFilter(newInsts, kernelFilter);
 
-		LDA lda = new LDA();
-		// FLDA flda = new FLDA();
+        LDA lda = new LDA();
 
-		lda.buildClassifier(newInsts);
+        lda.buildClassifier(newInsts);
 
-		long timeStartEval = System.currentTimeMillis();
+        long timeStartEval = System.currentTimeMillis();
 
-		Evaluation eval = new Evaluation(newInsts);
-		eval.evaluateModel(lda, evalInsts);
-		logger.debug("LDA pct correct: " + eval.pctCorrect());
+        Evaluation eval = new Evaluation(newInsts);
+        eval.evaluateModel(lda, evalInsts);
+        logger.debug("LDA pct correct: " + eval.pctCorrect());
+        Assert.assertTrue(eval.pctCorrect() > 0);
 
-		long timeTaken = System.currentTimeMillis() - timeStart;
-		long timeTakenEval = System.currentTimeMillis() - timeStartEval;
+        long timeTaken = System.currentTimeMillis() - timeStart;
+        long timeTakenEval = System.currentTimeMillis() - timeStartEval;
 
-		logger.debug("LDA took " + (timeTaken / 1000) + " s.");
-		logger.debug("LDA eval took " + (timeTakenEval / 1000) + " s.");
-	}
+        logger.debug("LDA took " + (timeTaken / 1000) + " s.");
+        logger.debug("LDA eval took " + (timeTakenEval / 1000) + " s.");
+    }
 }

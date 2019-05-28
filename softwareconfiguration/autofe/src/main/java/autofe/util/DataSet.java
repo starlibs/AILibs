@@ -52,7 +52,7 @@ public class DataSet {
 	}
 
 	public void updateInstances() {
-		if (this.intermediateInstances != null) {
+		if (this.intermediateInstances != null && !this.intermediateInstances.isEmpty()) {
 			this.instances = DataSetUtils.matricesToInstances(this.intermediateInstances, this.instances);
 		} else {
 			logger.debug("Could not update any instance due to lack of intermediate instances.");

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import autofe.util.test.DataSetUtilsTest;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.Test;
 
@@ -21,7 +22,7 @@ public class HASCOFeatureEngineeringTest {
 	public void hascoImageFETest() throws Exception {
 
 		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.FASHION_MNIST_ID);
-		long[] shape = DataSetUtils.FASHION_MNIST_SHAPE;
+		long[] shape = DataSetUtilsTest.FASHION_MNIST_SHAPE;
 
 		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(42), .7);
 
@@ -43,7 +44,7 @@ public class HASCOFeatureEngineeringTest {
 
 		// TODO
 		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.SEGMENT_ID);
-		long[] shape = DataSetUtils.SEGMENT_INPUT_SHAPE;
+		long[] shape = DataSetUtilsTest.SEGMENT_INPUT_SHAPE;
 
 		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
 
