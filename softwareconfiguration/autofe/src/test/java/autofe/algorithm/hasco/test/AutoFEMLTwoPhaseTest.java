@@ -21,13 +21,11 @@ public class AutoFEMLTwoPhaseTest {
 
 		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(42), .7);
 
-		// long[] shape = DataSetUtils.FASHION_MNIST_SHAPE;
-
 		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
 
-		TimeOut autofeTO = new TimeOut(300, TimeUnit.SECONDS);
-		TimeOut mlplanTO = new TimeOut(300, TimeUnit.SECONDS);
-		TimeOut evalTimeout = new TimeOut(300, TimeUnit.SECONDS);
+		TimeOut autofeTO = new TimeOut(60, TimeUnit.SECONDS);
+		TimeOut mlplanTO = new TimeOut(60, TimeUnit.SECONDS);
+		TimeOut evalTimeout = new TimeOut(60, TimeUnit.SECONDS);
 
 		AutoFEMLTwoPhase autofeml = new AutoFEMLTwoPhase(config, 4, "coco", 0.01, 5, 200, 42, autofeTO, mlplanTO,
 				evalTimeout, 5);
