@@ -15,9 +15,6 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.eventbus.EventBus;
-import com.google.common.eventbus.Subscribe;
-
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
@@ -43,7 +40,6 @@ import jaicore.basic.algorithm.IAlgorithmConfig;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.WekaUtil;
@@ -80,7 +76,6 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
     private final Collection<Component> components;
     private final FilterPipelineFactory factory;
     private FilterPipeline selectedPipeline;
-    private final EventBus eventBus = new EventBus();
     private OptimizingFactory<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
     private AlgorithmState state = AlgorithmState.created;
     private DataSet data = null;
@@ -139,7 +134,8 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
         }
 
         /* Subsample dataset to reduce computational effort. */
-        logger.info("Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...", config.subsamplingRatio(), config.minInstances(), data.getInstances().numInstances(),
+        logger.info("Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...",
+                config.subsamplingRatio(), config.minInstances(), data.getInstances().numInstances(),
                 data.getInstances().numAttributes());
         DataSet dataForFE = DataSetUtils.subsample(data, config.subsamplingRatio(), config.minInstances(), new Random(config.randomSeed()));
         logger.info("Finished subsampling.");
@@ -164,15 +160,18 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
         }
 
         /* configure and start optimizing factory */
-        OptimizingFactoryProblem<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(factory, problem);
+        OptimizingFactoryProblem<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactoryProblem =
+                new OptimizingFactoryProblem<>(factory, problem);
         OnePhaseHASCOFactory hascoFactory = new OnePhaseHASCOFactory(config);
-
+        hascoFactory.withAlgorithmConfig(config);
         hascoFactory.setProblemInput(problem);
 
         hascoFactory.setSearchProblemTransformer(
-                new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(nodeEvaluator, null, config.randomSeed(), config.numberOfRandomCompletions(), config.timeoutForCandidateEvaluation(), config.timeoutForNodeEvaluation()));
+                new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(nodeEvaluator,
+                        null, config.randomSeed(), config.numberOfRandomCompletions(),
+                        config.timeoutForCandidateEvaluation(), config.timeoutForNodeEvaluation()));
 
-        optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, null);
+        optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
         optimizingFactory.setLoggerName(loggerName + ".2phasehasco");
         optimizingFactory.setTimeout(config.timeout(), TimeUnit.SECONDS);
         optimizingFactory.registerListener(this);
@@ -191,7 +190,8 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
         internalValidationErrorOfSelectedClassifier = optimizingFactory.getPerformanceOfObject();
         long startBuildTime = System.currentTimeMillis();
         long endBuildTime = System.currentTimeMillis();
-        logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
+        logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms",
+                endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
         state = AlgorithmState.inactive;
         return new AlgorithmFinishedEvent(getId());
     }
@@ -298,21 +298,6 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
         throw new UnsupportedOperationException();
     }
 
-    @Subscribe
-    public void receiveSolutionEvent(final SolutionCandidateFoundEvent<HASCOSolutionCandidate<Double>> event) {
-        HASCOSolutionCandidate<Double> solution = event.getSolutionCandidate();
-        try {
-            logger.debug("Received new solution {} with score {} and evaluation time {}ms", factory.getComponentInstantiation(solution.getComponentInstance()), solution.getScore(), solution.getTimeToEvaluateCandidate());
-        } catch (Exception e) {
-            logger.warn("Got exception due solution candidate evaluation.", e);
-        }
-        eventBus.post(event);
-    }
-
-    public void registerListenerForSolutionEvaluations(final Object listener) {
-        eventBus.register(listener);
-    }
-
     public GraphGenerator<TFDNode, String> getGraphGenerator() {
         if (state == AlgorithmState.created) {
             init();
@@ -336,8 +321,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
         return internalValidationErrorOfSelectedClassifier;
     }
 
-    public static List<Instances> generateRandomDataSets(final int dataset, // final double usedDataSetSize,
-                                                         final int maxSolutionCount, final int maxPipelineSize, final int timeout, final int seed) throws Exception {
+    public static List<Instances> generateRandomDataSets(final int dataset, final int maxSolutionCount, final int maxPipelineSize) throws Exception {
 
         /* load image dataset and create a train-test-split */
         OpenmlConnector connector = new OpenmlConnector();

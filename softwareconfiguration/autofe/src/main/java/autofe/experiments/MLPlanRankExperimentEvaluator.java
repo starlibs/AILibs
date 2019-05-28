@@ -54,7 +54,7 @@ public class MLPlanRankExperimentEvaluator implements IExperimentSetEvaluator {
 			if (dsInstances == null) {
 				// Create random
 				int dataSetID = DataSetUtils.getDataSetIDByName(dataSet);
-				List<Instances> dataSetVariations = HASCOFeatureEngineering.generateRandomDataSets(dataSetID, 1, MAX_PIPELINE_SIZE, DATASET_GENERATION_TIMEOUT, seed);
+				List<Instances> dataSetVariations = HASCOFeatureEngineering.generateRandomDataSets(dataSetID, 1, MAX_PIPELINE_SIZE);
 
 				if (dataSetVariations.size() != 1) {
 					throw new IllegalStateException("HASCOFE has not generated the expected amount of data set variations.");

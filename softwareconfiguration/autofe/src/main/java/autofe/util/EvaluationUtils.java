@@ -7,11 +7,11 @@ import de.upb.crc901.mlplan.core.AbstractMLPlanBuilder;
 import de.upb.crc901.mlplan.core.MLPlan;
 import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import fantail.core.Correlation;
 import jaicore.basic.TimeOut;
 import jaicore.ml.WekaUtil;
 import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import jaicore.search.model.travesaltree.Node;
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
@@ -534,7 +534,8 @@ public final class EvaluationUtils {
     }
 
     public static double rankKendallsTau(final double[] ranking1, final double[] ranking2) {
-        return Correlation.rankKendallTauBeta(ranking1, ranking2);
+        KendallsCorrelation kendalsCorr = new KendallsCorrelation();
+        return kendalsCorr.correlation(ranking1, ranking2);
     }
 
     public static double evaluateMLPlan(final int timeout, final Instances training, final Instances test,

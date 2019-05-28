@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
 import jaicore.ml.core.exception.TrainingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
     private Logger logger = LoggerFactory.getLogger(AutoFEMLComplete.class);
     private String loggerName;
 
-    private static final int NUMBER_OF_MC_ITERATIONS_IN_SEARCH = 3;
+    private static final int NUMBER_OF_MC_ITERATIONS_IN_SEARCH = 1;
     private static final int NUMBER_OF_MC_FOLDS_IN_SEARCH = 5;
     private static final int NUMBER_OF_MC_ITERATIONS_IN_SELECTION = 3;
     private static final int NUMBER_OF_MC_FOLDS_IN_SELECTION = 3;
@@ -86,7 +87,8 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
     private double internalValidationErrorOfSelectedClassifier;
     private final String id = getClass().getName() + "-" + System.currentTimeMillis();
 
-    public AutoFEMLComplete(final long seed, final double subsampleRatio, final double mlplanSubsampleRatioFactor, final int minInstances, final MLPlanFEWekaClassifierConfig config, final AutoFEWekaPipelineFactory factory)
+    public AutoFEMLComplete(final long seed, final double subsampleRatio, final double mlplanSubsampleRatioFactor,
+                            final int minInstances, final MLPlanFEWekaClassifierConfig config, final AutoFEWekaPipelineFactory factory)
             throws IOException {
 
         componentFile = new File("model/MLPlanFEWeka.json");
@@ -225,17 +227,11 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
         }
 
         /* dynamically compute blow-ups */
-        double blowUpInSelectionPhase = MathExt.round(
-                1f / NUMBER_OF_MC_FOLDS_IN_SEARCH * (NUMBER_OF_MC_FOLDS_IN_SELECTION / (double) NUMBER_OF_MC_ITERATIONS_IN_SEARCH), 2);
-        double blowUpInPostprocessing = MathExt.round((1 / (1 - config.dataPortionForSelection())) / NUMBER_OF_MC_FOLDS_IN_SELECTION, 2);
-        config.setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
-        config.setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
-
         logger.info("Starting AutoFEMLComplete search.");
         logger.info("Using the following preferred node evaluator: {}", preferredNodeEvaluator);
 
         /* create HASCO problem */
-        IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(benchmark, NUMBER_OF_MC_ITERATIONS_IN_SEARCH, dataShownToSearch, NUMBER_OF_MC_FOLDS_IN_SEARCH, config.seed());
+        IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(benchmark, NUMBER_OF_MC_ITERATIONS_IN_SEARCH, dataShownToSearch, 0.7, config.seed());
         IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
             try {
                 return searchBenchmark.evaluate(factory.getComponentInstantiation(c));
@@ -274,6 +270,9 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
         /* configure and start optimizing factory */
         OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, AutoFEWekaPipeline, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(factory, problem);
         TwoPhaseHASCOFactory hascoFactory = new TwoPhaseHASCOFactory();
+        hascoFactory.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(config.seed(),
+                config.numberOfRandomCompletions(), config.timeoutForCandidateEvaluation(),
+                config.timeoutForNodeEvaluation()));
 
         hascoFactory.setConfig(config);
         optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);

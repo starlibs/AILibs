@@ -18,30 +18,32 @@ import autofe.util.DataSetUtils;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 
 public class AutoFEMLCompleteTest {
-	@Test
-	public void autoFEMLCompleteTest() throws Exception {
+    @Test
+    public void autoFEMLCompleteTest() throws Exception {
 
-		DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.MNIST_ID);
-		long[] shape = DataSetUtilsTest.MNIST_INPUT_SHAPE;
+        DataSet data = DataSetUtils.getDataSetByID(DataSetUtils.FASHION_MNIST_ID);
+        long[] shape = DataSetUtilsTest.FASHION_MNIST_SHAPE;
 
-		List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(42), .7);
+        List<DataSet> trainTestSplit = DataSetUtils.getStratifiedSplit(data, new Random(42), .7);
 
-		MLPlanFEWekaClassifierConfig config = ConfigFactory.create(MLPlanFEWekaClassifierConfig.class);
+        MLPlanFEWekaClassifierConfig config = ConfigFactory.create(MLPlanFEWekaClassifierConfig.class);
 
-		AutoFEWekaPipelineFactory factory = new AutoFEWekaPipelineFactory(new FilterPipelineFactory(shape),
-				new WEKAPipelineFactory());
+        AutoFEWekaPipelineFactory factory = new AutoFEWekaPipelineFactory(new FilterPipelineFactory(shape),
+                new WEKAPipelineFactory());
 
-		AutoFEMLComplete autofeml = new AutoFEMLComplete(42, 0.01, 5, 200, config, factory);
-		autofeml.setTimeoutForNodeEvaluation(15);
-		autofeml.setTimeoutForSingleSolutionEvaluation(15);
-		autofeml.setTimeout(30, TimeUnit.SECONDS);
+        AutoFEMLComplete autofeml = new AutoFEMLComplete(42, 0.01, 5, 200, config, factory);
+        autofeml.setTimeoutForNodeEvaluation(30);
+        autofeml.setTimeoutForSingleSolutionEvaluation(30);
+        autofeml.setTimeout(600, TimeUnit.SECONDS);
+        autofeml.setNumCPUs(4);
+        System.out.println("Timeout:"+ autofeml.getTimeout().toString());
 
-		System.out.println("Start building AutoFEML classifier...");
+        System.out.println("Start building AutoFEML classifier...");
 
-		autofeml.buildClassifier(trainTestSplit.get(0));
+        autofeml.buildClassifier(trainTestSplit.get(0));
 
-		System.out.println("Solution: " + autofeml.getSelectedPipeline());
-		System.out.println("Internal score: " + autofeml.getInternalValidationErrorOfSelectedClassifier());
-		Assert.assertTrue(autofeml.getInternalValidationErrorOfSelectedClassifier() < 1);
-	}
+        System.out.println("Solution: " + autofeml.getSelectedPipeline());
+        System.out.println("Internal score: " + autofeml.getInternalValidationErrorOfSelectedClassifier());
+        Assert.assertTrue(autofeml.getInternalValidationErrorOfSelectedClassifier() < 1);
+    }
 }

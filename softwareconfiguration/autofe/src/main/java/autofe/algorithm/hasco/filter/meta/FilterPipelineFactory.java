@@ -1,10 +1,8 @@
 package autofe.algorithm.hasco.filter.meta;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
+import autofe.algorithm.hasco.filter.generic.IdentityFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +40,8 @@ public class FilterPipelineFactory implements BaseFactory<FilterPipeline> {
 
             ComponentInstance actCI = groundComponent.getSatisfactionOfRequiredInterfaces().get("pipe");
             if (actCI == null) {
-                return new FilterPipeline(null, null);
+                filterGraph.addItem(new IdentityFilter());
+                return new FilterPipeline(groundComponent, filterGraph);
             }
 
             open.offer(actCI);
@@ -138,7 +137,7 @@ public class FilterPipelineFactory implements BaseFactory<FilterPipeline> {
         } else {
             logger.warn(
                     "Could not instantiate FilterPipeline object due to missing 'FilterPipeline' ground component.");
-            return null;
+            return new FilterPipeline(groundComponent, filterGraph);
         }
     }
 

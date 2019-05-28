@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.junit.Assert;
 import org.junit.Test;
 
 import autofe.algorithm.hasco.AutoFEMLTwoPhase;
@@ -24,9 +25,9 @@ public class AutoFEMLTwoPhaseTest {
 
 		HASCOFeatureEngineeringConfig config = ConfigFactory.create(HASCOFeatureEngineeringConfig.class);
 
-		TimeOut autofeTO = new TimeOut(30, TimeUnit.SECONDS);
-		TimeOut mlplanTO = new TimeOut(30, TimeUnit.SECONDS);
-		TimeOut evalTimeout = new TimeOut(30, TimeUnit.SECONDS);
+		TimeOut autofeTO = new TimeOut(300, TimeUnit.SECONDS);
+		TimeOut mlplanTO = new TimeOut(300, TimeUnit.SECONDS);
+		TimeOut evalTimeout = new TimeOut(300, TimeUnit.SECONDS);
 
 		AutoFEMLTwoPhase autofeml = new AutoFEMLTwoPhase(config, 4, "coco", 0.01, 5, 200, 42, autofeTO, mlplanTO,
 				evalTimeout, 5);
@@ -38,5 +39,6 @@ public class AutoFEMLTwoPhaseTest {
 		System.out.println("Selected solution: " + autofeml.getSelectedPipeline());
 		System.out.println("Scores (AutoFE / MLPlan): " + autofeml.getInternalAutoFEScore() + " / "
 				+ autofeml.getInternalMlPlanScore());
+		Assert.assertNotNull(autofeml.getSelectedPipeline());
 	}
 }
