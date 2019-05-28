@@ -22,7 +22,7 @@ public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamp
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			try {
 				this.sample = (D) getInput().createEmpty();
 				this.copyDataset = (D) this.getInput().createEmpty();
@@ -31,7 +31,7 @@ public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamp
 				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
 			return this.activate();
-		case active:
+		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
 				int i = random.nextInt(this.copyDataset.size());
 				this.sample.add(this.copyDataset.get(i));
@@ -40,7 +40,7 @@ public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamp
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

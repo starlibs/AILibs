@@ -14,7 +14,16 @@ import java.util.stream.Collectors;
 import jaicore.basic.SQLAdapter;
 import jaicore.basic.ValueUtil;
 
+/**
+ *
+ * @author mwever
+ *
+ */
 public class KVStoreUtil {
+
+	private KVStoreUtil() {
+		// prevent instantiation of this util class.
+	}
 
 	public static String kvStoreCollectionToLaTeXTable(final KVStoreCollection kvStoreCollection, final String rowIndex, final String columnIndex) {
 		StringBuilder sb = new StringBuilder();

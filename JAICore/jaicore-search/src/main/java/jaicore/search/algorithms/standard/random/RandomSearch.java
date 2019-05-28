@@ -189,13 +189,13 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			this.logger.debug("Starting next algorithm step.");
 			assert this.exploredGraph.isGraphSane();
 			switch (this.getState()) {
-			case created:
+			case CREATED:
 				this.post(new GraphInitializedEvent<>(this.getId(), this.root));
 				this.logger.info("Starting random search ...");
 				assert this.exploredGraph.isGraphSane();
 				return this.activate();
 
-			case active:
+			case ACTIVE:
 
 				/* if the root is exhausted, cancel */
 				SearchGraphPath<N, A> drawnPath = null;

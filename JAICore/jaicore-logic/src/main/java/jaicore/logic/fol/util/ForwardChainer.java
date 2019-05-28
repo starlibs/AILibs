@@ -61,7 +61,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 		switch (this.getState()) {
 
 		/* initialize the algorithm for the most promising literal */
-		case created:
+		case CREATED:
 			this.conclusion = this.getInput().getConclusion();
 			assert !this.conclusion.isEmpty() : "The algorithm should not be invoked with an empty conclusion";
 			this.factbase = this.getInput().getFactbase();
@@ -118,7 +118,7 @@ public class ForwardChainer extends AAlgorithm<ForwardChainingProblem, Collectio
 			this.logger.info("Initialized FC algorithm within {}ms.", end - start);
 			return this.activate();
 
-		case active:
+		case ACTIVE:
 
 			this.checkAndConductTermination();
 

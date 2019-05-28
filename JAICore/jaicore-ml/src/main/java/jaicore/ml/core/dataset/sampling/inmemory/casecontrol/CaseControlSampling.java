@@ -34,7 +34,7 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			try {
 				this.sample = (D)getInput().createEmpty();
 			} catch (DatasetCreationException e) {
@@ -51,7 +51,7 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 				probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
 			}
 			return this.activate();
-		case active:
+		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
 				I choosenInstance = null;
 				double r;
@@ -72,7 +72,7 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.EAlgorithmState;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import jaicore.ml.core.dataset.ArffUtilities;
@@ -79,7 +79,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			return new File(this.outputFilePath);
 		}
 		// Start the sampling process otherwise.
-		this.setState(AlgorithmState.created);
+		this.setState(EAlgorithmState.CREATED);
 		while (this.hasNext()) {
 			try {
 				this.checkAndConductTermination();
