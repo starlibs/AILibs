@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import jaicore.basic.algorithm.AAlgorithm;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmState;
+import jaicore.basic.algorithm.EAlgorithmState;
 import jaicore.basic.algorithm.events.AlgorithmEvent;
 import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -77,7 +77,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 			return dataset;
 		} else {
 			// Working configuration, so create the actual sample.
-			this.setState(AlgorithmState.created);
+			this.setState(EAlgorithmState.CREATED);
 			while (this.hasNext()) {
 				try {
 					checkAndConductTermination();

@@ -45,7 +45,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private long timeOfTimeoutDetection = -1; // timestamp for when timeout has been triggered
 	private long canceled = -1; // timestamp for when the algorithm has been canceled
 	private final Set<Thread> activeThreads = new HashSet<>();
-	private AlgorithmState state = AlgorithmState.created;
+	private EAlgorithmState state = EAlgorithmState.CREATED;
 	private final EventBus eventBus = new EventBus();
 
 	private int timeoutPrecautionOffset = 100; // this offset is substracted from the true remaining time whenever a timer is scheduled to ensure that the timeout is respected
@@ -87,7 +87,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public boolean hasNext() {
-		return this.state != AlgorithmState.inactive;
+		return this.state != EAlgorithmState.INACTIVE;
 	}
 
 	@Override
@@ -337,7 +337,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	/**
 	 * @return The current state of the algorithm.
 	 */
-	public AlgorithmState getState() {
+	public EAlgorithmState getState() {
 		return this.state;
 	}
 
@@ -345,10 +345,10 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 * @param state
 	 *            The new state of the algorithm.
 	 */
-	protected void setState(final AlgorithmState state) {
-		if (state == AlgorithmState.active) {
+	protected void setState(final EAlgorithmState state) {
+		if (state == EAlgorithmState.ACTIVE) {
 			throw new IllegalArgumentException("Cannot switch state to active. Use \"activate\" instead, which will set the state to active and provide the AlgorithmInitializedEvent.");
-		} else if (state == AlgorithmState.inactive) {
+		} else if (state == EAlgorithmState.INACTIVE) {
 			throw new IllegalArgumentException("Cannot switch state to inactive. Use \"terminate\" instead, which will set the state to inactive and provide the AlgorithmFinishedEvent.");
 		}
 		this.state = state;
@@ -374,12 +374,12 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 * Should only be called once and as before the state is set to something else.
 	 */
 	protected AlgorithmInitializedEvent activate() {
-		assert this.state == AlgorithmState.created : "Can only activate an algorithm as long as its state has not been changed from CREATED to something else. It is currently " + this.state;
+		assert this.state == EAlgorithmState.CREATED : "Can only activate an algorithm as long as its state has not been changed from CREATED to something else. It is currently " + this.state;
 		this.activationTime = System.currentTimeMillis();
 		if (this.getTimeout().milliseconds() > 0) {
 			this.deadline = this.activationTime + this.getTimeout().milliseconds();
 		}
-		this.state = AlgorithmState.active;
+		this.state = EAlgorithmState.ACTIVE;
 		AlgorithmInitializedEvent event = new AlgorithmInitializedEvent(this.getId());
 		this.eventBus.post(event);
 		this.logger.trace("Starting algorithm {} with problem {} and config {}", this.getId(), this.input, this.config);
@@ -393,7 +393,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 */
 	protected AlgorithmFinishedEvent terminate() {
 		this.logger.info("Terminating algorithm {}.", this.getId());
-		this.state = AlgorithmState.inactive;
+		this.state = EAlgorithmState.INACTIVE;
 		AlgorithmFinishedEvent finishedEvent = new AlgorithmFinishedEvent(this.getId());
 		this.unregisterThreadAndShutdown();
 		this.eventBus.post(finishedEvent);

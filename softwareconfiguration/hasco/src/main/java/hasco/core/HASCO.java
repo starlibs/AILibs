@@ -140,7 +140,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 
 		/* act depending on state */
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			this.logger.info("Starting HASCO run.");
 			AlgorithmInitializedEvent event = this.activate();
 
@@ -213,7 +213,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			this.logger.info("HASCO initialization completed.");
 			return event;
 
-		case active:
+		case ACTIVE:
 
 			/* step search */
 			this.logger.debug("Stepping search algorithm.");

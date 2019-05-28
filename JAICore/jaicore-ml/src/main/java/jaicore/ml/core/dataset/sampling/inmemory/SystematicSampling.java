@@ -65,7 +65,7 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			// Initialize variables and sort dataset.
 			try {
 				this.sample = (D) this.getInput().createEmpty();
@@ -81,7 +81,7 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 			this.k = this.sortedDataset.size() / this.sampleSize;
 			this.index = 0;
 			return this.activate();
-		case active:
+		case ACTIVE:
 			// If the sample size is not reached yet, add the next datapoint from the
 			// systematic sampling method.
 			if (this.sample.size() < this.sampleSize) {
@@ -91,7 +91,7 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

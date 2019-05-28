@@ -35,9 +35,9 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException  {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			return this.activate();
-		case active: {
+		case ACTIVE: {
 			int expanded = 0;
 			Stack<Node<N, ?>> open = new Stack<>();
 			N root = ((SingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot();

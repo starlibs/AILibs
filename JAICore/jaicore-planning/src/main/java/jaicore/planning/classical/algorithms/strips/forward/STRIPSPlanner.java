@@ -94,14 +94,14 @@ public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPla
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			this.setLoggerOfSearch();
 			this.search.setTimeout(this.getTimeout());
 			if (this.visualize) {
 				throw new UnsupportedOperationException("Currently no visualization supported!");
 			}
 			return this.activate();
-		case active:
+		case ACTIVE:
 
 			/* invoke next step in search algorithm */
 			if (!this.search.hasNext()) {

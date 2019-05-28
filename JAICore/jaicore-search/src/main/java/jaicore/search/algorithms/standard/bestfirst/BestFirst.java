@@ -1049,7 +1049,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		try {
 			this.registerActiveThread();
 			switch (this.getState()) {
-			case created: {
+			case CREATED: {
 				AlgorithmInitializedEvent event = this.activate();
 				this.logger.info("Initializing BestFirst search {} with {} CPUs and a timeout of {}ms", this.getId(), this.getConfig().cpus(), this.getConfig().timeout());
 				int additionalCPUs = this.getConfig().cpus() - 1;
@@ -1060,7 +1060,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				this.logger.info("Search initialized, returning activation event.");
 				return event;
 			}
-			case active: {
+			case ACTIVE: {
 				synchronized (this.pendingSolutionFoundEvents) {
 					if (!this.pendingSolutionFoundEvents.isEmpty()) {
 						return this.pendingSolutionFoundEvents.poll(); // these already have been posted over the event bus but are now returned to the controller for respective handling

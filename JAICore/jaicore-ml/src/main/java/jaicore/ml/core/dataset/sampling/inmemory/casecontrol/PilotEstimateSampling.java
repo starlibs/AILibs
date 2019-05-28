@@ -46,10 +46,10 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			this.doInitStep();
 			break;
-		case active:
+		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
 				do {
 					double r = this.rand.nextDouble();
@@ -69,7 +69,7 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

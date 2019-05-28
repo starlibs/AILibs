@@ -73,7 +73,7 @@ public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? ex
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			// Initialize variables
 			try {
 				this.sample = (D)getInput().createEmpty();
@@ -94,10 +94,10 @@ public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? ex
 			}
 
 			return this.activate();
-		case active:
+		case ACTIVE:
 			this.doAlgorithmStep();
 			break;
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

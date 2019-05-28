@@ -62,7 +62,7 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			try {
 				this.sample = (D) this.getInput().createEmpty();
 				D sampleCopy = (D) this.getInput().createEmpty();
@@ -75,7 +75,7 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends
 				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
 			return this.activate();
-		case active:
+		case ACTIVE:
 			I choosenInstance;
 			if (this.sample.size() < this.sampleSize) {
 				do {
@@ -86,7 +86,7 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

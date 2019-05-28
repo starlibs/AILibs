@@ -84,7 +84,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
@@ -118,7 +118,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			this.logger.info("Size: {}", this.graph.getItems().size());
 			return this.activate();
 
-		case active:
+		case ACTIVE:
 			this.logger.debug("timeout: {}", this.getTimeout());
 
 			/* now compute best local values bottom up */

@@ -58,7 +58,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 			registerActiveThread();
 			logger.debug("Conducting step. Current path length is {}", currentPath.size());
 			switch (getState()) {
-			case created:
+			case CREATED:
 				N root = ((SingleRootGenerator<N>) getInput().getGraphGenerator().getRootGenerator()).getRoot();
 				post(new GraphInitializedEvent<>(getId(), root));
 
@@ -90,7 +90,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 
 				logger.info("Algorithm activated.");
 				return activate();
-			case active:
+			case ACTIVE:
 
 				/* compute the currently relevant leaf */
 				N leaf = currentPath.get(currentPath.size() - 1);
