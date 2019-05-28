@@ -41,10 +41,6 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 
 	private static final AutoFEMLExperimenterConfig CONFIG = ConfigCache.getOrCreate(AutoFEMLExperimenterConfig.class);
 
-	// Logging properties
-	private SQLAdapter adapter;
-	private int experimentID;
-
 	@Override
 	public IExperimentSetConfig getConfig() {
 		return CONFIG;
@@ -59,14 +55,14 @@ public class AutoFEMLExperimenter implements IExperimentSetEvaluator {
 		Map<String, String> experiment = experimentEntry.getExperiment().getValuesOfKeyFields();
 		LOGGER.info("Evaluate experiment: {}", experiment);
 
-		double subsampleRatio = Double.valueOf(experiment.get("subsampleRatio"));
-		double mlplanSubsampleRatioFactor = Double.valueOf(experiment.get("mlplanSubsampleRatioFactor"));
-		long seed = Long.valueOf(experiment.get("seed"));
-		long amlTimeout = Long.valueOf(experiment.get("amlTimeout"));
-		long feTimeout = Long.valueOf(experiment.get("feTimeout"));
-		long evalTimeout = Long.valueOf(experiment.get("evalTimeout"));
-		int minInstances = Integer.valueOf(experiment.get("minInstances"));
-		int maxPipelineSize = Integer.valueOf(experiment.get("maxPipelineSize"));
+		double subsampleRatio = Double.parseDouble(experiment.get("subsampleRatio"));
+		double mlplanSubsampleRatioFactor = Double.parseDouble(experiment.get("mlplanSubsampleRatioFactor"));
+		long seed = Long.parseLong(experiment.get("seed"));
+		long amlTimeout = Long.parseLong(experiment.get("amlTimeout"));
+		long feTimeout = Long.parseLong(experiment.get("feTimeout"));
+		long evalTimeout = Long.parseLong(experiment.get("evalTimeout"));
+		int minInstances = Integer.parseInt(experiment.get("minInstances"));
+		int maxPipelineSize = Integer.parseInt(experiment.get("maxPipelineSize"));
 
 		LOGGER.info("Load dataset...");
 		String datasetName = experiment.get("dataset");

@@ -26,7 +26,6 @@ public class MLPlanRankExperimentEvaluator implements IExperimentSetEvaluator {
 	private final IMLPlanRankConfig config = ConfigCache.getOrCreate(IMLPlanRankConfig.class);
 
 	private static final int MAX_PIPELINE_SIZE = 10;
-	private static final int DATASET_GENERATION_TIMEOUT = 600 * 1000;
 	private static final int MLPLAN_TIMEOUT_S = 3600;
 	private static final double MLPLAN_SPLIT_RATIO = 0.75;
 

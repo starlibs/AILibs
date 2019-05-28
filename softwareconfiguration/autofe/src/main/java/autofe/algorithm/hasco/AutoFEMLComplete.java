@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import hasco.core.HASCOSolutionCandidate;
@@ -27,7 +26,6 @@ import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfiguratio
 import jaicore.basic.FileUtil;
 import jaicore.basic.ILoggingCustomizable;
 import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.MathExt;
 import jaicore.basic.TimeOut;
 import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import jaicore.basic.algorithm.AlgorithmState;
@@ -58,7 +56,6 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
     private String loggerName;
 
     private static final int NUMBER_OF_MC_ITERATIONS_IN_SEARCH = 1;
-    private static final int NUMBER_OF_MC_FOLDS_IN_SEARCH = 5;
     private static final int NUMBER_OF_MC_ITERATIONS_IN_SELECTION = 3;
     private static final int NUMBER_OF_MC_FOLDS_IN_SELECTION = 3;
 
