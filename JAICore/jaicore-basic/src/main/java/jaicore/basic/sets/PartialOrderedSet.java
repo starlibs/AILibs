@@ -12,18 +12,24 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * A {@link Set} with a partial order added to it.
  *
  * @author David Niehues - davnie@mail.upb.de
  */
-@SuppressWarnings("serial")
 public class PartialOrderedSet<E> extends HashSet<E> {
 
 	/**
+	 * Automatically generated version UID for serialization.
+	 */
+	private static final long serialVersionUID = 5450009458863214917L;
+	/**
 	 * The order of this set. For an a the b's with a < b are stored.
 	 */
-	private final Map<E, Set<E>> order;
+	private final transient Map<E, Set<E>> order;
 
 	/**
 	 * Creates a new partial ordered set with the same elements as
@@ -66,23 +72,21 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		if (!this.contains(b)) {
 			this.add(b);
 		}
-		Set<E> directlyAfterA = this.order.get(a);
-		if (directlyAfterA == null) {
-			directlyAfterA = new HashSet<>();
-			this.order.put(a, directlyAfterA);
-		}
+		Set<E> directlyAfterA = this.order.computeIfAbsent(a, k -> new HashSet<>());
 		directlyAfterA.add(b);
 	}
 
+	/**
+	 * Require that A is before b.
+	 *
+	 * @param a The A which is to be tested.
+	 * @param b The B which is to be tested.
+	 */
 	public void requireABeforeB(final E a, final E b) {
 		if (!this.allowsABeforeB(a, b)) {
 			throw new IllegalStateException("By transitivity " + a + " before " + b + "isn't allowed.");
 		}
-		Set<E> directlyAfterA = this.order.get(a);
-		if (directlyAfterA == null) {
-			directlyAfterA = new HashSet<>();
-			this.order.put(a, directlyAfterA);
-		}
+		Set<E> directlyAfterA = this.order.computeIfAbsent(a, k -> new HashSet<>());
 		directlyAfterA.add(b);
 	}
 
@@ -225,6 +229,11 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		tmpSet.order.forEach((k, vSet) -> vSet.forEach(v -> this.addABeforeB(k, v)));
 	}
 
+	/**
+	 * Adds all elements of the other partial order set.
+	 *
+	 * @param set The set to be added to this partial-order set.
+	 */
 	public void addAll(final PartialOrderedSet<? extends E> set) {
 		this.merge(set);
 	}
@@ -266,8 +275,12 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 
 	}
 
+	/**
+	 * Getter for a linearization of the partial order set.
+	 *
+	 * @return A list representing a linearization of the partial order set.
+	 */
 	public List<E> getLinearization() {
-
 		/* create a copy of all elements */
 		List<E> elements = new ArrayList<>();
 		Iterator<E> iterator = super.iterator();
@@ -289,8 +302,7 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 				if (linearization.contains(itemToInsert)) {
 					continue;
 				}
-				assert !linearization.contains(itemToInsert) : "The object " + itemToInsert
-				+ " is already contained in the linearization " + linearization;
+				assert !linearization.contains(itemToInsert) : "The object " + itemToInsert + " is already contained in the linearization " + linearization;
 				linearization.add(0, itemToInsert);
 				uninsertedItems.remove(itemToInsert);
 				for (E uninsertedItem : uninsertedItems) {
@@ -305,15 +317,7 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		}
 
 		/* consistency check */
-		assert linearization.size() == super.size() : "The linearization of " + elements
-				+ " has produced another number of elements: " + linearization.toString();
-		// if () {
-		// for (E e1 : linearization) {
-		// for (E e2 : linearization) {
-		//
-		// }
-		// }
-		// }
+		assert linearization.size() == super.size() : "The linearization of " + elements + " has produced another number of elements: " + linearization.toString();
 
 		return linearization;
 	}
@@ -369,6 +373,22 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	public boolean remove(final Object e) {
 		this.order.remove(e);
 		return super.remove(e);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public boolean equals(final Object obj) {
+		if (!(obj instanceof PartialOrderedSet)) {
+			return false;
+		}
+		PartialOrderedSet<E> other = (PartialOrderedSet<E>) obj;
+
+		return new EqualsBuilder().append(this.order, other.order).isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(this.order).toHashCode();
 	}
 
 }

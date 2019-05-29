@@ -6,9 +6,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class solves the following problem: Sometimes you want to use objects of a concrete List class L
@@ -25,6 +29,9 @@ import java.util.ListIterator;
  * @param <E>
  */
 public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> implements List<D> {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ListDecorator.class);
+
 	private final L list;
 	private final Class<E> typeOfDecoratedItems;
 	private final Class<D> typeOfDecoratingItems;
@@ -40,9 +47,8 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		Constructor<D> vConstructorForDecoratedItems = null;
 		try {
 			vConstructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
-		}
-		catch (NoSuchMethodException e) {
-			e.printStackTrace(); // this should never be thrown
+		} catch (NoSuchMethodException e) {
+			LOGGER.error("The constructor of the list class couldn ot be invoked.", e); // this should never be thrown
 		}
 		this.constructorForDecoratedItems = vConstructorForDecoratedItems;
 	}
@@ -51,7 +57,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		try {
 			return this.constructorForDecoratedItems.newInstance(element);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
+			LOGGER.error("The decoration for the given element could not be obtained.", e);
 			return null;
 		}
 	}
@@ -115,6 +121,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		return this.getDecorationForElement(this.list.get(index));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public int indexOf(final Object o) {
 		return this.typeOfDecoratingItems.isInstance(o) ? (this.list.indexOf(((D) o).getElement())) : -1;
@@ -144,6 +151,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public int lastIndexOf(final Object o) {
 		return this.typeOfDecoratingItems.isInstance(o) ? (this.list.lastIndexOf(((D) o).getElement())) : -1;
@@ -207,9 +215,10 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		};
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean remove(final Object o) {
-		return this.typeOfDecoratingItems.isInstance(o) ? (this.list.remove(((D) o).getElement())) : false;
+		return (this.typeOfDecoratingItems.isInstance(o) && (this.list.remove(((D) o).getElement())));
 	}
 
 	@Override
@@ -230,16 +239,15 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 
 	@Override
 	public boolean retainAll(final Collection<?> c) {
-		boolean changed = false;
+		Collection<E> elementsToRemove = new HashSet<>();
 		for (int i = 0; i < this.list.size(); i++) {
 			D construct = this.getDecorationForElement(this.list.get(i));
 			if (!c.contains(construct)) {
-				this.list.remove(i);
-				i--;
-				changed = true;
+				elementsToRemove.add(this.list.get(i));
 			}
 		}
-		return changed;
+		this.list.removeAll(elementsToRemove);
+		return !elementsToRemove.isEmpty();
 	}
 
 	@Override
@@ -257,22 +265,24 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		throw new UnsupportedOperationException();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] toArray() {
 		Object[] arrayOfInternals = this.list.toArray();
 		Object[] array = new Object[arrayOfInternals.length];
 		for (int i = 0; i < arrayOfInternals.length; i++) {
-			array[i] = this.getDecorationForElement((E)arrayOfInternals[i]);
+			array[i] = this.getDecorationForElement((E) arrayOfInternals[i]);
 		}
 		return array;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T[] toArray(final T[] a) {
 		Object[] arrayOfInternals = this.list.toArray();
 		T[] array = (T[]) Array.newInstance(a.getClass().getComponentType(), arrayOfInternals.length);
 		for (int i = 0; i < arrayOfInternals.length; i++) {
-			array[i] = (T)this.getDecorationForElement((E)arrayOfInternals[i]);
+			array[i] = (T) this.getDecorationForElement((E) arrayOfInternals[i]);
 		}
 		return array;
 	}
