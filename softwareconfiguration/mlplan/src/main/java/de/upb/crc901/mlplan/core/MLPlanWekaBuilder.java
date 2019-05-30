@@ -22,8 +22,8 @@ import jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
 
 public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 
-	private static final String RES_SSC_TINY_WEKA = "resources/automl/searchmodels/weka/tinytest.json";
-	private static final String RES_SSC_WEKA_COMPLETE = "resources/automl/searchmodels/weka/weka-all-autoweka.json";
+	private static final String RES_SSC_TINY_WEKA = "automl/searchmodels/weka/tinytest.json";
+	private static final String RES_SSC_WEKA_COMPLETE = "automl/searchmodels/weka/weka-all-autoweka.json";
 	private static final String FS_SSC_WEKA = "conf/mlplan-weka.json";
 
 	private static final String RES_PREFERRED_COMPONENTS = "mlplan/weka-preferenceList.txt";

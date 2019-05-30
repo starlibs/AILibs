@@ -237,7 +237,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @throws IOException Thrown if the given file does not exist.
 	 */
 	public AbstractMLPlanBuilder withSearchSpaceConfigFile(File searchSpaceConfig) throws IOException {
-		searchSpaceConfig = new File(URLDecoder.decode(searchSpaceConfig.getAbsolutePath(), "UTF-8"));
+		searchSpaceConfig = new File(URLDecoder.decode(searchSpaceConfig.getAbsolutePath(),"UTF-8"));
 		FileUtil.requireFileExists(searchSpaceConfig);
 		this.searchSpaceFile = searchSpaceConfig;
 		this.components.clear();

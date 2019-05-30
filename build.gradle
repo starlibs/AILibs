@@ -182,6 +182,7 @@ allprojects {
 
 dependencies{
 	compile project(":hasco")
+	compile project(":autofe")
 	compile project(":autofe-reldata")
 	compile project(":mlplan")
 	compile project(":JAICore:jaicore-basic")
@@ -196,6 +197,7 @@ dependencies{
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-modifiedISAC")
 }
 
 test{

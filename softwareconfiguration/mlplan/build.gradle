@@ -24,7 +24,7 @@ dependencies {
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:ed1071c4ef'
-	compile 'com.github.helegraf:data-handling:bd4f875ad5'
+    compile 'com.github.helegraf:data-handling:bd4f875ad5'
 	
 	// linear algebra
 	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta2'

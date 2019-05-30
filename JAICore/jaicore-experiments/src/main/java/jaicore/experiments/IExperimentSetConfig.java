@@ -2,16 +2,17 @@ package jaicore.experiments;
 
 import java.util.List;
 
-import org.aeonbits.owner.Mutable;
 import org.aeonbits.owner.Reloadable;
 
-public interface IExperimentSetConfig extends Mutable, Reloadable {
+import jaicore.basic.IConfig;
+
+public interface IExperimentSetConfig extends IConfig, Reloadable {
 
 	public static final String MEM_MAX = "mem.max";
 	public static final String MEM_OPP = "mem.opp";
 	public static final String CPU_MAX = "cpu.max";
 
-		/* the key fields define the semantics of a single experiment */
+	/* the key fields define the semantics of a single experiment */
 	public static final String KEYFIELDS = "keyfields";
 
 	/* the result fields define fields for results of each run */

@@ -1,0 +1,16 @@
+mem.max = 16392
+cpu.max = 6
+
+db.host = localhost
+db.username = experiments2
+db.password = experiments123!
+db.database = experiments
+db.table = benchmarkranking
+
+datasets = fashion-mnist, mnist, cifar10
+benchmarks = KernelLDA, KernelCluster, LDA, Cluster, Random, COCO, COED
+seeds = 1,2,3,4,5,6,7,8,9,10
+
+keyfields = seeds, datasets, benchmarks
+resultfields = kendallsTau, benchmarkRanking, mlplanRanking
+datasetfolder = D:\\Data\\Ranking
