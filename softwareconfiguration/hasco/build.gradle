@@ -1,37 +1,68 @@
-plugins {
-	id 'java'
-	id 'eclipse-wtp'
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir 'src'
-        }
-        resources {
-        	srcDir 'conf'
-    	}
-    }
-    test {
-	   	java {
-	   		srcDir 'test'
-	   	}
-    }
-}
-
 dependencies {
 	compile project(':JAICore:jaicore-basic')
-	compile project(':JAICore:jaicore-concurrent')
 	compile project(':JAICore:jaicore-logic')
-	compile project(':JAICore:jaicore-graph')
+	compile project(':JAICore:jaicore-ml')
 	compile project(':JAICore:jaicore-graphvisualizer')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
+	compile project(':JAICore:jaicore-ml')
 	
 	// basic dependencies
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
 	// database connector	
 	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
 	
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArchives')
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+}
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}	
+      		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}
+
+      		pom.project {
+        		name 'HASCO'
+        		packaging 'jar'
+        		// optionally artifactId can be defined here 
+        		description 'HASCO is a framework for reducing configuration tasks (e.g. software system configuration or algorithm configuration) into an HTN planning problem. This can then in turn be reduced to a graph search problem that can be solved by any kind of standard graph search algorithm, e.g., breadth-first-search.'
+        		url 'https://libs.ai'
+
+        		scm {
+          			connection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			developerConnection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			url 'https://github.com/fmohr/AILibs'
+        		}
+
+        		licenses {
+          			license {
+            			name 'GPLv3'
+            			url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+          			}
+        		}
+
+        		developers {
+          			developer {
+            			id 'fmohr'
+            			name 'Felix Mohr'
+            			email 'felix.mohr@upb.de'
+          			}
+          			developer {
+          				id 'mwever'    
+          			    name 'Marcel Wever'
+          			    email 'marcel.wever@upb.de'
+          			}
+          			developer {
+          			    id 'ahetzer'
+          			    name 'Alexander Hetzer'
+          			    email 'alexander.hetzer@upb.de'
+          			}
+        		}
+      		}
+    	}
+  	}
 }

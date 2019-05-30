@@ -1,0 +1,586 @@
+{
+	"repository": "MEKA",
+	"include": [],
+	"parameters": [],
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.BR",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": []
+		},
+		{
+			"name": "meka.classifiers.multilabel.BRq",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "P",
+					"type": "double",
+					"min": 0.2,
+					"max": 0.8,
+					"default": 0.8,
+					"minInterval": 0.01,
+					"refineSplits": 8
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.CC",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": []
+		},
+		{
+			"name": "meka.classifiers.multilabel.CCq",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "P",
+					"type": "double",
+					"min": 0.2,
+					"max": 0.8,
+					"default": 0.8,
+					"minInterval": 0.01,
+					"refineSplits": 8
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.BCC",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "X",
+					"comment": "The way to measure dependencies. default: lbf (frequencies only) | TODO: No label dependence still missing as an option",
+					"type": "cat",
+					"default": "lbf",
+					"values": ["lbf","C","I","Ib","H","Hbf","X","F","L","None"]
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PCC",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": []
+		},
+		{
+			"name": "meka.classifiers.multilabel.MCC",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "Is",
+					"comment": "The number of iterations to search the chain space at train time. default: 0",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 1500,
+					"minInterval": 5,
+					"refineSplits": 8
+				},
+				{
+					"name": "Iy",
+					"comment": "The number of iterations to search the output space at test time. default: 10",
+					"type": "int",
+					"default": 10,
+					"min": 0,
+					"max": 100,
+					"minInterval": 1,
+					"refineSplits": 8
+				},
+				{
+					"name": "P",
+					"comment": "Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match",
+					"type": "cat",
+					"default": "Exact match",
+					"values": ["Accuracy","Jaccard index","Hamming score","Exact match","Jaccard distance","Hamming loss","ZeroOne loss","Harmonic score","One error","Rank loss","Avg precision","Log Loss (lim. L)","Log Loss (lim. D)","Micro Precision","Micro Recall","Macro Precision","Macro Recall","F1 (micro averaged)","F1 (macro averaged by example)","F1 (macro averaged by label)","AUPRC (macro averaged)","AUROC (macro averaged)","Levenshtein distance"]
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PMCC",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "M",
+					"comment": "The population size (of chains) __ should be smaller than the total number of chains evaluated (Is) default: 10",
+					"type": "int",
+					"default": 10,
+					"min": 1,
+					"max": 50,
+					"minInterval": 1,
+					"refineSplits": 8
+				},
+				{
+					"name": "O",
+					"comment": "Use temperature: cool the chain down over time (from the beginning of the chain) __ can be faster default: 0 (no temperature)",
+					"type": "cat",
+					"default": "0",
+					"values": ["0","1"]
+				},
+				{
+					"name": "B",
+					"comment": "If using O = 1 for temperature, this sets the Beta constant default: 0.03",
+					"type": "double",
+					"default": 0.03,
+					"min": 0.01,
+					"max": 0.99,
+					"minInterval": 1E-3,
+					"refineSplits": 8
+				},
+				{
+					"name": "Is",
+					"comment": "The number of iterations to search the chain space at train time. default: 0",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 1500,
+					"minInterval": 5,
+					"refineSplits": 8
+				},
+				{
+					"name": "Iy",
+					"comment": "The number of iterations to search the output space at test time. default: 10",
+					"type": "int",
+					"default": 10,
+					"min": 0,
+					"max": 100,
+					"minInterval": 1,
+					"refineSplits": 8
+				},
+				{
+					"name": "P",
+					"comment": "Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match",
+					"type": "cat",
+					"default": "Exact match",
+					"values": ["Accuracy","Jaccard index","Hamming score","Exact match","Jaccard distance","Hamming loss","ZeroOne loss","Harmonic score","One error","Rank loss","Avg precision","Log Loss (lim. L)","Log Loss (lim. D)","Micro Precision","Micro Recall","Macro Precision","Macro Recall","F1 (micro averaged)","F1 (macro averaged by example)","F1 (macro averaged by label)","AUPRC (macro averaged)","AUROC (macro averaged)","Levenshtein distance"]
+				}
+			],
+			"dependencies": [{"pre": "O in {1}","post": "B in [0.03,0.03]"}]
+		},
+		{
+			"name": "meka.classifiers.multilabel.CT",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "H",
+					"comment": "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)).",
+					"type": "cat",
+					"default": "0",
+					"values": ["0","-1"]
+				},
+				{
+					"name": "X",
+					"comment": "The way to measure dependencies. default: lbf (frequencies only) | TODO: No label dependence still missing as an option",
+					"type": "cat",
+					"default": "lbf",
+					"values": ["lbf","C","I","Ib","H","Hbf","X","F","L","None"]
+				},
+				{
+					"comment": "Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values ",
+					"name": "L",
+					"type": "int",
+					"default": 1,
+					"min": 1,
+					"max": 4,
+					"minInterval": 1,
+					"refineSplits": 4
+				},
+				{
+					"name": "Is",
+					"comment": "The number of iterations to search the chain space at train time. default: 0",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 1500,
+					"minInterval": 5,
+					"refineSplits": 8
+				},
+				{
+					"name": "Iy",
+					"comment": "The number of iterations to search the output space at test time. default: 10",
+					"type": "int",
+					"default": 10,
+					"min": 0,
+					"max": 100,
+					"minInterval": 1,
+					"refineSplits": 8
+				},
+				{
+					"name": "P",
+					"comment": "Sets the payoff function. Any of those listed in regular evaluation output will do (e.g., 'Exact match'). default: Exact match",
+					"type": "cat",
+					"default": "Exact match",
+					"values": ["Accuracy","Jaccard index","Hamming score","Exact match","Jaccard distance","Hamming loss","ZeroOne loss","Harmonic score","One error","Rank loss","Avg precision","Log Loss (lim. L)","Log Loss (lim. D)","Micro Precision","Micro Recall","Macro Precision","Macro Recall","F1 (micro averaged)","F1 (macro averaged by example)","F1 (macro averaged by label)","AUPRC (macro averaged)","AUROC (macro averaged)","Levenshtein distance"]
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.CDN",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "I",
+					"comment": "The total number of iterations. default: 1000 ",
+					"type": "int",
+					"default": 1000,
+					"min": 100,
+					"max": 1000,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "Ic",
+					"comment": "The number of collection iterations. default: 100 ",
+					"type": "int",
+					"default": 100,
+					"min": 1,
+					"max": 100,
+					"refineSplits": 8,
+					"minInterval": 1
+				}
+			]
+		},
+		
+		{
+			"name": "meka.classifiers.multilabel.CDT",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "H",
+					"comment": "Determines the width of the trellis (use 0 for chain; use _1 for a square trellis, i.e., width of sqrt(number of labels)). ",
+					"type": "cat",
+					"default": "0",
+					"values": ["0","-1"]
+				},
+				{
+					"name": "L",
+					"comment": "Determines the neighbourhood density (the number of neighbours for each node in the trellis). CAUTION: default obtained from source code. No idea about good other values ",
+					"type": "int",
+					"default": 1,
+					"min": 1,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 5
+				},
+				{
+					"comment": "The dependency heuristic to use in rearranging the trellis (None by default). ",
+					"name": "X",
+					"type": "cat",
+					"default": "None",
+					"values": ["lbf","C","I","Ib","H","Hbf","X","F","L","None"]
+				},
+				{
+					"name": "I",
+					"comment": "The total number of iterations. default: 1000 ",
+					"type": "int",
+					"default": 1000,
+					"min": 100,
+					"max": 1000,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "Ic",
+					"comment": "The number of collection iterations. default: 100 ",
+					"type": "int",
+					"default": 100,
+					"min": 1,
+					"max": 100,
+					"refineSplits": 8,
+					"minInterval": 1
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.FW",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.RT",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.LC",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PS",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "P",
+					"comment": "Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				},
+				{
+					"name": "N",
+					"comment": "Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.PSt",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"parameter": [
+				{
+					"name": "P",
+					"comment": "Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				},
+				{
+					"name": "N",
+					"comment": "Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.RAkEL",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"comment": "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels\nLEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).",
+			"parameter": [
+				{
+					"name": "M",
+					"comment": "Sets M (default 10): the number of subsets",
+					"type": "int",
+					"min": 2,
+					"max": 20,
+					"default": 10,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				{
+					"name": "P",
+					"comment": "Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				},
+				{
+					"name": "N",
+					"comment": "Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.RAkELd",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"comment": "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels.\nLEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m).",
+			"parameter": [
+				{
+					"name": "P",
+					"comment": "Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				},
+				{
+					"name": "N",
+					"comment": "Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.BPNN",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [],
+			"parameter": [
+				{
+					"name": "H",
+					"comment": "Sets the number of hidden units default: 10",
+					"type": "int",
+					"default": "10",
+					"min": "1",
+					"max": "100",
+					"refineSplits": 8,
+					"minInterval": 5
+				},
+				{
+					"name": "E",
+					"comment": "Sets the maximum number of epochs default: 1000 (auto_cut_out)",
+					"type": "int",
+					"default": 1000,
+					"min": 10,
+					"max": 10000,
+					"refineSplits": 8,
+					"minInterval": 100
+				},
+				{
+					"name": "r",
+					"comment": "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 1E-3,
+					"max": 0.1,
+					"refineSplits": 8,
+					"minInterval": 1E-4
+				},
+				{
+					"name": "m",
+					"comment": "Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 0.1,
+					"max": 0.9,
+					"refineSplits": 8,
+					"minInterval": 0.05
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.DBPNN",
+			"providedInterface": ["MLClassifier","BasicMLClassifier","ProblemTransformationMethod"],
+			"requiredInterface": [{"id": "W","name": "meka.classifiers.multilabel.BPNN"}],
+			"parameter": [
+				{
+					"name": "H",
+					"comment": "Sets the number of hidden units default: 10",
+					"type": "int",
+					"default": "10",
+					"min": "1",
+					"max": "100",
+					"refineSplits": 8,
+					"minInterval": 5
+				},
+				{
+					"name": "E",
+					"comment": "Sets the maximum number of epochs default: 1000 (auto_cut_out)",
+					"type": "int",
+					"default": 1000,
+					"min": 10,
+					"max": 10000,
+					"refineSplits": 8,
+					"minInterval": 100
+				},
+				{
+					"name": "r",
+					"comment": "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 1E-3,
+					"max": 0.1,
+					"refineSplits": 8,
+					"minInterval": 1E-4
+				},
+				{
+					"name": "m",
+					"comment": "Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 0.1,
+					"max": 0.9,
+					"refineSplits": 8,
+					"minInterval": 0.05
+				},
+				
+				{
+					"name": "N",
+					"type": "int",
+					"default": 1,
+					"min": 1,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				}
+			]
+		},
+		
+		
+		
+		{
+			"name": "meka.classifiers.multilabel.HASEL",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [{"id": "W","name": "AbstractClassifier"}],
+			"comment": "LEFT OUT: _k  The number of labels in each partition __ should be 1 <= k < (L/2) where L is the total number of labels. LEFT OUT: _N  Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
+			"parameter": [
+				{
+					"name": "P",
+					"comment": "Sets the pruning value, defining an infrequent labelset as one which occurs <= P times in the data (P = 0 defaults to LC). default: 0 (LC)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				},
+				{
+					"name": "N",
+					"comment": "Sets the (maximum) number of frequent labelsets to subsample from the infrequent labelsets. default: 0 (none) n N = n _n N = n, or 0 if LCard(D) >= 2 n_m N = random(n,m)",
+					"type": "int",
+					"default": 0,
+					"min": 0,
+					"max": 5,
+					"minInterval": 1,
+					"refineSplits": 6
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.MajorityLabelset",
+			"providedInterface": ["MLClassifier","BasicMLClassifier"],
+			"requiredInterface": [],
+			"parameter": []
+		}
+	]
+}

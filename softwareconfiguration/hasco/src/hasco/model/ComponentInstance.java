@@ -5,14 +5,20 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import jaicore.basic.sets.SetUtil;
 
 /**
- * For a given component, a composition defines all parameter values and the required interfaces (recursively)
+ * For a given component, a composition defines all parameter values and the
+ * required interfaces (recursively)
  *
  * @author fmohr
  *
  */
+@JsonPropertyOrder(alphabetic=true)
 public class ComponentInstance {
 	private final Component component;
 	private final Map<String, String> parameterValues;
@@ -22,8 +28,9 @@ public class ComponentInstance {
 	 */
 	private final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces;
 
-	public ComponentInstance(final Component component, final Map<String, String> parameterValues,
-			final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
+	public ComponentInstance(@JsonProperty("component") final Component component,
+			@JsonProperty("parameterValues") final Map<String, String> parameterValues,
+			@JsonProperty("satisfactionOfRequiredInterfaces") final Map<String, ComponentInstance> satisfactionOfRequiredInterfaces) {
 		super();
 		this.component = component;
 		this.parameterValues = parameterValues;
@@ -37,21 +44,22 @@ public class ComponentInstance {
 	public Map<String, String> getParameterValues() {
 		return this.parameterValues;
 	}
-	
+
 	public Collection<Parameter> getParametersThatHaveBeenSetExplicitly() {
 		if (parameterValues == null)
 			return new ArrayList<>();
-		return getComponent().getParameters().stream().filter(p -> parameterValues.containsKey(p.getName())).collect(Collectors.toList());
+		return getComponent().getParameters().stream().filter(p -> parameterValues.containsKey(p.getName()))
+				.collect(Collectors.toList());
 	}
-	
+
 	public Collection<Parameter> getParametersThatHaveNotBeenSetExplicitly() {
 		return SetUtil.difference(component.getParameters(), getParametersThatHaveBeenSetExplicitly());
 	}
-	
+
 	public String getParameterValue(Parameter param) {
 		return getParameterValue(param.getName());
 	}
-	
+
 	public String getParameterValue(String param) {
 		return parameterValues.get(param);
 	}
@@ -74,6 +82,7 @@ public class ComponentInstance {
 		return sb.toString();
 	}
 
+	@JsonIgnore
 	public String getPrettyPrint() {
 		return getPrettyPrint(0);
 	}
@@ -103,14 +112,15 @@ public class ComponentInstance {
 		}
 		return sb.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((component == null) ? 0 : component.hashCode());
 		result = prime * result + ((parameterValues == null) ? 0 : parameterValues.hashCode());
-		result = prime * result + ((satisfactionOfRequiredInterfaces == null) ? 0 : satisfactionOfRequiredInterfaces.hashCode());
+		result = prime * result
+				+ ((satisfactionOfRequiredInterfaces == null) ? 0 : satisfactionOfRequiredInterfaces.hashCode());
 		return result;
 	}
 

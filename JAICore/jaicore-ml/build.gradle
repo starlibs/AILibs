@@ -1,47 +1,117 @@
-sourceSets {
-    main {
-      java {
-          srcDir 'src'
-      }
-    }
-    test {
-     	java {
-     		srcDir 'test'
-     	}
-    }
-}
-
-repositories {
-   flatDir {
-       dirs 'lib'
-   }
-}   
-
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-	compile project(":JAICore:jaicore-concurrent")
 	compile project(":JAICore:jaicore-experiments")
-	compile project(":JAICore:jaicore-graph")
 	compile project(":JAICore:jaicore-graphvisualizer")
 	compile project(":JAICore:jaicore-search")
+	compile project(":JAICore:jaicore-processes")
+	compile project(":JAICore:jaicore-math")
+	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
 	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
 	compile group: 'de.upb.isys', name: 'omlwebapp', version: '0.0.1'
-	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
-	compile ('de.upb.isys:interruptable-weka:0.0.7') {
-	  	exclude group: 'log4j'
-    	exclude group: 'org.slf4j'
+	compile ('de.upb.isys:meka:0.0.4') 
+    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '1.3.0'
+
+	
+	// dependencies for meka
+	compile group: 'org.kramerlab', name: 'bmad', version: '2.4'
+	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
+	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.1'
+	compile group: 'org.markdownj', name: 'markdownj', version: '0.3.0-1.0.2b4'
+	compile group: 'net.sf.meka.thirdparty', name: 'mst', version: '4.0'
+	
+	// weka requiring projects
+	compile group: 'org.kramerlab', name: 'autoencoder', version: '0.1'
+	compile group: 'com.github.fracpete', name: 'multisearch-weka-package', version: '2017.10.1'
+	
+	compile ('net.sf.meka.thirdparty:mulan:1.4.0')
+	
+	// deep learning
+	compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
+	
+	// linear algebra
+  compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
+
+	// end dependencies for meka
+	
+	// weka dependencies
+	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
+			exclude group: 'log4j'
+			exclude group: 'org.slf4j'            
 	}
+
+	compile ('nz.ac.waikato.cms.weka:rotationForest:1.0.3') {
+		exclude group: 'weka-dev'
+	}
+	
+	
+    // d4j dependencies: https://deeplearning4j.org/docs/latest/deeplearning4j-config-buildtools
+    compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
+    compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
 	
 	//JTwig template engine
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
 	
-	// https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
-	compile group: 'com.googlecode.json-simple', name: 'json-simple', version: '1.1.1'
+	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
 	
-	// https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
-	testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.3.1'
-	
-	compile group: 'com.github.fommil.netlib', name: 'core', version: '1.1.2'
-    compile name: 'mtj'
+	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.28'
+	compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.28'
+	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-json-jackson', version: '2.28'
+}
+
+configurations.all {
+    exclude module: 'weka-dev'
+}
+
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}	
+      		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}
+
+      		pom.project {
+        		name 'JAICore-Basic'
+        		packaging 'jar'
+        		// optionally artifactId can be defined here 
+        		description 'This project provides utils to deal with machine learning tasks. Especially it gives support to work with standard ML libraries in Java.'
+        		url 'https://libs.ai'
+
+        		scm {
+          			connection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			developerConnection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			url 'https://github.com/fmohr/AILibs'
+        		}
+
+        		licenses {
+          			license {
+            			name 'GPLv3'
+            			url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+          			}
+        		}
+
+        		developers {
+          			developer {
+            			id 'fmohr'
+            			name 'Felix Mohr'
+            			email 'felix.mohr@upb.de'
+          			}
+          			developer {
+          				id 'mwever'    
+          			    name 'Marcel Wever'
+          			    email 'marcel.wever@upb.de'
+          			}
+          			developer {
+          			    id 'ahetzer'
+          			    name 'Alexander Hetzer'
+          			    email 'alexander.hetzer@upb.de'
+          			}
+        		}
+      		}
+    	}
+  	}
 }

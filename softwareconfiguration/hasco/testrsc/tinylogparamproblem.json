@@ -1,0 +1,25 @@
+{
+	"repository": "SimpleRecursiveProblem",
+	"components": [
+		{
+			"name": "A",
+			"requiredInterface": [],
+			"providedInterface": [ "IFace" ],
+			"parameter": [
+				{
+					"name": "c",
+					"type": "double-log",
+      "default" : 1.0,
+      "min" : 1.0E-7,
+      "max" : 1.0E7,
+      "refineSplits" : 120,
+      "minInterval" : 1000000,
+      "basis": 1.2,
+      "includeExtremals": true,
+      "focus": 0.0
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

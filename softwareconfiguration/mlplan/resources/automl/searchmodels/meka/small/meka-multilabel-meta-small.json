@@ -1,0 +1,25 @@
+{
+	"repository": "MEKA_META",
+	"include": [],
+	"parameters": [
+	],
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.meta.BaggingML",
+			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
+			"requiredInterface": [ { "id": "W", "name": "BasicMLClassifier" } ],
+			"parameter": [
+				{
+					"name": "I",
+					"comment": "Sets the number of models (default 10)",
+					"type": "int",
+					"default": 10,
+					"min": 2,
+					"max": 20,
+					"refineSplits": 2,
+					"minInterval": 1
+				}
+			]
+		}
+	]
+}

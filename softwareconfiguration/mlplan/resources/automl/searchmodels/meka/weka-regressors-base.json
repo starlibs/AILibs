@@ -1,0 +1,95 @@
+{
+	"repository": "Auto-WEKA",
+	"components": [
+		{
+			"name": "weka.classifiers.trees.M5P",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"BaseRegressor",
+				"Regressor"
+			],
+			"parameter": [
+				{
+					"name": "N",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "M",
+					"type": "int",
+					"default": 4.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "U",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "R",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": [
+			]
+		},
+		{
+			"name": "weka.classifiers.functions.SimpleLinearRegression",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"BaseRegressor",
+				"Regressor"
+			],
+			"parameter": [
+			],
+			"dependencies": [
+			]
+		},
+		{
+			"name": "weka.classifiers.rules.M5Rules",
+			"requiredInterface": [
+			],
+			"providedInterface": [
+				"AbstractRegressor",
+				"BaseRegressor",
+				"Regressor"
+			],
+			"parameter": [
+				{
+					"name": "N",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "M",
+					"type": "int",
+					"default": 4.0,
+					"min": 1.0,
+					"max": 64.0,
+					"refineSplits": 8,
+					"minInterval": 10
+				},
+				{
+					"name": "U",
+					"type": "boolean",
+					"default": "true"
+				},
+				{
+					"name": "R",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": [
+			]
+		}
+	]
+}

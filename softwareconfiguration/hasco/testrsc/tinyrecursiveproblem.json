@@ -1,0 +1,64 @@
+{
+	"repository": "SimpleRecursiveProblem",
+	"components": [
+		{
+			"name": "A",
+			"requiredInterface": [
+				{
+					"id": "ri",
+					"name": "Q"
+				}
+			],
+			"providedInterface": [
+				"IFace"
+			],
+			"parameter": [
+				{
+					"name": "a",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "B",
+			"requiredInterface": [
+				{
+					"id": "rid",
+					"name": "R"
+				}
+			],
+			"providedInterface": [
+				"Q"
+			],
+			"parameter": [
+				{
+					"name": "b",
+					"type": "boolean",
+					"default": "true"
+				}
+			],
+			"dependencies": []
+		},
+		{
+			"name": "C",
+			"requiredInterface": [],
+			"providedInterface": [
+				"R"
+			],
+			"parameter": [
+				{
+					"name": "c",
+					"type": "int",
+					"min": 0,
+					"max": 10,
+					"default": "3",
+					"refineSplits": 10,
+					"minInterval": 1
+				}
+			],
+			"dependencies": []
+		}
+	]
+}

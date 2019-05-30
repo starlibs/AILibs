@@ -1,0 +1,40 @@
+{
+	"repository": "MEKA Mulan Bridge",
+	"include": [
+	],
+	"parameters": [
+	],
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.MULAN",
+			"providedInterface": [
+				"MLClassifier",
+				"BasicMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "baselearner",
+					"name": "Classifier"
+				}
+			],
+			"parameter": [
+				{
+					"name": "_S",
+					"comment": "Method Name default: RAkEL1; HOMER is discarded in the set of values",
+					"type": "cat",
+					"default": "RAkEL1",
+					"values": [
+						"RAkEL1",
+						"BR",
+						"LP",
+						"CLR",
+						"RAkELn",
+						"MLkNN",
+						"IBLR_ML",
+						"BPMLL"
+					]
+				}
+			]
+		}
+	]
+}

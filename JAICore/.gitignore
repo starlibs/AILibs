@@ -231,6 +231,7 @@ gradle-app.setting
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
 
+.sonarlint
 
 # End of https://www.gitignore.io/api/java,linux,macos,gradle,windows,eclipse,intellij
 

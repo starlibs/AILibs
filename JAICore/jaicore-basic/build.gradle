@@ -1,21 +1,60 @@
-plugins {
-	id "com.github.hauner.jarTest" version "1.0.1"
+dependencies {
+  compile ('org.apache.commons:commons-math3:3.6.1')
+  compile ('org.apache.commons:commons-lang3:3.9')
+  compile ('it.unimi.dsi:fastutil:8.2.1')
+  compile ('com.fasterxml.jackson.core:jackson-databind:2.9.7')
+  testCompile 'org.awaitility:awaitility:3.1.6'
 }
 
-sourceSets {
-    main {
-      java {
-          srcDir 'src'
-      }
-    }
-    test {
-     	java {
-     		srcDir 'test'
-     	}
-    }
-}
-dependencies {
-	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
-	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.10'
-  	compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}	
+      		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+      		}
+
+      		pom.project {
+        		name 'JAICore-Basic'
+        		packaging 'jar'
+        		// optionally artifactId can be defined here 
+        		description 'Fundamental utils required by many other starlibs projects.'
+        		url 'https://libs.ai'
+
+        		scm {
+          			connection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			developerConnection 'scm:git:https://github.com/fmohr/AILibs.git'
+          			url 'https://github.com/fmohr/AILibs'
+        		}
+
+        		licenses {
+          			license {
+            			name 'GPLv3'
+            			url 'https://www.gnu.org/licenses/gpl-3.0.en.html'
+          			}
+        		}
+
+        		developers {
+          			developer {
+            			id 'fmohr'
+            			name 'Felix Mohr'
+            			email 'felix.mohr@upb.de'
+          			}
+          			developer {
+          				id 'mwever'    
+          			    name 'Marcel Wever'
+          			    email 'marcel.wever@upb.de'
+          			}
+          			developer {
+          			    id 'ahetzer'
+          			    name 'Alexander Hetzer'
+          			    email 'alexander.hetzer@upb.de'
+          			}
+        		}
+      		}
+    	}
+  	}
 }

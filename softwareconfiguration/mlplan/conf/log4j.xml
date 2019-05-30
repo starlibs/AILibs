@@ -2,84 +2,247 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 
 <log4j:configuration>
-	<appender name="console" class="org.apache.log4j.ConsoleAppender">
-		<param name="Target" value="System.out" />
-		<param name="Threshold" value="debug" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
-				- %m%n" /> -->
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
-		</layout>
-	</appender>
+  <appender name="console" class="org.apache.log4j.ConsoleAppender">
+    <param name="Target" value="System.out" />
+    <param name="Threshold" value="trace" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
+        - %m%n" /> -->
+      <param name="ConversionPattern" value="%-5p [%t] [%c.%M (%C:%L)] - %m%n" />
+    </layout>
+  </appender>
 
-	<appender name="infoFileAppender" class="org.apache.log4j.FileAppender">
-		<param name="File" value="logs/info.log" />
-		<param name="Threshold" value="INFO" />
-		<param name="Append" value="false" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
-		</layout>
-	</appender>
+  <appender name="infoFileAppender" class="org.apache.log4j.FileAppender">
+    <param name="File" value="logs/info.log" />
+    <param name="Threshold" value="INFO" />
+    <param name="Append" value="false" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
+    </layout>
+  </appender>
 
-	<appender name="errFileAppender" class="org.apache.log4j.FileAppender">
-		<param name="File" value="logs/error.log" />
-		<param name="Threshold" value="ERROR" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
-		</layout>
-	</appender>
+  <appender name="errFileAppender" class="org.apache.log4j.FileAppender">
+    <param name="File" value="logs/error.log" />
+    <param name="Threshold" value="ERROR" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
+    </layout>
+  </appender>
+  
+  <appender name="warnFileAppender" class="org.apache.log4j.FileAppender">
+    <param name="File" value="logs/warn.log" />
+    <param name="Threshold" value="WARN" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
+    </layout>
+  </appender>
 
-	<appender name="warnFileAppender" class="org.apache.log4j.FileAppender">
-		<param name="File" value="logs/warn.log" />
-		<param name="Threshold" value="WARN" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
-		</layout>
-	</appender>
+  <appender name="traceFileAppender" class="org.apache.log4j.FileAppender">
+    <param name="File" value="logs/trace.log" />
+    <param name="Threshold" value="TRACE" />
+    <param name="Append" value="false" />
+    <layout class="org.apache.log4j.PatternLayout">
+      <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
+    </layout>
+  </appender>
 
-	<appender name="traceFileAppender" class="org.apache.log4j.FileAppender">
-		<param name="File" value="logs/trace.log" />
-		<param name="Threshold" value="TRACE" />
-		<param name="Append" value="false" />
-		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
-		</layout>
-	</appender>
-
-	<logger name="jaicore">
-		<level value="warn" />
-		<appender-ref ref="console" />
-		<appender-ref ref="infoFileAppender" />
-		<appender-ref ref="warnFileAppender" />
-		<appender-ref ref="errFileAppender" />
-		<appender-ref ref="traceFileAppender" />
-	</logger>
-
-	<logger name="de.upb.crc901">
-		<level value="warn" />
-		<appender-ref ref="console" />
-		<appender-ref ref="infoFileAppender" />
-		<appender-ref ref="warnFileAppender" />
-		<appender-ref ref="errFileAppender" />
-		<appender-ref ref="traceFileAppender" />
-	</logger>
-	
-	<logger name="hasco">
-		<level value="warn" />
-		<appender-ref ref="console" />
-	</logger>
-	
-	<logger name="mlplan">
-		<level value="debug" />
-		<appender-ref ref="console" />
-		<appender-ref ref="infoFileAppender" />
-	</logger>
-	
-	<logger name="jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch">
-		<level value="off" />
-	</logger>
-	
-	<logger name="mlplan.2phasehasco.optimizer.hasco">
+  <logger name="de.upb.crc901">
     <level value="warn" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="jaicore">
+    <level value="warn" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+   <level value="trace" />
+  </logger>
+    
+  <logger name="de.upb.crc901.automl.AutoMLAlgorithmTester">
+    <level value="info" />
+  </logger>
+  
+  <logger name="de.upb.crc901.automl.AutoMLAlgorithmResultProductionTester">
+    <level value="info" />
+  </logger>
+    
+  <logger name="de.upb.crc901.mlplan.core">
+  	 <level value="debug" />
+  </logger>
+  
+  <logger name="MLPlanCLI">
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="jaicore.graphvisualizer">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.interrupt">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="hasco">
+    <level value="warn" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="sklmlplanc">
+    <level value="warn" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  <logger name="sklmlplanc.mlplan.optimizingfactory">
+    <level value="warn" />
+  </logger>
+  <logger name="sklmlplanc.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
+    <level value="debug" />
+  </logger>
+  
+  <logger name="mlplan">
+    <level value="info" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="ml2plan">
+    <level value="info" />
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="hasco.core.Util">
+  	 <level value="warn" />
+  </logger>
+  
+  <logger name="hasco.core.IsRefinementCompletedPredicate">
+  	 <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo">
+    <level value="info" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+    <level value="info" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator.benchmark">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search._orgraphsearch._algorithm">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.treepolicy">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator.secondary.randomsearch">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
+  	<level value="warn" />
+  </logger>
+  
+  <logger name="de.upb.crc901.mlplan.examples.multilabel.meka.ML2PlanAutoMLCExperimenter">
+  	<level value="info" />
+  </logger>
+  
+  <!-- configuration for ML-Plan Test logging -->
+  <logger name="testedalgorithm">
+    <level value="info" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+    <level value="info" />
+  </logger>
+  
+  <!-- configuration for ML-Plan 4 big data Test logging -->
+  <logger name="testedalgorithm.mlplan.optimizingfactory">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.solutionevaluator">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search">
+    <level value="info" />
+  </logger>
+  
+  <logger name="testedalgorithm.mlplan.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
+    <level value="info" />
   </logger>
 </log4j:configuration>

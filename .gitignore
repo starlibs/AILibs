@@ -1,6 +1,9 @@
 
 # Created by https://www.gitignore.io/api/java,linux,macos,gradle,windows,eclipse,intellij
 
+### VS Code ###
+.vscode/
+
 ### Eclipse ###
 
 .metadata
@@ -244,6 +247,10 @@ gradle-app.setting
 
 # End of https://www.gitignore.io/api/java,linux,macos,gradle,windows,eclipse,intellij
 
+# ignore sonarlint
+.sonarlint
+
 # Generated files by running skikitwrapper
 JAICore/jaicore-ml/tmp/
 JAICore/jaicore-ml/model_dumps/
+JAICore/jaicore-ml/testsrc/ml/scikitwrapper/importfolder_test/__pycache__/

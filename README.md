@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/fmohr/AILibs.svg?branch=dev)](https://travis-ci.org/fmohr/AILibs)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=alert_status)](https://sonarcloud.io/dashboard/index/starlibs.ailibs)
 
 
 # AILibs
@@ -38,3 +39,27 @@ Navigate to the folder where you cloned this repository and run
 ```
 This automatically creates the eclipse project files and configures the dependencies among the projects.
 Then open Eclipse and go to the import menu, e.g., in the package manager. Choose to import *Existing Projects into Workspace*, select the folder where you cloned the repository, and make sure to check the *Search for nested projects* option.
+
+
+## AILibs JavaDoc API
+
+### JAICore
+
+* [JAICore:jaicore-basic](JAICore/jaicore-basic/docs/javadoc/)
+* [JAICore:jaicore-concurrent](JAICore/jaicore-concurrent/docs/javadoc/)
+* [JAICore:jaicore-ea](JAICore/jaicore-ea/docs/javadoc/)
+* [JAICore:jaicore-experiments](JAICore/jaicore-experiments/docs/javadoc/)
+* [JAICore:jaicore-graph](JAICore/jaicore-graph/docs/javadoc/)
+* [JAICore:jaicore-graphvisualizer](JAICore/jaicore-graphvisualizer/docs/javadoc/)
+* [JAICore:jaicore-logic](JAICore/jaicore-logic/docs/javadoc/)
+* [JAICore:jaicore-math](JAICore/jaicore-math/docs/javadoc/)
+* [JAICore:jaicore-ml](JAICore/jaicore-ml/docs/javadoc/)
+* [JAICore:jaicore-planning](JAICore/jaicore-planning/docs/javadoc/)
+* [JAICore:jaicore-processes](JAICore/jaicore-processes/docs/javadoc/)
+* [JAICore:jaicore-search](JAICore/jaicore-search/docs/javadoc/)
+* [JAICore:jaicore-services](JAICore/jaicore-services/docs/javadoc/)
+
+### Software Configuration
+
+* [HASCO](softwareconfiguration/hasco/docs/javadoc/)
+* [ML-Plan](softwareconfiguration/mlplan/docs/javadoc/)

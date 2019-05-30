@@ -1,0 +1,16 @@
+dependencies {
+    compile project(':mlplan')
+    
+    // TODO: Check if we need all of them
+    compile project(':JAICore:jaicore-logic')
+	compile project(':JAICore:jaicore-basic')
+	compile project(':JAICore:jaicore-planning')
+	compile project(':JAICore:jaicore-search')
+	compile project(':JAICore:jaicore-ml')
+	compile project(':JAICore:jaicore-experiments')
+
+	compile 'com.google.code.gson:gson:2.8.5'
+	compile 'org.xerial:sqlite-jdbc:3.23.1'
+	compile 'org.nd4j:nd4j-native-platform:1.0.0-beta2'
+}
+

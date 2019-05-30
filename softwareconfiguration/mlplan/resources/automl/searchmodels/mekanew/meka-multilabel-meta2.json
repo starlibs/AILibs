@@ -1,0 +1,138 @@
+{
+	"repository": "MEKA_META",
+	"include": [],
+	"parameters": [
+	],
+	"components": [
+		{
+			"name": "meka.classifiers.multilabel.Maniac",
+			"providedInterface": [
+				"MLClassifier",
+				"BasicMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+				{
+					"name": "compression",
+					"comment": "Compression factor of the autoencoders, each level of autoencoders will compress the labels to factor times previous layer size. (default: 0.85)",
+					"type": "double",
+					"default": 0.85,
+					"min": 0.01,
+					"max": 0.99,
+					"minInterval": 0.05,
+					"refineSplits": 2
+				},
+				{
+					"name": "numberAutoencoders",
+					"comment": "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+					"type": "int",
+					"default": 4,
+					"min": 1,
+					"max": 10,
+					"minInterval": 1,
+					"refineSplits": 2
+				},
+				{
+					"name": "optimizeAE",
+					"comment": "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+					"type": "boolean",
+					"default": "false"
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.DeepML",
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier","ProblemTransformationMethod"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+				{
+					"comment": "Sets the number of RBMs default: 2",
+					"name": "N",
+					"type": "int",
+					"default": 2,
+					"min": 2,
+					"max": 5,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				{
+					"comment": "Sets the number of hidden units default: 10",
+					"name": "H",
+					"type": "int",
+					"default": 10,
+					"min": 5,
+					"max": 100,
+					"refineSplits": 2,
+					"minInterval": 5
+				},
+				{
+					"comment": "Sets the maximum number of epochs default: 1000 (auto_cut_out)",
+					"name": "E",
+					"type": "int",
+					"default": 1000,
+					"min": 100,
+					"max": 10000,
+					"refineSplits": 2,
+					"minInterval": 100
+				},
+				{
+					"comment": "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+					"name": "r",
+					"type": "double",
+					"default": 0.1,
+					"min": 1E-5,
+					"max": 0.1,
+					"refineSplits": 2,
+					"minInterval": 1E-5
+				},
+				{
+					"name": "m",
+					"comment": "Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 0.1,
+					"max": 0.9,
+					"refineSplits": 2,
+					"minInterval": 0.05
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.FilteredClassifier",
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+				{
+					"name": "F",
+					"comment": "The number of iterations of EM to carry out (default: 10). REMARK: Here we could also use a subcomponent for filters!",
+					"type": "cat",
+					"default": "weka.filters.supervised.attribute.Discretize -R first_last -precision 6",
+					"values": [
+						"weka.filters.supervised.attribute.Discretize -R first_last -precision 6"
+					]
+				}
+			]
+		}
+	]
+}

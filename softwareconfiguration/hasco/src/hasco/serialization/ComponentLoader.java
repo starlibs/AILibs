@@ -16,8 +16,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,41 +33,22 @@ import jaicore.basic.sets.SetUtil.Pair;
 
 public class ComponentLoader {
 
-	private static final Logger L = LoggerFactory.getLogger(ComponentLoader.class);
-
-	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
-	private final Collection<Component> components = new ArrayList<>();
+	private Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs = new HashMap<>();
+	private Collection<Component> components = new ArrayList<>();
 	private final Set<String> parsedFiles = new HashSet<>();
 	private final ObjectMapper objectMapper = new ObjectMapper();
-	private final Map<String, JsonNode> parameterMap = new HashMap<>();
-	private final Set<String> uniqueComponentNames = new HashSet<>();
-
-	private final Set<String> requiredInterfaces = new HashSet<>();
-	private final Set<String> providedInterfaces = new HashSet<>();
-
-	private final Map<String, JsonNode> componentMap = new HashMap<>();
-	private final boolean checkRequiredInterfacesResolvable;
+	private Map<String, JsonNode> parameterMap = new HashMap<>();
+	private Set<String> uniqueComponentNames = new HashSet<>();
 
 	public ComponentLoader() {
-		this(false);
-	}
-
-	public ComponentLoader(final boolean checkRequiredInterfacesResolvable) {
-		this.checkRequiredInterfacesResolvable = checkRequiredInterfacesResolvable;
 	}
 
 	public ComponentLoader(final File jsonFile) throws IOException {
-		this();
-		this.loadComponents(jsonFile);
-	}
-
-	public ComponentLoader(final File jsonFile, final boolean checkRequiredInterfacesResolvable) throws IOException {
-		this(checkRequiredInterfacesResolvable);
-		this.loadComponents(jsonFile);
+		this.parseFile(jsonFile);
 	}
 
 	private void parseFile(final File jsonFile) throws IOException {
-		L.debug("Parse file {}...", jsonFile.getAbsolutePath());
+		System.out.println("Parse file " + jsonFile.getAbsolutePath());
 		StringBuilder stringDescriptionSB = new StringBuilder();
 		String line;
 		try (BufferedReader br = new BufferedReader(new FileReader(jsonFile))) {
@@ -113,14 +92,22 @@ public class ComponentLoader {
 				}
 			}
 		}
+		readFromJson(rootNode);
+	}
+	
+	public void readFromString(String json) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		readFromJson(mapper.readTree(json));
+	}
+
+	private void readFromJson(JsonNode rootNode) throws IOException {
 		// get the array of components
 		JsonNode components = rootNode.path("components");
 		if (components != null) {
+
 			Component c;
 			for (JsonNode component : components) {
 				c = new Component(component.get("name").asText());
-				this.componentMap.put(c.getName(), component);
-
 				if (!this.uniqueComponentNames.add(c.getName())) {
 					throw new IllegalArgumentException("Noticed a component with duplicative component name: " + c.getName());
 				}
@@ -360,64 +347,29 @@ public class ComponentLoader {
 
 				this.paramConfigs.put(c, paramConfig);
 				this.components.add(c);
-
-				this.requiredInterfaces.addAll(c.getRequiredInterfaces().values());
-				this.providedInterfaces.addAll(c.getProvidedInterfaces());
 			}
 		}
 	}
 
-	public void loadComponents(final File componentDescriptionFile) throws IOException, UnresolvableRequiredInterfaceException {
+	public void loadComponents(final File componentDescriptionFile) throws IOException {
 		this.paramConfigs.clear();
 		this.components.clear();
 		this.uniqueComponentNames.clear();
-		this.requiredInterfaces.clear();
-		this.providedInterfaces.clear();
 
 		this.parseFile(componentDescriptionFile);
-
-		if (this.checkRequiredInterfacesResolvable && !this.getUnresolvableRequiredInterfaces().isEmpty()) {
-			throw new UnresolvableRequiredInterfaceException();
-		}
 	}
 
-	/**
-	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
-	 */
-	public Collection<String> getUnresolvableRequiredInterfaces() {
-		return SetUtil.difference(this.requiredInterfaces, this.providedInterfaces);
-	}
-
-	/**
-	 * @param componentName
-	 *            The name of the component.
-	 * @return Returns the collection of required interfaces that cannot be resolved by a provided interface.
-	 */
-	public JsonNode getComponentAsJsonNode(final String componentName) {
-		return this.componentMap.get(componentName);
-	}
-
-	/**
-	 * @return The map describing for each component individually how its parameters may be refined.
-	 */
 	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getParamConfigs() {
 		return this.paramConfigs;
 	}
 
-	/**
-	 * @return The collection of parsed components.
-	 */
 	public Collection<Component> getComponents() {
 		return this.components;
 	}
 
-	public static void main(final String[] args) throws IOException, UnresolvableRequiredInterfaceException {
+	public static void main(final String[] args) throws IOException {
 		ComponentLoader cl = new ComponentLoader();
 		cl.loadComponents(new File("complexMLComponents.json"));
-	}
-
-	public Map<String, JsonNode> getJsonNodeComponents() {
-		return this.componentMap;
 	}
 
 }

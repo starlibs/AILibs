@@ -8,7 +8,7 @@
 		<layout class="org.apache.log4j.PatternLayout">
 			<!-- <param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c{1}.%M:%L] 
 				- %m%n" /> -->
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+			<param name="ConversionPattern" value="%-5p [%t] [%c.%M (%C:%L)] - %m%n" />
 		</layout>
 	</appender>
 
@@ -42,7 +42,7 @@
 		<param name="Threshold" value="TRACE" />
 		<param name="Append" value="false" />
 		<layout class="org.apache.log4j.PatternLayout">
-			<param name="ConversionPattern" value="%-5p [%t] [%c{1}.%M:%L] - %m%n" />
+			<param name="ConversionPattern" value="(%d{ISO8601}) %-5p [%t] [%c.%M (%C:%L)] - %m%n" />
 		</layout>
 	</appender>
 
@@ -55,11 +55,63 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="jaicore.logic">
-		<level value="warn" />
+	<logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+	 <level value="warn" />
 	</logger>
 	
-	<logger name="jaicore.search.algorithms.standard">
-		<level value="warn" />
-	</logger>
+  <logger name="testedalgorithm">
+    <level value="trace" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="testedalgorithm._orgraphsearch._algorithm">
+    <level value="trace" />
+  </logger>
+  
+  <logger name="testedalgorithm.nodeevaluator">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+    <level value="info" />
+  </logger>
+  
+  <logger name="jaicore.basic.algorithm.SolutionCandidateIteratorTester">
+    <level value="info" />
+  </logger>
+  
+  <logger name="jaicore.interrupt">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.timing">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.concurrent">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="jaicore.search.algorithms.standard.bestfirst.RandomCompletionNodeEvaluatorTester">
+    <level value="debug" />
+  </logger>
+  
+  <logger name="testednodeevaluator">
+    <level value="trace" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+  
+  <logger name="testednodeevaluator.completer">
+  	<level value="warn" />
+  </logger>
 </log4j:configuration>

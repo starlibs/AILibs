@@ -1,3 +1,4 @@
+
 package hasco.core;
 
 import java.util.ArrayDeque;
@@ -284,6 +285,32 @@ public class Util {
 			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
 			for (String requiredInterfaceName : requiredInterfaceNames) {
 				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
+				componentInstances.push(instance);
+			}
+		}
+		return components;
+	}
+	
+	/**
+	 * Computes a list of all component instances of the given composition.
+	 * 
+	 * @param composition
+	 * @return List of components in right to left depth-first order
+	 */
+	public static List<ComponentInstance> getComponentInstancesOfComposition(ComponentInstance composition) {
+		List<ComponentInstance> components = new LinkedList<ComponentInstance>();
+		Deque<ComponentInstance> componentInstances = new ArrayDeque<ComponentInstance>();
+		componentInstances.push(composition);
+		ComponentInstance curInstance;
+		while (!componentInstances.isEmpty()) {
+			curInstance = componentInstances.pop();
+			components.add(curInstance);
+			LinkedHashMap<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			for (String requiredInterfaceName : requiredInterfaceNames) {
+				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces()
+						.get(requiredInterfaceName);
 				componentInstances.push(instance);
 			}
 		}

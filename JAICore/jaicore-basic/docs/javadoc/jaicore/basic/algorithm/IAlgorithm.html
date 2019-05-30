@@ -1,0 +1,508 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>IAlgorithm (jaicore-basic 0.0.1-SNAPSHOT API)</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+<script type="text/javascript" src="../../../script.js"></script>
+</head>
+<body>
+<script type="text/javascript"><!--
+    try {
+        if (location.href.indexOf('is-external=true') == -1) {
+            parent.document.title="IAlgorithm (jaicore-basic 0.0.1-SNAPSHOT API)";
+        }
+    }
+    catch(err) {
+    }
+//-->
+var methods = {"i0":6,"i1":6,"i2":6,"i3":6,"i4":6,"i5":6,"i6":6,"i7":6,"i8":6,"i9":6,"i10":6,"i11":6};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar.top">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.top.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-all.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?jaicore/basic/algorithm/IAlgorithm.html" target="_top">Frames</a></li>
+<li><a href="IAlgorithm.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">jaicore.basic.algorithm</div>
+<h2 title="Interface IAlgorithm" class="title">Interface IAlgorithm&lt;I,O&gt;</h2>
+</div>
+<div class="contentContainer">
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt><span class="paramLabel">Type Parameters:</span></dt>
+<dd><code>I</code> - class of which inputs stems from</dd>
+<dd><code>O</code> - class of which solution candidates and the eventually returned result stem from</dd>
+</dl>
+<dl>
+<dt>All Superinterfaces:</dt>
+<dd>java.util.concurrent.Callable&lt;O&gt;, <a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a>, java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;, java.util.Iterator&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;</dd>
+</dl>
+<dl>
+<dt>All Known Subinterfaces:</dt>
+<dd><a href="../../../jaicore/basic/algorithm/IOptimizationAlgorithm.html" title="interface in jaicore.basic.algorithm">IOptimizationAlgorithm</a>&lt;I,O,V&gt;, <a href="../../../jaicore/basic/algorithm/ISolutionCandidateIterator.html" title="interface in jaicore.basic.algorithm">ISolutionCandidateIterator</a>&lt;I,O&gt;</dd>
+</dl>
+<dl>
+<dt>All Known Implementing Classes:</dt>
+<dd><a href="../../../jaicore/basic/algorithm/AAlgorithm.html" title="class in jaicore.basic.algorithm">AAlgorithm</a>, <a href="../../../jaicore/basic/algorithm/AOptimizer.html" title="class in jaicore.basic.algorithm">AOptimizer</a>, <a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="class in jaicore.basic.algorithm">ASolutionCandidateIterator</a>, <a href="../../../jaicore/basic/sets/LDSRelationComputer.html" title="class in jaicore.basic.sets">LDSRelationComputer</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public interface <span class="typeNameLabel">IAlgorithm&lt;I,O&gt;</span>
+extends java.lang.Iterable&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;, java.util.Iterator&lt;<a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&gt;, java.util.concurrent.Callable&lt;O&gt;, <a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a></pre>
+<div class="block">The algorithms should actually also be interruptible, but since this is often not the case,
+ we require the cancel method to ensure that the authors of the algorithms provide a mechanism
+ to stop the algorithm and free the used resources.
+
+ Implementation of both Iterable and Iterator: We envision that an object of an algorithm really
+ only represents one run, so there is really no reason to have an additional object only to hold
+ the state.</div>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t3" class="tableTab"><span><a href="javascript:show(4);">Abstract Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="type parameter in IAlgorithm">O</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#call--">call</a></span>()</code>
+<div class="block">Overrides the call of Callable to restrict the set of allowed exceptions</div>
+</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html" title="interface in jaicore.basic.algorithm">IAlgorithmConfig</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getConfig--">getConfig</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>java.lang.String</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getId--">getId</a></span>()</code>
+<div class="block">globally unique identifier for the algorithm run</div>
+</td>
+</tr>
+<tr id="i3" class="rowColor">
+<td class="colFirst"><code><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="type parameter in IAlgorithm">I</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getInput--">getInput</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i4" class="altColor">
+<td class="colFirst"><code>int</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getNumCPUs--">getNumCPUs</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i5" class="rowColor">
+<td class="colFirst"><code><a href="../../../jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#getTimeout--">getTimeout</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i6" class="altColor">
+<td class="colFirst"><code><a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a></code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#nextWithException--">nextWithException</a></span>()</code>
+<div class="block">Continues the execution of the algorithm until the next event is emitted.</div>
+</td>
+</tr>
+<tr id="i7" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#registerListener-java.lang.Object-">registerListener</a></span>(java.lang.Object&nbsp;listener)</code>
+<div class="block">Registers a listener to the algorithm's event bus.</div>
+</td>
+</tr>
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setMaxNumThreads-int-">setMaxNumThreads</a></span>(int&nbsp;maxNumberOfThreads)</code>
+<div class="block">While setNumCPUs aims at telling the algorithm how many CPUs *should* be used for parallelization,
+ this method can be used to define a strict constraint on the number of threads that must be spawned
+ by the algorithm itself at most.</div>
+</td>
+</tr>
+<tr id="i9" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setNumCPUs-int-">setNumCPUs</a></span>(int&nbsp;numberOfCPUs)</code>&nbsp;</td>
+</tr>
+<tr id="i10" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setTimeout-long-java.util.concurrent.TimeUnit-">setTimeout</a></span>(long&nbsp;timeout,
+          java.util.concurrent.TimeUnit&nbsp;timeUnit)</code>
+<div class="block">Sets the timeout for the algorithm to the given value in the given time unit.</div>
+</td>
+</tr>
+<tr id="i11" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/basic/algorithm/IAlgorithm.html#setTimeout-jaicore.basic.TimeOut-">setTimeout</a></span>(<a href="../../../jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a>&nbsp;timeout)</code>&nbsp;</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.lang.Iterable</h3>
+<code>forEach, iterator, spliterator</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.Iterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.util.Iterator</h3>
+<code>forEachRemaining, hasNext, next, remove</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.Cancelable">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.<a href="../../../jaicore/basic/Cancelable.html" title="interface in jaicore.basic">Cancelable</a></h3>
+<code><a href="../../../jaicore/basic/Cancelable.html#cancel--">cancel</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="getInput--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getInput</h4>
+<pre><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="type parameter in IAlgorithm">I</a>&nbsp;getInput()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The input that has been given to the algorithm.</dd>
+</dl>
+</li>
+</ul>
+<a name="registerListener-java.lang.Object-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>registerListener</h4>
+<pre>void&nbsp;registerListener(java.lang.Object&nbsp;listener)</pre>
+<div class="block">Registers a listener to the algorithm's event bus.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>listener</code> - The listener to register.</dd>
+</dl>
+</li>
+</ul>
+<a name="getNumCPUs--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getNumCPUs</h4>
+<pre>int&nbsp;getNumCPUs()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The number of cpus (the amount of parallelization) that is allowed to be used by the algorithm.</dd>
+</dl>
+</li>
+</ul>
+<a name="setNumCPUs-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setNumCPUs</h4>
+<pre>void&nbsp;setNumCPUs(int&nbsp;numberOfCPUs)</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>numberOfCPUs</code> - The numer of cpus that is allowed to be used by the algorithm.</dd>
+</dl>
+</li>
+</ul>
+<a name="setMaxNumThreads-int-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setMaxNumThreads</h4>
+<pre>void&nbsp;setMaxNumThreads(int&nbsp;maxNumberOfThreads)</pre>
+<div class="block">While setNumCPUs aims at telling the algorithm how many CPUs *should* be used for parallelization,
+ this method can be used to define a strict constraint on the number of threads that must be spawned
+ by the algorithm itself at most. The motivation for this functionality is that, on some systems,
+ processes get killed if they consume too much CPU resources. This can usually be avoided if the
+ number of threads is limited (e.g. to the number of cores that may be used). <code>setNumCPUs</code>
+ does not put such a restriction, because this is unnecessarily limiting in environment where such
+ constraints do not exist.
+
+ If the value is set to 0, no own threads must be used at all. Note that this may not be possible for
+ some algorithms that need observers in the background.
+
+ If the value is set to -1, any restriction on the number of threads is removed.
+
+ Note that different algorithms may have different default behaviors if this number is not set.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>maxNumberOfThreads</code> - The maximum number of threads that may be spawned by the algorithm itself.</dd>
+</dl>
+</li>
+</ul>
+<a name="setTimeout-long-java.util.concurrent.TimeUnit-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setTimeout</h4>
+<pre>void&nbsp;setTimeout(long&nbsp;timeout,
+                java.util.concurrent.TimeUnit&nbsp;timeUnit)</pre>
+<div class="block">Sets the timeout for the algorithm to the given value in the given time unit.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>timeout</code> - The number of e.g. ms, seconds, minutes according to the given time unit.</dd>
+<dd><code>timeUnit</code> - The time unit for which the timeout variable will be interpreted.</dd>
+</dl>
+</li>
+</ul>
+<a name="setTimeout-jaicore.basic.TimeOut-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setTimeout</h4>
+<pre>void&nbsp;setTimeout(<a href="../../../jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a>&nbsp;timeout)</pre>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>timeout</code> - The timeout for the algorithm.</dd>
+</dl>
+</li>
+</ul>
+<a name="getTimeout--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getTimeout</h4>
+<pre><a href="../../../jaicore/basic/TimeOut.html" title="class in jaicore.basic">TimeOut</a>&nbsp;getTimeout()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The timeout for the algorithm.</dd>
+</dl>
+</li>
+</ul>
+<a name="nextWithException--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>nextWithException</h4>
+<pre><a href="../../../jaicore/basic/algorithm/events/AlgorithmEvent.html" title="interface in jaicore.basic.algorithm.events">AlgorithmEvent</a>&nbsp;nextWithException()
+                          throws java.lang.InterruptedException,
+                                 <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
+                                 <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a>,
+                                 <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></pre>
+<div class="block">Continues the execution of the algorithm until the next event is emitted.</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The next event occuring during the execution of the algorithm.</dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.Exception</code></dd>
+<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getConfig--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getConfig</h4>
+<pre><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html" title="interface in jaicore.basic.algorithm">IAlgorithmConfig</a>&nbsp;getConfig()</pre>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+<dd>The config interface to store parameters to the algorithm in.</dd>
+</dl>
+</li>
+</ul>
+<a name="call--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>call</h4>
+<pre><a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="type parameter in IAlgorithm">O</a>&nbsp;call()
+throws java.lang.InterruptedException,
+       <a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a>,
+       <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a>,
+       <a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></pre>
+<div class="block">Overrides the call of Callable to restrict the set of allowed exceptions</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>call</code>&nbsp;in interface&nbsp;<code>java.util.concurrent.Callable&lt;<a href="../../../jaicore/basic/algorithm/IAlgorithm.html" title="type parameter in IAlgorithm">O</a>&gt;</code></dd>
+<dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code>java.lang.InterruptedException</code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/AlgorithmExecutionCanceledException.html" title="class in jaicore.basic.algorithm">AlgorithmExecutionCanceledException</a></code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmTimeoutedException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmTimeoutedException</a></code></dd>
+<dd><code><a href="../../../jaicore/basic/algorithm/exceptions/AlgorithmException.html" title="class in jaicore.basic.algorithm.exceptions">AlgorithmException</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getId--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getId</h4>
+<pre>java.lang.String&nbsp;getId()</pre>
+<div class="block">globally unique identifier for the algorithm run</div>
+<dl>
+<dt><span class="returnLabel">Returns:</span></dt>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar.bottom">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.bottom.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-all.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../jaicore/basic/algorithm/ASolutionCandidateIterator.html" title="class in jaicore.basic.algorithm"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li><a href="../../../jaicore/basic/algorithm/IAlgorithmConfig.html" title="interface in jaicore.basic.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?jaicore/basic/algorithm/IAlgorithm.html" target="_top">Frames</a></li>
+<li><a href="IAlgorithm.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li>Constr&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>
