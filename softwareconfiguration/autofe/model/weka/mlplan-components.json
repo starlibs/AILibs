@@ -1,0 +1,67 @@
+{
+	"repository": "ML-Plan",
+	"components": [
+		{
+			"name": "weka.classifiers.trees.RandomTree",
+			"providedInterface": ["AbstractClassifier"],
+			"requiredInterface": [],
+			"parameter": [
+			]
+		},
+		
+		{
+			"name": "weka.classifiers.trees.RandomForest",
+			"providedInterface": ["AbstractClassifier"],
+			"requiredInterface": [],
+			"parameter": [ {
+			      "name" : "I",
+			      "type" : "int",
+			      "default" : 10.0,
+			      "min" : 2.0,
+			      "max" : 256.0,
+			      "refineSplits" : 8,
+			      "minInterval" : 10
+			}, {
+      			"name" : "featuresActivator",
+      			"type" : "cat",
+      			"default" : "0",
+      			"values" : [ "0", "1" ]
+    		}, {
+      			"name" : "K",
+      			"type" : "int",
+      			"default" : "0",
+      			"min" : 0.0,
+      			"max" : 0.0,
+      			"refineSplits" : 8,
+      			"minInterval" : 10
+    		}, {
+      			"name" : "depthActivator",
+      			"type" : "cat",
+      			"default" : "0",
+      			"values" : [ "0", "1" ]
+    		}, {
+      			"name" : "depth",
+      			"type" : "int",
+      			"default" : "0",
+      			"values" : [ "0" ],
+      			"min" : 0.0,
+      			"max" : 0.0,
+      			"refineSplits" : 8,
+      			"minInterval" : 10
+    		} ],
+	    "dependencies" : [ {
+	    		"pre" : "featuresActivator in {0}",
+	    		"post" : "K in {0}"
+	    	}, {
+	      		"pre" : "featuresActivator in {1}",
+	      		"post" : "K in [1.0,32.0]"
+	    	}, {
+	      		"pre" : "depthActivator in {0}",
+	      		"post" : "depth in {0}"
+	    	}, {
+	      		"pre" : "depthActivator in {1}",
+	      		"post" : "depth in [1.0,20.0]"
+	    	} ]
+		}
+	]
+}

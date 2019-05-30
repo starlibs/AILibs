@@ -1,8 +1,9 @@
 package hasco.variants.forwarddecomposition.twophase;
 
 import hasco.core.HASCOConfig;
+import jaicore.basic.algorithm.IRandomAlgorithmConfig;
 
-public interface HASCOWithRandomCompletionsConfig extends HASCOConfig {
+public interface HASCOWithRandomCompletionsConfig extends HASCOConfig, IRandomAlgorithmConfig {
 	public static final String K_RANDOM_COMPLETIONS_NUM = "hasco.random_completions.num";
 	public static final String K_RANDOM_COMPLETIONS_TIMEOUT_NODE = "hasco.random_completions.timeout_node";
 	public static final String K_RANDOM_COMPLETIONS_TIMEOUT_PATH = "hasco.random_completions.timeout_path";

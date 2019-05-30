@@ -1,6 +1,6 @@
 package autofe.db.sql;
 
-public class UnsupportedAttributeTypeException extends Exception {
+public class UnsupportedAttributeTypeException extends RuntimeException {
 
 	/**
 	 *

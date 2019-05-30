@@ -1,0 +1,54 @@
+plugins {
+	id 'eclipse-wtp'
+}
+
+dependencies {
+    compile project(':hasco')
+    compile project(':mlplan')
+    
+    // TODO: Check if we need all of them
+    compile project(':JAICore:jaicore-logic')
+	compile project(':JAICore:jaicore-basic')
+	compile project(':JAICore:jaicore-planning')
+	compile project(':JAICore:jaicore-search')
+	compile project(':JAICore:jaicore-ml')
+	compile project(':JAICore:jaicore-experiments')
+	
+	// Graph Stream
+	compile group: 'org.graphstream', name: 'gs-core', version: '1.1.1'
+	compile group: 'org.graphstream', name: 'gs-ui', version: '1.3'
+
+	// Basics
+	compile group: 'org.aeonbits.owner', name: 'owner-java8', version:'1.0.6'
+
+	// DB connector
+	compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.45'
+
+	// Jackson for JSON (used by JAICore but not contained in the JAR)
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0.pr4'
+	
+	// OpenML connector
+	compile group: 'org.openml', name: 'apiconnector', version: '1.0.18'
+
+	// servicification dependencies
+	compile group: 'de.upb.isys', name: 'interruptable-weka', version: '0.0.7'
+	compile group: 'de.upb.isys', name: 'meka', version: '0.0.1'
+	
+	//compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta2'
+	//compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta2'
+	//compile group: 'org.nd4j', name: 'nd4j-native', version: '1.0.0-beta2'
+	//compile group: 'org.nd4j', name: 'nd4j-cuda-8.0-platform', version: '0.9.1'
+	
+	// Catalano
+	compile files('lib/Catalano.Image.jar')
+	compile files('lib/Catalano.Core.jar')
+	compile files('lib/Catalano.Math.jar')
+	compile files('lib/Catalano.Statistics.jar')
+	
+	// Deeplearning4j
+	compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta2"
+	compile "org.deeplearning4j:deeplearning4j-zoo:1.0.0-beta2"
+	compile "org.nd4j:nd4j-native-platform:1.0.0-beta2"
+	
+	// compile "org.deeplearning4j:deeplearning4j-cuda-8.0:1.0.0-beta"
+}
