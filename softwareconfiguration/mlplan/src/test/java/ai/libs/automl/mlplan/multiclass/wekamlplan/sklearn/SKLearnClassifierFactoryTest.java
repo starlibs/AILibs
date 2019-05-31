@@ -15,12 +15,12 @@ import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.ComponentUtil;
+import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.model.ComponentUtil;
-import hasco.serialization.ComponentLoader;
 import weka.core.Instances;
 
 /**

@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import org.junit.Test;
 
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
@@ -17,8 +19,6 @@ import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import hasco.model.ComponentInstance;
-import hasco.serialization.ComponentLoader;
 import weka.attributeSelection.OneRAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.classifiers.functions.MultilayerPerceptron;

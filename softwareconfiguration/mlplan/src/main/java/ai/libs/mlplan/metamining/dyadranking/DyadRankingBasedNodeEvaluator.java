@@ -29,6 +29,10 @@ import org.apache.commons.collections.bidimap.DualHashBidiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.core.Util;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
@@ -64,10 +68,6 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
-import hasco.core.Util;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.serialization.ComponentLoader;
 import weka.core.Instances;
 
 /**

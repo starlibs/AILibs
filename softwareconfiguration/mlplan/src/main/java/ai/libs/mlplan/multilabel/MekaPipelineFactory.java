@@ -7,11 +7,11 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
-import hasco.exceptions.ComponentInstantiationFailedException;
-import hasco.model.ComponentInstance;
-import hasco.model.NumericParameterDomain;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;

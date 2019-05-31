@@ -14,6 +14,8 @@ import org.aeonbits.owner.ConfigCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -44,8 +46,6 @@ import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanMekaBuilder;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import hasco.model.ComponentInstance;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import meka.classifiers.multilabel.Evaluation;

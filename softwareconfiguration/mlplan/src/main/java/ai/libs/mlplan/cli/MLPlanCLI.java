@@ -19,6 +19,7 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
@@ -45,7 +46,6 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanMekaBuilder;
 import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import meka.classifiers.multilabel.MultiLabelClassifier;

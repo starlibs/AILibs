@@ -7,6 +7,16 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.core.HASCOFactory;
+import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.events.HASCOSolutionEvent;
+import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.optimizingfactory.OptimizingFactory;
+import ai.libs.hasco.optimizingfactory.OptimizingFactoryProblem;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
@@ -25,16 +35,6 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import hasco.core.HASCOFactory;
-import hasco.core.HASCOSolutionCandidate;
-import hasco.events.HASCOSolutionEvent;
-import hasco.exceptions.ComponentInstantiationFailedException;
-import hasco.model.ComponentInstance;
-import hasco.optimizingfactory.OptimizingFactory;
-import hasco.optimizingfactory.OptimizingFactoryProblem;
-import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
-import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
-import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 

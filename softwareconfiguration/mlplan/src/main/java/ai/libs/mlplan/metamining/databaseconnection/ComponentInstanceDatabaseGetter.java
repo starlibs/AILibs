@@ -8,12 +8,12 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.ComponentNotFoundException;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
-import hasco.model.ComponentInstance;
-import hasco.serialization.ComponentNotFoundException;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.classifiers.AbstractClassifier;

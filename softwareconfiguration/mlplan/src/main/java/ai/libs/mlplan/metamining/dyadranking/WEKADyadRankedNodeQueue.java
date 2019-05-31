@@ -5,6 +5,9 @@ import java.util.Collection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.core.Util;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IDyadRanker;
@@ -13,9 +16,6 @@ import ai.libs.jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
-import hasco.core.Util;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
 
 /**
  * A queue that uses a dyad ranker to rank WEKA pipelines.

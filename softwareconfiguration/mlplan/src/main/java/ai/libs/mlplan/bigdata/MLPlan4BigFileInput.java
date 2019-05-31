@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.basic.TimeOut;
@@ -33,7 +34,6 @@ import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
-import hasco.model.ComponentInstance;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Attribute;

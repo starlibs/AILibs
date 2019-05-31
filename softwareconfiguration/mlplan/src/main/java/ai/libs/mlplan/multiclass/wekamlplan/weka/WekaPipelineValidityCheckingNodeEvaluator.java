@@ -3,14 +3,14 @@ package ai.libs.mlplan.multiclass.wekamlplan.weka;
 import java.util.Arrays;
 import java.util.Collection;
 
+import ai.libs.hasco.core.Util;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
 import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
-import hasco.core.Util;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;

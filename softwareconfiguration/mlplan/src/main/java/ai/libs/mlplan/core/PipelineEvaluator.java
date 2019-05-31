@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.IInformedObjectEvaluatorExtension;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
@@ -15,8 +17,6 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
-import hasco.exceptions.ComponentInstantiationFailedException;
-import hasco.model.ComponentInstance;
 import weka.classifiers.Classifier;
 
 /**

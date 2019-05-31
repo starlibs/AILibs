@@ -15,12 +15,12 @@ import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hasco.core.Util;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.model.NumericParameterDomain;
-import hasco.model.Parameter;
-import hasco.model.ParameterRefinementConfiguration;
+import ai.libs.hasco.core.Util;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.NumericParameterDomain;
+import ai.libs.hasco.model.Parameter;
+import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import treeminer.util.TreeRepresentationUtils;
 
 public class ComponentInstanceStringConverter extends Thread {

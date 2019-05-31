@@ -2,14 +2,14 @@ package ai.libs.mlpipeline_evaluation;
 
 import java.io.File;
 
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.mlpipeline_evaluation.DatasetOrigin;
 import ai.libs.mlpipeline_evaluation.PipelineEvaluationCache;
 import ai.libs.mlpipeline_evaluation.PipelineEvaluationCacheConfigBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import hasco.model.ComponentInstance;
-import hasco.serialization.ComponentLoader;
 import weka.attributeSelection.OneRAttributeEval;
 import weka.attributeSelection.Ranker;
 import weka.classifiers.trees.RandomForest;

@@ -13,6 +13,11 @@ import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.core.HASCOFactory;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
+import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.TimeOut;
@@ -56,11 +61,6 @@ import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.multilabel.MekaPipelineFactory;
-import hasco.core.HASCOFactory;
-import hasco.model.Component;
-import hasco.serialization.ComponentLoader;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
-import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import weka.core.Instances;
 
 /**

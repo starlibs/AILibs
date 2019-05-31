@@ -3,10 +3,10 @@ package ai.libs.mlplan.core.events;
 import java.util.HashMap;
 import java.util.Map;
 
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
-import hasco.model.ComponentInstance;
 import weka.classifiers.Classifier;
 
 public class ClassifierFoundEvent extends ASolutionCandidateFoundEvent<Classifier> implements ScoredSolutionCandidateFoundEvent<Classifier, Double> {

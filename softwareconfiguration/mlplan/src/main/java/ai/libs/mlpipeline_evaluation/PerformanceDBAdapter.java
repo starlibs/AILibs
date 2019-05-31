@@ -22,9 +22,9 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
-import hasco.model.ComponentInstance;
 
 /**
  * Database adapter for performance data. Functionality to store and save

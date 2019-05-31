@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
@@ -24,7 +25,6 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;
 import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import weka.classifiers.Classifier;

@@ -9,13 +9,13 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
+import ai.libs.hasco.model.CategoricalParameterDomain;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
-import hasco.exceptions.ComponentInstantiationFailedException;
-import hasco.model.CategoricalParameterDomain;
-import hasco.model.ComponentInstance;
-import hasco.model.Parameter;
 import weka.classifiers.Classifier;
 
 /**

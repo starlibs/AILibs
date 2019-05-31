@@ -2,7 +2,7 @@ package autofe.algorithm.hasco;
 
 import org.aeonbits.owner.Config.Sources;
 
-import hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
 
 @Sources({ "file:conf/autofe.properties" })
 public interface HASCOFeatureEngineeringConfig extends HASCOWithRandomCompletionsConfig {

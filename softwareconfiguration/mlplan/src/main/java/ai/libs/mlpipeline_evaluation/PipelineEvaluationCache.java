@@ -9,10 +9,10 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.CompositionSerializer;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
-import hasco.model.ComponentInstance;
-import hasco.serialization.CompositionSerializer;
 import weka.classifiers.Classifier;
 import weka.core.converters.ConverterUtils.DataSource;
 

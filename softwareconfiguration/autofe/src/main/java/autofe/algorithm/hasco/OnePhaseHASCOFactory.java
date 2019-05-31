@@ -1,12 +1,12 @@
 package autofe.algorithm.hasco;
 
-import hasco.core.HASCOConfig;
-import hasco.core.HASCOSolutionCandidate;
-import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
-import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
-import hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
+import ai.libs.hasco.core.HASCOConfig;
+import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
+import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
+import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompletionsFactory;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.HASCOWithRandomCompletionsConfig;
 
 public class OnePhaseHASCOFactory extends HASCOViaFDAndBestFirstWithRandomCompletionsFactory implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<Double>, HASCOSolutionCandidate<Double>, Double> {
 

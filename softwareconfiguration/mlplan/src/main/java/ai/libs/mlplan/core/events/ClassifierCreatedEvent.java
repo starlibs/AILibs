@@ -1,7 +1,7 @@
 package ai.libs.mlplan.core.events;
 
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.events.IEvent;
-import hasco.model.ComponentInstance;
 import weka.classifiers.Classifier;
 
 public class ClassifierCreatedEvent implements IEvent {

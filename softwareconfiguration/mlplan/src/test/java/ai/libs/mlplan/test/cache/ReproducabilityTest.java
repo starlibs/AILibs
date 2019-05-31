@@ -13,14 +13,14 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.hasco.serialization.HASCOJacksonModule;
 import ai.libs.jaicore.ml.cache.Instruction;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import ai.libs.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
-import hasco.model.ComponentInstance;
-import hasco.serialization.ComponentLoader;
-import hasco.serialization.HASCOJacksonModule;
 import weka.classifiers.Classifier;
 
 /**

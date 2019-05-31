@@ -14,12 +14,12 @@ import java.util.TreeSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.EvaluatedSoftwareConfigurationSolution;
 import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.graph.Graph;
 import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.util.DataSet;
-import hasco.model.ComponentInstance;
-import hasco.model.EvaluatedSoftwareConfigurationSolution;
 
 @SuppressWarnings("serial")
 public class FilterPipeline implements IFilter, Serializable, EvaluatedSoftwareConfigurationSolution<Double> {

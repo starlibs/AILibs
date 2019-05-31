@@ -7,12 +7,12 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
-import hasco.model.ComponentInstance;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 

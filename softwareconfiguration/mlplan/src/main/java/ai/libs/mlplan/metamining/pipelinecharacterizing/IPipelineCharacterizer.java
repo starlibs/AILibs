@@ -2,8 +2,8 @@ package ai.libs.mlplan.metamining.pipelinecharacterizing;
 
 import java.util.List;
 
+import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import hasco.model.ComponentInstance;
 
 /**
  * Finds patterns in given MLPipelines. A pipeline characterizer first has to be

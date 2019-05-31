@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.concurrent.GlobalTimer;
@@ -30,7 +31,6 @@ import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import hasco.events.HASCOSolutionEvent;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.core.Instances;

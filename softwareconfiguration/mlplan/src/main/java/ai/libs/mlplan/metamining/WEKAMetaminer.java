@@ -10,6 +10,11 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.metamining.IMetaMiner;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.Parameter;
+import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
@@ -17,11 +22,6 @@ import ai.libs.mlplan.metamining.similaritymeasures.F3Optimizer;
 import ai.libs.mlplan.metamining.similaritymeasures.IHeterogenousSimilarityMeasureComputer;
 import ai.libs.mlplan.metamining.similaritymeasures.IRelativeRankMatrixComputer;
 import ai.libs.mlplan.metamining.similaritymeasures.RelativeRankMatricComputer;
-import hasco.metamining.IMetaMiner;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.model.Parameter;
-import hasco.model.ParameterRefinementConfiguration;
 import weka.core.Attribute;
 import weka.core.Instances;
 

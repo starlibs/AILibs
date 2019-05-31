@@ -8,12 +8,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.model.CategoricalParameterDomain;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import hasco.model.CategoricalParameterDomain;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.model.Parameter;
 
 /**
  * Characterizes a pipelines by the components that occur in it and the

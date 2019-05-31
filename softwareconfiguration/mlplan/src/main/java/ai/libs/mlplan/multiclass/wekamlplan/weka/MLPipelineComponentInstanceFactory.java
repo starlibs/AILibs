@@ -11,12 +11,12 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.ComponentNotFoundException;
+import ai.libs.hasco.serialization.ComponentUtils;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.SupervisedFilterSelector;
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.serialization.ComponentNotFoundException;
-import hasco.serialization.ComponentUtils;
 import weka.core.OptionHandler;
 
 /**

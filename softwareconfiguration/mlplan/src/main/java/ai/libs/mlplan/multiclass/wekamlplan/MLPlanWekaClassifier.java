@@ -10,6 +10,8 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
+import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.events.IEventEmitter;
@@ -24,8 +26,6 @@ import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import hasco.model.Component;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import weka.classifiers.Classifier;

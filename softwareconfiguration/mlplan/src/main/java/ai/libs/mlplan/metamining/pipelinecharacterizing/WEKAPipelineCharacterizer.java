@@ -13,10 +13,10 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hasco.model.Component;
-import hasco.model.ComponentInstance;
-import hasco.model.Parameter;
-import hasco.model.ParameterRefinementConfiguration;
+import ai.libs.hasco.model.Component;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.model.Parameter;
+import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
 import treeminer.util.TreeRepresentationUtils;

@@ -16,9 +16,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import hasco.model.ComponentInstance;
-import hasco.serialization.ComponentLoader;
-import hasco.serialization.HASCOJacksonModule;
+import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.hasco.serialization.ComponentLoader;
+import ai.libs.hasco.serialization.HASCOJacksonModule;
 
 /**
  * Tests the deserialization module for the {@link ComponentInstance} json

@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
+import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
+import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
@@ -21,8 +23,6 @@ import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.PipelineEvaluator;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import weka.core.Instances;
 
 /**
