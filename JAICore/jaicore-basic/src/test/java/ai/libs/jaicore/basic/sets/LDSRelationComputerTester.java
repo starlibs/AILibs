@@ -44,7 +44,7 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 		this.testRelation(this.getInfeasibleCompletelyPrunedRelationProblem(), 0);
 	}
 
-	private void testRelation(final RelationComputationProblem<Object> problem, final int expected) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException  {
+	private void testRelation(final RelationComputationProblem<Object> problem, final int expected) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		LDSRelationComputer<Object> cpc = new LDSRelationComputer<>(problem);
 		List<List<Object>> relation = cpc.call();
 		assertEquals(expected, relation.size()); // the size of the output must be correct
@@ -62,7 +62,7 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 	private int computeDefficiency(final List<? extends Collection<?>> collections, final List<?> tuple) {
 		int defficiency = 0;
 		for (int i = 0; i < tuple.size(); i++) {
-			List<?> ithSet = (List<?>)collections.get(i);
+			List<?> ithSet = (List<?>) collections.get(i);
 			defficiency += ithSet.indexOf(tuple.get(i));
 		}
 		return defficiency;
@@ -82,6 +82,6 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final Object problem) {
-		return new LDSRelationComputer<>((RelationComputationProblem<?>)problem);
+		return new LDSRelationComputer<>((RelationComputationProblem<?>) problem);
 	}
 }
