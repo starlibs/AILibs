@@ -20,8 +20,7 @@ public abstract class AProcessListener implements IProcessListener {
 			// While process is alive the output- and error stream is output.
 			while (process.isAlive()) {
 				if (Thread.currentThread().isInterrupted()) {
-					ProcessUtil.killProcess(ProcessUtil.getPID(process));
-					process.destroyForcibly();
+					ProcessUtil.killProcess(process);
 					throw new InterruptedException("Process execution was interrupted.");
 				}
 				String line;

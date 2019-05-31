@@ -5,6 +5,9 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sun.jna.Pointer;
 
 /**
@@ -14,6 +17,9 @@ import com.sun.jna.Pointer;
  *
  */
 public class ProcessUtil {
+
+	/* Logging */
+	private static final Logger logger = LoggerFactory.getLogger(ProcessUtil.class);
 
 	private ProcessUtil() {
 		/* Intentionally left blank, just prevent an instantiation of this class. */
@@ -63,8 +69,9 @@ public class ProcessUtil {
 	 * Gets the operating system's process id of the given process.
 	 * @param process The process for which the process id shall be looked up.
 	 * @return The process id of the given process.
+	 * @throws ProcessIDNotRetrievableException Thrown if the process id cannot be retrieved.
 	 */
-	public static int getPID(final Process process) {
+	public static int getPID(final Process process) throws ProcessIDNotRetrievableException {
 		Integer pid;
 		try {
 			if (process.getClass().getName().equals("java.lang.UNIXProcess")) {
@@ -88,7 +95,7 @@ public class ProcessUtil {
 				return pid;
 			}
 		} catch (Throwable e) {
-			e.printStackTrace();
+			throw new ProcessIDNotRetrievableException("Could not retrieve process ID", e);
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -113,6 +120,11 @@ public class ProcessUtil {
 	 * @throws IOException Thrown if the system command could not be issued.
 	 */
 	public static void killProcess(final Process process) throws IOException {
-		killProcess(getPID(process));
+		try {
+			killProcess(getPID(process));
+		} catch (ProcessIDNotRetrievableException e) {
+			logger.warn("Cannot kill process with certainty. Thus try to kill the process via the process' destroy method.", e);
+			process.destroyForcibly();
+		}
 	}
 }

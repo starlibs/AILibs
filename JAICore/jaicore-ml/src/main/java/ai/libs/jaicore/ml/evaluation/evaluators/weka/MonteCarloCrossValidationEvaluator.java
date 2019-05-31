@@ -1,6 +1,8 @@
 package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
@@ -13,6 +15,7 @@ import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.basic.events.IEvent;
 import ai.libs.jaicore.basic.events.IEventEmitter;
+import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
@@ -45,6 +48,8 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 	/* Can either compute the loss or cache it */
 	private final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator;
 
+	private final Map<Long, List<Instances>> splitCache = new HashMap<>();
+
 	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator, final IDatasetSplitter datasetSplitter, final int repeats, final Instances data, final double trainingPortion,
 			final long seed) {
 		super();
@@ -58,7 +63,7 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 		this.repeats = repeats;
 		this.splitBasedEvaluator = splitBasedEvaluator;
 		if (this.splitBasedEvaluator instanceof IEventEmitter) {
-			((IEventEmitter)splitBasedEvaluator).registerListener(this);
+			((IEventEmitter) splitBasedEvaluator).registerListener(this);
 		}
 		this.data = data;
 		this.trainingPortion = trainingPortion;
@@ -86,19 +91,24 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 
 		long startTimestamp = System.currentTimeMillis();
 		/* perform random stratified split */
-		this.logger.info("Starting MMCV evaluation of {} (Description: {})", pl.getClass().getName(), pl);
+		this.logger.info("Starting MMCV evaluation of {} (Description: {})", pl.getClass().getName(), WekaUtil.getClassifierDescriptor(pl));
 		for (int i = 0; i < this.repeats && !this.canceled; i++) {
 			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
 			if (Thread.interrupted()) { // clear the interrupted field. This is Java a general convention when an InterruptedException is thrown (see Java documentation for details)
 				this.logger.info("MCCV has been interrupted, leaving MCCV.");
 				throw new InterruptedException("MCCV has been interrupted.");
 			}
-			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
+
+			if (!this.splitCache.containsKey(this.seed + i)) {
+				this.splitCache.put(this.seed + i, this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion));
+			}
+			List<Instances> split = this.splitCache.get(this.seed + i);
+
 			try {
 				long startTimeForSplitEvaluation = System.currentTimeMillis();
 				double score = this.splitBasedEvaluator.evaluateSplit(pl, split.get(0), split.get(1));
 				if (this.hasListeners) {
-					this.eventBus.post(new MCCVSplitEvaluationEvent(pl, split.get(0).size(), split.get(1).size(), (int)(System.currentTimeMillis() - startTimeForSplitEvaluation), score));
+					this.eventBus.post(new MCCVSplitEvaluationEvent(pl, split.get(0).size(), split.get(1).size(), (int) (System.currentTimeMillis() - startTimeForSplitEvaluation), score));
 				}
 				this.logger.info("Score for evaluation of {} with split #{}/{}: {} after {}ms", pl.getClass().getName(), i + 1, this.repeats, score, (System.currentTimeMillis() - startTimestamp));
 				stats.addValue(score);

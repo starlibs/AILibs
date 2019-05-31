@@ -18,18 +18,24 @@ import ai.libs.jaicore.search.model.travesaltree.Node;
 public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 
 	private final Collection<Component> components;
-	private final List<String> ORDERING_OF_CLASSIFIERS;
+	private final List<String> orderingOfComponents;
 	private final static Logger logger = LoggerFactory.getLogger(PreferenceBasedNodeEvaluator.class);
 	private boolean sentLogMessageForHavingEnteredSecondSubPhase = false;
+	private String methodPrefix = "resolveAbstractClassifierWith";
 
-	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> ORDERING_OF_CLASSIFIERS) {
+	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents) {
 		super();
 		this.components = components;
-		this.ORDERING_OF_CLASSIFIERS = ORDERING_OF_CLASSIFIERS;
+		this.orderingOfComponents = orderingOfComponents;
 	}
 
 	public PreferenceBasedNodeEvaluator(final Collection<Component> components) {
 		this(components, new ArrayList<>());
+	}
+
+	public PreferenceBasedNodeEvaluator(final Collection<Component> components, final List<String> orderingOfComponents, final String methodPrefix) {
+		this(components, orderingOfComponents);
+		this.methodPrefix = methodPrefix;
 	}
 
 	@Override
@@ -59,15 +65,15 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 				}
 			} else {
 				classifierName = instance.getComponent().getName();
-				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith("resolveAbstractClassifierWith");
+				lastMethod = lastMethod || appliedMethods.get(appliedMethods.size() - 1).startsWith(this.methodPrefix);
 			}
 
 			if (lastMethod) {
 				if (isPipeline) {
-					score += this.ORDERING_OF_CLASSIFIERS.size() + 1;
+					score += this.orderingOfComponents.size() + 1;
 				}
 
-				score += (this.ORDERING_OF_CLASSIFIERS.contains(classifierName) ? this.ORDERING_OF_CLASSIFIERS.indexOf(classifierName) + 1 : this.ORDERING_OF_CLASSIFIERS.size() + 1);
+				score += (this.orderingOfComponents.contains(classifierName) ? this.orderingOfComponents.indexOf(classifierName) + 1 : this.orderingOfComponents.size() + 1);
 				score *= 1.0e-10;
 			} else {
 				score = null;
@@ -85,6 +91,6 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 
 	@Override
 	public String toString() {
-		return "PreferenceBasedNodeEvaluator [ORDERING_OF_CLASSIFIERS=" + this.ORDERING_OF_CLASSIFIERS + "]";
+		return "PreferenceBasedNodeEvaluator [ORDERING_OF_CLASSIFIERS=" + this.orderingOfComponents + "]";
 	}
 }
