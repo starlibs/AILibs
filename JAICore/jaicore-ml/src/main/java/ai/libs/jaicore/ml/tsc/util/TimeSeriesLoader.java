@@ -247,7 +247,27 @@ public class TimeSeriesLoader {
 			}
 
 			// Update empty data rows
-			numEmptyDataRows = numInstances - lineCounter;
+			numEmptyDataRows = numInstances - (long)lineCounter;
+
+			if (matrix == null) {
+				throw new IllegalStateException("Matrix is null, which it should not be at this point!");
+			}
+
+			// Due to efficiency reasons, the matrices are narrowed afterwards to eliminate
+			// empty data rows
+			if (numEmptyDataRows > 0) {
+				long endIndex = matrix.shape()[0] - numEmptyDataRows;
+				matrix = matrix.get(NDArrayIndex.interval(0, endIndex));
+				targetMatrix = targetMatrix.get(NDArrayIndex.interval(0, endIndex));
+			}
+
+			Object[] result = new Object[3];
+			result[0] = matrix;
+			result[1] = targetMatrix;
+			result[2] = targetValues;
+			// return new TimeSeriesDataset(Arrays.asList(matrix), null, targetMatrix,
+			// targetValues);
+			return result;
 
 		} catch (
 
@@ -259,22 +279,6 @@ public class TimeSeriesLoader {
 		} catch (IOException e) {
 			throw new TimeSeriesLoadingException("Could not load time series dataset due to IOException.", e);
 		}
-
-		// Due to efficiency reasons, the matrices are narrowed afterwards to eliminate
-		// empty data rows
-		if (numEmptyDataRows > 0) {
-			long endIndex = matrix.shape()[0] - numEmptyDataRows;
-			matrix = matrix.get(NDArrayIndex.interval(0, endIndex));
-			targetMatrix = targetMatrix.get(NDArrayIndex.interval(0, endIndex));
-		}
-
-		Object[] result = new Object[3];
-		result[0] = matrix;
-		result[1] = targetMatrix;
-		result[2] = targetValues;
-		// return new TimeSeriesDataset(Arrays.asList(matrix), null, targetMatrix,
-		// targetValues);
-		return result;
 	}
 
 	/**

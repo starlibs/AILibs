@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -215,7 +216,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public AlgorithmEvent next() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new NoSuchElementException("Cannot enumerate this algorithm!");
 	}
 
 	/**
@@ -559,7 +560,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 				// If caching is used, calculate and store the generated features
 				if (useFeatureCaching) {
-					long key = i + dataset[i].length * t1 + dataset[i].length * dataset[i].length * t2;
+					long key = (long)i + dataset[i].length * t1 + dataset[i].length * dataset[i].length * t2;
 					if (!this.transformedFeaturesCache.containsKey(key)) {
 						features = getFeatures(dataset[i], t1, t2, USE_BIAS_CORRECTION);
 						this.transformedFeaturesCache.put(key, features);
@@ -660,7 +661,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		List<Integer> T2 = new ArrayList<>();
 		List<Integer> W = randomlySampleNoReplacement(IntStream.rangeClosed(1, m).boxed().collect(Collectors.toList()), (int) Math.sqrt(m), seed);
 		for (int w : W) {
-			List<Integer> tmpSampling = randomlySampleNoReplacement(IntStream.rangeClosed(0, m - w).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1), seed);
+			List<Integer> tmpSampling = randomlySampleNoReplacement(IntStream.rangeClosed(0, m - w).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1.0), seed);
 			T1.addAll(tmpSampling);
 			for (int t1 : tmpSampling) {
 				T2.add(t1 + w - 1);

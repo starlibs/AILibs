@@ -17,21 +17,20 @@ import ai.libs.jaicore.ml.tsc.filter.ZTransformer;
 
 /**
  * @author Helen Beierling
- *	This class predicts labels for instances by cutting the instance into pieces and calculate for every piece the DFT values and
- *  assigns them to the corresponding letter to form the SFA words of that piece and afterwards creating a histogram for which the
- *  distance is calculated to all histograms of the training data and the label of the nearest one is returned as prediction.
+ *         This class predicts labels for instances by cutting the instance into pieces and calculate for every piece the DFT values and
+ *         assigns them to the corresponding letter to form the SFA words of that piece and afterwards creating a histogram for which the
+ *         distance is calculated to all histograms of the training data and the label of the nearest one is returned as prediction.
  */
 public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 
 	private TimeSeriesDataset trainingData;
-	//---------------------------------------------------------------
+	// ---------------------------------------------------------------
 	// All variables needed for the to predict instance and for the BOSS Algorithm or calculated by it .
 	private final IBossAlgorithmConfig config;
-	private ArrayList<ArrayList<HashMap<Integer,Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer,Integer>>> ();
+	private ArrayList<ArrayList<HashMap<Integer, Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer, Integer>>>();
 	private ArrayList<HashMap<Integer, Integer>> univirateHistograms;
 
-
-	//---------------------------------------------------------------
+	// ---------------------------------------------------------------
 	// All needed for every predict.
 	private SlidingWindowBuilder slide = new SlidingWindowBuilder();
 	private HistogramBuilder histoBuilder = new HistogramBuilder();
@@ -50,10 +49,9 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	public BOSSClassifier(final IBossAlgorithmConfig config) {
 		this.config = config;
 
-		//This is the same window size as used for the training samples
+		// This is the same window size as used for the training samples
 		this.slide.setDefaultWindowSize(config.windowSize());
 	}
-
 
 	public ArrayList<HashMap<Integer, Integer>> getUnivirateHistograms() {
 		return this.univirateHistograms;
@@ -62,7 +60,6 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	public void setTrainingData(final TimeSeriesDataset trainingData) {
 		this.trainingData = trainingData;
 	}
-
 
 	public void setMultivirateHistograms(final ArrayList<ArrayList<HashMap<Integer, Integer>>> multivirateHistograms) {
 		this.multivirateHistograms = multivirateHistograms;
@@ -76,21 +73,19 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	public Integer predict(final double[] univInstance) throws PredictionException {
 		SFA sfa = new SFA(this.config.alphabet(), this.config.wordLength(), this.config.meanCorrected());
 
-
-		//create windows for test instance an there for a small dataset with
-		//windows as instances.
+		// create windows for test instance an there for a small dataset with
+		// windows as instances.
 		TimeSeriesDataset tmp = this.slide.specialFitTransform(univInstance);
 		try {
 
 			// need to call a new fit for each predict because each window gets z normalized by its own.
-			//c.f.p. 1509 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
-			for(int instance = 0; instance < tmp.getValues(0).length; instance++) {
+			// c.f.p. 1509 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+			for (int instance = 0; instance < tmp.getValues(0).length; instance++) {
 				tmp.getValues(0)[instance] = this.znorm.fitTransform(tmp.getValues(0)[instance]);
 			}
 
-			TimeSeriesDataset tmpznormedsfaTransformed= sfa.fitTransform(tmp);
-			HashMap<Integer,Integer> histogram = this.histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
-
+			TimeSeriesDataset tmpznormedsfaTransformed = sfa.fitTransform(tmp);
+			HashMap<Integer, Integer> histogram = this.histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
 
 			// Calculate distance for all histograms for all instances in the training set.
 			// Remember index of histogram with minimum distance in list because it corresponds to the
@@ -98,9 +93,9 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 			int indexOFminDistInstance = 0;
 			double minDist = Double.MAX_VALUE;
 
-			for(int i = 0; i< this.univirateHistograms.size(); i++) {
-				double dist = this.BossDistance(histogram, this.univirateHistograms.get(i));
-				if(dist < minDist) {
+			for (int i = 0; i < this.univirateHistograms.size(); i++) {
+				double dist = this.getBossDistance(histogram, this.univirateHistograms.get(i));
+				if (dist < minDist) {
 					minDist = dist;
 					indexOFminDistInstance = i;
 				}
@@ -129,8 +124,8 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	public List<Integer> predict(final TimeSeriesDataset dataset) throws PredictionException {
 		// For a list of instances a list of predictions are getting created and the list is than returned.
 		ArrayList<Integer> predictions = new ArrayList<Integer>();
-		for(double[][] matrix: dataset.getValueMatrices()) {
-			for(double[] instance : matrix) {
+		for (double[][] matrix : dataset.getValueMatrices()) {
+			for (double[] instance : matrix) {
 				predictions.add(this.predict(instance));
 			}
 		}
@@ -139,25 +134,24 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 
 	/**
 	 * @param a The distance starting point histogram.
-	 * @param b	The distance destination histogram.
+	 * @param b The distance destination histogram.
 	 * @return The distance between Histogram a and b.
 	 *
-	 * The distance itself is calculated as 0 if the word does appear in "b" but not in "a" and
-	 * if the word exists in "a" but not in "b" it is the word count of "a" squared. For the "normal" case
-	 * where the word exists in "a" and "b" the distance is word count of "a" minus "b" and the result gets
-	 * squared for each word and summed up over the whole histogram.
-	 * Therefore the two histograms do not need to be of the same size and the distance of "a" to "b" must not
-	 * be equal to the distance of "b" to "a".
-	 * c.f. p. 1516 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+	 *         The distance itself is calculated as 0 if the word does appear in "b" but not in "a" and
+	 *         if the word exists in "a" but not in "b" it is the word count of "a" squared. For the "normal" case
+	 *         where the word exists in "a" and "b" the distance is word count of "a" minus "b" and the result gets
+	 *         squared for each word and summed up over the whole histogram.
+	 *         Therefore the two histograms do not need to be of the same size and the distance of "a" to "b" must not
+	 *         be equal to the distance of "b" to "a".
+	 *         c.f. p. 1516 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
 	 */
-	private double BossDistance(final HashMap<Integer,Integer> a, final HashMap<Integer,Integer> b) {
+	private double getBossDistance(final HashMap<Integer, Integer> a, final HashMap<Integer, Integer> b) {
 		double result = 0;
-		for(Integer key : a.keySet()) {
-			if(b.containsKey(key)) {
-				result += (Math.pow(a.get(key)-b.get(key),2));
-			}
-			else {
-				result += Math.pow(a.get(key),2);
+		for (Integer key : a.keySet()) {
+			if (b.containsKey(key)) {
+				result += (Math.pow(a.get(key) - (double)b.get(key), 2));
+			} else {
+				result += Math.pow(a.get(key), 2);
 			}
 		}
 		return result;

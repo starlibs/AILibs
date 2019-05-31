@@ -1,25 +1,20 @@
 package ai.libs.jaicore.ml.multioptionsingleenhancer;
 
-/*
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
+/* This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>. */
 
-/*
- *    Bagging.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
- *
- */
+/* Bagging.java
+ * Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand */
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,22 +41,21 @@ import weka.core.WeightedInstancesHandler;
  *
  * @author nino
  *
- * This is an extended version of Bagging that does not only allow one base classifier with one configuration, but
- * multiple different configuration for one given classifier
+ *         This is an extended version of Bagging that does not only allow one base classifier with one configuration, but
+ *         multiple different configuration for one given classifier
  *
- * As one very easy notices, most of this code is copied from weka.classifiers.meta.Bagging
- * In fact all routines are very similar as in weka.classifiers.meta.Bagging. The only difference is, that
- * the array that is used in the iterations of buildingClassifer now is allowed to contain multiple different classifers.
+ *         As one very easy notices, most of this code is copied from weka.classifiers.meta.Bagging
+ *         In fact all routines are very similar as in weka.classifiers.meta.Bagging. The only difference is, that
+ *         the array that is used in the iterations of buildingClassifer now is allowed to contain multiple different classifers.
  *
- * Note that unfortunately we had to copy this much code, because ExtendedBagging has to be a MultiClassifiersCombiner
- * to ensure that ML-Plan is able to work properly with this class
+ *         Note that unfortunately we had to copy this much code, because ExtendedBagging has to be a MultiClassifiersCombiner
+ *         to ensure that ML-Plan is able to work properly with this class
  *
  */
-public class ExtendedBagging extends SingleEnhancerDerivedRandomizableMultipleClassifiersCombiner
-implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInformationHandler, PartitionGenerator {
+public class ExtendedBagging extends SingleEnhancerDerivedRandomizableMultipleClassifiersCombiner implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInformationHandler, PartitionGenerator {
 
-	//does not work in parallel anymore
-	//not aggregatable anymore
+	// does not work in parallel anymore
+	// not aggregatable anymore
 
 	/** for serialization */
 	private static final long serialVersionUID = -115879962237199703L;
@@ -114,8 +108,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 */
 	public String globalInfo() {
 
-		return "Class for bagging a classifier to reduce variance. Can do classification " + "and regression depending on the base learner. \n\n" + "For more information, see\n\n"
-				+ this.getTechnicalInformation().toString();
+		return "Class for bagging a classifier to reduce variance. Can do classification " + "and regression depending on the base learner. \n\n" + "For more information, see\n\n" + this.getTechnicalInformation().toString();
 	}
 
 	/**
@@ -152,12 +145,9 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 
 		newVector.addElement(new Option("\tSize of each bag, as a percentage of the\n" + "\ttraining set size. (default 100)", "P", 1, "-P"));
 		newVector.addElement(new Option("\tCalculate the out of bag error.", "O", 0, "-O"));
-		newVector
-		.addElement(new Option("\tWhether to store out of bag predictions in internal evaluation object.", "store-out-of-bag-predictions", 0, "-store-out-of-bag-predictions"));
-		newVector.addElement(new Option("\tWhether to output complexity-based statistics when out-of-bag evaluation is performed.", "output-out-of-bag-complexity-statistics", 0,
-				"-output-out-of-bag-complexity-statistics"));
-		newVector
-		.addElement(new Option("\tRepresent copies of instances using weights rather than explicitly.", "represent-copies-using-weights", 0, "-represent-copies-using-weights"));
+		newVector.addElement(new Option("\tWhether to store out of bag predictions in internal evaluation object.", "store-out-of-bag-predictions", 0, "-store-out-of-bag-predictions"));
+		newVector.addElement(new Option("\tWhether to output complexity-based statistics when out-of-bag evaluation is performed.", "output-out-of-bag-complexity-statistics", 0, "-output-out-of-bag-complexity-statistics"));
+		newVector.addElement(new Option("\tRepresent copies of instances using weights rather than explicitly.", "represent-copies-using-weights", 0, "-represent-copies-using-weights"));
 		newVector.addElement(new Option("\tPrint the individual classifiers in the output", "print", 0, "-print"));
 
 		newVector.addAll(Collections.list(super.listOptions()));
@@ -240,9 +230,9 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * <p>
 	 *
 	 * @param options
-	 *          the list of options as an array of strings
+	 *            the list of options as an array of strings
 	 * @throws Exception
-	 *           if an option is not supported
+	 *             if an option is not supported
 	 */
 	@Override
 	public void setOptions(final String[] options) throws Exception {
@@ -330,7 +320,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Sets the size of each bag, as a percentage of the training set size.
 	 *
 	 * @param newBagSizePercent
-	 *          the bag size, as a percentage.
+	 *            the bag size, as a percentage.
 	 */
 	public void setBagSizePercent(final int newBagSizePercent) {
 
@@ -350,7 +340,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Set whether copies of instances are represented using weights rather than explicitly.
 	 *
 	 * @param representUsingWeights
-	 *          whether to represent copies using weights
+	 *            whether to represent copies using weights
 	 */
 	public void setRepresentCopiesUsingWeights(final boolean representUsingWeights) {
 
@@ -380,7 +370,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Set whether the out of bag predictions are stored.
 	 *
 	 * @param storeOutOfBag
-	 *          whether the out of bag predictions are stored
+	 *            whether the out of bag predictions are stored
 	 */
 	public void setStoreOutOfBagPredictions(final boolean storeOutOfBag) {
 
@@ -410,7 +400,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Set whether the out of bag error is calculated.
 	 *
 	 * @param calcOutOfBag
-	 *          whether to calculate the out of bag error
+	 *            whether to calculate the out of bag error
 	 */
 	public void setCalcOutOfBag(final boolean calcOutOfBag) {
 
@@ -451,7 +441,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Sets whether complexity statistics are output when OOB estimation is performed.
 	 *
 	 * @param b
-	 *          whether statistics are calculated
+	 *            whether statistics are calculated
 	 */
 	public void setOutputOutOfBagComplexityStatistics(final boolean b) {
 
@@ -471,7 +461,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Set whether to print the individual ensemble classifiers in the output
 	 *
 	 * @param print
-	 *          true if the individual classifiers are to be printed
+	 *            true if the individual classifiers are to be printed
 	 */
 	public void setPrintClassifiers(final boolean print) {
 		this.m_printClassifiers = print;
@@ -521,10 +511,10 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Returns the value of the named measure.
 	 *
 	 * @param additionalMeasureName
-	 *          the name of the measure to query for its value
+	 *            the name of the measure to query for its value
 	 * @return the value of the named measure
 	 * @throws IllegalArgumentException
-	 *           if the named measure is not supported
+	 *             if the named measure is not supported
 	 */
 	@Override
 	public double getMeasure(final String additionalMeasureName) {
@@ -540,15 +530,15 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Returns a training set for a particular iteration.
 	 *
 	 * @param iteration
-	 *          the number of the iteration for the requested training set.
+	 *            the number of the iteration for the requested training set.
 	 * @return the training set for the supplied iteration number
 	 * @throws Exception
-	 *           if something goes wrong when generating a training set.
+	 *             if something goes wrong when generating a training set.
 	 */
 	protected synchronized Instances getTrainingSet(final int iteration) throws Exception {
 		int bagSize = (int) (this.m_data.numInstances() * (this.m_BagSizePercent / 100.0));
 		Instances bagData = null;
-		Random r = new Random(this.m_Seed + iteration);
+		Random r = new Random((long)this.m_Seed + iteration);
 
 		// create the in-bag dataset
 		if (this.m_CalcOutOfBag) {
@@ -582,9 +572,9 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Bagging method.
 	 *
 	 * @param data
-	 *          the training data to be used for generating the bagged classifier.
+	 *            the training data to be used for generating the bagged classifier.
 	 * @throws Exception
-	 *           if the classifier could not be built successfully
+	 *             if the classifier could not be built successfully
 	 */
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
@@ -602,7 +592,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 
 		super.buildClassifier(this.m_data);
 
-		for(int i = 0; i < this.m_Classifiers.length; i++) {
+		for (int i = 0; i < this.m_Classifiers.length; i++) {
 			this.m_Classifiers[i].buildClassifier(this.m_data);
 		}
 
@@ -693,10 +683,10 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Calculates the class membership probabilities for the given test instance.
 	 *
 	 * @param instance
-	 *          the instance to be classified
+	 *            the instance to be classified
 	 * @return preedicted class probability distribution
 	 * @throws Exception
-	 *           if distribution can't be computed successfully
+	 *             if distribution can't be computed successfully
 	 */
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
@@ -746,7 +736,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 		}
 		StringBuffer text = new StringBuffer();
 		text.append("Bagging with " + this.m_Classifiers.length + " iterations and base learners\n\n");
-		for(int i = 0; i < this.m_Classifiers.length; i++) {
+		for (int i = 0; i < this.m_Classifiers.length; i++) {
 			text.append(this.getClassifierSpec(i) + "\n");
 		}
 		if (this.getPrintClassifiers()) {
@@ -832,7 +822,7 @@ implements WeightedInstancesHandler, AdditionalMeasureProducer, TechnicalInforma
 	 * Main method for testing this class.
 	 *
 	 * @param argv
-	 *          the options
+	 *            the options
 	 */
 	public static void main(final String[] argv) {
 		runClassifier(new ExtendedBagging(), argv);

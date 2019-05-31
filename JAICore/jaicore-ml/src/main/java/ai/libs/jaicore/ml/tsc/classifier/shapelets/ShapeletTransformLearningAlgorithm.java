@@ -155,9 +155,10 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	 * @return Returns the trained model
 	 * @throws AlgorithmException
 	 *             Thrown if the training could not be finished
+	 * @throws InterruptedException
 	 */
 	@Override
-	public ShapeletTransformTSClassifier call() throws AlgorithmException {
+	public ShapeletTransformTSClassifier call() throws AlgorithmException, InterruptedException {
 		if (this.getNumCPUs() > 1) {
 			LOGGER.warn("Multithreading is not supported for LearnShapelets yet. Therefore, the number of CPUs is not considered.");
 		}
@@ -184,71 +185,66 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		int seed = this.getConfig().seed();
 		ShapeletTransformTSClassifier model = this.getClassifier();
 
-		try {
-			final int timeSeriesLength = dataMatrix[0].length;
+		final int timeSeriesLength = dataMatrix[0].length;
 
-			// Estimate min and max
-			if (this.getConfig().estimateShapeletLengthBorders()) {
-				LOGGER.debug("Starting min max estimation.");
-				int[] minMax = this.estimateMinMax(dataMatrix, targetMatrix, beginTime);
-				minShapeletLength = minMax[0];
-				maxShapeletLength = minMax[1];
-				LOGGER.debug("Finished min max estimation. min={}, max={}", minShapeletLength, maxShapeletLength);
-			} else {
-				if (maxShapeletLength == -1) {
-					maxShapeletLength = timeSeriesLength - 1;
-				}
-			}
-
-			if (maxShapeletLength >= timeSeriesLength) {
-				LOGGER.debug("The maximum shapelet length was larger than the total time series length. Therefore, it will be set to time series length - 1.");
+		// Estimate min and max
+		if (this.getConfig().estimateShapeletLengthBorders()) {
+			LOGGER.debug("Starting min max estimation.");
+			int[] minMax = this.estimateMinMax(dataMatrix, targetMatrix, beginTime);
+			minShapeletLength = minMax[0];
+			maxShapeletLength = minMax[1];
+			LOGGER.debug("Finished min max estimation. min={}, max={}", minShapeletLength, maxShapeletLength);
+		} else {
+			if (maxShapeletLength == -1) {
 				maxShapeletLength = timeSeriesLength - 1;
 			}
-
-			// Determine shapelets
-			LOGGER.debug("Starting cached shapelet selection with min={}, max={} and k={}...", minShapeletLength, maxShapeletLength, this.getConfig().numShapelets());
-			List<Shapelet> shapelets = null;
-
-			shapelets = this.shapeletCachedSelection(dataMatrix,minShapeletLength, maxShapeletLength, this.getConfig().numShapelets(), targetMatrix, beginTime);
-			LOGGER.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
-
-			// Cluster shapelets
-			if (this.getConfig().clusterShapelets()) {
-				LOGGER.debug("Starting shapelet clustering...");
-				shapelets = this.clusterShapelets(shapelets, this.getConfig().numClusters(), beginTime);
-				LOGGER.debug("Finished shapelet clustering. Staying with {} shapelets.", shapelets.size());
-			}
-			model.setShapelets(shapelets);
-
-			// Transforming the data using the extracted shapelets
-			LOGGER.debug("Transforming the training data using the extracted shapelets.");
-			TimeSeriesDataset transfTrainingData = shapeletTransform(data, model.getShapelets(), this.getTimeout(), beginTime, this.minDistanceSearchStrategy);
-			LOGGER.debug("Finished transforming the training data.");
-
-			// Inititalize Weka ensemble
-			LOGGER.debug("Initializing ensemble classifier...");
-			Classifier classifier = null;
-			try {
-				classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel(seed, this.getConfig().numFolds());
-			} catch (Exception e1) {
-				throw new AlgorithmException(e1, "Could not train model due to ensemble exception.");
-			}
-			LOGGER.debug("Initialized ensemble classifier.");
-
-			// Train Weka ensemble using the data
-			LOGGER.debug("Starting ensemble training...");
-			try {
-				WekaUtil.buildWekaClassifierFromSimplifiedTS(classifier, transfTrainingData);
-			} catch (TrainingException e) {
-				throw new AlgorithmException(e, "Could not train classifier due to a training exception.");
-			}
-			LOGGER.debug("Finished ensemble training.");
-
-			model.setClassifier(classifier);
-		} catch (InterruptedException e1) {
-			LOGGER.warn("Timeout in training Shapelet Transform classifier. Aborting...");
-			throw new AlgorithmException("Could not finish training due to timeout.");
 		}
+
+		if (maxShapeletLength >= timeSeriesLength) {
+			LOGGER.debug("The maximum shapelet length was larger than the total time series length. Therefore, it will be set to time series length - 1.");
+			maxShapeletLength = timeSeriesLength - 1;
+		}
+
+		// Determine shapelets
+		LOGGER.debug("Starting cached shapelet selection with min={}, max={} and k={}...", minShapeletLength, maxShapeletLength, this.getConfig().numShapelets());
+		List<Shapelet> shapelets = null;
+
+		shapelets = this.shapeletCachedSelection(dataMatrix,minShapeletLength, maxShapeletLength, this.getConfig().numShapelets(), targetMatrix, beginTime);
+		LOGGER.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
+
+		// Cluster shapelets
+		if (this.getConfig().clusterShapelets()) {
+			LOGGER.debug("Starting shapelet clustering...");
+			shapelets = this.clusterShapelets(shapelets, this.getConfig().numClusters(), beginTime);
+			LOGGER.debug("Finished shapelet clustering. Staying with {} shapelets.", shapelets.size());
+		}
+		model.setShapelets(shapelets);
+
+		// Transforming the data using the extracted shapelets
+		LOGGER.debug("Transforming the training data using the extracted shapelets.");
+		TimeSeriesDataset transfTrainingData = shapeletTransform(data, model.getShapelets(), this.getTimeout(), beginTime, this.minDistanceSearchStrategy);
+		LOGGER.debug("Finished transforming the training data.");
+
+		// Inititalize Weka ensemble
+		LOGGER.debug("Initializing ensemble classifier...");
+		Classifier classifier = null;
+		try {
+			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel(seed, this.getConfig().numFolds());
+		} catch (Exception e1) {
+			throw new AlgorithmException(e1, "Could not train model due to ensemble exception.");
+		}
+		LOGGER.debug("Initialized ensemble classifier.");
+
+		// Train Weka ensemble using the data
+		LOGGER.debug("Starting ensemble training...");
+		try {
+			WekaUtil.buildWekaClassifierFromSimplifiedTS(classifier, transfTrainingData);
+		} catch (TrainingException e) {
+			throw new AlgorithmException(e, "Could not train classifier due to a training exception.");
+		}
+		LOGGER.debug("Finished ensemble training.");
+
+		model.setClassifier(classifier);
 
 		return model;
 	}

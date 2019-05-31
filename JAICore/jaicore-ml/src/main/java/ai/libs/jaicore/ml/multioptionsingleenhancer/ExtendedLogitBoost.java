@@ -1154,7 +1154,7 @@ implements WeightedInstancesHandler, TechnicalInformationHandler, IterativeClass
 		if (this.m_ZeroR != null) {
 			StringBuffer buf = new StringBuffer();
 			buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
-			buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll(".", "=") + "\n\n");
+			buf.append(this.getClass().getName().replaceAll(".*\\.", "").replaceAll("\\.", "=") + "\n\n");
 			buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
 			buf.append(this.m_ZeroR.toString());
 			return buf.toString();

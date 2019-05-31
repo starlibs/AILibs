@@ -247,7 +247,8 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 		try {
 			transformedDataset = ShapeletTransformLearningAlgorithm.shapeletTransform(dataset, this.shapelets, null, -1, this.minDistanceSearchStrategy);
 		} catch (InterruptedException e1) {
-			throw new IllegalStateException("Got interrupted within the shapelet transform although it should not happen due to unlimited timeout.");
+			Thread.currentThread().interrupt();
+			return new ArrayList<>();
 		}
 		LOGGER.debug("Transformed dataset.");
 		double[][] timeSeries = transformedDataset.getValuesOrNull(0);

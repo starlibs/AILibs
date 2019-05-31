@@ -388,7 +388,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		final int scaleR = this.getConfig().scaleR();
 		final int minShapeLength = this.getConfig().minShapeletLength();
 		final int maxIter = this.getConfig().maxIterations();
-		final int seed = this.getConfig().seed();
+		final long seed = this.getConfig().seed();
 		final int numShapelets = this.getConfig().numShapelets();
 		final double learningRate = this.getConfig().learningRate();
 		final double regularization = this.getConfig().regularization();

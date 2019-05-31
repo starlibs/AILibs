@@ -54,6 +54,9 @@ public class FStat implements IQualityMeasure {
 		}
 		result /= numClasses - 1;
 		denominator /= distances.size() - numClasses;
+		if (denominator == 0) {
+			throw new IllegalArgumentException("Given arguments yield a 0 " + denominator);
+		}
 		result /= denominator;
 
 		return result;
