@@ -29,13 +29,6 @@ public class Table<V> {
 	private final Map<String, Map<String, V>> tableData = new HashMap<>();
 
 	/**
-	 * Standard c'tor.
-	 */
-	public Table() {
-
-	}
-
-	/**
 	 * Adds a value to the cell identified by the columnIndexValue and the rowIndexValue. Already existing values are overwritten.
 	 *
 	 * @param columnIndexValue
@@ -46,17 +39,14 @@ public class Table<V> {
 	 *            The entry to add to the table's cell.
 	 */
 	public void add(final String columnIndexValue, final String rowIndexValue, final V entry) {
-		Map<String, V> selectedRow = this.tableData.get(rowIndexValue);
-		if (selectedRow == null) {
-			selectedRow = new HashMap<>();
-			this.tableData.put(rowIndexValue, selectedRow);
-			if (!this.rowIndex.contains(rowIndexValue)) {
-				this.rowIndex.add(rowIndexValue);
-			}
+		if (!this.rowIndex.contains(rowIndexValue)) {
+			this.rowIndex.add(rowIndexValue);
 		}
 		if (!this.columnIndex.contains(columnIndexValue)) {
 			this.columnIndex.add(columnIndexValue);
 		}
+
+		Map<String, V> selectedRow = this.tableData.computeIfAbsent(rowIndexValue, t -> new HashMap<>());
 		selectedRow.put(columnIndexValue, entry);
 	}
 
@@ -88,13 +78,10 @@ public class Table<V> {
 		Collections.sort(this.columnIndex);
 		for (String c : this.columnIndex) {
 			sb.append("&");
-			// sb.append("\\rotatebox{90}{");
 			sb.append(c);
-			// sb.append("}");
 		}
 		sb.append("\\\\\n");
 
-		// Collections.sort(this.rowIndex);
 		for (String r : this.rowIndex) {
 			sb.append(r);
 
@@ -140,7 +127,6 @@ public class Table<V> {
 	public String toCSV(final String separator, final String standardValue) {
 		StringBuilder sb = new StringBuilder();
 
-		// Collections.sort(this.columnIndex);
 		Collections.sort(this.rowIndex);
 
 		boolean first = true;
@@ -154,7 +140,6 @@ public class Table<V> {
 		}
 		sb.append("\n");
 		for (String r : this.rowIndex) {
-			// sb.append(r);
 
 			first = true;
 
