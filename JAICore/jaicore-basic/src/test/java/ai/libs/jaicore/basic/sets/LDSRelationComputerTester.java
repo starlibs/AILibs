@@ -13,8 +13,6 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import ai.libs.jaicore.basic.sets.LDSRelationComputer;
-import ai.libs.jaicore.basic.sets.RelationComputationProblem;
 import ai.libs.jaicore.basic.sets.algorithms.RelationComputerTester;
 
 public class LDSRelationComputerTester extends RelationComputerTester {
@@ -29,7 +27,9 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 	@Test
 	public void testOutputSizeForNonEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
 		RelationComputationProblem<Object> problem = this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes();
-		List<List<Object>> cartesianProduct = new LDSRelationComputer<>(this.getCartesianProductProblem()).call();
+		LDSRelationComputer<Object> ldsComputer = new LDSRelationComputer<>(this.getCartesianProductProblem());
+		ldsComputer.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		List<List<Object>> cartesianProduct = ldsComputer.call();
 		List<List<?>> groundTruth = cartesianProduct.stream().filter(problem.getPrefixFilter()).collect(Collectors.toList());
 		this.testRelation(problem, groundTruth.size());
 	}
@@ -52,7 +52,7 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 			List<?> tuple1 = relation.get(i);
 			assertEquals(problem.getSets().size(), tuple1.size());
 			List<?> tuple2 = relation.get(i + 1);
-			assertEquals(problem.getSets().size(), tuple2.size());
+			assertEquals("The tuple does not have the right length. Expected tuple length was " + problem.getSets().size() + ", but the given tuple has " + tuple2.size() + " entries", problem.getSets().size(), tuple2.size());
 			int d1 = this.computeDefficiency(problem.getSets(), tuple1);
 			int d2 = this.computeDefficiency(problem.getSets(), tuple2);
 			assertTrue(d1 <= d2);
