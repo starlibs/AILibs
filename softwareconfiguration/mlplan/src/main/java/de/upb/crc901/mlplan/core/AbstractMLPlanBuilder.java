@@ -2,10 +2,12 @@ package de.upb.crc901.mlplan.core;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -20,6 +22,8 @@ import de.upb.crc901.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import hasco.core.HASCOFactory;
 import hasco.model.Component;
+import hasco.model.Parameter;
+import hasco.model.ParameterRefinementConfiguration;
 import hasco.serialization.ComponentLoader;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import hasco.variants.forwarddecomposition.HASCOViaFDFactory;
@@ -151,6 +155,10 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	public Collection<Component> getComponents() throws IOException {
 		return new ComponentLoader(this.searchSpaceFile).getComponents();
 	}
+	
+	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getComponentParameterConfigurations() throws IOException {
+		return new ComponentLoader(this.searchSpaceFile).getParamConfigs();
+	}
 
 	/***********************************************************************************************************************************************************************************************************************/
 	/***********************************************************************************************************************************************************************************************************************/
@@ -228,7 +236,8 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @return The builder object.
 	 * @throws IOException Thrown if the given file does not exist.
 	 */
-	public AbstractMLPlanBuilder withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
+	public AbstractMLPlanBuilder withSearchSpaceConfigFile(File searchSpaceConfig) throws IOException {
+		searchSpaceConfig = new File(URLDecoder.decode(searchSpaceConfig.getAbsolutePath(),"UTF-8"));
 		FileUtil.requireFileExists(searchSpaceConfig);
 		this.searchSpaceFile = searchSpaceConfig;
 		this.components.clear();

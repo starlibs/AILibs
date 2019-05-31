@@ -19,7 +19,7 @@ import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import treeminer.FrequentSubtreeFinder;
 import treeminer.TreeMiner;
-import treeminer.TreeRepresentationUtils;
+import treeminer.util.TreeRepresentationUtils;
 
 /**
  * A characterizer for MLPipelines. It characterizes pipelines using an ontology
@@ -79,6 +79,9 @@ public class WEKAPipelineCharacterizer implements IPipelineCharacterizer {
 	 */
 	public WEKAPipelineCharacterizer(
 			Map<Component, Map<Parameter, ParameterRefinementConfiguration>> componentParameters) {
+		TreeMiner miner = new TreeMiner();
+		miner.setCountMultipleOccurrences(false);
+		miner.setOnlySearchForPatternsThatStartWithTheRoot(true);
 		this.treeMiner = new TreeMiner();
 		this.componentParameters = componentParameters;
 
