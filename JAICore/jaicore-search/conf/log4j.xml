@@ -59,6 +59,10 @@
 	 <level value="warn" />
 	</logger>
 	
+	<logger name="jaicore.search.evaluationproblems">
+		<level value="info" />
+	</logger>
+	
   <logger name="testedalgorithm">
     <level value="trace" />
     

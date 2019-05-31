@@ -58,11 +58,11 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 		}
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) {
 		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) {
 		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;
