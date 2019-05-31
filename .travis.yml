@@ -24,7 +24,7 @@ jobs:
   include:
   - stage: compile
     script:
-    - "./gradlew build -x test -x signArchives"
+    - "./gradlew build -x test"
   - stage: analysis
     addons:
       sonarcloud:
