@@ -8,11 +8,11 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.UnparametrizedComponentInstance;
-import jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
 /**
  * 

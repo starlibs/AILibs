@@ -3,13 +3,13 @@ package hasco.gui.civiewplugin;
 import java.util.Collection;
 import java.util.Map.Entry;
 
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.model.travesaltree.Node;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
-import jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.model.travesaltree.Node;
 
 /**
  * This info generator is meant to be used in combination with the node info plug-in.

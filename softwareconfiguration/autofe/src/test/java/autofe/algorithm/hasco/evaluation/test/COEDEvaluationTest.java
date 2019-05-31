@@ -11,10 +11,10 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.ml.WekaUtil;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
 import autofe.util.FileUtils;
-import jaicore.ml.WekaUtil;
 import weka.core.Instances;
 
 public class COEDEvaluationTest {

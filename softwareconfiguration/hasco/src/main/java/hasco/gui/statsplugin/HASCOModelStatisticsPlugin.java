@@ -1,6 +1,6 @@
 package hasco.gui.statsplugin;
 
-import jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPlugin;
 
 /**
  * 

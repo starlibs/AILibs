@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jaicore.basic.kvstore.KVStore;
-import jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.kvstore.KVStore;
+import ai.libs.jaicore.basic.sets.SetUtil;
 
 /**
  * The ComponentUtil class can be used to deal with Components in a convenient way.

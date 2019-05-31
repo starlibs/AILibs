@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.FastBitmap.ColorSpace;
 import Catalano.Imaging.Filters.Crop;
-import jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.WekaUtil;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;

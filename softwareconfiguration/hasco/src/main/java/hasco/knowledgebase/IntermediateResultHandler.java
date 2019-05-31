@@ -8,8 +8,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.basic.SQLAdapter;
 import hasco.events.HASCOSolutionEvaluationEvent;
-import jaicore.basic.SQLAdapter;
 
 /**
  * Class to handle HASCOSolutionEvaluationEvents and insert the results into the

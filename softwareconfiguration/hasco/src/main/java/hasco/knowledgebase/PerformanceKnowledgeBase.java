@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import ai.libs.jaicore.basic.SQLAdapter;
 import hasco.core.Util;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -31,7 +32,6 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.serialization.ParameterDeserializer;
 import hasco.serialization.ParameterDomainDeserializer;
-import jaicore.basic.SQLAdapter;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;

@@ -9,13 +9,13 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import autofe.algorithm.hasco.AutoFEMLComplete;
 import autofe.algorithm.hasco.AutoFEWekaPipelineFactory;
 import autofe.algorithm.hasco.MLPlanFEWekaClassifierConfig;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 
 public class AutoFEMLCompleteTest {
     @Test

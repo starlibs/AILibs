@@ -8,11 +8,11 @@ import org.aeonbits.owner.ConfigFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ai.libs.jaicore.basic.TimeOut;
 import autofe.algorithm.hasco.AutoFEMLTwoPhase;
 import autofe.algorithm.hasco.HASCOFeatureEngineeringConfig;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import jaicore.basic.TimeOut;
 
 public class AutoFEMLTwoPhaseTest {
 	@Test

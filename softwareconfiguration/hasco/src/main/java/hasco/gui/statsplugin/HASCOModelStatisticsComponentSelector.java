@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import hasco.events.HASCOSolutionEvent;
 import hasco.model.ComponentInstance;
 import hasco.model.UnparametrizedComponentInstance;
-import jaicore.basic.sets.SetUtil.Pair;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.aeonbits.owner.Config.Sources;
 
-import jaicore.experiments.IExperimentSetConfig;
+import ai.libs.jaicore.experiments.IExperimentSetConfig;
 
 @Sources({ "file:conf/benchmarkRankConf.txt" })
 public interface IBenchmarkRankConfig extends IExperimentSetConfig {

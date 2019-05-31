@@ -46,7 +46,7 @@
     </layout>
   </appender>
 
-  <logger name="de.upb.crc901">
+  <logger name="ai.libs">
     <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -55,29 +55,8 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="jaicore">
-    <level value="warn" />
-    <appender-ref ref="console" />
-    <appender-ref ref="infoFileAppender" />
-    <appender-ref ref="warnFileAppender" />
-    <appender-ref ref="errFileAppender" />
-    <appender-ref ref="traceFileAppender" />
-  </logger>
-  
-  <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+  <logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
    <level value="trace" />
-  </logger>
-    
-  <logger name="de.upb.crc901.automl.AutoMLAlgorithmTester">
-    <level value="info" />
-  </logger>
-  
-  <logger name="de.upb.crc901.automl.AutoMLAlgorithmResultProductionTester">
-    <level value="info" />
-  </logger>
-    
-  <logger name="de.upb.crc901.mlplan.core">
-  	 <level value="debug" />
   </logger>
   
   <logger name="MLPlanCLI">
@@ -88,11 +67,11 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="jaicore.graphvisualizer">
+  <logger name="ai.libs.jaicore.graphvisualizer">
     <level value="warn" />
   </logger>
   
-  <logger name="jaicore.interrupt">
+  <logger name="ai.libs.jaicore.interrupt">
     <level value="warn" />
   </logger>
   
@@ -184,10 +163,6 @@
   
   <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
   	<level value="warn" />
-  </logger>
-  
-  <logger name="de.upb.crc901.mlplan.examples.multilabel.meka.ML2PlanAutoMLCExperimenter">
-  	<level value="info" />
   </logger>
   
   <!-- configuration for ML-Plan Test logging -->

@@ -10,10 +10,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import hasco.model.Dependency;
 import hasco.model.IParameterDomain;
 import hasco.model.Parameter;
-import jaicore.basic.sets.SetUtil.Pair;
 
 public class ParameterDomainDeserializer extends StdDeserializer<Dependency> {
 

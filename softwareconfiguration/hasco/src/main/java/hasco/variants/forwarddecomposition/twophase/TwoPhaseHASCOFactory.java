@@ -1,10 +1,10 @@
 package hasco.variants.forwarddecomposition.twophase;
 
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import hasco.core.HASCO;
 import hasco.core.HASCOFactory;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
-import jaicore.search.probleminputs.GraphSearchInput;
 
 public class TwoPhaseHASCOFactory<S extends GraphSearchInput<N, A>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 

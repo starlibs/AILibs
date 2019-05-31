@@ -1,7 +1,7 @@
 package hasco.variants.forwarddecomposition.twophase;
 
+import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
 import hasco.core.HASCOConfig;
-import jaicore.basic.algorithm.IRandomAlgorithmConfig;
 
 public interface HASCOWithRandomCompletionsConfig extends HASCOConfig, IRandomAlgorithmConfig {
 	public static final String K_RANDOM_COMPLETIONS_NUM = "hasco.random_completions.num";

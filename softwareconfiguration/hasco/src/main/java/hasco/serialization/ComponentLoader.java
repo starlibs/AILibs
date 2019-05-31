@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import hasco.model.BooleanParameterDomain;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
@@ -31,8 +33,6 @@ import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.IParameterDomain;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.basic.sets.SetUtil;
-import jaicore.basic.sets.SetUtil.Pair;
 
 public class ComponentLoader {
 

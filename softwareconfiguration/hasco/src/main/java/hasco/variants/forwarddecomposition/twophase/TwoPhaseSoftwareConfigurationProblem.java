@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import ai.libs.jaicore.basic.IObjectEvaluator;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.SoftwareConfigurationProblem;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.basic.IObjectEvaluator;
 
 public class TwoPhaseSoftwareConfigurationProblem extends RefinementConfiguredSoftwareConfigurationProblem<Double> {
 	private final IObjectEvaluator<ComponentInstance, Double> selectionBenchmark;

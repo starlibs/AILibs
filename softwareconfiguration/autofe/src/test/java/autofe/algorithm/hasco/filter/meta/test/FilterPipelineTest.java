@@ -6,6 +6,7 @@ import java.util.Random;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ai.libs.jaicore.graph.Graph;
 import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
@@ -13,7 +14,6 @@ import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import autofe.util.FileUtils;
-import jaicore.graph.Graph;
 
 public class FilterPipelineTest {
 	@Test

@@ -4,17 +4,17 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
-import jaicore.ml.core.exception.PredictionException;
-import jaicore.ml.core.exception.TrainingException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.core.exception.PredictionException;
+import ai.libs.jaicore.ml.core.exception.TrainingException;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Capabilities;
 import weka.core.Instance;

@@ -1,8 +1,8 @@
 package autofe.algorithm.hasco;
 
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.BaseFactory;

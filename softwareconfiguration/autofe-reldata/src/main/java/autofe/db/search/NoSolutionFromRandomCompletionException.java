@@ -1,6 +1,6 @@
 package autofe.db.search;
 
-import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 
 public class NoSolutionFromRandomCompletionException extends NodeEvaluationException {
 

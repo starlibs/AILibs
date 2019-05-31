@@ -15,10 +15,10 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.basic.SQLAdapter;
 import hasco.events.HASCORunStartedEvent;
 import hasco.events.HASCORunTerminatedEvent;
 import hasco.events.HASCOSolutionEvaluationEvent;
-import jaicore.basic.SQLAdapter;
 
 public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 

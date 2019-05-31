@@ -11,6 +11,11 @@ import java.util.List;
 
 import org.junit.Test;
 
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
@@ -24,11 +29,6 @@ import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
 import autofe.db.util.DBUtils;
-import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import jaicore.search.model.other.SearchGraphPath;
-import jaicore.search.model.travesaltree.NodeExpansionDescription;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class SearchTest {
 

@@ -1,7 +1,7 @@
 package autofe.algorithm.hasco;
 
+import ai.libs.jaicore.basic.IObjectEvaluator;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
-import jaicore.basic.IObjectEvaluator;
 
 public class AutoFEMLPreferredObjectEvaluator implements IObjectEvaluator<FilterPipeline, Double> {
 

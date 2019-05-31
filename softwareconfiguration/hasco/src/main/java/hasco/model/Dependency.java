@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 
 public class Dependency {
 	private final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)

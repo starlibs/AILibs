@@ -7,10 +7,12 @@ import autofe.algorithm.hasco.filter.meta.FilterPipelineFactory;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
 import autofe.util.test.DataSetUtilsTest;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+
 import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 
 import java.util.List;
 import java.util.Random;

@@ -5,12 +5,12 @@ import java.io.File;
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 
+import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
-import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class HASCOFactory<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 

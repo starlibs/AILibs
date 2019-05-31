@@ -19,9 +19,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import jaicore.basic.sets.SetUtil;
-import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 /**
  * For a given <code>Component</code>, a <code>Component Instance</code> defines all parameter values and the

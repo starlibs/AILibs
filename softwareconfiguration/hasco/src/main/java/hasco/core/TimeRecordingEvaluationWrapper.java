@@ -3,11 +3,11 @@ package hasco.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import ai.libs.jaicore.basic.IInformedObjectEvaluatorExtension;
+import ai.libs.jaicore.basic.IObjectEvaluator;
+import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 import hasco.model.ComponentInstance;
-import jaicore.basic.IInformedObjectEvaluatorExtension;
-import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import jaicore.logging.ToJSONStringUtil;
 
 public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V>, IInformedObjectEvaluatorExtension<V> {
 

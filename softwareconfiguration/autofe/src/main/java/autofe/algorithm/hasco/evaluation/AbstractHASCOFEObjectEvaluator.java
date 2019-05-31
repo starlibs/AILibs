@@ -1,10 +1,12 @@
 package autofe.algorithm.hasco.evaluation;
 
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
-import jaicore.basic.IObjectEvaluator;
-import jaicore.basic.SQLAdapter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.basic.IObjectEvaluator;
+import ai.libs.jaicore.basic.SQLAdapter;
 
 public abstract class AbstractHASCOFEObjectEvaluator extends AbstractHASCOFEEvaluator
 		implements IObjectEvaluator<FilterPipeline, Double> {

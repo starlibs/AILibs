@@ -6,10 +6,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.graphvisualizer.events.gui.Histogram;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import hasco.core.HASCOSolutionCandidate;
-import jaicore.basic.sets.SetUtil.Pair;
-import jaicore.graphvisualizer.events.gui.Histogram;
-import jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import javafx.application.Platform;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.VBox;

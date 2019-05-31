@@ -4,20 +4,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jaicore.logic.fol.structure.Literal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.logic.fol.structure.Literal;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.model.travesaltree.Node;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import hasco.core.Util;
 import hasco.exceptions.ComponentInstantiationFailedException;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.BaseFactory;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.model.travesaltree.Node;
 
 public class AutoFEPreferredNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
 

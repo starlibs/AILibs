@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class UnparametrizedComponentInstance {
 	private final String componentName;

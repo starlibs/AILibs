@@ -16,12 +16,12 @@ import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.upb.crc901.mlplan.core.MLPlan;
-import de.upb.crc901.mlplan.core.MLPlanWekaBuilder;
-import de.upb.crc901.mlplan.multiclass.MLPlanClassifierConfig;
-import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import jaicore.basic.TimeOut;
-import jaicore.ml.WekaUtil;
+import ai.libs.jaicore.basic.TimeOut;
+import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.mlplan.core.MLPlan;
+import ai.libs.mlplan.core.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.ReliefFAttributeEval;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

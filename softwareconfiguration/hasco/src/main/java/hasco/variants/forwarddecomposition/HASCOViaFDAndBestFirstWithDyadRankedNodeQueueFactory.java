@@ -1,11 +1,11 @@
 package hasco.variants.forwarddecomposition;
 
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.algorithms.standard.bestfirst.DyadRankedBestFirstFactory;
-import jaicore.search.algorithms.standard.bestfirst.IBestFirstQueueConfiguration;
-import jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.DyadRankedBestFirstFactory;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.IBestFirstQueueConfiguration;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
 
 /**
  * HASCO variant factory using best first and a dyad-ranked OPEN list.

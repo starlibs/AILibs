@@ -6,10 +6,10 @@ import autofe.algorithm.hasco.filter.generic.IdentityFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.graph.Graph;
 import autofe.util.FilterUtils;
 import hasco.model.ComponentInstance;
 import hasco.optimizingfactory.BaseFactory;
-import jaicore.graph.Graph;
 
 public class FilterPipelineFactory implements BaseFactory<FilterPipeline> {
 

@@ -11,6 +11,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.SQLAdapter;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardFeature;
@@ -20,7 +21,6 @@ import autofe.db.model.database.Table;
 import autofe.db.model.relation.ForwardRelationship;
 import autofe.db.util.DBUtils;
 import autofe.db.util.SqlUtils;
-import jaicore.basic.SQLAdapter;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;

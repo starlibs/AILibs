@@ -4,12 +4,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import ai.libs.jaicore.logic.fol.structure.ConstantParam;
+import ai.libs.jaicore.logic.fol.structure.Monom;
+import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
 import hasco.model.Component;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.logic.fol.structure.ConstantParam;
-import jaicore.logic.fol.structure.Monom;
-import jaicore.logic.fol.theories.EvaluablePredicate;
 
 public class IsNotRefinable implements EvaluablePredicate {
 

@@ -1,15 +1,15 @@
 package hasco.variants.forwarddecomposition;
 
+import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.ForwardDecompositionReducer;
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import hasco.core.DefaultHASCOPlanningGraphGeneratorDeriver;
 import hasco.core.HASCO;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
-import jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.ForwardDecompositionReducer;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import jaicore.search.model.other.EvaluatedSearchGraphPath;
-import jaicore.search.probleminputs.GraphSearchInput;
-import jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class HASCOViaFD<ISearch extends GraphSearchInput<TFDNode, String>, V extends Comparable<V>> extends HASCO<ISearch, TFDNode, String, V> {
 

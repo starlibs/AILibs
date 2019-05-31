@@ -16,14 +16,14 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.graph.Graph;
+import ai.libs.jaicore.ml.WekaUtil;
 import autofe.algorithm.hasco.filter.image.CatalanoBinaryPatternFilter;
 import autofe.algorithm.hasco.filter.image.CatalanoInPlaceFilter;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import jaicore.graph.Graph;
-import jaicore.ml.WekaUtil;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;

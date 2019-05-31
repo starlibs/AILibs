@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
+import ai.libs.jaicore.ml.core.FeatureDomain;
+import ai.libs.jaicore.ml.core.FeatureSpace;
+import ai.libs.jaicore.ml.intervaltree.ExtendedRandomForest;
 import hasco.core.Util;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
-import jaicore.ml.core.FeatureDomain;
-import jaicore.ml.core.FeatureSpace;
-import jaicore.ml.intervaltree.ExtendedRandomForest;
 import weka.core.Instances;
 
 /**

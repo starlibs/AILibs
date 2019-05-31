@@ -10,6 +10,10 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import hasco.core.HASCO;
 import hasco.core.HASCOSolutionCandidate;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
@@ -17,10 +21,6 @@ import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRandomCompl
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 import hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 

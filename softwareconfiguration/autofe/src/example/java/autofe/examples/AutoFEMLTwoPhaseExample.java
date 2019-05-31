@@ -4,10 +4,12 @@ import autofe.algorithm.hasco.AutoFEMLTwoPhase;
 import autofe.algorithm.hasco.HASCOFeatureEngineeringConfig;
 import autofe.util.DataSet;
 import autofe.util.DataSetUtils;
-import jaicore.basic.TimeOut;
+
 import org.aeonbits.owner.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.basic.TimeOut;
 
 import java.util.List;
 import java.util.Random;

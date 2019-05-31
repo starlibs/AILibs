@@ -1,9 +1,9 @@
 package hasco.optimizingfactory;
 
+import ai.libs.jaicore.basic.algorithm.AOptimizer;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
 import hasco.core.SoftwareConfigurationProblem;
 import hasco.model.EvaluatedSoftwareConfigurationSolution;
-import jaicore.basic.algorithm.AOptimizer;
-import jaicore.basic.algorithm.IAlgorithmConfig;
 
 public abstract class SoftwareConfigurationAlgorithm<P extends SoftwareConfigurationProblem<V>, O extends EvaluatedSoftwareConfigurationSolution<V>, V extends Comparable<V>> extends AOptimizer<P, O, V> {
 

@@ -4,13 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import ai.libs.jaicore.basic.IObjectEvaluator;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
 import hasco.serialization.ComponentLoader;
 import hasco.serialization.UnresolvableRequiredInterfaceException;
-import jaicore.basic.IObjectEvaluator;
 
 /**
  * In this problem, the core software configuration problem is extended by predefining how the the parameters may be refined

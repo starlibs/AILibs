@@ -15,6 +15,11 @@ import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.logic.fol.structure.ConstantParam;
+import ai.libs.jaicore.logic.fol.structure.Literal;
+import ai.libs.jaicore.logic.fol.structure.Monom;
+import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
 import hasco.model.CategoricalParameterDomain;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
@@ -22,11 +27,6 @@ import hasco.model.IParameterDomain;
 import hasco.model.NumericParameterDomain;
 import hasco.model.Parameter;
 import hasco.model.ParameterRefinementConfiguration;
-import jaicore.basic.sets.SetUtil;
-import jaicore.logic.fol.structure.ConstantParam;
-import jaicore.logic.fol.structure.Literal;
-import jaicore.logic.fol.structure.Monom;
-import jaicore.logic.fol.theories.EvaluablePredicate;
 
 public class IsValidParameterRangeRefinementPredicate implements EvaluablePredicate {
 

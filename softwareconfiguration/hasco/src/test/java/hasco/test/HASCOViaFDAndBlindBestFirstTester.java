@@ -1,10 +1,10 @@
 package hasco.test;
 
+import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import hasco.core.HASCO;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
-import jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class HASCOViaFDAndBlindBestFirstTester extends HASCOTester<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> {
 

@@ -4,14 +4,14 @@ import autofe.util.test.DataSetUtilsTest;
 import org.junit.Assert;
 import org.junit.Test;
 
+import ai.libs.jaicore.graph.Graph;
+import ai.libs.jaicore.ml.WekaUtil;
 import autofe.algorithm.hasco.AutoFEWekaPipeline;
 import autofe.algorithm.hasco.filter.image.PretrainedNNFilter;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.algorithm.hasco.filter.meta.IFilter;
 import autofe.util.DataSetUtils;
 import autofe.util.ImageUtils;
-import jaicore.graph.Graph;
-import jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.RandomForest;
 

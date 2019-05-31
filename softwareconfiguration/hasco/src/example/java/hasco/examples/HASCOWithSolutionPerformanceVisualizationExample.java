@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
+import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.serialization.UnresolvableRequiredInterfaceException;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
 import hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
-import jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import jaicore.basic.algorithm.exceptions.AlgorithmException;
-import jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
-import jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
-import jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 

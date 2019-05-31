@@ -12,6 +12,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import ai.libs.jaicore.logic.fol.structure.ConstantParam;
+import ai.libs.jaicore.logic.fol.structure.Literal;
+import ai.libs.jaicore.logic.fol.structure.Monom;
 import hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import hasco.core.Util;
 import hasco.model.CategoricalParameterDomain;
@@ -20,9 +23,6 @@ import hasco.model.ComponentInstance;
 import hasco.model.Parameter;
 import hasco.model.IParameterDomain;
 import hasco.serialization.ComponentLoader;
-import jaicore.logic.fol.structure.ConstantParam;
-import jaicore.logic.fol.structure.Literal;
-import jaicore.logic.fol.structure.Monom;
 
 public class UtilTester {
 

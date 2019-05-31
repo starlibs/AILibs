@@ -2,7 +2,7 @@ package hasco.core;
 
 import org.aeonbits.owner.Config.Sources;
 
-import jaicore.basic.algorithm.IAlgorithmConfig;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
 
 @Sources({ "file:conf/hasco.properties" })
 public interface HASCOConfig extends IAlgorithmConfig {

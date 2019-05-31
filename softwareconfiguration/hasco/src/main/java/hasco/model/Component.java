@@ -18,8 +18,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jaicore.basic.sets.PartialOrderedSet;
-import jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.basic.sets.PartialOrderedSet;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 /**
  * A <code>Component</code> is described by

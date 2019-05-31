@@ -6,11 +6,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import ai.libs.jaicore.basic.IObjectEvaluator;
+import ai.libs.jaicore.logging.ToJSONStringUtil;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
 import hasco.serialization.ComponentLoader;
-import jaicore.basic.IObjectEvaluator;
-import jaicore.logging.ToJSONStringUtil;
 
 public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 	private final Collection<Component> components;

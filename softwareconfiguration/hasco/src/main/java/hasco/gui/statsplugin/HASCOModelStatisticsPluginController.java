@@ -1,8 +1,8 @@
 package hasco.gui.statsplugin;
 
+import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 import hasco.events.HASCOSolutionEvent;
-import jaicore.basic.algorithm.events.AlgorithmEvent;
-import jaicore.graphvisualizer.plugin.ASimpleMVCPluginController;
 
 /**
  * 
