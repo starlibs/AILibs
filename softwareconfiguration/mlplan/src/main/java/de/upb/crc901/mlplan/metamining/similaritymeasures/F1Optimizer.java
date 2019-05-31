@@ -1,5 +1,7 @@
 package de.upb.crc901.mlplan.metamining.similaritymeasures;
 
+import java.util.Random;
+
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
@@ -25,6 +27,8 @@ public class F1Optimizer implements IHeterogenousSimilarityMeasureComputer {
 	private INDArray x;
 	private INDArray u; // the learned matrix
 
+	private final Random rand = new Random();
+
 	/**
 	 * Learns a matrix U that minimizes F1 (W is ignored here)
 	 *
@@ -43,7 +47,7 @@ public class F1Optimizer implements IHeterogenousSimilarityMeasureComputer {
 		int c = 0;
 		for (int i = 0; i < m; i++) {
 			for (int j = 0; j < numberOfImplicitFeatures; j++) {
-				denseVector[c++] = (Math.random() - 0.5) * 100;
+				denseVector[c++] = (this.rand.nextDouble() - 0.5) * 100;
 			}
 		}
 		DoubleVector currentSolutionAsVector = new DenseDoubleVector(denseVector);

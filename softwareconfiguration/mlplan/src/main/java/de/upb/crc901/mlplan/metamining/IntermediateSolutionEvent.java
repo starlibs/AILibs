@@ -1,23 +1,18 @@
 package de.upb.crc901.mlplan.metamining;
 
 import de.upb.crc901.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
-import jaicore.basic.algorithm.events.AlgorithmEvent;
+import jaicore.basic.algorithm.events.AAlgorithmEvent;
 import weka.classifiers.Classifier;
 
-public class IntermediateSolutionEvent implements AlgorithmEvent {
-	
-	String algorithmId;
-	
-	String classifier;
-	String searcher;
-	String evaluator;
-	
-	double score;
-	
-	long foundAt;
-	
-	public IntermediateSolutionEvent(String algorithmId, Classifier classifier, double score, long foundAt) {
-		this.algorithmId = algorithmId;
+public class IntermediateSolutionEvent extends AAlgorithmEvent {
+
+	private String classifier;
+	private String searcher;
+	private String evaluator;
+
+	private double score;
+	public IntermediateSolutionEvent(final String algorithmId, final Classifier classifier, final double score) {
+		super (algorithmId);
 		if (classifier instanceof MLPipeline) {
 			MLPipeline pl = (MLPipeline) classifier;
 			this.classifier=pl.getBaseClassifier().getClass().getName();
@@ -30,36 +25,21 @@ public class IntermediateSolutionEvent implements AlgorithmEvent {
 		}
 
 		this.score=score;
-		this.foundAt=foundAt;
 	}
 
 	public String getClassifier() {
-		return classifier;
+		return this.classifier;
 	}
 
 	public String getSearcher() {
-		return searcher;
+		return this.searcher;
 	}
 
 	public String getEvaluator() {
-		return evaluator;
+		return this.evaluator;
 	}
 
 	public double getScore() {
-		return score;
-	}
-
-	public long getFoundAt() {
-		return foundAt;
-	}
-
-	@Override
-	public String getAlgorithmId() {
-		return algorithmId;
-	}
-
-	@Override
-	public long getTimestamp() {
-		return foundAt;
+		return this.score;
 	}
 }

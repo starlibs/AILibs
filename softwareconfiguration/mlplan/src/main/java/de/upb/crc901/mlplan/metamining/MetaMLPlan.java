@@ -48,6 +48,7 @@ public class MetaMLPlan extends AbstractClassifier {
 
 	// ids
 	private static final long serialVersionUID = 4772178784402396834L;
+	private static final File resourceFile = new File("resources/automl/searchmodels/weka/weka-all-autoweka.json");
 	private String algorithmId = "MetaMLPlan";
 
 	// Search components
@@ -71,7 +72,7 @@ public class MetaMLPlan extends AbstractClassifier {
 	private transient EventBus eventBus = new EventBus();
 
 	public MetaMLPlan(final Instances data) throws IOException {
-		this(new File("resources/automl/searchmodels/weka/weka-all-autoweka.json"), data);
+		this(resourceFile, data);
 	}
 
 	public MetaMLPlan(final File configFile, final Instances data) throws IOException {
@@ -88,27 +89,22 @@ public class MetaMLPlan extends AbstractClassifier {
 
 		// Get lds
 		BestFirstLimitedDiscrepancySearchFactory<TFDNode, String, NodeOrderList> ldsFactory = new BestFirstLimitedDiscrepancySearchFactory<>();
-		GraphSearchWithNodeRecommenderInput<TFDNode, String> problemInput = new GraphSearchWithNodeRecommenderInput<>(
-				new ReducedGraphGenerator<>(mlPlan.getGraphGenerator()),
+		GraphSearchWithNodeRecommenderInput<TFDNode, String> problemInput = new GraphSearchWithNodeRecommenderInput<>(new ReducedGraphGenerator<>(mlPlan.getGraphGenerator()),
 				new MetaMinerBasedSorter(this.metaMiner, builder.getComponents()));
 		ldsFactory.setProblemInput(problemInput);
 		this.lds = ldsFactory.getAlgorithm();
 	}
 
 	public void buildMetaComponents(final String host, final String user, final String password) throws AlgorithmException, InterruptedException, SQLException, IOException {
-		ExperimentRepository repo = new ExperimentRepository(host, user, password,
-				new MLPipelineComponentInstanceFactory(this.components), this.cpus, this.metaFeatureSetName, this.datasetSetName);
-		this.metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(),
-				repo.getPipelineResultsOnDatasets());
+		ExperimentRepository repo = new ExperimentRepository(host, user, password, new MLPipelineComponentInstanceFactory(this.components), this.cpus, this.metaFeatureSetName, this.datasetSetName);
+		this.metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(), repo.getPipelineResultsOnDatasets());
 	}
 
 	public void buildMetaComponents(final String host, final String user, final String password, final int limit) throws AlgorithmException, InterruptedException, SQLException, IOException {
 		this.logger.info("Get past experiment data from data base and build MetaMiner.");
-		ExperimentRepository repo = new ExperimentRepository(host, user, password,
-				new MLPipelineComponentInstanceFactory(this.components), this.cpus, this.metaFeatureSetName, this.datasetSetName);
+		ExperimentRepository repo = new ExperimentRepository(host, user, password, new MLPipelineComponentInstanceFactory(this.components), this.cpus, this.metaFeatureSetName, this.datasetSetName);
 		repo.setLimit(limit);
-		this.metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(),
-				repo.getPipelineResultsOnDatasets());
+		this.metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(), repo.getPipelineResultsOnDatasets());
 	}
 
 	@Override
@@ -123,8 +119,7 @@ public class MetaMLPlan extends AbstractClassifier {
 		// Preparing the split for validating pipelines
 		this.logger.info("Preparing validation split");
 		SimpleSLCSplitBasedClassifierEvaluator classifierEval = new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss());
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(
-				classifierEval,  5, data, .7f, this.seed);
+		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(classifierEval, 5, data, .7f, this.seed);
 
 		// Search for solutions
 		this.logger.info("Searching for solutions");
@@ -146,19 +141,18 @@ public class MetaMLPlan extends AbstractClassifier {
 				}
 
 				// Prepare pipeline
-				ComponentInstance ci = Util.getSolutionCompositionFromState(this.components,
-						solution.get(solution.size() - 1).getState(), true);
+				ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, solution.get(solution.size() - 1).getState(), true);
 				Classifier pl = this.factory.getComponentInstantiation(ci);
 
 				// Evaluate pipeline
 				trainingTimer.reset();
 				trainingTimer.start();
-				this.logger.info("Evaluate Pipeline: {}",pl);
+				this.logger.info("Evaluate Pipeline: {}", pl);
 				double score = mccv.evaluate(pl);
-				this.logger.info("Pipeline Score: {}",score);
+				this.logger.info("Pipeline Score: {}", score);
 				trainingTimer.stop();
 
-				this.eventBus.post(new IntermediateSolutionEvent(this.algorithmId,pl, score, System.currentTimeMillis()));
+				this.eventBus.post(new IntermediateSolutionEvent(this.algorithmId, pl, score));
 
 				// Check if better than previous best
 				if (score < bestScore) {
@@ -170,11 +164,11 @@ public class MetaMLPlan extends AbstractClassifier {
 				}
 
 				thereIsEnoughTime = this.checkTermination(totalTimer, bestModelMaxTrainingTime, thereIsEnoughTime);
-			} catch(NoSuchElementException e) {
+			} catch (NoSuchElementException e) {
 				this.logger.info("Finished search (Exhaustive search conducted).");
 				thereAreMoreElements = false;
 			} catch (Exception e) {
-				this.logger.warn("Continuing search despite error: {}",e);
+				this.logger.warn("Continuing search despite error: {}", e);
 			}
 		}
 
@@ -182,12 +176,12 @@ public class MetaMLPlan extends AbstractClassifier {
 
 			@Override
 			public void run() {
-				MetaMLPlan.this.logger.info("Evaluating best model on whole training data ({})",MetaMLPlan.this.bestModel);
+				MetaMLPlan.this.logger.info("Evaluating best model on whole training data ({})", MetaMLPlan.this.bestModel);
 				try {
 					MetaMLPlan.this.bestModel.buildClassifier(data);
 				} catch (Exception e) {
 					MetaMLPlan.this.bestModel = null;
-					MetaMLPlan.this.logger.error("Evaluation of best model failed with an exception: {}",e);
+					MetaMLPlan.this.logger.error("Evaluation of best model failed with an exception: {}", e);
 				}
 			}
 		};
@@ -202,8 +196,7 @@ public class MetaMLPlan extends AbstractClassifier {
 
 		// Start timer that interrupts the final training
 		try {
-			new Timer().schedule(newT,
-					this.timeoutInSeconds * 1000 - this.safetyInSeconds * 1000 - totalTimer.getTime());
+			new Timer().schedule(newT, this.timeoutInSeconds * 1000 - this.safetyInSeconds * 1000 - totalTimer.getTime());
 		} catch (IllegalArgumentException e) {
 			this.logger.error("No time anymore to start evaluation of final model. Abort search.");
 			return;
@@ -211,15 +204,14 @@ public class MetaMLPlan extends AbstractClassifier {
 		finalEval.start();
 		finalEval.join();
 
-		this.logger.info("Ready. Best solution: {}",this.bestModel);
+		this.logger.info("Ready. Best solution: {}", this.bestModel);
 	}
 
 	private boolean checkTermination(final StopWatch totalTimer, final double bestModelMaxTrainingTime, boolean thereIsEnoughTime) {
 		// Check if enough time remaining to re-train the current best model on the
 		// whole training data
-		if ((this.timeoutInSeconds - this.safetyInSeconds)
-				* 1000 <= (totalTimer.getTime() + bestModelMaxTrainingTime)) {
-			this.logger.info("Stopping search to train best model on whole training data which is expected to take {} ms",bestModelMaxTrainingTime);
+		if ((this.timeoutInSeconds - this.safetyInSeconds) * 1000 <= (totalTimer.getTime() + bestModelMaxTrainingTime)) {
+			this.logger.info("Stopping search to train best model on whole training data which is expected to take {} ms", bestModelMaxTrainingTime);
 			thereIsEnoughTime = false;
 		}
 		return thereIsEnoughTime;
