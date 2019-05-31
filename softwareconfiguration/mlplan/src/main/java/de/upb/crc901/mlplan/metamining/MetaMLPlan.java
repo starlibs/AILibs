@@ -2,6 +2,7 @@ package de.upb.crc901.mlplan.metamining;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -24,6 +25,7 @@ import hasco.core.Util;
 import hasco.metamining.MetaMinerBasedSorter;
 import hasco.model.Component;
 import hasco.model.ComponentInstance;
+import jaicore.basic.algorithm.exceptions.AlgorithmException;
 import jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
@@ -41,13 +43,13 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 public class MetaMLPlan extends AbstractClassifier {
-	
+
 	private transient Logger logger = LoggerFactory.getLogger(MetaMLPlan.class);
 
 	// ids
-	private static final long serialVersionUID = 4772178784402396834L;	
+	private static final long serialVersionUID = 4772178784402396834L;
 	private String algorithmId = "MetaMLPlan";
-	
+
 	// Search components
 	private transient BestFirstLimitedDiscrepancySearch<TFDNode, String, NodeOrderList> lds;
 	private transient WEKAMetaminer metaMiner;
@@ -68,17 +70,17 @@ public class MetaMLPlan extends AbstractClassifier {
 	// For intermediate results
 	private transient EventBus eventBus = new EventBus();
 
-	public MetaMLPlan(Instances data) throws IOException {
+	public MetaMLPlan(final Instances data) throws IOException {
 		this(new File("resources/automl/searchmodels/weka/weka-all-autoweka.json"), data);
 	}
 
-	public MetaMLPlan(File configFile, Instances data) throws IOException {
+	public MetaMLPlan(final File configFile, final Instances data) throws IOException {
 		// Prepare mlPlan to get a graphGenerator
 		MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
 		builder.withSearchSpaceConfigFile(configFile);
 		builder.withDataset(data);
 		MLPlan mlPlan = builder.build();
-		mlPlan.next();	
+		mlPlan.next();
 
 		// Set search components except lds
 		this.components = builder.getComponents();
@@ -88,91 +90,91 @@ public class MetaMLPlan extends AbstractClassifier {
 		BestFirstLimitedDiscrepancySearchFactory<TFDNode, String, NodeOrderList> ldsFactory = new BestFirstLimitedDiscrepancySearchFactory<>();
 		GraphSearchWithNodeRecommenderInput<TFDNode, String> problemInput = new GraphSearchWithNodeRecommenderInput<>(
 				new ReducedGraphGenerator<>(mlPlan.getGraphGenerator()),
-				new MetaMinerBasedSorter(metaMiner, builder.getComponents()));
+				new MetaMinerBasedSorter(this.metaMiner, builder.getComponents()));
 		ldsFactory.setProblemInput(problemInput);
 		this.lds = ldsFactory.getAlgorithm();
 	}
 
-	public void buildMetaComponents(String host, String user, String password) throws Exception {
+	public void buildMetaComponents(final String host, final String user, final String password) throws AlgorithmException, InterruptedException, SQLException, IOException {
 		ExperimentRepository repo = new ExperimentRepository(host, user, password,
-				new MLPipelineComponentInstanceFactory(components), cpus, metaFeatureSetName, datasetSetName);
-		metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(),
+				new MLPipelineComponentInstanceFactory(this.components), this.cpus, this.metaFeatureSetName, this.datasetSetName);
+		this.metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(),
 				repo.getPipelineResultsOnDatasets());
 	}
 
-	public void buildMetaComponents(String host, String user, String password, int limit) throws Exception {
-		logger.info("Get past experiment data from data base and build MetaMiner.");
+	public void buildMetaComponents(final String host, final String user, final String password, final int limit) throws AlgorithmException, InterruptedException, SQLException, IOException {
+		this.logger.info("Get past experiment data from data base and build MetaMiner.");
 		ExperimentRepository repo = new ExperimentRepository(host, user, password,
-				new MLPipelineComponentInstanceFactory(components), cpus, metaFeatureSetName, datasetSetName);
+				new MLPipelineComponentInstanceFactory(this.components), this.cpus, this.metaFeatureSetName, this.datasetSetName);
 		repo.setLimit(limit);
-		metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(),
+		this.metaMiner.build(repo.getDistinctPipelines(), repo.getDatasetCahracterizations(),
 				repo.getPipelineResultsOnDatasets());
 	}
 
 	@Override
-	public void buildClassifier(Instances data) throws Exception {
+	public void buildClassifier(final Instances data) throws Exception {
 		StopWatch totalTimer = new StopWatch();
 		totalTimer.start();
 
 		// Characterize data set and give to meta miner
-		logger.info("Characterizing data set");
-		metaMiner.setDataSetCharacterization(new GlobalCharacterizer().characterize(data));
+		this.logger.info("Characterizing data set");
+		this.metaMiner.setDataSetCharacterization(new GlobalCharacterizer().characterize(data));
 
 		// Preparing the split for validating pipelines
-		logger.info("Preparing validation split");
+		this.logger.info("Preparing validation split");
 		SimpleSLCSplitBasedClassifierEvaluator classifierEval = new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss());
 		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(
-				classifierEval,  5, data, .7f, seed);
+				classifierEval,  5, data, .7f, this.seed);
 
 		// Search for solutions
-		logger.info("Searching for solutions");
+		this.logger.info("Searching for solutions");
 		StopWatch trainingTimer = new StopWatch();
-		bestModel = null;
+		this.bestModel = null;
 		double bestScore = 1;
 		double bestModelMaxTrainingTime = 0;
 		boolean thereIsEnoughTime = true;
 		boolean thereAreMoreElements = true;
 
-		while (!lds.isCanceled() && thereIsEnoughTime && thereAreMoreElements) {
+		while (!this.lds.isCanceled() && thereIsEnoughTime && thereAreMoreElements) {
 			try {
-				SearchGraphPath<TFDNode, String> searchGraphPath = lds.nextSolutionCandidate();					
+				SearchGraphPath<TFDNode, String> searchGraphPath = this.lds.nextSolutionCandidate();
 				List<TFDNode> solution = searchGraphPath.getNodes();
 
 				if (solution == null) {
-					logger.info("Ran out of solutions. Search is over.");
+					this.logger.info("Ran out of solutions. Search is over.");
 					break;
 				}
 
 				// Prepare pipeline
-				ComponentInstance ci = Util.getSolutionCompositionFromState(components,
+				ComponentInstance ci = Util.getSolutionCompositionFromState(this.components,
 						solution.get(solution.size() - 1).getState(), true);
-				Classifier pl = factory.getComponentInstantiation(ci);
+				Classifier pl = this.factory.getComponentInstantiation(ci);
 
 				// Evaluate pipeline
 				trainingTimer.reset();
 				trainingTimer.start();
-				logger.info("Evaluate Pipeline: {}",pl);
+				this.logger.info("Evaluate Pipeline: {}",pl);
 				double score = mccv.evaluate(pl);
-				logger.info("Pipeline Score: {}",score);
+				this.logger.info("Pipeline Score: {}",score);
 				trainingTimer.stop();
 
-				eventBus.post(new IntermediateSolutionEvent(this.algorithmId,pl, score, System.currentTimeMillis()));
+				this.eventBus.post(new IntermediateSolutionEvent(this.algorithmId,pl, score, System.currentTimeMillis()));
 
 				// Check if better than previous best
 				if (score < bestScore) {
-					bestModel = pl;
+					this.bestModel = pl;
 					bestScore = score;
 				}
 				if (trainingTimer.getTime() > bestModelMaxTrainingTime) {
 					bestModelMaxTrainingTime = trainingTimer.getTime();
 				}
 
-				thereIsEnoughTime = checkTermination(totalTimer, bestModelMaxTrainingTime, thereIsEnoughTime);
+				thereIsEnoughTime = this.checkTermination(totalTimer, bestModelMaxTrainingTime, thereIsEnoughTime);
 			} catch(NoSuchElementException e) {
-				logger.info("Finished search (Exhaustive search conducted).");
+				this.logger.info("Finished search (Exhaustive search conducted).");
 				thereAreMoreElements = false;
 			} catch (Exception e) {
-				logger.warn("Continuing search despite error: {}",e);
+				this.logger.warn("Continuing search despite error: {}",e);
 			}
 		}
 
@@ -180,12 +182,12 @@ public class MetaMLPlan extends AbstractClassifier {
 
 			@Override
 			public void run() {
-				logger.info("Evaluating best model on whole training data ({})",bestModel);
+				MetaMLPlan.this.logger.info("Evaluating best model on whole training data ({})",MetaMLPlan.this.bestModel);
 				try {
-					bestModel.buildClassifier(data);
+					MetaMLPlan.this.bestModel.buildClassifier(data);
 				} catch (Exception e) {
-					bestModel = null;
-					logger.error("Evaluation of best model failed with an exception: {}",e);
+					MetaMLPlan.this.bestModel = null;
+					MetaMLPlan.this.logger.error("Evaluation of best model failed with an exception: {}",e);
 				}
 			}
 		};
@@ -193,7 +195,7 @@ public class MetaMLPlan extends AbstractClassifier {
 		TimerTask newT = new TimerTask() {
 			@Override
 			public void run() {
-				logger.error("MetaMLPlan: Interrupt building of final classifier because time is running out.");
+				MetaMLPlan.this.logger.error("MetaMLPlan: Interrupt building of final classifier because time is running out.");
 				finalEval.interrupt();
 			}
 		};
@@ -201,23 +203,23 @@ public class MetaMLPlan extends AbstractClassifier {
 		// Start timer that interrupts the final training
 		try {
 			new Timer().schedule(newT,
-					(long) (timeoutInSeconds * 1000 - safetyInSeconds * 1000 - totalTimer.getTime()));
+					this.timeoutInSeconds * 1000 - this.safetyInSeconds * 1000 - totalTimer.getTime());
 		} catch (IllegalArgumentException e) {
-			logger.error("No time anymore to start evaluation of final model. Abort search.");
+			this.logger.error("No time anymore to start evaluation of final model. Abort search.");
 			return;
 		}
 		finalEval.start();
 		finalEval.join();
 
-		logger.info("Ready. Best solution: {}",bestModel);
+		this.logger.info("Ready. Best solution: {}",this.bestModel);
 	}
 
-	private boolean checkTermination(StopWatch totalTimer, double bestModelMaxTrainingTime, boolean thereIsEnoughTime) {
+	private boolean checkTermination(final StopWatch totalTimer, final double bestModelMaxTrainingTime, boolean thereIsEnoughTime) {
 		// Check if enough time remaining to re-train the current best model on the
 		// whole training data
-		if ((timeoutInSeconds - safetyInSeconds)
+		if ((this.timeoutInSeconds - this.safetyInSeconds)
 				* 1000 <= (totalTimer.getTime() + bestModelMaxTrainingTime)) {
-			logger.info("Stopping search to train best model on whole training data which is expected to take {} ms",bestModelMaxTrainingTime);
+			this.logger.info("Stopping search to train best model on whole training data which is expected to take {} ms",bestModelMaxTrainingTime);
 			thereIsEnoughTime = false;
 		}
 		return thereIsEnoughTime;
@@ -225,42 +227,42 @@ public class MetaMLPlan extends AbstractClassifier {
 
 	@Override
 	public double classifyInstance(final Instance instance) throws Exception {
-		return bestModel.classifyInstance(instance);
+		return this.bestModel.classifyInstance(instance);
 	}
 
-	public void registerListenerForIntermediateSolutions(Object listener) {
-		eventBus.register(listener);
+	public void registerListenerForIntermediateSolutions(final Object listener) {
+		this.eventBus.register(listener);
 	}
 
-	public void setTimeOutInSeconds(int timeOutInSeconds) {
+	public void setTimeOutInSeconds(final int timeOutInSeconds) {
 		this.timeoutInSeconds = timeOutInSeconds;
 	}
 
-	public void setMetaFeatureSetName(String metaFeatureSetName) {
+	public void setMetaFeatureSetName(final String metaFeatureSetName) {
 		this.metaFeatureSetName = metaFeatureSetName;
 	}
 
-	public void setDatasetSetName(String datasetSetName) {
+	public void setDatasetSetName(final String datasetSetName) {
 		this.datasetSetName = datasetSetName;
 	}
 
-	public void setCPUs(int cPUs) {
-		cpus = cPUs;
+	public void setCPUs(final int cPUs) {
+		this.cpus = cPUs;
 	}
 
 	public WEKAMetaminer getMetaMiner() {
-		return metaMiner;
+		return this.metaMiner;
 	}
 
-	public void setSeed(int seed) {
+	public void setSeed(final int seed) {
 		this.seed = seed;
 	}
 
 	public String getAlgorithmId() {
-		return algorithmId;
+		return this.algorithmId;
 	}
 
-	public void setAlgorithmId(String algorithmId) {
+	public void setAlgorithmId(final String algorithmId) {
 		this.algorithmId = algorithmId;
 	}
 }

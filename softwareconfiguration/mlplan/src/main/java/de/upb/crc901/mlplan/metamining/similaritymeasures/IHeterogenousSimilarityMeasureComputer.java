@@ -6,7 +6,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
  * Encapsulates a model that is trained to compute the similarity between two
  * multidimensional measures, e.g. data set meta features, algorithm meta
  * features and algorithm performance on a data set.
- * 
+ *
  * @author Helena Graf
  *
  */
@@ -15,7 +15,7 @@ public interface IHeterogenousSimilarityMeasureComputer {
 	/**
 	 * Build a model based on training data that can then be used to estimate the
 	 * similarity of two measures for a new problem.
-	 * 
+	 *
 	 * @param x
 	 *            Feature values for instances of the first measure (One row =
 	 *            features of one instance, e.g. meta features of a data set)
@@ -33,7 +33,7 @@ public interface IHeterogenousSimilarityMeasureComputer {
 	/**
 	 * Compute the 'quality of the match' of given feature values for a new problem
 	 * instance based on the training.
-	 * 
+	 *
 	 * @param x
 	 *            Feature values for the instance for the first measure (e.g. meta
 	 *            data of a new data set)
