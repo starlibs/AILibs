@@ -353,8 +353,7 @@ public class WekaUtil {
 	}
 
 	/**
-	 * Returns true if there is at least one nominal attribute in the given dataset
-	 * that has more than 2 values.
+	 * Returns true if there is at least one nominal attribute in the given dataset that has more than 2 values.
 	 *
 	 * @param wekaInstances
 	 *            dataset that is checked
@@ -691,6 +690,7 @@ public class WekaUtil {
 
 			/* update point for class */
 			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId, numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) - 1);
+
 			do {
 				foldId++;
 				if (foldId >= portions.length) {
@@ -700,7 +700,7 @@ public class WekaUtil {
 			nextBinForClass.put(assignedClass, foldId);
 		}
 
-		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
 		return folds;
 	}
 
@@ -1156,9 +1156,7 @@ public class WekaUtil {
 	}
 
 	/**
-	 * Compute indices of instances of the original data set that are contained in
-	 * the given subset. This does only work for data sets that contain an instance
-	 * at most once!
+	 * Compute indices of instances of the original data set that are contained in the given subset. This does only work for data sets that contain an instance at most once!
 	 *
 	 * @param dataset
 	 * @param subset

@@ -37,7 +37,7 @@ dependencies {
 	// weka dependencies
 	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
 			exclude group: 'log4j'
-			exclude group: 'org.slf4j'            
+			exclude group: 'org.slf4j'
 	}
 
 	compile ('nz.ac.waikato.cms.weka:rotationForest:1.0.3') {
