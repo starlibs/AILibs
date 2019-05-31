@@ -10,7 +10,6 @@ include ":JAICore:jaicore-graphvisualizer"
 include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-math"
 include ":JAICore:jaicore-ml"
-include ":JAICore:jaicore-modifiedISAC"
 
 include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"
