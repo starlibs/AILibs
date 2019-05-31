@@ -11,11 +11,11 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
-import ai.libs.hasco.core.IsNotRefinable;
 import ai.libs.hasco.core.IsRefinementCompletedPredicate;
 import ai.libs.hasco.core.IsValidParameterRangeRefinementPredicate;
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.hasco.core.Util;
+import ai.libs.hasco.core.isNotRefinable;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.NumericParameterDomain;
@@ -130,7 +130,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
 					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
+						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + this.paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
@@ -259,7 +259,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	public CEOCIPSTNPlanningProblem getPlanningProblem(final CEOCIPSTNPlanningDomain domain, final CNFFormula knowledge, final Monom init) {
 		Map<String, EvaluablePredicate> evaluablePredicates = new HashMap<>();
 		evaluablePredicates.put("isValidParameterRangeRefinement", new IsValidParameterRangeRefinementPredicate(this.components, this.paramRefinementConfig));
-		evaluablePredicates.put("notRefinable", new IsNotRefinable(this.components, this.paramRefinementConfig));
+		evaluablePredicates.put("notRefinable", new isNotRefinable(this.components, this.paramRefinementConfig));
 		evaluablePredicates.put("refinementCompleted", new IsRefinementCompletedPredicate(this.components, this.paramRefinementConfig));
 		return new CEOCIPSTNPlanningProblem(domain, knowledge, init, new TaskNetwork(RESOLVE_COMPONENT_IFACE_PREFIX + this.originalProblem.getRequiredInterface() + "('request', 'solution')"), evaluablePredicates, new HashMap<>());
 	}

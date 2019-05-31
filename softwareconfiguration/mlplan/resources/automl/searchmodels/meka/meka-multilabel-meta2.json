@@ -1,11 +1,117 @@
 {
-	"repository": "MEKA-MultiTarget-Meta",
-	"include": ["./mlplan-multitarget.json"],
+	"repository": "MEKA_META",
+	"include": [],
 	"parameters": [
 	],
 	"components": [
 		{
-			"name": "meka.classifiers.multilabel.meta.MultiSearch",
+			"name": "meka.classifiers.multilabel.Maniac",
+			"providedInterface": [
+				"MLClassifier",
+				"BasicMLClassifier"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+				{
+					"name": "compression",
+					"comment": "Compression factor of the autoencoders, each level of autoencoders will compress the labels to factor times previous layer size. (default: 0.85)",
+					"type": "double",
+					"default": 0.85,
+					"min": 0.01,
+					"max": 0.99,
+					"minInterval": 0.05,
+					"refineSplits": 2
+				},
+				{
+					"name": "numberAutoencoders",
+					"comment": "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+					"type": "int",
+					"default": 4,
+					"min": 1,
+					"max": 10,
+					"minInterval": 1,
+					"refineSplits": 2
+				},
+				{
+					"name": "optimizeAE",
+					"comment": "Number of autoencoders, i.e. number of hidden layers +1. Note that this can be also used as the number of autoencoders to use in the optimization search, autoencoders will be added until this number is reached and then the best configuration in terms of number of layers is selects. (default: 4)",
+					"type": "boolean",
+					"default": "false"
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.DeepML",
+			"providedInterface": [
+				"MLClassifier",
+				"MetaMLClassifier","ProblemTransformationMethod"
+			],
+			"requiredInterface": [
+				{
+					"id": "W",
+					"name": "BasicMLClassifier"
+				}
+			],
+			"parameter": [
+				{
+					"comment": "Sets the number of RBMs default: 2",
+					"name": "N",
+					"type": "int",
+					"default": 2,
+					"min": 2,
+					"max": 5,
+					"refineSplits": 2,
+					"minInterval": 1
+				},
+				{
+					"comment": "Sets the number of hidden units default: 10",
+					"name": "H",
+					"type": "int",
+					"default": 10,
+					"min": 5,
+					"max": 100,
+					"refineSplits": 2,
+					"minInterval": 5
+				},
+				{
+					"comment": "Sets the maximum number of epochs default: 1000 (auto_cut_out)",
+					"name": "E",
+					"type": "int",
+					"default": 1000,
+					"min": 100,
+					"max": 10000,
+					"refineSplits": 2,
+					"minInterval": 100
+				},
+				{
+					"comment": "Sets the learning rate (tyically somewhere between 'very small' and 0.1) default: 0.1",
+					"name": "r",
+					"type": "double",
+					"default": 0.1,
+					"min": 1E-5,
+					"max": 0.1,
+					"refineSplits": 2,
+					"minInterval": 1E-5
+				},
+				{
+					"name": "m",
+					"comment": "Sets the momentum (typically somewhere between 0.1 and 0.9) default: 0.1",
+					"type": "double",
+					"default": 0.1,
+					"min": 0.1,
+					"max": 0.9,
+					"refineSplits": 2,
+					"minInterval": 0.05
+				}
+			]
+		},
+		{
+			"name": "meka.classifiers.multilabel.meta.FilteredClassifier",
 			"providedInterface": [
 				"MLClassifier",
 				"MetaMLClassifier"
@@ -16,52 +122,15 @@
 					"name": "BasicMLClassifier"
 				}
 			],
-			"comment": "LEFT OUT: _search, _algorithm",
 			"parameter": [
 				{
 					"name": "F",
-					"comment": "Determines the parameter used for evaluation: ACC = Accuracy JIDX = Jaccard index HSCORE = Hamming score EM = Exact match JDIST = Jaccard distance HLOSS = Hamming loss ZOLOSS = ZeroOne loss HARSCORE = Harmonic score OE = One error RLOSS = Rank loss AVGPREC = Avg precision LOGLOSSL = Log Loss (lim. L) LOGLOSSD = Log Loss (lim. D) F1MICRO = F1 (micro averaged) F1MACROEX = F1 (macro averaged by example) F1MACROLBL = F1 (macro averaged by label) AUPRC = AUPRC (macro averaged) AUROC = AUROC (macro averaged) LCARD = Label cardinality (predicted) LDIST = Levenshtein distance (default: ACC)",
+					"comment": "The number of iterations of EM to carry out (default: 10). REMARK: Here we could also use a subcomponent for filters!",
 					"type": "cat",
-					"default": "ACC",
+					"default": "weka.filters.supervised.attribute.Discretize -R first_last -precision 6",
 					"values": [
-						"ACC",
-						"JIDX",
-						"HSCORE",
-						"EM",
-						"JDIST",
-						"HLOSS",
-						"ZOLOSS",
-						"HARSCORE",
-						"OE",
-						"RLOSS",
-						"AVGPREC",
-						"LOGLOSSL",
-						"LOGLOSSD",
-						"F1MICRO",
-						"F1MACROEX",
-						"F1MACROLBL",
-						"AUPRC",
-						"AUROC",
-						"LCARD",
-						"LDIST"
+						"weka.filters.supervised.attribute.Discretize -R first_last -precision 6"
 					]
-				}
-			]
-		},
-		{
-			"name": "meka.classifiers.multilabel.PLST",
-			"providedInterface": ["MLClassifier", "MetaMLClassifier"],
-			"requiredInterface": ["BasicMTClassifier"],
-			"parameter": [
-				{
-					"name": "_size",
-					"comment": "Size of the compressed matrix. Should be less than the number of labels and more than 1. (default: 3)",
-					"type": "int",
-					"min": 2,
-					"max": 20,
-					"default": 3,
-					"minInterval": 1,
-					"refineSplits": 2
 				}
 			]
 		}
