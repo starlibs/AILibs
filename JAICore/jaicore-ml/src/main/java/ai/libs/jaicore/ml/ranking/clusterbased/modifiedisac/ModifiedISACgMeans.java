@@ -21,7 +21,7 @@ public class ModifiedISACgMeans extends GMeans<DoublePoint> {
 	private Map<double[], List<double[]>> intermediatePoints;
 	private List<double[]> loopPoints;
 	private Map<double[], ProblemInstance<Instance>> pointToInstance;
-	L1DistanceMetric dist = new L1DistanceMetric();
+	private L1DistanceMetric dist = new L1DistanceMetric();
 
 	/**
 	 * inilizes toClusterPoints with the points that are to Cluster and are
