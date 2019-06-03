@@ -281,9 +281,9 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		// Search for the best splitting criterion in terms of the best Entrance gain
 		// for each feature type due to different feature scales
-		List<Integer> T1 = T1T2.getX();
+		List<Integer> t1 = T1T2.getX();
 		List<Integer> T2 = T1T2.getY();
-		for (int i = 0; i < T1.size(); i++) {
+		for (int i = 0; i < t1.size(); i++) {
 			for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 				for (final double cand : thresholdCandidates.get(k)) {
 					// Calculate delta entropy and E for f_k(t1,t2) <= cand
@@ -317,7 +317,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		// Update node's decision function
 		nodeToBeFilled.getValue().f = FeatureType.values()[fStar];
-		nodeToBeFilled.getValue().t1 = T1.get(t1t2Star);
+		nodeToBeFilled.getValue().t1 = t1.get(t1t2Star);
 		nodeToBeFilled.getValue().t2 = T2.get(t1t2Star);
 		nodeToBeFilled.getValue().threshold = thresholdStar;
 
