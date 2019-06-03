@@ -187,7 +187,7 @@ public class DFT implements IFilter {
 	}
 
 	@Override
-	public void fit(final double[][] input)  {
+	public void fit(final double[][] input) {
 
 		this.dftCoefficientsMatrix = new double[input.length][this.numberOfDisieredCoefficients * 2 - (this.startingpoint * 2)];
 		double[] dftCoefficientsOFInstance = null;
