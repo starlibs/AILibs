@@ -3,6 +3,9 @@ package ai.libs.jaicore.ml.rqp;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
@@ -10,7 +13,7 @@ import weka.core.Instances;
 import weka.core.neighboursearch.NearestNeighbourSearch;
 
 /**
- * Samples interval-valued data from a dataset of precise points. 
+ * Samples interval-valued data from a dataset of precise points.
  * First chooses one point uniformly at random and then generates a point in the interval-valued augmented space
  * from it and its (exact) K nearest neighbors according to euclidean distance on the attributes, excluding the class,
  * which is assumed to be the last attribute.
@@ -18,28 +21,30 @@ import weka.core.neighboursearch.NearestNeighbourSearch;
  *
  */
 public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
-	
+
+
+	private static final Logger logger = LoggerFactory.getLogger(KNNAugSpaceSampler.class);
 	private final NearestNeighbourSearch nearestNeighbour;
 	private int k;
-	
+
 	/**
 	 * @param nearestNeighbour The nearest neighbour search algorithm to use.
 	 * @author Michael
 	 *
 	 */
-	public KNNAugSpaceSampler(Instances preciseInsts, Random rng, int k, NearestNeighbourSearch nearestNeighbour) {
+	public KNNAugSpaceSampler(final Instances preciseInsts, final Random rng, final int k, final NearestNeighbourSearch nearestNeighbour) {
 		super(preciseInsts, rng);
 		this.k = k;
 		DistanceFunction dist = new EuclideanDistance(preciseInsts);
 		String distOptionColumns = String.format("-R first-%d", preciseInsts.numAttributes() - 1);
 		String[] distOptions = {distOptionColumns};
-		
+
 		try {
 			dist.setOptions(distOptions);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed with exception: {}", e);
 		}
-		
+
 		try {
 			nearestNeighbour.setDistanceFunction(dist);
 			nearestNeighbour.setInstances(preciseInsts);
@@ -54,19 +59,19 @@ public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 	public Instance augSpaceSample() {
 		Instances preciseInsts = this.getPreciseInsts();
 		int numInsts = preciseInsts.size();
-		
-		Instance x = preciseInsts.get(this.getRng().nextInt(numInsts));		
-		Instances kNNs = null;	
+
+		Instance x = preciseInsts.get(this.getRng().nextInt(numInsts));
+		Instances kNNs = null;
 		try {
-			kNNs = nearestNeighbour.kNearestNeighbours(x, k);
+			kNNs = this.nearestNeighbour.kNearestNeighbours(x, this.k);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		ArrayList<Instance> sampledPoints = new ArrayList<Instance>();
 		sampledPoints.add(x);
 		sampledPoints.addAll(kNNs);
-		
+
 		return generateAugPoint(sampledPoints);
 	}
 
@@ -74,13 +79,13 @@ public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 	 * @return the k
 	 */
 	public int getK() {
-		return k;
+		return this.k;
 	}
 
 	/**
 	 * @param k the k to set
 	 */
-	public void setK(int k) {
+	public void setK(final int k) {
 		this.k = k;
 	}
 
