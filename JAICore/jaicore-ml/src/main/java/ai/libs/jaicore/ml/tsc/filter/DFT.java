@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.tsc.filter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.math3.complex.Complex;
 
@@ -20,15 +21,17 @@ import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
  */
 public class DFT implements IFilter {
 
+	private static final String MSG_EMPTYINPUT = "The input can not be empty";
+
 	/**
 	 * Is used to save the final DFT Coefficients matrices. Each entry in the list corresponds to one
 	 * matrix in the original dataset.
 	 */
-	private ArrayList<double[][]> DFTCoefficients = new ArrayList<double[][]>();
+	private List<double[][]> dftCoefficients = new ArrayList<>();
 
-	private double[][] DFTCoefficientsMatrix;
+	private double[][] dftCoefficientsMatrix;
 
-	private double[] DFTCoefficientsInstance;
+	private double[] dftCoefficientsInstance;
 	/**
 	 * default value for the computation of the DFT Coefficients normally set to the wordlength/2
 	 */
@@ -70,7 +73,7 @@ public class DFT implements IFilter {
 	 *
 	 */
 	@Override
-	public TimeSeriesDataset transform(final TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset transform(final TimeSeriesDataset input) {
 
 		if (input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
@@ -80,48 +83,46 @@ public class DFT implements IFilter {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method is called.");
 		}
 		// creates a new dataset out of the matrix vice Arraylist of the DFT coefficents calculated by fit
-		TimeSeriesDataset output = new TimeSeriesDataset(this.DFTCoefficients, null, null);
-
-		return output;
+		return new TimeSeriesDataset(this.dftCoefficients, null, null);
 	}
 
 	// calculates the number of desired DFT coefficients for each matrix and therefore for each instance
 	@Override
-	public void fit(final TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public void fit(final TimeSeriesDataset input) {
 
 		if (input.isEmpty()) {
 			throw new IllegalArgumentException("This method can not work with an empty dataset.");
 		}
-		this.DFTCoefficients.clear();
+		this.dftCoefficients.clear();
 
 		for (int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
 			this.fitTransform(input.getValues(matrix));
 			this.fittedMatrix = false;
-			this.DFTCoefficients.add(this.DFTCoefficientsMatrix);
+			this.dftCoefficients.add(this.dftCoefficientsMatrix);
 		}
 
 		this.fitted = true;
 	}
 
 	@Override
-	public TimeSeriesDataset fitTransform(final TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset fitTransform(final TimeSeriesDataset input) {
 		this.fit(input);
 		return this.transform(input);
 	}
 
 	@Override
-	public double[] transform(final double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[] transform(final double[] input) {
 		if (!this.fittedInstance) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
 		}
 		if (input.length == 0) {
 			throw new IllegalArgumentException("The input can not be empty.");
 		}
-		return this.DFTCoefficientsInstance;
+		return this.dftCoefficientsInstance;
 	}
 
 	@Override
-	public void fit(final double[] input) throws IllegalArgumentException {
+	public void fit(final double[] input) {
 
 		if (this.numberOfDisieredCoefficients > input.length) {
 			throw new IllegalArgumentException("There cannot be more DFT coefficents calcualated than there entrys in the basis instance.");
@@ -135,7 +136,7 @@ public class DFT implements IFilter {
 			this.startingpoint = 0;
 		}
 		// The buffer for the calculated DFT coefficeients
-		this.DFTCoefficientsInstance = new double[this.numberOfDisieredCoefficients * 2 - (this.startingpoint * 2)];
+		this.dftCoefficientsInstance = new double[this.numberOfDisieredCoefficients * 2 - (this.startingpoint * 2)];
 
 		// Variable used to make steps of size two in a loop that makes setps of size one
 		int loopcounter = 0;
@@ -157,53 +158,49 @@ public class DFT implements IFilter {
 				result = result.add(tmp);
 			}
 
-			// result = result.multiply(paperSpecificVariable);
-
 			// saves the calculated coefficient in the buffer with first the real part and than the imaginary
-			this.DFTCoefficientsInstance[loopcounter] = result.getReal();
-			this.DFTCoefficientsInstance[loopcounter + 1] = result.getImaginary();
+			this.dftCoefficientsInstance[loopcounter] = result.getReal();
+			this.dftCoefficientsInstance[loopcounter + 1] = result.getImaginary();
 			loopcounter += 2;
 		}
-		if (this.rekursivFirstInstance) {
-			if (this.meanCorrected) {
-				this.startingpoint = 1;
-			}
+		if (this.rekursivFirstInstance && this.meanCorrected) {
+			this.startingpoint = 1;
 		}
 		this.fittedInstance = true;
 	}
 
 	@Override
-	public double[] fitTransform(final double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[] fitTransform(final double[] input) {
 		this.fit(input);
 		return this.transform(input);
 	}
 
 	@Override
-	public double[][] transform(final double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[][] transform(final double[][] input) {
 		if (!this.fittedMatrix) {
 			throw new NoneFittedFilterExeception("The fit method must be called before transforming");
 		}
 		if (input.length == 0) {
-			throw new IllegalArgumentException("The input can not be empty");
+			throw new IllegalArgumentException(MSG_EMPTYINPUT);
 		}
-		return this.DFTCoefficientsMatrix;
+		return this.dftCoefficientsMatrix;
 	}
 
 	@Override
-	public void fit(final double[][] input) throws IllegalArgumentException {
+	public void fit(final double[][] input)  {
 
-		this.DFTCoefficientsMatrix = new double[input.length][this.numberOfDisieredCoefficients * 2 - (this.startingpoint * 2)];
-		double[] DFTCoefficientsOFInstance = null;
+		this.dftCoefficientsMatrix = new double[input.length][this.numberOfDisieredCoefficients * 2 - (this.startingpoint * 2)];
+		double[] dftCoefficientsOFInstance = null;
 		for (int instance = 0; instance < input.length; instance++) {
-			DFTCoefficientsOFInstance = this.fitTransform(input[instance]);
+			dftCoefficientsOFInstance = this.fitTransform(input[instance]);
 			this.fittedInstance = false;
-			this.DFTCoefficientsMatrix[instance] = DFTCoefficientsOFInstance;
+			this.dftCoefficientsMatrix[instance] = dftCoefficientsOFInstance;
 		}
 		this.fittedMatrix = true;
 	}
 
 	@Override
-	public double[][] fitTransform(final double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[][] fitTransform(final double[][] input) {
 		this.fit(input);
 		return this.transform(input);
 	}
@@ -214,7 +211,7 @@ public class DFT implements IFilter {
 
 	public double[][] rekursivDFT(final double[][] input) {
 		if (input.length == 0) {
-			throw new IllegalArgumentException("The input can not be empty");
+			throw new IllegalArgumentException(MSG_EMPTYINPUT);
 		}
 
 		if (input[0].length < this.numberOfDisieredCoefficients) {
@@ -226,12 +223,6 @@ public class DFT implements IFilter {
 		}
 
 		Complex[][] outputComplex = new Complex[input.length][this.numberOfDisieredCoefficients];
-		/*
-		 * Complex[][] vMatrix = new
-		 * Complex[numberOfDisieredCoefficients][numberOfDisieredCoefficients]; for(int
-		 * i = 0; i < numberOfDisieredCoefficients; i++) { vMatrix[i][i] = vFormular(-i,
-		 * input[0].length); }
-		 */
 
 		for (int i = 0; i < input.length; i++) {
 			if (i == 0) {
@@ -252,14 +243,12 @@ public class DFT implements IFilter {
 			}
 		}
 
-		double[][] output = this.conversion(outputComplex);
-		return output;
-
+		return this.conversion(outputComplex);
 	}
 
 	private double[][] conversion(final Complex[][] input) {
 		if (input.length == 0) {
-			throw new IllegalArgumentException("The input can not be empty");
+			throw new IllegalArgumentException(MSG_EMPTYINPUT);
 		}
 
 		double[][] output = new double[input.length][input[0].length * 2 - (this.startingpoint * 2)];
@@ -275,12 +264,11 @@ public class DFT implements IFilter {
 	}
 
 	private Complex vFormular(final int coefficient, final int legthOfinstance) {
-		Complex result = new Complex(Math.cos(2 * Math.PI * coefficient / legthOfinstance), Math.sin(2 * Math.PI * coefficient / legthOfinstance));
-		return result;
+		return new Complex(Math.cos(2 * Math.PI * coefficient / legthOfinstance), Math.sin(2 * Math.PI * coefficient / legthOfinstance));
 	}
 
 	public TimeSeriesDataset rekursivDFT(final TimeSeriesDataset input) {
-		ArrayList<double[][]> tmp = new ArrayList<double[][]>();
+		List<double[][]> tmp = new ArrayList<>();
 		for (int matrix = 0; matrix < input.getNumberOfVariables(); matrix++) {
 			tmp.add(this.rekursivDFT(input.getValues(matrix)));
 		}
