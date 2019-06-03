@@ -41,15 +41,10 @@ public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 
 		try {
 			dist.setOptions(distOptions);
-		} catch (Exception e) {
-			logger.error("Failed with exception: {}", e);
-		}
-
-		try {
 			nearestNeighbour.setDistanceFunction(dist);
 			nearestNeighbour.setInstances(preciseInsts);
 		} catch (Exception e) {
-			logger.error("Failed with exception: {}", e);
+			logger.error("Could not configure distance function or setup nearest neighbour: {}", e);
 		}
 		nearestNeighbour.setMeasurePerformance(false);
 		this.nearestNeighbour = nearestNeighbour;
@@ -65,10 +60,10 @@ public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 		try {
 			kNNs = this.nearestNeighbour.kNearestNeighbours(x, this.k);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Creating the augmented space sample failed with exception: {}", e);
 		}
 
-		ArrayList<Instance> sampledPoints = new ArrayList<Instance>();
+		ArrayList<Instance> sampledPoints = new ArrayList<>();
 		sampledPoints.add(x);
 		sampledPoints.addAll(kNNs);
 

@@ -9,6 +9,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.model.travesaltree.NodeType;
 import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
@@ -24,7 +25,6 @@ import autofe.db.model.relation.AbstractRelationship;
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
 import autofe.db.util.DBUtils;
-import autofe.db.util.Tuple;
 
 public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNode, String> {
 
@@ -138,14 +138,14 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		}
 
 		// Compute possible next path elements
-		List<Tuple<AbstractRelationship, AggregationFunction>> nextPathElements = this.nextIntermediatePathElements(lastTable);
+		List<Pair<AbstractRelationship, AggregationFunction>> nextPathElements = this.nextIntermediatePathElements(lastTable);
 
-		List<Tuple<AbstractRelationship, AggregationFunction>> validNextPathElements = new ArrayList<>();
+		List<Pair<AbstractRelationship, AggregationFunction>> validNextPathElements = new ArrayList<>();
 
 		// Check whether the candidates are duplicates
-		for (Tuple<AbstractRelationship, AggregationFunction> nextPathElement : nextPathElements) {
+		for (Pair<AbstractRelationship, AggregationFunction> nextPathElement : nextPathElements) {
 			// Compute all possible path from there
-			AbstractRelationship ar = nextPathElement.getT();
+			AbstractRelationship ar = nextPathElement.getX();
 			ar.setContext(this.db);
 			Path prefix = new Path(intermediateFeature.getPath());
 			prefix.addPathElement(nextPathElement);
@@ -168,7 +168,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		}
 
 		List<NodeExpansionDescription<DatabaseNode, String>> toReturn = new ArrayList<>();
-		for (Tuple<AbstractRelationship, AggregationFunction> nextPathElement : validNextPathElements) {
+		for (Pair<AbstractRelationship, AggregationFunction> nextPathElement : validNextPathElements) {
 			List<AbstractFeature> extendedFeatures = this.cloneFeatureList(node.getSelectedFeatures());
 			BackwardFeature extendedintermediateFeature = this.getIntermediateFeature(extendedFeatures);
 			if (extendedintermediateFeature == null) {
@@ -178,8 +178,8 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			extendedPath.addPathElement(nextPathElement);
 			extendedintermediateFeature.setPath(extendedPath);
 			DatabaseNode extendedNode = new DatabaseNode(extendedFeatures, false);
-			AbstractRelationship ar = nextPathElement.getT();
-			String description = String.format("Intermediate: <[%s -> %s], %s>", ar.getFrom().getName(), ar.getTo().getName(), nextPathElement.getU());
+			AbstractRelationship ar = nextPathElement.getX();
+			String description = String.format("Intermediate: <[%s -> %s], %s>", ar.getFrom().getName(), ar.getTo().getName(), nextPathElement.getY());
 			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, extendedNode, description, NodeType.OR));
 		}
 
@@ -187,8 +187,8 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 	}
 
-	private List<Tuple<AbstractRelationship, AggregationFunction>> nextIntermediatePathElements(final Table lastTable) {
-		List<Tuple<AbstractRelationship, AggregationFunction>> toReturn = new ArrayList<>();
+	private List<Pair<AbstractRelationship, AggregationFunction>> nextIntermediatePathElements(final Table lastTable) {
+		List<Pair<AbstractRelationship, AggregationFunction>> toReturn = new ArrayList<>();
 
 		// Find all possible next tables
 		Set<BackwardRelationship> backwards = DBUtils.getBackwardsTo(lastTable, this.db);
@@ -196,13 +196,13 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 
 		for (BackwardRelationship br : backwards) {
 			for (AggregationFunction af : AggregationFunction.values()) {
-				Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<>(br, af);
+				Pair<AbstractRelationship, AggregationFunction> toAdd = new Pair<>(br, af);
 				toReturn.add(toAdd);
 			}
 		}
 
 		for (ForwardRelationship fr : forwards) {
-			Tuple<AbstractRelationship, AggregationFunction> toAdd = new Tuple<>(fr, null);
+			Pair<AbstractRelationship, AggregationFunction> toAdd = new Pair<>(fr, null);
 			toReturn.add(toAdd);
 		}
 
@@ -248,8 +248,8 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 		if (from == null) {
 			from = DBUtils.getAttributeTable(feature.getParent(), this.db);
 		}
-		List<Tuple<AbstractRelationship, AggregationFunction>> nextElements = this.nextIntermediatePathElements(from);
-		for (Tuple<AbstractRelationship, AggregationFunction> nextElement : nextElements) {
+		List<Pair<AbstractRelationship, AggregationFunction>> nextElements = this.nextIntermediatePathElements(from);
+		for (Pair<AbstractRelationship, AggregationFunction> nextElement : nextElements) {
 			Path extended = new Path(prefix);
 			extended.addPathElement(nextElement);
 			// Found complete path

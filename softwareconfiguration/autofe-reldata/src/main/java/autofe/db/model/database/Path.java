@@ -3,18 +3,18 @@ package autofe.db.model.database;
 import java.util.ArrayList;
 import java.util.List;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import autofe.db.model.relation.AbstractRelationship;
-import autofe.db.util.Tuple;
 
 public class Path {
 
-	private List<Tuple<AbstractRelationship, AggregationFunction>> pathElements;
+	private List<Pair<AbstractRelationship, AggregationFunction>> pathElements;
 
 	public Path() {
 		this.pathElements = new ArrayList<>();
 	}
 
-	public Path(final List<Tuple<AbstractRelationship, AggregationFunction>> pathElements) {
+	public Path(final List<Pair<AbstractRelationship, AggregationFunction>> pathElements) {
 		this.pathElements = new ArrayList<>(pathElements);
 	}
 
@@ -22,24 +22,24 @@ public class Path {
 		this(toClone.pathElements);
 	}
 
-	public List<Tuple<AbstractRelationship, AggregationFunction>> getPathElements() {
+	public List<Pair<AbstractRelationship, AggregationFunction>> getPathElements() {
 		return this.pathElements;
 	}
 
-	public void addPathElement(final Tuple<AbstractRelationship, AggregationFunction> toAdd) {
+	public void addPathElement(final Pair<AbstractRelationship, AggregationFunction> toAdd) {
 		this.pathElements.add(toAdd);
 	}
 
 	public void addPathElement(final AbstractRelationship ar, final AggregationFunction af) {
-		this.pathElements.add(new Tuple<AbstractRelationship, AggregationFunction>(ar, af));
+		this.pathElements.add(new Pair<AbstractRelationship, AggregationFunction>(ar, af));
 	}
 
 	public String getLastTableName() {
 		if (this.pathElements.isEmpty()) {
 			return null;
 		}
-		Tuple<AbstractRelationship, AggregationFunction> lastPathElement = this.pathElements.get(this.pathElements.size() - 1);
-		return lastPathElement.getT().getFromTableName();
+		Pair<AbstractRelationship, AggregationFunction> lastPathElement = this.pathElements.get(this.pathElements.size() - 1);
+		return lastPathElement.getX().getFromTableName();
 	}
 
 	public int length() {
@@ -76,10 +76,10 @@ public class Path {
 			return "[{}]";
 		}
 		StringBuilder sb = new StringBuilder();
-		for (Tuple<AbstractRelationship, AggregationFunction> pathElement : this.pathElements) {
-			sb.append(pathElement.getT().getFromTableName());
-			sb.append("<-(" + pathElement.getU() + ")-");
-			sb.append(pathElement.getT().getToTableName());
+		for (Pair<AbstractRelationship, AggregationFunction> pathElement : this.pathElements) {
+			sb.append(pathElement.getX().getFromTableName());
+			sb.append("<-(" + pathElement.getY() + ")-");
+			sb.append(pathElement.getX().getToTableName());
 			sb.append("|");
 		}
 		return sb.substring(0, sb.length() - 1);

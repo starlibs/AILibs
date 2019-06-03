@@ -34,69 +34,6 @@ public class SetUtil {
 		// prevent instantiation of this util class
 	}
 
-	public static class Pair<X, Y> {
-		private X x;
-		private Y y;
-
-		public Pair(final X x, final Y y) {
-			super();
-			this.x = x;
-			this.y = y;
-		}
-
-		public X getX() {
-			return this.x;
-		}
-
-		public Y getY() {
-			return this.y;
-		}
-
-		@Override
-		public String toString() {
-			return "<" + this.x + ", " + this.y + ">";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((this.x == null) ? 0 : this.x.hashCode());
-			result = prime * result + ((this.y == null) ? 0 : this.y.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (this.getClass() != obj.getClass()) {
-				return false;
-			}
-			@SuppressWarnings("unchecked")
-			Pair<X, Y> other = (Pair<X, Y>) obj;
-			if (this.x == null) {
-				if (other.x != null) {
-					return false;
-				}
-			} else if (!this.x.equals(other.x)) {
-				return false;
-			}
-			if (this.y == null) {
-				if (other.y != null) {
-					return false;
-				}
-			} else if (!this.y.equals(other.y)) {
-				return false;
-			}
-			return true;
-		}
-	}
-
 	/* BASIC SET OPERATIONS */
 	@SafeVarargs
 	public static <T> Collection<T> union(final Collection<T>... set) {
@@ -814,7 +751,7 @@ public class SetUtil {
 	}
 
 	/* ORDER OPERATIONS (SHUFFLE, SORT, PERMUTATE) */
-	public static <T> void shuffle(final List<T> list) {
+	public static <T> void shuffle(final List<T> list, final long seed) {
 
 		/* preliminaries */
 		List<Integer> unusedItems = new ArrayList<>();
@@ -827,13 +764,13 @@ public class SetUtil {
 
 		/* select randomly from unusedItems until unusedItems is empty */
 		while (!unusedItems.isEmpty()) {
-			int index = new Random().nextInt(unusedItems.size());
+			int index = new Random(seed).nextInt(unusedItems.size());
 			list.add(copy.get(unusedItems.get(index)));
 		}
 	}
 
-	public static <T> T getRandomElement(final Collection<T> set) {
-		int choice = new Random().nextInt(set.size());
+	public static <T> T getRandomElement(final Collection<T> set, final long seed) {
+		int choice = new Random(seed).nextInt(set.size());
 		if (set instanceof List) {
 			return ((List<T>) set).get(choice);
 		}

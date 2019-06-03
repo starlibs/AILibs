@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
 
@@ -324,9 +324,7 @@ public class TimeSeriesUtil {
 	 *                          instead of n should be applied
 	 * @return Z-normalized vector
 	 */
-	// TODO: Unify with Helen's calculation
 	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
-		// TODO: Parameter checks...
 
 		int n = dataVector.length - (besselsCorrection ? 1 : 0);
 
@@ -853,7 +851,7 @@ public class TimeSeriesUtil {
 		return Math.sqrt(variance(t));
 	}
 
-	public static double EPSILON = 0.0000001;
+	public static final double EPSILON = 0.0000001;
 
 	public static double[] zTransform(final double[] t) {
 		double mean = mean(t);

@@ -27,8 +27,8 @@ import ai.libs.hasco.model.IParameterDomain;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
@@ -208,7 +208,7 @@ public class Util {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
 				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: "
-						+ state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
+				+ state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);
@@ -525,7 +525,7 @@ public class Util {
 		for (Interval proposedRefinement : proposedRefinements) {
 			double epsilon = 1E-7;
 			assert proposedRefinement.getInf() + epsilon >= inf && proposedRefinement.getSup() <= sup + epsilon : "The proposed refinement [" + proposedRefinement.getInf() + ", " + proposedRefinement.getSup()
-					+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
+			+ "] is not a sub-interval of [" + inf + ", " + sup + "].";
 			if (proposedRefinement.equals(interval)) {
 				throw new IllegalStateException("No real refinement! Intervals are identical.");
 			}

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
@@ -59,7 +60,6 @@ public class SimplifiedTimeSeriesLoader {
 	 */
 	private static final double TARGET_EQUALS_EPS = 0.01;
 
-	// TODO: Add meta data support
 	/**
 	 * Loads a univariate time series dataset from the given arff file. Assumes the
 	 * class attribute to be the last among the declared attributes in the file.
@@ -116,8 +116,6 @@ public class SimplifiedTimeSeriesLoader {
 		List<String> classNames = null;
 
 		for (final File arffFile : arffFiles) {
-			// Pair<INDArray, INDArray> tsWithTarget =
-			// loadTimeSeriesWithTargetFromArffFile(arffFile);
 			Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
 			if (classNames == null && tsTargetClassNames[2] != null) {
@@ -152,7 +150,7 @@ public class SimplifiedTimeSeriesLoader {
 			cm = new ClassMapper(classNames);
 		}
 
-		return new Pair<TimeSeriesDataset, ClassMapper>(new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), target), cm);
+		return new Pair<>(new TimeSeriesDataset(matrices, new ArrayList<>(), target), cm);
 	}
 
 	/**
@@ -178,7 +176,7 @@ public class SimplifiedTimeSeriesLoader {
 		List<String> targetValues = null;
 		boolean stringAttributes = false;
 
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arffFile), DEFAULT_CHARSET))) {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arffFile), StandardCharsets.UTF_8))) {
 
 			int attributeCount = 0;
 

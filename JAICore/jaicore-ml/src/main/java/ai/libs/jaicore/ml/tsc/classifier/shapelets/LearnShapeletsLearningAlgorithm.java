@@ -142,12 +142,12 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	/**
 	 * Predefined alpha parameter used within the calculations.
 	 */
-	public static double ALPHA = -30d; // Used in implementation. Paper says -100d
+	public static final double ALPHA = -30d; // Used in implementation. Paper says -100d
 
 	/**
 	 * Epsilon value used to prevent dividing by zero occurrences.
 	 */
-	private static double EPS = 0.000000000000000000001d;
+	private static final double EPS = 0.000000000000000000001d;
 
 	/**
 	 * See {@link IAlgorithm#getTimeout()}.

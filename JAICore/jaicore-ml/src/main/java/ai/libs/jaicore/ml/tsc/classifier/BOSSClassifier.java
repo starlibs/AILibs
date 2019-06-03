@@ -3,6 +3,8 @@ package ai.libs.jaicore.ml.tsc.classifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.aeonbits.owner.ConfigCache;
 
@@ -10,7 +12,6 @@ import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.HistogramBuilder;
 import ai.libs.jaicore.ml.tsc.classifier.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 import ai.libs.jaicore.ml.tsc.filter.SFA;
 import ai.libs.jaicore.ml.tsc.filter.SlidingWindowBuilder;
 import ai.libs.jaicore.ml.tsc.filter.ZTransformer;
@@ -27,8 +28,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	// ---------------------------------------------------------------
 	// All variables needed for the to predict instance and for the BOSS Algorithm or calculated by it .
 	private final IBossAlgorithmConfig config;
-	private ArrayList<ArrayList<HashMap<Integer, Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer, Integer>>>();
-	private ArrayList<HashMap<Integer, Integer>> univirateHistograms;
+	private List<Map<Integer, Integer>> univirateHistograms;
 
 	// ---------------------------------------------------------------
 	// All needed for every predict.
@@ -53,7 +53,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		this.slide.setDefaultWindowSize(config.windowSize());
 	}
 
-	public ArrayList<HashMap<Integer, Integer>> getUnivirateHistograms() {
+	public List<Map<Integer, Integer>> getUnivirateHistograms() {
 		return this.univirateHistograms;
 	}
 
@@ -61,57 +61,43 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		this.trainingData = trainingData;
 	}
 
-	public void setMultivirateHistograms(final ArrayList<ArrayList<HashMap<Integer, Integer>>> multivirateHistograms) {
-		this.multivirateHistograms = multivirateHistograms;
-	}
-
-	public void setHistogramUnivirate(final ArrayList<HashMap<Integer, Integer>> histograms) {
+	public void setHistogramUnivirate(final List<Map<Integer, Integer>> histograms) {
 		this.univirateHistograms = histograms;
 	}
 
 	@Override
 	public Integer predict(final double[] univInstance) throws PredictionException {
-		SFA sfa = new SFA(this.config.alphabet(), this.config.wordLength(), this.config.meanCorrected());
+		SFA sfa = new SFA(this.config.alphabet(), this.config.wordLength());
 
 		// create windows for test instance an there for a small dataset with
 		// windows as instances.
 		TimeSeriesDataset tmp = this.slide.specialFitTransform(univInstance);
-		try {
 
-			// need to call a new fit for each predict because each window gets z normalized by its own.
-			// c.f.p. 1509 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
-			for (int instance = 0; instance < tmp.getValues(0).length; instance++) {
-				tmp.getValues(0)[instance] = this.znorm.fitTransform(tmp.getValues(0)[instance]);
-			}
-
-			TimeSeriesDataset tmpznormedsfaTransformed = sfa.fitTransform(tmp);
-			HashMap<Integer, Integer> histogram = this.histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
-
-			// Calculate distance for all histograms for all instances in the training set.
-			// Remember index of histogram with minimum distance in list because it corresponds to the
-			// instance that produced that histogram with minimum distance.
-			int indexOFminDistInstance = 0;
-			double minDist = Double.MAX_VALUE;
-
-			for (int i = 0; i < this.univirateHistograms.size(); i++) {
-				double dist = this.getBossDistance(histogram, this.univirateHistograms.get(i));
-				if (dist < minDist) {
-					minDist = dist;
-					indexOFminDistInstance = i;
-				}
-			}
-
-			// return the target of that instance that had the minimum distance.
-			return this.trainingData.getTargets()[indexOFminDistInstance];
-
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoneFittedFilterExeception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// need to call a new fit for each predict because each window gets z normalized by its own.
+		// c.f.p. 1509 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
+		for (int instance = 0; instance < tmp.getValues(0).length; instance++) {
+			tmp.getValues(0)[instance] = this.znorm.fitTransform(tmp.getValues(0)[instance]);
 		}
-		return null;
+
+		TimeSeriesDataset tmpznormedsfaTransformed = sfa.fitTransform(tmp);
+		HashMap<Integer, Integer> histogram = this.histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
+
+		// Calculate distance for all histograms for all instances in the training set.
+		// Remember index of histogram with minimum distance in list because it corresponds to the
+		// instance that produced that histogram with minimum distance.
+		int indexOFminDistInstance = 0;
+		double minDist = Double.MAX_VALUE;
+
+		for (int i = 0; i < this.univirateHistograms.size(); i++) {
+			double dist = this.getBossDistance(histogram, this.univirateHistograms.get(i));
+			if (dist < minDist) {
+				minDist = dist;
+				indexOFminDistInstance = i;
+			}
+		}
+
+		// return the target of that instance that had the minimum distance.
+		return this.trainingData.getTargets()[indexOFminDistInstance];
 	}
 
 	@Override
@@ -123,7 +109,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	@Override
 	public List<Integer> predict(final TimeSeriesDataset dataset) throws PredictionException {
 		// For a list of instances a list of predictions are getting created and the list is than returned.
-		ArrayList<Integer> predictions = new ArrayList<Integer>();
+		List<Integer> predictions = new ArrayList<>();
 		for (double[][] matrix : dataset.getValueMatrices()) {
 			for (double[] instance : matrix) {
 				predictions.add(this.predict(instance));
@@ -145,13 +131,15 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 	 *         be equal to the distance of "b" to "a".
 	 *         c.f. p. 1516 "The BOSS is concerned with time series classification in the presence of noise by Patrick Schäfer"
 	 */
-	private double getBossDistance(final HashMap<Integer, Integer> a, final HashMap<Integer, Integer> b) {
+	private double getBossDistance(final Map<Integer, Integer> a, final Map<Integer, Integer> b) {
 		double result = 0;
-		for (Integer key : a.keySet()) {
+		for (Entry<Integer, Integer> entry : a.entrySet()) {
+			int key = entry.getKey();
+			int val = entry.getValue();
 			if (b.containsKey(key)) {
-				result += (Math.pow(a.get(key) - (double)b.get(key), 2));
+				result += (Math.pow(val - (double) b.get(key), 2));
 			} else {
-				result += Math.pow(a.get(key), 2);
+				result += Math.pow(val, 2);
 			}
 		}
 		return result;

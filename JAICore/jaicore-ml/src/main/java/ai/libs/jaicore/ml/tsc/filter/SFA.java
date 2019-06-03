@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.tsc.filter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
@@ -13,6 +14,9 @@ import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
  *         which selects the right letter for a DFT coefficient.
  */
 public class SFA implements IFilter {
+
+	private static final String MSG_NOEMPTYDS = "This method can not work with an empty dataset.";
+	private static final String MSG_NOSINGLEINSTANCE = "To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.";
 
 	private double[] alphabet;
 
@@ -26,14 +30,8 @@ public class SFA implements IFilter {
 
 	private int numberOfDesieredDFTCoefficients;
 
-	private DFT dftFilter = null;
-	private DFT dftFilterMatrix = null;
-
-	private ArrayList<double[][]> lookupTable = new ArrayList<double[][]>();
+	private List<double[][]> lookupTable = new ArrayList<>();
 	private double[][] lookUpTableMatrix = null;
-
-	private ArrayList<double[][]> sfaDataset = new ArrayList<double[][]>();
-	private double[][] sfaMatrix = null;
 
 	private boolean rekursiv;
 
@@ -49,7 +47,7 @@ public class SFA implements IFilter {
 		this.rekursiv = true;
 	}
 
-	public SFA(final double[] alphabet, final int wordLength, final boolean meanCorrected) {
+	public SFA(final double[] alphabet, final int wordLength) {
 		this.alphabet = alphabet;
 
 		// The wordlength must be even
@@ -57,16 +55,16 @@ public class SFA implements IFilter {
 	}
 
 	@Override
-	public TimeSeriesDataset transform(final TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset transform(final TimeSeriesDataset input) {
 
 		if (input.isEmpty()) {
-			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+			throw new IllegalArgumentException(MSG_NOEMPTYDS);
 		}
 		if (!this.fitted) {
 			throw new NoneFittedFilterExeception("The filter must be fitted before it can transform.");
 		}
 
-		this.sfaDataset = new ArrayList<double[][]>();
+		List<double[][]> sfaDataset = new ArrayList<>();
 		// calculate SFA words for every instance and its DFT coefficients
 		for (int matrix = 0; matrix < this.dFTDataset.getNumberOfVariables(); matrix++) {
 			double[][] sfaWords = new double[this.dFTDataset.getNumberOfInstances()][this.numberOfDesieredDFTCoefficients * 2];
@@ -74,7 +72,7 @@ public class SFA implements IFilter {
 				for (int entry = 0; entry < this.numberOfDesieredDFTCoefficients * 2; entry++) {
 					double elem = this.dFTDataset.getValues(matrix)[instance][entry];
 					// get the lookup table for DFT values of the instance
-					double lookup[] = this.lookupTable.get(matrix)[entry];
+					double[] lookup = this.lookupTable.get(matrix)[entry];
 
 					// if the DFT coefficient is smaller than the first or larger than the last
 					// or it lays on the border give it first, last or second ,penultimate
@@ -102,46 +100,33 @@ public class SFA implements IFilter {
 					}
 				}
 			}
-			this.sfaDataset.add(sfaWords);
+			sfaDataset.add(sfaWords);
 		}
-		TimeSeriesDataset output = new TimeSeriesDataset(this.sfaDataset, null, null);
-		return output;
+		return new TimeSeriesDataset(sfaDataset, null, null);
 	}
 
 	@Override
 	public void fit(final TimeSeriesDataset input) {
-		// TODO Auto-generated method stub
-
 		if (input.isEmpty()) {
-			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+			throw new IllegalArgumentException(MSG_NOEMPTYDS);
 		}
-
 		if (this.alphabet.length == 0) {
 			throw new IllegalArgumentException("The alphabet size can not be zero.");
 		}
 
 		this.lookupTable.clear();
 
-		this.dftFilter = new DFT();
-		this.dftFilter.setMeanCorrected(this.meanCorrected);
+		DFT dftFilter = new DFT();
+		dftFilter.setMeanCorrected(this.meanCorrected);
 
-		try {
-			// calculates the number of DFT coefficents with wordlength as number of desired DFT coefficients
-			this.dftFilter.setNumberOfDisieredCoefficients(this.numberOfDesieredDFTCoefficients);
+		// calculates the number of DFT coefficents with wordlength as number of desired DFT coefficients
+		dftFilter.setNumberOfDisieredCoefficients(this.numberOfDesieredDFTCoefficients);
 
-			if (!this.rekursiv) {
-				this.dFTDataset = this.dftFilter.fitTransform(input);
-			} else {
-				// Only works for sliding windows. However it is normally used for SFA.
-				this.dFTDataset = this.dftFilter.rekursivDFT(input);
-			}
-
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoneFittedFilterExeception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (!this.rekursiv) {
+			this.dFTDataset = dftFilter.fitTransform(input);
+		} else {
+			// Only works for sliding windows. However it is normally used for SFA.
+			this.dFTDataset = dftFilter.rekursivDFT(input);
 		}
 
 		for (int matrix = 0; matrix < this.dFTDataset.getNumberOfVariables(); matrix++) {
@@ -180,74 +165,72 @@ public class SFA implements IFilter {
 	}
 
 	@Override
-	public TimeSeriesDataset fitTransform(final TimeSeriesDataset input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public TimeSeriesDataset fitTransform(final TimeSeriesDataset input) {
 		this.fit(input);
 		return this.transform(input);
 	}
 
 	@Override
-	public double[] transform(final double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-
-		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+	public double[] transform(final double[] input) {
+		throw new UnsupportedOperationException(MSG_NOSINGLEINSTANCE);
 	}
 
 	@Override
-	public void fit(final double[] input) throws IllegalArgumentException {
+	public void fit(final double[] input) {
 
-		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+		throw new UnsupportedOperationException(MSG_NOSINGLEINSTANCE);
 	}
 
 	@Override
-	public double[] fitTransform(final double[] input) throws IllegalArgumentException, NoneFittedFilterExeception {
-
-		throw new UnsupportedOperationException("To build a SFA word the full dataset has to be considerd therefore it is not reasonable in this context to perform this operation on a single Instance.");
+	public double[] fitTransform(final double[] input) {
+		throw new UnsupportedOperationException(MSG_NOSINGLEINSTANCE);
 	}
 
 	@Override
-	public double[][] transform(final double[][] input) throws IllegalArgumentException, NoneFittedFilterExeception {
+	public double[][] transform(final double[][] input) {
 		if (input.length == 0) {
-			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+			throw new IllegalArgumentException(MSG_NOEMPTYDS);
 		}
 		if (!this.fittedMatrix) {
 			throw new NoneFittedFilterExeception("The filter must be fitted before it can transform.");
 		}
 
-		this.sfaMatrix = new double[this.dftMatrix.length][this.numberOfDesieredDFTCoefficients * 2];
+		double[][] sfaMatrix = new double[this.dftMatrix.length][this.numberOfDesieredDFTCoefficients * 2];
 		for (int instance = 0; instance < this.dftMatrix.length; instance++) {
 			for (int entry = 0; entry < this.numberOfDesieredDFTCoefficients * 2; entry++) {
 				double elem = this.dftMatrix[instance][entry];
 				// get the lookup table for DFT values of the instance
-				double lookup[] = this.lookUpTableMatrix[entry];
+				double[] lookup = this.lookUpTableMatrix[entry];
 
 				// if the DFT coefficient is smaller than the first or larger than the last
 				// or it lays on the border give it first, last or second ,penultimate
 				if (elem < lookup[0]) {
-					this.sfaMatrix[instance][entry] = this.alphabet[0];
+					sfaMatrix[instance][entry] = this.alphabet[0];
 				}
 				if (elem == lookup[0]) {
-					this.sfaMatrix[instance][entry] = this.alphabet[1];
+					sfaMatrix[instance][entry] = this.alphabet[1];
 				}
 				if (elem > lookup[this.alphabet.length - 2]) {
-					this.sfaMatrix[instance][entry] = this.alphabet[this.alphabet.length - 1];
+					sfaMatrix[instance][entry] = this.alphabet[this.alphabet.length - 1];
 				}
 				if (elem == lookup[this.alphabet.length - 2]) {
-					this.sfaMatrix[instance][entry] = this.alphabet[this.alphabet.length - 1];
+					sfaMatrix[instance][entry] = this.alphabet[this.alphabet.length - 1];
 				}
 				// get alphabet letter for every non extrem coefficient
 				else {
 					for (int i = 1; i < lookup.length - 2; i++) {
 						if (elem > lookup[i]) {
-							this.sfaMatrix[instance][entry] = this.alphabet[i];
+							sfaMatrix[instance][entry] = this.alphabet[i];
 						}
 						if (elem == lookup[i]) {
-							this.sfaMatrix[instance][entry] = this.alphabet[i + 1];
+							sfaMatrix[instance][entry] = this.alphabet[i + 1];
 						}
 					}
 				}
 			}
 		}
 
-		return this.sfaMatrix;
+		return sfaMatrix;
 	}
 
 	/*
@@ -255,32 +238,23 @@ public class SFA implements IFilter {
 	 * Filter and for the dataset an overall Filter is needed.
 	 */
 	@Override
-	public void fit(final double[][] input) throws IllegalArgumentException {
+	public void fit(final double[][] input) {
 		if (input.length == 0) {
-			throw new IllegalArgumentException("This method can not work with an empty dataset.");
+			throw new IllegalArgumentException(MSG_NOEMPTYDS);
 		}
 
 		if (this.alphabet.length == 0) {
 			throw new IllegalArgumentException("The alphabet size can not be zero.");
 		}
 
-		this.dftFilterMatrix = new DFT();
+		DFT dftFilterMatrix = new DFT();
 
-		try {
-			// calculates the number of DFT coefficents with wordlength as number of desired DFT coefficients
-			this.dftFilterMatrix.setNumberOfDisieredCoefficients(this.numberOfDesieredDFTCoefficients);
-			if (!this.rekursiv) {
-				this.dftMatrix = this.dftFilterMatrix.fitTransform(input);
-			} else {
-				this.dftMatrix = this.dftFilterMatrix.rekursivDFT(input);
-			}
-
-		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoneFittedFilterExeception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		// calculates the number of DFT coefficents with wordlength as number of desired DFT coefficients
+		dftFilterMatrix.setNumberOfDisieredCoefficients(this.numberOfDesieredDFTCoefficients);
+		if (!this.rekursiv) {
+			this.dftMatrix = dftFilterMatrix.fitTransform(input);
+		} else {
+			this.dftMatrix = dftFilterMatrix.rekursivDFT(input);
 		}
 
 		this.lookUpTableMatrix = new double[this.numberOfDesieredDFTCoefficients * 2][this.alphabet.length - 1];

@@ -3,25 +3,23 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.ArrayList;
 import java.util.Random;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
 import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.standard.SimpleDataset;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstancesUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
-import weka.core.Instances;
 
 public class LocalCaseControlSampling<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> extends PilotEstimateSampling<I, D> {
 
-	public LocalCaseControlSampling(Random rand, int preSampleSize, D input) {
+	public LocalCaseControlSampling(final Random rand, final int preSampleSize, final D input) {
 		super(input);
 		this.rand = rand;
 		this.preSampleSize = preSampleSize;
 	}
 
-	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(D instances, Classifier pilotEstimator) {
+	@Override
+	protected ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(final D instances, final Classifier pilotEstimator) {
 		double boundaryOfCurrentInstance = 0.0;
 		ArrayList<Pair<Instance, Double>> instanceProbabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;
@@ -48,7 +46,7 @@ public class LocalCaseControlSampling<I extends ILabeledAttributeArrayInstance<?
 		ArrayList<Pair<I, Double>> probabilityBoundaries = new ArrayList<>();
 		int iterator = 0;
 		for (I instance : instances) {
-			probabilityBoundaries.add(new Pair<I, Double>((I) instance, instanceProbabilityBoundaries.get(iterator).getY()));
+			probabilityBoundaries.add(new Pair<I, Double>(instance, instanceProbabilityBoundaries.get(iterator).getY()));
 			iterator++;
 		}
 		return probabilityBoundaries;

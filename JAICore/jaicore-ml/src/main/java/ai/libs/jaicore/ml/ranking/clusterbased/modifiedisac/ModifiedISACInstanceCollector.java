@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
 import ai.libs.jaicore.ml.ranking.clusterbased.datamanager.IInstanceCollector;
 import weka.core.Instance;
@@ -20,7 +20,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 	/**
 	 * The collected and processed Instances
 	 */
-	private ArrayList<ArrayList<SetUtil.Pair<String,Double>>> collectedClassifierandPerformance;
+	private ArrayList<ArrayList<Pair<String,Double>>> collectedClassifierandPerformance;
 
 	private int numberOfClassifier;
 	private ArrayList<String> allClassifier = new ArrayList<>();
@@ -36,7 +36,7 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		return atributesofTrainingsdata;
 	}
 
-	public List<ArrayList<SetUtil.Pair<String,Double>>> getCollectedClassifierandPerformance() {
+	public List<ArrayList<Pair<String,Double>>> getCollectedClassifierandPerformance() {
 		return this.collectedClassifierandPerformance;
 	}
 
@@ -54,11 +54,11 @@ public class ModifiedISACInstanceCollector implements IInstanceCollector<Instanc
 		this.numberOfClassifier = (((endOfClassifierPerformanceValues+1)-(startOfClassifierPerformanceValues+1))+1);
 
 		for(Instance i : data) {
-			ArrayList<SetUtil.Pair<String,Double>> pandc = new ArrayList<>();
+			ArrayList<Pair<String,Double>> pandc = new ArrayList<>();
 			for(int j = endOfClassifierPerformanceValues; j>=startOfClassifierPerformanceValues; j--) {
 				String classi = i.attribute(j).name();
 				double perfo = i.value(j);
-				SetUtil.Pair<String, Double> tup = new SetUtil.Pair<>(classi,perfo);
+				Pair<String, Double> tup = new Pair<>(classi,perfo);
 				pandc.add(tup);
 			}
 			this.collectedClassifierandPerformance.add(pandc);

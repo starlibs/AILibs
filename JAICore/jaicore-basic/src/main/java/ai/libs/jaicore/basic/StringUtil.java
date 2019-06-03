@@ -53,10 +53,10 @@ public class StringUtil {
 	 * @param chars The set of characters to be used to generate a random string.
 	 * @return The generated random string.
 	 */
-	public static String getRandomString(final int length, final char[] chars) {
+	public static String getRandomString(final int length, final char[] chars, final long seed) {
 		StringBuilder s = new StringBuilder();
 		for (int i = 0; i < length; i++) {
-			s.append(chars[new Random().nextInt(chars.length)]);
+			s.append(chars[new Random(seed).nextInt(chars.length)]);
 		}
 		return s.toString();
 	}
@@ -210,9 +210,9 @@ public class StringUtil {
 		binarySequence = binarySequence.replace(" ", "");
 		Arrays.stream( // Create a Stream
 				binarySequence.split("(?<=\\G.{8})") // Splits the input string into 8-char-sections (Since a char has 8 bits = 1 byte)
-		).forEach(s -> // Go through each 8-char-section...
-		sb.append((char) Integer.parseInt(s, 2)) // ...and turn it into an int and then to a char
-		);
+				).forEach(s -> // Go through each 8-char-section...
+				sb.append((char) Integer.parseInt(s, 2)) // ...and turn it into an int and then to a char
+						);
 
 		return sb.toString(); // Output text (t)
 	}

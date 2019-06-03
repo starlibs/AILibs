@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
 import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
@@ -15,28 +15,28 @@ public abstract class CaseControlLikeSampling<I extends ILabeledInstance<?>, D e
 	protected Random rand;
 	protected List<Pair<I, Double>> probabilityBoundaries = null;
 
-	protected CaseControlLikeSampling(D input) {
+	protected CaseControlLikeSampling(final D input) {
 		super(input);
 	}
 
 	public List<Pair<I, Double>> getProbabilityBoundaries() {
-		return probabilityBoundaries;
+		return this.probabilityBoundaries;
 	}
 
-	public void setProbabilityBoundaries(List<Pair<I, Double>> probabilityBoundaries) {
+	public void setProbabilityBoundaries(final List<Pair<I, Double>> probabilityBoundaries) {
 		this.probabilityBoundaries = probabilityBoundaries;
 	}
 
 	/**
 	 * Count occurrences of every class. Needed to determine the probability for all
 	 * instances of that class
-	 * 
+	 *
 	 * @param dataset
 	 *            Dataset of the sample algorithm object
 	 * @return HashMap of occurrences
 	 * @throws ClassNotFoundException
 	 */
-	protected HashMap<Object, Integer> countClassOccurrences(D dataset) {
+	protected HashMap<Object, Integer> countClassOccurrences(final D dataset) {
 		HashMap<Object, Integer> classOccurrences = new HashMap<>();
 		for (I instance : dataset) {
 			boolean classExists = false;
@@ -55,8 +55,8 @@ public abstract class CaseControlLikeSampling<I extends ILabeledInstance<?>, D e
 		return classOccurrences;
 	}
 
-	protected List<Pair<I, Double>> calculateInstanceBoundaries(HashMap<Object, Integer> classOccurrences,
-			int numberOfClasses) {
+	protected List<Pair<I, Double>> calculateInstanceBoundaries(final HashMap<Object, Integer> classOccurrences,
+			final int numberOfClasses) {
 		double boundaryOfCurrentInstance = 0.0;
 		List<Pair<I, Double>> boundaries = new ArrayList<>();
 		for (I instance : this.getInput()) {

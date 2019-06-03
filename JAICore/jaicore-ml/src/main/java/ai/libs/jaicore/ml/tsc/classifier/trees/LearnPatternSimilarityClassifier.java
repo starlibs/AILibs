@@ -60,7 +60,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	/**
 	 * The random regression model trees used for prediction.
 	 */
-	private RandomRegressionTree[] trees;
+	private AccessibleRandomTree[] trees;
 
 	/**
 	 * The predicted leaf nodes for each instance per segment for each tree used
@@ -138,7 +138,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 			}
 
 			seqInstances.setClassIndex(this.classAttIndexPerTree[i]);
-			leafNodeCounts[i] = new int[this.trees[i].nosLeafNodes];
+			leafNodeCounts[i] = new int[this.trees[i].getNosLeafNodes()];
 
 			for(int inst = 0; inst< seqInstances.numInstances(); inst++) {
 				LearnPatternSimilarityLearningAlgorithm.collectLeafCounts(leafNodeCounts[i], seqInstances.get(inst), this.trees[i]);
@@ -274,7 +274,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	/**
 	 * @return the trees
 	 */
-	public RandomRegressionTree[] getTrees() {
+	public AccessibleRandomTree[] getTrees() {
 		return this.trees;
 	}
 
@@ -282,7 +282,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	 * @param trees
 	 *            the trees to set
 	 */
-	public void setTrees(final RandomRegressionTree[] trees) {
+	public void setTrees(final AccessibleRandomTree[] trees) {
 		this.trees = trees;
 	}
 

@@ -8,16 +8,14 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
-import ai.libs.jaicore.ml.tsc.util.ClassMapper;
-import ai.libs.jaicore.ml.tsc.util.SimplifiedTimeSeriesLoader;
 
 /**
  * Unit tests for loading simplified, native Java array using time series
  * datasets from files using the class <code>SimplifiedTimeSeriesLoader</code>.
- * 
+ *
  * @author Julian Lienen
  *
  */

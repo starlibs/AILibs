@@ -2,12 +2,12 @@ package ai.libs.jaicore.ml.tsc.classifier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.ml.tsc.HistogramBuilder;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 import ai.libs.jaicore.ml.tsc.filter.SFA;
 import ai.libs.jaicore.ml.tsc.filter.SlidingWindowBuilder;
 import ai.libs.jaicore.ml.tsc.filter.ZTransformer;
@@ -68,7 +68,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 	/**
 	 * The list contains the list of Histograms in which every matrix of the multivariate dataset results in.
 	 */
-	private ArrayList<ArrayList<HashMap<Integer, Integer>>> multivirateHistograms = new ArrayList<ArrayList<HashMap<Integer, Integer>>>();
+	private List<ArrayList<HashMap<Integer, Integer>>> multivirateHistograms = new ArrayList<>();
 	/**
 	 * Constians the histograms of one matrix for each instance one. Where the keys are the words which are double value
 	 * sequences converted to an integer hash code and the values are the corresponding word counts.
@@ -93,7 +93,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 		IBossAlgorithmConfig config = (IBossAlgorithmConfig) this.getConfig();
 
 		HistogramBuilder histoBuilder = new HistogramBuilder();
-		SFA sfa = new SFA(config.alphabet(), config.wordLength(), config.meanCorrected());
+		SFA sfa = new SFA(config.alphabet(), config.wordLength());
 
 		/* calculates the lookup table for the alphabet for the whole input dataset. */
 		SlidingWindowBuilder slide = new SlidingWindowBuilder();
@@ -114,28 +114,20 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 				 * split into sliding windows.
 				 */
 				TimeSeriesDataset tmp = slide.specialFitTransform(data.getValues(matrix)[instance]);
-				try {
-					/* The from one instance resulting dataset is z-normalized. */
-					ZTransformer znorm = new ZTransformer();
-					for (int i = 0; i < tmp.getValues(0).length; i++) {
-						tmp.getValues(0)[i] = znorm.fitTransform(tmp.getValues(0)[i]);
-					}
 
-					// The SFA words for that dataset are computed using the precomputed MCB quantisation intervals
-					TimeSeriesDataset tmpTransformed = sfa.fitTransform(tmp);
-					// The occurring SFA words of the instance are getting counted with a parallel numerosity reduction.
-
-					HashMap<Integer, Integer> histogram = histoBuilder.histogramForInstance(tmpTransformed);
-					// Each instance in the dataset has its own histogram so the original dataset results in a list of histograms.
-					this.histograms.add((HashMap<Integer, Integer>) histogram.clone());
+				/* The from one instance resulting dataset is z-normalized. */
+				ZTransformer znorm = new ZTransformer();
+				for (int i = 0; i < tmp.getValues(0).length; i++) {
+					tmp.getValues(0)[i] = znorm.fitTransform(tmp.getValues(0)[i]);
 				}
 
-				catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (NoneFittedFilterExeception e) {
-					e.printStackTrace();
-				}
+				// The SFA words for that dataset are computed using the precomputed MCB quantisation intervals
+				TimeSeriesDataset tmpTransformed = sfa.fitTransform(tmp);
+				// The occurring SFA words of the instance are getting counted with a parallel numerosity reduction.
 
+				HashMap<Integer, Integer> histogram = histoBuilder.histogramForInstance(tmpTransformed);
+				// Each instance in the dataset has its own histogram so the original dataset results in a list of histograms.
+				this.histograms.add(new HashMap<>(histogram));
 			}
 			// In the case of a multivariate dataset each matrix would have a list of histograms which than results
 			// in a list of lists of histograms.
@@ -145,8 +137,6 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 
 		// In the end all calculated and needed algortihms are set for the classifier.
 		BOSSClassifier model = this.getClassifier();
-		model.setMultivirateHistograms(this.multivirateHistograms);
-		model.setHistogramUnivirate(this.multivirateHistograms.get(0));
 		model.setTrainingData(this.getInput());
 		return model;
 	}
