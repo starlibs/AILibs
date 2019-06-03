@@ -151,7 +151,6 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 			try {
 				trees[i].buildClassifier(seqInstances);
 			} catch (Exception e) {
-				e.printStackTrace();
 				throw new AlgorithmException("Could not build tree in iteration " + i + " due to the following exception: " + e.getMessage());
 			}
 
@@ -165,7 +164,6 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 					try {
 						collectLeafCounts(leafNodeCounts[inst][i], seqInstances.get(instanceIdx), trees[i]);
 					} catch (PredictionException e1) {
-						e1.printStackTrace();
 						throw new AlgorithmException("Could not prediction using the tree in iteration " + i + " due to the following exception: " + e1.getMessage());
 					}
 				}
