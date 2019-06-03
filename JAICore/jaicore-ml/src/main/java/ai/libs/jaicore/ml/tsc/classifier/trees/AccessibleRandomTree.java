@@ -1,6 +1,11 @@
 package ai.libs.jaicore.ml.tsc.classifier.trees;
+
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.ml.core.exception.PredictionException;
 import weka.classifiers.trees.RandomTree;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -27,17 +32,19 @@ public class AccessibleRandomTree extends RandomTree {
 	 */
 	private int lastNode = 0;
 
+	private static final Logger logger = LoggerFactory.getLogger(AccessibleRandomTree.class);
+
 	/**
 	 * Internal tree object providing access to leaf node information.
 	 */
-	protected AccessibleTree m_Tree = null;
+	protected AccessibleTree tree = null;
 
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		if (this.m_zeroR != null) {
 			return this.m_zeroR.distributionForInstance(instance);
 		} else {
-			return this.m_Tree.distributionForInstance(instance);
+			return this.tree.distributionForInstance(instance);
 		}
 	}
 
@@ -54,7 +61,7 @@ public class AccessibleRandomTree extends RandomTree {
 			this.m_KValue = data.numAttributes() - 1;
 		}
 		if (this.m_KValue < 1) {
-			this.m_KValue = (int) Utils.log2(data.numAttributes() - 1) + 1;
+			this.m_KValue = (int) Utils.log2(data.numAttributes() - 1.0) + 1;
 		}
 
 		// can classifier handle the data?
@@ -66,8 +73,7 @@ public class AccessibleRandomTree extends RandomTree {
 
 		// only class? -> build ZeroR model
 		if (data.numAttributes() == 1) {
-			System.err.println(
-					"Cannot build model (only class attribute present in data!), " + "using ZeroR model instead!");
+			logger.error("Cannot build model (only class attribute present in data!), using ZeroR model instead!");
 			this.m_zeroR = new weka.classifiers.rules.ZeroR();
 			this.m_zeroR.buildClassifier(data);
 			return;
@@ -92,7 +98,6 @@ public class AccessibleRandomTree extends RandomTree {
 		int[] attIndicesWindow = new int[data.numAttributes() - 1];
 		int j = 0;
 		for (int i = 0; i < attIndicesWindow.length; i++) {
-			// XXX kill weka execution
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InterruptedException("Thread got interrupted, thus, kill WEKA.");
 			}
@@ -108,7 +113,6 @@ public class AccessibleRandomTree extends RandomTree {
 		// Compute initial class counts
 		double[] classProbs = new double[train.numClasses()];
 		for (int i = 0; i < train.numInstances(); i++) {
-			// XXX kill weka execution
 			if (Thread.currentThread().isInterrupted()) {
 				throw new InterruptedException("Thread got interrupted, thus, kill WEKA.");
 			}
@@ -124,20 +128,22 @@ public class AccessibleRandomTree extends RandomTree {
 		}
 
 		double trainVariance = 0;
+		if (totalWeight == 0) {
+			throw new IllegalStateException("Total weight must not be 0 at this point.");
+		}
 		if (data.classAttribute().isNumeric()) {
 			trainVariance = RandomTree.singleVariance(classProbs[0], totalSumSquared, totalWeight) / totalWeight;
 			classProbs[0] /= totalWeight;
 		}
 
 		// Build tree
-		this.m_Tree = new AccessibleTree();
+		this.tree = new AccessibleTree();
 		this.m_Info = new Instances(data, 0);
-		this.m_Tree.buildTree(train, classProbs, attIndicesWindow, totalWeight, rand, 0,
-				this.m_MinVarianceProp * trainVariance);
+		this.tree.buildTree(train, classProbs, attIndicesWindow, totalWeight, rand, 0, this.m_MinVarianceProp * trainVariance);
 
 		// Backfit if required
 		if (backfit != null) {
-			this.m_Tree.backfitData(backfit);
+			this.tree.backfitData(backfit);
 		}
 
 	}
@@ -146,7 +152,7 @@ public class AccessibleRandomTree extends RandomTree {
 	 * @return the m_Tree
 	 */
 	public AccessibleTree getMTree() {
-		return this.m_Tree;
+		return this.tree;
 	}
 
 	class AccessibleTree extends Tree {
@@ -156,7 +162,7 @@ public class AccessibleRandomTree extends RandomTree {
 		private static final long serialVersionUID = 1L;
 
 		/** The subtrees appended to this tree. */
-		protected AccessibleTree[] m_Successors;
+		protected AccessibleTree[] successors;
 
 		/**
 		 * ID of the last leaf node in the prediction.
@@ -164,8 +170,7 @@ public class AccessibleRandomTree extends RandomTree {
 		private int leafNodeID;
 
 		@Override
-		protected void buildTree(final Instances data, final double[] classProbs, final int[] attIndicesWindow, double totalWeight,
-				final Random random, final int depth, final double minVariance) throws Exception {
+		protected void buildTree(final Instances data, final double[] classProbs, final int[] attIndicesWindow, double totalWeight, final Random random, final int depth, final double minVariance) throws Exception {
 
 			// Make leaf if there are no training instances
 			if (data.numInstances() == 0) {
@@ -184,7 +189,9 @@ public class AccessibleRandomTree extends RandomTree {
 			if (data.classAttribute().isNumeric()) {
 
 				// Compute prior variance
-				double totalSum = 0, totalSumSquared = 0, totalSumOfWeights = 0;
+				double totalSum = 0;
+				double totalSumSquared = 0;
+				double totalSumOfWeights = 0;
 				for (int i = 0; i < data.numInstances(); i++) {
 					Instance inst = data.instance(i);
 					totalSum += inst.classValue() * inst.weight();
@@ -194,18 +201,14 @@ public class AccessibleRandomTree extends RandomTree {
 				priorVar = AccessibleRandomTree.singleVariance(totalSum, totalSumSquared, totalSumOfWeights);
 			}
 
-			// Check if node doesn't contain enough instances or is pure
-			// or maximum depth reached
+			// Check if node doesn't contain enough instances or is pure or maximum depth reached
 			if (data.classAttribute().isNominal()) {
 				totalWeight = Utils.sum(classProbs);
 			}
-			// System.err.println("Total weight " + totalWeight);
-			// double sum = Utils.sum(classProbs);
 			if (totalWeight < 2 * AccessibleRandomTree.this.m_MinNum ||
 
 					// Nominal case
-					(data.classAttribute().isNominal()
-							&& Utils.eq(classProbs[Utils.maxIndex(classProbs)], Utils.sum(classProbs)))
+					(data.classAttribute().isNominal() && Utils.eq(classProbs[Utils.maxIndex(classProbs)], Utils.sum(classProbs)))
 
 					||
 
@@ -260,11 +263,9 @@ public class AccessibleRandomTree extends RandomTree {
 				attIndicesWindow[windowSize - 1] = attIndex;
 				windowSize--;
 
-				double currSplit = data.classAttribute().isNominal() ? this.distribution(props, dists, attIndex, data)
-						: this.numericDistribution(props, dists, attIndex, totalSubsetWeights, data, tempNumericVals);
+				double currSplit = data.classAttribute().isNominal() ? this.distribution(props, dists, attIndex, data) : this.numericDistribution(props, dists, attIndex, totalSubsetWeights, data, tempNumericVals);
 
-				double currVal = data.classAttribute().isNominal() ? this.gain(dists[0], this.priorVal(dists[0]))
-						: tempNumericVals[attIndex];
+				double currVal = data.classAttribute().isNominal() ? this.gain(dists[0], this.priorVal(dists[0])) : tempNumericVals[attIndex];
 
 				if (Utils.gr(currVal, 0)) {
 					gainFound = true;
@@ -289,21 +290,19 @@ public class AccessibleRandomTree extends RandomTree {
 				this.m_SplitPoint = split;
 				this.m_Prop = bestProps;
 				Instances[] subsets = this.splitData(data);
-				this.m_Successors = new AccessibleTree[bestDists.length];
+				this.successors = new AccessibleTree[bestDists.length];
 				double[] attTotalSubsetWeights = totalSubsetWeights[bestIndex];
 
 				for (int i = 0; i < bestDists.length; i++) {
-					this.m_Successors[i] = new AccessibleTree();
-					this.m_Successors[i].buildTree(subsets[i], bestDists[i], attIndicesWindow,
-							data.classAttribute().isNominal() ? 0 : attTotalSubsetWeights[i], random, depth + 1,
-									minVariance);
+					this.successors[i] = new AccessibleTree();
+					this.successors[i].buildTree(subsets[i], bestDists[i], attIndicesWindow, data.classAttribute().isNominal() ? 0 : attTotalSubsetWeights[i], random, depth + 1, minVariance);
 				}
 
 				// If all successors are non-empty, we don't need to store the class
 				// distribution
 				boolean emptySuccessor = false;
 				for (int i = 0; i < subsets.length; i++) {
-					if (this.m_Successors[i].m_ClassDistribution == null) {
+					if (this.successors[i].m_ClassDistribution == null) {
 						emptySuccessor = true;
 						break;
 					}
@@ -336,8 +335,8 @@ public class AccessibleRandomTree extends RandomTree {
 					returnedDist = new double[AccessibleRandomTree.this.m_Info.numClasses()];
 
 					// Split instance up
-					for (int i = 0; i < this.m_Successors.length; i++) {
-						double[] help = this.m_Successors[i].distributionForInstance(instance);
+					for (int i = 0; i < this.successors.length; i++) {
+						double[] help = this.successors[i].distributionForInstance(instance);
 						if (help != null) {
 							for (int j = 0; j < help.length; j++) {
 								returnedDist[j] += this.m_Prop[i] * help[j];
@@ -347,14 +346,14 @@ public class AccessibleRandomTree extends RandomTree {
 				} else if (AccessibleRandomTree.this.m_Info.attribute(this.m_Attribute).isNominal()) {
 
 					// For nominal attributes
-					returnedDist = this.m_Successors[(int) instance.value(this.m_Attribute)].distributionForInstance(instance);
+					returnedDist = this.successors[(int) instance.value(this.m_Attribute)].distributionForInstance(instance);
 				} else {
 
 					// For numeric attributes
 					if (instance.value(this.m_Attribute) < this.m_SplitPoint) {
-						returnedDist = this.m_Successors[0].distributionForInstance(instance);
+						returnedDist = this.successors[0].distributionForInstance(instance);
 					} else {
-						returnedDist = this.m_Successors[1].distributionForInstance(instance);
+						returnedDist = this.successors[1].distributionForInstance(instance);
 					}
 				}
 			}
@@ -371,7 +370,7 @@ public class AccessibleRandomTree extends RandomTree {
 						}
 						return result;
 					} else {
-						return null;
+						throw new PredictionException("Could not obtain a prediction.");
 					}
 				}
 
