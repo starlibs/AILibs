@@ -32,6 +32,7 @@ jobs:
     script:
     - ./gradlew compileJava
     - ./gradlew testClasses
+    - git fetch --no-tags --unshallow https://github.com/fmohr/AILibs.git +dev:refs/heads/dev
     - ./gradlew sonarqube -x test
   #- stage: deploy
     #script: 
