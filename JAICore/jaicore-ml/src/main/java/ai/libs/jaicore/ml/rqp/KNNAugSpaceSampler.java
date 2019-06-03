@@ -49,7 +49,7 @@ public class KNNAugSpaceSampler extends AbstractAugmentedSpaceSampler {
 			nearestNeighbour.setDistanceFunction(dist);
 			nearestNeighbour.setInstances(preciseInsts);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Failed with exception: {}", e);
 		}
 		nearestNeighbour.setMeasurePerformance(false);
 		this.nearestNeighbour = nearestNeighbour;
