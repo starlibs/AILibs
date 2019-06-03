@@ -82,7 +82,11 @@ public class TimeSeriesFeature {
 		result[1] = stddev;
 
 		// Calculate slope
-		result[2] = (length * xy - x * y) / (length * xx - x * x);
+		double divisor = (length * xx - x * x);
+		if (divisor == 0) {
+			throw new IllegalStateException("Divisor is 0, which must not happen!");
+		}
+		result[2] = (length * xy - x * y) / divisor;
 		return result;
 	}
 

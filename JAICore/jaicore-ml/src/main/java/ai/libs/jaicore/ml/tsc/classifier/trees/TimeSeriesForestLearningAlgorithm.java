@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.tsc.classifier.trees;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -157,7 +158,7 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 	 */
 	@Override
 	public AlgorithmEvent next() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new NoSuchElementException("Cannot enumerate on this algorithm");
 	}
 
 	/**

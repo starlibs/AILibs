@@ -119,7 +119,7 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 		final int[] lengthPerTree = new int[numTrees];
 		final int[] classAttIndex = new int[numTrees];
 
-		final RandomRegressionTree[] trees = new RandomRegressionTree[numTrees];
+		final AccessibleRandomTree[] trees = new AccessibleRandomTree[numTrees];
 		final int[] numLeavesPerTree = new int[numTrees];
 		final int[][][] leafNodeCounts = new int[data.getNumberOfInstances()][numTrees][];
 
@@ -155,7 +155,7 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 				throw new AlgorithmException("Could not build tree in iteration " + i + " due to the following exception: " + e.getMessage());
 			}
 
-			numLeavesPerTree[i] = trees[i].nosLeafNodes;
+			numLeavesPerTree[i] = trees[i].getNosLeafNodes();
 			for (int inst = 0; inst < data.getNumberOfInstances(); inst++) {
 				leafNodeCounts[inst][i] = new int[numLeavesPerTree[i]];
 
@@ -222,8 +222,8 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 	 *            the minimum number of instances per leaf)
 	 * @return Returns the initialized tree
 	 */
-	public RandomRegressionTree initializeRegressionTree(final int numInstances) {
-		RandomRegressionTree regTree = new RandomRegressionTree();
+	public AccessibleRandomTree initializeRegressionTree(final int numInstances) {
+		AccessibleRandomTree regTree = new AccessibleRandomTree();
 		regTree.setSeed(this.getConfig().seed());
 		regTree.setMaxDepth(this.getConfig().maxDepth());
 		regTree.setKValue(1);
@@ -247,13 +247,13 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 	 *             Thrown if the random regression tree could not predict anything
 	 *             for the given <code>instance</code>
 	 */
-	public static void collectLeafCounts(final int[] leafNodeCountsForInstance, final Instance instance, final RandomRegressionTree regTree) throws PredictionException {
+	public static void collectLeafCounts(final int[] leafNodeCountsForInstance, final Instance instance, final AccessibleRandomTree regTree) throws PredictionException {
 		try {
 			regTree.distributionForInstance(instance);
 		} catch (Exception e) {
 			throw new PredictionException("Could not predict the distribution for instance for the given instance '" + instance.toString() + "' due to an internal Weka exception.", e);
 		}
-		int leafNodeIdx = RandomRegressionTree.lastNode;
+		int leafNodeIdx = regTree.getLastNode();
 		leafNodeCountsForInstance[leafNodeIdx]++;
 	}
 

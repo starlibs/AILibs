@@ -12,11 +12,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.TreeNode;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
-import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeClassifier;
-import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeClassifier.TimeSeriesTreeNodeDecisionFunction;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;

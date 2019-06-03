@@ -30,19 +30,20 @@ public class WekaUtil {
 
 	/**
 	 * Stacks the given matrices horizontally.
-	 * 
+	 *
 	 * @param matrices
 	 *            List of INDArray matrices to be stacked
 	 * @return Returns one INDArray containing all <code>matrices</code>. New
 	 *         dimensionality is (originalShape[0] x sum of originalShape[1]s)
 	 */
-	private static INDArray hstackINDArrays(List<INDArray> matrices) {
+	private static INDArray hstackINDArrays(final List<INDArray> matrices) {
 		// Check first shape dimension
 		if (matrices.size() > 0) {
 			long[] shape = matrices.get(0).shape();
 			for (int i = 1; i < matrices.size(); i++) {
-				if (matrices.get(i).shape()[0] != shape[0])
+				if (matrices.get(i).shape()[0] != shape[0]) {
 					throw new IllegalArgumentException("First dimensionality of the given matrices must be equal!");
+				}
 			}
 		}
 
@@ -62,7 +63,7 @@ public class WekaUtil {
 
 	/**
 	 * Maps a time series instance to a Weka instance.
-	 * 
+	 *
 	 * @param instance
 	 *            The time series instance storing the time series data and the
 	 *            target value
@@ -89,7 +90,7 @@ public class WekaUtil {
 
 	/**
 	 * Maps an univariate simplified time series instance to a Weka instance.
-	 * 
+	 *
 	 * @param instance
 	 *            The time series instance storing the time series data
 	 * @return Returns the Weka instance containing the time series
@@ -104,7 +105,7 @@ public class WekaUtil {
 	/**
 	 * Trains a given Weka <code>classifier</code> using the time series data set
 	 * <code>timeSeriesDataset</code>.
-	 * 
+	 *
 	 * @param classifier
 	 *            The Weka {@link weka.Classifier} object
 	 * @param timeSeriesDataset
@@ -122,15 +123,14 @@ public class WekaUtil {
 		try {
 			classifier.buildClassifier(trainingInstances);
 		} catch (Exception e) {
-			throw new TrainingException(String.format("Could not train classifier %d due to a Weka exception.",
-					classifier.getClass().getName()), e);
+			throw new TrainingException("Could not train classifier " + classifier.getClass().getName() + " due to a Weka exception.", e);
 		}
 	}
 
 	/**
 	 * Trains a given Weka <code>classifier</code> using the simplified time series
 	 * data set <code>timeSeriesDataset</code>.
-	 * 
+	 *
 	 * @param classifier
 	 *            The Weka {@link weka.Classifier} object
 	 * @param timeSeriesDataset
@@ -155,7 +155,7 @@ public class WekaUtil {
 
 	/**
 	 * Converts Weka instances to an INDArray matrix.
-	 * 
+	 *
 	 * @param instances
 	 *            Weka instances to be converted.
 	 * @param keepClass
@@ -165,8 +165,9 @@ public class WekaUtil {
 	 *         (number instances x number attributes)
 	 */
 	public static INDArray wekaInstancesToINDArray(final Instances instances, final boolean keepClass) {
-		if (instances == null || instances.size() == 0)
+		if (instances == null || instances.size() == 0) {
 			throw new IllegalArgumentException("Instances must not be null or empty!");
+		}
 
 		int classSub = keepClass ? 0 : (instances.classIndex() > -1 ? 1 : 0);
 		int numAttributes = instances.numAttributes() - classSub;
@@ -187,7 +188,7 @@ public class WekaUtil {
 	/**
 	 * Converts a given {@link TimeSeriesDataset} object to a Weka Instances object.
 	 * Works with {@link CategoricalAttributeType} target values.
-	 * 
+	 *
 	 * @param dataSet
 	 *            Data set which is transformed
 	 * @return Transformed Weka Instances object
@@ -197,8 +198,9 @@ public class WekaUtil {
 
 		// TODO: Integrate direct access in TimeSeriesDataset
 		List<INDArray> matrices = new ArrayList<>();
-		for (int i = 0; i < dataSet.getNumberOfVariables(); i++)
+		for (int i = 0; i < dataSet.getNumberOfVariables(); i++) {
 			matrices.add(dataSet.getValues(i));
+		}
 
 		// Create attributes
 		final ArrayList<Attribute> attributes = new ArrayList<>();
@@ -214,7 +216,7 @@ public class WekaUtil {
 		final INDArray targets = dataSet.getTargets();
 		attributes.add(new Attribute("class",
 				IntStream.rangeClosed((int) targets.minNumber().longValue(), (int) targets.maxNumber().longValue())
-						.boxed().map(i -> String.valueOf(i)).collect(Collectors.toList())));
+				.boxed().map(i -> String.valueOf(i)).collect(Collectors.toList())));
 		final Instances result = new Instances("Instances", attributes, (int) dataSet.getNumberOfInstances());
 		result.setClassIndex(result.numAttributes() - 1);
 
@@ -238,7 +240,7 @@ public class WekaUtil {
 	/**
 	 * Converts a given simplified {@link ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset}
 	 * object to a Weka Instances object.
-	 * 
+	 *
 	 * @param dataSet
 	 *            Data set which is transformed
 	 * @return Transformed Weka Instances object
@@ -261,7 +263,7 @@ public class WekaUtil {
 	/**
 	 * Converts a given simplified {@link ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset}
 	 * object to a Weka Instances object.
-	 * 
+	 *
 	 * @param dataSet
 	 *            Data set which is transformed
 	 * @return Transformed Weka Instances object
@@ -272,15 +274,17 @@ public class WekaUtil {
 
 		// TODO: Integrate direct access in TimeSeriesDataset
 		List<double[][]> matrices = new ArrayList<>();
-		for (int i = 0; i < dataSet.getNumberOfVariables(); i++)
+		for (int i = 0; i < dataSet.getNumberOfVariables(); i++) {
 			matrices.add(dataSet.getValues(i));
+		}
 
 		// Create attributes
 		final ArrayList<Attribute> attributes = new ArrayList<>();
 		for (int m = 0; m < matrices.size(); m++) {
 			double[][] matrix = matrices.get(m);
-			if (matrix == null)
+			if (matrix == null) {
 				continue;
+			}
 
 			for (int i = 0; i < matrix[0].length; i++) {
 				final Attribute newAtt = new Attribute(String.format("val_%d_%d", m, i));
@@ -291,7 +295,7 @@ public class WekaUtil {
 		// Add class attribute
 		final int[] targets = dataSet.getTargets();
 		attributes.add(new Attribute("class", classValues));
-		final Instances result = new Instances("Instances", attributes, (int) dataSet.getNumberOfInstances());
+		final Instances result = new Instances("Instances", attributes, dataSet.getNumberOfInstances());
 		result.setClassIndex(result.numAttributes() - 1);
 
 		// Create instances
@@ -316,7 +320,7 @@ public class WekaUtil {
 	/**
 	 * Converts an INDArray matrix (number of instances x number of attributes) to
 	 * Weka instances without any class attribute.
-	 * 
+	 *
 	 * @param matrix
 	 *            INDArray matrix storing all the attribute values of the instances
 	 * @return Returns the Weka Instances object consisting of all instances and the
@@ -326,10 +330,11 @@ public class WekaUtil {
 		if (matrix == null || matrix.length() == 0) {
 			throw new IllegalArgumentException("Matrix must not be null or empty!");
 		}
-		if (matrix.shape().length != 2)
+		if (matrix.shape().length != 2) {
 			throw new IllegalArgumentException(String.format(
 					"Parameter matrix must be a matrix with 2 axis (instances x attributes). Actual shape: (%s)",
 					Arrays.toString(matrix.shape())));
+		}
 
 		final int numInstances = (int) matrix.shape()[0];
 		final int numAttributes = (int) matrix.shape()[1];
@@ -358,7 +363,7 @@ public class WekaUtil {
 	/**
 	 * Converts a double[][] matrix (number of instances x number of attributes) to
 	 * Weka instances without any class attribute.
-	 * 
+	 *
 	 * @param matrix
 	 *            The double[][] matrix storing all the attribute values of the
 	 *            instances

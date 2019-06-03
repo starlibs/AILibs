@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -20,7 +21,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.TreeNode;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeClassifier.TimeSeriesTreeNodeDecisionFunction;
@@ -215,7 +216,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public AlgorithmEvent next() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new NoSuchElementException("Cannot enumerate this algorithm!");
 	}
 
 	/**
@@ -280,9 +281,9 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		// Search for the best splitting criterion in terms of the best Entrance gain
 		// for each feature type due to different feature scales
-		List<Integer> T1 = T1T2.getX();
+		List<Integer> t1 = T1T2.getX();
 		List<Integer> T2 = T1T2.getY();
-		for (int i = 0; i < T1.size(); i++) {
+		for (int i = 0; i < t1.size(); i++) {
 			for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 				for (final double cand : thresholdCandidates.get(k)) {
 					// Calculate delta entropy and E for f_k(t1,t2) <= cand
@@ -316,7 +317,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		// Update node's decision function
 		nodeToBeFilled.getValue().f = FeatureType.values()[fStar];
-		nodeToBeFilled.getValue().t1 = T1.get(t1t2Star);
+		nodeToBeFilled.getValue().t1 = t1.get(t1t2Star);
 		nodeToBeFilled.getValue().t2 = T2.get(t1t2Star);
 		nodeToBeFilled.getValue().threshold = thresholdStar;
 
@@ -559,7 +560,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 				// If caching is used, calculate and store the generated features
 				if (useFeatureCaching) {
-					long key = i + dataset[i].length * t1 + dataset[i].length * dataset[i].length * t2;
+					long key = (long)i + dataset[i].length * t1 + dataset[i].length * dataset[i].length * t2;
 					if (!this.transformedFeaturesCache.containsKey(key)) {
 						features = getFeatures(dataset[i], t1, t2, USE_BIAS_CORRECTION);
 						this.transformedFeaturesCache.put(key, features);
@@ -660,13 +661,13 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		List<Integer> T2 = new ArrayList<>();
 		List<Integer> W = randomlySampleNoReplacement(IntStream.rangeClosed(1, m).boxed().collect(Collectors.toList()), (int) Math.sqrt(m), seed);
 		for (int w : W) {
-			List<Integer> tmpSampling = randomlySampleNoReplacement(IntStream.rangeClosed(0, m - w).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1), seed);
+			List<Integer> tmpSampling = randomlySampleNoReplacement(IntStream.rangeClosed(0, m - w).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1.0), seed);
 			T1.addAll(tmpSampling);
 			for (int t1 : tmpSampling) {
 				T2.add(t1 + w - 1);
 			}
 		}
-		return new Pair<List<Integer>, List<Integer>>(T1, T2);
+		return new Pair<>(T1, T2);
 	}
 
 	/**

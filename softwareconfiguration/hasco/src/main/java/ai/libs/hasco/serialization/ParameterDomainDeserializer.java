@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import ai.libs.hasco.model.Dependency;
 import ai.libs.hasco.model.IParameterDomain;
 import ai.libs.hasco.model.Parameter;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 
 public class ParameterDomainDeserializer extends StdDeserializer<Dependency> {
 

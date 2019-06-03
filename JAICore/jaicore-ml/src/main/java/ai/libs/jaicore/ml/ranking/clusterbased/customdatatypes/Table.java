@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.sets.Pair;
 
 /**
  * Table.java - This class is used to store probleminstance and their according solutions and
@@ -17,7 +17,7 @@ import ai.libs.jaicore.basic.sets.SetUtil;
  */
 
 public class Table<I, S, P> {
-	private HashMap<ProblemInstance<I>, ArrayList<SetUtil.Pair<S, P>>> informationForRanking;
+	private HashMap<ProblemInstance<I>, ArrayList<Pair<S, P>>> informationForRanking;
 
 	public Table() {
 		this.informationForRanking = new HashMap<>();
@@ -30,9 +30,9 @@ public class Table<I, S, P> {
 	 * @return Gives an ArrayList with all solutions for a probleminstance
 	 */
 	ArrayList<S> getSolutionforProblemInstanceTable(final ProblemInstance<I> consideredProblemInstance) {
-		ArrayList<SetUtil.Pair<S, P>> listOfInformationForProblemInst = this.informationForRanking.get(consideredProblemInstance);
+		ArrayList<Pair<S, P>> listOfInformationForProblemInst = this.informationForRanking.get(consideredProblemInstance);
 		ArrayList<S> solutionsForInstance = new ArrayList<>();
-		for (SetUtil.Pair<S, P> i : listOfInformationForProblemInst) {
+		for (Pair<S, P> i : listOfInformationForProblemInst) {
 			solutionsForInstance.add(i.getX());
 		}
 		return solutionsForInstance;
@@ -45,9 +45,9 @@ public class Table<I, S, P> {
 	 * @return Gives an ArrayList with all performances for a probleminstance
 	 */
 	ArrayList<P> getPerformanceforProblemInstanceTable(final ProblemInstance<I> consideredProblemInstance) {
-		ArrayList<SetUtil.Pair<S, P>> listOfInformationForProblemInst = this.informationForRanking.get(consideredProblemInstance);
+		ArrayList<Pair<S, P>> listOfInformationForProblemInst = this.informationForRanking.get(consideredProblemInstance);
 		ArrayList<P> performanceForInstance = new ArrayList<>();
-		for (SetUtil.Pair<S, P> i : listOfInformationForProblemInst) {
+		for (Pair<S, P> i : listOfInformationForProblemInst) {
 			performanceForInstance.add(i.getY());
 		}
 		return performanceForInstance;
@@ -60,7 +60,7 @@ public class Table<I, S, P> {
 	 * @param consideredProblemInstance the considered problemInstance
 	 * @return Gives an ArrayList of tuple consisting of the solution and its performance
 	 */
-	ArrayList<SetUtil.Pair<S, P>> getInfromationforInstance(final ProblemInstance<I> consideredProblemInstance) {
+	ArrayList<Pair<S, P>> getInfromationforInstance(final ProblemInstance<I> consideredProblemInstance) {
 		return this.informationForRanking.get(consideredProblemInstance);
 	}
 
@@ -70,7 +70,7 @@ public class Table<I, S, P> {
 	 * @return The hashmap with the probleminstances as keys and their solutions and the according
 	 *         performances as values.
 	 */
-	HashMap<ProblemInstance<I>, ArrayList<SetUtil.Pair<S, P>>> getInformationForRanking() {
+	HashMap<ProblemInstance<I>, ArrayList<Pair<S, P>>> getInformationForRanking() {
 		return this.informationForRanking;
 	}
 
@@ -80,7 +80,7 @@ public class Table<I, S, P> {
 	 * @param newProblemInstanceForTab the new Instance
 	 * @param informationForInstance adds a new key,value pair to the Hashmap Table
 	 */
-	void addProblemInstanceToTable(final ProblemInstance<I> newProblemInstanceForTab, final ArrayList<SetUtil.Pair<S, P>> informationForInstance) {
+	void addProblemInstanceToTable(final ProblemInstance<I> newProblemInstanceForTab, final ArrayList<Pair<S, P>> informationForInstance) {
 		this.informationForRanking.put(newProblemInstanceForTab, informationForInstance);
 	}
 }

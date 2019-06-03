@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
@@ -59,7 +60,6 @@ public class SimplifiedTimeSeriesLoader {
 	 */
 	private static final double TARGET_EQUALS_EPS = 0.01;
 
-	// TODO: Add meta data support
 	/**
 	 * Loads a univariate time series dataset from the given arff file. Assumes the
 	 * class attribute to be the last among the declared attributes in the file.
@@ -88,8 +88,7 @@ public class SimplifiedTimeSeriesLoader {
 			cm = new ClassMapper((List<String>) tsTargetClassNames[2]);
 		}
 
-		return new Pair<TimeSeriesDataset, ClassMapper>(
-				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]), cm);
+		return new Pair<TimeSeriesDataset, ClassMapper>(new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]), cm);
 	}
 
 	/**
@@ -107,8 +106,7 @@ public class SimplifiedTimeSeriesLoader {
 	 *             created from the given files.
 	 */
 	@SuppressWarnings("unchecked")
-	public static Pair<TimeSeriesDataset, ClassMapper> loadArffs(final File... arffFiles)
-			throws TimeSeriesLoadingException {
+	public static Pair<TimeSeriesDataset, ClassMapper> loadArffs(final File... arffFiles) throws TimeSeriesLoadingException {
 		if (arffFiles == null) {
 			throw new IllegalArgumentException("Parameter 'arffFiles' must not be null!");
 		}
@@ -118,8 +116,6 @@ public class SimplifiedTimeSeriesLoader {
 		List<String> classNames = null;
 
 		for (final File arffFile : arffFiles) {
-			// Pair<INDArray, INDArray> tsWithTarget =
-			// loadTimeSeriesWithTargetFromArffFile(arffFile);
 			Object[] tsTargetClassNames = loadTimeSeriesWithTargetFromArffFile(arffFile);
 
 			if (classNames == null && tsTargetClassNames[2] != null) {
@@ -127,11 +123,8 @@ public class SimplifiedTimeSeriesLoader {
 			} else {
 				// Check whether the same class names are used among all of the time series
 				List<String> furtherClassNames = (List<String>) tsTargetClassNames[2];
-				if ((classNames != null && furtherClassNames == null)
-						|| (furtherClassNames != null && !furtherClassNames.equals(classNames))) {
-					throw new TimeSeriesLoadingException(
-							"Could not load multivariate time series with different targets. Target values have to be stored in each "
-									+ "time series arff file and must be equal!");
+				if ((classNames != null && furtherClassNames == null) || (furtherClassNames != null && !furtherClassNames.equals(classNames))) {
+					throw new TimeSeriesLoadingException("Could not load multivariate time series with different targets. Target values have to be stored in each " + "time series arff file and must be equal!");
 				}
 			}
 
@@ -140,18 +133,14 @@ public class SimplifiedTimeSeriesLoader {
 			} else {
 				// Check whether the same targets are used among all of the time series
 				int[] furtherTarget = (int[]) tsTargetClassNames[1];
-				if (furtherTarget == null || target.length != furtherTarget.length
-						|| !Arrays.equals(target, furtherTarget)) {
-					throw new TimeSeriesLoadingException(
-							"Could not load multivariate time series with different targets. Target values have to be stored in each "
-									+ "time series arff file and must be equal!");
+				if (furtherTarget == null || target.length != furtherTarget.length || !Arrays.equals(target, furtherTarget)) {
+					throw new TimeSeriesLoadingException("Could not load multivariate time series with different targets. Target values have to be stored in each " + "time series arff file and must be equal!");
 				}
 			}
 
 			// Check for same instance length
 			if (!matrices.isEmpty() && ((double[][]) tsTargetClassNames[0]).length != matrices.get(0).length) {
-				throw new TimeSeriesLoadingException(
-						"All time series must have the same first dimensionality (number of instances).");
+				throw new TimeSeriesLoadingException("All time series must have the same first dimensionality (number of instances).");
 			}
 
 			matrices.add((double[][]) tsTargetClassNames[0]);
@@ -161,8 +150,7 @@ public class SimplifiedTimeSeriesLoader {
 			cm = new ClassMapper(classNames);
 		}
 
-		return new Pair<TimeSeriesDataset, ClassMapper>(
-				new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), target), cm);
+		return new Pair<>(new TimeSeriesDataset(matrices, new ArrayList<>(), target), cm);
 	}
 
 	/**
@@ -179,8 +167,7 @@ public class SimplifiedTimeSeriesLoader {
 	 *             Throws an exception when the matrices could not be extracted from
 	 *             the given arff file
 	 */
-	private static Object[] loadTimeSeriesWithTargetFromArffFile(final File arffFile)
-			throws TimeSeriesLoadingException {
+	private static Object[] loadTimeSeriesWithTargetFromArffFile(final File arffFile) throws TimeSeriesLoadingException {
 		double[][] matrix = null;
 		int[] targetMatrix = null;
 
@@ -189,8 +176,7 @@ public class SimplifiedTimeSeriesLoader {
 		List<String> targetValues = null;
 		boolean stringAttributes = false;
 
-		try (BufferedReader br = new BufferedReader(
-				new InputStreamReader(new FileInputStream(arffFile), DEFAULT_CHARSET))) {
+		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arffFile), StandardCharsets.UTF_8))) {
 
 			int attributeCount = 0;
 
@@ -265,30 +251,31 @@ public class SimplifiedTimeSeriesLoader {
 			// Update empty data rows
 			numEmptyDataRows = numInstances - lineCounter;
 
-		} catch (
+			if (matrix == null) {
+				throw new IllegalStateException("Matrix is null, which it should not be at this point!");
+			}
 
-				UnsupportedEncodingException e) {
+			// Due to efficiency reasons, the matrices are narrowed afterwards to eliminate
+			// empty data rows
+			if (numEmptyDataRows > 0) {
+				int endIndex = matrix.length - numEmptyDataRows;
+				matrix = getInterval(matrix, 0, endIndex);
+				targetMatrix = getInterval(targetMatrix, 0, endIndex);
+			}
+
+			Object[] result = new Object[3];
+			result[0] = matrix;
+			result[1] = targetMatrix;
+			result[2] = stringAttributes ? targetValues : null;
+			return result;
+
+		} catch (UnsupportedEncodingException e) {
 			throw new TimeSeriesLoadingException("Could not load time series dataset due to unsupported encoding.", e);
 		} catch (FileNotFoundException e) {
-			throw new TimeSeriesLoadingException(
-					String.format("Could not locate time series dataset file '%s'.", arffFile.getPath()), e);
+			throw new TimeSeriesLoadingException(String.format("Could not locate time series dataset file '%s'.", arffFile.getPath()), e);
 		} catch (IOException e) {
 			throw new TimeSeriesLoadingException("Could not load time series dataset due to IOException.", e);
 		}
-
-		// Due to efficiency reasons, the matrices are narrowed afterwards to eliminate
-		// empty data rows
-		if (numEmptyDataRows > 0) {
-			int endIndex = matrix.length - numEmptyDataRows;
-			matrix = getInterval(matrix, 0, endIndex);
-			targetMatrix = getInterval(targetMatrix, 0, endIndex);
-		}
-
-		Object[] result = new Object[3];
-		result[0] = matrix;
-		result[1] = targetMatrix;
-		result[2] = stringAttributes ? targetValues : null;
-		return result;
 	}
 
 	/**

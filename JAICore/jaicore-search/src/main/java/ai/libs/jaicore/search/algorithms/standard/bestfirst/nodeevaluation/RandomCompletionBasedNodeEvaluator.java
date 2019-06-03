@@ -28,7 +28,7 @@ import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
@@ -190,7 +190,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				int countedExceptions = 0;
 				List<V> evaluations = new ArrayList<>();
 				List<List<T>> completedPaths = new ArrayList<>();
-				this.logger.debug("Now drawing {} successful examples but no more than {}", this.desiredNumberOfSuccesfulSamples, maxSamples);
+				this.logger.debug("Now drawing {} successful examples but no more than {}", this.desiredNumberOfSuccesfulSamples, this.maxSamples);
 				while (successfulSamples.get() < this.desiredNumberOfSuccesfulSamples) {
 					this.logger.debug("Drawing next sample. {} samples have been drawn already, {} have been successful.", drawnSamples, successfulSamples);
 					this.checkInterruption();
@@ -215,15 +215,15 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 					/* complete the current path by the dfs-solution; we assume that this goes quickly */
 					List<T> tmpCompletedPath = null;
 					try {
-						tmpCompletedPath = getNextRandomPathCompletionForNode(n);
+						tmpCompletedPath = this.getNextRandomPathCompletionForNode(n);
 					} catch (RCNEPathCompletionFailedException e1) {
 						if (e1.getCause() instanceof InterruptedException) {
 							throw (InterruptedException)e1.getCause();
 						}
-						logger.info("Stopping sampling.");
+						this.logger.info("Stopping sampling.");
 						break;
 					}
-					final List<T> completedPath = tmpCompletedPath; 
+					final List<T> completedPath = tmpCompletedPath;
 					completedPaths.add(completedPath);
 
 					/* evaluate the found solution and update internal value model */
@@ -246,7 +246,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 						this.logger.debug("Path evaluation has been interrupted.");
 						throw e;
 					} catch (Exception ex) {
-						if (countedExceptions == maxSamples) {
+						if (countedExceptions == this.maxSamples) {
 							this.logger.warn("Too many retry attempts, giving up. {} samples were drawn, {} were successful.", drawnSamples, successfulSamples);
 							throw new NodeEvaluationException(ex, "Error in the evaluation of a node!");
 						} else {
@@ -315,9 +315,9 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 		this.logger.info("Returning f-value: {}. Annotated uncertainty is {}", f, n.getAnnotation("uncertainty"));
 		return f;
 	}
-	
-	public List<T> getNextRandomPathCompletionForNode(Node<T, ?> n) throws InterruptedException, RCNEPathCompletionFailedException {
-		
+
+	public List<T> getNextRandomPathCompletionForNode(final Node<T, ?> n) throws InterruptedException, RCNEPathCompletionFailedException {
+
 		/* make sure that the completer has the path from the root to the node in question and that the f-values of the nodes above are added to the map */
 		if (!this.completer.knowsNode(n.getPoint())) {
 			synchronized (this.completer) {
@@ -330,7 +330,7 @@ implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionRe
 				current = current.getParent();
 			}
 		}
-		
+
 		/* now draw random completion */
 		List<T> pathCompletion = null;
 		final List<T> completedPath = new ArrayList<>(n.externalPath());

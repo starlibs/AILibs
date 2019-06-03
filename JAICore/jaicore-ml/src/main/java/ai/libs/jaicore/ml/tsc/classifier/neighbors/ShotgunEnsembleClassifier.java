@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.aeonbits.owner.ConfigCache;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleLearnerAlgorithm.IShotgunEnsembleLearnerConfig;
@@ -74,8 +74,8 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 	 * Creates a Shotgun Ensemble classifier.
 	 *
 	 * @param algorithm The training algorithm.
-	 * @param factor    Factor used to determine whether or not to include a window
-	 *                  length into the overall predicition.
+	 * @param factor Factor used to determine whether or not to include a window
+	 *            length into the overall predicition.
 	 */
 	public ShotgunEnsembleClassifier(final int minWindowLength, final int maxWindowLength, final boolean meanNormalization, final double factor) {
 		super();
@@ -87,8 +87,7 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 			throw new IllegalArgumentException("The parameter maxWindowLength must be greater equal to 1.");
 		}
 		if (minWindowLength > maxWindowLength) {
-			throw new IllegalAccessError(
-					"The parameter maxWindowsLength must be greater equal to parameter minWindowLength");
+			throw new IllegalAccessError("The parameter maxWindowsLength must be greater equal to parameter minWindowLength");
 		}
 		this.config.setProperty(IShotgunEnsembleLearnerConfig.K_WINDOWLENGTH_MIN, "" + minWindowLength);
 		this.config.setProperty(IShotgunEnsembleLearnerConfig.K_WINDOWLENGTH_MAX, "" + maxWindowLength);
@@ -161,8 +160,7 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 	 * @return Map of (window length, predicitions) pairs.
 	 * @throws PredictionException
 	 */
-	protected Map<Integer, List<Integer>> calculateWindowLengthPredictions(final TimeSeriesDataset dataset)
-			throws PredictionException {
+	protected Map<Integer, List<Integer>> calculateWindowLengthPredictions(final TimeSeriesDataset dataset) throws PredictionException {
 		// Map holding (windowLength, prediction for dataset) pairs.
 		Map<Integer, List<Integer>> windowLengthPredicitions = new HashMap<>();
 
@@ -183,17 +181,13 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 	 * Map of (window length, list of prediciton for each instance) pairs.
 	 *
 	 * @param windowLengthPredicitions Map of (window length, list of prediciton for
-	 *                                 each instance) pairs.
+	 *            each instance) pairs.
 	 * @return The most frequent predicition for each instace.
 	 */
-	protected List<Integer> mostFrequentLabelsFromWindowLengthPredicitions(
-			final Map<Integer, List<Integer>> windowLengthPredicitions) {
+	protected List<Integer> mostFrequentLabelsFromWindowLengthPredicitions(final Map<Integer, List<Integer>> windowLengthPredicitions) {
 		// Return most frequent label for each instance.
-		int numberOfInstances = 0;
-		for (List<Integer> labels : windowLengthPredicitions.values()) {
-			numberOfInstances = labels.size();
-			break;
-		}
+		int numberOfInstances = windowLengthPredicitions.values().iterator().next().size();
+
 		List<Integer> predicitions = new ArrayList<>(numberOfInstances);
 		for (int i = 0; i < numberOfInstances; i++) {
 			// Map holding (windowLength, predicition for instance) pairs.
@@ -309,8 +303,7 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 	protected void setNearestNeighborClassifier(final NearestNeighborClassifier nearestNeighborClassifier) {
 		ITimeSeriesDistance distanceMeasure = nearestNeighborClassifier.getDistanceMeasure();
 		if (!(distanceMeasure instanceof ShotgunDistance)) {
-			throw new IllegalArgumentException(
-					"The nearest neighbor classifier must use a ShotgunDistance as dsitance measure.");
+			throw new IllegalArgumentException("The nearest neighbor classifier must use a ShotgunDistance as dsitance measure.");
 		} else {
 			this.shotgunDistance = (ShotgunDistance) distanceMeasure;
 		}

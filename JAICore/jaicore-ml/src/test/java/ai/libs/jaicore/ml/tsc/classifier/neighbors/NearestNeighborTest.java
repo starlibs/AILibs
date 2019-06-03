@@ -8,10 +8,9 @@ import java.util.PriorityQueue;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
-import ai.libs.jaicore.ml.tsc.classifier.neighbors.NearestNeighborClassifier;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.distances.EuclideanDistance;
 

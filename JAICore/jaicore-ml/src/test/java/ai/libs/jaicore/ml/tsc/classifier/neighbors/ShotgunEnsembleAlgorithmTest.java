@@ -10,9 +10,7 @@ import org.junit.Test;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
-import ai.libs.jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleClassifier;
-import ai.libs.jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleLearnerAlgorithm;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /**

@@ -142,12 +142,12 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	/**
 	 * Predefined alpha parameter used within the calculations.
 	 */
-	public static double ALPHA = -30d; // Used in implementation. Paper says -100d
+	public static final double ALPHA = -30d; // Used in implementation. Paper says -100d
 
 	/**
 	 * Epsilon value used to prevent dividing by zero occurrences.
 	 */
-	private static double EPS = 0.000000000000000000001d;
+	private static final double EPS = 0.000000000000000000001d;
 
 	/**
 	 * See {@link IAlgorithm#getTimeout()}.
@@ -388,7 +388,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		final int scaleR = this.getConfig().scaleR();
 		final int minShapeLength = this.getConfig().minShapeletLength();
 		final int maxIter = this.getConfig().maxIterations();
-		final int seed = this.getConfig().seed();
+		final long seed = this.getConfig().seed();
 		final int numShapelets = this.getConfig().numShapelets();
 		final double learningRate = this.getConfig().learningRate();
 		final double regularization = this.getConfig().regularization();

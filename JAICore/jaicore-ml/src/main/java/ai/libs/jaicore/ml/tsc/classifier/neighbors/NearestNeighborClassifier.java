@@ -9,7 +9,7 @@ import java.util.PriorityQueue;
 import org.aeonbits.owner.ConfigCache;
 
 import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;

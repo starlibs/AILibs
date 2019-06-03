@@ -19,6 +19,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
 import autofe.db.model.database.Database;
@@ -36,7 +37,7 @@ public class DBUtils {
 		// prevent instantiation of this util class.
 	}
 
-	public static Table getTargetTable(Database db) {
+	public static Table getTargetTable(final Database db) {
 		for (Table t : db.getTables()) {
 			if (t.isTarget()) {
 				return t;
@@ -45,7 +46,7 @@ public class DBUtils {
 		return null;
 	}
 
-	public static Set<ForwardRelationship> getForwardsFrom(Table table, Database db) {
+	public static Set<ForwardRelationship> getForwardsFrom(final Table table, final Database db) {
 		Set<ForwardRelationship> toReturn = new HashSet<>();
 		for (ForwardRelationship forwardRelationship : db.getForwards()) {
 			forwardRelationship.setContext(db);
@@ -56,7 +57,7 @@ public class DBUtils {
 		return toReturn;
 	}
 
-	public static Set<BackwardRelationship> getBackwardsFrom(Table table, Database db) {
+	public static Set<BackwardRelationship> getBackwardsFrom(final Table table, final Database db) {
 		Set<BackwardRelationship> toReturn = new HashSet<>();
 		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
 			backwardRelationship.setContext(db);
@@ -67,7 +68,7 @@ public class DBUtils {
 		return toReturn;
 	}
 
-	public static Set<ForwardRelationship> getForwardsTo(Table table, Database db) {
+	public static Set<ForwardRelationship> getForwardsTo(final Table table, final Database db) {
 		Set<ForwardRelationship> toReturn = new HashSet<>();
 		for (ForwardRelationship forwardRelationship : db.getForwards()) {
 			forwardRelationship.setContext(db);
@@ -78,7 +79,7 @@ public class DBUtils {
 		return toReturn;
 	}
 
-	public static Set<BackwardRelationship> getBackwardsTo(Table table, Database db) {
+	public static Set<BackwardRelationship> getBackwardsTo(final Table table, final Database db) {
 		Set<BackwardRelationship> toReturn = new HashSet<>();
 		for (BackwardRelationship backwardRelationship : db.getBackwards()) {
 			backwardRelationship.setContext(db);
@@ -89,21 +90,21 @@ public class DBUtils {
 		return toReturn;
 	}
 
-	public static Set<Table> getForwardReachableTables(Table from, Database db) {
+	public static Set<Table> getForwardReachableTables(final Table from, final Database db) {
 		Set<Table> tables = new HashSet<>();
 
 		addForwardTables(from, db, tables);
 		return tables;
 	}
 
-	private static void addForwardTables(Table from, Database db, Set<Table> tables) {
+	private static void addForwardTables(final Table from, final Database db, final Set<Table> tables) {
 		tables.add(from);
 		for (ForwardRelationship fr : getForwardsFrom(from, db)) {
 			addForwardTables(fr.getTo(), db, tables);
 		}
 	}
 
-	public static Set<Table> getBackwardReachableTables(Table from, Database db) {
+	public static Set<Table> getBackwardReachableTables(final Table from, final Database db) {
 		Set<Table> tables = new HashSet<>();
 		Set<Table> forwardTables = getForwardReachableTables(from, db);
 		for (Table t : forwardTables) {
@@ -112,14 +113,14 @@ public class DBUtils {
 		return tables;
 	}
 
-	private static void addBackwardTables(Table from, Database db, Set<Table> tables) {
+	private static void addBackwardTables(final Table from, final Database db, final Set<Table> tables) {
 		for (BackwardRelationship br : getBackwardsFrom(from, db)) {
 			tables.add(br.getTo());
 			addBackwardTables(br.getTo(), db, tables);
 		}
 	}
 
-	public static void serializeToFile(Database db, String path) {
+	public static void serializeToFile(final Database db, final String path) {
 		Gson gson = initGson();
 		try {
 			FileWriter fw = new FileWriter(path);
@@ -131,7 +132,7 @@ public class DBUtils {
 		}
 	}
 
-	public static Database deserializeFromFile(String path) {
+	public static Database deserializeFromFile(final String path) {
 		Database db = null;
 		Gson gson = initGson();
 		try {
@@ -142,7 +143,7 @@ public class DBUtils {
 		return db;
 	}
 
-	public static String serializeToString(Database db) {
+	public static String serializeToString(final Database db) {
 		Gson gson = initGson();
 		try {
 			return gson.toJson(db);
@@ -152,7 +153,7 @@ public class DBUtils {
 		return null;
 	}
 
-	public static Database deserializeFromString(String serialized) {
+	public static Database deserializeFromString(final String serialized) {
 		Database db = null;
 		Gson gson = initGson();
 		try {
@@ -167,12 +168,12 @@ public class DBUtils {
 		return new GsonBuilder().registerTypeAdapter(AbstractRelationship.class, new InterfaceAdapter<>()).create();
 	}
 
-	public static Database clone(Database db) {
+	public static Database clone(final Database db) {
 		String serialized = serializeToString(db);
 		return deserializeFromString(serialized);
 	}
 
-	public static Table getTableByName(String name, Database db) {
+	public static Table getTableByName(final String name, final Database db) {
 		for (Table t : db.getTables()) {
 			if (t.getName().equals(name)) {
 				return t;
@@ -181,7 +182,7 @@ public class DBUtils {
 		return null;
 	}
 
-	public static Attribute getAttributeByName(String name, Table table) {
+	public static Attribute getAttributeByName(final String name, final Table table) {
 		for (Attribute a : table.getColumns()) {
 			if (a.getName().equals(name)) {
 				return a;
@@ -190,7 +191,7 @@ public class DBUtils {
 		return null;
 	}
 
-	public static Table getAttributeTable(Attribute attribute, Database db) {
+	public static Table getAttributeTable(final Attribute attribute, final Database db) {
 		for (Table t : db.getTables()) {
 			if (t.getColumns().contains(attribute)) {
 				return t;
@@ -199,22 +200,22 @@ public class DBUtils {
 		return null;
 	}
 
-	public static boolean isIntermediate(Path path, Database db) {
-		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = path.getPathElements();
+	public static boolean isIntermediate(final Path path, final Database db) {
+		List<Pair<AbstractRelationship, AggregationFunction>> pathElements = path.getPathElements();
 
 		if (pathElements.isEmpty()) {
 			return true;
 		}
 
 		// Check whether last edge goes to the target or is forward reachable
-		AbstractRelationship relationship = pathElements.get(pathElements.size() - 1).getT();
+		AbstractRelationship relationship = pathElements.get(pathElements.size() - 1).getX();
 		relationship.setContext(db);
 		Table lastTable = relationship.getFrom();
 		Set<Table> forwardReachable = getForwardReachableTables(getTargetTable(db), db);
 		return ((!lastTable.isTarget()) && !(forwardReachable.contains(lastTable)));
 	}
 
-	public static Attribute getPrimaryKey(Table table) {
+	public static Attribute getPrimaryKey(final Table table) {
 		for (Attribute attribute : table.getColumns()) {
 			if (attribute.isPrimaryKey()) {
 				return attribute;
@@ -223,7 +224,7 @@ public class DBUtils {
 		return null;
 	}
 
-	public static Attribute getTargetAttribute(Database db) {
+	public static Attribute getTargetAttribute(final Database db) {
 		Table targetTable = getTargetTable(db);
 		if (targetTable == null) {
 			throw new IllegalArgumentException("The target table must not be null");
@@ -237,7 +238,7 @@ public class DBUtils {
 		return null;
 	}
 
-	public static List<ForwardRelationship> getJoinTables(Table from, Table to, Database db) {
+	public static List<ForwardRelationship> getJoinTables(final Table from, final Table to, final Database db) {
 		Map<Table, List<ForwardRelationship>> paths = new HashMap<>();
 		for (ForwardRelationship fr : getForwardsFrom(from, db)) {
 			addJoinTable(new ArrayList<>(), fr, db, paths);
@@ -245,7 +246,7 @@ public class DBUtils {
 		return paths.get(to);
 	}
 
-	private static void addJoinTable(List<ForwardRelationship> currentPath, ForwardRelationship currentRelationship, Database db, Map<Table, List<ForwardRelationship>> paths) {
+	private static void addJoinTable(final List<ForwardRelationship> currentPath, final ForwardRelationship currentRelationship, final Database db, final Map<Table, List<ForwardRelationship>> paths) {
 		currentRelationship.setContext(db);
 		List<ForwardRelationship> extendedPath = new ArrayList<>(currentPath);
 		extendedPath.add(currentRelationship);

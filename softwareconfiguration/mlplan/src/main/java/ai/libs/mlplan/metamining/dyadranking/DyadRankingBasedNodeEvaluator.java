@@ -36,7 +36,7 @@ import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
 import ai.libs.jaicore.ml.WekaUtil;

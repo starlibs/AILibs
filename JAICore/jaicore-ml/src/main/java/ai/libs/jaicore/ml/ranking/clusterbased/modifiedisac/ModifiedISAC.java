@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.ranking.clusterbased.GroupBasedRanker;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.Group;
@@ -83,7 +83,7 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String> {
 						break;
 					}
 				}
-				ArrayList<SetUtil.Pair<String, Double>> solutionsOfPoint = collector.getCollectedClassifierandPerformance().get(myIndex);
+				ArrayList<Pair<String, Double>> solutionsOfPoint = collector.getCollectedClassifierandPerformance().get(myIndex);
 				for (int i = 0; i < solutionsOfPoint.size(); i++) {
 
 					double perfo = solutionsOfPoint.get(i).getY();

@@ -157,7 +157,11 @@ public class MathUtil {
 
 		// Calculate slope
 		int length = t2 - t1 + 1;
-		return (length * xy - x * y) / (length * xx - x * x);
+		double denominator = (length * xx - x * x);
+		if (denominator == 0) {
+			throw new IllegalArgumentException("Given arguments yield a 0 " + denominator);
+		}
+		return (length * xy - x * y) / denominator;
 	}
 
 	/**

@@ -292,6 +292,6 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	}
 
 	private Class<?> getClassWithoutGenerics(final String className) throws ClassNotFoundException {
-		return Class.forName(className.replaceAll("(<.*>)", ""));
+		return Class.forName(className.replaceAll("(<[^>*]>)", ""));
 	}
 }

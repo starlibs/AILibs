@@ -9,9 +9,6 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.classifier.trees.LearnPatternSimilarityClassifier;
-import ai.libs.jaicore.ml.tsc.classifier.trees.LearnPatternSimilarityLearningAlgorithm;
-import ai.libs.jaicore.ml.tsc.classifier.trees.RandomRegressionTree;
 import junit.framework.Assert;
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -123,7 +120,7 @@ public class LearnPatternSimilarityAlgorithmTest {
 	 */
 	@Test
 	public void initializeRegressionTreeTest() {
-		final RandomRegressionTree regTree = this.algorithm.initializeRegressionTree(100);
+		final AccessibleRandomTree regTree = this.algorithm.initializeRegressionTree(100);
 
 		// Check tree initialization
 		Assert.assertEquals("The random regression tree uses a different seed than configured after initalization.", this.algorithm.getConfig().seed(), regTree.getSeed());

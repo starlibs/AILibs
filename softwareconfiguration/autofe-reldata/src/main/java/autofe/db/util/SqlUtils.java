@@ -3,6 +3,7 @@ package autofe.db.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;
@@ -57,10 +58,10 @@ public class SqlUtils {
 			sb.append("_");
 			Path path = ((BackwardFeature) feature).getPath();
 			for (int i = 0; i < path.length(); i++) {
-				Tuple<AbstractRelationship, AggregationFunction> pathElement = path.getPathElements().get(i);
-				AbstractRelationship ar = pathElement.getT();
-				if (pathElement.getU() != null) {
-					sb.append(pathElement.getU());
+				Pair<AbstractRelationship, AggregationFunction> pathElement = path.getPathElements().get(i);
+				AbstractRelationship ar = pathElement.getX();
+				if (pathElement.getY() != null) {
+					sb.append(pathElement.getY());
 				}
 				sb.append(ar.getFromTableName());
 				if (i != path.length() - 1) {
@@ -114,8 +115,8 @@ public class SqlUtils {
 		// Create select parts
 		List<SelectPart> selectParts = new ArrayList<>();
 		for (int i = 0; i < path.length(); i++) {
-			Tuple<AbstractRelationship, AggregationFunction> pathElement = path.getPathElements().get(i);
-			AbstractRelationship ar = pathElement.getT();
+			Pair<AbstractRelationship, AggregationFunction> pathElement = path.getPathElements().get(i);
+			AbstractRelationship ar = pathElement.getX();
 			ar.setContext(db);
 			SelectPart sp = new SelectPart(escape(ar.getCommonAttributeName()), i, escape(ar.getFromTableName()), escape(ar.getToTableName()));
 			List<String> selectedColumns = new ArrayList<>();
@@ -127,8 +128,8 @@ public class SqlUtils {
 
 			// Join attribute for next join
 			if (i != path.length() - 1) {
-				Tuple<AbstractRelationship, AggregationFunction> nextPathElement = path.getPathElements().get(i + 1);
-				String joinAttribute = String.format(PATTERN_TABLE_ATTRIBUTE, escape(ar.getFromTableName()), escape(nextPathElement.getT().getCommonAttributeName()));
+				Pair<AbstractRelationship, AggregationFunction> nextPathElement = path.getPathElements().get(i + 1);
+				String joinAttribute = String.format(PATTERN_TABLE_ATTRIBUTE, escape(ar.getFromTableName()), escape(nextPathElement.getX().getCommonAttributeName()));
 				if (!selectedColumns.contains(joinAttribute)) {
 					selectedColumns.add(joinAttribute);
 				}
@@ -137,11 +138,11 @@ public class SqlUtils {
 			if (ar instanceof BackwardRelationship) {
 				// Aggregated attribute
 				if (i != 0 && i != path.length() - 1) {
-					selectedColumns.add(String.format("%s(%s) AS %s", pathElement.getU(), escape(TEMP_FEATURE + (i - 1)), TEMP_FEATURE + i));
+					selectedColumns.add(String.format("%s(%s) AS %s", pathElement.getY(), escape(TEMP_FEATURE + (i - 1)), TEMP_FEATURE + i));
 				} else if (i == path.length() - 1) {
-					selectedColumns.add(String.format("%s(%s) AS '%s'", pathElement.getU(), escape(TEMP_FEATURE + (i - 1)), feature.getName()));
+					selectedColumns.add(String.format("%s(%s) AS '%s'", pathElement.getY(), escape(TEMP_FEATURE + (i - 1)), feature.getName()));
 				} else {
-					selectedColumns.add(String.format("%s(" + PATTERN_TABLE_ATTRIBUTE + ") AS %s", pathElement.getU(), escape(ar.getToTableName()), escape(feature.getParent().getName()), TEMP_FEATURE + i));
+					selectedColumns.add(String.format("%s(" + PATTERN_TABLE_ATTRIBUTE + ") AS %s", pathElement.getY(), escape(ar.getToTableName()), escape(feature.getParent().getName()), TEMP_FEATURE + i));
 				}
 
 				sp.setGroupBy(String.format(PATTERN_TABLE_ATTRIBUTE, escape(ar.getFromTableName()), escape(ar.getCommonAttributeName())));

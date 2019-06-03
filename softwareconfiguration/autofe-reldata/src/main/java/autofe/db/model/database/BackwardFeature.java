@@ -5,10 +5,10 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import autofe.db.model.relation.AbstractRelationship;
 import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.model.relation.ForwardRelationship;
-import autofe.db.util.Tuple;
 
 public class BackwardFeature extends AbstractFeature {
 
@@ -43,21 +43,21 @@ public class BackwardFeature extends AbstractFeature {
 
 	@Override
 	public String getName() {
-		List<Tuple<AbstractRelationship, AggregationFunction>> pathElements = this.path.getPathElements();
+		List<Pair<AbstractRelationship, AggregationFunction>> pathElements = this.path.getPathElements();
 
 		String name;
 
 		if (pathElements == null || pathElements.isEmpty()) {
 			name = this.parent.getFullName();
 		} else {
-			String parentTableName = pathElements.get(0).getT().getToTableName();
+			String parentTableName = pathElements.get(0).getX().getToTableName();
 			name = String.format("%s.%s", parentTableName, this.parent.getName());
 
-			for (Tuple<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
-				if (pathElement.getT() instanceof BackwardRelationship) {
-					name = String.format("%s.%s(%s)", pathElement.getT().getFromTableName(), pathElement.getU(), name);
-				} else if (pathElement.getT() instanceof ForwardRelationship) {
-					name = String.format("%s.(%s)", pathElement.getT().getFromTableName(), name);
+			for (Pair<AbstractRelationship, AggregationFunction> pathElement : pathElements) {
+				if (pathElement.getX() instanceof BackwardRelationship) {
+					name = String.format("%s.%s(%s)", pathElement.getX().getFromTableName(), pathElement.getY(), name);
+				} else if (pathElement.getX() instanceof ForwardRelationship) {
+					name = String.format("%s.(%s)", pathElement.getX().getFromTableName(), name);
 				}
 			}
 		}
