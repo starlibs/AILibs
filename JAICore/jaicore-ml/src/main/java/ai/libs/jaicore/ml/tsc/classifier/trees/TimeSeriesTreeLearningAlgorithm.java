@@ -667,7 +667,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 				T2.add(t1 + w - 1);
 			}
 		}
-		return new Pair<List<Integer>, List<Integer>>(T1, T2);
+		return new Pair<>(T1, T2);
 	}
 
 	/**
