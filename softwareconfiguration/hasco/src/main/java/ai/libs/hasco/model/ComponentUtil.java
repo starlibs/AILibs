@@ -176,7 +176,6 @@ public class ComponentUtil {
 		return false;
 	}
 
-
 	public static boolean isDefaultConfiguration(final ComponentInstance instance) {
 		for (Parameter p : instance.getParametersThatHaveBeenSetExplicitly()) {
 			if (p.isNumeric()) {
