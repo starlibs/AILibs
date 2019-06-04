@@ -90,9 +90,8 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 	private double internalValidationErrorOfSelectedClassifier;
 	private final String id = this.getClass().getName() + "-" + System.currentTimeMillis();
 
-	public AutoFEMLComplete(final long seed, final double subsampleRatio, final double mlplanSubsampleRatioFactor,
-			final int minInstances, final MLPlanFEWekaClassifierConfig config, final AutoFEWekaPipelineFactory factory)
-					throws IOException {
+	public AutoFEMLComplete(final long seed, final double subsampleRatio, final double mlplanSubsampleRatioFactor, final int minInstances, final MLPlanFEWekaClassifierConfig config, final AutoFEWekaPipelineFactory factory)
+			throws IOException {
 
 		this.componentFile = new File("model/MLPlanFEWeka.json");
 		this.components = new ComponentLoader(this.componentFile).getComponents();
@@ -273,9 +272,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		/* configure and start optimizing factory */
 		OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, AutoFEWekaPipeline, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.factory, problem);
 		TwoPhaseHASCOFactory hascoFactory = new TwoPhaseHASCOFactory();
-		hascoFactory.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.config.seed(),
-				this.config.numberOfRandomCompletions(), this.config.timeoutForCandidateEvaluation(),
-				this.config.timeoutForNodeEvaluation()));
+		hascoFactory.setHascoFactory(new HASCOViaFDAndBestFirstWithRandomCompletionsFactory(this.config.seed(), this.config.numberOfRandomCompletions(), this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
 
 		hascoFactory.setConfig(this.config);
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
@@ -307,16 +304,17 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 	}
 
 	@Override
-	public void setLoggerName(final String name) {
-		this.loggerName = name;
-		this.logger.info("Switching logger name to {}", name);
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Switched ML-Plan logger to {}", name);
+	public String getLoggerName() {
+		return this.loggerName;
 	}
 
 	@Override
-	public String getLoggerName() {
-		return this.loggerName;
+	public void setLoggerName(final String name) {
+		this.loggerName = name;
+		this.logger.info("Switching AutoFEMLComplete logger name to {}", name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.optimizingFactory.setLoggerName(this.loggerName + ".optimizingFactory");
+		this.logger.info("Switched AutoFEMLComplete logger to {}", name);
 	}
 
 	@Override
