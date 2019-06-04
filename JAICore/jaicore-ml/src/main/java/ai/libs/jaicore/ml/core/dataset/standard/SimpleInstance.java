@@ -66,9 +66,8 @@ public class SimpleInstance<L> implements INumericLabeledAttributeArrayInstance<
 	}
 
 	@Override
-	public IAttributeValue<Double> getAttributeValue(int position) {
-		// TODO Auto-generated method stub
-		return null;
+	public IAttributeValue<Double> getAttributeValue(final int position) {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -78,7 +77,6 @@ public class SimpleInstance<L> implements INumericLabeledAttributeArrayInstance<
 
 	@Override
 	public int getNumberOfAttributes() {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 }

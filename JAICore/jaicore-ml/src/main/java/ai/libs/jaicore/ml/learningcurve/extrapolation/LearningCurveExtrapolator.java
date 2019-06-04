@@ -70,7 +70,7 @@ public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<
 	 *            with.
 	 * @param seed
 	 *            Random seed.
-	 * @throws DatasetCreationException 
+	 * @throws DatasetCreationException
 	 */
 	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final Classifier learner, final D dataset, final double trainsplit, final int[] anchorPoints,
 			final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final long seed) throws DatasetCreationException {
@@ -134,7 +134,7 @@ public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<
 				this.yValues[i] = correctCounter / testInstances.size();
 				this.logger.debug("Training finished. Observed learning curve value (accuracy) of {}.", this.yValues[i]);
 			}
-			if (logger.isInfoEnabled()) {
+			if (this.logger.isInfoEnabled()) {
 				this.logger.info("Computed accuracies of {} for anchor points {}. Now extrapolating a curve from these observations.", Arrays.toString(this.yValues), Arrays.toString(this.anchorPoints));
 			}
 			return this.extrapolationMethod.extrapolateLearningCurveFromAnchorPoints(this.anchorPoints, this.yValues, this.dataset.size());
@@ -174,7 +174,6 @@ public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<
 			}
 			classStrati.get(c).add(d);
 		}
-		;
 
 		// Retrieve strati sizes
 		Map<Object, Integer> classStratiSizes = new HashMap<>(classStrati.size());

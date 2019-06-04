@@ -1,14 +1,13 @@
 package ai.libs.jaicore.ml.core;
 
 import java.util.Arrays;
-import java.util.Collection;
 
-import weka.core.Instance;
+import ai.libs.jaicore.ml.intervaltree.ExtendedRandomTree;
 
 /**
  * Description of a categorical feature domain. Needed for fANOVA application in
  * the {@link ExtendedRandomTree}.
- * 
+ *
  * @author jmhansel
  *
  */
@@ -20,15 +19,10 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 		this.values = values;
 	}
 
-	public CategoricalFeatureDomain(CategoricalFeatureDomain domain) {
+	public CategoricalFeatureDomain(final CategoricalFeatureDomain domain) {
 		super();
 		this.values = domain.values;
 	}
-
-	// public CategoricalFeatureDomain(final Collection<String> values, int[]
-	// indices) {
-	// this(values.toArray(new String[] {}));
-	// }
 
 	public double[] getValues() {
 		return this.values;
@@ -38,80 +32,60 @@ public class CategoricalFeatureDomain extends FeatureDomain {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(values);
+		result = prime * result + Arrays.hashCode(this.values);
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		CategoricalFeatureDomain other = (CategoricalFeatureDomain) obj;
-		if (!Arrays.equals(values, other.values))
-			return false;
-		return true;
+		return Arrays.equals(this.values, other.values);
 	}
-
-	// @Override
-	// public boolean contains(Object item) {
-	// if (item == null)
-	// throw new IllegalArgumentException("Cannot request membership of NULL in a
-	// categorical parameter domain.");
-	// double itemAsDouble = (double) item;
-	// for (int i = 0; i < values.length; i++)
-	// if (values[i].equals(itemAsDouble))
-	// return true;
-	// return false;
-	// }
-
-	// TODO do I need this?
-	// @Override
-	// public boolean subsumes(FeatureDomain otherDomain) {
-	// if (!(otherDomain instanceof CategoricalFeatureDomain))
-	// return false;
-	// CategoricalFeatureDomain otherCategoricalDomain =
-	// (CategoricalFeatureDomain)otherDomain;
-	// return
-	// Arrays.asList(values).containsAll(Arrays.asList(otherCategoricalDomain.getValues()));
-	// }
 
 	@Override
 	public String toString() {
-		return "CategoricalFeatureDomain [values=" + Arrays.toString(values) + "]";
+		return "CategoricalFeatureDomain [values=" + Arrays.toString(this.values) + "]";
 	}
 
 	@Override
 	public double getRangeSize() {
-		// For safety, if the domain is empty, it shouldn't effect the range size of the
-		// feature space
-		if (values.length == 0)
+		// For safety, if the domain is empty, it shouldn't effect the range size of the feature space
+		if (this.values.length == 0) {
 			return 1;
-		return values.length;
+		}
+		return this.values.length;
 	}
 
-	public void setValues(double[] values) {
+	public void setValues(final double[] values) {
 		this.values = values;
 	}
 
 	@Override
-	public boolean containsInstance(double value) {
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] == value)
+	public boolean containsInstance(final double value) {
+		for (int i = 0; i < this.values.length; i++) {
+			if (this.values[i] == value) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	@Override
-	public boolean contains(Object item) {
+	public boolean contains(final Object item) {
 		double value = (double) item;
-		for (int i = 0; i < values.length; i++) {
-			if (values[i] == value)
+		for (int i = 0; i < this.values.length; i++) {
+			if (this.values[i] == value) {
 				return true;
+			}
 		}
 		return false;
 	}

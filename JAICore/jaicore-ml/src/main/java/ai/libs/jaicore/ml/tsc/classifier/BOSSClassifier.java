@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.tsc.classifier;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -80,7 +79,7 @@ public class BOSSClassifier extends ASimplifiedTSClassifier<Integer> {
 		}
 
 		TimeSeriesDataset tmpznormedsfaTransformed = sfa.fitTransform(tmp);
-		HashMap<Integer, Integer> histogram = this.histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
+		Map<Integer, Integer> histogram = this.histoBuilder.histogramForInstance(tmpznormedsfaTransformed);
 
 		// Calculate distance for all histograms for all instances in the training set.
 		// Remember index of histogram with minimum distance in list because it corresponds to the

@@ -18,11 +18,6 @@ import ai.libs.jaicore.ml.tsc.util.ClassMapper;
 public abstract class ASimplifiedTSClassifier<T> {
 
 	/**
-	 * The algorithm object used for the training of the classifier.
-	 */
-	private ASimplifiedTSCLearningAlgorithm<T, ? extends ASimplifiedTSClassifier<T>> algorithm;
-
-	/**
 	 * Class mapper object used to encode and decode predicted values if String
 	 * values are used as classes. Can be null if the predicted values are not
 	 * mapped to String values.
@@ -42,60 +37,32 @@ public abstract class ASimplifiedTSClassifier<T> {
 	 * representation and returns the result.
 	 *
 	 * @param univInstance Univariate instance given by a double vector of time
-	 *                     series values used for the prediction
+	 *            series values used for the prediction
 	 * @return Returns the result of the prediction
 	 * @throws PredictionException If something fails during the prediction process.
 	 */
 	public abstract T predict(final double[] univInstance) throws PredictionException;
 
 	/**
-	 * Performs a prediction based on the given univariate double[] instance
-	 * representation with timestamps and returns the result.
-	 *
-	 * @param univInstance Univariate instance given by a double vector of time
-	 *                     series values used for the prediction
-	 * @return Returns the result of the prediction
-	 * @throws PredictionException If something fails during the prediction process.
-	 */
-	public T predict(final double[] univInstance, final double[] timestamps) throws PredictionException {
-		return this.predict(univInstance);
-	}
-
-	/**
 	 * Performs a prediction based on the given multivariate list of double[]
 	 * instance representation and returns the result.
 	 *
 	 * @param multivInstance Multivariate instance given by a list of multiple
-	 *                       double[] time series used for the prediction
+	 *            double[] time series used for the prediction
 	 * @return Returns the result of the prediction
 	 * @throws PredictionException If something fails during the prediction process.
 	 */
 	public abstract T predict(final List<double[]> multivInstance) throws PredictionException;
 
 	/**
-	 * Performs a prediction based on the given multivariate list of double[]
-	 * instance representation with timestamps and returns the result.
-	 *
-	 * @param multivInstance Multivariate instance given by a list of multiple
-	 *                       double[] time series used for the prediction
-	 * @return Returns the result of the prediction
-	 * @throws PredictionException If something fails during the prediction process.
-	 */
-	public T predict(final List<double[]> multivInstance, final List<double[]> timestamps)
-			throws PredictionException {
-		return this.predict(multivInstance);
-	}
-
-	/**
 	 * Performs predictions based on the given instances in the given dataset.
 	 *
 	 * @param dataset The {@link TimeSeriesDataset} for which predictions should be
-	 *                made.
+	 *            made.
 	 * @return Returns the result of the predictions
 	 * @throws PredictionException If something fails during the prediction process
 	 */
 	public abstract List<T> predict(final TimeSeriesDataset dataset) throws PredictionException;
-
 
 	public abstract <U extends ASimplifiedTSClassifier<T>> ASimplifiedTSCLearningAlgorithm<T, U> getLearningAlgorithm(final TimeSeriesDataset dataset);
 
@@ -104,18 +71,18 @@ public abstract class ASimplifiedTSClassifier<T> {
 	 * {@link TimeSeriesDataset}.
 	 *
 	 * @param dataset The {@link TimeSeriesDataset} which should be used for the
-	 *                training.
+	 *            training.
 	 * @throws TrainingException If something fails during the training process.
 	 */
 	public final void train(final TimeSeriesDataset dataset) throws TrainingException {
 
 		// Set model which is trained
-		this.algorithm = this.getLearningAlgorithm(dataset);
+		ASimplifiedTSCLearningAlgorithm<T, ? extends ASimplifiedTSClassifier<T>> algorithm = this.getLearningAlgorithm(dataset);
 
 		// Set input data from which the model should learn
 		try {
 			// Train
-			this.algorithm.call();
+			algorithm.call();
 			this.trained = true;
 		} catch (Exception e) {
 			throw new TrainingException("Could not train model " + this.getClass().getSimpleName(), e);

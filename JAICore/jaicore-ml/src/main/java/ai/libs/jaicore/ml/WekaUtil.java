@@ -60,6 +60,9 @@ import weka.filters.unsupervised.attribute.Remove;
 
 public class WekaUtil {
 
+	private static final String MSG_DEVIATING_NUMBER_OF_INSTANCES = "The number of instances in the folds does not equal the number of instances in the original dataset";
+	private static boolean debug = false;
+
 	public static Collection<String> getBasicLearners() {
 		Collection<String> classifiers = new ArrayList<>();
 
@@ -599,7 +602,7 @@ public class WekaUtil {
 		while (!indices.isEmpty()) {
 			folds[rand.nextInt(folds.length)].add(indices.poll());
 		}
-		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instancens in the folds does not equal the number of instances in the original dataset";
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : MSG_DEVIATING_NUMBER_OF_INSTANCES;
 		return folds;
 	}
 
@@ -700,7 +703,7 @@ public class WekaUtil {
 			nextBinForClass.put(assignedClass, foldId);
 		}
 
-		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		assert Arrays.asList(folds).stream().mapToInt(l -> l.size()).sum() == data.size() : MSG_DEVIATING_NUMBER_OF_INSTANCES;
 		return folds;
 	}
 
@@ -764,7 +767,9 @@ public class WekaUtil {
 
 			Collections.shuffle(instancesForSplit, rand);
 		}
-		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		if (debug && instances.stream().mapToInt(List::size).sum() != data.size()) {
+			throw new IllegalStateException(MSG_DEVIATING_NUMBER_OF_INSTANCES);
+		}
 		return instances;
 	}
 
@@ -837,7 +842,7 @@ public class WekaUtil {
 			}
 			instancesForSplit.randomize(rand);
 		}
-		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : MSG_DEVIATING_NUMBER_OF_INSTANCES;
 		return instances;
 	}
 
@@ -927,7 +932,7 @@ public class WekaUtil {
 			}
 			instancesForSplit.randomize(rand);
 		}
-		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : "The number of instances in the folds does not equal the number of instances in the original dataset";
+		assert instances.stream().mapToInt(l -> l.size()).sum() == data.size() : MSG_DEVIATING_NUMBER_OF_INSTANCES;
 
 		/* update ReproducibleInstanes history */
 		String ratiosAsString = Arrays.toString(portions);
@@ -1255,5 +1260,13 @@ public class WekaUtil {
 		sb.append(")");
 
 		return sb.toString();
+	}
+
+	public static boolean isDebug() {
+		return debug;
+	}
+
+	public static void setDebug(final boolean debug) {
+		WekaUtil.debug = debug;
 	}
 }
