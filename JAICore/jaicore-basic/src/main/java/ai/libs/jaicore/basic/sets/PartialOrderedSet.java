@@ -12,9 +12,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 /**
  * A {@link Set} with a partial order added to it.
  *
@@ -375,20 +372,35 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		return super.remove(e);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public boolean equals(final Object obj) {
-		if (!(obj instanceof PartialOrderedSet)) {
-			return false;
-		}
-		PartialOrderedSet<E> other = (PartialOrderedSet<E>) obj;
-
-		return new EqualsBuilder().append(this.order, other.order).isEquals();
-	}
-
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder().append(this.order).toHashCode();
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.order == null) ? 0 : this.order.hashCode());
+		return result;
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		PartialOrderedSet other = (PartialOrderedSet) obj;
+		if (this.order == null) {
+			if (other.order != null) {
+				return false;
+			}
+		} else if (!this.order.equals(other.order)) {
+			return false;
+		}
+		return true;
 	}
 
 }
