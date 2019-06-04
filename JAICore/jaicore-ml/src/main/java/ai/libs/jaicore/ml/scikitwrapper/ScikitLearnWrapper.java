@@ -98,7 +98,7 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 	 * Lists will keep the unflattened results until classifyInstances is called again. classifyInstances will only return a flattened representation of a multi-target prediction.
 	 * The outer list represents the rows whilst the inner list represents the x target values in this row.
 	 */
-	private List<List<Double>> rawLastClassificationResults = null;
+	private transient List<List<Double>> rawLastClassificationResults = null;
 
 	/**
 	 * Starts a new wrapper and creates its underlying script with the given parameters.
@@ -238,8 +238,8 @@ public class ScikitLearnWrapper implements IInstancesClassifier, Classifier {
 		try {
 			/* Parse the result */
 			fileContent = FileUtil.readFileAsString(outputFile);
-			if (DELETE_TEMPORARY_FILES_ON_EXIT) {
-				outputFile.delete();
+			if (DELETE_TEMPORARY_FILES_ON_EXIT && !outputFile.delete()) {
+				L.warn("Could not delete output file {}", outputFile.getAbsolutePath());
 			}
 			ObjectMapper objMapper = new ObjectMapper();
 			this.rawLastClassificationResults = objMapper.readValue(fileContent, List.class);

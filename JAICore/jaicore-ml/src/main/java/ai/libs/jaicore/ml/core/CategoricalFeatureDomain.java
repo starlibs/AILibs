@@ -12,6 +12,11 @@ import ai.libs.jaicore.ml.intervaltree.ExtendedRandomTree;
  *
  */
 public class CategoricalFeatureDomain extends FeatureDomain {
+	/**
+	 * Automatically generated version uid for serialization.
+	 */
+	private static final long serialVersionUID = 5890074168706122933L;
+
 	private double[] values;
 
 	public CategoricalFeatureDomain(final double[] values) {
