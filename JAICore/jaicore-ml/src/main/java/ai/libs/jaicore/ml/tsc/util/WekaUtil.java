@@ -28,6 +28,12 @@ import weka.core.Instances;
  */
 public class WekaUtil {
 
+	private static final String I_NAME = "Instances";
+
+	private WekaUtil() {
+		/* no instantiation desired */
+	}
+
 	/**
 	 * Stacks the given matrices horizontally.
 	 *
@@ -38,7 +44,7 @@ public class WekaUtil {
 	 */
 	private static INDArray hstackINDArrays(final List<INDArray> matrices) {
 		// Check first shape dimension
-		if (matrices.size() > 0) {
+		if (!matrices.isEmpty()) {
 			long[] shape = matrices.get(0).shape();
 			for (int i = 1; i < matrices.size(); i++) {
 				if (matrices.get(i).shape()[0] != shape[0]) {
@@ -48,7 +54,7 @@ public class WekaUtil {
 		}
 
 		INDArray combinedMatrix;
-		if (matrices.size() > 0) {
+		if (!matrices.isEmpty()) {
 			combinedMatrix = matrices.get(0).dup();
 			for (int i = 1; i < matrices.size(); i++) {
 				combinedMatrix = Nd4j.hstack(combinedMatrix, matrices.get(i));
@@ -70,7 +76,6 @@ public class WekaUtil {
 	 * @return Returns the Weka instance containing the time series data and the
 	 *         class information.
 	 */
-	// TODO: Add meta attribute support
 	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance<?> instance) {
 		IAttributeValue<?>[] attValues = instance.getAllAttributeValues();
 		List<INDArray> indArrays = new ArrayList<>();
@@ -84,7 +89,7 @@ public class WekaUtil {
 		INDArray combinedMatrix = hstackINDArrays(indArrays);
 
 		final Instance finalInstance = new DenseInstance(1, Nd4j.toFlattened(combinedMatrix).toDoubleVector());
-		finalInstance.setClassValue(ai.libs.jaicore.ml.WekaUtil.getIntValOfClassName(finalInstance, (String)instance.getTargetValue()));
+		finalInstance.setClassValue(ai.libs.jaicore.ml.WekaUtil.getIntValOfClassName(finalInstance, (String) instance.getTargetValue()));
 		return finalInstance;
 	}
 
@@ -95,11 +100,8 @@ public class WekaUtil {
 	 *            The time series instance storing the time series data
 	 * @return Returns the Weka instance containing the time series
 	 */
-	// TODO: Add meta attribute support
 	public static Instance simplifiedTSInstanceToWekaInstance(final double[] instance) {
-
-		final Instance finalInstance = new DenseInstance(1, instance);
-		return finalInstance;
+		return new DenseInstance(1, instance);
 	}
 
 	/**
@@ -115,8 +117,7 @@ public class WekaUtil {
 	 *             Throws exception if the training could not be finished
 	 *             successfully
 	 */
-	public static void buildWekaClassifierFromTS(final Classifier classifier, final TimeSeriesDataset timeSeriesDataset)
-			throws TrainingException {
+	public static <L> void buildWekaClassifierFromTS(final Classifier classifier, final TimeSeriesDataset<L> timeSeriesDataset) throws TrainingException {
 
 		final Instances trainingInstances = timeSeriesDatasetToWekaInstances(timeSeriesDataset);
 
@@ -140,16 +141,14 @@ public class WekaUtil {
 	 *             Throws exception if the training could not be finished
 	 *             successfully
 	 */
-	public static void buildWekaClassifierFromSimplifiedTS(final Classifier classifier,
-			final ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset timeSeriesDataset) throws TrainingException {
+	public static void buildWekaClassifierFromSimplifiedTS(final Classifier classifier, final ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset timeSeriesDataset) throws TrainingException {
 
 		final Instances trainingInstances = simplifiedTimeSeriesDatasetToWekaInstances(timeSeriesDataset);
 
 		try {
 			classifier.buildClassifier(trainingInstances);
 		} catch (Exception e) {
-			throw new TrainingException(String.format("Could not train classifier %s due to a Weka exception.",
-					classifier.getClass().getName()), e);
+			throw new TrainingException(String.format("Could not train classifier %s due to a Weka exception.", classifier.getClass().getName()), e);
 		}
 	}
 
@@ -165,11 +164,11 @@ public class WekaUtil {
 	 *         (number instances x number attributes)
 	 */
 	public static INDArray wekaInstancesToINDArray(final Instances instances, final boolean keepClass) {
-		if (instances == null || instances.size() == 0) {
+		if (instances == null || instances.isEmpty()) {
 			throw new IllegalArgumentException("Instances must not be null or empty!");
 		}
 
-		int classSub = keepClass ? 0 : (instances.classIndex() > -1 ? 1 : 0);
+		int classSub = (keepClass || instances.classIndex() < -1) ? 0 : 1;
 		int numAttributes = instances.numAttributes() - classSub;
 		int numInstances = instances.numInstances();
 
@@ -193,10 +192,7 @@ public class WekaUtil {
 	 *            Data set which is transformed
 	 * @return Transformed Weka Instances object
 	 */
-	// TODO: Include meta information
-	public static Instances timeSeriesDatasetToWekaInstances(final TimeSeriesDataset dataSet) {
-
-		// TODO: Integrate direct access in TimeSeriesDataset
+	public static <L> Instances timeSeriesDatasetToWekaInstances(final TimeSeriesDataset<L> dataSet) {
 		List<INDArray> matrices = new ArrayList<>();
 		for (int i = 0; i < dataSet.getNumberOfVariables(); i++) {
 			matrices.add(dataSet.getValues(i));
@@ -214,10 +210,8 @@ public class WekaUtil {
 
 		// Add class attribute
 		final INDArray targets = dataSet.getTargets();
-		attributes.add(new Attribute("class",
-				IntStream.rangeClosed((int) targets.minNumber().longValue(), (int) targets.maxNumber().longValue())
-				.boxed().map(i -> String.valueOf(i)).collect(Collectors.toList())));
-		final Instances result = new Instances("Instances", attributes, (int) dataSet.getNumberOfInstances());
+		attributes.add(new Attribute("class", IntStream.rangeClosed((int) targets.minNumber().longValue(), (int) targets.maxNumber().longValue()).boxed().map(String::valueOf).collect(Collectors.toList())));
+		final Instances result = new Instances(I_NAME, attributes, (int) dataSet.getNumberOfInstances());
 		result.setClassIndex(result.numAttributes() - 1);
 
 		// Concatenate multiple matrices if series is multivariate
@@ -227,8 +221,7 @@ public class WekaUtil {
 		for (int i = 0; i < dataSet.getNumberOfInstances(); i++) {
 
 			// Initialize instance
-			final Instance inst = new DenseInstance(1, Nd4j.hstack(Nd4j.toFlattened(combinedMatrix.getRow(i)),
-					Nd4j.create(new double[] { targets.getDouble(i) })).toDoubleVector());
+			final Instance inst = new DenseInstance(1, Nd4j.hstack(Nd4j.toFlattened(combinedMatrix.getRow(i)), Nd4j.create(new double[] { targets.getDouble(i) })).toDoubleVector());
 
 			inst.setDataset(result);
 			result.add(inst);
@@ -245,17 +238,14 @@ public class WekaUtil {
 	 *            Data set which is transformed
 	 * @return Transformed Weka Instances object
 	 */
-	// TODO: Include meta information
-	public static Instances simplifiedTimeSeriesDatasetToWekaInstances(
-			final ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset dataSet) {
+	public static Instances simplifiedTimeSeriesDatasetToWekaInstances(final ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset dataSet) {
 
 		final int[] targets = dataSet.getTargets();
 		List<Integer> targetList = Arrays.asList(ArrayUtils.toObject(targets));
 
 		int min = Collections.min(targetList);
 		int max = Collections.max(targetList);
-		List<String> classValues = IntStream.rangeClosed(min, max).boxed().map(i -> String.valueOf(i))
-				.collect(Collectors.toList());
+		List<String> classValues = IntStream.rangeClosed(min, max).boxed().map(String::valueOf).collect(Collectors.toList());
 
 		return simplifiedTimeSeriesDatasetToWekaInstances(dataSet, classValues);
 	}
@@ -268,11 +258,8 @@ public class WekaUtil {
 	 *            Data set which is transformed
 	 * @return Transformed Weka Instances object
 	 */
-	// TODO: Include meta information
-	public static Instances simplifiedTimeSeriesDatasetToWekaInstances(
-			final ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset dataSet, final List<String> classValues) {
+	public static Instances simplifiedTimeSeriesDatasetToWekaInstances(final ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset dataSet, final List<String> classValues) {
 
-		// TODO: Integrate direct access in TimeSeriesDataset
 		List<double[][]> matrices = new ArrayList<>();
 		for (int i = 0; i < dataSet.getNumberOfVariables(); i++) {
 			matrices.add(dataSet.getValues(i));
@@ -295,7 +282,7 @@ public class WekaUtil {
 		// Add class attribute
 		final int[] targets = dataSet.getTargets();
 		attributes.add(new Attribute("class", classValues));
-		final Instances result = new Instances("Instances", attributes, dataSet.getNumberOfInstances());
+		final Instances result = new Instances(I_NAME, attributes, dataSet.getNumberOfInstances());
 		result.setClassIndex(result.numAttributes() - 1);
 
 		// Create instances
@@ -331,9 +318,7 @@ public class WekaUtil {
 			throw new IllegalArgumentException("Matrix must not be null or empty!");
 		}
 		if (matrix.shape().length != 2) {
-			throw new IllegalArgumentException(String.format(
-					"Parameter matrix must be a matrix with 2 axis (instances x attributes). Actual shape: (%s)",
-					Arrays.toString(matrix.shape())));
+			throw new IllegalArgumentException(String.format("Parameter matrix must be a matrix with 2 axis (instances x attributes). Actual shape: (%s)", Arrays.toString(matrix.shape())));
 		}
 
 		final int numInstances = (int) matrix.shape()[0];
@@ -346,7 +331,7 @@ public class WekaUtil {
 			attributes.add(newAtt);
 		}
 
-		final Instances result = new Instances("Instances", attributes, numInstances);
+		final Instances result = new Instances(I_NAME, attributes, numInstances);
 
 		for (int i = 0; i < numInstances; i++) {
 
@@ -376,7 +361,7 @@ public class WekaUtil {
 			final Attribute newAtt = new Attribute("val" + i);
 			attributes.add(newAtt);
 		}
-		Instances wekaInstances = new Instances("Instances", attributes, matrix.length);
+		Instances wekaInstances = new Instances(I_NAME, attributes, matrix.length);
 		for (int i = 0; i < matrix[0].length; i++) {
 			final Instance inst = new DenseInstance(1, matrix[i]);
 			inst.setDataset(wekaInstances);

@@ -1,17 +1,16 @@
 package ai.libs.jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.distances.IScalarDistance;
-import ai.libs.jaicore.ml.tsc.distances.TimeWarpEditDistance;
 import ai.libs.jaicore.ml.tsc.util.ScalarDistanceUtil;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.TimeWarpEditDistance}
  * implementation.
- * 
+ *
  * @author fischor
  */
 public class TimeWarpEditDistanceTest {
@@ -106,6 +105,7 @@ public class TimeWarpEditDistanceTest {
 	public void testBoundaryForLambdaEqualToZero() {
 		double lambda = 0;
 		new TimeWarpEditDistance(lambda, 1, ScalarDistanceUtil.getAbsoluteDistance());
+		assertTrue(true); // this part must be reached
 	}
 
 	/**
@@ -116,6 +116,7 @@ public class TimeWarpEditDistanceTest {
 	public void testBoundaryForNuEqualToZero() {
 		double nu = 0;
 		new TimeWarpEditDistance(1, nu, ScalarDistanceUtil.getAbsoluteDistance());
+		assertTrue(true); // this part must be reached
 	}
 
 }

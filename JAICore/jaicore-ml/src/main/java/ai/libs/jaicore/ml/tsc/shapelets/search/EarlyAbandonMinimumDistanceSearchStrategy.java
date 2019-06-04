@@ -14,14 +14,14 @@ import ai.libs.jaicore.ml.tsc.util.TimeSeriesUtil;
  * series classification. In Proceedings of the 18th ACM SIGKDD international
  * conference on Knowledge discovery and data mining (KDD '12). ACM, New York,
  * NY, USA, 289-297.'.
- * 
+ *
  * @author Julian Lienen
  *
  */
 public class EarlyAbandonMinimumDistanceSearchStrategy extends AMinimumDistanceSearchStrategy {
 	/**
 	 * Standard constructor.
-	 * 
+	 *
 	 * @param useBiasCorrection
 	 *            See {@link AMinimumDistanceSearchStrategy#useBiasCorrection}
 	 */
@@ -34,7 +34,7 @@ public class EarlyAbandonMinimumDistanceSearchStrategy extends AMinimumDistanceS
 	 * the given <code>timeSeries</code> to the <code>shapelet</code>'s data. This
 	 * function implements the algorithm 2 mentioned in the original paper. It
 	 * performs the similarity search with online normalization and early abandon.
-	 * 
+	 *
 	 * @param shapelet
 	 *            The shapelet to be compared to all subsequences
 	 * @param timeSeries
@@ -43,15 +43,14 @@ public class EarlyAbandonMinimumDistanceSearchStrategy extends AMinimumDistanceS
 	 * @return Return the minimum distance among all subsequences
 	 */
 	@Override
-	public double findMinimumDistance(Shapelet shapelet, double[] timeSeries) {
+	public double findMinimumDistance(final Shapelet shapelet, final double[] timeSeries) {
 		double length = shapelet.getLength();
 		int m = timeSeries.length;
 
 		// Order normalized shapelet values
 		final double[] S_prime = shapelet.getData();
 		final List<Integer> A = TimeSeriesUtil.sortIndexes(S_prime, false); // descending
-		final double[] F = TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, 0, shapelet.getLength()),
-				this.useBiasCorrection);
+		final double[] F = TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, 0, shapelet.getLength()), this.useBiasCorrection);
 
 		// Online normalization
 		double p = 0;
@@ -73,8 +72,7 @@ public class EarlyAbandonMinimumDistanceSearchStrategy extends AMinimumDistanceS
 			q += t_il * t_il;
 			double x_bar = p / length;
 			double s = q / (length) - x_bar * x_bar;
-			s = s < 0.000000001d ? 0d
-					: Math.sqrt((this.useBiasCorrection ? ((double) length / (double) (length - 1d)) : 1d) * s);
+			s = s < 0.000000001d ? 0d : Math.sqrt((this.useBiasCorrection ? (length / (length - 1d)) : 1d) * s);
 
 			int j = 0;
 			double d = 0d;

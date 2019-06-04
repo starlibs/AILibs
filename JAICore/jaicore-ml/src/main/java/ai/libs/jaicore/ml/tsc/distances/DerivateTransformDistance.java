@@ -183,13 +183,13 @@ public class DerivateTransformDistance implements ITimeSeriesDistance {
 	}
 
 	@Override
-	public double distance(final double[] A, final double[] B) {
-		double[] derivateA = this.derivate.transform(A);
-		double[] derivateB = this.derivate.transform(B);
-		double[] transformA = this.transform.transform(A);
-		double[] transformB = this.transform.transform(B);
+	public double distance(final double[] a, final double[] b) {
+		double[] derivateA = this.derivate.transform(a);
+		double[] derivateB = this.derivate.transform(b);
+		double[] transformA = this.transform.transform(a);
+		double[] transformB = this.transform.transform(b);
 
-		return this.a * this.timeSeriesDistance.distance(A, B) + this.b * this.derivateDistance.distance(derivateA, derivateB) + this.c * this.transformDistance.distance(transformA, transformB);
+		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.derivateDistance.distance(derivateA, derivateB) + this.c * this.transformDistance.distance(transformA, transformB);
 	}
 
 	/**

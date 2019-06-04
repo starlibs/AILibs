@@ -174,7 +174,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 
 		// Prepare Weka instances for generated features
 		Instances subseriesInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(TimeSeriesUtil.createDatasetForMatrix(intervalFeatures),
-				IntStream.rangeClosed(0, this.numClasses - 1).boxed().map(i -> String.valueOf(i)).collect(Collectors.toList()));
+				IntStream.rangeClosed(0, this.numClasses - 1).boxed().map(String::valueOf).collect(Collectors.toList()));
 
 		// Predict probabilities using the subseries Random Forest classifier
 		double[][] probs = null;
@@ -185,9 +185,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 				predictedTargets[i] = (int) this.subseriesClf.classifyInstance(subseriesInstances.get(i));
 			}
 		} catch (Exception e) {
-			final String errorMessage = "Cannot derive the probabilities using the subseries classifier due to an internal Weka exception.";
-			LOGGER.warn(errorMessage, e);
-			throw new PredictionException(errorMessage, e);
+			throw new PredictionException("Cannot derive the probabilities using the subseries classifier due to an internal Weka exception.", e);
 		}
 
 		// Discretize probabilities and create histograms for final Weka instance
@@ -199,7 +197,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 		// Prepare final Weka instance
 		double[][] finalHistogramInstances = TimeSeriesBagOfFeaturesLearningAlgorithm.generateHistogramInstances(histograms, relativeFrequencies);
 		Instances finalInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(TimeSeriesUtil.createDatasetForMatrix(finalHistogramInstances),
-				IntStream.rangeClosed(0, this.numClasses - 1).boxed().map(i -> String.valueOf(i)).collect(Collectors.toList()));
+				IntStream.rangeClosed(0, this.numClasses - 1).boxed().map(String::valueOf).collect(Collectors.toList()));
 
 		// Ensure that only on instance has been generated out of the given
 		// probabilities
@@ -210,8 +208,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 
 		// Predict using the generated Weka instance
 		try {
-			int pred = (int) this.finalClf.classifyInstance(finalInstances.firstInstance());
-			return pred;
+			return (int) this.finalClf.classifyInstance(finalInstances.firstInstance());
 		} catch (Exception e) {
 			throw new PredictionException("Could not predict instance due to an internal Weka exception.", e);
 		}

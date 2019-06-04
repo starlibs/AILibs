@@ -13,41 +13,50 @@ import weka.core.Instances;
  *
  * @author Julian Lienen
  */
-public class AddRandomFilter implements IFilter {
+public class AddRandomFilter implements IFilter, Cloneable {
 
-    private double[] randomValues = null;
+	private double[] randomValues = null;
 
-    private Random random = new Random();
+	private Random random = new Random();
 
-    @Override
-    public DataSet applyFilter(DataSet inputData, boolean copy) {
-        if (this.randomValues == null) {
-            randomValues = new double[inputData.getInstances().numAttributes() - 1];
-            for (int i = 0; i < randomValues.length; i++) {
-                randomValues[i] = random.nextDouble() * 1000;
-            }
-        }
+	public AddRandomFilter() {
 
-        Instances transformedInstances;
-        if (copy) {
-            transformedInstances = new Instances(inputData.getInstances());
-        } else {
-            transformedInstances = inputData.getInstances();
-        }
-        for (Instance inst : transformedInstances) {
-            for (int i = 0; i < inst.numAttributes() - 1; i++) {
-                Attribute att = inst.attribute(i);
-                if (att.isNumeric())
-                    inst.setValue(att, inst.value(att) + this.randomValues[i]);
-            }
-        }
+		/* just assume default values */
+	}
 
-        return new DataSet(transformedInstances, inputData.getIntermediateInstances());
-    }
+	public AddRandomFilter(final AddRandomFilter objectToCopy) {
+		this.randomValues = objectToCopy.randomValues;
+	}
 
-    @Override
-    public AddRandomFilter clone() throws CloneNotSupportedException {
-        super.clone();
-        return new AddRandomFilter();
-    }
+	@Override
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
+		if (this.randomValues == null) {
+			this.randomValues = new double[inputData.getInstances().numAttributes() - 1];
+			for (int i = 0; i < this.randomValues.length; i++) {
+				this.randomValues[i] = this.random.nextDouble() * 1000;
+			}
+		}
+
+		Instances transformedInstances;
+		if (copy) {
+			transformedInstances = new Instances(inputData.getInstances());
+		} else {
+			transformedInstances = inputData.getInstances();
+		}
+		for (Instance inst : transformedInstances) {
+			for (int i = 0; i < inst.numAttributes() - 1; i++) {
+				Attribute att = inst.attribute(i);
+				if (att.isNumeric()) {
+					inst.setValue(att, inst.value(att) + this.randomValues[i]);
+				}
+			}
+		}
+
+		return new DataSet(transformedInstances, inputData.getIntermediateInstances());
+	}
+
+	@Override
+	public AddRandomFilter clone() {
+		return new AddRandomFilter(this);
+	}
 }

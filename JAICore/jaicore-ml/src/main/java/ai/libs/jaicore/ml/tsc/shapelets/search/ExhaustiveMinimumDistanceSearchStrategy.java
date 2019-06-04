@@ -47,12 +47,9 @@ public class ExhaustiveMinimumDistanceSearchStrategy extends AMinimumDistanceSea
 
 		double[] normalizedShapeletData = shapelet.getData();
 
-		// TODO: Reference implementation uses i < n-l => Leads sometimes to a better
-		// performance => Check this
+		// Reference implementation uses i < n-l => Leads sometimes to a better performance
 		for (int i = 0; i <= n - l; i++) {
-			double tmpED = MathUtil.singleSquaredEuclideanDistance(normalizedShapeletData,
-					TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, i, i + l),
-							this.useBiasCorrection));
+			double tmpED = MathUtil.singleSquaredEuclideanDistance(normalizedShapeletData, TimeSeriesUtil.zNormalize(TimeSeriesUtil.getInterval(timeSeries, i, i + l), this.useBiasCorrection));
 			if (tmpED < min) {
 				min = tmpED;
 			}

@@ -3,11 +3,11 @@ package ai.libs.jaicore.ml.tsc.exceptions;
 /**
  * Exception thrown when a time series dataset could not be extracted from an
  * external data source (e. g. a file).
- * 
+ *
  * @author Julian Lienen
  *
  */
-public class TimeSeriesLoadingException extends Throwable {
+public class TimeSeriesLoadingException extends Exception {
 
 	/**
 	 * Default generated serial version UID.
@@ -16,23 +16,23 @@ public class TimeSeriesLoadingException extends Throwable {
 
 	/**
 	 * Constructor using a nested <code>Throwable</code> exception.
-	 * 
+	 *
 	 * @param message
 	 *            Individual exception message
 	 * @param cause
 	 *            Nested exception
 	 */
-	public TimeSeriesLoadingException(String message, Throwable cause) {
+	public TimeSeriesLoadingException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * Standard constructor.
-	 * 
+	 *
 	 * @param message
 	 *            Individual exception message
 	 */
-	public TimeSeriesLoadingException(String message) {
+	public TimeSeriesLoadingException(final String message) {
 		super(message);
 	}
 }

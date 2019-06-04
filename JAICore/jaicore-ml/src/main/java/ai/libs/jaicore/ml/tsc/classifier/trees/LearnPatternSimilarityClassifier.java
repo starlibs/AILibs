@@ -78,7 +78,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	 * Attributes used for the generation of Weka instances to use the internal Weka
 	 * models.
 	 */
-	private ArrayList<Attribute> attributes;
+	private List<Attribute> attributes;
 
 	private final IPatternSimilarityConfig config;
 
@@ -129,7 +129,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 		for (int i = 0; i < this.trees.length; i++) {
 
 			// Generate subseries features
-			Instances seqInstances = new Instances("SeqFeatures", this.attributes, this.lengthPerTree[i]);
+			Instances seqInstances = new Instances("SeqFeatures", new ArrayList<>(this.attributes), this.lengthPerTree[i]);
 
 			for (int len = 0; len < this.lengthPerTree[i]; len++) {
 				Instance instance = LearnPatternSimilarityLearningAlgorithm.generateSubseriesFeatureInstance(univInstance,
@@ -193,12 +193,12 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 			throw new PredictionException("Model has not been built before!");
 		}
 
-		if (dataset.isMultivariate()) {
-			throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
-		}
-
 		if (dataset == null || dataset.isEmpty()) {
 			throw new IllegalArgumentException("Dataset to be predicted must not be null or empty!");
+		}
+
+		if (dataset.isMultivariate()) {
+			throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
 		}
 
 		double[][] data = dataset.getValuesOrNull(0);
@@ -319,7 +319,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	/**
 	 * @return the attributes
 	 */
-	public ArrayList<Attribute> getAttributes() {
+	public List<Attribute> getAttributes() {
 		return this.attributes;
 	}
 
@@ -327,7 +327,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	 * @param attributes
 	 *            the attributes to set
 	 */
-	public void setAttributes(final ArrayList<Attribute> attributes) {
+	public void setAttributes(final List<Attribute> attributes) {
 		this.attributes = attributes;
 	}
 

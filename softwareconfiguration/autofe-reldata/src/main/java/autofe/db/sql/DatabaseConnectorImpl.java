@@ -197,7 +197,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		this.sqlAdapter.update(sql, Collections.emptyList());
 	}
 
-	private Instances setupInstances(final List<AbstractFeature> features, final autofe.db.model.database.Attribute target) throws UnsupportedAttributeTypeException {
+	private Instances setupInstances(final List<AbstractFeature> features, final autofe.db.model.database.Attribute target) {
 		ArrayList<Attribute> wekaAttributes = new ArrayList<>();
 		for (AbstractFeature feature : features) {
 			if (feature.getType() == AttributeType.TEXT) {
@@ -224,7 +224,7 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		return instances;
 	}
 
-	private Instance createInstance(final ResultSet rs, final List<AbstractFeature> features, final autofe.db.model.database.Attribute target, final Instances instances) throws SQLException, UnsupportedAttributeTypeException {
+	private Instance createInstance(final ResultSet rs, final List<AbstractFeature> features, final autofe.db.model.database.Attribute target, final Instances instances) throws SQLException {
 		Instance instance = new DenseInstance(features.size() + 1);
 		instance.setDataset(instances);
 		for (int i = 0; i < features.size(); i++) {

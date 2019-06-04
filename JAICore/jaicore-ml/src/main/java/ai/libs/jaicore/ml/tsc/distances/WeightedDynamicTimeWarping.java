@@ -74,8 +74,6 @@ public class WeightedDynamicTimeWarping implements ITimeSeriesDistance {
 		for (int i = 1; i <= n; i++) {
 			for (int j = 1; j <= m; j++) {
 				// Paper: | w[i-j] (a_i - b_j) |^p
-				// double cost = Math.pow(Math.abs(weights[Math.abs(i - j)] * (A[i - 1] - B[j -
-				// 1])), p);
 				double cost = weights[Math.abs(i - j)] * this.d.distance(a[i - 1], b[j - 1]);
 				double minimum = Math.min(matrix[i - 1][j], Math.min(matrix[i][j - 1], matrix[i - 1][j - 1]));
 				matrix[i][j] = cost + minimum;

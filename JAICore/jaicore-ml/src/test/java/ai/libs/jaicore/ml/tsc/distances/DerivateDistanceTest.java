@@ -1,18 +1,14 @@
 package ai.libs.jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-
-import ai.libs.jaicore.ml.tsc.distances.DerivateDistance;
-import ai.libs.jaicore.ml.tsc.distances.DynamicTimeWarping;
-import ai.libs.jaicore.ml.tsc.distances.EuclideanDistance;
-import ai.libs.jaicore.ml.tsc.distances.ITimeSeriesDistance;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.DerivateDistance}
  * implementation.
- * 
+ *
  * @author fischor
  */
 public class DerivateDistanceTest {
@@ -101,8 +97,8 @@ public class DerivateDistanceTest {
 	 */
 	@Test
 	public void testBoundaryForAlphaEqualToZero() {
-		double alpha = 0;
-		new DerivateDistance(alpha, new EuclideanDistance());
+		new DerivateDistance(0, new EuclideanDistance());
+		assertTrue(true); // this part must be reached
 	}
 
 	/**
@@ -113,6 +109,7 @@ public class DerivateDistanceTest {
 	public void testBoundaryForAlphaEqualToPiHalf() {
 		double alpha = Math.PI / 2;
 		new DerivateDistance(alpha, new EuclideanDistance());
+		assertTrue(true); // this part must be reached
 	}
 
 }
