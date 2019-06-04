@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
 
@@ -88,7 +89,7 @@ public class SimplifiedTimeSeriesLoader {
 			cm = new ClassMapper((List<String>) tsTargetClassNames[2]);
 		}
 
-		return new Pair<TimeSeriesDataset, ClassMapper>(new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]), cm);
+		return new Pair<>(new TimeSeriesDataset(matrices, new ArrayList<double[][]>(), (int[]) tsTargetClassNames[1]), cm);
 	}
 
 	/**
@@ -196,18 +197,11 @@ public class SimplifiedTimeSeriesLoader {
 
 					// Set target values
 					if (!targetSet && line.equals("") && lastLine.startsWith(ARFF_ATTRIBUTE_PREFIX)) {
-						String targetString = lastLine.substring(lastLine.indexOf("{") + 1, lastLine.length() - 1);
+						String targetString = lastLine.substring(lastLine.indexOf('{') + 1, lastLine.length() - 1);
 						targetValues = Arrays.asList(targetString.split(ARFF_VALUE_DELIMITER));
-						for (String targetVal : targetValues) {
-							try {
-								Double.parseDouble(targetVal);
-							} catch (NumberFormatException e) {
-								LOGGER.info("Found String attributes in parsed dataset.");
-								stringAttributes = true;
-								break;
-							}
+						if (!SetUtil.doesStringCollectionOnlyContainNumbers(targetValues)) {
+							stringAttributes = true;
 						}
-
 						targetSet = true;
 					}
 
@@ -359,8 +353,8 @@ public class SimplifiedTimeSeriesLoader {
 			// make it easy for the optimizer to tune this loop
 			int count = 0;
 			while (readChars == 1024) {
-				for (int i = 0; i < 1024;) {
-					if (c[i++] == '\n') {
+				for (int i = 0; i < 1024; i++) {
+					if (c[i] == '\n') {
 						++count;
 					}
 				}

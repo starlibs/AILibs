@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.tsc.quality_measures;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * F-Stat quality measure performing a analysis of variance according to chapter
@@ -37,19 +38,22 @@ public class FStat implements IQualityMeasure {
 
 		// Calculate class and overall means
 		HashMap<Integer, Double> classMeans = new HashMap<>();
-		for (Integer clazz : classDistances.keySet()) {
-			classMeans.put(clazz, classDistances.get(clazz).stream().mapToDouble(a -> a).average().getAsDouble());
+		for (Entry<Integer, List<Double>> entry : classDistances.entrySet()) {
+			Integer clazz = entry.getKey();
+			classMeans.put(clazz, entry.getValue().stream().mapToDouble(a -> a).average().getAsDouble());
 		}
 		double completeMean = distances.stream().mapToDouble(a -> a).average().getAsDouble();
 		double denominator = 0;
 
 		// Calculate actual F score
 		double result = 0;
-		for (Integer clazz : classMeans.keySet()) {
-			result += Math.pow(classMeans.get(clazz) - completeMean, 2);
+		for (Entry<Integer, Double> entry : classMeans.entrySet()) {
+			Integer clazz = entry.getKey();
+			double mean = entry.getValue();
+			result += Math.pow(mean - completeMean, 2);
 
 			for (Double dist : classDistances.get(clazz)) {
-				denominator += Math.pow(dist - classMeans.get(clazz), 2);
+				denominator += Math.pow(dist - mean, 2);
 			}
 		}
 		result /= numClasses - 1;

@@ -3,10 +3,10 @@ package ai.libs.jaicore.ml.tsc.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -82,8 +82,7 @@ public class TimeSeriesUtil {
 	public static void isTimeSeriesOrException(final INDArray... array) {
 		for (INDArray a : array) {
 			if (!isTimeSeries(array)) {
-				String message = String.format(
-						"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", a.rank());
+				String message = String.format("The given INDArray is no time series. It should have rank 1, but has a rank of %d.", a.rank());
 				throw new IllegalArgumentException(message);
 			}
 		}
@@ -100,13 +99,11 @@ public class TimeSeriesUtil {
 	public static void isTimeSeriesOrException(final int length, final INDArray... array) {
 		for (INDArray a : array) {
 			if (!isTimeSeries(array)) {
-				String message = String.format(
-						"The given INDArray is no time series. It should have rank 1, but has a rank of %d.", a.rank());
+				String message = String.format("The given INDArray is no time series. It should have rank 1, but has a rank of %d.", a.rank());
 				throw new IllegalArgumentException(message);
 			}
 			if (!isTimeSeries(length, a)) {
-				String message = String.format("The given time series should length 7, but has a length of %d.",
-						a.length());
+				String message = String.format("The given time series should length 7, but has a length of %d.", a.length());
 				throw new IllegalArgumentException(message);
 			}
 		}
@@ -123,8 +120,7 @@ public class TimeSeriesUtil {
 	public static void isTimeSeriesOrException(final int length, final double[]... array) {
 		for (double[] a : array) {
 			if (!isTimeSeries(length, a)) {
-				String message = String.format("The given time series should length 7, but has a length of %d.",
-						a.length);
+				String message = String.format("The given time series should length 7, but has a length of %d.", a.length);
 				throw new IllegalArgumentException(message);
 			}
 		}
@@ -173,9 +169,7 @@ public class TimeSeriesUtil {
 	public static void isSameLengthOrException(final INDArray timeSeries1, final INDArray... timeSeries) {
 		for (INDArray t : timeSeries) {
 			if (!isSameLength(timeSeries1, t)) {
-				String message = String.format(
-						"Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)",
-						timeSeries1.length(), t.length());
+				String message = String.format("Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)", timeSeries1.length(), t.length());
 				throw new TimeSeriesLengthException(message);
 			}
 		}
@@ -192,9 +186,7 @@ public class TimeSeriesUtil {
 	public static void isSameLengthOrException(final double[] timeSeries1, final double[]... timeSeries) {
 		for (double[] t : timeSeries) {
 			if (!isSameLength(timeSeries1, t)) {
-				String message = String.format(
-						"Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)",
-						timeSeries1.length, t.length);
+				String message = String.format("Length of the given time series are not equal: Length first time series: (%d). Length of seconds time series: (%d)", timeSeries1.length, t.length);
 				throw new TimeSeriesLengthException(message);
 			}
 		}
@@ -204,7 +196,7 @@ public class TimeSeriesUtil {
 	 * Creates equidistant timestamps for a time series.
 	 *
 	 * @param timeSeries Time series to generate timestamps for. Let n be its
-	 *                   length.
+	 *            length.
 	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
 	 */
 	public static INDArray createEquidistantTimestamps(final INDArray timeSeries) {
@@ -218,7 +210,7 @@ public class TimeSeriesUtil {
 	 * Creates equidistant timestamps for a time series.
 	 *
 	 * @param timeSeries Time series to generate timestamps for. Let n be its
-	 *                   length.
+	 *            length.
 	 * @return Equidistant timestamp, i.e. {0, 1, .., n-1}.
 	 */
 	public static double[] createEquidistantTimestamps(final double[] timeSeries) {
@@ -231,8 +223,8 @@ public class TimeSeriesUtil {
 	 * <code>timeSeries</code> vector.
 	 *
 	 * @param timeSeries Time series vector source
-	 * @param start      Start of the interval
-	 * @param end        End index of the interval (exclusive)
+	 * @param start Start of the interval
+	 * @param end End index of the interval (exclusive)
 	 * @return Returns the specified interval as a double array
 	 */
 	public static double[] getInterval(final double[] timeSeries, final int start, final int end) {
@@ -250,17 +242,15 @@ public class TimeSeriesUtil {
 	/**
 	 * Normalizes an INDArray vector object.
 	 *
-	 * @param array   INDArray row vector with single shape dimension
+	 * @param array INDArray row vector with single shape dimension
 	 * @param inplace Indication whether the normalization should be performed in
-	 *                place or on a new array copy
+	 *            place or on a new array copy
 	 * @return Returns the view on the transformed INDArray (if inplace) or a
 	 *         normalized copy of the input array (if not inplace)
 	 */
 	public static INDArray normalizeINDArray(final INDArray array, final boolean inplace) {
 		if (array.shape().length > 2 && array.shape()[0] != 1) {
-			throw new IllegalArgumentException(
-					String.format("Input INDArray object must be a vector with shape size 1. Actual shape: (%s)",
-							Arrays.toString(array.shape())));
+			throw new IllegalArgumentException(String.format("Input INDArray object must be a vector with shape size 1. Actual shape: (%s)", Arrays.toString(array.shape())));
 		}
 
 		final double mean = array.mean(1).getDouble(0);
@@ -305,9 +295,11 @@ public class TimeSeriesUtil {
 	public static <T> T getMaximumKeyByValue(final Map<T, Integer> map) {
 		T maxKey = null;
 		int maxCount = 0;
-		for (T key : map.keySet()) {
-			if (map.get(key) > maxCount) {
-				maxCount = map.get(key);
+		for (Entry<T, Integer> entry : map.entrySet()) {
+			T key = entry.getKey();
+			int val = entry.getValue();
+			if (val > maxCount) {
+				maxCount = val;
 				maxKey = key;
 			}
 		}
@@ -319,16 +311,16 @@ public class TimeSeriesUtil {
 	 * Z-normalizes a given <code>dataVector</code>. Uses Bessel's correction
 	 * (1/(n-1) in the calculation of the standard deviation) if set.
 	 *
-	 * @param dataVector        Vector to be z-normalized
+	 * @param dataVector Vector to be z-normalized
 	 * @param besselsCorrection Indicator whether the std dev correction using n-1
-	 *                          instead of n should be applied
+	 *            instead of n should be applied
 	 * @return Z-normalized vector
 	 */
 	public static double[] zNormalize(final double[] dataVector, final boolean besselsCorrection) {
 
 		int n = dataVector.length - (besselsCorrection ? 1 : 0);
 
-		double mean = 0; // dataVector.meanNumber().doubleValue();
+		double mean = 0;
 		for (int i = 0; i < dataVector.length; i++) {
 			mean += dataVector[i];
 		}
@@ -357,7 +349,7 @@ public class TimeSeriesUtil {
 	 * Sorts the indices of the given <code>vector</code> based on the the vector's
 	 * values (argsort).
 	 *
-	 * @param vector    Vector where the values are extracted from
+	 * @param vector Vector where the values are extracted from
 	 * @param ascending Indicator whether the indices should be sorted ascending
 	 * @return Returns the list of indices which are sorting based on the vector's
 	 *         values
@@ -370,12 +362,7 @@ public class TimeSeriesUtil {
 			indexes[i] = i;
 		}
 
-		Arrays.sort(indexes, new Comparator<Integer>() {
-			@Override
-			public int compare(final Integer i1, final Integer i2) {
-				return (ascending ? 1 : -1) * Double.compare(Math.abs(vector[i1]), Math.abs(vector[i2]));
-			}
-		});
+		Arrays.sort(indexes, (i1, i2) -> (ascending ? 1 : -1) * Double.compare(Math.abs(vector[i1]), Math.abs(vector[i2])));
 
 		for (int i = 0; i < indexes.length; i++) {
 			result.add(indexes[i]);
@@ -394,8 +381,7 @@ public class TimeSeriesUtil {
 	 */
 	public static int getNumberOfClasses(final TimeSeriesDataset dataset) {
 		if (dataset == null || dataset.getTargets() == null) {
-			throw new IllegalArgumentException(
-					"Given parameter 'dataset' must not be null and must contain a target matrix!");
+			throw new IllegalArgumentException("Given parameter 'dataset' must not be null and must contain a target matrix!");
 		}
 
 		return getClassesInDataset(dataset).size();
@@ -411,12 +397,10 @@ public class TimeSeriesUtil {
 	 */
 	public static List<Integer> getClassesInDataset(final TimeSeriesDataset dataset) {
 		if (dataset == null || dataset.getTargets() == null) {
-			throw new IllegalArgumentException(
-					"Given parameter 'dataset' must not be null and must contain a target matrix!");
+			throw new IllegalArgumentException("Given parameter 'dataset' must not be null and must contain a target matrix!");
 		}
 
-		return IntStream.of(dataset.getTargets()).boxed().collect(Collectors.toSet()).stream()
-				.collect(Collectors.toList());
+		return IntStream.of(dataset.getTargets()).boxed().collect(Collectors.toSet()).stream().collect(Collectors.toList());
 	}
 
 	/**
@@ -424,12 +408,11 @@ public class TimeSeriesUtil {
 	 * <code>seed</code>.
 	 *
 	 * @param dataset The dataset to be shuffled
-	 * @param seed    The seed used within the randomized shuffling
+	 * @param seed The seed used within the randomized shuffling
 	 */
 	public static void shuffleTimeSeriesDataset(final TimeSeriesDataset dataset, final int seed) {
 
-		List<Integer> indices = IntStream.range(0, dataset.getNumberOfInstances()).boxed()
-				.collect(Collectors.toList());
+		List<Integer> indices = IntStream.range(0, dataset.getNumberOfInstances()).boxed().collect(Collectors.toList());
 		Collections.shuffle(indices, new Random(seed));
 
 		List<double[][]> valueMatrices = dataset.getValueMatrices();
@@ -463,7 +446,7 @@ public class TimeSeriesUtil {
 	 * the dimensionality of <code>srcMatrix</code>.
 	 *
 	 * @param srcMatrix The source matrix to be shuffled
-	 * @param indices   The Integer indices representing the new shuffled order
+	 * @param indices The Integer indices representing the new shuffled order
 	 * @return Returns the matrix copied from the given source matrix and the
 	 *         indices
 	 */
@@ -473,8 +456,7 @@ public class TimeSeriesUtil {
 		}
 
 		if (indices == null || indices.size() != srcMatrix.length) {
-			throw new IllegalArgumentException(
-					"Parameter 'indices' must not be null and must have the same length as the number of instances in the source matrix!");
+			throw new IllegalArgumentException("Parameter 'indices' must not be null and must have the same length as the number of instances in the source matrix!");
 		}
 
 		final double[][] result = new double[srcMatrix.length][srcMatrix[0].length];
@@ -490,7 +472,7 @@ public class TimeSeriesUtil {
 	 * the dimensionality of <code>srcMatrix</code>.
 	 *
 	 * @param srcMatrix The source matrix to be shuffled
-	 * @param indices   The Integer indices representing the new shuffled order
+	 * @param indices The Integer indices representing the new shuffled order
 	 * @return Returns the matrix copied from the given source matrix and the
 	 *         indices
 	 */
@@ -500,8 +482,7 @@ public class TimeSeriesUtil {
 		}
 
 		if (indices == null || indices.size() != srcMatrix.length) {
-			throw new IllegalArgumentException(
-					"Parameter 'indices' must not be null and must have the same length as the number of instances in the source matrix!");
+			throw new IllegalArgumentException("Parameter 'indices' must not be null and must have the same length as the number of instances in the source matrix!");
 		}
 
 		final int[] result = new int[srcMatrix.length];
@@ -521,19 +502,16 @@ public class TimeSeriesUtil {
 	 * and
 	 * {@link TimeSeriesUtil#selectTestDataForFold(int, int, int, int, double[][], int[])}.
 	 *
-	 * @param fold            The current fold for which the datasets should be
-	 *                        prepared
-	 * @param numFolds        Number of total folds using within the performed cross
-	 *                        validation
-	 * @param srcValueMatrix  Source dataset from which the instances are copied
+	 * @param fold The current fold for which the datasets should be
+	 *            prepared
+	 * @param numFolds Number of total folds using within the performed cross
+	 *            validation
+	 * @param srcValueMatrix Source dataset from which the instances are copied
 	 * @param srcTargetMatrix Source targets from which the targets are copied
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
-	public static Pair<TimeSeriesDataset, TimeSeriesDataset> getTrainingAndTestDataForFold(final int fold,
-			final int numFolds, final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
-		return new Pair<TimeSeriesDataset, TimeSeriesDataset>(
-				selectTrainingDataForFold(fold, numFolds, srcValueMatrix, srcTargetMatrix),
-				selectTestDataForFold(fold, numFolds, srcValueMatrix, srcTargetMatrix));
+	public static Pair<TimeSeriesDataset, TimeSeriesDataset> getTrainingAndTestDataForFold(final int fold, final int numFolds, final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
+		return new Pair<>(selectTrainingDataForFold(fold, numFolds, srcValueMatrix, srcTargetMatrix), selectTestDataForFold(fold, numFolds, srcValueMatrix, srcTargetMatrix));
 	}
 
 	/**
@@ -541,16 +519,15 @@ public class TimeSeriesUtil {
 	 * {@link TimeSeriesUtil#getTrainingAndTestDataForFold(int, int, int, int, double[][], int[])
 	 * for further details.
 	 *
-	 * @param fold            The current fold for which the datasets should be
-	 *                        prepared
-	 * @param numFolds        Number of total folds using within the performed cross
-	 *                        validation
-	 * @param srcValueMatrix  Source dataset from which the instances are copied
+	 * @param fold The current fold for which the datasets should be
+	 *            prepared
+	 * @param numFolds Number of total folds using within the performed cross
+	 *            validation
+	 * @param srcValueMatrix Source dataset from which the instances are copied
 	 * @param srcTargetMatrix Source targets from which the targets are copied
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
-	private static TimeSeriesDataset selectTrainingDataForFold(final int fold, final int numFolds,
-			final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
+	private static TimeSeriesDataset selectTrainingDataForFold(final int fold, final int numFolds, final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
 
 		int numTestInstsPerFold = (int) ((double) srcValueMatrix.length / (double) numFolds);
 
@@ -558,11 +535,9 @@ public class TimeSeriesUtil {
 		int[] destTargetMatrix = new int[(numFolds - 1) * numTestInstsPerFold];
 
 		if (fold == 0) { // First fold
-			System.arraycopy(srcValueMatrix, numTestInstsPerFold, destValueMatrix, 0,
-					(numFolds - 1) * numTestInstsPerFold);
+			System.arraycopy(srcValueMatrix, numTestInstsPerFold, destValueMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
 
-			System.arraycopy(srcTargetMatrix, numTestInstsPerFold, destTargetMatrix, 0,
-					(numFolds - 1) * numTestInstsPerFold);
+			System.arraycopy(srcTargetMatrix, numTestInstsPerFold, destTargetMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
 
 		} else if (fold == (numFolds - 1)) { // Last fold
 			System.arraycopy(srcValueMatrix, 0, destValueMatrix, 0, (numFolds - 1) * numTestInstsPerFold);
@@ -571,12 +546,10 @@ public class TimeSeriesUtil {
 
 		} else { // Inner folds
 			System.arraycopy(srcValueMatrix, 0, destValueMatrix, 0, fold * numTestInstsPerFold);
-			System.arraycopy(srcValueMatrix, (fold + 1) * numTestInstsPerFold, destValueMatrix,
-					fold * numTestInstsPerFold, (numFolds - fold - 1) * numTestInstsPerFold);
+			System.arraycopy(srcValueMatrix, (fold + 1) * numTestInstsPerFold, destValueMatrix, fold * numTestInstsPerFold, (numFolds - fold - 1) * numTestInstsPerFold);
 
 			System.arraycopy(srcTargetMatrix, 0, destTargetMatrix, 0, fold * numTestInstsPerFold);
-			System.arraycopy(srcTargetMatrix, (fold + 1) * numTestInstsPerFold, destTargetMatrix,
-					fold * numTestInstsPerFold, (numFolds - fold - 1) * numTestInstsPerFold);
+			System.arraycopy(srcTargetMatrix, (fold + 1) * numTestInstsPerFold, destTargetMatrix, fold * numTestInstsPerFold, (numFolds - fold - 1) * numTestInstsPerFold);
 		}
 
 		ArrayList<double[][]> valueMatrices = new ArrayList<>();
@@ -589,17 +562,16 @@ public class TimeSeriesUtil {
 	 * {@link TimeSeriesUtil#getTrainingAndTestDataForFold(int, int, int, int, double[][], int[])
 	 * for further details.
 	 *
-	 * @param fold            The current fold for which the datasets should be
-	 *                        prepared
-	 * @param numFolds        Number of total folds using within the performed cross
-	 *                        validation
-	 * @param numClasses      Number of classes in the targets
-	 * @param srcValueMatrix  Source dataset from which the instances are copied
+	 * @param fold The current fold for which the datasets should be
+	 *            prepared
+	 * @param numFolds Number of total folds using within the performed cross
+	 *            validation
+	 * @param numClasses Number of classes in the targets
+	 * @param srcValueMatrix Source dataset from which the instances are copied
 	 * @param srcTargetMatrix Source targets from which the targets are copied
 	 * @return Returns a pair consisting of the training and test dataset
 	 */
-	private static TimeSeriesDataset selectTestDataForFold(final int fold, final int numFolds,
-			final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
+	private static TimeSeriesDataset selectTestDataForFold(final int fold, final int numFolds, final double[][] srcValueMatrix, final int[] srcTargetMatrix) {
 
 		int numTestInstsPerFold = (int) ((double) srcValueMatrix.length / (double) numFolds);
 
@@ -615,8 +587,7 @@ public class TimeSeriesUtil {
 		}
 
 		System.arraycopy(srcValueMatrix, fold * numTestInstsPerFold, currTestMatrix, 0, currTestMatrix.length);
-		System.arraycopy(srcTargetMatrix, fold * numTestInstsPerFold, currTestTargetMatrix, 0,
-				currTestTargetMatrix.length);
+		System.arraycopy(srcTargetMatrix, fold * numTestInstsPerFold, currTestTargetMatrix, 0, currTestTargetMatrix.length);
 
 		ArrayList<double[][]> testValueMatrices = new ArrayList<>();
 		testValueMatrices.add(currTestMatrix);
@@ -627,15 +598,14 @@ public class TimeSeriesUtil {
 	 * Function creating a {@link TimeSeriesDataset} object given the
 	 * <code>targets</code> and one or multiple <code>valueMatrices</code>.
 	 *
-	 * @param targets       The target values of the instances
+	 * @param targets The target values of the instances
 	 * @param valueMatrices One or more matrices storing the time series values
 	 * @return Returns a {@link TimeSeriesDataset} object constructed out of the
 	 *         given parameters
 	 */
 	public static TimeSeriesDataset createDatasetForMatrix(final int[] targets, final double[][]... valueMatrices) {
 		if (valueMatrices.length == 0) {
-			throw new IllegalArgumentException(
-					"There must be at least one value matrix to generate a TimeSeriesDataset object!");
+			throw new IllegalArgumentException("There must be at least one value matrix to generate a TimeSeriesDataset object!");
 		}
 
 		ArrayList<double[][]> values = new ArrayList<>();
@@ -856,7 +826,6 @@ public class TimeSeriesUtil {
 	public static double[] zTransform(final double[] t) {
 		double mean = mean(t);
 		double standardDeviation = standardDeviation(t);
-		// TODO: How to handle zero standard deviation properly.
 		if ((-EPSILON < standardDeviation) && (standardDeviation < EPSILON)) {
 			return new double[t.length]; // All zeros.
 		}

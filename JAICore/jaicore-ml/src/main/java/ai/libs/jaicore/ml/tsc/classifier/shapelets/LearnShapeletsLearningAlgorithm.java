@@ -121,18 +121,17 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	private static final Logger LOGGER = LoggerFactory.getLogger(LearnShapeletsLearningAlgorithm.class);
 
 	/**
-	 * The number of instances.
+	 * The number of instances. This is parameter I of the paper.
 	 */
-	private int I;
+	private int numInstances;
 	/**
-	 * The number of attributes (i. e. the time series lengths without the class
-	 * attribute).
+	 * The number of attributes (i. e. the time series lengths without the class attribute).
 	 */
-	private int Q;
+	private int q;
 	/**
-	 * The number of classes.
+	 * The number of classes. This is parameter C of the paper.
 	 */
-	private int C;
+	private int numClasses;
 
 	/**
 	 * Indicator whether Bessel's correction should be used when normalizing arrays.
@@ -192,7 +191,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		final double[][][] result = new double[scaleR][][];
 
 		for (int r = 0; r < scaleR; r++) {
-			final int numberOfSegments = getNumberOfSegments(this.Q, minShapeLength, r);
+			final int numberOfSegments = getNumberOfSegments(this.q, minShapeLength, r);
 			if (numberOfSegments < 1) {
 				throw new TrainingException("The number of segments is lower than 1. Can not train the LearnShapelets model.");
 			}
@@ -229,10 +228,10 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 			Instances clusterCentroids = kMeans.getClusterCentroids();
 
 			double[][] tmpResult = new double[clusterCentroids.numInstances()][clusterCentroids.numAttributes()];
-			for (int i = 0; i < tmpResult.length; i++) {
-				double[] instValues = clusterCentroids.get(i).toDoubleArray();
-				for (int j = 0; j < tmpResult[i].length; j++) {
-					tmpResult[i][j] = instValues[j];
+			for (int j = 0; j < tmpResult.length; j++) {
+				double[] instValues = clusterCentroids.get(j).toDoubleArray();
+				for (int k = 0; k < tmpResult[j].length; k++) {
+					tmpResult[j][k] = instValues[k];
 				}
 			}
 			result[r] = tmpResult;
@@ -271,67 +270,67 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		final int[] targetMatrix = data.getTargets();
 		final List<Integer> occuringClasses = TimeSeriesUtil.getClassesInDataset(data);
 
-		this.I = data.getNumberOfInstances(); // I
-		this.Q = dataMatrix[0].length; // Q
-		this.C = occuringClasses.size(); // C
+		this.numInstances = data.getNumberOfInstances(); // I
+		this.q = dataMatrix[0].length; // Q
+		this.numClasses = occuringClasses.size(); // C
 
 		/* update knowledge about the absolute min length of the shapelets */
-		this.getConfig().setProperty(ILearnShapeletsLearningAlgorithmConfig.K_SHAPELETLENGTH_MIN, "" + (this.getConfig().minShapeLengthPercentage() * this.Q));
+		this.getConfig().setProperty(ILearnShapeletsLearningAlgorithmConfig.K_SHAPELETLENGTH_MIN, "" + (this.getConfig().minShapeLengthPercentage() * this.q));
 		final int minShapeLength = this.getConfig().minShapeletLength();
 		final int scaleR = this.getConfig().scaleR();
 
 		// Prepare binary classes
-		int[][] Y = new int[this.I][this.C];
-		for (int i = 0; i < this.I; i++) {
+		int[][] y = new int[this.numInstances][this.numClasses];
+		for (int i = 0; i < this.numInstances; i++) {
 			Integer instanceClass = targetMatrix[i];
-			Y[i][occuringClasses.indexOf(instanceClass)] = 1;
+			y[i][occuringClasses.indexOf(instanceClass)] = 1;
 		}
 
 		// Estimate parameter K by the maximum number of segments
 		if (this.getConfig().estimateK()) {
 			int totalSegments = 0;
 			for (int r = 0; r < scaleR; r++) {
-				final int numberOfSegments = getNumberOfSegments(this.Q, minShapeLength, r);
-				totalSegments += numberOfSegments * this.I;
+				final int numberOfSegments = getNumberOfSegments(this.q, minShapeLength, r);
+				totalSegments += numberOfSegments * this.numInstances;
 			}
 
-			int k = (int)(Math.log(totalSegments) * (this.C - 1));
+			int k = (int)(Math.log(totalSegments) * (this.numClasses - 1));
 			this.getConfig().setProperty(ILearnShapeletsLearningAlgorithmConfig.K_NUMSHAPELETS, "" +  (k >= 0 ? k : 1));
 		}
 		final int k = this.getConfig().numShapelets();
-		LOGGER.info("Parameters: k={}, learningRate={}, reg={}, r={}, minShapeLength={}, maxIter={}, Q={}, C={}", k, this.getConfig().learningRate(), this.getConfig().regularization(), scaleR, this.getConfig().minShapeletLength(), this.getConfig().maxIterations(), this.Q, this.C);
+		LOGGER.info("Parameters: k={}, learningRate={}, reg={}, r={}, minShapeLength={}, maxIter={}, Q={}, C={}", k, this.getConfig().learningRate(), this.getConfig().regularization(), scaleR, this.getConfig().minShapeletLength(), this.getConfig().maxIterations(), this.q, this.numClasses);
 
 		// Initialization
-		double[][][] S;
+		double[][][] s;
 		try {
-			S = this.initializeS(dataMatrix);
+			s = this.initializeS(dataMatrix);
 		} catch (TrainingException e) {
 			throw new AlgorithmException(e, "Can not train LearnShapelets model due to error during initialization of S.");
 		}
-		double[][][] S_hist = new double[scaleR][][];
+		double[][][] sHist = new double[scaleR][][];
 		for (int r = 0; r < scaleR; r++) {
-			S_hist[r] = new double[S[r].length][S[r][0].length];
+			sHist[r] = new double[s[r].length][s[r][0].length];
 		}
 
 		// Initializes the given weights nearly around zeros (as opposed to the paper
 		// due to vanish effects)
-		double[][][] W = new double[this.C][scaleR][k];
-		double[][][] W_hist = new double[this.C][scaleR][k];
-		double[] W_0 = new double[this.C];
-		double[] W_0_hist = new double[this.C];
-		this.initializeWeights(W, W_0);
+		double[][][] w = new double[this.numClasses][scaleR][k];
+		double[][][] wHist = new double[this.numClasses][scaleR][k];
+		double[] w0 = new double[this.numClasses];
+		double[] w0Hist = new double[this.numClasses];
+		this.initializeWeights(w, w0);
 
 		// Perform stochastic gradient descent
 		LOGGER.debug("Starting training for {} iterations...", this.getConfig().maxIterations());
-		this.performSGD(W, W_hist, W_0, W_0_hist, S, S_hist, dataMatrix, Y, beginTime, targetMatrix);
+		this.performSGD(w, wHist, w0, w0Hist, s, sHist, dataMatrix, y, beginTime, targetMatrix);
 		LOGGER.debug("Finished training.");
 
 		// Update model
 		LearnShapeletsClassifier model = this.getClassifier();
-		model.setS(S);
-		model.setW(W);
-		model.setW_0(W_0);
-		model.setC(this.C);
+		model.setS(s);
+		model.setW(w);
+		model.setW0(w0);
+		model.setC(this.numClasses);
 		return model;
 	}
 
@@ -340,20 +339,20 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * approach has been changed to a different standard deviation as used in the
 	 * reference implementation for performance reasons.
 	 *
-	 * @param W
+	 * @param w
 	 *            The weight matrix
-	 * @param W_0
+	 * @param w0
 	 *            The bias vector
 	 */
-	public void initializeWeights(final double[][][] W, final double[] W_0) {
+	public void initializeWeights(final double[][][] w, final double[] w0) {
 		Random rand = new Random(this.getConfig().seed());
 		final int scaleR = this.getConfig().scaleR();
 		final int numShapelets = this.getConfig().numShapelets();
-		for (int i = 0; i < this.C; i++) {
-			W_0[i] = EPS * rand.nextDouble() * Math.pow(-1, rand.nextInt(2));
+		for (int i = 0; i < this.numClasses; i++) {
+			w0[i] = EPS * rand.nextDouble() * Math.pow(-1, rand.nextInt(2));
 			for (int j = 0; j < scaleR; j++) {
 				for (int k = 0; k < numShapelets; k++) {
-					W[i][j][k] = EPS * rand.nextDouble() * Math.pow(-1, rand.nextInt(2));
+					w[i][j][k] = EPS * rand.nextDouble() * Math.pow(-1, rand.nextInt(2));
 				}
 			}
 		}
@@ -363,26 +362,26 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * Method performing the stochastic gradient descent to learn the weights and
 	 * shapelets.
 	 *
-	 * @param W
+	 * @param w
 	 *            The weight matrix
-	 * @param W_hist
+	 * @param wHist
 	 *            The weight's history matrix used for smoothing learning
-	 * @param W_0
+	 * @param w0
 	 *            The bias vector
-	 * @param W_0_hist
+	 * @param w0Hist
 	 *            The bias' history vector used for smoothing learning
-	 * @param S
+	 * @param s
 	 *            The shapelet matrix
-	 * @param S_hist
+	 * @param sHist
 	 *            The shapelet's history matrix used for smoothing learning
 	 * @param dataMatrix
 	 *            The data values matrix
-	 * @param Y
+	 * @param y
 	 *            The binarized target matrix
 	 * @param beginTime
 	 *            The begin time used to check for the timeout
 	 */
-	public void performSGD(final double[][][] W, final double[][][] W_hist, final double[] W_0, final double[] W_0_hist, final double[][][] S, final double[][][] S_hist, final double[][] dataMatrix, final int[][] Y, final long beginTime,
+	public void performSGD(final double[][][] w, final double[][][] wHist, final double[] w0, final double[] w0Hist, final double[][][] s, final double[][][] sHist, final double[][] dataMatrix, final int[][] y, final long beginTime,
 			final int[] targets) {
 		// Define the "helper" matrices used for the gradient calculations
 		final int scaleR = this.getConfig().scaleR();
@@ -394,36 +393,36 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		final double regularization = this.getConfig().regularization();
 		final double gamma = this.getConfig().gamma();
 
-		double[][][][] D = new double[scaleR][][][];
-		double[][][][] Xi = new double[scaleR][][][];
-		double[][][][] Phi = new double[scaleR][][][];
+		double[][][][] d = new double[scaleR][][][];
+		double[][][][] xi = new double[scaleR][][][];
+		double[][][][] phi = new double[scaleR][][][];
 
 		int[] numberOfSegments = new int[scaleR];
 
 		for (int r = 0; r < scaleR; r++) {
-			numberOfSegments[r] = getNumberOfSegments(this.Q, minShapeLength, r);
-			D[r] = new double[this.I][numShapelets][numberOfSegments[r]];
-			Xi[r] = new double[this.I][numShapelets][numberOfSegments[r]];
-			Phi[r] = new double[this.I][numShapelets][numberOfSegments[r]];
+			numberOfSegments[r] = getNumberOfSegments(this.q, minShapeLength, r);
+			d[r] = new double[this.numInstances][numShapelets][numberOfSegments[r]];
+			xi[r] = new double[this.numInstances][numShapelets][numberOfSegments[r]];
+			phi[r] = new double[this.numInstances][numShapelets][numberOfSegments[r]];
 		}
 
-		double[][][] Psi = new double[scaleR][this.I][numShapelets];
-		double[][][] M_hat = new double[scaleR][this.I][numShapelets];
-		double[][] Theta = new double[this.I][this.C];
+		double[][][] psi = new double[scaleR][this.numInstances][numShapelets];
+		double[][][] mHat = new double[scaleR][this.numInstances][numShapelets];
+		double[][] theta = new double[this.numInstances][this.numClasses];
 
-		List<Integer> indices = IntStream.range(0, this.I).boxed().collect(Collectors.toList());
+		List<Integer> indices = IntStream.range(0, this.numInstances).boxed().collect(Collectors.toList());
 
 		// Stochastic gradient descent
 		LOGGER.debug("Starting training for {} iterations...", maxIter);
 
 		// Initialize velocities used within training with zeros
-		double[][][] velocitiesW = new double[W.length][W[0].length][W[0][0].length];
-		double[] velocitiesW0 = new double[W_0.length];
-		double[][][] velocitiesS = new double[S.length][][];
-		for (int i = 0; i < S.length; i++) {
-			velocitiesS[i] = new double[S[i].length][];
-			for (int j = 0; j < S[i].length; j++) {
-				velocitiesS[i][j] = new double[S[i][j].length];
+		double[][][] velocitiesW = new double[w.length][w[0].length][w[0][0].length];
+		double[] velocitiesW0 = new double[w0.length];
+		double[][][] velocitiesS = new double[s.length][][];
+		for (int i = 0; i < s.length; i++) {
+			velocitiesS[i] = new double[s[i].length][];
+			for (int j = 0; j < s[i].length; j++) {
+				velocitiesS[i][j] = new double[s[i][j].length];
 			}
 		}
 
@@ -436,93 +435,93 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 				Collections.shuffle(indices, new Random(seed + it));
 			}
 
-			for (int idx = 0; idx < this.I; idx++) {
+			for (int idx = 0; idx < this.numInstances; idx++) {
 				int i = indices.get(idx);
 
 				// Pre-compute terms
 				for (int r = 0; r < scaleR; r++) {
 
-					long kBound = S[r].length;
+					long kBound = s[r].length;
 					for (int k = 0; k < kBound; k++) { // this.K
 
-						int J_r = numberOfSegments[r];
+						int jr = numberOfSegments[r];
 
-						for (int j = 0; j < J_r; j++) {
+						for (int j = 0; j < jr; j++) {
 
-							double newDValue = calculateD(S, minShapeLength, r, dataMatrix[i], k, j);
-							D[r][i][k][j] = newDValue;
+							double newDValue = calculateD(s, minShapeLength, r, dataMatrix[i], k, j);
+							d[r][i][k][j] = newDValue;
 							newDValue = Math.exp(ALPHA * newDValue);
-							Xi[r][i][k][j] = newDValue;
+							xi[r][i][k][j] = newDValue;
 
 						}
 
 						double newPsiValue = 0;
 						double newMHatValue = 0;
 
-						for (int j = 0; j < J_r; j++) {
-							newPsiValue += Xi[r][i][k][j];
-							newMHatValue += D[r][i][k][j] * Xi[r][i][k][j];
+						for (int j = 0; j < jr; j++) {
+							newPsiValue += xi[r][i][k][j];
+							newMHatValue += d[r][i][k][j] * xi[r][i][k][j];
 						}
-						Psi[r][i][k] = newPsiValue;
+						psi[r][i][k] = newPsiValue;
 
-						newMHatValue /= Psi[r][i][k];
+						newMHatValue /= psi[r][i][k];
 
-						M_hat[r][i][k] = newMHatValue;
+						mHat[r][i][k] = newMHatValue;
 					}
 				}
 
-				for (int c = 0; c < this.C; c++) {
+				for (int c = 0; c < this.numClasses; c++) {
 					double newThetaValue = 0;
 					for (int r = 0; r < scaleR; r++) {
 						for (int k = 0; k < numShapelets; k++) {
 
-							newThetaValue += M_hat[r][i][k] * W[c][r][k];
+							newThetaValue += mHat[r][i][k] * w[c][r][k];
 						}
 					}
-					Theta[i][c] = Y[i][c] - MathUtil.sigmoid(newThetaValue);
+					theta[i][c] = y[i][c] - MathUtil.sigmoid(newThetaValue);
 				}
 
 				// Learn shapelets and classification weights
-				for (int c = 0; c < this.C; c++) {
-					double gradW_0 = Theta[i][c];
+				for (int c = 0; c < this.numClasses; c++) {
+					double gradw0 = theta[i][c];
 
 					for (int r = 0; r < scaleR; r++) {
-						for (int k = 0; k < S[r].length; k++) { // this differs from paper: this.K instead of
+						for (int k = 0; k < s[r].length; k++) { // this differs from paper: this.K instead of
 							// shapelet length
-							double wStep = (-1d) * Theta[i][c] * M_hat[r][i][k] + 2d * regularization / (this.I) * W[c][r][k];
+							double wStep = (-1d) * theta[i][c] * mHat[r][i][k] + 2d * regularization / (this.numInstances) * w[c][r][k];
 							velocitiesW[c][r][k] = gamma * velocitiesW[c][r][k] + learningRate * wStep;
-							W_hist[c][r][k] += wStep * wStep;
+							wHist[c][r][k] += wStep * wStep;
 
-							W[c][r][k] -= (velocitiesW[c][r][k] / Math.sqrt(W_hist[c][r][k] + EPS));
+							w[c][r][k] -= (velocitiesW[c][r][k] / Math.sqrt(wHist[c][r][k] + EPS));
 
-							int J_r = numberOfSegments[r];
+							int jr = numberOfSegments[r];
 
-							double phiDenominator = 1d / ((r + 1d) * minShapeLength * Psi[r][i][k]);
+							double phiDenominator = 1d / ((r + 1d) * minShapeLength * psi[r][i][k]);
 
-							double[] distDiff = new double[J_r];
-							for (int j = 0; j < J_r; j++) {
-								distDiff[j] = Xi[r][i][k][j] * (1d + ALPHA * (D[r][i][k][j] - M_hat[r][i][k]));
+							double[] distDiff = new double[jr];
+							for (int j = 0; j < jr; j++) {
+								distDiff[j] = xi[r][i][k][j] * (1d + ALPHA * (d[r][i][k][j] - mHat[r][i][k]));
 							}
 
 							for (int l = 0; l < (r + 1) * minShapeLength; l++) {
 								double shapeletDiff = 0;
-								for (int j = 0; j < J_r; j++) {
-									shapeletDiff += distDiff[j] * (S[r][k][l] - dataMatrix[i][j + l]);
+								for (int j = 0; j < jr; j++) {
+									shapeletDiff += distDiff[j] * (s[r][k][l] - dataMatrix[i][j + l]);
 								}
 
-								double sStep = (-1d) * gradW_0 * shapeletDiff * W[c][r][k] * phiDenominator;
+								double sStep = (-1d) * gradw0 * shapeletDiff * w[c][r][k] * phiDenominator;
 
 								velocitiesS[r][k][l] = gamma * velocitiesS[r][k][l] + learningRate * sStep;
-								S_hist[r][k][l] += sStep * sStep;
+								sHist[r][k][l] += sStep * sStep;
 
-								S[r][k][l] -= velocitiesS[r][k][l] / Math.sqrt(S_hist[r][k][l] + EPS);
+								s[r][k][l] -= velocitiesS[r][k][l] / Math.sqrt(sHist[r][k][l] + EPS);
 							}
 						}
 					}
 
-					velocitiesW0[c] = gamma * velocitiesW0[c] + learningRate * gradW_0;
-					W_0_hist[c] += gradW_0 * gradW_0;
-					W_0[c] += velocitiesW0[c] / Math.sqrt(W_0_hist[c] + EPS);
+					velocitiesW0[c] = gamma * velocitiesW0[c] + learningRate * gradw0;
+					w0Hist[c] += gradw0 * gradw0;
+					w0[c] += velocitiesW0[c] / Math.sqrt(w0Hist[c] + EPS);
 
 				}
 			}
@@ -583,7 +582,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		Iterator<Iterator<Integer>> roundRobinIt = Iterables.cycle(iteratorList).iterator();
 		for (int i = 0; i < instanceIndices.size(); i++) {
 			int tmpCounter = 0;
-			while (roundRobinIt.hasNext() && tmpCounter < this.C) {
+			while (roundRobinIt.hasNext() && tmpCounter < this.numClasses) {
 				Iterator<Integer> tmpIt = roundRobinIt.next();
 				if (!tmpIt.hasNext()) {
 					tmpCounter++;
@@ -602,7 +601,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * approximation of the minimum distance matrix given in the paper in section
 	 * 3.1.4.
 	 *
-	 * @param S
+	 * @param s
 	 *            The tensor storing the shapelets for different scales
 	 * @param minShapeLength
 	 *            The minimum shape length
@@ -621,13 +620,13 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 *         the shapelet given by the parameters <code>r</code> and
 	 *         <code>k</code>.
 	 */
-	public static double calculateM_hat(final double[][][] S, final int minShapeLength, final int r, final double[] instance, final int k, final int Q, final double alpha) {
+	public static double calculateMHat(final double[][][] s, final int minShapeLength, final int r, final double[] instance, final int k, final int Q, final double alpha) {
 		double nominator = 0;
 		double denominator = 0;
 		for (int j = 0; j < getNumberOfSegments(Q, minShapeLength, r); j++) {
-			double D = calculateD(S, minShapeLength, r, instance, k, j);
-			double expD = Math.exp(alpha * D);
-			nominator += D * expD;
+			double d = calculateD(s, minShapeLength, r, instance, k, j);
+			double expD = Math.exp(alpha * d);
+			nominator += d * expD;
 			denominator += expD;
 		}
 		denominator = denominator == 0d ? EPS : denominator;
@@ -639,7 +638,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * the given time series <code>instance</code> and the <code>k</code>-th
 	 * shapelet stored in the shapelet tensor <code>S</code>.
 	 *
-	 * @param S
+	 * @param s
 	 *            The tensor storing the shapelets for different scales
 	 * @param minShapeLength
 	 *            The minimum shape length
@@ -655,11 +654,10 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 *         instance and the shapelet given by the parameters <code>r</code>,
 	 *         <code>k</code> and <code>j</code>.
 	 */
-	public static double calculateD(final double[][][] S, final int minShapeLength, final int r, final double[] instance, final int k, final int j) {
-
+	public static double calculateD(final double[][][] s, final int minShapeLength, final int r, final double[] instance, final int k, final int j) {
 		double result = 0;
 		for (int l = 0; l < (r + 1) * minShapeLength; l++) {
-			result += Math.pow(instance[j + l] - S[r][k][l], 2);
+			result += Math.pow(instance[j + l] - s[r][k][l], 2);
 		}
 		return result / ((r + 1) * minShapeLength);
 	}
@@ -717,7 +715,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * @return the c
 	 */
 	public int getC() {
-		return this.C;
+		return this.numClasses;
 	}
 
 	/**
@@ -725,6 +723,6 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 *            the c to set
 	 */
 	public void setC(final int c) {
-		this.C = c;
+		this.numClasses = c;
 	}
 }

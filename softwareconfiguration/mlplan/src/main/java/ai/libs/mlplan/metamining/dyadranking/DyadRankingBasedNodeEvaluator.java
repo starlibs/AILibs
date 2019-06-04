@@ -499,7 +499,8 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>((GraphGenerator<T, String>) this.graphGenerator, nodeEvaluator);
 		this.randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);
 		while (!(this.randomPathCompleter.next() instanceof AlgorithmInitializedEvent)) {
-			;
+
+			/* do not do anything, just skip until InitializationEvent is observed */
 		}
 	}
 

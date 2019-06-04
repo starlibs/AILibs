@@ -1,10 +1,8 @@
 package ai.libs.jaicore.ml.tsc.classifier.trees;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -55,11 +53,6 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 		@DefaultValue("1")
 		public int numSegments();
 	}
-
-	/**
-	 * Log4j logger
-	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(LearnPatternSimilarityLearningAlgorithm.class);
 
 	/**
 	 * Standard constructor.
@@ -274,8 +267,8 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 	 *            Matrix storing the instance values used for feature generation
 	 * @return Returns Weka instances storing the generated features
 	 */
-	public static Instances generateSubseriesFeaturesInstances(final ArrayList<Attribute> attributes, final int length, final int[] segments, final int[] segmentsDifference, final double[][] dataMatrix) {
-		Instances seqInstances = new Instances("SeqFeatures", attributes, dataMatrix.length * length);
+	public static Instances generateSubseriesFeaturesInstances(final List<Attribute> attributes, final int length, final int[] segments, final int[] segmentsDifference, final double[][] dataMatrix) {
+		Instances seqInstances = new Instances("SeqFeatures", new ArrayList<>(attributes), dataMatrix.length * length);
 		for (int inst = 0; inst < dataMatrix.length; inst++) {
 			double[] instValues = dataMatrix[inst];
 			for (int len = 0; len < length; len++) {

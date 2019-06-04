@@ -1,20 +1,17 @@
 package ai.libs.jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.distances.DynamicTimeWarping;
-import ai.libs.jaicore.ml.tsc.distances.EuclideanDistance;
-import ai.libs.jaicore.ml.tsc.distances.ITimeSeriesDistance;
-import ai.libs.jaicore.ml.tsc.distances.TransformDistance;
 import ai.libs.jaicore.ml.tsc.filter.transform.ATransformFilter;
 import ai.libs.jaicore.ml.tsc.filter.transform.HilbertTransform;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.TransformDistance}
  * implementation.
- * 
+ *
  * @author fischor
  */
 public class TransformDistanceTest {
@@ -44,8 +41,8 @@ public class TransformDistanceTest {
 	@Test
 	public void testCorrectnessForDistanceCalculation2() {
 		// Input.
-		double[] timeSeries1 = { 1, 2, 3, 4, 5 }; // transform { -6.0833, -5.6666667, -4, -0.6666667, 6.41666667 }
-		double[] timeSeries2 = { 2, 2, 2, 2, 2 }; // transform { -4.166667, -1.666667, 0, 1.666667, 4.166667 }
+		double[] timeSeries1 = { 1, 2, 3, 4, 5 }; // transform will give [-6.0833, -5.6666667, -4, -0.6666667, 6.41666667]
+		double[] timeSeries2 = { 2, 2, 2, 2, 2 }; // transform will give [ -4.166667, -1.666667, 0, 1.666667, 4.166667 ]
 		double alpha = 0.5;
 		ATransformFilter transform = new HilbertTransform();
 		ITimeSeriesDistance euclideanDistance = new EuclideanDistance();
@@ -105,6 +102,7 @@ public class TransformDistanceTest {
 	public void testBoundaryForAlphaEqualToZero() {
 		double alpha = 0;
 		new TransformDistance(alpha, new EuclideanDistance());
+		assertTrue(true); // this part must be reached
 	}
 
 	/**
@@ -115,6 +113,7 @@ public class TransformDistanceTest {
 	public void testBoundaryForAlphaEqualToPiHalf() {
 		double alpha = Math.PI / 2;
 		new TransformDistance(alpha, new EuclideanDistance());
+		assertTrue(true); // this part must be reached
 	}
 
 }

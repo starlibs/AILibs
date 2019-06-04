@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 
 import org.aeonbits.owner.ConfigCache;
 
@@ -22,7 +22,7 @@ public class RankingExperimentEvaluator implements IExperimentSetEvaluator {
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) {
 
-		String dataSetFolder = config.getDatasetFolder();
+		String dataSetFolder = this.config.getDatasetFolder();
 		if (dataSetFolder == null || !(new File(dataSetFolder).exists())) {
 			throw new IllegalArgumentException("Data set folder must exist!");
 		}
@@ -31,7 +31,7 @@ public class RankingExperimentEvaluator implements IExperimentSetEvaluator {
 
 		// Get benchmark function
 		String benchmark = description.get("benchmark");
-		Function<Instances, Double> benchmarkFunction = EvaluationUtils.getBenchmarkFunctionByName(benchmark);
+		ToDoubleFunction<Instances> benchmarkFunction = EvaluationUtils.getBenchmarkFunctionByName(benchmark);
 
 		Map<String, Object> results = new HashMap<>();
 
@@ -44,7 +44,7 @@ public class RankingExperimentEvaluator implements IExperimentSetEvaluator {
 		// Calculate ranking scores for all data sets
 		double[] scores = new double[dataSets.size()];
 		for (int i = 0; i < dataSets.size(); i++) {
-			scores[i] = benchmarkFunction.apply(dataSets.get(i));
+			scores[i] = benchmarkFunction.applyAsDouble(dataSets.get(i));
 		}
 
 		// Calculate Kendall's Tau result

@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.tsc.filter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -9,8 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.tsc.HistogramBuilder;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
@@ -18,7 +17,6 @@ import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 @RunWith(JUnit4.class)
 public class HistogramBuilderTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(HistogramBuilderTest.class);
 	double[] timeseries1;
 	double[] timeseries2;
 	TimeSeriesDataset dataset;
@@ -46,8 +44,7 @@ public class HistogramBuilderTest {
 				TimeSeriesDataset tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
 				HistogramBuilder histoBuilder = new HistogramBuilder();
 				Map<Integer, Integer> histo = histoBuilder.histogramForInstance(tmp);
-				logger.info("{}", histo);
-				logger.info("--------------------------------------------");
+				fail("This fail is just here to announce that this test does not really test anything at all. Insert a meaningful check. Output to prevent SQ to fire: " + histo);
 			}
 		}
 

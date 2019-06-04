@@ -1062,4 +1062,15 @@ public class SetUtil {
 
 		return sb.toString();
 	}
+
+	public static boolean doesStringCollectionOnlyContainNumbers(final Collection<String> strings) {
+		try {
+			for (String s : strings) {
+				Double.parseDouble(s);
+			}
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
 }
