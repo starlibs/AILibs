@@ -15,7 +15,7 @@ import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
  *         s.https://jmotif.github.io/sax-vsm_site/morea/algorithm/znorm.html
  *         one loop: https://www.strchr.com/standard_deviation_in_one_pass?allcomments=1
  */
-public class ZTransformer implements IFilter {
+public class ZTransformer extends AFilter {
 
 	private double mean;
 	private double deviation;
