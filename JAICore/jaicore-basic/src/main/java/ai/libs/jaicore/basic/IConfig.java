@@ -18,9 +18,6 @@ public interface IConfig extends Mutable {
 	 * @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given file.
 	 */
 	default IConfig loadPropertiesFromFile(final File file) {
-		if (!file.exists() || !file.isFile()) {
-			throw new IllegalArgumentException("File (" + file.getAbsolutePath() + ") to load properties from does not exist or is not a file.");
-		}
 		try {
 			return loadPropertiesFromList(FileUtil.readFileAsList(file));
 		} catch (IOException e) {
