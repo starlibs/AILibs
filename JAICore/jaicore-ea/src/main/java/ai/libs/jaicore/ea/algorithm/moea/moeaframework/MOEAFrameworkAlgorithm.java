@@ -70,6 +70,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 				e.printStackTrace();
 				System.exit(0);
 			}
+			throw new IllegalStateException("This line should not have reached!");
 		case ACTIVE:
 			System.out.println(this.getClass().getName() + " step3");
 			this.algorithm.step();
