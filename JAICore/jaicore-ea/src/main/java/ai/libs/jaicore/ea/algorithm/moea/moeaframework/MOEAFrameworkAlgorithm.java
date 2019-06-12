@@ -18,6 +18,8 @@ import org.moeaframework.core.operator.RandomInitialization;
 import org.moeaframework.core.operator.TournamentSelection;
 import org.moeaframework.core.spi.OperatorFactory;
 import org.moeaframework.util.TypedProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
@@ -30,6 +32,7 @@ import ai.libs.jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
 
 public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 
+	private Logger logger = LoggerFactory.getLogger(MOEAFrameworkAlgorithm.class);
 	private Algorithm algorithm;
 	private int numberOfGenerationsEvolved = 0;
 	private double bestFitness = 1.0;
@@ -44,7 +47,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		this.checkAndConductTermination();
 
 		if (this.getClass().getName().equals("ndea.core.simplend.nd.NDOptimizationEA")) {
-			System.out.println(this.getClass().getName() + " step1: " + this.getState());
+			this.logger.info("{} step1: {}", this.getClass().getName(), this.getState());
 		}
 
 		switch (this.getState()) {
