@@ -66,16 +66,14 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 				TournamentSelection selection = new TournamentSelection(2, new ChainedComparator(new ParetoDominanceComparator(), new CrowdingComparator()));
 				Variation variation = OperatorFactory.getInstance().getVariation(null, properties, this.getInput().getProblem());
 				this.algorithm = new NSGAII(this.getInput().getProblem(), population, null, selection, variation, initialization);
-				System.out.println(this.getClass().getName() + " step2");
+				this.logger.info("{} step2", this.getClass().getName());
 				this.algorithm.step();
 				return super.activate();
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(0);
+				throw new AlgorithmException(e, "Could not create the algorithm.");
 			}
-			throw new IllegalStateException("This line should not have reached!");
 		case ACTIVE:
-			System.out.println(this.getClass().getName() + " step3");
+			this.logger.info("{} step3", this.getClass().getName());
 			this.algorithm.step();
 
 			this.numberOfGenerationsWOChange++;
@@ -96,13 +94,13 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		this.setState(EAlgorithmState.CREATED);
 	}
 
-	public MOEAFrameworkAlgorithmResult getCurrentResult() {
+	public MOEAFrameworkAlgorithmResult getCurrentResult() throws AlgorithmException {
 		this.algorithm.getResult();
 		Population population = null;
 		try {
 			population = this.getPopulation();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			throw new AlgorithmException(e, "Could not get the result!");
 		}
 
 		return new MOEAFrameworkAlgorithmResult(this.algorithm.getResult(), population);
@@ -125,23 +123,21 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		while ((this.getState() == EAlgorithmState.CREATED || this.getState() == EAlgorithmState.ACTIVE) && (this.getConfig().numberOfGenerations() <= 0 || this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations())
 				&& (this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations())) {
 			this.nextWithException();
-			System.out.println("=============");
-			System.out.println("Current Result:");
-			System.out.println(MOEAFrameworkUtil.populationToString(this.getCurrentResult().getResult()));
-			System.out.println();
-			System.out.println("Gen: " + this.numberOfGenerationsEvolved + " / " + this.getConfig().numberOfGenerations());
-			System.out.println("Evals: " + this.getNumberOfEvaluations() + " / " + this.getConfig().numberOfEvaluations());
-			System.out.println("=============");
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("\n=============\nCurrent Result:\n{}\nGen: {}/{}\nEvals: {}/{}\n=============", MOEAFrameworkUtil.populationToString(this.getCurrentResult().getResult()), this.numberOfGenerationsEvolved,
+						this.getConfig().numberOfGenerations(), this.getNumberOfEvaluations(), this.getConfig().numberOfEvaluations());
+			}
 			this.numberOfGenerationsEvolved++;
 		}
 
-		System.out.println("State: " + (this.getState() == EAlgorithmState.CREATED || this.getState() == EAlgorithmState.ACTIVE));
-		System.out.println("Generations: " + (this.getConfig().numberOfGenerations() <= 0) + " " + (this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations()));
-		System.out.println("Evaluations: " + (this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations()));
+		if (this.logger.isInfoEnabled()) {
+			this.logger.info("State: {} ", (this.getState() == EAlgorithmState.CREATED || this.getState() == EAlgorithmState.ACTIVE));
+			this.logger.info("Generations: {} {}", this.getConfig().numberOfGenerations() <= 0, this.numberOfGenerationsEvolved < this.getConfig().numberOfGenerations());
+			this.logger.info("Evaluations: {}", this.getConfig().numberOfEvaluations() <= 0 || this.algorithm.getNumberOfEvaluations() < this.getConfig().numberOfEvaluations());
 
-		System.out.println("Gen: " + this.numberOfGenerationsEvolved + " / " + this.getConfig().numberOfGenerations());
-		System.out.println("Evals: " + this.getNumberOfEvaluations() + " / " + this.getConfig().numberOfEvaluations());
-
+			this.logger.info("Gen: {}/{}", this.numberOfGenerationsEvolved, this.getConfig().numberOfGenerations());
+			this.logger.info("Evals: {}/{}", this.getNumberOfEvaluations(), this.getConfig().numberOfEvaluations());
+		}
 		return this.getCurrentResult();
 	}
 
@@ -182,7 +178,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 		try {
 			getPopulationMethod = this.getAlgorithm().getClass().getMethod("getPopulation", (Class<?>[]) null);
 		} catch (NoSuchMethodException | SecurityException e) {
-
+			this.logger.error("Encountered exception: {}", e);
 		}
 
 		if (getPopulationMethod == null) {
