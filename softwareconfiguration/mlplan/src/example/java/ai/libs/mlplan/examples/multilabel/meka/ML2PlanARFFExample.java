@@ -52,7 +52,7 @@ public class ML2PlanARFFExample {
 		builder.withAlgorithmConfig(algoConfig);
 		builder.withNodeEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
-		builder.withNumCpus(8);
+		builder.withNumCpus(4);
 		builder.withTimeOut(new TimeOut(150, TimeUnit.SECONDS));
 
 		MLPlan ml2plan = new MLPlan(builder, split.get(0));

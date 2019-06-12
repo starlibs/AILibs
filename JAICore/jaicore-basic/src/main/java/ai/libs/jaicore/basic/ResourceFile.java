@@ -58,6 +58,11 @@ public class ResourceFile extends File {
 	}
 
 	@Override
+	public final String getPath() {
+		return this.getPathName();
+	}
+
+	@Override
 	public final ResourceFile getParentFile() {
 		List<String> stringList = SetUtil.explode(this.pathName, "/");
 		if (stringList.size() >= 1) {

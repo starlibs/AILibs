@@ -47,6 +47,8 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 	private static final String FS_SKLEARN_PREFERRED_COMPONENTS = "conf/sklearn-preferenceList.txt";
 
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "AbstractClassifier";
+	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
+
 	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new MulticlassClassStratifiedSplitter();
 	private static final IClassifierFactory DEF_CLASSIFIER_FACTORY = new SKLearnClassifierFactory();
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_SEARCHSPACE_CONFIG, FS_SEARCH_SPACE_CONFIG);
@@ -76,7 +78,7 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 			this.checkPythonSetup();
 		}
 		this.withSearchSpaceConfigFile(DEF_SEARCH_SPACE_CONFIG);
-		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS);
+		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
 		this.withRequestedInterface(DEF_REQUESTED_HASCO_INTERFACE);
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withDatasetSplitterForSearchSelectionSplit(DEF_SELECTION_HOLDOUT_SPLITTER);

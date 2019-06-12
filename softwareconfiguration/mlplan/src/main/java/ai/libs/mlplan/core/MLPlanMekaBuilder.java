@@ -31,6 +31,8 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 
 	/* Default configurations */
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "MLClassifier";
+	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveMLClassifierWith";
+
 	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new ArbitrarySplitter();
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_MEKA_COMPLETE, FS_SSC_MEKA_COMPLETE);
 	private static final File DEF_PREFERRED_COMPONENTS_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_PREFC_MEKA, FS_PREFC_MEKA);
@@ -44,7 +46,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 		super();
 		this.withSearchSpaceConfigFile(DEF_SEARCH_SPACE_CONFIG);
 		this.withRequestedInterface(DEF_REQUESTED_HASCO_INTERFACE);
-		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS_CONFIG);
+		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS_CONFIG, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
 		this.withDatasetSplitterForSearchSelectionSplit(DEF_SELECTION_HOLDOUT_SPLITTER);
 		this.withClassifierFactory(CLASSIFIER_FACTORY);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
