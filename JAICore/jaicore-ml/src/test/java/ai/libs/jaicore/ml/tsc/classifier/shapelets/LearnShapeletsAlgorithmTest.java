@@ -110,7 +110,7 @@ public class LearnShapeletsAlgorithmTest {
 
 	/**
 	 * See
-	 * {@link LearnShapeletsLearningAlgorithm#calculateM_hat(double[][][], int, int, double[], int, int, double)}.
+	 * {@link LearnShapeletsLearningAlgorithm#calculateMHat(double[][][], int, int, double[], int, int, double)}.
 	 */
 	@Test
 	public void calculateM_hatTest() {
@@ -120,11 +120,11 @@ public class LearnShapeletsAlgorithmTest {
 		final double alpha = -1d;
 
 		// getNumberOfSegments(Q=4, minShapeLength=3, r=0) = 1
-		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateM_hat(this.S, minShapeLength, r, instance, 0, instance.length, alpha));
+		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateMHat(this.S, minShapeLength, r, instance, 0, instance.length, alpha));
 
 		final double[] instance2 = new double[] { 1, 2, 3 };
 		// getNumberOfSegments(Q=3, minShapeLength=3, r=0) = 0
-		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateM_hat(this.S, minShapeLength, r, instance2, 0, instance2.length, alpha));
+		Assert.assertEquals("The calculated soft minimum distance does not match the expected distance.", 0d, LearnShapeletsLearningAlgorithm.calculateMHat(this.S, minShapeLength, r, instance2, 0, instance2.length, alpha));
 	}
 
 	/**

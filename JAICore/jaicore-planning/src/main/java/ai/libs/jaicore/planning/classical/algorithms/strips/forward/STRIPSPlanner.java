@@ -31,7 +31,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPlanningProblem, EvaluatedPlan<V>, V> {
 
 	/* logging */
-	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
+	private Logger logger = LoggerFactory.getLogger(STRIPSPlanner.class);
 	private String loggerName;
 
 	private final IPathInORGraphSearch<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String> search;

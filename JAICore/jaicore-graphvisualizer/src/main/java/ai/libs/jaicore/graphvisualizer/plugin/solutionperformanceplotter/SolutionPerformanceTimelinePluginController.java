@@ -12,7 +12,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
 public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPluginController<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginView> {
 
-	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePlugin.class);
+	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePluginController.class);
 
 	public SolutionPerformanceTimelinePluginController(final SolutionPerformanceTimelinePluginModel model, final SolutionPerformanceTimelinePluginView view) {
 		super(model, view);

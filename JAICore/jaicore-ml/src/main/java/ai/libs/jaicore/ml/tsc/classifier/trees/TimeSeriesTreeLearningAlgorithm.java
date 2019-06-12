@@ -106,7 +106,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public void registerListener(final Object listener) {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public int getNumCPUs() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -122,7 +122,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public void setNumCPUs(final int numberOfCPUs) {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public void setTimeout(final long timeout, final TimeUnit timeUnit) {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public void setTimeout(final TimeOut timeout) {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -146,7 +146,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public TimeOut getTimeout() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public AlgorithmEvent nextWithException() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -186,8 +186,8 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		// Set up feature caching
 		if (((ITimeSeriesTreeConfig)this.getConfig()).useFeatureCaching()) {
-			int Q = dataMatrix[0].length;
-			this.transformedFeaturesCache = new HashMap<>(Q * Q * n);
+			int q = dataMatrix[0].length;
+			this.transformedFeaturesCache = new HashMap<>(q * q * n);
 		}
 
 		// Build tree
@@ -200,7 +200,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public boolean hasNext() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -224,7 +224,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public void cancel() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -258,11 +258,11 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		ITimeSeriesTreeConfig config = (ITimeSeriesTreeConfig)this.getConfig();
 
 		// Sample the intervals used for the feature generation
-		Pair<List<Integer>, List<Integer>> T1T2 = sampleIntervals(data[0].length, config.seed());
+		Pair<List<Integer>, List<Integer>> pairOfIntervalLists = sampleIntervals(data[0].length, config.seed());
 
 		// Transform instances
-		double[][][] transformedInstances = this.transformInstances(data, T1T2);
-		List<List<Double>> thresholdCandidates = generateThresholdCandidates(T1T2, NUM_THRESH_CANDIDATES, transformedInstances);
+		double[][][] transformedInstances = this.transformInstances(data, pairOfIntervalLists);
+		List<List<Double>> thresholdCandidates = generateThresholdCandidates(pairOfIntervalLists, NUM_THRESH_CANDIDATES, transformedInstances);
 
 		// Get unique classes
 		final List<Integer> classes = new ArrayList<>(new HashSet<Integer>(Arrays.asList(ArrayUtils.toObject(targets))));
@@ -281,8 +281,8 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		// Search for the best splitting criterion in terms of the best Entrance gain
 		// for each feature type due to different feature scales
-		List<Integer> t1 = T1T2.getX();
-		List<Integer> T2 = T1T2.getY();
+		List<Integer> t1 = pairOfIntervalLists.getX();
+		List<Integer> T2 = pairOfIntervalLists.getY();
 		for (int i = 0; i < t1.size(); i++) {
 			for (int k = 0; k < NUM_FEATURE_TYPES; k++) {
 				for (final double cand : thresholdCandidates.get(k)) {
@@ -414,7 +414,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 				maxIndexes.add(i);
 			}
 		}
-		if (maxIndexes.size() < 1) {
+		if (maxIndexes.isEmpty()) {
 			throw new IllegalArgumentException("Could not find any maximum delta entropy star for any feature type for the given array " + Arrays.toString(deltaEntropyStarPerFeatureType) + ".");
 		}
 
@@ -539,23 +539,23 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 *
 	 * @param dataset
 	 *            The dataset which should be transformed
-	 * @param T1T2
+	 * @param pairOfItervalLists
 	 *            The start and end interval pairs (see
 	 *            {@link TimeSeriesTreeLearningAlgorithm#sampleIntervals(int, int)})
 	 * @return Returns the transformed instances (shape: number of feature types x
 	 *         number of interval pairs x number of instances)
 	 */
-	public double[][][] transformInstances(final double[][] dataset, final Pair<List<Integer>, List<Integer>> T1T2) {
-		double[][][] result = new double[NUM_FEATURE_TYPES][T1T2.getX().size()][dataset.length];
+	public double[][][] transformInstances(final double[][] dataset, final Pair<List<Integer>, List<Integer>> pairOfItervalLists) {
+		double[][][] result = new double[NUM_FEATURE_TYPES][pairOfItervalLists.getX().size()][dataset.length];
 
 		int n = dataset.length;
 		boolean useFeatureCaching = ((ITimeSeriesTreeConfig)this.getConfig()).useFeatureCaching();
 
 		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < T1T2.getX().size(); j++) {
+			for (int j = 0; j < pairOfItervalLists.getX().size(); j++) {
 
-				int t1 = T1T2.getX().get(j);
-				int t2 = T1T2.getY().get(j);
+				int t1 = pairOfItervalLists.getX().get(j);
+				int t2 = pairOfItervalLists.getY().get(j);
 				double[] features;
 
 				// If caching is used, calculate and store the generated features
@@ -585,7 +585,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * feature type and every possible interval and generates
 	 * <code>numberOfCandidates</code> candidates using equal-width intervals.
 	 *
-	 * @param T1T2
+	 * @param pairOfIntervalLists
 	 *            The pair of start and end interval pairs (see
 	 *            {@link TimeSeriesTreeLearningAlgorithm#sampleIntervals(int, int)})
 	 * @param numOfCandidates
@@ -595,7 +595,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * @return Returns a list consisting of a list for each feature type storing the
 	 *         threshold candidates
 	 */
-	public static List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> T1T2, final int numOfCandidates, final double[][][] transformedFeatures) {
+	public static List<List<Double>> generateThresholdCandidates(final Pair<List<Integer>, List<Integer>> pairOfIntervalLists, final int numOfCandidates, final double[][][] transformedFeatures) {
 		if (numOfCandidates < 1) {
 			throw new IllegalArgumentException("At least one candidate must be calculated!");
 		}
@@ -616,7 +616,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		// Find min and max
 		for (int i = 0; i < NUM_FEATURE_TYPES; i++) {
 			for (int j = 0; j < numInstances; j++) {
-				for (int l = 0; l < T1T2.getX().size(); l++) {
+				for (int l = 0; l < pairOfIntervalLists.getX().size(); l++) {
 					if (transformedFeatures[i][l][j] < min[i]) {
 						min[i] = transformedFeatures[i][l][j];
 					}
@@ -657,17 +657,17 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 			throw new IllegalArgumentException("The series' length m must be greater than zero.");
 		}
 
-		List<Integer> T1 = new ArrayList<>();
-		List<Integer> T2 = new ArrayList<>();
+		List<Integer> iList1 = new ArrayList<>();
+		List<Integer> iList2 = new ArrayList<>();
 		List<Integer> W = randomlySampleNoReplacement(IntStream.rangeClosed(1, m).boxed().collect(Collectors.toList()), (int) Math.sqrt(m), seed);
 		for (int w : W) {
 			List<Integer> tmpSampling = randomlySampleNoReplacement(IntStream.rangeClosed(0, m - w).boxed().collect(Collectors.toList()), (int) Math.sqrt(m - w + 1.0), seed);
-			T1.addAll(tmpSampling);
+			iList1.addAll(tmpSampling);
 			for (int t1 : tmpSampling) {
-				T2.add(t1 + w - 1);
+				iList2.add(t1 + w - 1);
 			}
 		}
-		return new Pair<>(T1, T2);
+		return new Pair<>(iList1, iList2);
 	}
 
 	/**

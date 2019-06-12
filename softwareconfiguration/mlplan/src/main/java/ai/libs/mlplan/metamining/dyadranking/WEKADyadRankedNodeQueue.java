@@ -25,7 +25,7 @@ import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
  */
 public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Double> {
 
-	private Logger logger = LoggerFactory.getLogger(ADyadRankedNodeQueue.class);
+	private Logger logger = LoggerFactory.getLogger(WEKADyadRankedNodeQueue.class);
 
 	/**
 	 * the allowed components of the pipelines

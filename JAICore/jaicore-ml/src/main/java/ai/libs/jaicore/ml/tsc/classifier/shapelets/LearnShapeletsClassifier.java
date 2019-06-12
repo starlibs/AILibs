@@ -37,21 +37,21 @@ public class LearnShapeletsClassifier extends ASimplifiedTSClassifier<Integer> {
 	/**
 	 * The tensor storing the derived shapelets.
 	 */
-	private double[][][] S;
+	private double[][][] s;
 	/**
 	 * The model's weights used for the class prediction learned by the training
 	 * algorithm.
 	 */
-	private double[][][] W;
+	private double[][][] w;
 	/**
 	 * The model's bias weights.
 	 */
-	private double[] W_0;
+	private double[] w0;
 
 	/**
 	 * The number of classes.
 	 */
-	private int C;
+	private int c;
 
 	private final ILearnShapeletsLearningAlgorithmConfig config;
 
@@ -123,64 +123,64 @@ public class LearnShapeletsClassifier extends ASimplifiedTSClassifier<Integer> {
 	}
 
 	/**
-	 * @return {@link LearnShapeletsClassifier#S}.
+	 * @return {@link LearnShapeletsClassifier#s}.
 	 */
 	public double[][][] getS() {
-		return this.S;
+		return this.s;
 	}
 
 	/**
-	 * Setter for {@link LearnShapeletsClassifier#S}
+	 * Setter for {@link LearnShapeletsClassifier#s}
 	 *
-	 * @param S
+	 * @param s
 	 *            New value to be set
 	 */
 	public void setS(final double[][][] s) {
-		this.S = s;
+		this.s = s;
 	}
 
 	/**
-	 * @return {@link LearnShapeletsClassifier#W}.
+	 * @return {@link LearnShapeletsClassifier#w}.
 	 */
 	public double[][][] getW() {
-		return this.W;
+		return this.w;
 	}
 
 	/**
-	 * Setter for {@link LearnShapeletsClassifier#W}
+	 * Setter for {@link LearnShapeletsClassifier#w}
 	 *
-	 * @param W
+	 * @param w
 	 *            New value to be set
 	 */
 	public void setW(final double[][][] w) {
-		this.W = w;
+		this.w = w;
 	}
 
 	/**
-	 * @return {@link LearnShapeletsClassifier#W_0}.
+	 * @return {@link LearnShapeletsClassifier#w0}.
 	 */
-	public double[] getW_0() {
-		return this.W_0;
+	public double[] getW0() {
+		return this.w0;
 	}
 
 	/**
-	 * Setter for {@link LearnShapeletsClassifier#W_0}
+	 * Setter for {@link LearnShapeletsClassifier#w0}
 	 *
-	 * @param W_0
+	 * @param w0
 	 *            New value to be set
 	 */
-	public void setW_0(final double[] w_0) {
-		this.W_0 = w_0;
+	public void setW0(final double[] w0) {
+		this.w0 = w0;
 	}
 
 	/**
-	 * Setter for {@link LearnShapeletsClassifier#C}
+	 * Setter for {@link LearnShapeletsClassifier#c}
 	 *
-	 * @param C
+	 * @param c
 	 *            New value to be set
 	 */
 	public void setC(final int c) {
-		this.C = c;
+		this.c = c;
 	}
 
 	/**
@@ -208,11 +208,11 @@ public class LearnShapeletsClassifier extends ASimplifiedTSClassifier<Integer> {
 		univInstance = TimeSeriesUtil.zNormalize(univInstance, LearnShapeletsLearningAlgorithm.USE_BIAS_CORRECTION);
 
 		// Calculate target class according to the paper's section 5.3
-		for (int i = 0; i < this.C; i++) {
-			double tmpScore = this.W_0[i];
+		for (int i = 0; i < this.c; i++) {
+			double tmpScore = this.w0[i];
 			for (int r = 0; r < this.config.scaleR(); r++) {
-				for (int k = 0; k < this.S[r].length; k++) {
-					tmpScore += LearnShapeletsLearningAlgorithm.calculateM_hat(this.S, this.config.minShapeletLength(), r, univInstance, k, univInstance.length, LearnShapeletsLearningAlgorithm.ALPHA) * this.W[i][r][k];
+				for (int k = 0; k < this.s[r].length; k++) {
+					tmpScore += LearnShapeletsLearningAlgorithm.calculateMHat(this.s, this.config.minShapeletLength(), r, univInstance, k, univInstance.length, LearnShapeletsLearningAlgorithm.ALPHA) * this.w[i][r][k];
 				}
 			}
 			scoring.put(i, MathUtil.sigmoid(tmpScore));

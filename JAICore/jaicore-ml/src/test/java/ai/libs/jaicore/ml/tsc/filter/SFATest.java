@@ -1,23 +1,19 @@
 package ai.libs.jaicore.ml.tsc.filter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 @RunWith(JUnit4.class)
 public class SFATest {
-
-	private static final Logger logger = LoggerFactory.getLogger(SFATest.class);
 
 	double[] timeseries1;
 	double[] timeseries2;
@@ -44,12 +40,9 @@ public class SFATest {
 				TimeSeriesDataset tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
 				for (double[][] m : tmp.getValueMatrices()) {
 					for (double[] i : m) {
-						if (logger.isInfoEnabled()) {
-							logger.info("{}", Arrays.toString(i));
-						}
+						fail("This fail is just here to announce that this test does not really test anything at all. Insert a meaningful check. Output to prevent SQ to fire: " + i);
 					}
 				}
-				logger.info("--------------------------------------------");
 			}
 		}
 

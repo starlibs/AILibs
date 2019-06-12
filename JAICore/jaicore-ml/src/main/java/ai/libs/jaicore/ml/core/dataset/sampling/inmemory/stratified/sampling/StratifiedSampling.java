@@ -20,7 +20,7 @@ import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEven
 /**
  * Implementation of Stratified Sampling: Divide dataset into strati and sample
  * from each of these.
- * 
+ *
  * @author Lukas Brandt
  */
 public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
@@ -37,7 +37,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 
 	/**
 	 * Constructor for Stratified Sampling.
-	 * 
+	 *
 	 * @param stratiAmountSelector
 	 *            The custom selector for the used amount of strati.
 	 * @param stratiAssigner
@@ -45,8 +45,8 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 	 * @param random
 	 *            Random object for sampling inside of the strati.
 	 */
-	public StratifiedSampling(IStratiAmountSelector<D> stratiAmountSelector, IStratiAssigner<I, D> stratiAssigner,
-			Random random, D input) {
+	public StratifiedSampling(final IStratiAmountSelector<D> stratiAmountSelector, final IStratiAssigner<I, D> stratiAssigner,
+			final Random random, final D input) {
 		super(input);
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
@@ -58,20 +58,20 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 		switch (this.getState()) {
 		case CREATED:
 			try {
-			this.sample = (D)getInput().createEmpty();
-			if (!allDatapointsAssigned) {
-				this.datasetCopy = (D)getInput().createEmpty();
-				this.datasetCopy.addAll(this.getInput());
-				this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
-				this.stratiAssigner.setNumCPUs(this.getNumCPUs());
-				this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
-				for (int i = 0; i < this.strati.length; i++) {
-					this.strati[i] = (D)getInput().createEmpty();
+				this.sample = (D)this.getInput().createEmpty();
+				if (!this.allDatapointsAssigned) {
+					this.datasetCopy = (D)this.getInput().createEmpty();
+					this.datasetCopy.addAll(this.getInput());
+					this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
+					this.stratiAssigner.setNumCPUs(this.getNumCPUs());
+					this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
+					for (int i = 0; i < this.strati.length; i++) {
+						this.strati[i] = this.getInput().createEmpty();
+					}
+					this.stratiAssigner.init(this.datasetCopy, this.strati.length);
 				}
-				this.stratiAssigner.init(this.datasetCopy, this.strati.length);
-			}
-			this.simpleRandomSamplingStarted = false;
-			this.executorService = Executors.newCachedThreadPool();
+				this.simpleRandomSamplingStarted = false;
+				this.executorService = Executors.newCachedThreadPool();
 			}
 			catch (DatasetCreationException e) {
 				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
@@ -79,7 +79,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 			return this.activate();
 		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
-				if (!allDatapointsAssigned) {
+				if (!this.allDatapointsAssigned) {
 					// Stratify the datapoints one by one.
 					I datapoint = this.datasetCopy.remove(0);
 					int assignedStrati = this.stratiAssigner.assignToStrati(datapoint);
@@ -91,14 +91,14 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 					if (this.datasetCopy.isEmpty()) {
 						this.allDatapointsAssigned = true;
 					}
-					return new SampleElementAddedEvent(getId());
+					return new SampleElementAddedEvent(this.getId());
 				} else {
-					if (!simpleRandomSamplingStarted) {
+					if (!this.simpleRandomSamplingStarted) {
 						// Simple Random Sampling has not started yet -> Initialize one sampling thread
 						// per stratum.
 						this.startSimpleRandomSamplingForStrati();
 						this.simpleRandomSamplingStarted = true;
-						return new WaitForSamplingStepEvent(getId());
+						return new WaitForSamplingStepEvent(this.getId());
 					} else {
 						// Check if all threads are finished. If yes finish Stratified Sampling, wait
 						// shortly in this step otherwise.
@@ -106,7 +106,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 							return this.terminate();
 						} else {
 							Thread.sleep(100);
-							return new WaitForSamplingStepEvent(getId());
+							return new WaitForSamplingStepEvent(this.getId());
 
 						}
 					}
@@ -142,14 +142,14 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 		for (int i = 0; i < this.strati.length; i++) {
 			int index = i;
 			this.executorService.execute(() -> {
-				SimpleRandomSampling<I, D> simpleRandomSampling = new SimpleRandomSampling<>(random, (D)strati[index]);
+				SimpleRandomSampling<I, D> simpleRandomSampling = new SimpleRandomSampling<>(this.random, (D)this.strati[index]);
 				simpleRandomSampling.setSampleSize(sampleSizeForStrati[index]);
 				try {
-					synchronized (sample) {
-						sample.addAll(simpleRandomSampling.call());
+					synchronized (this.sample) {
+						this.sample.addAll(simpleRandomSampling.call());
 					}
 				} catch (Exception e) {
-					logger.error("Unexpected exception during simple random sampling!", e);
+					this.logger.error("Unexpected exception during simple random sampling!", e);
 				}
 
 			});
@@ -159,10 +159,10 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 	}
 
 	public IDataset[] getStrati() {
-		return strati;
+		return this.strati;
 	}
 
-	public void setStrati(IDataset[] strati) {
+	public void setStrati(final IDataset[] strati) {
 		this.strati = strati;
 	}
 }

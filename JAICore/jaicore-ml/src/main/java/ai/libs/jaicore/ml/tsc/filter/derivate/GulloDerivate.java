@@ -22,26 +22,26 @@ public class GulloDerivate extends ADerivateFilter {
     }
 
     @Override
-    protected double[] derivate(double[] T) {
-        double[] derivate = new double[T.length - 2];
+    protected double[] derivate(double[] t) {
+        double[] derivate = new double[t.length - 2];
 
-        for (int i = 1; i < T.length - 1; i++) {
-            derivate[i - 1] = (T[i + 1] - T[i - 1]) / 2;
+        for (int i = 1; i < t.length - 1; i++) {
+            derivate[i - 1] = (t[i + 1] - t[i - 1]) / 2;
         }
 
         return derivate;
     }
 
     @Override
-    protected double[] derivateWithBoundaries(double[] T) {
-        double[] derivate = new double[T.length];
+    protected double[] derivateWithBoundaries(double[] t) {
+        double[] derivate = new double[t.length];
 
-        for (int i = 1; i < T.length - 1; i++) {
-            derivate[i] = (T[i + 1] - T[i - 1]) / 2;
+        for (int i = 1; i < t.length - 1; i++) {
+            derivate[i] = (t[i + 1] - t[i - 1]) / 2;
         }
 
         derivate[0] = derivate[1];
-        derivate[T.length - 1] = derivate[T.length - 2];
+        derivate[t.length - 1] = derivate[t.length - 2];
 
         return derivate;
     }

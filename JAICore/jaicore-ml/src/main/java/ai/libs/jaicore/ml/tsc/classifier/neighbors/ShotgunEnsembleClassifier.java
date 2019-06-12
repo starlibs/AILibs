@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.aeonbits.owner.ConfigCache;
 
@@ -142,8 +143,9 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most frequent label.
 		int topFrequency = -1;
 		int mostFrequentLabel = 0;
-		for (Integer label : labelFrequencyMap.keySet()) {
-			int labelFrequency = labelFrequencyMap.get(label);
+		for (Entry<Integer,Integer> entry : labelFrequencyMap.entrySet()) {
+			int label = entry.getKey();
+			int labelFrequency = entry.getValue();
 			if (labelFrequency > topFrequency) {
 				topFrequency = labelFrequency;
 				mostFrequentLabel = label;
@@ -192,8 +194,9 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 		for (int i = 0; i < numberOfInstances; i++) {
 			// Map holding (windowLength, predicition for instance) pairs.
 			Map<Integer, Integer> windowLabelsForInstance = new HashMap<>();
-			for (int windowLength : windowLengthPredicitions.keySet()) {
-				int predictionForWindowLength = windowLengthPredicitions.get(windowLength).get(i);
+			for (Entry<Integer, List<Integer>> entry : windowLengthPredicitions.entrySet()) {
+				int windowLength = entry.getKey();
+				int predictionForWindowLength = entry.getValue().get(i);
 				windowLabelsForInstance.put(windowLength, predictionForWindowLength);
 			}
 			int mostFrequentLabelForInstance = this.mostFrequentLabelFromWindowLengthPredicitions(windowLabelsForInstance);
@@ -215,8 +218,7 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 			throw new IllegalArgumentException("Instance to predict must not be null.");
 		}
 		Map<Integer, Integer> windowLengthPredicitions = this.calculateWindowLengthPredictions(univInstance);
-		int prediciton = this.mostFrequentLabelFromWindowLengthPredicitions(windowLengthPredicitions);
-		return prediciton;
+		return this.mostFrequentLabelFromWindowLengthPredicitions(windowLengthPredicitions);
 	}
 
 	/**
@@ -248,8 +250,7 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 		}
 		// Calculate predictions.
 		Map<Integer, List<Integer>> windowLengthPredicitions = this.calculateWindowLengthPredictions(dataset);
-		List<Integer> predictions = this.mostFrequentLabelsFromWindowLengthPredicitions(windowLengthPredicitions);
-		return predictions;
+		return this.mostFrequentLabelsFromWindowLengthPredicitions(windowLengthPredicitions);
 	}
 
 	/**
@@ -285,14 +286,14 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 	protected void setWindows(final ArrayList<Pair<Integer, Integer>> windows) {
 		this.windows = windows;
 		// Best score.
-		int bestScore = -1;
+		int tBestScore = -1;
 		for (Pair<Integer, Integer> window : windows) {
 			int correct = window.getX();
-			if (correct > bestScore) {
-				bestScore = correct;
+			if (correct > tBestScore) {
+				tBestScore = correct;
 			}
 		}
-		this.bestScore = bestScore;
+		this.bestScore = tBestScore;
 	}
 
 	/**

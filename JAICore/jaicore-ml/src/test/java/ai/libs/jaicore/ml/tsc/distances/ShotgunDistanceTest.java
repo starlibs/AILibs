@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -68,6 +69,7 @@ public class ShotgunDistanceTest {
 		int windowLength = 5;
 		ShotgunDistance shotgunDistance = new ShotgunDistance(windowLength, false);
 		shotgunDistance.distance(queryTimeSeries, sampleTimeSeries);
+		assertTrue(true); // this part must be reached
 	}
 
 	/**
@@ -85,6 +87,7 @@ public class ShotgunDistanceTest {
 		int windowLength = 5;
 		ShotgunDistance shotgunDistance = new ShotgunDistance(windowLength, false);
 		shotgunDistance.distance(queryTimeSeries, sampleTimeSeries);
+		assertTrue(true); // this part must be reached
 	}
 
 	/**
@@ -102,6 +105,7 @@ public class ShotgunDistanceTest {
 		int windowLength = 5;
 		ShotgunDistance shotgunDistance = new ShotgunDistance(windowLength, false);
 		shotgunDistance.distance(queryTimeSeries, sampleTimeSeries);
+		assertTrue(true); // this part must be reached
 	}
 
 	/**

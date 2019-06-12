@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.tsc.classifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -125,7 +126,7 @@ public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integ
 				TimeSeriesDataset tmpTransformed = sfa.fitTransform(tmp);
 				// The occurring SFA words of the instance are getting counted with a parallel numerosity reduction.
 
-				HashMap<Integer, Integer> histogram = histoBuilder.histogramForInstance(tmpTransformed);
+				Map<Integer, Integer> histogram = histoBuilder.histogramForInstance(tmpTransformed);
 				// Each instance in the dataset has its own histogram so the original dataset results in a list of histograms.
 				this.histograms.add(new HashMap<>(histogram));
 			}

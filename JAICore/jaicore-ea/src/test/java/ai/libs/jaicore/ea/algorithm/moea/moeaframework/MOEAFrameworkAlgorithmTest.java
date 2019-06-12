@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ea.algorithm.moea.moeaframework;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
@@ -8,11 +10,6 @@ import org.junit.Test;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.ea.algorithm.moea.moeaframework.IMOEAFrameworkAlgorithmConfig;
-import ai.libs.jaicore.ea.algorithm.moea.moeaframework.IMOEAFrameworkAlgorithmInput;
-import ai.libs.jaicore.ea.algorithm.moea.moeaframework.MOEAFrameworkAlgorithm;
-import ai.libs.jaicore.ea.algorithm.moea.moeaframework.MOEAFrameworkAlgorithmResult;
-import ai.libs.jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
 
 public class MOEAFrameworkAlgorithmTest {
 
@@ -27,11 +24,8 @@ public class MOEAFrameworkAlgorithmTest {
 		MOEAFrameworkAlgorithm algo = new MOEAFrameworkAlgorithm(config, problem);
 		MOEAFrameworkAlgorithmResult res = algo.call();
 
-		System.out.println("Number of Evaluations: " + algo.getNumberOfEvaluations());
-		System.out.println("Number of Generations: " + algo.getNumberOfGenerationsEvolved());
-
-		System.out.println(MOEAFrameworkUtil.populationToString(res.getResult()));
-
+		assertTrue("Not a single evaluation was made", algo.getNumberOfEvaluations() > 0);
+		assertTrue("Did not evolve anything.", algo.getNumberOfGenerationsEvolved() > 0);
 	}
 
 }

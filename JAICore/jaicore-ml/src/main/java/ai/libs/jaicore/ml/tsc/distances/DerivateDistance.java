@@ -65,7 +65,7 @@ public class DerivateDistance implements ITimeSeriesDistance {
 	/**
 	 * The distance measure to use to calculate the distance of the derivate values.
 	 */
-	private ITimeSeriesDistance derivateDistance;
+	private ITimeSeriesDistance baseDerivateDistance;
 
 	/**
 	 * Constructor with individual distance measures for the function and derivate
@@ -98,7 +98,7 @@ public class DerivateDistance implements ITimeSeriesDistance {
 		this.setAlpha(alpha);
 		this.derivate = derivate;
 		this.timeSeriesDistance = timeSeriesDistance;
-		this.derivateDistance = derivateDistance;
+		this.baseDerivateDistance = derivateDistance;
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class DerivateDistance implements ITimeSeriesDistance {
 		double[] derivateA = this.derivate.transform(a);
 		double[] derivateB = this.derivate.transform(b);
 
-		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.derivateDistance.distance(derivateA, derivateB);
+		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.baseDerivateDistance.distance(derivateA, derivateB);
 	}
 
 	/**

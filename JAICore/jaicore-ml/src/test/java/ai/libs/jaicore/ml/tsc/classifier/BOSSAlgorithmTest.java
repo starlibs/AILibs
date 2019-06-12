@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.tsc.classifier;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
 import org.junit.Before;
@@ -11,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import ai.libs.jaicore.ml.core.exception.TrainingException;
-import ai.libs.jaicore.ml.tsc.classifier.BOSSClassifier;
 import ai.libs.jaicore.ml.tsc.classifier.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
@@ -35,7 +35,7 @@ public class BOSSAlgorithmTest {
 		matrix[0] = this.timeseries1;
 		matrix[1] = this.timeseries2;
 
-		ArrayList<double[][]> futureDataSet = new ArrayList<double[][]>();
+		List<double[][]> futureDataSet = new ArrayList<>();
 		futureDataSet.add(matrix);
 		this.dataset = new TimeSeriesDataset(futureDataSet,null, null);
 	}

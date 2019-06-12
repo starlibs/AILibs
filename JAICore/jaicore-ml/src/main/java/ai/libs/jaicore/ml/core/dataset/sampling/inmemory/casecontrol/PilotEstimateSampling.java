@@ -44,7 +44,8 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+		this.logger.info("Executing next step.");
 		switch (this.getState()) {
 		case CREATED:
 			this.doInitStep();
@@ -78,7 +79,7 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 		return null;
 	}
 
-	private AlgorithmEvent doInitStep() throws AlgorithmException {
+	private AlgorithmEvent doInitStep() throws AlgorithmException, InterruptedException {
 		try {
 			this.sample = (D) this.getInput().createEmpty();
 			if (this.probabilityBoundaries == null || this.chosenInstance == null) {
@@ -128,20 +129,10 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 				String[] options = new String[2];
 				options[0] = "-R";
 				options[1] = "last";
-				try {
-					numericToNominal.setOptions(options);
-					numericToNominal.setInputFormat(pilotEstimateInstances);
-				} catch (Exception e) {
-					this.logger.error("Unexpected error", e);
-					this.terminate();
-				}
+				numericToNominal.setOptions(options);
+				numericToNominal.setInputFormat(pilotEstimateInstances);
 
-				try {
-					pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
-				} catch (Exception e) {
-					this.logger.error("Cannot apply filter", e);
-					this.terminate();
-				}
+				pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
 
 				ArrayList<Pair<Double, Double>> classMapping = new ArrayList<>();
 				boolean classNotInMapping;
@@ -157,16 +148,15 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 					}
 				}
 
-				try {
-					pilotEstimator.buildClassifier(pilotEstimateInstances);
-				} catch (Exception e) {
-					this.logger.error("Cannot build classifier", e);
-					this.terminate();
-				}
+				pilotEstimator.buildClassifier(pilotEstimateInstances);
 				this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 			}
 		} catch (DatasetCreationException e1) {
 			throw new AlgorithmException(e1, "Could not create a copy of the dataset.");
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new AlgorithmException(e, "Unexpected error");
 		}
 		return this.activate();
 	}

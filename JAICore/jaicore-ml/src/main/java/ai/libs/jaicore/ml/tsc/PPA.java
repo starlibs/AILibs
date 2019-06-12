@@ -1,27 +1,24 @@
 package ai.libs.jaicore.ml.tsc;
 
-
-//source https://jmotif.github.io/sax-vsm_site/morea/algorithm/PAA.html
+// source https://jmotif.github.io/sax-vsm_site/morea/algorithm/PAA.html
 
 public class PPA {
 
-	public static double[] ppa(double[] input, int lengthM ) {
+	private PPA() {
+		/* no instantiation allowed */
+	}
+
+	public static double[] ppa(final double[] input, final int lengthM) {
 		double[] ppa = new double[lengthM];
 		double n = input.length;
-		
-		//TODO if I find out if n/m is an int i change this must be Int 
-		//TODO how to chose break points for alphabet equal ? 
-		//TODO if ppa length == timeseries legth return ts
-		for(int i = 0; i < lengthM; i++) {
+		for (int i = 0; i < lengthM; i++) {
 			double ppavalue = 0;
-			for(int j = (int) (n/((lengthM*(i-1))+1)); j<((n/lengthM)*i); j++) {
-				ppavalue+= input[j];
+			for (int j = (int) (n / ((lengthM * (i - 1)) + 1)); j < ((n / lengthM) * i); j++) {
+				ppavalue += input[j];
 			}
-			ppavalue = (lengthM/n)*ppavalue;
-			ppa[i]=ppavalue;
+			ppavalue = (lengthM / n) * ppavalue;
+			ppa[i] = ppavalue;
 		}
-		
 		return ppa;
-		
 	}
 }
