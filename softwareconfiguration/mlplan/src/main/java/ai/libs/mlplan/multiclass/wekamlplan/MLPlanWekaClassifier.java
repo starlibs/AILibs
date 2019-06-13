@@ -10,6 +10,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
@@ -86,8 +87,8 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 
 		if (this.visualizationEnabled) {
 			new JFXPanel();
-			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new TFDNodeAsCIViewInfoGenerator(this.builder.getComponents())),
+					new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
 			Platform.runLater(window);
 		}
 

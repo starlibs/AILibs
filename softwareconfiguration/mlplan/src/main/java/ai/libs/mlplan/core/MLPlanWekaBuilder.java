@@ -31,6 +31,8 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 
 	/* Default configuration values. */
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "AbstractClassifier";
+	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
+
 	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new MulticlassClassStratifiedSplitter();
 	private static final IClassifierFactory DEF_CLASSIFIER_FACTORY = new WEKAPipelineFactory();
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_PREFERRED_COMPONENTS, FS_PREFERRED_COMPONENTS);
@@ -43,7 +45,7 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 	public MLPlanWekaBuilder() throws IOException {
 		super();
 		this.withSearchSpaceConfigFile(DEF_SEARCH_SPACE_CONFIG);
-		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS);
+		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
 		this.withRequestedInterface(DEF_REQUESTED_HASCO_INTERFACE);
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
 		this.withDatasetSplitterForSearchSelectionSplit(DEF_SELECTION_HOLDOUT_SPLITTER);

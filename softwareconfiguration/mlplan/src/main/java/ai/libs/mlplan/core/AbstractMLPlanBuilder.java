@@ -24,13 +24,14 @@ import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.basic.ResourceFile;
+import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
@@ -193,19 +194,22 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * Creates a preferred node evaluator that can be used to prefer components over other components.
 	 *
 	 * @param preferredComponentsFile The file containing a priority list of component names.
+	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
 	 * @return The builder object.
 	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
 	 */
-	public AbstractMLPlanBuilder withPreferredComponentsFile(final File preferredComponentsFile) throws IOException {
+	public AbstractMLPlanBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
 		List<String> ordering;
-		if (!preferredComponentsFile.exists()) {
+		if (preferredComponentsFile instanceof ResourceFile) {
+			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
+		} else if (!preferredComponentsFile.exists()) {
 			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
 			ordering = new ArrayList<>();
 		} else {
 			ordering = FileUtil.readFileAsList(preferredComponentsFile);
 		}
-		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
+		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering, preferableCompnentMethodPrefix));
 	}
 
 	/**
@@ -364,7 +368,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withSelectionPhaseEvaluatorFactory(final MonteCarloCrossValidationEvaluatorFactory evaluatorFactory) {
+	public AbstractMLPlanBuilder withSelectionPhaseEvaluatorFactory(final IClassifierEvaluatorFactory evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
 		return this;
 	}

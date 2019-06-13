@@ -1,5 +1,7 @@
 package ai.libs.jaicore.graphvisualizer.plugin.graphview;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,10 +13,21 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.IdAlreadyInUseException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
 public class GraphViewPluginModel implements IGUIPluginModel {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphViewPluginModel.class);
+
+	private static final String DEF_RES_STYLESHEET_PATH = "searchgraph.css";
+	private static final String STYLESHEET_PATH = "conf/searchgraph.css";
+
+	private static final File DEF_STYLESHEET = FileUtil.getExistingFileWithHighestPriority(DEF_RES_STYLESHEET_PATH, STYLESHEET_PATH);
 
 	private int nodeIdCounter;
 
@@ -27,10 +40,10 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 	private ConcurrentMap<Node, Set<Edge>> nodeToConnectedEdgesMap;
 
 	public GraphViewPluginModel(final GraphViewPluginView view) {
-		this(view, "conf/searchgraph.css");
+		this(view, DEF_STYLESHEET);
 	}
 
-	public GraphViewPluginModel(final GraphViewPluginView view, final String searchGraphCSSPath) {
+	public GraphViewPluginModel(final GraphViewPluginView view, final File searchGraphCSSPath) {
 		this.view = view;
 		this.searchGraphNodesToViewGraphNodesMap = new ConcurrentHashMap<>();
 		this.viewGraphNodesToSearchGraphNodesMap = new ConcurrentHashMap<>();
@@ -40,9 +53,14 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		this.initializeGraph(searchGraphCSSPath);
 	}
 
-	private void initializeGraph(final String searchGraphCSSPath) {
+	private void initializeGraph(final File searchGraphCSSPath) {
 		this.graph = new SingleGraph("Search Graph");
-		this.graph.setAttribute("ui.stylesheet", "url('" + searchGraphCSSPath + "')");
+
+		try {
+			this.graph.setAttribute("ui.stylesheet", ResourceUtil.readResourceFileToString(searchGraphCSSPath.getPath()));
+		} catch (IOException e) {
+			LOGGER.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);
+		}
 	}
 
 	public void addNode(final Object node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {
