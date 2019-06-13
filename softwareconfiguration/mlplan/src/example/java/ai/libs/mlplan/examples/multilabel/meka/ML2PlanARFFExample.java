@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
@@ -39,7 +40,7 @@ public class ML2PlanARFFExample {
 
 	public static void main(final String[] args) throws Exception {
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("../../../datasets/classification/multi-label/emotions.arff"));
+		Instances data = new Instances(new FileReader("testrsc/flags.arff"));
 		MLUtils.prepareData(data);
 
 		IDatasetSplitter testSplitter = new ArbitrarySplitter();
@@ -60,8 +61,8 @@ public class ML2PlanARFFExample {
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();
-			IGUIPlugin[] guiPlugins = new IGUIPlugin[] { new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(),
-					new HASCOModelStatisticsPlugin() /*, new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)) */ };
+			IGUIPlugin[] guiPlugins = new IGUIPlugin[] { new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new NodeInfoGUIPlugin<>(new TFDNodeAsCIViewInfoGenerator(builder.getComponents())),
+					new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin() /*, new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)) */ };
 			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(ml2plan, new GraphViewPlugin(), guiPlugins);
 			Platform.runLater(window);
 		}

@@ -32,7 +32,7 @@ public class MLPlanARFFExample {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MLPlanARFFExample.class);
 
-	private static final boolean ACTIVATE_VISUALIZATION = false;
+	private static final boolean ACTIVATE_VISUALIZATION = true;
 
 	public static void main(final String[] args) throws Exception {
 

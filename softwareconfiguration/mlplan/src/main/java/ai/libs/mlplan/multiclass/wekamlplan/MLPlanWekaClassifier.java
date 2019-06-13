@@ -10,6 +10,7 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
@@ -69,58 +70,58 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 
 	public MLPlanWekaClassifier(final AbstractMLPlanBuilder builder) {
 		this.builder = builder;
-		timeout = builder.getTimeOut();
+		this.timeout = builder.getTimeOut();
 	}
 
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
-		Objects.requireNonNull(timeout, "Timeout must be set before running ML-Plan.");
+		Objects.requireNonNull(this.timeout, "Timeout must be set before running ML-Plan.");
 
-		MLPlan mlplan = new MLPlan(builder, data);
-		listeners.forEach(l -> mlplan.registerListener(l));
-		mlplan.setTimeout(timeout);
-		if (loggerName != null) {
-			mlplan.setLoggerName(loggerName + "." + "mlplan");
+		MLPlan mlplan = new MLPlan(this.builder, data);
+		this.listeners.forEach(l -> mlplan.registerListener(l));
+		mlplan.setTimeout(this.timeout);
+		if (this.loggerName != null) {
+			mlplan.setLoggerName(this.loggerName + "." + "mlplan");
 		}
 
-		if (visualizationEnabled) {
+		if (this.visualizationEnabled) {
 			new JFXPanel();
-			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new TFDNodeAsCIViewInfoGenerator(this.builder.getComponents())),
+					new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
 			Platform.runLater(window);
 		}
 
-		classifierFoundByMLPlan = mlplan.call();
+		this.classifierFoundByMLPlan = mlplan.call();
 	}
 
 	@Override
 	public double[] classifyInstances(final Instances instances) throws Exception {
 		/* If the selected classifier can handle batch classification, use this feature. */
-		if (getSelectedClassifier() instanceof IInstancesClassifier) {
-			return ((IInstancesClassifier) getSelectedClassifier()).classifyInstances(instances);
+		if (this.getSelectedClassifier() instanceof IInstancesClassifier) {
+			return ((IInstancesClassifier) this.getSelectedClassifier()).classifyInstances(instances);
 		}
 
 		double[] predictions = new double[instances.size()];
 		for (int i = 0; i < instances.size(); i++) {
-			predictions[i] = getSelectedClassifier().classifyInstance(instances.get(i));
+			predictions[i] = this.getSelectedClassifier().classifyInstance(instances.get(i));
 		}
 		return predictions;
 	}
 
 	@Override
 	public double classifyInstance(final Instance instance) throws Exception {
-		if (classifierFoundByMLPlan == null) {
+		if (this.classifierFoundByMLPlan == null) {
 			throw new IllegalStateException("Classifier has not been built yet.");
 		}
-		return classifierFoundByMLPlan.classifyInstance(instance);
+		return this.classifierFoundByMLPlan.classifyInstance(instance);
 	}
 
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
-		if (classifierFoundByMLPlan == null) {
+		if (this.classifierFoundByMLPlan == null) {
 			throw new IllegalStateException("Classifier has not been built yet.");
 		}
-		return classifierFoundByMLPlan.distributionForInstance(instance);
+		return this.classifierFoundByMLPlan.distributionForInstance(instance);
 	}
 
 	@Override
@@ -169,11 +170,11 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	}
 
 	public MLPlanClassifierConfig getMLPlanConfig() {
-		return builder.getAlgorithmConfig();
+		return this.builder.getAlgorithmConfig();
 	}
 
 	public Collection<Component> getComponents() throws IOException {
-		return builder.getComponents();
+		return this.builder.getComponents();
 	}
 
 	/**
@@ -190,32 +191,32 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	 * @return An object of the classifier ML-Plan has selected during the build.
 	 */
 	public Classifier getSelectedClassifier() {
-		return classifierFoundByMLPlan;
+		return this.classifierFoundByMLPlan;
 	}
 
 	/**
 	 * @return The internal validation error (during selection phase) of the selected classifier.
 	 */
 	public double getInternalValidationErrorOfSelectedClassifier() {
-		return internalValidationErrorOfSelectedClassifier;
+		return this.internalValidationErrorOfSelectedClassifier;
 	}
 
 	@Override
 	public void setLoggerName(final String name) {
-		loggerName = name;
-		logger.info("Switching logger name to {}", name);
-		logger = LoggerFactory.getLogger(name);
-		logger.info("Switched ML-Plan logger to {}", name);
+		this.loggerName = name;
+		this.logger.info("Switching logger name to {}", name);
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Switched ML-Plan logger to {}", name);
 	}
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
 	@Override
 	public void registerListener(final Object listener) {
-		listeners.add(listener);
+		this.listeners.add(listener);
 	}
 
 }

@@ -104,8 +104,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			if (!this.buildSelectedClasifierOnGivenData) {
 				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
 				this.logger.info("Selected classifier won't be built, so now blow-up is calculated.");
-			}
-			else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
+			} else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
 				double blowUpInPostprocessing = 1;
 				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 				this.logger.info("No expected blow-up for postprocessing phase has been defined. Automatically configuring {}", blowUpInPostprocessing);
@@ -162,8 +161,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 						@SuppressWarnings("unchecked")
 						HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 						try {
-							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()),
-									solution.getScore(), solution.getTimeToEvaluateCandidate());
+							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", solution.getComponentInstance().getNestedComponentDescription(), solution.getScore(),
+									solution.getTimeToEvaluateCandidate());
 						} catch (Exception e) {
 							MLPlan.this.logger.warn("Could not print log due to exception while preparing the log message.", e);
 						}
