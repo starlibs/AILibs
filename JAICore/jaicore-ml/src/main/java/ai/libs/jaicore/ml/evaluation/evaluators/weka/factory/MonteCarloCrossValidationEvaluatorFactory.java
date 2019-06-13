@@ -5,8 +5,16 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBased
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import weka.core.Instances;
 
+/**
+ * Factory for configuring standard Monte Carlo cross-validation evaluators.
+ * @author mwever
+ *
+ */
 public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossValidationBasedEvaluatorFactory {
 
+	/**
+	 * Standard C'tor.
+	 */
 	public MonteCarloCrossValidationEvaluatorFactory() {
 		super();
 	}
