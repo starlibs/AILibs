@@ -8,6 +8,7 @@ import org.aeonbits.owner.ConfigFactory;
 
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.jaicore.basic.TimeOut;
+import ai.libs.jaicore.graphvisualizer.plugin.IGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
@@ -20,7 +21,6 @@ import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanMekaBuilder;
-import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -39,20 +39,20 @@ public class ML2PlanARFFExample {
 
 	public static void main(final String[] args) throws Exception {
 		/* load data for segment dataset and create a train-test-split */
-		Instances data = new Instances(new FileReader("../../../datasets/classification/multi-label/flags.arff"));
+		Instances data = new Instances(new FileReader("../../../datasets/classification/multi-label/emotions.arff"));
 		MLUtils.prepareData(data);
 
 		IDatasetSplitter testSplitter = new ArbitrarySplitter();
 		List<Instances> split = testSplitter.split(data, 0, .7);
 
 		MLPlanClassifierConfig algoConfig = ConfigFactory.create(MLPlanClassifierConfig.class);
-		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.0");
+		algoConfig.setProperty(MLPlanClassifierConfig.SELECTION_PORTION, "0.3");
 
 		MLPlanMekaBuilder builder = AbstractMLPlanBuilder.forMeka();
 		builder.withAlgorithmConfig(algoConfig);
 		builder.withNodeEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
 		builder.withCandidateEvaluationTimeOut(new TimeOut(60, TimeUnit.SECONDS));
-		builder.withNumCpus(4);
+		builder.withNumCpus(8);
 		builder.withTimeOut(new TimeOut(150, TimeUnit.SECONDS));
 
 		MLPlan ml2plan = new MLPlan(builder, split.get(0));
@@ -60,8 +60,9 @@ public class ML2PlanARFFExample {
 
 		if (ACTIVATE_VISUALIZATION) {
 			new JFXPanel();
-			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(ml2plan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin(), new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)));
+			IGUIPlugin[] guiPlugins = new IGUIPlugin[] { new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(),
+					new HASCOModelStatisticsPlugin() /*, new OutOfSampleErrorPlotPlugin(split.get(0), split.get(1)) */ };
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(ml2plan, new GraphViewPlugin(), guiPlugins);
 			Platform.runLater(window);
 		}
 

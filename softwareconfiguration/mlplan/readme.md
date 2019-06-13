@@ -58,6 +58,18 @@ MLPlanSKLearnBuilder builder = AbstractMLPlanBuilder.forSKLearn();
 `scikit-learn`.
 Please make sure that you really have `liac-arff` installed, and **not** the `arff` package.
 
+##### Multi-Label ML-Plan for MEKA (ML2-Plan)
+```java
+MLPlanMEKABuilder builder = AbstractMLPlanBuilder.forMEKA();
+```
+
+**Note**: Datasets, i.e. Instances objects, have to be loaded according to MEKA's conventions. More specifically, in order to use Instances for multi-label classification the labels have to appear in the first columns and the class index marks the number existing labels (starting to count from the first column). The dataset preparation can be conveniently achieved as follows.
+
+```java
+Instances myDataset = new Instances(new FileReader(new File("my-dataset-file.arff")));
+MLUtils.prepareData(myDataset);
+```
+
 #### Configuring timeouts
 With the `builder` variable being configured as above, you can specify timeouts for ML-Plan as a whole, as well as timeouts for the evaluation of a single solution candidate or nodes in the search.
 By default, all these timeouts are set to 60 seconds.

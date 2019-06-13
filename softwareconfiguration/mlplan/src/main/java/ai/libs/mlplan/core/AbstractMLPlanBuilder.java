@@ -32,7 +32,6 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
@@ -369,7 +368,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withSelectionPhaseEvaluatorFactory(final MonteCarloCrossValidationEvaluatorFactory evaluatorFactory) {
+	public AbstractMLPlanBuilder withSelectionPhaseEvaluatorFactory(final IClassifierEvaluatorFactory evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
 		return this;
 	}
