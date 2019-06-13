@@ -48,10 +48,11 @@ import weka.core.OptionHandler;
  * @author wever, fmohr
  *
  */
+@SuppressWarnings("serial")
 public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IInstancesClassifier, IEventEmitter {
 
 	/* Logger for controlled output. */
-	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
+	private transient Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
 	private boolean visualizationEnabled = false;
@@ -66,7 +67,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private Classifier classifierFoundByMLPlan;
 	private double internalValidationErrorOfSelectedClassifier;
 
-	private final List<Object> listeners = new ArrayList<>();
+	private final transient List<Object> listeners = new ArrayList<>();
 
 	public MLPlanWekaClassifier(final AbstractMLPlanBuilder builder) {
 		this.builder = builder;
@@ -78,7 +79,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		Objects.requireNonNull(this.timeout, "Timeout must be set before running ML-Plan.");
 
 		MLPlan mlplan = new MLPlan(this.builder, data);
-		this.listeners.forEach(l -> mlplan.registerListener(l));
+		this.listeners.forEach(mlplan::registerListener);
 		mlplan.setTimeout(this.timeout);
 		if (this.loggerName != null) {
 			mlplan.setLoggerName(this.loggerName + "." + "mlplan");

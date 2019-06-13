@@ -70,7 +70,7 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 	 */
 	@Override
 	public void registerListener(final Object listener) {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 	 */
 	@Override
 	public AlgorithmEvent nextWithException() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -142,7 +142,7 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 	 */
 	@Override
 	public Iterator<AlgorithmEvent> iterator() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 	 */
 	@Override
 	public boolean hasNext() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -166,7 +166,7 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 	 */
 	@Override
 	public void cancel() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
+		throw new UnsupportedOperationException();
 	}
 
 }

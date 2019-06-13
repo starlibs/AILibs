@@ -16,11 +16,16 @@ import weka.core.EuclideanDistance;
 /**
  * Class statically providing preconfigured ensembles as commonly used in TSC
  * implementations.
- * 
+ *
  * @author Julian Lienen
  *
  */
 public class EnsembleProvider {
+
+	private EnsembleProvider() {
+
+		/* no instantiation desired */
+	}
 
 	/**
 	 * Initializes the CAWPE ensemble model consisting of five classifiers (SMO,
@@ -30,7 +35,7 @@ public class EnsembleProvider {
 	 * Sarah & Bagnall, Anthony. (2018). Time Series Classification with HIVE-COTE:
 	 * The Hierarchical Vote Collective of Transformation-Based Ensembles. ACM
 	 * Transactions on Knowledge Discovery from Data. 12. 1-35. 10.1145/3182382.
-	 * 
+	 *
 	 * @param seed
 	 *            Seed used within the classifiers and the majority confidence
 	 *            voting scheme
@@ -81,7 +86,7 @@ public class EnsembleProvider {
 	 * Ensembles for Time Series Classification," 2016 IEEE 16th International
 	 * Conference on Data Mining (ICDM), Barcelona, 2016, pp. 1041-1046. doi:
 	 * 10.1109/ICDM.2016.0133.
-	 * 
+	 *
 	 * @param seed
 	 *            Seed used within the classifiers and the majority confidence
 	 *            voting scheme

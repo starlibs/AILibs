@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
 import org.aeonbits.owner.ConfigCache;
@@ -205,8 +206,7 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Determine the k nearest neighbors for the test instance.
 		PriorityQueue<Pair<Integer, Double>> nearestNeighbors = this.calculateNearestNeigbors(testInstance);
 		// Vote on determined neighbors to create prediction and return prediction.
-		int prediction = this.vote(nearestNeighbors);
-		return prediction;
+		return this.vote(nearestNeighbors);
 	}
 
 	/**
@@ -282,9 +282,9 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most voted target (class that got most weights).
 		Integer maxWeightOfVotes = Integer.MIN_VALUE;
 		Integer mostVotedTargetClass = -1;
-		for (Integer targetClass : votes.keySet()) {
-			Integer votedWeightsForTargetClass = votes.get(targetClass);
-			System.out.print(targetClass + " -> " + votedWeightsForTargetClass);
+		for (Entry<Integer,Integer> entry : votes.entrySet()) {
+			int targetClass = entry.getKey();
+			int votedWeightsForTargetClass = entry.getValue();
 			if (votedWeightsForTargetClass > maxWeightOfVotes) {
 				maxWeightOfVotes = votedWeightsForTargetClass;
 				mostVotedTargetClass = targetClass;
@@ -318,8 +318,9 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most voted target (class that got most weights).
 		Double maxWeightOfVotes = Double.MIN_VALUE;
 		Integer mostVotedTargetClass = -1;
-		for (Integer targetClass : votes.keySet()) {
-			Double votedWeightsForTargetClass = votes.get(targetClass);
+		for (Entry<Integer,Double> entry : votes.entrySet()) {
+			int targetClass = entry.getKey();
+			double votedWeightsForTargetClass = entry.getValue();
 			if (votedWeightsForTargetClass > maxWeightOfVotes) {
 				maxWeightOfVotes = votedWeightsForTargetClass;
 				mostVotedTargetClass = targetClass;
@@ -351,8 +352,9 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most voted target.
 		Integer maxNumberOfVotes = Integer.MIN_VALUE;
 		Integer mostVotedTargetClass = -1;
-		for (Integer targetClass : votes.keySet()) {
-			Integer numberOfVotesForTargetClass = votes.get(targetClass);
+		for (Entry<Integer,Integer> entry : votes.entrySet()) {
+			int targetClass = entry.getKey();
+			int numberOfVotesForTargetClass = entry.getValue();
 			if (numberOfVotesForTargetClass > maxNumberOfVotes) {
 				maxNumberOfVotes = numberOfVotesForTargetClass;
 				mostVotedTargetClass = targetClass;

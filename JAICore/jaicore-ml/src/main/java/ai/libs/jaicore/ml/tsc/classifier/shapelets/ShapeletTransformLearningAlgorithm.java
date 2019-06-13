@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -129,7 +130,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	/**
 	 * Static indicator whether the bias (Bessel's) correction should be used.
 	 */
-	private static boolean USE_BIAS_CORRECTION = true;
+	private static final boolean USE_BIAS_CORRECTION = true;
 
 	/**
 	 * Strategy used for the minimum distance search.
@@ -334,13 +335,13 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 					int comparisons = C.get(i).size() * C.get(j).size();
 					for (int l = 0; l < C.get(i).size(); l++) {
 						for (int k = 0; k < C.get(j).size(); k++) {
-							Shapelet c_l = C.get(i).get(l);
-							Shapelet c_k = C.get(j).get(k);
+							Shapelet cl = C.get(i).get(l);
+							Shapelet ck = C.get(j).get(k);
 
-							if (c_l.getLength() > c_k.getLength()) {
-								distance += this.minDistanceSearchStrategy.findMinimumDistance(c_k, c_l.getData());
+							if (cl.getLength() > ck.getLength()) {
+								distance += this.minDistanceSearchStrategy.findMinimumDistance(ck, cl.getData());
 							} else {
-								distance += this.minDistanceSearchStrategy.findMinimumDistance(c_l, c_k.getData());
+								distance += this.minDistanceSearchStrategy.findMinimumDistance(cl, ck.getData());
 							}
 						}
 					}
@@ -427,7 +428,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 			kShapelets = merge(k, kShapelets, shapelets);
 		}
 
-		return kShapelets.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+		return kShapelets.stream().map(Entry::getKey).collect(Collectors.toList());
 	}
 
 	/**

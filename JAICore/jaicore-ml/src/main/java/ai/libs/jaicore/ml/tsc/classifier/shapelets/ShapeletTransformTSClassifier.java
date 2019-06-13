@@ -213,7 +213,7 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 		try {
 			return (int) Math.round(this.classifier.classifyInstance(inst));
 		} catch (Exception e) {
-			throw new PredictionException(String.format("Could not predict Weka instance {}.", inst.toString()), e);
+			throw new PredictionException(String.format("Could not predict Weka instance %s.", inst.toString()), e);
 		}
 	}
 
@@ -269,7 +269,7 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 				double prediction = this.classifier.classifyInstance(inst);
 				predictions.add((int) Math.round(prediction));
 			} catch (Exception e) {
-				throw new PredictionException(String.format("Could not predict Weka instance {}.", inst.toString()), e);
+				throw new PredictionException(String.format("Could not predict Weka instance %s.", inst.toString()), e);
 			}
 		}
 		LOGGER.debug("Finished prediction.");

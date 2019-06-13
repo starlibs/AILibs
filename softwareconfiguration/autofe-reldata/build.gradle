@@ -8,6 +8,8 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 	compile project(':JAICore:jaicore-experiments')
+	
+	compile project(':autofe')
 
 	compile 'com.google.code.gson:gson:2.8.5'
 	compile 'org.xerial:sqlite-jdbc:3.23.1'

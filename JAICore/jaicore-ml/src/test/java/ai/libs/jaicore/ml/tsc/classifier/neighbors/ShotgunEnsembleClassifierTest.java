@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.tsc.classifier.neighbors;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,9 +11,6 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import ai.libs.jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleClassifier;
-import ai.libs.jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleLearnerAlgorithm;
 
 /**
  * Test suite for the
@@ -26,7 +24,6 @@ public class ShotgunEnsembleClassifierTest {
 	ShotgunEnsembleLearnerAlgorithm algorithm;
 
 	ShotgunEnsembleClassifier shotgunEnsembleClassifier;
-
 
 	// Set up model and algorithm.
 	private int minWindowLength = 3;
@@ -42,11 +39,6 @@ public class ShotgunEnsembleClassifierTest {
 	}
 
 	@Test
-	public void testCorrectnessCalculateWindowLengthPredictionsOnInstance() {
-		// TODO
-	}
-
-	@Test
 	public void testMostFrequentLabelFromWindowLengthPredicitons() {
 		Map<Integer, Integer> windowLengthPredicitions = new HashMap<>();
 		windowLengthPredicitions.put(2, 1);
@@ -57,15 +49,9 @@ public class ShotgunEnsembleClassifierTest {
 		windowLengthPredicitions.put(7, 2);
 		windowLengthPredicitions.put(8, 3);
 		windowLengthPredicitions.put(9, 3);
-		int mostFrequentlabel = this.shotgunEnsembleClassifier
-				.mostFrequentLabelFromWindowLengthPredicitions(windowLengthPredicitions);
+		int mostFrequentlabel = this.shotgunEnsembleClassifier.mostFrequentLabelFromWindowLengthPredicitions(windowLengthPredicitions);
 		int expectation = 2;
 		assertEquals(expectation, mostFrequentlabel);
-	}
-
-	@Test
-	public void testCorrectnessForCalculateWindowLengthPredictionsOnDataset() {
-		// TODO
 	}
 
 	@Test
@@ -77,14 +63,13 @@ public class ShotgunEnsembleClassifierTest {
 		List<Integer> list3 = Arrays.asList(2, 1, 3, 2, 1);
 		List<Integer> list4 = Arrays.asList(1, 2, 3, 3, 1);
 		windowLengthPredicitions.put(1, list1);
-		windowLengthPredicitions.put(2, list1);
-		windowLengthPredicitions.put(3, list1);
-		windowLengthPredicitions.put(4, list1);
+		windowLengthPredicitions.put(2, list2);
+		windowLengthPredicitions.put(3, list3);
+		windowLengthPredicitions.put(4, list4);
 		// Expectation.
 		int[] expectation = { 1, 2, 3, 1, 1 };
 
-		List<Integer> mostFrequentLabels = this.shotgunEnsembleClassifier
-				.mostFrequentLabelsFromWindowLengthPredicitions(windowLengthPredicitions);
+		List<Integer> mostFrequentLabels = this.shotgunEnsembleClassifier.mostFrequentLabelsFromWindowLengthPredicitions(windowLengthPredicitions);
 
 		assertArrayEquals(expectation, mostFrequentLabels.stream().mapToInt(i -> i).toArray());
 	}
@@ -122,6 +107,7 @@ public class ShotgunEnsembleClassifierTest {
 		// Minimal factor.
 		double factor = Double.MIN_VALUE;
 		new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		assertTrue(true); // this part must be reached
 	}
 
 	@Test
@@ -129,6 +115,7 @@ public class ShotgunEnsembleClassifierTest {
 		// Some valid factor in between.
 		double factor = 0.5;
 		new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		assertTrue(true); // this part must be reached
 	}
 
 	@Test
@@ -136,5 +123,6 @@ public class ShotgunEnsembleClassifierTest {
 		// Maximal factor.
 		double factor = 1;
 		new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, factor);
+		assertTrue(true); // this part must be reached
 	}
 }

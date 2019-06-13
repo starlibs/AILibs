@@ -131,11 +131,9 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		}
 
 		// Get number classes
-		int C = TimeSeriesUtil.getNumberOfClasses(dataset);
+		int numClasses = TimeSeriesUtil.getNumberOfClasses(dataset);
 
-		// Standardize each time series to zero mean and unit standard deviation (z
-		// transformation)
-		// TODO: Use unifying implementation
+		// Standardize each time series to zero mean and unit standard deviation (z-transformation)
 		if (this.getConfig().zNormalization()) {
 			for (int i = 0; i < dataset.getNumberOfInstances(); i++) {
 				data[i] = TimeSeriesUtil.zNormalize(data[i], true);
@@ -200,7 +198,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		subseriesClf.setNumIterations(NUM_TREES_IN_FOREST);
 		double[][] probs = null;
 		try {
-			probs = measureOOBProbabilitiesUsingCV(subSeqValueMatrix, targetMatrix, (r - d) * data.length, this.getConfig().numFolds(), C, subseriesClf);
+			probs = measureOOBProbabilitiesUsingCV(subSeqValueMatrix, targetMatrix, (r - d) * data.length, this.getConfig().numFolds(), numClasses, subseriesClf);
 		} catch (TrainingException e1) {
 			throw new AlgorithmException(e1, "Could not measure OOB probabilities using CV.");
 		}
@@ -214,7 +212,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 
 		// Discretize probability and form histogram
 		int[][] discretizedProbs = discretizeProbs(this.getConfig().numBins(), probs);
-		Pair<int[][][], int[][]> histFreqPair = formHistogramsAndRelativeFreqs(discretizedProbs, targets, data.length, C, this.getConfig().numBins());
+		Pair<int[][][], int[][]> histFreqPair = formHistogramsAndRelativeFreqs(discretizedProbs, targets, data.length, numClasses, this.getConfig().numBins());
 		int[][][] histograms = histFreqPair.getX();
 		int[][] relativeFrequencies = histFreqPair.getY();
 
@@ -232,7 +230,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		TimeSeriesBagOfFeaturesClassifier model = this.getClassifier();
 		model.setSubseriesClf(subseriesClf);
 		model.setFinalClf(finalClf);
-		model.setNumClasses(C);
+		model.setNumClasses(numClasses);
 		model.setIntervals(intervals);
 		model.setSubsequences(subsequences);
 		return model;
@@ -284,7 +282,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 				intervals[i][j][1] = subsequences[i][0] + (j + 1) * intervalLength; // exclusive
 			}
 		}
-		return new Pair<int[][], int[][][]>(subsequences, intervals);
+		return new Pair<>(subsequences, intervals);
 	}
 
 	/**
@@ -426,15 +424,13 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 
 			// Prepare test instances
 			TimeSeriesDataset testDataset = trainingTestDatasets.getY();
-			Instances testInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(testDataset, IntStream.rangeClosed(0, numClasses - 1).boxed().map(v -> String.valueOf(v)).collect(Collectors.toList()));
+			Instances testInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(testDataset, IntStream.rangeClosed(0, numClasses - 1).boxed().map(String::valueOf).collect(Collectors.toList()));
 
 			double[][] testProbs = null;
 			try {
 				testProbs = rf.distributionsForInstances(testInstances);
 			} catch (Exception e) {
-				String errorMessage = "Could not induce test probabilities in OOB probability estimation due to an internal Weka error.";
-				LOGGER.error(errorMessage, e);
-				throw new TrainingException(errorMessage, e);
+				throw new TrainingException("Could not induce test probabilities in OOB probability estimation due to an internal Weka error.", e);
 			}
 
 			// Store induced probabilities
@@ -508,7 +504,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 			}
 		}
 
-		return new Pair<int[][][], int[][]>(histograms, relativeFrequencies);
+		return new Pair<>(histograms, relativeFrequencies);
 	}
 
 	/**

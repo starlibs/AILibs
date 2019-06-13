@@ -9,6 +9,11 @@ import java.util.stream.DoubleStream;
  *
  */
 public class MathUtil {
+
+	private MathUtil() {
+		/* no instantiation desired */
+	}
+
 	/**
 	 * Function to calculate the sigmoid for the given value <code>z</code>.
 	 *
@@ -57,16 +62,16 @@ public class MathUtil {
 	 * Simple Manhattan distance (sum of the absolute differences between the
 	 * vectors' elements) implementation for arrays of Integer.
 	 *
-	 * @param A
+	 * @param a
 	 *            First argument vector
-	 * @param B
+	 * @param b
 	 *            Second argument vector
 	 * @return Returns the Manhattan distance of the two given vectors
 	 */
-	public static double intManhattanDistance(final int[] A, final int[] B) {
+	public static double intManhattanDistance(final int[] a, final int[] b) {
 		double result = 0;
-		for (int j = 0; j < A.length; j++) {
-			result += Math.abs(A[j] - B[j]);
+		for (int j = 0; j < a.length; j++) {
+			result += Math.abs(a[j] - b[j]);
 		}
 		return result;
 	}
