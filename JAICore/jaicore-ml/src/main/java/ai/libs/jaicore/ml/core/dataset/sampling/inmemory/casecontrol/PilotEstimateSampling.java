@@ -8,9 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.classifiers.Classifier;
@@ -20,15 +21,18 @@ import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 
-public abstract class PilotEstimateSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
+public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
 
 	protected int preSampleSize;
 	private I chosenInstance = null;
 
-	protected PilotEstimateSampling(final IDataset<I> input) {
+	protected PilotEstimateSampling(final D input) {
 		super(input);
+		if (!(input instanceof WekaInstances)) {
+			throw new IllegalArgumentException("Pilot Estimate Sampling currently only works with WekaInstances. The signature is kept general to avoid refactoring later on.");
+		}
 	}
 
 	public I getChosenInstance() {
@@ -40,12 +44,13 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+		this.logger.info("Executing next step.");
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			this.doInitStep();
 			break;
-		case active:
+		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
 				do {
 					double r = this.rand.nextDouble();
@@ -65,7 +70,7 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:
@@ -74,94 +79,87 @@ public abstract class PilotEstimateSampling<I extends IInstance> extends CaseCon
 		return null;
 	}
 
-	private AlgorithmEvent doInitStep() {
-		this.sample = this.getInput().createEmpty();
-		if (this.probabilityBoundaries == null || this.chosenInstance == null) {
-			Classifier pilotEstimator = new Logistic();
-			// set preSampleSize to |Dataset|/2 as default value, if preSampleSize would be
-			// smaller than 1
-			if (this.preSampleSize < 1) {
-				this.preSampleSize = this.getInput().size() / 2;
-			}
-			IDataset<I> pilotEstimateSample = this.getInput().createEmpty();
-			IDataset<I> sampleCopy = this.getInput().createEmpty();
+	private AlgorithmEvent doInitStep() throws AlgorithmException, InterruptedException {
+		try {
+			this.sample = (D) this.getInput().createEmpty();
+			if (this.probabilityBoundaries == null || this.chosenInstance == null) {
+				Classifier pilotEstimator = new Logistic();
+				// set preSampleSize to |Dataset|/2 as default value, if preSampleSize would be
+				// smaller than 1
+				if (this.preSampleSize < 1) {
+					this.preSampleSize = this.getInput().size() / 2;
+				}
+				D pilotEstimateSample = (D) this.getInput().createEmpty();
+				D sampleCopy = (D) this.getInput().createEmpty();
 
-			for (I instance : this.getInput()) {
-				sampleCopy.add(instance);
-			}
+				for (I instance : this.getInput()) {
+					sampleCopy.add(instance);
+				}
 
-			HashMap<Object, Integer> classOccurrences = this.countClassOccurrences(sampleCopy);
+				HashMap<Object, Integer> classOccurrences = this.countClassOccurrences(sampleCopy);
 
-			// Count number of classes
-			int numberOfClasses = classOccurrences.keySet().size();
+				// Count number of classes
+				int numberOfClasses = classOccurrences.keySet().size();
 
-			// Calculate Boundaries that define which Instances is choose for which random
-			// number
-			this.probabilityBoundaries = this.calculateInstanceBoundaries(classOccurrences, numberOfClasses);
+				// Calculate Boundaries that define which Instances is choose for which random
+				// number
+				this.probabilityBoundaries = this.calculateInstanceBoundaries(classOccurrences, numberOfClasses);
 
-			double r;
-			I choosenInstance;
-			for (int i = 0; i < this.preSampleSize; i++) {
-				do {
-					r = this.rand.nextDouble();
-					choosenInstance = null;
-					for (int j = 0; j < this.probabilityBoundaries.size(); j++) {
-						if (this.probabilityBoundaries.get(j).getY().doubleValue() > r) {
-							choosenInstance = this.probabilityBoundaries.get(j).getX();
-							break;
+				double r;
+				I choosenInstance;
+				for (int i = 0; i < this.preSampleSize; i++) {
+					do {
+						r = this.rand.nextDouble();
+						choosenInstance = null;
+						for (int j = 0; j < this.probabilityBoundaries.size(); j++) {
+							if (this.probabilityBoundaries.get(j).getY().doubleValue() > r) {
+								choosenInstance = this.probabilityBoundaries.get(j).getX();
+								break;
+							}
 						}
-					}
-					if (choosenInstance == null) {
-						choosenInstance = this.probabilityBoundaries.get(this.probabilityBoundaries.size() - 1).getX();
-					}
-				} while (pilotEstimateSample.contains(choosenInstance));
-				pilotEstimateSample.add(choosenInstance);
-			}
-			Instances pilotEstimateInstances = ((WekaInstances) pilotEstimateSample).getList();
+						if (choosenInstance == null) {
+							choosenInstance = this.probabilityBoundaries.get(this.probabilityBoundaries.size() - 1).getX();
+						}
+					} while (pilotEstimateSample.contains(choosenInstance));
+					pilotEstimateSample.add(choosenInstance);
+				}
+				Instances pilotEstimateInstances = ((WekaInstances<?>) pilotEstimateSample).getList();
 
-			NumericToNominal numericToNominal = new NumericToNominal();
-			String[] options = new String[2];
-			options[0] = "-R";
-			options[1] = "last";
-			try {
+				NumericToNominal numericToNominal = new NumericToNominal();
+				String[] options = new String[2];
+				options[0] = "-R";
+				options[1] = "last";
 				numericToNominal.setOptions(options);
 				numericToNominal.setInputFormat(pilotEstimateInstances);
-			} catch (Exception e) {
-				this.logger.error("Unexpected error", e);
-				this.terminate();
-			}
 
-			try {
 				pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
-			} catch (Exception e) {
-				this.logger.error("Cannot apply filter", e);
-				this.terminate();
-			}
 
-			ArrayList<Pair<Double, Double>> classMapping = new ArrayList<>();
-			boolean classNotInMapping;
-			for (Instance in : pilotEstimateInstances) {
-				classNotInMapping = true;
-				for (Pair<Double, Double> classPair : classMapping) {
-					if (in.classValue() == classPair.getX().doubleValue()) {
-						classNotInMapping = false;
+				ArrayList<Pair<Double, Double>> classMapping = new ArrayList<>();
+				boolean classNotInMapping;
+				for (Instance in : pilotEstimateInstances) {
+					classNotInMapping = true;
+					for (Pair<Double, Double> classPair : classMapping) {
+						if (in.classValue() == classPair.getX().doubleValue()) {
+							classNotInMapping = false;
+						}
+					}
+					if (classNotInMapping) {
+						classMapping.add(new Pair<Double, Double>(in.classValue(), (double) classMapping.size()));
 					}
 				}
-				if (classNotInMapping) {
-					classMapping.add(new Pair<Double, Double>(in.classValue(), (double) classMapping.size()));
-				}
-			}
 
-			try {
 				pilotEstimator.buildClassifier(pilotEstimateInstances);
-			} catch (Exception e) {
-				this.logger.error("Cannot build classifier", e);
-				this.terminate();
+				this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 			}
-			this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(((WekaInstances) sampleCopy).getList(), pilotEstimator);
+		} catch (DatasetCreationException e1) {
+			throw new AlgorithmException(e1, "Could not create a copy of the dataset.");
+		} catch (InterruptedException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new AlgorithmException(e, "Unexpected error");
 		}
 		return this.activate();
 	}
 
-	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(Instances instances, Classifier pilotEstimator);
+	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(D instances, Classifier pilotEstimator);
 }

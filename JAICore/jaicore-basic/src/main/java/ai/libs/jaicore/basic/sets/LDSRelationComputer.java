@@ -3,9 +3,14 @@ package ai.libs.jaicore.basic.sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
@@ -29,13 +34,16 @@ import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
  */
 public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProblem<T>, List<List<T>>> {
 
-	private class Node {
-		Node parent;
-		int defficiency;
-		int indexOfSet;
-		int indexOfValue;
+	private Logger logger = LoggerFactory.getLogger(LDSRelationComputer.class);
 
-		public Node() { }
+	private class Node {
+		private Node parent;
+		private int defficiency;
+		private int indexOfSet;
+		private int indexOfValue;
+
+		public Node() {
+		}
 
 		public Node(final Node parent, final int indexOfSet, final int defficiency, final int indexInSet) {
 			long start = System.currentTimeMillis();
@@ -101,15 +109,18 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+		this.logger.debug("Conducting next algorithm step.");
 		switch (this.getState()) {
-		case created: {
+		case CREATED:
 			this.open.add(new Node(null, -1, 0, 0));
 			this.numCreatedNodes++;
+			this.logger.info("Created algorithm for LDS Relation among {} sets with the following cardinalities: {}.", this.sets.size(), this.sets.stream().map(Collection::size).collect(Collectors.toList()));
 			return this.activate();
-		}
-		case active: {
+
+		case ACTIVE:
 			this.checkAndConductTermination();
 			if (this.open.isEmpty()) {
+				this.logger.info("Nothing more to compute, return AlgorithmFinishedEvent.");
 				return this.terminate();
 			}
 
@@ -154,6 +165,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 
 			/* at this point, next should contain a fully specified tuple. If no next element exists, or the chosen node is not a leaf, terminate */
 			if (next == null || next.indexOfSet < this.sets.size() - 1) {
+				this.logger.info("No next tuple found, return AlgorithmFinishedEvent.");
 				return this.terminate();
 			}
 			this.computedTuples++;
@@ -166,8 +178,9 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 			this.numRecycledNodes++;
 			List<T> tuple = new ArrayList<>(this.currentTuple);
 			assert this.currentTuple.size() == this.numSets : "Tuple " + this.currentTuple + " should contain " + this.numSets + " elements but has " + this.currentTuple.size();
+			this.logger.debug("Computed tuple {}", tuple);
 			return new TupleOfCartesianProductFoundEvent<>(this.getId(), tuple);
-		}
+
 		default:
 			throw new IllegalStateException();
 		}
@@ -179,7 +192,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		while (this.hasNext()) {
 			AlgorithmEvent e = this.nextWithException();
 			if (e instanceof AlgorithmFinishedEvent) {
-				return null;
+				throw new NoSuchElementException();
 			} else if (e instanceof TupleOfCartesianProductFoundEvent) {
 				return ((TupleOfCartesianProductFoundEvent<T>) e).getTuple();
 			} else if (!(e instanceof AlgorithmInitializedEvent)) {
@@ -193,9 +206,15 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	public List<List<T>> call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		List<List<T>> product = new ArrayList<>();
 		List<T> nextTuple;
-		while ((nextTuple = this.nextTuple()) != null) {
-			product.add(nextTuple);
+		try {
+			while (this.hasNext() && (nextTuple = this.nextTuple()) != null) {
+				assert nextTuple.size() == this.sets.size() : "The returned tuple " + nextTuple + " does not have " + this.sets.size() + " entries.";
+				product.add(nextTuple);
+			}
+		} catch (NoSuchElementException e) {
+			this.logger.info("No more solutions exist.");
 		}
+		this.logger.info("Returning a set of {} tuples.", product.size());
 		return product;
 	}
 
@@ -205,5 +224,17 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 
 	public int getNumCreatedNodes() {
 		return this.numCreatedNodes;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		super.setLoggerName(name + "._algorithm");
+		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Switched logger to {}", name);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }

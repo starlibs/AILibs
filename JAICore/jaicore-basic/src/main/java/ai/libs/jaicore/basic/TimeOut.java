@@ -1,8 +1,10 @@
 package ai.libs.jaicore.basic;
 
+import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
-public class TimeOut {
+@SuppressWarnings("serial")
+public class TimeOut implements Serializable {
 
 	private final TimeUnit unit;
 	private final long duration;

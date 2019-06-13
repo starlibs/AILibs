@@ -62,7 +62,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 	public AlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			// Sort dataset and skip with reader the ARFF header.
 			File sortedDatasetFile = null;
 			try {
@@ -96,7 +96,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Was not able to count the datapoints.");
 			}
-		case active:
+		case ACTIVE:
 			// If the sample size is not reached yet, add the next datapoint from the
 			// systematic sampling method.
 			if (this.addedDatapoints < this.sampleSize) {
@@ -122,7 +122,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				this.cleanUp();
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.cleanUp();
 			if (this.addedDatapoints < this.sampleSize) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");

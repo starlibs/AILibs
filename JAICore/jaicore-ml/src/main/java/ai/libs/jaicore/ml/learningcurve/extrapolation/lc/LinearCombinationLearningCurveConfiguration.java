@@ -8,7 +8,7 @@ import java.util.List;
  * parameterizations are given, the value of the learning curve can be
  * calculated by averaging the values of the individual linear combination
  * functions.
- * 
+ *
  * @author Felix Weiland
  *
  */
@@ -17,10 +17,10 @@ public class LinearCombinationLearningCurveConfiguration {
 	private List<LinearCombinationParameterSet> parameterSets;
 
 	public List<LinearCombinationParameterSet> getParameterSets() {
-		return parameterSets;
+		return this.parameterSets;
 	}
 
-	public void setParameterSets(List<LinearCombinationParameterSet> parameterSets) {
+	public void setParameterSets(final List<LinearCombinationParameterSet> parameterSets) {
 		this.parameterSets = parameterSets;
 	}
 
@@ -28,25 +28,27 @@ public class LinearCombinationLearningCurveConfiguration {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((parameterSets == null) ? 0 : parameterSets.hashCode());
+		result = prime * result + ((this.parameterSets == null) ? 0 : this.parameterSets.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass()) {
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		LinearCombinationLearningCurveConfiguration other = (LinearCombinationLearningCurveConfiguration) obj;
-		if (parameterSets == null) {
+		if (this.parameterSets == null) {
 			if (other.parameterSets != null) {
 				return false;
 			}
-		} else if (!parameterSets.equals(other.parameterSets)) {
+		} else if (!this.parameterSets.equals(other.parameterSets)) {
 			return false;
 		}
 		return true;
@@ -54,7 +56,7 @@ public class LinearCombinationLearningCurveConfiguration {
 
 	@Override
 	public String toString() {
-		return "LinearCombinationLearningCurveConfiguration [parameterSets=" + parameterSets + "]";
+		return "LinearCombinationLearningCurveConfiguration [parameterSets=" + this.parameterSets + "]";
 	}
 
 }

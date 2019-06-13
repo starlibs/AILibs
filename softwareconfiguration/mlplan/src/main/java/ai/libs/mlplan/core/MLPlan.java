@@ -73,7 +73,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			this.logger.info("Starting an ML-Plan instance.");
 			AlgorithmInitializedEvent event = this.activate();
 
@@ -104,8 +104,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			if (!this.buildSelectedClasifierOnGivenData) {
 				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(0));
 				this.logger.info("Selected classifier won't be built, so now blow-up is calculated.");
-			}
-			else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
+			} else if (Double.isNaN(this.getConfig().expectedBlowupInPostprocessing())) {
 				double blowUpInPostprocessing = 1;
 				this.getConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 				this.logger.info("No expected blow-up for postprocessing phase has been defined. Automatically configuring {}", blowUpInPostprocessing);
@@ -129,8 +128,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
 						this.getInput().hashCode(), this.builder.getPerformanceMeasureName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
-						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch,
-						classifierEvaluatorForSelection, this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
+						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch.getBenchmark(),
+						classifierEvaluatorForSelection.getBenchmark(), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}
 
 			/* create 2-phase software configuration problem */
@@ -162,8 +161,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 						@SuppressWarnings("unchecked")
 						HASCOSolutionCandidate<Double> solution = ((HASCOSolutionEvent<Double>) event).getSolutionCandidate();
 						try {
-							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()),
-									solution.getScore(), solution.getTimeToEvaluateCandidate());
+							MLPlan.this.logger.info("Received new solution {} with score {} and evaluation time {}ms", solution.getComponentInstance().getNestedComponentDescription(), solution.getScore(),
+									solution.getTimeToEvaluateCandidate());
 						} catch (Exception e) {
 							MLPlan.this.logger.warn("Could not print log due to exception while preparing the log message.", e);
 						}
@@ -195,7 +194,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			this.logger.info("Started and activated ML-Plan.");
 			return event;
 
-		case active:
+		case ACTIVE:
 
 			/* train the classifier returned by the optimizing factory */
 			long startOptimizationTime = System.currentTimeMillis();

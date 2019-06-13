@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,11 +16,13 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.interfaces.LabeledInstance;
 import ai.libs.jaicore.ml.interfaces.LabeledInstances;
 
 @SuppressWarnings("serial")
 public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String>> implements LabeledInstances<String> {
+	private static final Logger logger = LoggerFactory.getLogger(SimpleLabeledInstancesImpl.class);
 
 	private int numColumns = -1;
 
@@ -78,7 +83,7 @@ public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String
 		try {
 			return om.writeValueAsString(root);
 		} catch (JsonProcessingException e) {
-			e.printStackTrace();
+			logger.error(LoggerUtil.getExceptionInfo(e));
 			return null;
 		}
 	}
@@ -118,5 +123,32 @@ public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String
 	@Override
 	public void addAllFromJson(final File jsonFile) throws IOException {
 		this.addAllFromJson(FileUtil.readFileAsString(jsonFile));
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + this.numColumns;
+		result = prime * result + this.occurringLabels.hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		SimpleLabeledInstancesImpl other = (SimpleLabeledInstancesImpl) obj;
+		if (this.numColumns != other.numColumns) {
+			return false;
+		}
+		return this.occurringLabels.equals(other.occurringLabels);
 	}
 }

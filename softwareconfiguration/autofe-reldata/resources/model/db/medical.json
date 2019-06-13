@@ -1,0 +1,425 @@
+{
+  "tables": [
+    {
+      "name": "Examination",
+      "columns": [
+        {
+          "fullName": "Examination.ID",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "Examination.Examination Date",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.aCL IgG",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.aCL IgM",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.ANA",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.ANA Pattern",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.aCL IgA",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.Diagnosis",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.KCT",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.RVVT",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.LAC",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.Symptoms",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Examination.Thrombosis",
+          "type": "NUMERIC",
+          "isTarget": true,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": true
+    },
+    {
+      "name": "Laboratory",
+      "columns": [
+        {
+          "fullName": "Laboratory.ID",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "Laboratory.Date",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.GOT",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.GPT",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.LDH",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.ALP",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.TP",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.ALB",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.UA",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.UN",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.CRE",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.T-BIL",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.T-CHO",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.TG",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.CPK",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.GLU",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.WBC",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.RBC",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.HGB",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.HCT",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.PLT",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.PT",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.APTT",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.FG",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.PIC",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.TAT",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.TAT2",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.U-PRO",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.IGG",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.IGA",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.IGM",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.CRP",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.RA",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.RF",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.C3",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.C4",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.RNP",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.SM",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.SC170",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.SSA",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.SSB",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.CENTROMEA",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.DNA",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Laboratory.DNA-II",
+          "type": "NUMERIC",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    },
+    {
+      "name": "Patient",
+      "columns": [
+        {
+          "fullName": "Patient.ID",
+          "type": "ID",
+          "isTarget": false,
+          "isPrimaryKey": true
+        },
+        {
+          "fullName": "Patient.SEX",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Patient.Birthday",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Patient.Description",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Patient.First Date",
+          "type": "DATE",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Patient.Admission",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        },
+        {
+          "fullName": "Patient.Diagnosis",
+          "type": "TEXT",
+          "isTarget": false,
+          "isPrimaryKey": false
+        }
+      ],
+      "isTarget": false
+    }],
+  "forwards": [
+    {
+      "fromTableName": "Examination",
+      "toTableName": "Patient",
+      "commonAttributeName": "ID"
+    }
+  ],
+  "backwards": [
+    {
+      "fromTableName": "Patient",
+      "toTableName": "Laboratory",
+      "commonAttributeName": "ID"
+    }
+  ],
+  "jdbcDriver": "mysql",
+  "jdbcUrl" : "isys-db.cs.upb.de",
+  "jdbcUsername" : "pgotfml",
+  "jdbcPassword" : "automl2018",
+  "jdbcDatabase" : "fweiland_medical"
+
+}

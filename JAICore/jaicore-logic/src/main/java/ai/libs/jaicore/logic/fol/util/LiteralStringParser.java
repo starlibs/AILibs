@@ -15,9 +15,14 @@ import ai.libs.jaicore.logic.fol.structure.LiteralSet;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 
 public class LiteralStringParser {
+
 	private static Pattern basicPattern = Pattern.compile("(!|~)?(.*)\\(([^\\)]*)\\)");
 
-	public static LiteralSet convertStringToLiteralSetWithConst(String literalSetString, Set<String> evaluablePredicates) {
+	private LiteralStringParser() {
+		/* do nothing */
+	}
+
+	public static LiteralSet convertStringToLiteralSetWithConst(final String literalSetString, final Set<String> evaluablePredicates) {
 		LiteralSet literalSet = new LiteralSet();
 
 		String[] literals = literalSetString.split("&");
@@ -34,13 +39,12 @@ public class LiteralStringParser {
 		string = string.trim();
 
 		Matcher matcher = basicPattern.matcher(string);
-		if (!matcher.find())
+		if (!matcher.find()) {
 			return null;
+		}
 		MatchResult results = matcher.toMatchResult();
 		String predicateName = results.group(2); // position 2 is predicate name
-		String[] paramsAsStrings = results.group(3).split(","); // position 3
-																// are the
-																// variables
+		String[] paramsAsStrings = results.group(3).split(","); // position 3 are the variables
 		List<LiteralParam> params = new LinkedList<>();
 		for (int i = 0; i < paramsAsStrings.length; i++) {
 			String param = paramsAsStrings[i].trim();

@@ -5,8 +5,9 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.ml.clustering.GMeans;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 
 /**
  * Implementation of a sampling method using gmeans-clustering. This algorithm
@@ -15,38 +16,42 @@ import ai.libs.jaicore.ml.core.dataset.IInstance;
  * center is added, otherwise the whole cluster is added to the sample.
  * <p>
  * Caution: This does ignore the given sample size!
- * 
+ *
  * @author jnowack
  *
  */
-public class GmeansSampling<I extends IInstance> extends ClusterSampling<I> {
+public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ClusterSampling<I, D> {
 
-	public GmeansSampling(long seed, DistanceMeasure dist, IDataset<I> input) {
+	public GmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
 	}
 
-	public GmeansSampling(long seed, IDataset<I> input) {
+	public GmeansSampling(final long seed, final D input) {
 		super(seed, input);
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 			// Initialize variables
-			this.sample = getInput().createEmpty();
+			try {
+				this.sample = (D)this.getInput().createEmpty();
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			}
 
 			if (this.clusterResults == null) {
 				// create cluster
-				GMeans<I> gMeansCluster = new GMeans<>(getInput(), distanceMeassure, seed);
-				clusterResults = gMeansCluster.cluster();
+				GMeans<I> gMeansCluster = new GMeans<>(this.getInput(), this.distanceMeassure, this.seed);
+				this.clusterResults = gMeansCluster.cluster();
 			}
 
 			return this.activate();
-		case active:
+		case ACTIVE:
 			this.doAlgorithmStep();
 			break;
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

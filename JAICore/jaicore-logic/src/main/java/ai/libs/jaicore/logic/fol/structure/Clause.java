@@ -5,7 +5,7 @@ import java.util.Map;
 import ai.libs.jaicore.logic.fol.util.LogicUtil;
 
 public class Clause extends LiteralSet {
-	public static Clause getByNegatingMonom(Monom m) {
+	public static Clause getByNegatingMonom(final Monom m) {
 		Clause c = new Clause();
 		for (Literal l : m) {
 			c.add(new Literal(l.getProperty(), l.getParameters(), !l.isPositive()));
@@ -17,11 +17,11 @@ public class Clause extends LiteralSet {
 		super();
 	}
 
-	public Clause(Literal l) {
+	public Clause(final Literal l) {
 		super(l);
 	}
 
-	public Clause(LiteralSet literals, Map<VariableParam, ? extends LiteralParam> m) {
+	public Clause(final LiteralSet literals, final Map<VariableParam, ? extends LiteralParam> m) {
 		super();
 		for (Literal l : literals) {
 			Literal lCopy = l.clone(m);
@@ -32,18 +32,18 @@ public class Clause extends LiteralSet {
 					this.add(new Literal("!A"));
 					return;
 				}
-			}
-			else
+			} else {
 				this.add(lCopy);
+			}
 		}
 	}
-	
-	public Clause(String literals) {
+
+	public Clause(final String literals) {
 		super(literals, "\\|");
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 3915423297171319761L;
 

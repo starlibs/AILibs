@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -22,17 +23,17 @@ public class RPNDSplitter implements ISplitter {
 	private final Random rand;
 	private final Classifier rpndClassifier;
 
-	public RPNDSplitter(Random rand, Classifier rpndClassifier) {
+	public RPNDSplitter(final Random rand, final Classifier rpndClassifier) {
 		super();
 		this.rand = rand;
 		this.rpndClassifier = rpndClassifier;
 	}
 
 	@Override
-	public Collection<Collection<String>> split(Instances data) throws Exception {
+	public Collection<Collection<String>> split(final Instances data) throws Exception {
 
 		Collection<String> classes = WekaUtil.getClassesActuallyContainedInDataset(data);
-		
+
 		/* 2. if we have a leaf node, abort */
 		if (classes.size() == 1) {
 			Collection<Collection<String>> split = new ArrayList<>();
@@ -42,24 +43,24 @@ public class RPNDSplitter implements ISplitter {
 
 		/* 3a. otherwise select randomly two classes */
 		List<String> copy = new ArrayList<>(classes);
-		Collections.shuffle(copy, rand);
+		Collections.shuffle(copy, this.rand);
 		String c1 = copy.get(0);
 		String c2 = copy.get(1);
 		Collection<String> s1 = new HashSet<>();
 		s1.add(c1);
 		Collection<String> s2 = new HashSet<>();
 		s2.add(c2);
-		return split(copy, s1, s2, data);
+		return this.split(copy, s1, s2, data);
 	}
 
-	public Collection<Collection<String>> split(Collection<String> classes, Collection<String> s1, Collection<String> s2, Instances data) throws Exception {
+	public Collection<Collection<String>> split(final Collection<String> classes, final Collection<String> s1, final Collection<String> s2, final Instances data) throws Exception {
 
 		logger.info("Start creation of RPND split with basis {}/{} for classes {}", s1, s2, classes);
 
 		/* 3b. and 3c. train binary classifiers for c1 vs c2 */
 		Instances reducedData = WekaUtil.mergeClassesOfInstances(data, s1, s2);
 		logger.debug("Building classifier for separating the two class sets {} and {}", s1, s2);
-		rpndClassifier.buildClassifier(reducedData);
+		this.rpndClassifier.buildClassifier(reducedData);
 
 		/* 3d. insort the remaining classes */
 		logger.info("Now classifying the items of the other classes");
@@ -71,22 +72,25 @@ public class RPNDSplitter implements ISplitter {
 			int o1 = 0;
 			int o2 = 0;
 			for (Instance inst : testData) {
-				if (Thread.interrupted())
+				if (Thread.interrupted()) {
 					throw new InterruptedException();
+				}
 				try {
-					double prediction = rpndClassifier.classifyInstance(WekaUtil.getRefactoredInstance(inst));
-					if (prediction == 0)
+					double prediction = this.rpndClassifier.classifyInstance(WekaUtil.getRefactoredInstance(inst));
+					if (prediction == 0) {
 						o1++;
-					else
+					} else {
 						o2++;
+					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error(LoggerUtil.getExceptionInfo(e));
 				}
 			}
-			if (o1 > o2)
+			if (o1 > o2) {
 				s1.add(className);
-			else
+			} else {
 				s2.add(className);
+			}
 		}
 		Collection<Collection<String>> split = new ArrayList<>();
 		split.add(s1);

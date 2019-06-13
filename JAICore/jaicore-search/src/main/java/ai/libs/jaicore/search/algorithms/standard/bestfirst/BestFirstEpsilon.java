@@ -21,7 +21,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
  */
 public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBestFirst<T, A, Double> {
 
-	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
+	private Logger logger = LoggerFactory.getLogger(BestFirstEpsilon.class);
 	private String loggerName;
 
 	private final INodeEvaluator<T, W> secondaryNodeEvaluator;
@@ -47,8 +47,8 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 			focal.stream().filter(n -> !BestFirstEpsilon.this.secondaryCache.containsKey(n)).forEach(n -> {
 				try {
 					BestFirstEpsilon.this.secondaryCache.put(n, BestFirstEpsilon.this.secondaryNodeEvaluator.f(n));
-				} catch (Throwable e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					BestFirstEpsilon.this.logger.error("Observed exception during computation of f: {}", e);
 				}
 			});
 			Node<T, Double> choice = focal.stream().min((p1, p2) -> BestFirstEpsilon.this.secondaryCache.get(p1).compareTo(BestFirstEpsilon.this.secondaryCache.get(p2))).get();
@@ -58,11 +58,11 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 		}
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) {
 		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) {
 		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;

@@ -1,17 +1,21 @@
 package ai.libs.mlplan.multiclass.wekamlplan;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Objects;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.hasco.gui.civiewplugin.TFDNodeAsCIViewInfoGenerator;
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.TimeOut;
+import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
@@ -44,10 +48,11 @@ import weka.core.OptionHandler;
  * @author wever, fmohr
  *
  */
-public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IInstancesClassifier {
+@SuppressWarnings("serial")
+public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, OptionHandler, ILoggingCustomizable, IInstancesClassifier, IEventEmitter {
 
 	/* Logger for controlled output. */
-	private Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
+	private transient Logger logger = LoggerFactory.getLogger(MLPlanWekaClassifier.class);
 	private String loggerName;
 
 	private boolean visualizationEnabled = false;
@@ -62,6 +67,8 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	private Classifier classifierFoundByMLPlan;
 	private double internalValidationErrorOfSelectedClassifier;
 
+	private final transient List<Object> listeners = new ArrayList<>();
+
 	public MLPlanWekaClassifier(final AbstractMLPlanBuilder builder) {
 		this.builder = builder;
 		this.timeout = builder.getTimeOut();
@@ -72,6 +79,7 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 		Objects.requireNonNull(this.timeout, "Timeout must be set before running ML-Plan.");
 
 		MLPlan mlplan = new MLPlan(this.builder, data);
+		this.listeners.forEach(mlplan::registerListener);
 		mlplan.setTimeout(this.timeout);
 		if (this.loggerName != null) {
 			mlplan.setLoggerName(this.loggerName + "." + "mlplan");
@@ -79,8 +87,8 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 
 		if (this.visualizationEnabled) {
 			new JFXPanel();
-			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(),
-					new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+			AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new TFDNodeAsCIViewInfoGenerator(this.builder.getComponents())),
+					new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
 			Platform.runLater(window);
 		}
 
@@ -205,6 +213,11 @@ public class MLPlanWekaClassifier implements Classifier, CapabilitiesHandler, Op
 	@Override
 	public String getLoggerName() {
 		return this.loggerName;
+	}
+
+	@Override
+	public void registerListener(final Object listener) {
+		this.listeners.add(listener);
 	}
 
 }

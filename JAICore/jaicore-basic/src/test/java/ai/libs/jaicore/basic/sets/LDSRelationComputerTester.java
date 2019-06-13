@@ -13,8 +13,6 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import ai.libs.jaicore.basic.sets.LDSRelationComputer;
-import ai.libs.jaicore.basic.sets.RelationComputationProblem;
 import ai.libs.jaicore.basic.sets.algorithms.RelationComputerTester;
 
 public class LDSRelationComputerTester extends RelationComputerTester {
@@ -29,7 +27,9 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 	@Test
 	public void testOutputSizeForNonEmptyRelation() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTestProblemSetCreationException {
 		RelationComputationProblem<Object> problem = this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes();
-		List<List<Object>> cartesianProduct = new LDSRelationComputer<>(this.getCartesianProductProblem()).call();
+		LDSRelationComputer<Object> ldsComputer = new LDSRelationComputer<>(this.getCartesianProductProblem());
+		ldsComputer.setLoggerName(TESTEDALGORITHM_LOGGERNAME);
+		List<List<Object>> cartesianProduct = ldsComputer.call();
 		List<List<?>> groundTruth = cartesianProduct.stream().filter(problem.getPrefixFilter()).collect(Collectors.toList());
 		this.testRelation(problem, groundTruth.size());
 	}
@@ -44,7 +44,7 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 		this.testRelation(this.getInfeasibleCompletelyPrunedRelationProblem(), 0);
 	}
 
-	private void testRelation(final RelationComputationProblem<Object> problem, final int expected) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException  {
+	private void testRelation(final RelationComputationProblem<Object> problem, final int expected) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		LDSRelationComputer<Object> cpc = new LDSRelationComputer<>(problem);
 		List<List<Object>> relation = cpc.call();
 		assertEquals(expected, relation.size()); // the size of the output must be correct
@@ -52,7 +52,7 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 			List<?> tuple1 = relation.get(i);
 			assertEquals(problem.getSets().size(), tuple1.size());
 			List<?> tuple2 = relation.get(i + 1);
-			assertEquals(problem.getSets().size(), tuple2.size());
+			assertEquals("The tuple does not have the right length. Expected tuple length was " + problem.getSets().size() + ", but the given tuple has " + tuple2.size() + " entries", problem.getSets().size(), tuple2.size());
 			int d1 = this.computeDefficiency(problem.getSets(), tuple1);
 			int d2 = this.computeDefficiency(problem.getSets(), tuple2);
 			assertTrue(d1 <= d2);
@@ -62,7 +62,7 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 	private int computeDefficiency(final List<? extends Collection<?>> collections, final List<?> tuple) {
 		int defficiency = 0;
 		for (int i = 0; i < tuple.size(); i++) {
-			List<?> ithSet = (List<?>)collections.get(i);
+			List<?> ithSet = (List<?>) collections.get(i);
 			defficiency += ithSet.indexOf(tuple.get(i));
 		}
 		return defficiency;
@@ -82,6 +82,6 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final Object problem) {
-		return new LDSRelationComputer<>((RelationComputationProblem<?>)problem);
+		return new LDSRelationComputer<>((RelationComputationProblem<?>) problem);
 	}
 }

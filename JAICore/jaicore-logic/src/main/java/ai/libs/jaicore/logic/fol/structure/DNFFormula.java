@@ -13,28 +13,28 @@ public class DNFFormula extends HashSet<Monom> {
 		super();
 	}
 
-	public DNFFormula(Monom m) {
+	public DNFFormula(final Monom m) {
 		super();
 		this.add(m);
 	}
-	
-	public DNFFormula(Clause m) {
+
+	public DNFFormula(final Clause m) {
 		super();
 		for (Literal l : m) {
 			this.add(new Monom(l));
 		}
 	}
-	
-	public DNFFormula(Collection<Monom> m) {
+
+	public DNFFormula(final Collection<Monom> m) {
 		super();
 		this.addAll(m);
 	}
 
-	public DNFFormula(Set<Monom> monoms, Map<VariableParam, ? extends LiteralParam> mapping) {
+	public DNFFormula(final Set<Monom> monoms, final Map<VariableParam, ? extends LiteralParam> mapping) {
 		super();
 		for (Monom c : monoms) {
 			Monom replacedMonom = new Monom(c, mapping);
-			
+
 			/* if the monom is empty, it is false */
 			if (replacedMonom.isEmpty()) {
 				this.clear();
@@ -42,46 +42,51 @@ public class DNFFormula extends HashSet<Monom> {
 				this.add(new Monom("!A"));
 				return;
 			}
-			
+
 			/* if the monom is contradictory, we also do not need to add it */
-			if (!replacedMonom.isContradictory())
+			if (!replacedMonom.isContradictory()) {
 				this.add(replacedMonom);
+			}
 		}
 	}
 
 	public Set<VariableParam> getVariableParams() {
 		Set<VariableParam> vars = new HashSet<>();
-		for (Monom m : this)
+		for (Monom m : this) {
 			vars.addAll(m.getVariableParams());
+		}
 		return vars;
 	}
 
 	public Set<ConstantParam> getConstantParams() {
 		Set<ConstantParam> constants = new HashSet<>();
-		for (Monom m : this)
+		for (Monom m : this) {
 			constants.addAll(m.getConstantParams());
+		}
 		return constants;
 	}
 
 	public boolean hasConjunctions() {
 		for (Monom m : this) {
-			if (m.size() > 1)
+			if (m.size() > 1) {
 				return true;
+			}
 		}
 		return false;
 	}
-	
+
 	public Clause extractClause() {
-		if (hasConjunctions())
+		if (this.hasConjunctions()) {
 			throw new IllegalArgumentException("Cannot extract a clause from a non-monom DNF");
+		}
 		Clause c = new Clause();
 		for (Monom m : this) {
 			c.add(m.iterator().next());
 		}
 		return c;
 	}
-	
-	public boolean entailedBy(Monom m) {
+
+	public boolean entailedBy(final Monom m) {
 		for (Monom m2 : this) {
 			boolean monomSatisfied = true;
 			for (Literal l : m2) {
@@ -90,16 +95,15 @@ public class DNFFormula extends HashSet<Monom> {
 						monomSatisfied = false;
 						break;
 					}
-					else
-						continue;
 				}
 				else if (!(l.isPositive() && m.contains(l) || l.isNegated() && !m.contains(l.clone().toggleNegation()))) {
 					monomSatisfied = false;
 					break;
 				}
 			}
-			if (monomSatisfied)
+			if (monomSatisfied) {
 				return true;
+			}
 		}
 		return false;
 	}

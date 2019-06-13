@@ -1,21 +1,8 @@
 package ai.libs.jaicore.basic.algorithm;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
+import ai.libs.jaicore.basic.IConfig;
 
-import org.aeonbits.owner.Mutable;
-
-import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.PropertiesLoadFailedException;
-import ai.libs.jaicore.basic.ResourceFile;
-import ai.libs.jaicore.basic.ResourceUtil;
-
-public interface IAlgorithmConfig extends Mutable {
+public interface IAlgorithmConfig extends IConfig {
 
 	public static final String K_CPUS = "cpus";
 	public static final String K_THREADS = "threads";
@@ -49,78 +36,4 @@ public interface IAlgorithmConfig extends Mutable {
 	@Key(K_TIMEOUT)
 	@DefaultValue("-1")
 	public long timeout();
-
-	/**
-	 * Reads properties of a config from a config file.
-	 * @param file The file to read in as properties.
-	 * @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given file.
-	 */
-	default IAlgorithmConfig loadPropertiesFromFile(final File file) {
-		if (!(file instanceof ResourceFile) && !file.exists()) {
-			throw new IllegalArgumentException("File (" + file + ") to load properties from does not exist.");
-		}
-		try {
-			if (file instanceof ResourceFile) {
-				return loadPropertiesFromList(ResourceUtil.readResourceFileToStringList((ResourceFile) file));
-			} else {
-				return loadPropertiesFromList(FileUtil.readFileAsList(file));
-			}
-		} catch (IOException e) {
-			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
-		}
-	}
-
-	/**
-	* Reads properties of a config from a config file.
-	* @param file The file to read in as properties.
-	* @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given file.
-	*/
-	default IAlgorithmConfig loadPropertiesFromPath(final String path) {
-		try {
-			return loadPropertiesFromList(FileUtil.readFileAsList(path));
-		} catch (IOException e) {
-			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
-		}
-	}
-
-	/**
-	 * Loads properties from a resource (instead of a file).
-	 * @param resourcePath The path to the resource.
-	 * @throws IOException Throws an IOException if an issue occurs while reading in the properties from the given resource.
-	 */
-	default IAlgorithmConfig loadPropertiesFromResource(final String resourcePath) throws IOException {
-		// Get file from resources folder
-		ClassLoader classLoader = FileUtil.class.getClassLoader();
-		String content = null;
-		try (InputStream inputStream = classLoader.getResourceAsStream(resourcePath)) {
-			ByteArrayOutputStream result = new ByteArrayOutputStream(1024);
-			byte[] buffer = new byte[1024];
-			int length;
-			while ((length = inputStream.read(buffer)) != -1) {
-				result.write(buffer, 0, length);
-			}
-			content = result.toString(StandardCharsets.UTF_8.name());
-		}
-
-		if (content != null) {
-			return loadPropertiesFromList(Arrays.asList(content.split("\n")));
-		}
-		return this;
-	}
-
-	/**
-	 * Loads a properties config from a list of property assignments.
-	 *
-	 * @param propertiesList The list of property assignments.
-	 */
-	default IAlgorithmConfig loadPropertiesFromList(final List<String> propertiesList) {
-		for (String line : propertiesList) {
-			if (!line.contains("=") || line.startsWith("#")) {
-				continue;
-			}
-			String[] split = line.split("=");
-			this.setProperty(split[0].trim(), split[1].trim());
-		}
-		return this;
-	}
 }

@@ -80,12 +80,12 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		this.registerActiveThread();
 		try {
 			switch (this.getState()) {
-			case created:
+			case CREATED:
 				this.traversalTree = this.newNode(null, this.rootGenerator.getRoot());
 				this.post(new GraphInitializedEvent<>(this.getId(), this.traversalTree));
 				return this.activate();
 
-			case active:
+			case ACTIVE:
 				this.currentK = this.maxK;
 				AlgorithmEvent event = this.ldsProbe(this.traversalTree);
 				if (event instanceof NoMoreNodesOnLevelEvent) {

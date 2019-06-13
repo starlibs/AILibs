@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
@@ -14,9 +15,12 @@ import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
+import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
 /**
@@ -24,10 +28,10 @@ import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
  * algorithm. For a specific sampling algorithm, this class can be extended by a
  * class that is specific for that particular algorithm.
  *
- * @author Felix Weiland
+ * @author Felix Weiland, fmohr
  *
  */
-public abstract class GeneralSamplingTester<I extends IInstance> extends GeneralAlgorithmTester {
+public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
@@ -46,6 +50,20 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 		}
 		return Arrays.asList(data);
 	}
+	
+	@Override
+	public SamplingAlgorithmTestProblemSet<L> getProblemSet() {
+		return (SamplingAlgorithmTestProblemSet<L>) super.getProblemSet();
+	}
+	
+	@Override
+	public final IAlgorithm<?, ?> getAlgorithm(Object problem) {
+		@SuppressWarnings("unchecked")
+		IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<L>, L> dataset = (IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<L>, L>) problem;
+		return getAlgorithm(dataset);
+	}
+	
+	public abstract IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<L>, L> dataset);
 
 	/**
 	 * This test verifies that the produced samples have the desired size.
@@ -53,13 +71,14 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	 * This test executes the test on a small problem/data set.
 	 *
 	 * @param sampleFraction
+	 * @throws AlgorithmTestProblemSetCreationException
+	 * @throws AlgorithmCreationException
 	 * @throws Exception
 	 */
 	@Test
-	public void testSampleSizeSmallProblem() throws Exception {
-		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
-		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
+	public void testSampleSizeSmallProblem() throws AlgorithmTestProblemSetCreationException {
+		SamplingAlgorithmTestProblemSet<L> problemSet = getProblemSet();
+		IOrderedLabeledAttributeArrayDataset<?, L> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
@@ -69,39 +88,43 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	 * This test executes the test on a large problem/data set.
 	 *
 	 * @param sampleFraction
+	 * @throws AlgorithmTestProblemSetCreationException
+	 * @throws AlgorithmCreationException
 	 * @throws Exception
 	 */
 	@Test
-	public void testSampleSizeLargeProblem() throws Exception {
-		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
-		IDataset<I> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
+	public void testSampleSizeLargeProblem() throws AlgorithmTestProblemSetCreationException {
+		SamplingAlgorithmTestProblemSet<L> problemSet = getProblemSet();
+		IOrderedLabeledAttributeArrayDataset<?, L> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
 	}
 
-	private void testSampleSize(final IDataset<I> dataset, final double sampleFraction) throws AlgorithmCreationException {
+	private void testSampleSize(final IOrderedLabeledAttributeArrayDataset<?, L> dataset, final double sampleFraction) {
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) getAlgorithm(dataset);
+		ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset<?, L>> samplingAlgorithm = (ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset<?, L>>) getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		IDataset<I> sample = this.getSample(samplingAlgorithm);
-
-		assertEquals(sampleSize, sample.size());
+		IOrderedLabeledAttributeArrayDataset<?, ?> sample = this.getSample(samplingAlgorithm);
+		assertNotNull(sample);
+		if (sample != null) {
+			assertEquals(sampleSize, sample.size());
+		}
 	}
 
 	/**
 	 * This test verifies that the produced samples do not contain duplicates.
 	 *
 	 * This test executes the test on a small problem/data set.
+	 * 
+	 * @throws AlgorithmCreationException
 	 *
 	 * @throws Exception
 	 *
 	 */
 	@Test
-	public void testNoDuplicatesSmallProblem() throws Exception {
-		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
-		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
+	public void testNoDuplicatesSmallProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException {
+		SamplingAlgorithmTestProblemSet<L> problemSet = getProblemSet();
+		IOrderedLabeledAttributeArrayDataset<?, L> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
 
@@ -109,52 +132,58 @@ public abstract class GeneralSamplingTester<I extends IInstance> extends General
 	 * This test verifies that the produced samples do not contain duplicates.
 	 *
 	 * This test executes the test on a large problem/data set.
+	 * 
+	 * @throws AlgorithmTestProblemSetCreationException
 	 *
 	 * @throws Exception
 	 *
 	 */
 	@Test
-	public void testNoDuplicatesLargeProblem() throws Exception {
-		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
-		IDataset<I> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
+	public void testNoDuplicatesLargeProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException {
+		SamplingAlgorithmTestProblemSet<L> problemSet = getProblemSet();
+		IOrderedLabeledAttributeArrayDataset<?, L> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
 		this.testNoDuplicates(dataset);
 	}
 
-	private void testNoDuplicates(final IDataset<I> dataset) throws AlgorithmCreationException {
+	private void testNoDuplicates(final IOrderedLabeledAttributeArrayDataset<?, L> dataset) throws AlgorithmCreationException {
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) getAlgorithm(dataset);
+		ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset<?, L>> samplingAlgorithm = (ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset<?, L>>) getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		IDataset<I> sample = this.getSample(samplingAlgorithm);
-		int actualSampleSize = sample.size();
-		Set<IInstance> set = new HashSet<>();
+		IOrderedLabeledAttributeArrayDataset<?, L> sample = this.getSample(samplingAlgorithm);
+		Set<ILabeledAttributeArrayInstance<L>> set = new HashSet<>();
 		set.addAll(sample);
-		assertEquals(actualSampleSize, set.size());
+		if (sample == null) {
+			fail("Sample must not be null");
+		} else {
+			assertEquals(sample.size(), set.size());
+		}
 	}
 
 	/**
 	 * This test verifies that the original data set, which is fed to the sampling
 	 * algorithm, is not modified in the sampling process.
+	 * 
+	 * @throws AlgorithmTestProblemSetCreationException
+	 * @throws AlgorithmCreationException
 	 *
 	 * @throws Exception
 	 */
 	@Test
-	public void checkOriginalDataSetNotModified() throws Exception {
-		@SuppressWarnings("unchecked")
-		SamplingAlgorithmTestProblemSet<I> problemSet = (SamplingAlgorithmTestProblemSet<I>) getProblemSet();
-		IDataset<I> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
+	public void checkOriginalDataSetNotModified() throws AlgorithmTestProblemSetCreationException {
+		SamplingAlgorithmTestProblemSet problemSet = getProblemSet();
+		IOrderedLabeledAttributeArrayDataset<?, ?> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I> samplingAlgorithm = (ASamplingAlgorithm<I>) getAlgorithm(dataset);
+		ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset<?, L>> samplingAlgorithm = (ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset<?, L>>) getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		this.getSample(samplingAlgorithm);
 		assertEquals(hashCode, dataset.hashCode());
 	}
 
-	private IDataset<I> getSample(final ASamplingAlgorithm<I> samplingAlgorithm) {
-		IDataset<I> sample = null;
+	private IOrderedLabeledAttributeArrayDataset<?, L> getSample(final ASamplingAlgorithm<IOrderedLabeledAttributeArrayDataset<?, L>> samplingAlgorithm) {
+		IOrderedLabeledAttributeArrayDataset<?, L> sample = null;
 		try {
 			sample = samplingAlgorithm.call();
 		} catch (Exception e) {

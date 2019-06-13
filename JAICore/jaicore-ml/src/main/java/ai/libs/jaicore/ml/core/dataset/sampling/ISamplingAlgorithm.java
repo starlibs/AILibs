@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset.sampling;
 
 import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 
 /**
  * Interface for sampling algorithms. Sampling algorithms take a dataset as input and return a (reduced) dataset as their output.
@@ -9,6 +9,6 @@ import ai.libs.jaicore.ml.core.dataset.IDataset;
  * @author wever
  *
  */
-public interface ISamplingAlgorithm extends IAlgorithm<IDataset, IDataset> {
+public interface ISamplingAlgorithm extends IAlgorithm<AILabeledAttributeArrayDataset, AILabeledAttributeArrayDataset> {
 
 }

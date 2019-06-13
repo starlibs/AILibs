@@ -198,9 +198,9 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
 
-		double[] classDistribution = new double[this.containedClasses.size()];
-		this.distributionForInstance(instance, classDistribution);
-		return classDistribution;
+	double[] classDistribution = new double[this.containedClasses.size()];
+	this.distributionForInstance(instance, classDistribution);
+	return classDistribution;
 	}
 
 	@Override
@@ -328,10 +328,10 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 
 	@Override
 	public Iterator<MCTreeNode> iterator() {
-		Iterator<MCTreeNode> iterator = new Iterator<MCTreeNode>() {
+		return new Iterator<MCTreeNode>() {
 
-			int currentlyTraversedChild = -1;
-			Iterator<MCTreeNode> childIterator = null;
+			private int currentlyTraversedChild = -1;
+			private Iterator<MCTreeNode> childIterator = null;
 
 			@Override
 			public boolean hasNext() {
@@ -367,6 +367,5 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 				}
 			}
 		};
-		return iterator;
 	}
 }

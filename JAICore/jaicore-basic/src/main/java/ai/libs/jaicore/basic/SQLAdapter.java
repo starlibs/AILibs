@@ -18,7 +18,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
@@ -113,8 +113,10 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				try {
 					Thread.sleep(3000);
 				} catch (InterruptedException e1) {
-					this.logger.error("SQLAdapter was interrupted while waiting to try again establishing a database connection", e1);
-					throw new RuntimeException("SQLAdapter was interrupted while trying to establish a database connection", e1);
+					Thread.currentThread().interrupt();
+					this.logger.error(
+							"SQLAdapter got interrupted while trying to establish a connection to the database. NOTE: This will trigger an immediate shutdown as no sql connection could be established. Reason for the interrupt was:", e1);
+					break;
 				}
 			}
 		} while (tries < 3);

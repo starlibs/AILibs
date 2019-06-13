@@ -26,8 +26,8 @@ import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
@@ -167,7 +167,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 			this.logger.debug("Performing next step. Current state is {}", this.getState());
 			this.checkAndConductTermination();
 			switch (this.getState()) {
-			case created:
+			case CREATED:
 				AlgorithmInitializedEvent initializationEvent = this.activate();
 
 				/* Lines 14 to 17 */
@@ -190,7 +190,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				assert !this.open.isEmpty() : "OPEN must not be empty after initialization!";
 				return initializationEvent;
 
-			case active:
+			case ACTIVE:
 
 				/* return unreturned solutions if such exist */
 				if (!this.unreturnedSolutionEvents.isEmpty()) {

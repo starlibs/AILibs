@@ -46,6 +46,7 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	/**
 	 * @return The attribute type of this attribute value.
 	 */
+	@Override
 	public IAttributeType<D> getType() {
 		return this.type;
 	}
@@ -58,8 +59,7 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	@Override
 	public void setValue(final D value) {
 		if (!this.type.isValidValue(value)) {
-			throw new IllegalArgumentException(
-					"The attribute value does not conform the domain of the attribute type.");
+			throw new IllegalArgumentException("The attribute value does not conform the domain of the attribute type.");
 		}
 		this.value = value;
 	}
@@ -68,32 +68,35 @@ public abstract class AAttributeValue<D> implements IAttributeValue<D> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		result = prime * result + ((value == null) ? 0 : value.hashCode());
+		result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
+		result = prime * result + ((this.value == null) ? 0 : this.value.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		AAttributeValue other = (AAttributeValue) obj;
-		if (type == null) {
+		if (this.type == null) {
 			if (other.type != null) {
 				return false;
 			}
-		} else if (!type.equals(other.type)) {
+		} else if (!this.type.equals(other.type)) {
 			return false;
 		}
-		if (value == null) {
+		if (this.value == null) {
 			if (other.value != null) {
 				return false;
 			}
-		} else if (!value.equals(other.value)) {
+		} else if (!this.value.equals(other.value)) {
 			return false;
 		}
 		return true;

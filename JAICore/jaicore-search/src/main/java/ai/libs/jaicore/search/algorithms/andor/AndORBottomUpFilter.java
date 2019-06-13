@@ -41,11 +41,11 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	private String loggerName;
 
 	public class InnerNodeLabel {
-		InnerNodeLabel parent;
-		int val;
-		N node;
-		NodeType type;
-		boolean evaluated;
+		private InnerNodeLabel parent;
+		private int val;
+		private N node;
+		private NodeType type;
+		private boolean evaluated;
 
 		public InnerNodeLabel(final N node, final NodeType type) {
 			super();
@@ -62,8 +62,8 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	}
 
 	class EvaluatedGraph {
-		Graph<N> graph;
-		V value;
+		private Graph<N> graph;
+		private V value;
 	}
 
 	private final Graph<InnerNodeLabel> graph = new Graph<>();
@@ -84,7 +84,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
-		case created:
+		case CREATED:
 
 			/* step 1: construct the whole graph */
 			Queue<InnerNodeLabel> open = new LinkedList<>();
@@ -118,7 +118,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 			this.logger.info("Size: {}", this.graph.getItems().size());
 			return this.activate();
 
-		case active:
+		case ACTIVE:
 			this.logger.debug("timeout: {}", this.getTimeout());
 
 			/* now compute best local values bottom up */

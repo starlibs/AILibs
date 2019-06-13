@@ -122,7 +122,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 		this.logger.info("Stepping 2phase HASCO. Current state: {}", getState());
 		switch (getState()) {
-		case created:
+		case CREATED:
 			if (this.hasco == null) {
 				throw new IllegalStateException("Cannot start algorithm before HASCO has been set. Please set HASCO either in constructor or via the setter.");
 			}
@@ -141,7 +141,7 @@ public class TwoPhaseHASCO<S extends GraphSearchInput<N, A>, N, A> extends Softw
 			return event;
 
 			/* active is only one step in this model; this could be refined */
-		case active:
+		case ACTIVE:
 
 			/* phase 1: gather solutions */
 			if (this.hasco.getTimeout().milliseconds() >= 0) {
