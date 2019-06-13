@@ -6,14 +6,14 @@ You can bind in ML-Plan via a Maven dependency (using Maven central as repositor
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>mlplan</artifactId>
-  <version>0.1.2</version>
+  <version>0.1.3</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:mlplan:0.1.2'
+    implementation 'ai.libs:mlplan:0.1.3'
 }
 ```
 

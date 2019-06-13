@@ -5,88 +5,52 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBased
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import weka.core.Instances;
 
-public class ProbabilisticMonteCarloCrossValidationEvaluatorFactory implements IClassifierEvaluatorFactory {
-
-	private IDatasetSplitter datasetSplitter;
-	private ISplitBasedClassifierEvaluator<Double> splitBasedEvaluator;
-	private int seed;
-	private int numMCIterations;
-	private Instances data;
-	private double trainFoldSize;
-	private int timeoutForSolutionEvaluation;
+public class ProbabilisticMonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossValidationBasedEvaluatorFactory {
 
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory() {
 		super();
 	}
 
-	public IDatasetSplitter getDatasetSplitter() {
-		return this.datasetSplitter;
-	}
-
-	public ISplitBasedClassifierEvaluator<Double> getSplitBasedEvaluator() {
-		return this.splitBasedEvaluator;
-	}
-
-	public int getSeed() {
-		return this.seed;
-	}
-
-	public int getNumMCIterations() {
-		return this.numMCIterations;
-	}
-
-	public Instances getData() {
-		return this.data;
-	}
-
-	public double getTrainFoldSize() {
-		return this.trainFoldSize;
-	}
-
-	public int getTimeoutForSolutionEvaluation() {
-		return this.timeoutForSolutionEvaluation;
-	}
-
+	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory withDatasetSplitter(final IDatasetSplitter datasetSplitter) {
-		this.datasetSplitter = datasetSplitter;
-		return this;
+		return (ProbabilisticMonteCarloCrossValidationEvaluatorFactory) super.withDatasetSplitter(datasetSplitter);
 	}
 
+	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory withSplitBasedEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedClassifierEvaluator) {
-		this.splitBasedEvaluator = splitBasedClassifierEvaluator;
-		return this;
+		return (ProbabilisticMonteCarloCrossValidationEvaluatorFactory) super.withSplitBasedEvaluator(splitBasedClassifierEvaluator);
 	}
 
+	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory withSeed(final int seed) {
-		this.seed = seed;
-		return this;
+		return (ProbabilisticMonteCarloCrossValidationEvaluatorFactory) super.withSeed(seed);
 	}
 
+	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory withNumMCIterations(final int numMCIterations) {
-		this.numMCIterations = numMCIterations;
-		return this;
+		return (ProbabilisticMonteCarloCrossValidationEvaluatorFactory) super.withNumMCIterations(numMCIterations);
 	}
 
+	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory withData(final Instances data) {
-		this.data = data;
-		return this;
+		return (ProbabilisticMonteCarloCrossValidationEvaluatorFactory) super.withData(data);
 	}
 
+	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory withTrainFoldSize(final double trainFoldSize) {
-		this.trainFoldSize = trainFoldSize;
-		return this;
+		return (ProbabilisticMonteCarloCrossValidationEvaluatorFactory) super.withTrainFoldSize(trainFoldSize);
 	}
 
+	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluatorFactory withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
-		this.timeoutForSolutionEvaluation = timeoutForSolutionEvaluation;
-		return this;
+		return (ProbabilisticMonteCarloCrossValidationEvaluatorFactory) super.withTimeoutForSolutionEvaluation(timeoutForSolutionEvaluation);
 	}
 
 	@Override
 	public ProbabilisticMonteCarloCrossValidationEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) {
-		if (this.splitBasedEvaluator == null) {
+		if (this.getSplitBasedEvaluator() == null) {
 			throw new IllegalStateException("Cannot create MCCV, because no splitBasedEvaluator has been set!");
 		}
-		return new ProbabilisticMonteCarloCrossValidationEvaluator(this.splitBasedEvaluator, this.datasetSplitter, this.numMCIterations, 1, dataset, this.trainFoldSize, seed);
+		return new ProbabilisticMonteCarloCrossValidationEvaluator(this.getSplitBasedEvaluator(), this.getDatasetSplitter(), this.getNumMCIterations(), 1, dataset, this.getTrainFoldSize(), seed);
 	}
 }
