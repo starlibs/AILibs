@@ -27,10 +27,10 @@ public abstract class ADerivateFilter implements IFilter {
     /**
      * Calculates the derivate of a time series.
      * 
-     * @param T The time series to calculate the derivate for.
+     * @param t The time series to calculate the derivate for.
      * @return The derivate of the time series.
      */
-    protected abstract double[] derivate(double[] T);
+    protected abstract double[] derivate(double[] t);
 
     /**
      * Calcuates the derivates of a time series. In contrast to the normal
@@ -38,10 +38,10 @@ public abstract class ADerivateFilter implements IFilter {
      * that has the same length than the original time series. This is accomplished
      * via padding.
      * 
-     * @param T The time series to calculate the derivate for.
+     * @param t The time series to calculate the derivate for.
      * @return The, possibly padded, derivate of the time series.
      */
-    protected abstract double[] derivateWithBoundaries(double[] T);
+    protected abstract double[] derivateWithBoundaries(double[] t);
 
     @Override
     public TimeSeriesDataset transform(TimeSeriesDataset input) {

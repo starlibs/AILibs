@@ -1,5 +1,7 @@
 package autofe.algorithm.hasco.evaluation.test;
 
+import static org.junit.Assert.fail;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,14 +16,13 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.ml.WekaUtil;
 import autofe.util.DataSetUtils;
 import autofe.util.EvaluationUtils;
-import autofe.util.FileUtils;
 import weka.core.Instances;
 
 public class COEDEvaluationTest {
 
 	private static final Logger logger = LoggerFactory.getLogger(COEDEvaluationTest.class);
 
-	 @Test
+	@Test
 	public void coedEvalTest() throws Exception {
 		logger.info("Starting COED evaluation test...");
 
@@ -33,6 +34,6 @@ public class COEDEvaluationTest {
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .01f);
 
-		logger.info("Result: " + EvaluationUtils.calculateCOEDForBatch(split.get(0)));
+		fail("This is a reminder to say that this test yet does not check anything. Result of the computation is: " + EvaluationUtils.calculateCOEDForBatch(split.get(0)));
 	}
 }

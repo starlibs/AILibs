@@ -66,7 +66,7 @@ public class BOSSEnsembleClassifier extends ASimplifiedTSClassifier<Integer> {
 
 	@Override
 	public List<Integer> predict(final TimeSeriesDataset dataset) throws PredictionException {
-		ArrayList<Integer> predicts = new ArrayList<Integer>();
+		ArrayList<Integer> predicts = new ArrayList<>();
 		for (double[][] matrix : dataset.getValueMatrices()) {
 			for (double[] instance : matrix) {
 				predicts.add(this.predict(instance));

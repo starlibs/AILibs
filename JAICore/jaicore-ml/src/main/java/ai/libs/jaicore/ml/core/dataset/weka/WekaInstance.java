@@ -53,8 +53,7 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 
 	@Override
 	public IAttributeValue<Double> getAttributeValue(final int position) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -64,7 +63,6 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 
 	@Override
 	public int getNumberOfAttributes() {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException();
 	}
 }

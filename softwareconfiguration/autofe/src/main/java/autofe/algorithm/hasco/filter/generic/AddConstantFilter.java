@@ -13,52 +13,55 @@ import weka.core.Instances;
  *
  * @author Julian Lienen
  */
-public class AddConstantFilter implements IFilter {
+public class AddConstantFilter implements IFilter, Cloneable {
 
-    private double constant = 1;
+	private double constant = 1;
 
-    public AddConstantFilter() {
-        super();
-    }
+	public AddConstantFilter() {
+		super();
+	}
 
-    public AddConstantFilter(final double constant) {
-        super();
-        this.constant = constant;
-    }
+	public AddConstantFilter(final double constant) {
+		super();
+		this.constant = constant;
+	}
 
-    @Override
-    public DataSet applyFilter(DataSet inputData, final boolean copy) {
+	public AddConstantFilter(final AddConstantFilter objectToCopy) {
+		this.constant = objectToCopy.constant;
+	}
 
-        Instances transformedInstances;
-        if (copy) {
-            transformedInstances = new Instances(inputData.getInstances());
-        } else {
-            transformedInstances = inputData.getInstances();
-        }
-        for (Instance inst : transformedInstances) {
-            Enumeration<Attribute> atts = inst.enumerateAttributes();
-            while (atts.hasMoreElements()) {
-                Attribute att = atts.nextElement();
-                if (att.isNumeric()) {
-                    inst.setValue(att, inst.value(att) + this.constant);
-                }
-            }
-        }
+	@Override
+	public DataSet applyFilter(final DataSet inputData, final boolean copy) {
 
-        return new DataSet(transformedInstances, inputData.getIntermediateInstances());
-    }
+		Instances transformedInstances;
+		if (copy) {
+			transformedInstances = new Instances(inputData.getInstances());
+		} else {
+			transformedInstances = inputData.getInstances();
+		}
+		for (Instance inst : transformedInstances) {
+			Enumeration<Attribute> atts = inst.enumerateAttributes();
+			while (atts.hasMoreElements()) {
+				Attribute att = atts.nextElement();
+				if (att.isNumeric()) {
+					inst.setValue(att, inst.value(att) + this.constant);
+				}
+			}
+		}
 
-    public double getConstant() {
-        return constant;
-    }
+		return new DataSet(transformedInstances, inputData.getIntermediateInstances());
+	}
 
-    public void setConstant(double constant) {
-        this.constant = constant;
-    }
+	public double getConstant() {
+		return this.constant;
+	}
 
-    @Override
-    public AddConstantFilter clone() throws CloneNotSupportedException {
-        super.clone();
-        return new AddConstantFilter(this.constant);
-    }
+	public void setConstant(final double constant) {
+		this.constant = constant;
+	}
+
+	@Override
+	public AddConstantFilter clone() {
+		return new AddConstantFilter(this);
+	}
 }

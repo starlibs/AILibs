@@ -24,24 +24,25 @@ public class ClusterNodeEvaluator extends AbstractHASCOFENodeEvaluator {
 
 	@Override
 	public Double f(final Node<TFDNode, ?> node) throws NodeEvaluationException {
-		if(hasNodeEmptyParent(node))
+		if (this.hasNodeEmptyParent(node)) {
 			return null;
+		}
 
 		// If pipeline is too deep, assign worst value
-		if (hasPathExceededPipelineSize(node)) {
+		if (this.hasPathExceededPipelineSize(node)) {
 			return MAX_EVAL_VALUE;
 		}
 
-		FilterPipeline pipe = extractPipelineFromNode(node);
+		FilterPipeline pipe = this.extractPipelineFromNode(node);
 
 		if (pipe != null && pipe.getFilters() != null) {
 			// If pipeline is too deep, assign worst value
-			if (pipe.getFilters().getItems().size() > maxPipelineSize) {
+			if (pipe.getFilters().getItems().size() > this.maxPipelineSize) {
 				return MAX_EVAL_VALUE;
 			}
 
 			try {
-				double finalScore = Math.min(1 - EvaluationUtils.performClustering(pipe, data) + ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(data.getInstances()), MAX_EVAL_VALUE - 1);
+				double finalScore = Math.min(1 - EvaluationUtils.performClustering(pipe, this.data) + ATT_COUNT_PENALTY * EvaluationUtils.calculateAttributeCountPenalty(this.data.getInstances()), MAX_EVAL_VALUE - 1);
 				logger.debug("Final clustering node evaluation score: {}", finalScore);
 				return finalScore;
 			} catch (Exception e) {

@@ -66,21 +66,20 @@ public class TransformDistance implements ITimeSeriesDistance {
 	 * The distance measure to use to calculate the distance of the transform
 	 * values.
 	 */
-	private ITimeSeriesDistance transformDistance;
+	private ITimeSeriesDistance baseTransformDistance;
 
 	/**
 	 * Constructor with individual distance measures for the function and transform
 	 * values.
 	 *
-	 * @param alpha              @see #alpha ,<code>0 <= alpha <= pi/2</code>.
-	 * @param transform          The transform calculation to use.
+	 * @param alpha @see #alpha ,<code>0 <= alpha <= pi/2</code>.
+	 * @param transform The transform calculation to use.
 	 * @param timeSeriesDistance The distance measure to use to calculate the
-	 *                           distance of the transform values.
-	 * @param transformDistance  The distance measure to use to calculate the
-	 *                           distance of the transform values.
+	 *            distance of the transform values.
+	 * @param transformDistance The distance measure to use to calculate the
+	 *            distance of the transform values.
 	 */
-	public TransformDistance(final double alpha, final ATransformFilter transform, final ITimeSeriesDistance timeSeriesDistance,
-			final ITimeSeriesDistance transformDistance) {
+	public TransformDistance(final double alpha, final ATransformFilter transform, final ITimeSeriesDistance timeSeriesDistance, final ITimeSeriesDistance transformDistance) {
 		// Parameter checks.
 		if (alpha > Math.PI / 2 || alpha < 0) {
 			throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
@@ -98,23 +97,22 @@ public class TransformDistance implements ITimeSeriesDistance {
 		this.setAlpha(alpha);
 		this.transform = transform;
 		this.timeSeriesDistance = timeSeriesDistance;
-		this.transformDistance = transformDistance;
+		this.baseTransformDistance = transformDistance;
 	}
 
 	/**
 	 * Constructor with individual distance measures for the function and transform
 	 * values that uses the {@link CosineTransform} as transformation.
 	 *
-	 * @param alpha              The distance measure to use to calculate the
-	 *                           distance of the function values.
-	 *                           <code>0 <= alpha <= pi/2</code>.
+	 * @param alpha The distance measure to use to calculate the
+	 *            distance of the function values.
+	 *            <code>0 <= alpha <= pi/2</code>.
 	 * @param timeSeriesDistance The distance measure to use to calculate the
-	 *                           distance of the transform values.
-	 * @param transformDistance  The distance measure to use to calculate the
-	 *                           distance of the transform values.
+	 *            distance of the transform values.
+	 * @param transformDistance The distance measure to use to calculate the
+	 *            distance of the transform values.
 	 */
-	public TransformDistance(final double alpha, final ITimeSeriesDistance timeSeriesDistance,
-			final ITimeSeriesDistance transformDistance) {
+	public TransformDistance(final double alpha, final ITimeSeriesDistance timeSeriesDistance, final ITimeSeriesDistance transformDistance) {
 		this(alpha, new CosineTransform(), timeSeriesDistance, transformDistance);
 	}
 
@@ -122,11 +120,11 @@ public class TransformDistance implements ITimeSeriesDistance {
 	 * Constructor that uses the same distance measures for the function and
 	 * transform values.
 	 *
-	 * @param alpha     The distance measure to use to calculate the distance of the
-	 *                  function values. <code>0 <= alpha <= pi/2</code>.
+	 * @param alpha The distance measure to use to calculate the distance of the
+	 *            function values. <code>0 <= alpha <= pi/2</code>.
 	 * @param transform The transform calculation to use.
-	 * @param distance  The distance measure to use to calculate the distance of the
-	 *                  function and transform values.
+	 * @param distance The distance measure to use to calculate the distance of the
+	 *            function and transform values.
 	 */
 	public TransformDistance(final double alpha, final ATransformFilter transform, final ITimeSeriesDistance distance) {
 		this(alpha, transform, distance, distance);
@@ -136,10 +134,10 @@ public class TransformDistance implements ITimeSeriesDistance {
 	 * Constructor that uses the same distance measures for the function and
 	 * transform values that uses the {@link CosineTransform} as transformation.
 	 *
-	 * @param alpha    The distance measure to use to calculate the distance of the
-	 *                 function values. <code>0 <= alpha <= pi/2</code>.
+	 * @param alpha The distance measure to use to calculate the distance of the
+	 *            function values. <code>0 <= alpha <= pi/2</code>.
 	 * @param distance The distance measure to use to calculate the distance of the
-	 *                 function and transform values.
+	 *            function and transform values.
 	 */
 	public TransformDistance(final double alpha, final ITimeSeriesDistance distance) {
 		this(alpha, new CosineTransform(), distance);
@@ -150,7 +148,7 @@ public class TransformDistance implements ITimeSeriesDistance {
 		double[] transformA = this.transform.transform(a);
 		double[] transformB = this.transform.transform(b);
 
-		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.transformDistance.distance(transformA, transformB);
+		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.baseTransformDistance.distance(transformA, transformB);
 	}
 
 	/**

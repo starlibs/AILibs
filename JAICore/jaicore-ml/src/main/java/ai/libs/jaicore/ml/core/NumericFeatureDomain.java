@@ -1,17 +1,18 @@
 package ai.libs.jaicore.ml.core;
 
-import weka.core.Instance;
+import ai.libs.jaicore.ml.intervaltree.ExtendedRandomTree;
 
 /**
  * Description of a numeric feature domain. Needed for fANOVA application in the
  * {@link ExtendedRandomTree}.
- * 
+ *
  * @author jmhansel
  *
  */
 public class NumericFeatureDomain extends FeatureDomain {
 	private final boolean isInteger;
-	private double min, max;
+	private double min;
+	private double max;
 
 	public NumericFeatureDomain(final boolean isInteger, final double min, final double max) {
 		super();
@@ -20,14 +21,14 @@ public class NumericFeatureDomain extends FeatureDomain {
 		this.max = max;
 	}
 
-	public NumericFeatureDomain(NumericFeatureDomain domain) {
+	public NumericFeatureDomain(final NumericFeatureDomain domain) {
 		super();
 		this.isInteger = domain.isInteger;
 		this.min = domain.min;
 		this.max = domain.max;
 	}
 
-	
+
 	public boolean isInteger() {
 		return this.isInteger;
 	}
@@ -40,92 +41,79 @@ public class NumericFeatureDomain extends FeatureDomain {
 		return this.max;
 	}
 
-	public void setMin(double min) {
+	public void setMin(final double min) {
 		this.min = min;
 	}
 
-	public void setMax(double max) {
+	public void setMax(final double max) {
 		this.max = max;
 	}
 
 	@Override
 	public String toString() {
-		return "NumericFeatureDomain [isInteger=" + isInteger + ", min=" + min + ", max=" + max + "]";
+		return "NumericFeatureDomain [isInteger=" + this.isInteger + ", min=" + this.min + ", max=" + this.max + "]";
 	}
 
 	@Override
-	public boolean contains(Object item) {
-		if (!(item instanceof Number))
+	public boolean contains(final Object item) {
+		if (!(item instanceof Number)) {
 			return false;
+		}
 		Double n = (Double) item;
-		return n >= min && n <= max;
+		return n >= this.min && n <= this.max;
 	}
-
-	// TODO do I need this?
-	// @Override
-	// public boolean subsumes(ParameterDomain otherDomain) {
-	// if (!(otherDomain instanceof NumericParameterDomain))
-	// return false;
-	// NumericParameterDomain otherNumericDomain =
-	// (NumericParameterDomain)otherDomain;
-	// if (this.isInteger && !otherNumericDomain.isInteger)
-	// return false;
-	// return this.min <= otherNumericDomain.getMin() && this.max >=
-	// otherNumericDomain.getMax();
-	// }
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + (isInteger ? 1231 : 1237);
+		result = prime * result + (this.isInteger ? 1231 : 1237);
 		long temp;
-		temp = Double.doubleToLongBits(max);
+		temp = Double.doubleToLongBits(this.max);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(min);
+		temp = Double.doubleToLongBits(this.min);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		NumericFeatureDomain other = (NumericFeatureDomain) obj;
-		if (isInteger != other.isInteger)
+		if (this.isInteger != other.isInteger) {
 			return false;
-		if (Double.doubleToLongBits(max) != Double.doubleToLongBits(other.max))
+		}
+		if (Double.doubleToLongBits(this.max) != Double.doubleToLongBits(other.max)) {
 			return false;
-		if (Double.doubleToLongBits(min) != Double.doubleToLongBits(other.min))
-			return false;
-		return true;
+		}
+		return (Double.doubleToLongBits(this.min) == Double.doubleToLongBits(other.min));
 	}
 
 	@Override
 	public double getRangeSize() {
-		double temp = max - min;
-		// For safety, if the interval is empty, it shouldn't effect the range size of
-		// the feature space
-		if (temp == 0.0d)
+		double temp = this.max - this.min;
+		// For safety, if the interval is empty, it shouldn't effect the range size of the feature space
+		if (temp == 0.0d) {
 			return 1.0d;
+		}
 		return temp;
 	}
 
 	@Override
-	public boolean containsInstance(double value) {
-		// TODO
-		// System.out.println("Check: " + min + " <= " + value + " <= " + max + " " +
-		// ((value >= min) && (value <= max)));
-		return ((value >= min) && (value <= max));
+	public boolean containsInstance(final double value) {
+		return ((value >= this.min) && (value <= this.max));
 	}
 
 	@Override
 	public String compactString() {
-		String result = "[" + this.min + "," + this.max + "]";
-		return result;
+		return "[" + this.min + "," + this.max + "]";
 	}
 }

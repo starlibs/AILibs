@@ -5,17 +5,15 @@ import ai.libs.jaicore.ml.core.exception.UncheckedJaicoreMLException;
 public class NoneFittedFilterExeception extends UncheckedJaicoreMLException {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public NoneFittedFilterExeception(String message, Throwable cause) {
+	public NoneFittedFilterExeception(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 
-	public NoneFittedFilterExeception(String message) {
+	public NoneFittedFilterExeception(final String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
-
 }

@@ -9,23 +9,18 @@ import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
 
 /**
- * @author Helen Beierling
- *         This class calculates the DFT coefficients for a given double vector or a set of them.
- *         The calculations are done iteratively or recursively.
+ * @author Helen Beierling This class calculates the DFT coefficients for a given double vector or a set of them. The calculations are done iteratively or recursively.
  *
- *         Rafiei, D., and Mendelzon, A. Efficient retrieval of similar time sequences using DFT.
- *         (1998), pp. 249–257. (1)
+ *         Rafiei, D., and Mendelzon, A. Efficient retrieval of similar time sequences using DFT. (1998), pp. 249ï¿½257. (1)
  *
- *         Schäfer, P.: The BOSS is concerned with time series classification in the presence of noise. DMKD (2015)
- *         p.1510 p.1516 (2)
+ *         Schï¿½fer, P.: The BOSS is concerned with time series classification in the presence of noise. DMKD (2015) p.1510 p.1516 (2)
  */
-public class DFT implements IFilter {
+public class DFT extends AFilter {
 
 	private static final String MSG_EMPTYINPUT = "The input can not be empty";
 
 	/**
-	 * Is used to save the final DFT Coefficients matrices. Each entry in the list corresponds to one
-	 * matrix in the original dataset.
+	 * Is used to save the final DFT Coefficients matrices. Each entry in the list corresponds to one matrix in the original dataset.
 	 */
 	private List<double[][]> dftCoefficients = new ArrayList<>();
 
@@ -105,12 +100,6 @@ public class DFT implements IFilter {
 	}
 
 	@Override
-	public TimeSeriesDataset fitTransform(final TimeSeriesDataset input) {
-		this.fit(input);
-		return this.transform(input);
-	}
-
-	@Override
 	public double[] transform(final double[] input) {
 		if (!this.fittedInstance) {
 			throw new NoneFittedFilterExeception("The fit method must be called before the transform method.");
@@ -148,7 +137,7 @@ public class DFT implements IFilter {
 			for (int entry = 0; entry < input.length; entry++) {
 
 				// calculates the real and imaginary part of the entry according to the desired coefficient
-				// c.f. p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+				// c.f. p. 1510 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schï¿½fer
 				double realpart = Math.cos(-(1.0 / input.length) * 2.0 * Math.PI * entry * coefficient);
 				double imaginarypart = Math.sin(-(1.0 / input.length) * 2.0 * Math.PI * entry * coefficient);
 
@@ -206,7 +195,7 @@ public class DFT implements IFilter {
 	}
 
 	// It is required that the input is inform of the already sliced windows.
-	// cf. p. 1516 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schäfer
+	// cf. p. 1516 "The BOSS is concerned with time series classification in the presence of noise" by Patrick Schï¿½fer
 	// Best explanation of the algorithm can be found here : "https://www.dsprelated.com/showarticle/776.php"
 
 	public double[][] rekursivDFT(final double[][] input) {

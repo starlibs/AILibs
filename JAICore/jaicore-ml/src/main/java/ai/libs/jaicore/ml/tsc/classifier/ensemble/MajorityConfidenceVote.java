@@ -14,7 +14,7 @@ import weka.core.Utils;
  * each classifier are aggregated using the sum of each unique values times
  * classifier weights. The classifier weights are determined during training
  * using a CV.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -34,7 +34,7 @@ public class MajorityConfidenceVote extends Vote {
 	 * The classifier weights which are used within distribution for instance
 	 * calculation.
 	 */
-	private double classifierWeights[];
+	private double[] classifierWeights;
 
 	/**
 	 * Seed used within CV for splitting the data.
@@ -43,7 +43,7 @@ public class MajorityConfidenceVote extends Vote {
 
 	/**
 	 * Constructor for a majority confidence vote ensemble classifier.
-	 * 
+	 *
 	 * @param numFolds
 	 *            See {@link MajorityConfidenceVote#numFolds}
 	 * @param seed
@@ -58,7 +58,7 @@ public class MajorityConfidenceVote extends Vote {
 	 * Builds the ensemble by assessing the classifier weights using a cross
 	 * validation of each classifier of the ensemble and then training the
 	 * classifiers using the complete <code>data</code>.
-	 * 
+	 *
 	 * @param data
 	 *            Training instances
 	 */
@@ -76,9 +76,8 @@ public class MajorityConfidenceVote extends Vote {
 		this.getCapabilities().testWithFail(data);
 
 		for (int i = 0; i < this.m_Classifiers.length; i++) {
-			// XXX kill weka execution
 			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException("Thread got interrupted, thus, kill WEKA.");
+				throw new InterruptedException();
 			}
 
 			// Perform cross validation to determine the classifier weights
@@ -93,7 +92,7 @@ public class MajorityConfidenceVote extends Vote {
 			}
 
 			this.classifierWeights[i] = Math.pow(this.classifierWeights[i], 2);
-			this.classifierWeights[i] /= (double) this.numFolds;
+			this.classifierWeights[i] /= this.numFolds;
 
 			this.getClassifier(i).buildClassifier(newData);
 		}
@@ -101,7 +100,7 @@ public class MajorityConfidenceVote extends Vote {
 		// If no classifier predicted something correctly, assume uniform distribution
 		if (Arrays.stream(this.classifierWeights).allMatch(d -> d < 0.000001d)) {
 			for (int i = 0; i < this.classifierWeights.length; i++) {
-				this.classifierWeights[i] = 1d / (double) this.classifierWeights.length;
+				this.classifierWeights[i] = 1d / this.classifierWeights.length;
 			}
 		}
 	}
@@ -111,12 +110,12 @@ public class MajorityConfidenceVote extends Vote {
 	 * distributions for each classifier and multiplying the result by the
 	 * classifier weights. The final result is the sum of each probabilities for
 	 * each class.
-	 * 
+	 *
 	 * @param instace
 	 *            Instance to be predicted
 	 * @return Returns the final probability distribution for each class for the
 	 *         given <code>instance</code>
-	 * 
+	 *
 	 */
 	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
@@ -127,9 +126,8 @@ public class MajorityConfidenceVote extends Vote {
 
 		int numPredictions = 0;
 		for (int i = 0; i < this.m_Classifiers.length; i++) {
-			// XXX kill weka execution
 			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException("Thread got interrupted, thus, kill WEKA.");
+				throw new InterruptedException();
 			}
 			double[] dist = this.getClassifier(i).distributionForInstance(instance);
 			if (Utils.sum(dist) > 0) {
@@ -141,9 +139,8 @@ public class MajorityConfidenceVote extends Vote {
 		}
 
 		for (int i = 0; i < this.m_preBuiltClassifiers.size(); i++) {
-			// XXX kill weka execution
 			if (Thread.currentThread().isInterrupted()) {
-				throw new InterruptedException("Thread got interrupted, thus, kill WEKA.");
+				throw new InterruptedException();
 			}
 			double[] dist = this.m_preBuiltClassifiers.get(i).distributionForInstance(instance);
 			if (Utils.sum(dist) > 0) {
@@ -167,12 +164,12 @@ public class MajorityConfidenceVote extends Vote {
 
 		return probs;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
-	 @Override
-	  public double classifyInstance(final Instance instance) throws Exception {
+	@Override
+	public double classifyInstance(final Instance instance) throws Exception {
 		double result;
 		int index;
 		double[] dist = this.distributionForInstance(instance);
@@ -189,5 +186,5 @@ public class MajorityConfidenceVote extends Vote {
 			result = Utils.missingValue();
 		}
 		return result;
-	 }
+	}
 }

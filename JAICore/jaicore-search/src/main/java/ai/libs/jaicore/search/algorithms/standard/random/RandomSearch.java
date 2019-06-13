@@ -126,7 +126,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			}
 
 			/* if no node has been added yet (either because this is not a SingleNodeGenerator or because the SingleNodeGenerator did not produce any new successor) */
-			if (!nodeAdded){
+			if (!nodeAdded) {
 				long start = System.currentTimeMillis();
 				List<NodeExpansionDescription<N, A>> successors = this.gen.generateSuccessors(node); // could have been interrupted here
 				this.logger.debug("Identified {} successor(s) in {}ms, which are now appended.", successors.size(), System.currentTimeMillis() - start);
@@ -178,12 +178,11 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		}
 		this.exploredGraph.addEdge(from, to);
 		boolean isGoalNode = this.goalTester.isGoal(to);
-		if (isGoalNode) { }
 		this.post(new NodeAddedEvent<>(this.getId(), from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException  {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		try {
 			this.registerActiveThread();
 			this.logger.debug("Starting next algorithm step.");
@@ -204,7 +203,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 					this.logger.info("Drew NULL path, terminating");
 					return this.terminate();
 				}
-				assert !drawnPath.getNodes().isEmpty() && goalTester.isGoal(drawnPath.getNodes().get(drawnPath.getNodes().size() - 1)) : "The drawn path is empty or its leaf node is not a goal!";
+				assert !drawnPath.getNodes().isEmpty() && this.goalTester.isGoal(drawnPath.getNodes().get(drawnPath.getNodes().size() - 1)) : "The drawn path is empty or its leaf node is not a goal!";
 				this.logger.info("Drew path of length {}. Posting this event. For more details on the path, enable TRACE", drawnPath.getNodes().size());
 				this.logger.trace("The drawn path is {}", drawnPath);
 				AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), drawnPath);
@@ -216,17 +215,15 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			default:
 				throw new IllegalStateException("Cannot do anything in state " + this.getState());
 			}
-		}
-		catch (InterruptedException e) {
-			if (hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
-				checkTermination(false);
+		} catch (InterruptedException e) {
+			if (this.hasThreadBeenInterruptedDuringShutdown(Thread.currentThread())) {
+				this.checkTermination(false);
 				assert false : "The thread has been interrupted due to shutdown but apparently no stopping criterion is satisfied!";
 				throw new AlgorithmException("This part should never be reached!");
-			}
-			else
+			} else {
 				throw e;
-		}
-		finally {
+			}
+		} finally {
 			this.unregisterActiveThread();
 		}
 	}
@@ -274,7 +271,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 
 				/* get unexhausted successors */
 				List<N> successors = this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exhausted.contains(n)).collect(Collectors.toList());
-				assert this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList()).isEmpty() : "Corrupt exploration graph: Some successors cannot be found again in the graph: " + this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList());
+				assert this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList()).isEmpty() : "Corrupt exploration graph: Some successors cannot be found again in the graph: "
+				+ this.exploredGraph.getSuccessors(head).stream().filter(n -> !this.exploredGraph.hasItem(n)).collect(Collectors.toList());
 
 				/* if we are in a dead end, mark the node as exhausted and remove the head again */
 				if (successors.isEmpty()) {
@@ -308,13 +306,13 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				path.add(head);
 			}
 		}
-		
+
 		/* propagate exhausted state */
 		this.logger.trace("Head node {} has been exhausted.", head);
 		this.exhausted.add(head);
 		this.prioritizedNodes.remove(head);
 		this.updateExhaustedAndPrioritizedState(head);
-		return head == root ? null : new SearchGraphPath<>(path, null);
+		return head == this.root ? null : new SearchGraphPath<>(path, null);
 	}
 
 	private boolean checkThatNodeExistsInExploredGraph(final N node) {
@@ -336,7 +334,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				current = predecessors.iterator().next();
 
 				/* if the currently considered node is not even fully expanded, it is certainly not exhausted */
-				boolean currentIsCompletelyExpanded = !this.isSingleNodeSuccessorGenerator || ((SingleSuccessorGenerator<N,A>)this.gen).allSuccessorsComputed(current);
+				boolean currentIsCompletelyExpanded = !this.isSingleNodeSuccessorGenerator || ((SingleSuccessorGenerator<N, A>) this.gen).allSuccessorsComputed(current);
 				if (!currentIsCompletelyExpanded) {
 					this.logger.trace("Leaving update routine at node {}, which has not been expanded completely.", current);
 					return;
