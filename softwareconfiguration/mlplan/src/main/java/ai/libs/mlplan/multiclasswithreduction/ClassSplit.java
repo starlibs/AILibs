@@ -2,6 +2,9 @@ package ai.libs.mlplan.multiclasswithreduction;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 public class ClassSplit<T> {
 	private final Collection<T> classes;
 	private final Collection<T> l;
@@ -32,12 +35,7 @@ public class ClassSplit<T> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.classes == null) ? 0 : this.classes.hashCode());
-		result = prime * result + ((this.l == null) ? 0 : this.l.hashCode());
-		result = prime * result + ((this.r == null) ? 0 : this.r.hashCode());
-		return result;
+		return new HashCodeBuilder().append(this.classes).append(this.l).append(this.r).toHashCode();
 	}
 
 	@Override
@@ -48,33 +46,12 @@ public class ClassSplit<T> {
 		if (obj == null) {
 			return false;
 		}
-		if (this.getClass() != obj.getClass()) {
+		if (!(obj instanceof ClassSplit)) {
 			return false;
 		}
-		@SuppressWarnings("unchecked")
-		ClassSplit<T> other = (ClassSplit<T>) obj;
-		if (this.classes == null) {
-			if (other.classes != null) {
-				return false;
-			}
-		} else if (!this.classes.equals(other.classes)) {
-			return false;
-		}
-		if (this.l == null) {
-			if (other.l != null) {
-				return false;
-			}
-		} else if (!this.l.equals(other.l)) {
-			return false;
-		}
-		if (this.r == null) {
-			if (other.r != null) {
-				return false;
-			}
-		} else if (!this.r.equals(other.r)) {
-			return false;
-		}
-		return true;
+		ClassSplit<?> other = (ClassSplit<?>) obj;
+		return new EqualsBuilder().append(other.classes, this.classes).append(other.l, this.l).append(other.r, this.r).isEquals();
+
 	}
 
 	@Override

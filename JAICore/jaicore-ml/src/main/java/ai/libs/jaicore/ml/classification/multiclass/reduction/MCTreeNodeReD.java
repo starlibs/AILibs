@@ -213,21 +213,6 @@ public class MCTreeNodeReD extends AMCTreeNode<String> {
 	}
 
 	@Override
-	public double classifyInstance(final Instance instance) throws Exception {
-		double selection = -1;
-		double best = 0;
-		double[] dist = this.distributionForInstance(instance);
-		for (int i = 0; i < dist.length; i++) {
-			double score = dist[i];
-			if (score > best) {
-				best = score;
-				selection = i;
-			}
-		}
-		return selection;
-	}
-
-	@Override
 	public double[] distributionForInstance(final Instance instance) throws Exception {
 		assert this.trained : "Cannot get distribution from untrained classifier " + this.toStringWithOffset();
 
