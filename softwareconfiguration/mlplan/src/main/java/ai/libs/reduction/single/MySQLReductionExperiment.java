@@ -1,5 +1,8 @@
 package ai.libs.reduction.single;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 public class MySQLReductionExperiment {
 	private final int id;
 	private final ReductionExperiment experiment;
@@ -20,33 +23,16 @@ public class MySQLReductionExperiment {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.experiment == null) ? 0 : this.experiment.hashCode());
-		result = prime * result + this.id;
-		return result;
+		return new HashCodeBuilder().append(this.experiment).append(this.id).toHashCode();
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
+		if (!(obj instanceof MySQLReductionExperiment)) {
 			return false;
 		}
-		if (this.getClass() != obj.getClass()) {
-			return false;
-		}
-		MySQLReductionExperiment other = (MySQLReductionExperiment) obj;
-		if (this.experiment == null) {
-			if (other.experiment != null) {
-				return false;
-			}
-		} else if (!this.experiment.equals(other.experiment)) {
-			return false;
-		}
-		return this.id == other.id;
+		MySQLReductionExperiment other = (MySQLReductionExperiment)obj;
+		return new EqualsBuilder().append(other.id, this.id).append(other.experiment, this.experiment).isEquals();
 	}
 
 	@Override

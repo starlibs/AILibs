@@ -2,6 +2,9 @@ package ai.libs.jaicore.planning.classical.problems.strips;
 
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 
@@ -32,11 +35,7 @@ public class StripsOperation extends Operation {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((this.addList == null) ? 0 : this.addList.hashCode());
-		result = prime * result + ((this.deleteList == null) ? 0 : this.deleteList.hashCode());
-		return result;
+		return new HashCodeBuilder().append(super.hashCode()).append(this.addList).append(this.deleteList).toHashCode();
 	}
 
 	@Override
@@ -47,24 +46,11 @@ public class StripsOperation extends Operation {
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (this.getClass() != obj.getClass()) {
+		if (!(obj instanceof StripsOperation)) {
 			return false;
 		}
 		StripsOperation other = (StripsOperation) obj;
-		if (this.addList == null) {
-			if (other.addList != null) {
-				return false;
-			}
-		} else if (!this.addList.equals(other.addList)) {
-			return false;
-		}
-		if (this.deleteList == null) {
-			if (other.deleteList != null) {
-				return false;
-			}
-		} else if (!this.deleteList.equals(other.deleteList)) {
-			return false;
-		}
-		return true;
+		return new EqualsBuilder().append(other.addList, this.addList).append(other.deleteList, this.deleteList).isEquals();
+
 	}
 }

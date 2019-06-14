@@ -2,6 +2,9 @@ package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gr
 
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 
@@ -43,11 +46,7 @@ public class RTNNode {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.remainingTasks == null) ? 0 : this.remainingTasks.hashCode());
-		result = prime * result + ((this.state == null) ? 0 : this.state.hashCode());
-		return result;
+		return new HashCodeBuilder().append(this.state).append(this.remainingTasks).toHashCode();
 	}
 
 	@Override
@@ -58,25 +57,12 @@ public class RTNNode {
 		if (obj == null) {
 			return false;
 		}
-		if (this.getClass() != obj.getClass()) {
+		if (!(obj instanceof RTNNode)) {
 			return false;
 		}
 		RTNNode other = (RTNNode) obj;
-		if (this.remainingTasks == null) {
-			if (other.remainingTasks != null) {
-				return false;
-			}
-		} else if (!this.remainingTasks.equals(other.remainingTasks)) {
-			return false;
-		}
-		if (this.state == null) {
-			if (other.state != null) {
-				return false;
-			}
-		} else if (!this.state.equals(other.state)) {
-			return false;
-		}
-		return true;
+		return new EqualsBuilder().append(other.state, this.state).append(other.remainingTasks, this.remainingTasks).isEquals();
+
 	}
 
 	@Override

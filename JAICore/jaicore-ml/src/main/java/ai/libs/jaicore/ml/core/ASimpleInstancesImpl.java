@@ -2,6 +2,8 @@ package ai.libs.jaicore.ml.core;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ai.libs.jaicore.ml.interfaces.Instances;
 
 @SuppressWarnings("serial")
@@ -29,13 +31,9 @@ public abstract class ASimpleInstancesImpl<I> extends ArrayList<I> implements In
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + this.numColumns;
-		return result;
+		return new HashCodeBuilder().append(super.hashCode()).append(this.numColumns).toHashCode();
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
@@ -44,9 +42,9 @@ public abstract class ASimpleInstancesImpl<I> extends ArrayList<I> implements In
 		if (!super.equals(obj)) {
 			return false;
 		}
-		if (this.getClass() != obj.getClass()) {
+		if (!(obj instanceof ASimpleInstancesImpl)) {
 			return false;
 		}
-		return this.numColumns == ((ASimpleInstancesImpl)obj).numColumns;
+		return this.numColumns == ((ASimpleInstancesImpl<?>)obj).numColumns;
 	}
 }
