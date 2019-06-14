@@ -19,7 +19,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;
 
-public class ConfusionBasedGreedyOptimizingAlgorithm {
+public class ConfusionBasedGreedyOptimizingAlgorithm extends AConfusionBasedAlgorithm {
 
 	private static Logger logger = LoggerFactory.getLogger(ConfusionBasedGreedyOptimizingAlgorithm.class);
 
@@ -159,27 +159,6 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 		return tree;
 	}
 
-	private int getLeastConflictingClass(final double[][] confusionMatrix, final Collection<Integer> blackList) {
-
-		/* compute least conflicting class */
-		int leastConflictingClass = -1;
-		int leastKnownScore = Integer.MAX_VALUE;
-		for (int i = 0; i < confusionMatrix.length; i++) {
-			if (blackList.contains(i)) {
-				continue;
-			}
-			int sum = 0;
-			for (int j = 0; j < confusionMatrix.length; j++) {
-				sum += confusionMatrix[i][j];
-			}
-			if (sum < leastKnownScore) {
-				leastKnownScore = sum;
-				leastConflictingClass = i;
-			}
-		}
-		return leastConflictingClass;
-	}
-
 	private Collection<Collection<Integer>> getZeroConflictSets(final double[][] confusionMatrix) {
 		Collection<Integer> blackList = new ArrayList<>();
 		Collection<Collection<Integer>> partitions = new ArrayList<>();
@@ -202,40 +181,5 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 		} while (leastConflictingClass >= 0);
 
 		return partitions;
-	}
-
-	private Collection<Integer> incrementCluster(final Collection<Integer> cluster, final double[][] confusionMatrix, final Collection<Integer> blackList) {
-		int leastSeenPenalty = Integer.MAX_VALUE;
-		int choice = -1;
-		for (int cId = 0; cId < confusionMatrix.length; cId++) {
-			if (cluster.contains(cId) || blackList.contains(cId)) {
-				continue;
-			}
-			int addedPenalty = 0;
-			for (int i = 0; i < confusionMatrix.length; i++) {
-				addedPenalty += confusionMatrix[i][cId];
-				addedPenalty += confusionMatrix[cId][i];
-			}
-			if (addedPenalty < leastSeenPenalty) {
-				leastSeenPenalty = addedPenalty;
-				choice = cId;
-			}
-		}
-		Collection<Integer> newCluster = new ArrayList<>(cluster);
-		if (choice < 0) {
-			return newCluster;
-		}
-		newCluster.add(choice);
-		return newCluster;
-	}
-
-	private int getPenaltyOfCluster(final Collection<Integer> cluster, final double[][] confusionMatrix) {
-		int sum = 0;
-		for (int i : cluster) {
-			for (int j : cluster) {
-				sum += confusionMatrix[i][j];
-			}
-		}
-		return sum;
 	}
 }
