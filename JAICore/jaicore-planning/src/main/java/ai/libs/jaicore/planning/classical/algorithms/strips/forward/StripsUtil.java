@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,18 +34,18 @@ public class StripsUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(StripsUtil.class);
 
-	public static List<StripsAction> getApplicableActionsInState(Monom state, StripsPlanningDomain domain) {
+	public static List<StripsAction> getApplicableActionsInState(final Monom state, final StripsPlanningDomain domain) {
 		return getApplicableActionsInState(state, domain, false, -1);
 	}
-	
-	public static List<StripsAction> getApplicableActionsInState(Monom state, StripsPlanningDomain domain, boolean randomized, final int pLimit)  {
+
+	public static List<StripsAction> getApplicableActionsInState(final Monom state, final StripsPlanningDomain domain, final boolean randomized, final int pLimit)  {
 		long start = System.currentTimeMillis();
 		int limit = pLimit;
 		logger.debug("Computing applicable actions for state with {} items (activate TRACE for exact state)", state.size());
 		logger.trace("Exact state is {}", state);
 		List<StripsAction> applicableDerivedActions = new ArrayList<>();
 		Collection<Operation> operations = domain.getOperations();
-		
+
 		/* if the computation should be randomized, shuffle operations first */
 		if (randomized) {
 			if (!(operations instanceof List)) {
@@ -52,21 +53,22 @@ public class StripsUtil {
 			}
 			Collections.shuffle((List<Operation>)operations);
 		}
-		
+
 		/* now walk over the operations and collect actions until the limit is reached */
 		long timeToOrderOps = System.currentTimeMillis() - start;
 		for (Operation op : domain.getOperations()) {
 			Collection<StripsAction> candidates = getPossibleOperationGroundingsForState(state, (StripsOperation) op, limit);
 			applicableDerivedActions.addAll(candidates);
-			if (limit >= 0)
+			if (limit >= 0) {
 				limit = Math.max(0, limit - candidates.size());
+			}
 		}
 		long duration = System.currentTimeMillis() - start;
 		logger.debug("Done. Computation of {} applicable actions took {}ms of which {}ms were used to order the operations", applicableDerivedActions.size(), duration, timeToOrderOps);
 		return applicableDerivedActions;
 	}
 
-	public static Collection<StripsAction> getPossibleOperationGroundingsForState(Monom state, StripsOperation operation, int limit)  {
+	public static Collection<StripsAction> getPossibleOperationGroundingsForState(final Monom state, final StripsOperation operation, final int limit)  {
 		Collection<StripsAction> applicableDerivedActions = new ArrayList<>();
 
 		/* decompose premise in positive and negative literals */
@@ -75,35 +77,32 @@ public class StripsUtil {
 		logger.trace("Exact state is {}", state);
 		long start = System.currentTimeMillis();
 		ForwardChainer fc = new ForwardChainer(new ForwardChainingProblem(state, operation.getPrecondition(), true));
-//		Collection<Map<VariableParam, LiteralParam>> groundings = LogicUtil.getSubstitutionsThatEnableForwardChainingUnderCWA(state, operation.getPrecondition());
-//		long duration = System.currentTimeMillis() - start;
-//		logger.debug("Done. Computation of {} groundings took {}ms", groundings.size(), duration);
 		long fcPreparationTime = System.currentTimeMillis() - start;
 		NextBindingFoundEvent event;
 		try {
 			int i = 0;
 			while ((event = fc.nextBinding()) != null && (limit < 0 || (i++ < limit))) {
-				
+
 				Map<VariableParam, LiteralParam> grounding = event.getGrounding();
-				
+
 				/* refactor grounding to constants only and add the respective action */
 				Map<VariableParam, ConstantParam> rGrounding = new HashMap<>();
-				for (VariableParam p : grounding.keySet()) {
-					ConstantParam cp = (ConstantParam) grounding.get(p);
-					rGrounding.put(p, cp);
+				for (Entry<VariableParam, LiteralParam> groundingEntry : grounding.entrySet()) {
+					ConstantParam cp = (ConstantParam)groundingEntry.getValue();
+					rGrounding.put(groundingEntry.getKey(), cp);
 				}
 				StripsAction a = new StripsAction(operation, rGrounding);
 				applicableDerivedActions.add(a);
 				logger.debug("Found action {} to be applicable after {}ms.", a.getEncoding(), System.currentTimeMillis() - start);
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("Error in grounding computation: {}", e);
 		}
 		logger.info("Determined {}/{} applicable actions within {}ms of which preparing the FC algorithm consumed {}ms.", applicableDerivedActions.size(), limit, System.currentTimeMillis() - start, fcPreparationTime);
 		return applicableDerivedActions;
 	}
 
-	public static void updateState(Monom state, Action appliedAction) {
+	public static void updateState(final Monom state, final Action appliedAction) {
 
 		/* apply effects of action (STRIPS) */
 		if (appliedAction.getOperation() instanceof StripsOperation) {
@@ -141,9 +140,9 @@ public class StripsUtil {
 
 						/* if the clause is not empty, add it to the condition */
 						if (!clauseContainsTrue) {
-							if (!modifiedClause.isEmpty())
+							if (!modifiedClause.isEmpty()) {
 								modifiedCondition.add(modifiedClause);
-							else {
+							} else {
 								conditionIsSatisfiable = false;
 								break;
 							}
@@ -160,17 +159,13 @@ public class StripsUtil {
 			state.addAll(toAdd);
 
 		} else {
-			System.err.println("No support for operations of class " + appliedAction.getOperation().getClass());
+			logger.error("No support for operations of class {}", appliedAction.getOperation().getClass());
 		}
 	}
 
-	public static Monom getStateAfterPlanExecution(Monom initState, Plan plan) {
+	public static Monom getStateAfterPlanExecution(final Monom initState, final Plan plan) {
 		Monom state = new Monom(initState);
 		plan.getActions().forEach(a -> updateState(state, a));
 		return state;
-	}
-
-	public static void main(String[] args) {
-		System.out.println("NON-PRIMITIVE!");
 	}
 }

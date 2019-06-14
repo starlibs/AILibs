@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import com.sun.jna.Pointer;
 
+import ai.libs.jaicore.processes.W32API.HANDLE;
+
 /**
  * The process util provides convenient methods for securely killing processes of the operating system. For instance, this is useful whenever sub-processes are spawned and shall be killed reliably.
  *
@@ -52,8 +54,9 @@ public class ProcessUtil {
 			return Runtime.getRuntime().exec(System.getenv("windir") + "\\system32\\" + "tasklist.exe");
 		case LINUX:
 			return Runtime.getRuntime().exec("ps -e -o user,pid,ppid,c,size,cmd");
+		default :
+			throw new UnsupportedOperationException("No action defined for OS " + os);
 		}
-		throw new UnsupportedOperationException("No action defined for OS " + os);
 	}
 
 	/**
@@ -89,12 +92,12 @@ public class ProcessUtil {
 				long handl = f.getLong(process);
 
 				Kernel32 kernel = Kernel32.INSTANCE;
-				W32API.HANDLE handle = new W32API.HANDLE();
+				HANDLE handle = new HANDLE();
 				handle.setPointer(Pointer.createConstant(handl));
-				pid = kernel.GetProcessId(handle);
+				pid = kernel.getProcessId(handle);
 				return pid;
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			throw new ProcessIDNotRetrievableException("Could not retrieve process ID", e);
 		}
 		throw new UnsupportedOperationException();

@@ -31,6 +31,8 @@ import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.sets.CartesianProductComputationProblem;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
@@ -180,22 +182,21 @@ public class WekaUtil {
 	 * Determines all attribute selection variants (search/evaluator combinations with default parametrization)
 	 *
 	 * @return
+	 * @throws AlgorithmExecutionCanceledException
+	 * @throws InterruptedException
+	 * @throws AlgorithmTimeoutedException
 	 */
-	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() {
+	public static Collection<List<String>> getAdmissibleSearcherEvaluatorCombinationsForAttributeSelection() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		Collection<List<String>> preprocessors = new ArrayList<>();
 		List<Collection<String>> sets = new ArrayList<>();
-		try {
-			sets.add(getSearchers());
-			sets.add(getFeatureEvaluators());
-			CartesianProductComputationProblem<String> problem = new CartesianProductComputationProblem<>(sets);
-			List<List<String>> combinations = new LDSRelationComputer<>(problem).call();
-			for (List<String> combo : combinations) {
-				if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
-					preprocessors.add(combo);
-				}
+		sets.add(getSearchers());
+		sets.add(getFeatureEvaluators());
+		CartesianProductComputationProblem<String> problem = new CartesianProductComputationProblem<>(sets);
+		List<List<String>> combinations = new LDSRelationComputer<>(problem).call();
+		for (List<String> combo : combinations) {
+			if (isValidPreprocessorCombination(combo.get(0), combo.get(1))) {
+				preprocessors.add(combo);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 		return preprocessors;
 	}
@@ -847,8 +848,7 @@ public class WekaUtil {
 	}
 
 	/**
-	 * Creates a stratified split for a given {@link ReproducibleInstances} Object.
-	 * The history will be updated to track the split.
+	 * Creates a stratified split for a given {@link ReproducibleInstances} Object. The history will be updated to track the split.
 	 *
 	 * @param data
 	 *            - Input data
@@ -856,16 +856,14 @@ public class WekaUtil {
 	 *            - random used to get a seed, which can be used and saved
 	 * @param portions
 	 *            - ratios to split
-	 * @return a list of {@link ReproducibleInstances}. For each of them the history
-	 *         will be updated to track the split
+	 * @return a list of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
 	 */
 	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double... portions) {
 		return getStratifiedSplit(data, rand.nextLong(), portions);
 	}
 
 	/**
-	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object.
-	 * THe History will be updated to track the split.
+	 * Creates a StratifiedSplit for a given {@link ReproducibleInstances} Object. THe History will be updated to track the split.
 	 *
 	 * @param data
 	 *            - Input data
@@ -873,8 +871,7 @@ public class WekaUtil {
 	 *            - random seed
 	 * @param portions
 	 *            - ratios to split
-	 * @return a List of {@link ReproducibleInstances}. For each of them the history
-	 *         will be updated to track the split
+	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
 	 */
 	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double... portions) {
 
@@ -1150,14 +1147,9 @@ public class WekaUtil {
 		return sb.toString();
 	}
 
-	public static Instances jsonStringToInstances(final String json) {
-		try {
-			JSONNode node = JSONNode.read(new BufferedReader(new StringReader(json)));
-			return JSONInstances.toInstances(node);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+	public static Instances jsonStringToInstances(final String json) throws Exception {
+		JSONNode node = JSONNode.read(new BufferedReader(new StringReader(json)));
+		return JSONInstances.toInstances(node);
 	}
 
 	/**

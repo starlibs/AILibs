@@ -167,11 +167,12 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public ResultSet getResultsOfQuery(final String query, final List<String> values) throws SQLException {
 		this.checkConnection();
-		PreparedStatement statement = this.connect.prepareStatement(query);
-		for (int i = 1; i <= values.size(); i++) {
-			statement.setString(i, values.get(i - 1));
+		try (PreparedStatement statement = this.connect.prepareStatement(query)) {
+			for (int i = 1; i <= values.size(); i++) {
+				statement.setString(i, values.get(i - 1));
+			}
+			return statement.executeQuery();
 		}
-		return statement.executeQuery();
 	}
 
 	public int insert(final String sql, final String[] values) throws SQLException {
@@ -180,15 +181,16 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public int insert(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
-		PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-		for (int i = 1; i <= values.size(); i++) {
-			this.setValue(stmt, i, values.get(i - 1));
-		}
-		stmt.executeUpdate();
+		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			for (int i = 1; i <= values.size(); i++) {
+				this.setValue(stmt, i, values.get(i - 1));
+			}
+			stmt.executeUpdate();
 
-		try (ResultSet rs = stmt.getGeneratedKeys()) {
-			rs.next();
-			return rs.getInt(1);
+			try (ResultSet rs = stmt.getGeneratedKeys()) {
+				rs.next();
+				return rs.getInt(1);
+			}
 		}
 	}
 
@@ -199,11 +201,12 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public void insertNoNewValues(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
-		PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-		for (int i = 1; i <= values.size(); i++) {
-			this.setValue(stmt, i, values.get(i - 1));
+		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			for (int i = 1; i <= values.size(); i++) {
+				this.setValue(stmt, i, values.get(i - 1));
+			}
+			stmt.executeUpdate();
 		}
-		stmt.executeUpdate();
 	}
 
 	private Pair<String, List<Object>> buildInsertStatement(final String table, final Map<String, ? extends Object> map) {
@@ -244,11 +247,12 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public void update(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
-		PreparedStatement stmt = this.connect.prepareStatement(sql);
-		for (int i = 1; i <= values.size(); i++) {
-			stmt.setString(i, values.get(i - 1).toString());
+		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
+			for (int i = 1; i <= values.size(); i++) {
+				stmt.setString(i, values.get(i - 1).toString());
+			}
+			stmt.executeUpdate();
 		}
-		stmt.executeUpdate();
 	}
 
 	public void update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
@@ -273,11 +277,12 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		}
 
 		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
-		PreparedStatement stmt = this.connect.prepareStatement(sql);
-		for (int i = 1; i <= values.size(); i++) {
-			this.setValue(stmt, i, values.get(i - 1));
+		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
+			for (int i = 1; i <= values.size(); i++) {
+				this.setValue(stmt, i, values.get(i - 1));
+			}
+			stmt.executeUpdate();
 		}
-		stmt.executeUpdate();
 	}
 
 	/**

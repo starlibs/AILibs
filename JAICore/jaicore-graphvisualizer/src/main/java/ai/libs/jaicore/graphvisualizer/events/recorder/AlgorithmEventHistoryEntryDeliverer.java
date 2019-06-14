@@ -19,8 +19,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.speedslider.ChangeSpeedEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
 /**
- * The {@link AlgorithmEventHistoryEntryDeliverer} is {@link Thread} constantly pulling events from a given {@link AlgorithmEventHistory} and sending these to all registered
- * {@link AlgorithmEventListener}s.
+ * The {@link AlgorithmEventHistoryEntryDeliverer} is {@link Thread} constantly pulling events from a given {@link AlgorithmEventHistory} and sending these to all registered {@link AlgorithmEventListener}s.
  *
  * @author ahetzer
  *
@@ -65,7 +64,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 
 	@Override
 	public void run() {
-		while (true) {
+		while (!Thread.currentThread().isInterrupted()) {
 			if (!this.paused && this.timestep < this.eventHistory.getLength()) {
 				AlgorithmEventHistoryEntry historyEntry = this.eventHistory.getEntryAtTimeStep(this.timestep);
 				AlgorithmEvent algorithmEvent = historyEntry.getAlgorithmEvent();
@@ -79,25 +78,26 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Algor
 				this.logger.debug("Not processing events since no unpublished events are known.");
 			}
 
-			this.goToSleep();
+			try {
+				this.goToSleep();
+			} catch (InterruptedException e) {
+				this.logger.info("{} has been interrupted: {}.", this.getClass().getSimpleName(), e);
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
 
-	private void goToSleep() {
-		try {
-			int sleepTime = (int) (this.sleepTimeMultiplier * this.maximumSleepTimeInMilliseconds);
-			this.logger.trace("Sleeping {}ms.", sleepTime);
-			sleep(sleepTime);
-		} catch (InterruptedException e) {
-			this.logger.info("{} was interrupted due to exception: {}.", this.getClass().getSimpleName(), e);
-		}
+	private void goToSleep() throws InterruptedException {
+		int sleepTime = (int) (this.sleepTimeMultiplier * this.maximumSleepTimeInMilliseconds);
+		this.logger.trace("Sleeping {}ms.", sleepTime);
+		sleep(sleepTime);
 	}
 
 	private void sendAlgorithmEventToListeners(final AlgorithmEvent algorithmEvent) {
 		for (AlgorithmEventListener eventListener : this.algorithmEventListeners) {
 			try {
 				this.sendAlgorithmEventToListener(algorithmEvent, eventListener);
-			} catch (Throwable e) {
+			} catch (Exception e) {
 				this.logger.error("Error in dispatching event {} due to error.", algorithmEvent, e);
 			}
 		}

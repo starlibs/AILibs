@@ -2,6 +2,7 @@ package ai.libs.jaicore.basic.algorithm;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -92,6 +93,9 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public AlgorithmEvent next() {
+		if (!this.hasNext()) {
+			throw new NoSuchElementException();
+		}
 		try {
 			return this.nextWithException();
 		} catch (Exception e) {

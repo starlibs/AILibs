@@ -169,7 +169,7 @@ public class JavaMethodToProcessWrapper {
 		/* if the process is supposed to be interrupted in the meantime, destroy it */
 		catch (InterruptedException e) {
 			logger.info("Received interrupt");
-			killerHook.run();
+			killerHook.start();
 			FileUtil.deleteFolderRecursively(dir);
 			throw e;
 		} finally {

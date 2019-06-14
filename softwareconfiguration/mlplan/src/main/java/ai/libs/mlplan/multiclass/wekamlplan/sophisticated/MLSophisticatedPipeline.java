@@ -14,7 +14,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * 
+ *
  * @author Felix Mohr
  *
  */
@@ -26,14 +26,17 @@ public class MLSophisticatedPipeline implements Classifier, FeatureGenerator, Se
 	private final List<FeaturePreprocessor> featureSelectors = new ArrayList<>();
 	private final Classifier classifier;
 	private boolean trained = false;
-	private long timeForTrainingPreprocessors, timeForTrainingClassifier, timeForExecutingPreprocessor, timeForExecutingClassifier;
+	private long timeForTrainingPreprocessors;
+	private long timeForTrainingClassifier;
+	private long timeForExecutingPreprocessor;
+	private long timeForExecutingClassifier;
 	private Instances emptyReferenceDataset;
 
-	public MLSophisticatedPipeline(List<FeatureGenerator> featureGenerators, List<FeaturePreprocessor> preprocessors, List<FeaturePreprocessor> featureSelectors,
-			Classifier baseClassifier) {
+	public MLSophisticatedPipeline(final List<FeatureGenerator> featureGenerators, final List<FeaturePreprocessor> preprocessors, final List<FeaturePreprocessor> featureSelectors, final Classifier baseClassifier) {
 		super();
-		if (baseClassifier == null)
+		if (baseClassifier == null) {
 			throw new IllegalArgumentException("Base classifier must not be null!");
+		}
 		this.featureGenerators.addAll(featureGenerators);
 		this.featurePreprocessors.addAll(preprocessors);
 		this.featureSelectors.addAll(featureSelectors);
@@ -44,65 +47,58 @@ public class MLSophisticatedPipeline implements Classifier, FeatureGenerator, Se
 	public void buildClassifier(Instances data) throws Exception {
 
 		/* determine features to be created */
-		long start = System.currentTimeMillis();
+		long start;
 		Instances mergedInstances = new Instances(data);
 		int f = data.numAttributes();
 
 		/* generate features */
-		for (FeatureGenerator pp : featureGenerators) {
+		for (FeatureGenerator pp : this.featureGenerators) {
 
 			/* if the filter has not been trained yet, do so now and store it */
 			if (!pp.isPrepared()) {
-				try {
-					start = System.currentTimeMillis();
-					pp.prepare(data);
-					timeForTrainingPreprocessors = System.currentTimeMillis() - start;
-					// int newNumberOfClasses = pp.apply(data).numClasses();
-					// if (data.numClasses() != newNumberOfClasses) {
-					// System.out.println(pp.getSelector() + " changed number of classes from " + data.numClasses() + " to " + newNumberOfClasses);
-					// }
-				} catch (NullPointerException e) {
-					System.err.println("Problems with training pipeline");
-					e.printStackTrace();
-				}
+				start = System.currentTimeMillis();
+				pp.prepare(data);
+				this.timeForTrainingPreprocessors = System.currentTimeMillis() - start;
 			}
 			Instances modifiedInstances = pp.apply(data);
-			if (modifiedInstances == null)
+			if (modifiedInstances == null) {
 				throw new IllegalStateException("Feature Generator " + pp + " has generated a null-dataset!");
+			}
 
 			/* now apply the attribute selector */
-			for (int i = 0; i < modifiedInstances.numAttributes(); i++)
+			for (int i = 0; i < modifiedInstances.numAttributes(); i++) {
 				modifiedInstances.renameAttribute(modifiedInstances.attribute(i), "f" + (f++));
+			}
 			mergedInstances = Instances.mergeInstances(mergedInstances, modifiedInstances);
 			mergedInstances.setClassIndex(data.classIndex());
 		}
 		data = mergedInstances;
 
 		/* preprocess features */
-		for (FeaturePreprocessor pp : featurePreprocessors) {
+		for (FeaturePreprocessor pp : this.featurePreprocessors) {
 			pp.prepare(data);
 			data = pp.apply(data);
-			if (data.classIndex() < 0)
+			if (data.classIndex() < 0) {
 				throw new IllegalStateException("Preprocessor " + pp + " has removed class index!");
+			}
 		}
 
 		/* feature selection */
-		int fCount = data.numAttributes();
-		for (FeaturePreprocessor pp : featureSelectors) {
+		for (FeaturePreprocessor pp : this.featureSelectors) {
 			pp.prepare(data);
 			data = pp.apply(data);
-			if (data.classIndex() < 0)
+			if (data.classIndex() < 0) {
 				throw new IllegalStateException("Preprocessor " + pp + " has removed class index!");
+			}
 		}
-		System.out.println("Reduced features from " + fCount + " to " + data.numAttributes());
 
 		/* build classifier based on reduced data */
-		emptyReferenceDataset = new Instances(data);
-		emptyReferenceDataset.clear();
+		this.emptyReferenceDataset = new Instances(data);
+		this.emptyReferenceDataset.clear();
 		start = System.currentTimeMillis();
-		classifier.buildClassifier(data);
-		timeForTrainingClassifier = System.currentTimeMillis() - start;
-		trained = true;
+		this.classifier.buildClassifier(data);
+		this.timeForTrainingClassifier = System.currentTimeMillis() - start;
+		this.trained = true;
 	}
 
 	private Instance applyPreprocessors(Instance data) throws Exception {
@@ -111,31 +107,32 @@ public class MLSophisticatedPipeline implements Classifier, FeatureGenerator, Se
 		/* create features */
 		Instance mergedInstance = new DenseInstance(data);
 		mergedInstance.setDataset(data.dataset());
-		for (FeatureGenerator pp : featureGenerators) {
+		for (FeatureGenerator pp : this.featureGenerators) {
 
 			Instances mergedDatasetA = new Instances(mergedInstance.dataset());
 			mergedDatasetA.clear();
 			mergedDatasetA.add(mergedInstance);
 			Instance modifiedInstance = pp.apply(data);
-			if (modifiedInstance.dataset() == null)
+			if (modifiedInstance.dataset() == null) {
 				throw new IllegalStateException("Instance was detached from dataset by " + pp);
+			}
 
 			Instances mergedDatasetB = modifiedInstance.dataset();
 			Instances mergedDataset = Instances.mergeInstances(mergedDatasetA, mergedDatasetB);
 			mergedDataset.setClassIndex(mergedDatasetA.classIndex());
 			mergedInstance = mergedInstance.mergeInstance(modifiedInstance);
 			mergedInstance.setDataset(mergedDataset);
-			timeForExecutingPreprocessor = System.currentTimeMillis() - start;
+			this.timeForExecutingPreprocessor = System.currentTimeMillis() - start;
 		}
 		data = mergedInstance;
 
 		/* preprocess features */
-		for (FeaturePreprocessor pp : featurePreprocessors) {
+		for (FeaturePreprocessor pp : this.featurePreprocessors) {
 			data = pp.apply(data);
 		}
 
 		/* feature selection */
-		for (FeaturePreprocessor pp : featureSelectors) {
+		for (FeaturePreprocessor pp : this.featureSelectors) {
 			data = pp.apply(data);
 		}
 		return data;
@@ -143,89 +140,94 @@ public class MLSophisticatedPipeline implements Classifier, FeatureGenerator, Se
 
 	@Override
 	public double classifyInstance(Instance arg0) throws Exception {
-		if (!trained)
+		if (!this.trained) {
 			throw new IllegalStateException("Cannot make predictions on untrained pipeline!");
-		arg0 = applyPreprocessors(arg0);
+		}
+		arg0 = this.applyPreprocessors(arg0);
 		long start = System.currentTimeMillis();
-		double result = classifier.classifyInstance(arg0);
-		timeForExecutingClassifier = System.currentTimeMillis() - start;
+		double result = this.classifier.classifyInstance(arg0);
+		this.timeForExecutingClassifier = System.currentTimeMillis() - start;
 		return result;
 	}
 
 	@Override
 	public double[] distributionForInstance(Instance arg0) throws Exception {
-		if (!trained)
+		if (!this.trained) {
 			throw new IllegalStateException("Cannot make predictions on untrained pipeline!");
-		if (arg0 == null)
+		}
+		if (arg0 == null) {
 			throw new IllegalArgumentException("Cannot make predictions for null-instance");
-		arg0 = applyPreprocessors(arg0);
-		if (arg0 == null)
+		}
+		arg0 = this.applyPreprocessors(arg0);
+		if (arg0 == null) {
 			throw new IllegalStateException("The filter has turned the instance into NULL");
+		}
 		long start = System.currentTimeMillis();
-		double[] result = classifier.distributionForInstance(arg0);
-		timeForExecutingClassifier = System.currentTimeMillis() - start;
+		double[] result = this.classifier.distributionForInstance(arg0);
+		this.timeForExecutingClassifier = System.currentTimeMillis() - start;
 		return result;
 	}
 
 	@Override
 	public Capabilities getCapabilities() {
-		return classifier.getCapabilities();
+		return this.classifier.getCapabilities();
 	}
 
 	public Classifier getBaseClassifier() {
-		return classifier;
+		return this.classifier;
 	}
 
 	public long getTimeForTrainingPreprocessor() {
-		return timeForTrainingPreprocessors;
+		return this.timeForTrainingPreprocessors;
 	}
 
 	public long getTimeForTrainingClassifier() {
-		return timeForTrainingClassifier;
+		return this.timeForTrainingClassifier;
 	}
 
 	public long getTimeForExecutingPreprocessor() {
-		return timeForExecutingPreprocessor;
+		return this.timeForExecutingPreprocessor;
 	}
 
 	public long getTimeForExecutingClassifier() {
-		return timeForExecutingClassifier;
+		return this.timeForExecutingClassifier;
 	}
 
 	@Override
-	public void prepare(Instances data) throws Exception {
-		buildClassifier(data);
+	public void prepare(final Instances data) throws Exception {
+		this.buildClassifier(data);
 	}
 
 	private Instances getEmptyProbingResultDataset() {
-		if (!isPrepared())
+		if (!this.isPrepared()) {
 			throw new IllegalStateException("Cannot determine empty dataset, because the pipeline has not been trained yet.");
+		}
 		ArrayList<Attribute> atts = new ArrayList<>();
-		List<String> attributeValues = WekaUtil.getClassesDeclaredInDataset(emptyReferenceDataset);
+		List<String> attributeValues = WekaUtil.getClassesDeclaredInDataset(this.emptyReferenceDataset);
 		for (String att : attributeValues) {
 			atts.add(new Attribute("probe_classprob_" + att + "_" + this));
 		}
-		Instances empty = new Instances("probing", atts, 0);
-		return empty;
+		return new Instances("probing", atts, 0);
 	}
 
 	@Override
-	public Instance apply(Instance data) throws Exception {
-		double[] classProbs = distributionForInstance(data);
+	public Instance apply(final Instance data) throws Exception {
+		double[] classProbs = this.distributionForInstance(data);
 		Instance newInst = new DenseInstance(classProbs.length);
-		Instances dataset = getEmptyProbingResultDataset();
+		Instances dataset = this.getEmptyProbingResultDataset();
 		dataset.add(newInst);
 		newInst.setDataset(dataset);
-		for (int i = 0; i < classProbs.length; i++)
+		for (int i = 0; i < classProbs.length; i++) {
 			newInst.setValue(i, classProbs[i]);
+		}
 		return newInst;
 	}
 
 	@Override
-	public Instances apply(Instances data) throws Exception {
-		Instances probingResults = new Instances(getEmptyProbingResultDataset());
+	public Instances apply(final Instances data) throws Exception {
+		Instances probingResults = new Instances(this.getEmptyProbingResultDataset());
 		for (Instance inst : data) {
-			Instance probedInst = apply(inst);
+			Instance probedInst = this.apply(inst);
 			probedInst.setDataset(probingResults);
 			probingResults.add(probedInst);
 		}

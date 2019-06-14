@@ -17,7 +17,7 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 @SuppressWarnings("serial")
 public class Graph<T> implements Serializable {
 
-	private class Node {
+	private class Node implements Serializable {
 		private T t = null;
 		private Set<Node> successors = new HashSet<>();
 		private Set<Node> predecessors = new HashSet<>();

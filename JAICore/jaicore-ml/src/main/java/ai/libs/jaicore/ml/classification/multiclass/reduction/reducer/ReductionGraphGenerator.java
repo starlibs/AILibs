@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.EMCNodeType;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.splitters.ISplitter;
@@ -26,6 +29,7 @@ import weka.core.Instances;
 
 public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Decision> {
 
+	private final Logger logger = LoggerFactory.getLogger(ReductionGraphGenerator.class);
 	private final Random rand;
 	private final Instances data;
 
@@ -106,7 +110,7 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				this.logger.error("Encountered error: {}", e);
 			}
 			return restProblems;
 		};

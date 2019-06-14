@@ -146,10 +146,7 @@ public class ReductionExperiment {
 		} else if (!this.nameOfRightClassifier.equals(other.nameOfRightClassifier)) {
 			return false;
 		}
-		if (this.seed != other.seed) {
-			return false;
-		}
-		return true;
+		return this.seed == other.seed;
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
@@ -51,10 +52,13 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 					BestFirstEpsilon.this.logger.error("Observed exception during computation of f: {}", e);
 				}
 			});
-			Node<T, Double> choice = focal.stream().min((p1, p2) -> BestFirstEpsilon.this.secondaryCache.get(p1).compareTo(BestFirstEpsilon.this.secondaryCache.get(p2))).get();
-			BestFirstEpsilon.this.logger.info("Best score is {}. Threshold for focal is {}. Choose node with f1 {} and best f2 {}. Size of focal was {}.", best, threshold, choice.getInternalLabel(),
-					BestFirstEpsilon.this.secondaryCache.get(choice), focal.size());
-			return choice;
+			Optional<Node<T, Double>> choice = focal.stream().min((p1, p2) -> BestFirstEpsilon.this.secondaryCache.get(p1).compareTo(BestFirstEpsilon.this.secondaryCache.get(p2)));
+			if (!choice.isPresent()) {
+				throw new IllegalStateException("No choice found!");
+			}
+			BestFirstEpsilon.this.logger.info("Best score is {}. Threshold for focal is {}. Choose node with f1 {} and best f2 {}. Size of focal was {}.", best, threshold, choice.get().getInternalLabel(),
+					BestFirstEpsilon.this.secondaryCache.get(choice.get()), focal.size());
+			return choice.get();
 		}
 	}
 
