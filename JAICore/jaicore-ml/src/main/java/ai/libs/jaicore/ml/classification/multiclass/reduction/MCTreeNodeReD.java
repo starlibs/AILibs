@@ -10,6 +10,7 @@ import java.util.Set;
 
 import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.core.exception.TrainingException;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
@@ -18,13 +19,14 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.WekaException;
 
-public class MCTreeNodeReD implements Classifier, Serializable {
+public class MCTreeNodeReD extends AMCTreeNode<String> {
 	/**
 	 * Automatically generated serial version UID.
 	 */
 	private static final long serialVersionUID = 8873192747068561266L;
 
-	private class ChildNode {
+	@SuppressWarnings("serial")
+	private class ChildNode implements Serializable {
 		private List<String> containedClasses;
 		private Classifier childNodeClassifier;
 
@@ -70,10 +72,7 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	 * Classifier assigned to this inner node.
 	 */
 	private Classifier innerNodeClassifier;
-	/**
-	 * Classes contained in this node.
-	 */
-	private final List<String> containedClasses = new ArrayList<>();
+
 	/**
 	 * List of children of this tree node.
 	 */
@@ -87,9 +86,8 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 		this(innerNodeClassifier, leftChildClasses, AbstractClassifier.forName(leftChildClassifier, null), rightChildClasses, AbstractClassifier.forName(rightChildClassifier, null));
 	}
 
-	@SuppressWarnings("unchecked")
 	public MCTreeNodeReD(final Classifier innerNodeClassifier, final Collection<String> leftChildClasses, final Classifier leftChildClassifier, final Collection<String> rightChildClasses, final Classifier rightChildClassifier) {
-		this(innerNodeClassifier, Arrays.asList(new Collection[] { leftChildClasses, rightChildClasses }), Arrays.asList(new Classifier[] { leftChildClassifier, rightChildClassifier }));
+		this(innerNodeClassifier, Arrays.asList(leftChildClasses, rightChildClasses), Arrays.asList(leftChildClassifier, rightChildClassifier));
 	}
 
 	public MCTreeNodeReD(final String innerNodeClassifier, final Collection<String> leftChildClasses, final Classifier leftChildClassifier, final Collection<String> rightChildClasses, final Classifier rightChildClassifier)
@@ -98,6 +96,7 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	}
 
 	public MCTreeNodeReD(final Classifier innerNodeClassifier, final List<Collection<String>> childClasses, final List<Classifier> childClassifier) {
+		this();
 		if (childClasses.size() != childClassifier.size()) {
 			throw new IllegalArgumentException("Number of child classes does not equal the number of child classifiers");
 		}
@@ -108,11 +107,12 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	}
 
 	public MCTreeNodeReD(final MCTreeNodeReD copy) throws Exception {
-		this(copy.innerNodeClassifier.getClass().getName(), copy.children.get(0).containedClasses, WekaUtil.cloneClassifier(copy.children.get(0).childNodeClassifier), copy.children.get(1).containedClasses, WekaUtil.cloneClassifier(copy.children.get(1).childNodeClassifier));
+		this(copy.innerNodeClassifier.getClass().getName(), copy.children.get(0).containedClasses, WekaUtil.cloneClassifier(copy.children.get(0).childNodeClassifier), copy.children.get(1).containedClasses,
+				WekaUtil.cloneClassifier(copy.children.get(1).childNodeClassifier));
 	}
 
 	protected MCTreeNodeReD() {
-		super();
+		super(new ArrayList<>());
 	}
 
 	public void addChild(final List<String> childClasses, final Classifier childClassifier) {
@@ -137,6 +137,7 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	 *
 	 * @return Returns a collection of the contained class values contained in the leaves of this node.
 	 */
+	@Override
 	public List<String> getContainedClasses() {
 		return this.containedClasses;
 	}
@@ -146,10 +147,8 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 			return false;
 		}
 		for (ChildNode child : this.children) {
-			if (child.childNodeClassifier instanceof MCTreeNodeReD) {
-				if (!((MCTreeNodeReD) child.childNodeClassifier).isCompletelyConfigured()) {
-					return false;
-				}
+			if (child.childNodeClassifier instanceof MCTreeNodeReD && !((MCTreeNodeReD) child.childNodeClassifier).isCompletelyConfigured()) {
+				return false;
 			}
 		}
 		return true;
@@ -157,7 +156,9 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
-		assert !data.isEmpty() : "Cannot train MCTree with empty set of instances.";
+		if (data.isEmpty()) {
+			throw new IllegalArgumentException("Cannot train MCTree with empty set of instances.");
+		}
 		assert !this.children.isEmpty() : "Cannot train MCTree without children";
 		assert !this.trained : "Cannot retrain MCTreeNodeReD";
 		assert this.containedClasses.containsAll(WekaUtil.getClassesActuallyContainedInDataset(data)) : "The classes for which this MCTreeNodeReD has been defined (" + this.containedClasses
@@ -191,8 +192,8 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 			assert WekaUtil.getClassesActuallyContainedInDataset(childData).containsAll(child.containedClasses) : "There are classes declared in the child, but no corresponding data have been passed";
 			try {
 				child.childNodeClassifier.buildClassifier(childData);
-			} catch (Throwable e) {
-				throw new RuntimeException("Cannot train classifier in child #" + childNum, e);
+			} catch (Exception e) {
+				throw new TrainingException("Cannot train classifier in child #" + childNum, e);
 			}
 			instancesClusters.add(new HashSet<>(child.containedClasses));
 		}
@@ -204,8 +205,8 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 		} catch (WekaException e) {
 			this.innerNodeClassifier = new ZeroR();
 			this.innerNodeClassifier.buildClassifier(trainingData);
-		} catch (Throwable e) {
-			throw new RuntimeException("Cannot train inner classifier", e);
+		} catch (Exception e) {
+			throw new TrainingException("Cannot train inner classifier", e);
 		}
 
 		this.trained = true;
@@ -286,7 +287,9 @@ public class MCTreeNodeReD implements Classifier, Serializable {
 	}
 
 	public void setBaseClassifier(final Classifier classifier) {
-		assert classifier != null : "Cannot set null classifier!";
+		if (classifier == null) {
+			throw new IllegalArgumentException("Cannot set null classifier!");
+		}
 		this.innerNodeClassifier = classifier;
 	}
 

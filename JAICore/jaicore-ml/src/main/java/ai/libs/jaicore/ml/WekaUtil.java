@@ -247,7 +247,7 @@ public class WekaUtil {
 		return wekaInstances;
 	}
 
-	public static Instances fromJAICoreInstances(final ai.libs.jaicore.ml.interfaces.Instances instances) {
+	public static Instances fromJAICoreInstances(final ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances) {
 
 		/* create basic attribute entries */
 		ArrayList<Attribute> attributes = new ArrayList<>();
@@ -321,7 +321,7 @@ public class WekaUtil {
 			attributeList.add(new Attribute("a" + i));
 		}
 		/* create class attribute */
-		ArrayList<String> classes = labeledInstances.getOccurringLabels();
+		List<String> classes = labeledInstances.getOccurringLabels();
 		Attribute classAttribute = new Attribute(NAME_LABEL, classes);
 
 		attributeList.add(classAttribute);
@@ -966,26 +966,11 @@ public class WekaUtil {
 	}
 
 	public static Instance getRefactoredInstance(final Instance instance) {
-
-		/* modify instance */
-		Instances dataset = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(instance.dataset());
-		int numAttributes = instance.numAttributes();
-		int classIndex = instance.classIndex();
-		Instance iNew = new DenseInstance(numAttributes);
-		for (int i = 0; i < numAttributes; i++) {
-			Attribute a = instance.attribute(i);
-			if (i != classIndex) {
-				iNew.setValue(a, instance.value(a));
-			} else {
-				iNew.setValue(a, 0.0); // the value does not matter since this should only be used for TESTING
-			}
-		}
-		dataset.add(iNew);
-		iNew.setDataset(dataset);
-		return iNew;
+		return getRefactoredInstance(instance, Arrays.asList("0.0", "1.0"));
 	}
 
 	public static Instance getRefactoredInstance(final Instance instance, final List<String> classes) {
+
 		/* modify instance */
 		Instances dataset = WekaUtil.getEmptySetOfInstancesWithRefactoredClass(instance.dataset(), classes);
 		int numAttributes = instance.numAttributes();
@@ -1005,11 +990,7 @@ public class WekaUtil {
 	}
 
 	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances) {
-		List<Attribute> newAttributes = getAttributes(instances, false);
-		newAttributes.add(instances.classIndex(), getNewClassAttribute(instances.classAttribute()));
-		Instances newData = new Instances("split", (ArrayList<Attribute>) newAttributes, 0);
-		newData.setClassIndex(instances.classIndex());
-		return newData;
+		return getEmptySetOfInstancesWithRefactoredClass(instances, Arrays.asList("0.0", "1.0"));
 	}
 
 	public static Instances getEmptySetOfInstancesWithRefactoredClass(final Instances instances, final List<String> classes) {
@@ -1052,7 +1033,7 @@ public class WekaUtil {
 
 	public static Attribute getNewClassAttribute(final Attribute attribute) {
 		List<String> vals = Arrays.asList("0.0", "1.0");
-		return new Attribute(attribute.name(), vals);
+		return getNewClassAttribute(attribute, vals);
 	}
 
 	public static Attribute getNewClassAttribute(final Attribute attribute, final List<String> classes) {

@@ -1,8 +1,6 @@
 package ai.libs.jaicore.ml.classification.multiclass.reduction;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -29,7 +27,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.WekaException;
 
-public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, Iterable<MCTreeNode> {
+public class MCTreeNode extends AMCTreeNode<Integer> implements ITreeClassifier, Iterable<MCTreeNode> {
 
 	/**
 	 *
@@ -40,17 +38,16 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 	private List<MCTreeNode> children = new ArrayList<>();
 	private Classifier classifier;
 	private String classifierID;
-	private final List<Integer> containedClasses;
 	private boolean trained = false;
 
-	private Logger logger = LoggerFactory.getLogger(MCTreeNode.class);
+	private transient Logger logger = LoggerFactory.getLogger(MCTreeNode.class);
 
 	public static final AtomicInteger cacheRetrievals = new AtomicInteger();
 	private static Map<String, Classifier> classifierCacheMap = new HashMap<>();
 	private static Lock classifierCacheMapLock = new ReentrantLock();
 
 	public MCTreeNode(final List<Integer> containedClasses) {
-		this.containedClasses = containedClasses;
+		super(containedClasses);
 	}
 
 	public MCTreeNode(final List<Integer> containedClasses, final EMCNodeType nodeType, final String classifierID) throws Exception {
@@ -81,10 +78,6 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 		return this.children;
 	}
 
-	public Collection<Integer> getContainedClasses() {
-		return this.containedClasses;
-	}
-
 	public boolean isCompletelyConfigured() {
 		if (this.classifier == null) {
 			return false;
@@ -113,7 +106,7 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 		IntStream.range(0, this.children.size()).forEach(x -> instancesCluster.add(new HashSet<>()));
 		int index = 0;
 		for (MCTreeNode child : this.children) {
-			for (Integer classIndex : child.getContainedClasses()) {
+			for (int classIndex : child.getContainedClasses()) {
 				instancesCluster.get(index).add(data.classAttribute().value(classIndex));
 			}
 			index++;
@@ -148,21 +141,6 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 		this.trained = true;
 	}
 
-	@Override
-	public double classifyInstance(final Instance instance) throws Exception {
-		double selection = -1;
-		double best = 0;
-		double[] dist = this.distributionForInstance(instance);
-		for (int i = 0; i < dist.length; i++) {
-			double score = dist[i];
-			if (score > best) {
-				best = score;
-				selection = i;
-			}
-		}
-		return this.containedClasses.get((int) selection);
-	}
-
 	public void distributionForInstance(final Instance instance, final double[] distribution) throws Exception {
 		Instance iNew = WekaUtil.getRefactoredInstance(instance, IntStream.range(0, this.children.size()).mapToObj(x -> x + ".0").collect(Collectors.toList()));
 
@@ -171,7 +149,7 @@ public class MCTreeNode implements Classifier, ITreeClassifier, Serializable, It
 			child.distributionForInstance(instance, distribution);
 			int indexOfChild = this.children.indexOf(child);
 
-			for (Integer classContainedInChild : child.getContainedClasses()) {
+			for (int classContainedInChild : child.getContainedClasses()) {
 				distribution[classContainedInChild] *= localDistribution[indexOfChild];
 			}
 		}

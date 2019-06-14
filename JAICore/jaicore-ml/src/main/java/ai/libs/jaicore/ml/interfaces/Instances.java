@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-public interface Instances extends List<Instance> {
+public interface Instances<I> extends List<I> {
 	public int getNumberOfRows();
 	public int getNumberOfColumns();
 	public String toJson() throws JsonProcessingException;

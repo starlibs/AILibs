@@ -12,10 +12,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.core.SimpleInstanceImpl;
-import ai.libs.jaicore.ml.core.SimpleInstancesImpl;
-import ai.libs.jaicore.ml.core.SimpleLabeledInstanceImpl;
-import ai.libs.jaicore.ml.core.WekaCompatibleInstancesImpl;
 import ai.libs.jaicore.ml.interfaces.LabeledInstance;
 import ai.libs.jaicore.ml.interfaces.LabeledInstances;
 import weka.classifiers.Classifier;
@@ -147,7 +143,7 @@ public class WekaConversionTest {
 
 	@Test
 	public void JAICoreInstanceToWeka() throws Exception {
-		ai.libs.jaicore.ml.interfaces.Instances instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
+		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
 		ai.libs.jaicore.ml.interfaces.Instance instance = instances.get(0);
 		Instance wekaInstance = WekaUtil.fromJAICoreInstance(instance);
 		Assert.assertEquals(instance.getNumberOfColumns(), wekaInstance.numAttributes());
@@ -173,7 +169,7 @@ public class WekaConversionTest {
 
 	@Test
 	public void serializeUnserializeJAICoreInstance() throws Exception {
-		ai.libs.jaicore.ml.interfaces.Instances instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
+		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
 		ai.libs.jaicore.ml.interfaces.Instance instance = instances.get(12);
 		String json = instance.toJson();
 		ai.libs.jaicore.ml.interfaces.Instance newInstance = new SimpleInstanceImpl(json);
@@ -182,9 +178,9 @@ public class WekaConversionTest {
 
 	@Test
 	public void serializeUnserializeJAICoreInstances() throws Exception {
-		ai.libs.jaicore.ml.interfaces.Instances instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
+		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
 		String json = instances.toJson();
-		ai.libs.jaicore.ml.interfaces.Instances newInstances = new SimpleInstancesImpl(json);
+		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> newInstances = new SimpleInstancesImpl(json);
 		Assert.assertEquals(newInstances, instances);
 	}
 

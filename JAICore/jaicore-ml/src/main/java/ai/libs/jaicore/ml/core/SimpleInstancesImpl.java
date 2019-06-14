@@ -2,7 +2,6 @@ package ai.libs.jaicore.ml.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,9 +12,7 @@ import ai.libs.jaicore.ml.interfaces.Instance;
 import ai.libs.jaicore.ml.interfaces.Instances;
 
 @SuppressWarnings("serial")
-public class SimpleInstancesImpl extends ArrayList<Instance> implements Instances {
-
-	private int numColumns = -1;
+public class SimpleInstancesImpl extends ASimpleInstancesImpl<Instance> implements Instances<Instance> {
 
 	public SimpleInstancesImpl() {
 	}
@@ -51,16 +48,6 @@ public class SimpleInstancesImpl extends ArrayList<Instance> implements Instance
 		}
 
 		return super.add(instance);
-	}
-
-	@Override
-	public int getNumberOfRows() {
-		return this.size();
-	}
-
-	@Override
-	public int getNumberOfColumns() {
-		return this.numColumns;
 	}
 
 	@Override
