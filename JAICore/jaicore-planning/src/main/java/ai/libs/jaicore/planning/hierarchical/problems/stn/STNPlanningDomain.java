@@ -14,53 +14,60 @@ public class STNPlanningDomain implements Serializable {
 	private final Collection<? extends Operation> operations;
 	private final Collection<? extends Method> methods;
 
-	public STNPlanningDomain(Collection<? extends Operation> operations, Collection<? extends Method> methods) {
+	public STNPlanningDomain(final Collection<? extends Operation> operations, final Collection<? extends Method> methods) {
 		super();
 		this.operations = operations;
 		this.methods = methods;
-		assert isValid();
+		assert this.isValid();
 	}
-	
+
 	public boolean isValid() {
 		return true;
 	}
 
 	public Collection<? extends Operation> getOperations() {
-		return operations;
+		return this.operations;
 	}
 
 	public Collection<? extends Method> getMethods() {
-		return methods;
+		return this.methods;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((methods == null) ? 0 : methods.hashCode());
-		result = prime * result + ((operations == null) ? 0 : operations.hashCode());
+		result = prime * result + ((this.methods == null) ? 0 : this.methods.hashCode());
+		result = prime * result + ((this.operations == null) ? 0 : this.operations.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		STNPlanningDomain other = (STNPlanningDomain) obj;
-		if (methods == null) {
-			if (other.methods != null)
+		if (this.methods == null) {
+			if (other.methods != null) {
 				return false;
-		} else if (!methods.equals(other.methods))
+			}
+		} else if (!this.methods.equals(other.methods)) {
 			return false;
-		if (operations == null) {
-			if (other.operations != null)
+		}
+		if (this.operations == null) {
+			if (other.operations != null) {
 				return false;
-		} else if (!operations.equals(other.operations))
+			}
+		} else if (!this.operations.equals(other.operations)) {
 			return false;
+		}
 		return true;
 	}
 

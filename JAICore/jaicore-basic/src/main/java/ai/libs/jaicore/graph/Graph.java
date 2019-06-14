@@ -1,5 +1,6 @@
 package ai.libs.jaicore.graph;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,7 +14,8 @@ import java.util.stream.Collectors;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-public class Graph<T> {
+@SuppressWarnings("serial")
+public class Graph<T> implements Serializable {
 
 	private class Node {
 		private T t = null;

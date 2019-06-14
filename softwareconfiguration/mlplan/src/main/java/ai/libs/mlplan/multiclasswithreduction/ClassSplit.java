@@ -4,72 +4,82 @@ import java.util.Collection;
 
 public class ClassSplit<T> {
 	private final Collection<T> classes;
-	private final Collection<T> l, r;
+	private final Collection<T> l;
+	private final Collection<T> r;
 
-	public ClassSplit(Collection<T> classes, Collection<T> l, Collection<T> r) {
+	public ClassSplit(final Collection<T> classes, final Collection<T> l, final Collection<T> r) {
 		super();
 		this.classes = classes;
 		this.l = l;
 		this.r = r;
 	}
-	
-	public ClassSplit(ClassSplit<T> split) {
+
+	public ClassSplit(final ClassSplit<T> split) {
 		this(split.getClasses(), new ArrayList<>(split.getL()), new ArrayList<>(split.getR()));
 	}
 
 	public Collection<T> getClasses() {
-		return classes;
+		return this.classes;
 	}
 
 	public Collection<T> getL() {
-		return l;
+		return this.l;
 	}
 
 	public Collection<T> getR() {
-		return r;
+		return this.r;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((classes == null) ? 0 : classes.hashCode());
-		result = prime * result + ((l == null) ? 0 : l.hashCode());
-		result = prime * result + ((r == null) ? 0 : r.hashCode());
+		result = prime * result + ((this.classes == null) ? 0 : this.classes.hashCode());
+		result = prime * result + ((this.l == null) ? 0 : this.l.hashCode());
+		result = prime * result + ((this.r == null) ? 0 : this.r.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		@SuppressWarnings("unchecked")
 		ClassSplit<T> other = (ClassSplit<T>) obj;
-		if (classes == null) {
-			if (other.classes != null)
+		if (this.classes == null) {
+			if (other.classes != null) {
 				return false;
-		} else if (!classes.equals(other.classes))
+			}
+		} else if (!this.classes.equals(other.classes)) {
 			return false;
-		if (l == null) {
-			if (other.l != null)
+		}
+		if (this.l == null) {
+			if (other.l != null) {
 				return false;
-		} else if (!l.equals(other.l))
+			}
+		} else if (!this.l.equals(other.l)) {
 			return false;
-		if (r == null) {
-			if (other.r != null)
+		}
+		if (this.r == null) {
+			if (other.r != null) {
 				return false;
-		} else if (!r.equals(other.r))
+			}
+		} else if (!this.r.equals(other.r)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "ClassSplit [classes=" + classes + ", l=" + l + ", r=" + r + "]";
+		return "ClassSplit [classes=" + this.classes + ", l=" + this.l + ", r=" + this.r + "]";
 	}
-	
+
 }

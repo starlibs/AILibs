@@ -8,12 +8,9 @@ import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 
+@SuppressWarnings("serial")
 public class Method implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7744180734251229160L;
 	private final String name;
 	private final List<VariableParam> parameters;
 	private final Literal task;
@@ -21,7 +18,7 @@ public class Method implements Serializable {
 	private final TaskNetwork network;
 	private final boolean lonely;
 
-	public Method(String name, List<VariableParam> parameters, Literal task, Monom precondition, TaskNetwork network, boolean lonely) {
+	public Method(final String name, final List<VariableParam> parameters, final Literal task, final Monom precondition, final TaskNetwork network, final boolean lonely) {
 		super();
 		this.name = name;
 		this.parameters = parameters;
@@ -29,93 +26,109 @@ public class Method implements Serializable {
 		this.precondition = precondition;
 		this.network = network;
 		this.lonely = lonely;
-		assert doAllParamsInNetworkOccurInParameterList() : "Invalid method instantiation for " + name + ". There are parameters in the task network that do not occur in the parameter list.";
+		if (!this.doAllParamsInNetworkOccurInParameterList()) {
+			throw new IllegalArgumentException("Invalid method instantiation for " + name + ". There are parameters in the task network that do not occur in the parameter list.");
+		}
 	}
-	
+
 	private boolean doAllParamsInNetworkOccurInParameterList() {
 		for (Literal l : this.network.getItems()) {
-			if (!SetUtil.difference(l.getVariableParams(), this.parameters).isEmpty())
+			if (!SetUtil.difference(l.getVariableParams(), this.parameters).isEmpty()) {
 				return false;
+			}
 		}
 		return true;
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public List<VariableParam> getParameters() {
-		return parameters;
+		return this.parameters;
 	}
 
 	public Literal getTask() {
-		return task;
+		return this.task;
 	}
 
 	public Monom getPrecondition() {
-		return precondition;
+		return this.precondition;
 	}
 
 	public TaskNetwork getNetwork() {
-		return network;
+		return this.network;
 	}
 
 	public boolean isLonely() {
-		return lonely;
+		return this.lonely;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((network == null) ? 0 : network.hashCode());
-		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
-		result = prime * result + ((precondition == null) ? 0 : precondition.hashCode());
-		result = prime * result + ((task == null) ? 0 : task.hashCode());
+		result = prime * result + ((this.name == null) ? 0 : this.name.hashCode());
+		result = prime * result + ((this.network == null) ? 0 : this.network.hashCode());
+		result = prime * result + ((this.parameters == null) ? 0 : this.parameters.hashCode());
+		result = prime * result + ((this.precondition == null) ? 0 : this.precondition.hashCode());
+		result = prime * result + ((this.task == null) ? 0 : this.task.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		Method other = (Method) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (this.name == null) {
+			if (other.name != null) {
 				return false;
-		} else if (!name.equals(other.name))
+			}
+		} else if (!this.name.equals(other.name)) {
 			return false;
-		if (network == null) {
-			if (other.network != null)
+		}
+		if (this.network == null) {
+			if (other.network != null) {
 				return false;
-		} else if (!network.equals(other.network))
+			}
+		} else if (!this.network.equals(other.network)) {
 			return false;
-		if (parameters == null) {
-			if (other.parameters != null)
+		}
+		if (this.parameters == null) {
+			if (other.parameters != null) {
 				return false;
-		} else if (!parameters.equals(other.parameters))
+			}
+		} else if (!this.parameters.equals(other.parameters)) {
 			return false;
-		if (precondition == null) {
-			if (other.precondition != null)
+		}
+		if (this.precondition == null) {
+			if (other.precondition != null) {
 				return false;
-		} else if (!precondition.equals(other.precondition))
+			}
+		} else if (!this.precondition.equals(other.precondition)) {
 			return false;
-		if (task == null) {
-			if (other.task != null)
+		}
+		if (this.task == null) {
+			if (other.task != null) {
 				return false;
-		} else if (!task.equals(other.task))
+			}
+		} else if (!this.task.equals(other.task)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "Method [name=" + name + ", parameters=" + parameters + ", task=" + task + ", precondition=" + precondition + ", network=" + network + ", lonely=" + lonely + "]";
+		return "Method [name=" + this.name + ", parameters=" + this.parameters + ", task=" + this.task + ", precondition=" + this.precondition + ", network=" + this.network + ", lonely=" + this.lonely + "]";
 	}
 
 }

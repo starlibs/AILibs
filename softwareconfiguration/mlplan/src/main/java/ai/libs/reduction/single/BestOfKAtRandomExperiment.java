@@ -2,50 +2,53 @@ package ai.libs.reduction.single;
 
 public class BestOfKAtRandomExperiment extends ReductionExperiment {
 
-	private final int k, mccvRepeats;
+	private final int k;
+	private final int mccvRepeats;
 
-	public BestOfKAtRandomExperiment(int seed, String dataset, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier, int k, int mccvRepeats) {
+	public BestOfKAtRandomExperiment(final int seed, final String dataset, final String nameOfLeftClassifier, final String nameOfInnerClassifier, final String nameOfRightClassifier, final int k, final int mccvRepeats) {
 		super(seed, dataset, nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier);
 		this.k = k;
 		this.mccvRepeats = mccvRepeats;
 	}
 
 	public int getK() {
-		return k;
+		return this.k;
 	}
 
 	public int getMccvRepeats() {
-		return mccvRepeats;
+		return this.mccvRepeats;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + k;
-		result = prime * result + mccvRepeats;
+		result = prime * result + this.k;
+		result = prime * result + this.mccvRepeats;
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		BestOfKAtRandomExperiment other = (BestOfKAtRandomExperiment) obj;
-		if (k != other.k)
+		if (this.k != other.k) {
 			return false;
-		if (mccvRepeats != other.mccvRepeats)
-			return false;
-		return true;
+		}
+		return this.mccvRepeats == other.mccvRepeats;
 	}
 
 	@Override
 	public String toString() {
-		return "BestOfKAtRandomExperiment [k=" + k + ", mccvRepeats=" + mccvRepeats + "]";
+		return "BestOfKAtRandomExperiment [k=" + this.k + ", mccvRepeats=" + this.mccvRepeats + "]";
 	}
 
 }

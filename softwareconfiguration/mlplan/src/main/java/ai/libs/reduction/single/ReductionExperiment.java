@@ -3,10 +3,14 @@ package ai.libs.reduction.single;
 public class ReductionExperiment {
 	private final int seed;
 	private final String dataset;
-	private final String nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier;
-	private String exceptionLeft, exceptionInner, exceptionRight;
+	private final String nameOfLeftClassifier;
+	private final String nameOfInnerClassifier;
+	private final String nameOfRightClassifier;
+	private String exceptionLeft;
+	private String exceptionInner;
+	private String exceptionRight;
 
-	public ReductionExperiment(int seed, String dataset, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier) {
+	public ReductionExperiment(final int seed, final String dataset, final String nameOfLeftClassifier, final String nameOfInnerClassifier, final String nameOfRightClassifier) {
 		super();
 		this.seed = seed;
 		this.dataset = dataset;
@@ -14,8 +18,8 @@ public class ReductionExperiment {
 		this.nameOfInnerClassifier = nameOfInnerClassifier;
 		this.nameOfRightClassifier = nameOfRightClassifier;
 	}
-	
-	public ReductionExperiment(int seed, String dataset, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier, String exceptionLeft, String exceptionInner, String exceptionRight) {
+
+	public ReductionExperiment(final int seed, final String dataset, final String nameOfLeftClassifier, final String nameOfInnerClassifier, final String nameOfRightClassifier, final String exceptionLeft, final String exceptionInner, final String exceptionRight) {
 		this(seed,dataset,nameOfLeftClassifier,nameOfInnerClassifier,nameOfRightClassifier);
 		this.exceptionLeft = exceptionLeft;
 		this.exceptionInner = exceptionInner;
@@ -23,46 +27,46 @@ public class ReductionExperiment {
 	}
 
 	public int getSeed() {
-		return seed;
+		return this.seed;
 	}
 
 	public String getDataset() {
-		return dataset;
+		return this.dataset;
 	}
 
 	public String getNameOfLeftClassifier() {
-		return nameOfLeftClassifier;
+		return this.nameOfLeftClassifier;
 	}
 
 	public String getNameOfInnerClassifier() {
-		return nameOfInnerClassifier;
+		return this.nameOfInnerClassifier;
 	}
 
 	public String getNameOfRightClassifier() {
-		return nameOfRightClassifier;
+		return this.nameOfRightClassifier;
 	}
 
 	public String getExceptionLeft() {
-		return exceptionLeft;
+		return this.exceptionLeft;
 	}
 
-	public void setExceptionLeft(String exceptionLeft) {
+	public void setExceptionLeft(final String exceptionLeft) {
 		this.exceptionLeft = exceptionLeft;
 	}
 
 	public String getExceptionInner() {
-		return exceptionInner;
+		return this.exceptionInner;
 	}
 
-	public void setExceptionInner(String exceptionInner) {
+	public void setExceptionInner(final String exceptionInner) {
 		this.exceptionInner = exceptionInner;
 	}
 
 	public String getExceptionRight() {
-		return exceptionRight;
+		return this.exceptionRight;
 	}
 
-	public void setExceptionRight(String exceptionRight) {
+	public void setExceptionRight(final String exceptionRight) {
 		this.exceptionRight = exceptionRight;
 	}
 
@@ -70,70 +74,88 @@ public class ReductionExperiment {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((dataset == null) ? 0 : dataset.hashCode());
-		result = prime * result + ((exceptionInner == null) ? 0 : exceptionInner.hashCode());
-		result = prime * result + ((exceptionLeft == null) ? 0 : exceptionLeft.hashCode());
-		result = prime * result + ((exceptionRight == null) ? 0 : exceptionRight.hashCode());
-		result = prime * result + ((nameOfInnerClassifier == null) ? 0 : nameOfInnerClassifier.hashCode());
-		result = prime * result + ((nameOfLeftClassifier == null) ? 0 : nameOfLeftClassifier.hashCode());
-		result = prime * result + ((nameOfRightClassifier == null) ? 0 : nameOfRightClassifier.hashCode());
-		result = prime * result + seed;
+		result = prime * result + ((this.dataset == null) ? 0 : this.dataset.hashCode());
+		result = prime * result + ((this.exceptionInner == null) ? 0 : this.exceptionInner.hashCode());
+		result = prime * result + ((this.exceptionLeft == null) ? 0 : this.exceptionLeft.hashCode());
+		result = prime * result + ((this.exceptionRight == null) ? 0 : this.exceptionRight.hashCode());
+		result = prime * result + ((this.nameOfInnerClassifier == null) ? 0 : this.nameOfInnerClassifier.hashCode());
+		result = prime * result + ((this.nameOfLeftClassifier == null) ? 0 : this.nameOfLeftClassifier.hashCode());
+		result = prime * result + ((this.nameOfRightClassifier == null) ? 0 : this.nameOfRightClassifier.hashCode());
+		result = prime * result + this.seed;
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		ReductionExperiment other = (ReductionExperiment) obj;
-		if (dataset == null) {
-			if (other.dataset != null)
+		if (this.dataset == null) {
+			if (other.dataset != null) {
 				return false;
-		} else if (!dataset.equals(other.dataset))
+			}
+		} else if (!this.dataset.equals(other.dataset)) {
 			return false;
-		if (exceptionInner == null) {
-			if (other.exceptionInner != null)
+		}
+		if (this.exceptionInner == null) {
+			if (other.exceptionInner != null) {
 				return false;
-		} else if (!exceptionInner.equals(other.exceptionInner))
+			}
+		} else if (!this.exceptionInner.equals(other.exceptionInner)) {
 			return false;
-		if (exceptionLeft == null) {
-			if (other.exceptionLeft != null)
+		}
+		if (this.exceptionLeft == null) {
+			if (other.exceptionLeft != null) {
 				return false;
-		} else if (!exceptionLeft.equals(other.exceptionLeft))
+			}
+		} else if (!this.exceptionLeft.equals(other.exceptionLeft)) {
 			return false;
-		if (exceptionRight == null) {
-			if (other.exceptionRight != null)
+		}
+		if (this.exceptionRight == null) {
+			if (other.exceptionRight != null) {
 				return false;
-		} else if (!exceptionRight.equals(other.exceptionRight))
+			}
+		} else if (!this.exceptionRight.equals(other.exceptionRight)) {
 			return false;
-		if (nameOfInnerClassifier == null) {
-			if (other.nameOfInnerClassifier != null)
+		}
+		if (this.nameOfInnerClassifier == null) {
+			if (other.nameOfInnerClassifier != null) {
 				return false;
-		} else if (!nameOfInnerClassifier.equals(other.nameOfInnerClassifier))
+			}
+		} else if (!this.nameOfInnerClassifier.equals(other.nameOfInnerClassifier)) {
 			return false;
-		if (nameOfLeftClassifier == null) {
-			if (other.nameOfLeftClassifier != null)
+		}
+		if (this.nameOfLeftClassifier == null) {
+			if (other.nameOfLeftClassifier != null) {
 				return false;
-		} else if (!nameOfLeftClassifier.equals(other.nameOfLeftClassifier))
+			}
+		} else if (!this.nameOfLeftClassifier.equals(other.nameOfLeftClassifier)) {
 			return false;
-		if (nameOfRightClassifier == null) {
-			if (other.nameOfRightClassifier != null)
+		}
+		if (this.nameOfRightClassifier == null) {
+			if (other.nameOfRightClassifier != null) {
 				return false;
-		} else if (!nameOfRightClassifier.equals(other.nameOfRightClassifier))
+			}
+		} else if (!this.nameOfRightClassifier.equals(other.nameOfRightClassifier)) {
 			return false;
-		if (seed != other.seed)
+		}
+		if (this.seed != other.seed) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "ReductionExperiment [seed=" + seed + ", dataset=" + dataset + ", nameOfLeftClassifier=" + nameOfLeftClassifier + ", nameOfInnerClassifier=" + nameOfInnerClassifier
-				+ ", nameOfRightClassifier=" + nameOfRightClassifier + ", exceptionLeft=" + exceptionLeft + ", exceptionInner="
-				+ exceptionInner + ", exceptionRight=" + exceptionRight + "]";
+		return "ReductionExperiment [seed=" + this.seed + ", dataset=" + this.dataset + ", nameOfLeftClassifier=" + this.nameOfLeftClassifier + ", nameOfInnerClassifier=" + this.nameOfInnerClassifier
+				+ ", nameOfRightClassifier=" + this.nameOfRightClassifier + ", exceptionLeft=" + this.exceptionLeft + ", exceptionInner="
+				+ this.exceptionInner + ", exceptionRight=" + this.exceptionRight + "]";
 	}
 }

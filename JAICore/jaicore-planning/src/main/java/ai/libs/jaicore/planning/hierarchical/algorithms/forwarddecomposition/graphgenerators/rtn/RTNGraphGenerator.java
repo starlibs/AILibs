@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,15 +40,16 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 	private final Map<String, Operation> primitiveTasks = new HashMap<>();
 	private final TaskPlannerUtil util = new TaskPlannerUtil(null);
 
-	public RTNGraphGenerator(RTNPlanningProblem problem) {
+	public RTNGraphGenerator(final RTNPlanningProblem problem) {
 		this.problem = problem;
-		for (Operation op : problem.getDomain().getOperations())
-			primitiveTasks.put(op.getName(), op);
+		for (Operation op : problem.getDomain().getOperations()) {
+			this.primitiveTasks.put(op.getName(), op);
+		}
 	}
 
 	@Override
 	public SingleRootGenerator<RTNNode> getRootGenerator() {
-		return () -> new RTNNode(false, problem.getInit(), new ArrayList<>(util.getTaskChainOfTotallyOrderedNetwork(problem.getNetwork())));
+		return () -> new RTNNode(false, this.problem.getInit(), new ArrayList<>(this.util.getTaskChainOfTotallyOrderedNetwork(this.problem.getNetwork())));
 	}
 
 	@Override
@@ -57,29 +59,30 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 			final Monom state = l.getState();
 			final List<Literal> currentlyRemainingTasks = l.getRemainingTasks();
 			final Literal nextTaskTmp = currentlyRemainingTasks.get(0);
-			if (nextTaskTmp == null)
+			if (nextTaskTmp == null) {
 				return successors;
-			final Literal nextTask = new Literal(nextTaskTmp.getPropertyName().substring(nextTaskTmp.getPropertyName().indexOf("-") + 1, nextTaskTmp.getPropertyName().length()),
+			}
+			final Literal nextTask = new Literal(nextTaskTmp.getPropertyName().substring(nextTaskTmp.getPropertyName().indexOf('-') + 1, nextTaskTmp.getPropertyName().length()),
 					nextTaskTmp.getParameters());
 			final String actualTaskName = nextTask.getPropertyName();
-			
+
 			/* if this is an or-node, perform the split as always */
 			if (!l.isAndNode()) {
 
 				/* if the task is primitive */
 
-				if (primitiveTasks.containsKey(actualTaskName)) {
+				if (this.primitiveTasks.containsKey(actualTaskName)) {
 
 					logger.info("Computing successors for PRIMITIVE task {} in state {}", nextTask, state);
 
-					final Collection<Action> applicableActions = util.getActionsForPrimitiveTaskThatAreApplicableInState(null, primitiveTasks.get(actualTaskName), nextTask,
+					final Collection<Action> applicableActions = this.util.getActionsForPrimitiveTaskThatAreApplicableInState(null, this.primitiveTasks.get(actualTaskName), nextTask,
 							state);
 					for (Action applicableAction : applicableActions) {
 						logger.info("Adding successor for PRIMITIVE task {} in state {}: {}", nextTask, state, applicableAction.getEncoding());
 
-						assert state.containsAll(applicableAction.getPrecondition().stream().filter(lit -> lit.isPositive()).collect(Collectors.toList()))
-								&& SetUtil.disjoint(state, applicableAction.getPrecondition().stream().filter(lit -> lit.isNegated()).collect(Collectors.toList())) : ("Action "
-										+ applicableAction + " is supposed to be aplpicable in state " + state + " but it is not!");
+						assert state.containsAll(applicableAction.getPrecondition().stream().filter(Literal::isPositive).collect(Collectors.toList()))
+						&& SetUtil.disjoint(state, applicableAction.getPrecondition().stream().filter(Literal::isNegated).collect(Collectors.toList())) : ("Action "
+								+ applicableAction + " is supposed to be aplpicable in state " + state + " but it is not!");
 
 						/* if the depth is % k == 0, then compute the rest problem explicitly */
 						final Monom updatedState = new Monom(state, false);
@@ -88,14 +91,13 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						try {
 							StripsUtil.updateState(updatedState, applicableAction);
 						} catch (Exception e) {
-							System.out.println("apply " + applicableAction.getEncoding() + " to state: " + state);
-							System.out.println("addlists: " + relevantAction.getAddLists());
-							e.printStackTrace();
-							System.exit(1);
+							logger.error("apply {} to state: {}", applicableAction.getEncoding(), state);
+							logger.error("addlists: {}", relevantAction.getAddLists());
+							logger.error("Observed exception: {}", e);
 						}
 						final List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 						remainingTasks.remove(0);
-						boolean isAndNode = remainingTasksInitializeANDNode(remainingTasks);
+						boolean isAndNode = this.remainingTasksInitializeANDNode(remainingTasks);
 						successors.add(new NodeExpansionDescription<>(l, new RTNNode(isAndNode, updatedState, remainingTasks), new RTNEdge(null, null, relevantAction), null));
 					}
 					assert checkDoubleNodes(successors);
@@ -109,7 +111,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 					final Set<Method> usedMethods = new HashSet<>();
 
 					/* if this is an OR-Node */
-					final Collection<MethodInstance> instances = util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask,
+					final Collection<MethodInstance> instances = this.util.getMethodInstancesForTaskThatAreApplicableInState(null, this.problem.getDomain().getMethods(), nextTask,
 							state, currentlyRemainingTasks);
 					for (MethodInstance instance : instances) {
 
@@ -120,20 +122,20 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 							continue;
 						}
 
-						assert state.containsAll(instance.getPrecondition().stream().filter(lit -> lit.isPositive()).collect(Collectors.toList()))
-								&& SetUtil.disjoint(state, instance.getPrecondition().stream().filter(lit -> lit.isNegated()).collect(Collectors.toList())) : ("Instance "
-										+ instance + " is supposed to be aplpicable in state " + state + " but it is not!");
+						assert state.containsAll(instance.getPrecondition().stream().filter(Literal::isPositive).collect(Collectors.toList()))
+						&& SetUtil.disjoint(state, instance.getPrecondition().stream().filter(Literal::isNegated).collect(Collectors.toList())) : ("Instance "
+								+ instance + " is supposed to be aplpicable in state " + state + " but it is not!");
 
 						logger.info("Adding successor {}", instance);
 
-						final List<Literal> remainingTasks = new ArrayList<>(util.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork()));
+						final List<Literal> remainingTasks = new ArrayList<>(this.util.getTaskChainOfTotallyOrderedNetwork(instance.getNetwork()));
 
 						final int indexForRemoval = remainingTasks.size();
 						remainingTasks.addAll(currentlyRemainingTasks);
 						remainingTasks.remove(indexForRemoval); // remove the first literal of the 2ndly appended list
 
 						/* hard code the and-or-stuff for a moment */
-						boolean isAndNode = remainingTasksInitializeANDNode(remainingTasks);
+						boolean isAndNode = this.remainingTasksInitializeANDNode(remainingTasks);
 						successors.add(new NodeExpansionDescription<>(l, new RTNNode(isAndNode, state, remainingTasks), new RTNEdge(null, instance, null), null));
 					}
 				}
@@ -163,23 +165,25 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						relevantConstants.add(new ConstantParam(c));
 					}
 					for (Literal lit : state) {
-						if (relevantConstants.containsAll(lit.getConstantParams()))
+						if (relevantConstants.containsAll(lit.getConstantParams())) {
 							reducedState.add(lit);
+						}
 					}
-					
+
 					/* rename clusters in reduced state */
 					Map<String, Collection<String>> clusters = new HashMap<>();
 					for (Literal lit : reducedState) {
 						if (lit.getPropertyName().equals("in")) {
 							String item = lit.getConstantParams().get(0).getName();
 							String cluster = lit.getConstantParams().get(1).getName();
-							if (!clusters.containsKey(cluster))
+							if (!clusters.containsKey(cluster)) {
 								clusters.put(cluster, new ArrayList<>());
+							}
 							clusters.get(cluster).add(item);
 						}
 					}
-					for (String cluster : clusters.keySet()) {
-						clusters.put(cluster, clusters.get(cluster).stream().sorted().collect(Collectors.toList()));
+					for (Entry<String,Collection<String>> nameWithItems : clusters.entrySet()) {
+						clusters.put(nameWithItems.getKey(), nameWithItems.getValue().stream().sorted().collect(Collectors.toList()));
 					}
 					final List<Literal> toRemove = new ArrayList<>();
 					final List<Literal> toInsert = new ArrayList<>();
@@ -187,7 +191,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						if (lit.getPropertyName().equals("biggest")) {
 							toRemove.add(lit);
 							continue;
-						} else if (!SetUtil.intersection(lit.getConstantParams().stream().map(p -> p.getName()).collect(Collectors.toList()), clusters.keySet()).isEmpty()) {
+						} else if (!SetUtil.intersection(lit.getConstantParams().stream().map(ConstantParam::getName).collect(Collectors.toList()), clusters.keySet()).isEmpty()) {
 							toRemove.add(lit);
 							final List<ConstantParam> params = new ArrayList<>();
 							for (ConstantParam p : lit.getConstantParams()) {
@@ -201,8 +205,9 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 					/* add the ground knowledge to the state (even about objects that are not there anymore) */
 					for (Literal lit : state) {
-						if (lit.getPropertyName().equals("bigger") && !reducedState.contains(lit))
+						if (lit.getPropertyName().equals("bigger") && !reducedState.contains(lit)) {
 							reducedState.add(lit);
+						}
 					}
 
 					/* define the remaining task */
@@ -214,17 +219,18 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 					/* define mapping for renaiming the subproblem solutions afterwards */
 					Map<ConstantParam, ConstantParam> mapping = new HashMap<>();
-					for (String cluster : clusters.keySet()) {
-						mapping.put(new ConstantParam(clusters.get(cluster).toString()), new ConstantParam(cluster));
+					for (Entry<String, Collection<String>> nameWithItems : clusters.entrySet()) {
+						mapping.put(new ConstantParam(nameWithItems.getValue().toString()), new ConstantParam(nameWithItems.getKey()));
 					}
 
-					remainingTask.add(new Literal(task.getPropertyName().substring(task.getPropertyName().indexOf("-") + 1), paramsForTask));
+					remainingTask.add(new Literal(task.getPropertyName().substring(task.getPropertyName().indexOf('-') + 1), paramsForTask));
 					successors.add(new NodeExpansionDescription<>(l, new RTNNode(false, reducedState, remainingTask), new RTNEdge(mapping, null, null), null));
 				}
 
 				/* now create one node for the remaining tasks */
-				if (!tasksForLastNode.isEmpty())
+				if (!tasksForLastNode.isEmpty()) {
 					successors.add(new NodeExpansionDescription<>(l, new RTNNode(false, state, tasksForLastNode), new RTNEdge(null, null, null), null));
+				}
 			}
 
 			logger.info("Computed {} successors", successors.size());
@@ -237,16 +243,17 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 		return p -> p.getRemainingTasks().isEmpty();
 	}
 
-	private boolean remainingTasksInitializeANDNode(List<Literal> tasks) {
-		if (tasks.isEmpty())
+	private boolean remainingTasksInitializeANDNode(final List<Literal> tasks) {
+		if (tasks.isEmpty()) {
 			return false;
+		}
 		Literal followingTask = tasks.get(0);
 		return followingTask.getPropertyName().contains("refine");
 	}
 
-	private static boolean checkDoubleNodes(List<NodeExpansionDescription<RTNNode, RTNEdge>> successors) {
+	private static boolean checkDoubleNodes(final List<NodeExpansionDescription<RTNNode, RTNEdge>> successors) {
 		if (successors.size() != new HashSet<>(successors).size()) {
-			System.err.println("Doppelte Knoten im Nachfolger!");
+			logger.error("Doppelte Knoten im Nachfolger!");
 			return false;
 		}
 		return true;
@@ -258,8 +265,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 	}
 
 	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
-		// TODO Auto-generated method stub
-		
+	public void setNodeNumbering(final boolean nodenumbering) {
+		throw new UnsupportedOperationException();
 	}
 }

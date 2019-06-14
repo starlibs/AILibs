@@ -4,17 +4,15 @@ import java.util.List;
 
 import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 
-public interface SuccessorGenerator<T,A> {
+public interface SuccessorGenerator<T, A> {
 
-
-	
 	/**
 	 * Generate the successors for a given node.
 	 *
-	 * @param node The node we want to expand.
+	 * @param node
+	 *            The node we want to expand.
 	 * @return A list of possible next steps.
 	 */
-	public List<NodeExpansionDescription<T,A>> generateSuccessors(T node) throws InterruptedException;
-
+	public List<NodeExpansionDescription<T, A>> generateSuccessors(T node) throws InterruptedException;
 
 }

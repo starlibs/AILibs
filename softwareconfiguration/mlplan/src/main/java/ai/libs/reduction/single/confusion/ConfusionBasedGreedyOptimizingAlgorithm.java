@@ -5,7 +5,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.WekaUtil;
@@ -17,35 +21,38 @@ import weka.core.Instances;
 
 public class ConfusionBasedGreedyOptimizingAlgorithm {
 
-	public MCTreeNodeReD buildClassifier(Instances data, final Collection<String> pClassifierNames) throws Exception {
+	private static Logger logger = LoggerFactory.getLogger(ConfusionBasedGreedyOptimizingAlgorithm.class);
 
-		System.out.println("START: " + data.relationName());
+	public MCTreeNodeReD buildClassifier(final Instances data, final Collection<String> pClassifierNames) throws Exception {
+
+		if (logger.isInfoEnabled()) {
+			logger.info("START: {}", data.relationName());
+		}
 		int seed = 0;
 		List<Instances> split = WekaUtil.getStratifiedSplit(data, seed, .7f);
-		// MulticlassEvaluator eval = new MulticlassEvaluator(new Random(seed));
 		int numClasses = data.numClasses();
 
 		/* compute confusion matrices for each classifier */
-		System.out.println("Computing confusion matrices ...");
+		logger.info("Computing confusion matrices ...");
 		Map<String, double[][]> confusionMatrices = new HashMap<>();
 		for (String classifier : pClassifierNames) {
-			System.out.println("\t" + classifier + " ...");
+			logger.info("\t{} ...", classifier);
 			try {
 				Classifier c = AbstractClassifier.forName(classifier, null);
 				c.buildClassifier(split.get(0));
 				Evaluation eval = new Evaluation(split.get(0));
 				eval.evaluateModel(c, split.get(1));
 				confusionMatrices.put(classifier, eval.confusionMatrix());
-			} catch (Throwable e) {
-				System.err.println(e.getClass().getName() + ": " + e.getMessage());
+			} catch (Exception e) {
+				logger.error("Could not train classifier: {}", e);
 			}
 		}
-		System.out.println("done");
+		logger.info("done");
 
 		/* compute zero-conflict sets for each classifier */
 		Map<String, Collection<Collection<Integer>>> zeroConflictSets = new HashMap<>();
-		for (String classifier : confusionMatrices.keySet()) {
-			zeroConflictSets.put(classifier, getZeroConflictSets(confusionMatrices.get(classifier)));
+		for (Entry<String, double[][]> entry : confusionMatrices.entrySet()) {
+			zeroConflictSets.put(entry.getKey(), this.getZeroConflictSets(entry.getValue()));
 		}
 
 		/* greedily identify triplets */
@@ -61,7 +68,7 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 			numPair++;
 			String c1 = classifierPair.get(0);
 			String c2 = classifierPair.get(1);
-			System.out.println("\tConsidering " + c1 + "/" + c2 + "(" + numPair + "/" + classifierPairs.size()+")");
+			logger.info("\tConsidering {}/{} ({}/{})", c1, c2, numPair, classifierPairs.size());
 			double[][] cm1 = confusionMatrices.get(c1);
 			double[][] cm2 = confusionMatrices.get(c2);
 			Collection<Collection<Integer>> z1 = zeroConflictSets.get(c1);
@@ -89,19 +96,20 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 					/* compute effect of adding this class to the respective clusters */
 					Collection<Integer> newBestZ1 = new ArrayList<>(bestZ1);
 					newBestZ1.add(cId);
-					int p1 = getPenaltyOfCluster(newBestZ1, cm1);
+					int p1 = this.getPenaltyOfCluster(newBestZ1, cm1);
 					Collection<Integer> newBestZ2 = new ArrayList<>(bestZ2);
 					newBestZ2.add(cId);
-					int p2 = getPenaltyOfCluster(newBestZ2, cm2);
+					int p2 = this.getPenaltyOfCluster(newBestZ2, cm2);
 
 					if (p1 < p2) {
 						bestZ1 = newBestZ1;
-					} else
+					} else {
 						bestZ2 = newBestZ2;
+					}
 				}
 			}
-			int p1 = getPenaltyOfCluster(bestZ1, cm1);
-			int p2 = getPenaltyOfCluster(bestZ2, cm2);
+			int p1 = this.getPenaltyOfCluster(bestZ1, cm1);
+			int p2 = this.getPenaltyOfCluster(bestZ2, cm2);
 
 			/* create the split problem */
 			Map<String, String> classMap = new HashMap<>();
@@ -117,7 +125,7 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 			/* now identify the classifier that can best separate these two clusters */
 			for (String classifier : pClassifierNames) {
 				try {
-					System.out.println("\t\tConsidering " + c1 +"/" + c2 + "/" + classifier);
+					logger.info("\t\tConsidering {}/{}/{}", c1, c2, classifier);
 					Classifier c = AbstractClassifier.forName(classifier, null);
 
 					c.buildClassifier(binaryInnerSplit.get(0));
@@ -127,7 +135,7 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 					int overallMistakes = p1 + p2 + mistakes;
 					if (overallMistakes < leastSeenMistakes) {
 						leastSeenMistakes = overallMistakes;
-						System.out.println("New best system: " + c1 + "/" + c2 + "/" + classifier + " with " + leastSeenMistakes);
+						logger.info("New best system: {}/{}/{} with {}", c1, c2, classifier, leastSeenMistakes);
 						bestLeftClasses = bestZ1;
 						bestRightClasses = bestZ2;
 						bestLeft = c1;
@@ -135,9 +143,13 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 						bestInner = classifier;
 					}
 				} catch (Exception e) {
-					System.err.println(e.getClass() + ": " + e.getMessage());
+					logger.error("Encountered error: {}", e);
 				}
 			}
+		}
+
+		if (bestLeftClasses == null) {
+			throw new IllegalStateException("Best left classes must not be null");
 		}
 
 		/* now create MCTreeNode with choices */
@@ -147,14 +159,15 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 		return tree;
 	}
 
-	private int getLeastConflictingClass(double[][] confusionMatrix, Collection<Integer> blackList) {
+	private int getLeastConflictingClass(final double[][] confusionMatrix, final Collection<Integer> blackList) {
 
 		/* compute least conflicting class */
 		int leastConflictingClass = -1;
 		int leastKnownScore = Integer.MAX_VALUE;
 		for (int i = 0; i < confusionMatrix.length; i++) {
-			if (blackList.contains(i))
+			if (blackList.contains(i)) {
 				continue;
+			}
 			int sum = 0;
 			for (int j = 0; j < confusionMatrix.length; j++) {
 				sum += confusionMatrix[i][j];
@@ -167,21 +180,22 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 		return leastConflictingClass;
 	}
 
-	private Collection<Collection<Integer>> getZeroConflictSets(double[][] confusionMatrix) {
+	private Collection<Collection<Integer>> getZeroConflictSets(final double[][] confusionMatrix) {
 		Collection<Integer> blackList = new ArrayList<>();
 		Collection<Collection<Integer>> partitions = new ArrayList<>();
 
 		int leastConflictingClass = -1;
 		do {
-			leastConflictingClass = getLeastConflictingClass(confusionMatrix, blackList);
+			leastConflictingClass = this.getLeastConflictingClass(confusionMatrix, blackList);
 			if (leastConflictingClass >= 0) {
 				Collection<Integer> cluster = new ArrayList<>();
 				cluster.add(leastConflictingClass);
 				do {
-					cluster = incrementCluster(cluster, confusionMatrix, blackList);
-					if (cluster.contains(-1))
+					cluster = this.incrementCluster(cluster, confusionMatrix, blackList);
+					if (cluster.contains(-1)) {
 						throw new IllegalStateException("Computed illegal cluster: " + cluster);
-				} while (getPenaltyOfCluster(cluster, confusionMatrix) == 0);
+					}
+				} while (this.getPenaltyOfCluster(cluster, confusionMatrix) == 0);
 				blackList.addAll(cluster);
 				partitions.add(cluster);
 			}
@@ -190,12 +204,13 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 		return partitions;
 	}
 
-	private Collection<Integer> incrementCluster(Collection<Integer> cluster, double[][] confusionMatrix, Collection<Integer> blackList) {
+	private Collection<Integer> incrementCluster(final Collection<Integer> cluster, final double[][] confusionMatrix, final Collection<Integer> blackList) {
 		int leastSeenPenalty = Integer.MAX_VALUE;
 		int choice = -1;
 		for (int cId = 0; cId < confusionMatrix.length; cId++) {
-			if (cluster.contains(cId) || blackList.contains(cId))
+			if (cluster.contains(cId) || blackList.contains(cId)) {
 				continue;
+			}
 			int addedPenalty = 0;
 			for (int i = 0; i < confusionMatrix.length; i++) {
 				addedPenalty += confusionMatrix[i][cId];
@@ -207,13 +222,14 @@ public class ConfusionBasedGreedyOptimizingAlgorithm {
 			}
 		}
 		Collection<Integer> newCluster = new ArrayList<>(cluster);
-		if (choice < 0)
+		if (choice < 0) {
 			return newCluster;
+		}
 		newCluster.add(choice);
 		return newCluster;
 	}
 
-	private int getPenaltyOfCluster(Collection<Integer> cluster, double[][] confusionMatrix) {
+	private int getPenaltyOfCluster(final Collection<Integer> cluster, final double[][] confusionMatrix) {
 		int sum = 0;
 		for (int i : cluster) {
 			for (int j : cluster) {

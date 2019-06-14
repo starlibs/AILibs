@@ -4,50 +4,53 @@ public class MySQLReductionExperiment {
 	private final int id;
 	private final ReductionExperiment experiment;
 
-	public MySQLReductionExperiment(int id, ReductionExperiment experiment) {
+	public MySQLReductionExperiment(final int id, final ReductionExperiment experiment) {
 		super();
 		this.id = id;
 		this.experiment = experiment;
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public ReductionExperiment getExperiment() {
-		return experiment;
+		return this.experiment;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((experiment == null) ? 0 : experiment.hashCode());
-		result = prime * result + id;
+		result = prime * result + ((this.experiment == null) ? 0 : this.experiment.hashCode());
+		result = prime * result + this.id;
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		MySQLReductionExperiment other = (MySQLReductionExperiment) obj;
-		if (experiment == null) {
-			if (other.experiment != null)
+		if (this.experiment == null) {
+			if (other.experiment != null) {
 				return false;
-		} else if (!experiment.equals(other.experiment))
+			}
+		} else if (!this.experiment.equals(other.experiment)) {
 			return false;
-		if (id != other.id)
-			return false;
-		return true;
+		}
+		return this.id == other.id;
 	}
 
 	@Override
 	public String toString() {
-		return "MySQLReductionExperiment [id=" + id + ", experiment=" + experiment + "]";
+		return "MySQLReductionExperiment [id=" + this.id + ", experiment=" + this.experiment + "]";
 	}
 }
