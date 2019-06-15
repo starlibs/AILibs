@@ -13,15 +13,13 @@ public class CEOCSTNPlanningDomain extends STNPlanningDomain {
 	}
 
 	@Override
-	public boolean isValid() {
+	public void checkValidity() {
 		for (CEOCOperation op : this.getOperations()) {
 			boolean isValid = !(op.getAddLists().isEmpty() && op.getDeleteLists().isEmpty());
-			assert isValid : "Degenerated planning problem. Operation \"" + op.getName() + "\" has empty add list and empty delete list!";
 			if (!isValid) {
-				return false;
+				throw new IllegalArgumentException("Degenerated planning problem. Operation \"" + op.getName() + "\" has empty add list and empty delete list!");
 			}
 		}
-		return true;
 	}
 
 	@Override

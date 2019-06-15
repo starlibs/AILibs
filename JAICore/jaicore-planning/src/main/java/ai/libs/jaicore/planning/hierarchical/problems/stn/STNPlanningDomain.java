@@ -19,11 +19,11 @@ public class STNPlanningDomain implements Serializable {
 		super();
 		this.operations = operations;
 		this.methods = methods;
-		assert this.isValid();
+		this.checkValidity();
 	}
 
-	public boolean isValid() {
-		return true;
+	public void checkValidity() {
+		/* does nothing by default */
 	}
 
 	public Collection<? extends Operation> getOperations() {
