@@ -52,7 +52,9 @@ public abstract class ASimplifiedTSClassifier<T> {
 	 * @return Returns the result of the prediction
 	 * @throws PredictionException If something fails during the prediction process.
 	 */
-	public abstract T predict(final List<double[]> multivInstance) throws PredictionException;
+	public T predict(final List<double[]> multivInstance) throws PredictionException {
+		throw new PredictionException("Can't predict on multivariate data yet.");
+	}
 
 	/**
 	 * Performs predictions based on the given instances in the given dataset.
@@ -112,5 +114,21 @@ public abstract class ASimplifiedTSClassifier<T> {
 	 */
 	public boolean isTrained() {
 		return this.trained;
+	}
+
+	protected double[][] checkWhetherPredictionIsPossible(final TimeSeriesDataset dataset) throws PredictionException {
+		// Parameter checks.
+		if (!this.isTrained()) {
+			throw new PredictionException("Model has not been built before!");
+		}
+
+		if (dataset == null || dataset.isEmpty()) {
+			throw new IllegalArgumentException("Dataset to be predicted must not be null or empty!");
+		}
+		double[][] testInstances = dataset.getValuesOrNull(0);
+		if (testInstances == null) {
+			throw new PredictionException("Can't predict on empty dataset.");
+		}
+		return testInstances;
 	}
 }

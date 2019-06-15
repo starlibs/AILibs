@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
@@ -141,8 +140,8 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		}
 
 		// Specify parameters used for subsequence and interval generation
-		int T = data[0].length; // Time series length
-		int lMin = (int) (this.getConfig().zProportion() * T); // Minimum subsequence length
+		int length = data[0].length; // Time series length
+		int lMin = (int) (this.getConfig().zProportion() * length); // Minimum subsequence length
 
 		// Check lower bound for minimum subsequence length
 		int minIntervalLength = this.getConfig().minIntervalLength();
@@ -151,7 +150,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		}
 
 		// Check upper bound for minimum subsequence length
-		if (lMin >= T - minIntervalLength) {
+		if (lMin >= length - minIntervalLength) {
 			lMin -= minIntervalLength;
 		}
 
@@ -159,10 +158,10 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		int d = this.getD(lMin);
 
 		// Number of possible intervals in a time series
-		int r = this.getR(T);
+		int r = this.getR(length);
 
 		// Generate r-d subsequences with each d intervals and calculate features
-		Pair<int[][], int[][][]> subSeqIntervals = this.generateSubsequencesAndIntervals(r, d, lMin, T);
+		Pair<int[][], int[][][]> subSeqIntervals = this.generateSubsequencesAndIntervals(r, d, lMin, length);
 		int[][] subsequences = subSeqIntervals.getX();
 		int[][][] intervals = subSeqIntervals.getY();
 
@@ -539,22 +538,6 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		}
 
 		return results;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void registerListener(final Object listener) {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public AlgorithmEvent nextWithException() {
-		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
 
 	/**

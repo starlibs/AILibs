@@ -19,26 +19,20 @@ import ai.libs.jaicore.ml.tsc.distances.ITimeSeriesDistance;
 /**
  * K-Nearest-Neighbor classifier for time series.
  *
- * Given an integer <code>k</code>, a distance measure <code>d</code>
- * ({@link ai.libs.jaicore.ml.tsc.distances}), a training set of time series
- * <code>TRAIN = {(x, y)}</code> and a test time series <code>T</code> (or a set
- * of test time series).
+ * Given an integer <code>k</code>, a distance measure <code>d</code> ({@link ai.libs.jaicore.ml.tsc.distances}), a training set of time series <code>TRAIN = {(x, y)}</code> and a test time series <code>T</code> (or a set of test time
+ * series).
  * <p>
- * The set of k nearest neighbors <code>NN</code> for <code>T</code> is a subset
- * (or equal) of <code>TRAIN</code> with cardinality <code>k</code> such that
- * for all <code>(T, S)</code> with <code>S</code> in <code>TRAIN\NN</code>
- * holds <code>d(S, T) >= max_{T' in NN} d(S, T')</code>.
+ * The set of k nearest neighbors <code>NN</code> for <code>T</code> is a subset (or equal) of <code>TRAIN</code> with cardinality <code>k</code> such that for all <code>(T, S)</code> with <code>S</code> in <code>TRAIN\NN</code> holds
+ * <code>d(S, T) >= max_{T' in NN} d(S, T')</code>.
  * </p>
- * From the labels of the instances in <code>NN</code> the label for
- * <code>T</code> is aggregated, e.g. via majority vote.
+ * From the labels of the instances in <code>NN</code> the label for <code>T</code> is aggregated, e.g. via majority vote.
  *
  * @author fischor
  */
 public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> {
 
 	/**
-	 * Votes types that describe how to aggregate the prediciton for a test instance
-	 * on its nearest neighbors found.
+	 * Votes types that describe how to aggregate the prediciton for a test instance on its nearest neighbors found.
 	 */
 	public enum VoteType {
 		/**
@@ -46,22 +40,17 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		 */
 		MAJORITY,
 		/**
-		 * Weighted stepwise vote with @see
-		 * NearestNeighborClassifier#voteWeightedStepwise.
+		 * Weighted stepwise vote with @see NearestNeighborClassifier#voteWeightedStepwise.
 		 */
 		WEIGHTED_STEPWISE,
 		/**
-		 * Weighted proportional to distance vote with @see
-		 * NearestNeighborClassifier#voteWeightedProportionalToDistance.
+		 * Weighted proportional to distance vote with @see NearestNeighborClassifier#voteWeightedProportionalToDistance.
 		 */
 		WEIGHTED_PROPORTIONAL_TO_DISTANCE,
 	}
 
 	/**
-	 * Comparator class for the nearest neighbor priority queues, used for the
-	 * nearest neighbor calculation. Sorts pairs of
-	 * <code>(Integer: targetClass, Double: distance)</code> for nearest neigbors by
-	 * distance ascending.
+	 * Comparator class for the nearest neighbor priority queues, used for the nearest neighbor calculation. Sorts pairs of <code>(Integer: targetClass, Double: distance)</code> for nearest neigbors by distance ascending.
 	 */
 	private static class NearestNeighborComparator implements Comparator<Pair<Integer, Double>> {
 
@@ -73,8 +62,7 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	}
 
 	/**
-	 * Singleton comparator instance for the nearest neighbor priority queues, used
-	 * for the nearest neighbor calculation.
+	 * Singleton comparator instance for the nearest neighbor priority queues, used for the nearest neighbor calculation.
 	 */
 	protected static final NearestNeighborComparator nearestNeighborComparator = new NearestNeighborComparator();
 
@@ -91,8 +79,7 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	protected double[][] values;
 
 	/**
-	 * Timestamp matrix containing the timestamps of the instances. Set by the
-	 * algorihm.
+	 * Timestamp matrix containing the timestamps of the instances. Set by the algorihm.
 	 */
 	protected double[][] timestamps;
 
@@ -102,12 +89,12 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	/**
 	 * Creates a k nearest neighbor classifier.
 	 *
-	 * @param k               The number of nearest neighbors.
-	 * @param distanceMeasure Distance measure for calculating the distances between
-	 *                        every pair of train and test instances.
-	 * @param voteType        Vote type to use to aggregate the the classes of the
-	 *                        the k nearest neighbors into a single class
-	 *                        prediction.
+	 * @param k
+	 *            The number of nearest neighbors.
+	 * @param distanceMeasure
+	 *            Distance measure for calculating the distances between every pair of train and test instances.
+	 * @param voteType
+	 *            Vote type to use to aggregate the the classes of the the k nearest neighbors into a single class prediction.
 	 */
 	public NearestNeighborClassifier(final int k, final ITimeSeriesDistance distanceMeasure, final VoteType voteType) {
 
@@ -128,9 +115,10 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	/**
 	 * Creates a k nearest neighbor classifier using majority vote.
 	 *
-	 * @param k               The number of nearest neighbors.
-	 * @param distanceMeasure Distance measure for calculating the distances between
-	 *                        every pair of train and test instances.
+	 * @param k
+	 *            The number of nearest neighbors.
+	 * @param distanceMeasure
+	 *            Distance measure for calculating the distances between every pair of train and test instances.
 	 */
 	public NearestNeighborClassifier(final int k, final ITimeSeriesDistance distanceMeasure) {
 		this(k, distanceMeasure, VoteType.MAJORITY);
@@ -139,8 +127,8 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	/**
 	 * Creates a 1 nearest neighbor classifier using majority vote.
 	 *
-	 * @param distanceMeasure Distance measure for calculating the distances between
-	 *                        every pair of train and test instances.
+	 * @param distanceMeasure
+	 *            Distance measure for calculating the distances between every pair of train and test instances.
 	 */
 	public NearestNeighborClassifier(final ITimeSeriesDistance distanceMeasure) {
 		this(1, distanceMeasure, VoteType.MAJORITY);
@@ -149,7 +137,8 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	/**
 	 * Predicts on univariate instance.
 	 *
-	 * @param univInstance The univariate instance.
+	 * @param univInstance
+	 *            The univariate instance.
 	 * @return Class prediction for the instance.
 	 */
 	@Override
@@ -161,32 +150,16 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	}
 
 	/**
-	 * Predicts on a multivariate instance. This is not supported yet.
-	 *
-	 * @param multivInstance The multivariate instance.
-	 * @return Class prediciton for the instance.
-	 */
-	@Override
-	public Integer predict(final List<double[]> multivInstance) throws PredictionException {
-		throw new PredictionException("Can't predict on multivariate data yet.");
-	}
-
-	/**
 	 * Predicts on a dataset.
 	 *
-	 * @param dataset The dataset.
+	 * @param dataset
+	 *            The dataset.
 	 * @return List of class predicitons for each instance of the dataset.
 	 */
 	@Override
 	public List<Integer> predict(final TimeSeriesDataset dataset) throws PredictionException {
-		// Parameter checks.
-		if (dataset == null) {
-			throw new IllegalArgumentException("Dataset must not be null.");
-		}
-		double[][] testInstances = dataset.getValuesOrNull(0);
-		if (testInstances == null) {
-			throw new PredictionException("Can't predict on empty dataset.");
-		}
+		double[][] testInstances = this.checkWhetherPredictionIsPossible(dataset);
+
 		// Calculate predictions.
 		ArrayList<Integer> predictions = new ArrayList<>(dataset.getNumberOfInstances());
 		for (double[] testInstance : testInstances) {
@@ -199,7 +172,8 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	/**
 	 * Calculates predicition on a single test instance.
 	 *
-	 * @param testInstance The test instance (not null assured within class).
+	 * @param testInstance
+	 *            The test instance (not null assured within class).
 	 * @return
 	 */
 	protected int calculatePrediction(final double[] testInstance) {
@@ -212,7 +186,8 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	/**
 	 * Determine the k nearest neighbors for a test instance.
 	 *
-	 * @param testInstance The time series to determine the k nearest neighbors for.
+	 * @param testInstance
+	 *            The time series to determine the k nearest neighbors for.
 	 * @return Queue of the k nearest neighbors as pairs (class, distance).
 	 */
 	protected PriorityQueue<Pair<Integer, Double>> calculateNearestNeigbors(final double[] testInstance) {
@@ -235,12 +210,10 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	}
 
 	/**
-	 * Performs a vote on the nearest neighbors found. Delegates the vote according
-	 * to the vote type.
+	 * Performs a vote on the nearest neighbors found. Delegates the vote according to the vote type.
 	 *
-	 * @param nearestNeighbors Priority queue of (class, distance)-pairs for nearest
-	 *                         neigbors, sorted by distance ascending. (Not null
-	 *                         assured within class)
+	 * @param nearestNeighbors
+	 *            Priority queue of (class, distance)-pairs for nearest neigbors, sorted by distance ascending. (Not null assured within class)
 	 * @return Result of the vote, i.e. the predicted class.
 	 */
 	protected int vote(final PriorityQueue<Pair<Integer, Double>> nearestNeighbors) {
@@ -256,12 +229,10 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	}
 
 	/**
-	 * Performs a vote with stepwise weights 1, 2, .., k on the set nearest
-	 * neighbors found.
+	 * Performs a vote with stepwise weights 1, 2, .., k on the set nearest neighbors found.
 	 *
-	 * @param nearestNeighbors Priority queue of (class, distance)-pairs for nearest
-	 *                         neigbors, sorted by distance ascending. (Not null
-	 *                         assured within class)
+	 * @param nearestNeighbors
+	 *            Priority queue of (class, distance)-pairs for nearest neigbors, sorted by distance ascending. (Not null assured within class)
 	 * @return Result of the vote, i.e. the predicted class.
 	 */
 	protected int voteWeightedStepwise(final PriorityQueue<Pair<Integer, Double>> nearestNeighbors) {
@@ -282,7 +253,7 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most voted target (class that got most weights).
 		Integer maxWeightOfVotes = Integer.MIN_VALUE;
 		Integer mostVotedTargetClass = -1;
-		for (Entry<Integer,Integer> entry : votes.entrySet()) {
+		for (Entry<Integer, Integer> entry : votes.entrySet()) {
 			int targetClass = entry.getKey();
 			int votedWeightsForTargetClass = entry.getValue();
 			if (votedWeightsForTargetClass > maxWeightOfVotes) {
@@ -294,12 +265,10 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	}
 
 	/**
-	 * Performs a vote with weights proportional to the distance on the set nearest
-	 * neighbors found.
+	 * Performs a vote with weights proportional to the distance on the set nearest neighbors found.
 	 *
-	 * @param nearestNeighbors Priority queue of (class, distance)-pairs for nearest
-	 *                         neigbors, sorted by distance ascending. (Not null
-	 *                         assured within class)
+	 * @param nearestNeighbors
+	 *            Priority queue of (class, distance)-pairs for nearest neigbors, sorted by distance ascending. (Not null assured within class)
 	 * @return Result of the vote, i.e. the predicted class.
 	 */
 	protected int voteWeightedProportionalToDistance(final PriorityQueue<Pair<Integer, Double>> nearestNeighbors) {
@@ -318,7 +287,7 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most voted target (class that got most weights).
 		Double maxWeightOfVotes = Double.MIN_VALUE;
 		Integer mostVotedTargetClass = -1;
-		for (Entry<Integer,Double> entry : votes.entrySet()) {
+		for (Entry<Integer, Double> entry : votes.entrySet()) {
 			int targetClass = entry.getKey();
 			double votedWeightsForTargetClass = entry.getValue();
 			if (votedWeightsForTargetClass > maxWeightOfVotes) {
@@ -332,9 +301,8 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 	/**
 	 * Performs a majority vote on the set nearest neighbors found.
 	 *
-	 * @param nearestNeighbors Priority queue of (class, distance)-pairs for nearest
-	 *                         neigbors, sorted by distance ascending. (Not null
-	 *                         assured within class)
+	 * @param nearestNeighbors
+	 *            Priority queue of (class, distance)-pairs for nearest neigbors, sorted by distance ascending. (Not null assured within class)
 	 * @return Result of the vote, i.e. the predicted class.
 	 */
 	protected int voteMajority(final PriorityQueue<Pair<Integer, Double>> nearestNeighbors) {
@@ -352,7 +320,7 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most voted target.
 		Integer maxNumberOfVotes = Integer.MIN_VALUE;
 		Integer mostVotedTargetClass = -1;
-		for (Entry<Integer,Integer> entry : votes.entrySet()) {
+		for (Entry<Integer, Integer> entry : votes.entrySet()) {
 			int targetClass = entry.getKey();
 			int numberOfVotesForTargetClass = entry.getValue();
 			if (numberOfVotesForTargetClass > maxNumberOfVotes) {

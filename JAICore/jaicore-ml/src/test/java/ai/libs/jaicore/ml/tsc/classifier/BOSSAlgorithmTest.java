@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.tsc.classifier;
 
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +54,7 @@ public class BOSSAlgorithmTest {
 		config.setProperty(IBossAlgorithmConfig.K_MEANCORRECTED, "" + false);
 		BOSSClassifier test2 = new BOSSClassifier(config);
 		test2.train(this.dataset);
+		fail("This is just a reminder that something should be tested here, which is currently not the case!");
 	}
 
 }

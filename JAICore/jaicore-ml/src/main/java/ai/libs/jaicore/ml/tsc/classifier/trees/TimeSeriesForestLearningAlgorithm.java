@@ -1,7 +1,5 @@
 package ai.libs.jaicore.ml.tsc.classifier.trees;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -12,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 import org.aeonbits.owner.ConfigCache;
 
 import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
@@ -63,22 +60,6 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 	 */
 	public TimeSeriesForestLearningAlgorithm(final ITimeSeriesForestConfig config, final TimeSeriesForestClassifier classifier, final TimeSeriesDataset data) {
 		super(config, classifier, data);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void registerListener(final Object listener) {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public AlgorithmEvent nextWithException() {
-		throw new UnsupportedOperationException();
 	}
 
 	/**
@@ -136,37 +117,4 @@ public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlg
 		this.getClassifier().setTrees(trees);
 		return this.getClassifier();
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Iterator<AlgorithmEvent> iterator() {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean hasNext() {
-		throw new UnsupportedOperationException();
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public AlgorithmEvent next() {
-		throw new NoSuchElementException("Cannot enumerate on this algorithm");
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void cancel() {
-		throw new UnsupportedOperationException();
-	}
-
 }

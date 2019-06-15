@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
@@ -312,11 +311,6 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 			instance.setValue(seq * 2 + 1, difference);
 		}
 		return instance;
-	}
-
-	@Override
-	public AlgorithmEvent nextWithException() {
-		throw new UnsupportedOperationException("Currently no step-wise execution possible.");
 	}
 
 	@Override

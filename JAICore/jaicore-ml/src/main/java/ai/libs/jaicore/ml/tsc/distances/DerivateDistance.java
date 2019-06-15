@@ -33,26 +33,7 @@ import ai.libs.jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
  *
  * @author fischor
  */
-public class DerivateDistance implements ITimeSeriesDistance {
-
-	/**
-	 * Alpha value that adjusts the parameters {@link a} and {@link b}, that is
-	 * <code>a=cos(alpha)</code> and <code>b=sin(alpha)</code>. It holds, that
-	 * <code>0 <= alpha <= pi/2</code>.
-	 */
-	private double alpha;
-
-	/**
-	 * Determines the influence of distance of the function values to the overall
-	 * distance measure.
-	 */
-	private double a;
-
-	/**
-	 * Determines the influence of distance of the derivates values to the overall
-	 * distance measure.
-	 */
-	private double b;
+public class DerivateDistance extends AWeightedTrigometricDistance {
 
 	/** The derivate calculation to use. */
 	private ADerivateFilter derivate;
@@ -81,10 +62,7 @@ public class DerivateDistance implements ITimeSeriesDistance {
 	 *            distance of the derivate values.
 	 */
 	public DerivateDistance(final double alpha, final ADerivateFilter derivate, final ITimeSeriesDistance timeSeriesDistance, final ITimeSeriesDistance derivateDistance) {
-		// Parameter checks.
-		if (alpha > Math.PI / 2 || alpha < 0) {
-			throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
-		}
+		super(alpha);
 		if (derivate == null) {
 			throw new IllegalArgumentException("Parameter derivate must not be null.");
 		}
@@ -94,8 +72,6 @@ public class DerivateDistance implements ITimeSeriesDistance {
 		if (derivateDistance == null) {
 			throw new IllegalArgumentException("Parameter derivateDistance must not be null.");
 		}
-
-		this.setAlpha(alpha);
 		this.derivate = derivate;
 		this.timeSeriesDistance = timeSeriesDistance;
 		this.baseDerivateDistance = derivateDistance;
@@ -145,50 +121,15 @@ public class DerivateDistance implements ITimeSeriesDistance {
 		this(alpha, new BackwardDifferenceDerivate(), distance, distance);
 	}
 
+	/**
+	 * @param a The influence of distance of the function values to the overall distance measure
+	 * @param b The influence of distance of the derivates values to the overall distance measure.
+	 */
 	@Override
 	public double distance(final double[] a, final double[] b) {
 		double[] derivateA = this.derivate.transform(a);
 		double[] derivateB = this.derivate.transform(b);
 
-		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.baseDerivateDistance.distance(derivateA, derivateB);
+		return this.getA() * this.timeSeriesDistance.distance(a, b) + this.getB() * this.baseDerivateDistance.distance(derivateA, derivateB);
 	}
-
-	/**
-	 * Sets the alpha value and adjusts the measurement parameters
-	 * <code>a = cos(alpha)<code> and <code>b = sin(alpha)</code> accordingly.
-	 *
-	 * @param alpha The alpha value, <code>0 <= alpha <= pi/2</code>.
-	 */
-	public void setAlpha(final double alpha) {
-		// Parameter checks.
-		if (alpha > Math.PI / 2 || alpha < 0) {
-			throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
-		}
-
-		this.alpha = alpha;
-		this.a = Math.cos(alpha);
-		this.b = Math.sin(alpha);
-	}
-
-	/**
-	 * Getter for the alpha value. It holds, that <code>0 <= alpha <= pi/2</code>.
-	 */
-	public double getAlpha() {
-		return this.alpha;
-	}
-
-	/**
-	 * Getter for the <code>a</code> parameter. @see #a
-	 */
-	public double getA() {
-		return this.a;
-	}
-
-	/**
-	 * Getter for the <code>a</code> parameter. @see #b
-	 */
-	public double getB() {
-		return this.b;
-	}
-
 }
