@@ -23,23 +23,17 @@ public class SpeedSliderGUIPluginView implements IGUIPluginView {
 		VBox visualizationSpeedSliderLayout = new VBox();
 		visualizationSpeedSliderLayout.setAlignment(Pos.CENTER);
 
-		visualizationSpeedSlider = new Slider(1, 100, model.getCurrentSpeedPercentage());
-		visualizationSpeedSlider.setShowTickLabels(true);
-		visualizationSpeedSlider.setShowTickMarks(true);
-		visualizationSpeedSlider.setMajorTickUnit(5);
-		visualizationSpeedSlider.setMinorTickCount(1);
+		this.visualizationSpeedSlider = new Slider(1, 100, this.model.getCurrentSpeedPercentage());
+		this.visualizationSpeedSlider.setShowTickLabels(true);
+		this.visualizationSpeedSlider.setShowTickMarks(true);
+		this.visualizationSpeedSlider.setMajorTickUnit(5);
+		this.visualizationSpeedSlider.setMinorTickCount(1);
 
-		visualizationSpeedSlider.setOnMouseReleased(event -> {
-			handleInputEvent();
-		});
-		visualizationSpeedSlider.setOnKeyPressed(event -> {
-			handleInputEvent();
-		});
-		visualizationSpeedSlider.setOnKeyReleased(event -> {
-			handleInputEvent();
-		});
+		this.visualizationSpeedSlider.setOnMouseReleased(event -> this.handleInputEvent());
+		this.visualizationSpeedSlider.setOnKeyPressed(event -> this.handleInputEvent());
+		this.visualizationSpeedSlider.setOnKeyReleased(event -> this.handleInputEvent());
 
-		visualizationSpeedSliderLayout.getChildren().add(visualizationSpeedSlider);
+		visualizationSpeedSliderLayout.getChildren().add(this.visualizationSpeedSlider);
 
 		Label visualizationSpeedSliderLabel = new Label("Visualization Speed (%)");
 		visualizationSpeedSliderLayout.getChildren().add(visualizationSpeedSliderLabel);
@@ -48,13 +42,13 @@ public class SpeedSliderGUIPluginView implements IGUIPluginView {
 	}
 
 	private void handleInputEvent() {
-		ChangeSpeedEvent changeSpeedEvent = new ChangeSpeedEvent((int) visualizationSpeedSlider.getValue());
+		ChangeSpeedEvent changeSpeedEvent = new ChangeSpeedEvent((int) this.visualizationSpeedSlider.getValue());
 		DefaultGUIEventBus.getInstance().postEvent(changeSpeedEvent);
 	}
 
 	@Override
 	public void update() {
-		visualizationSpeedSlider.setValue(model.getCurrentSpeedPercentage());
+		this.visualizationSpeedSlider.setValue(this.model.getCurrentSpeedPercentage());
 	}
 
 	@Override
@@ -63,7 +57,7 @@ public class SpeedSliderGUIPluginView implements IGUIPluginView {
 	}
 
 	public SpeedSliderGUIPluginModel getModel() {
-		return model;
+		return this.model;
 	}
 
 }

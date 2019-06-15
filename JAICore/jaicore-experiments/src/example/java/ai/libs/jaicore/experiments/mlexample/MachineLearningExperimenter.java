@@ -7,9 +7,9 @@ import java.util.Map;
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 
+import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentRunner;
-import ai.libs.jaicore.experiments.IDatabaseConfig;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;

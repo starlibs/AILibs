@@ -15,7 +15,7 @@ import javafx.scene.chart.XYChart;
 
 public class Histogram extends BarChart<String, Number>{
 	private final XYChart.Series<String, Number> series = new XYChart.Series<>();
-	private final ObservableList<Data<String, Number>> histogram;
+	private final ObservableList<Data<String, Number>> histogramData;
 	private int max;
 	private int n;
 	
@@ -27,8 +27,8 @@ public class Histogram extends BarChart<String, Number>{
 		for (int i = 0; i < n; i++) {
 			values.add(new Data<>("" + i, 0));
 		}
-		histogram = FXCollections.observableList(values);
-		series.setData(histogram);
+		histogramData = FXCollections.observableList(values);
+		series.setData(histogramData);
 		((NumberAxis)getYAxis()).setMinorTickVisible(false); // only show integers
 		
 		/* reasonable layout */
@@ -69,12 +69,12 @@ public class Histogram extends BarChart<String, Number>{
 			}
 			transformedValues.add(new Data<>("" + i, values[i]));
         }
-		this.histogram.setAll(transformedValues);
+		this.histogramData.setAll(transformedValues);
 	}
 	
 	public void clear() {
 		max = 0;
-		this.histogram.clear();
+		this.histogramData.clear();
 	}
 
 	public int getN() {

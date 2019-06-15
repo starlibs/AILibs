@@ -4,38 +4,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.Cancelable;
-import ai.libs.jaicore.interrupt.InterruptionTimerTask;
 
 public class CancellationTimerTask extends NamedTimerTask {
-	private static final Logger logger = LoggerFactory.getLogger(InterruptionTimerTask.class);
+	private static final Logger logger = LoggerFactory.getLogger(CancellationTimerTask.class);
 	private final Cancelable thingToBeCanceled;
 	private final Runnable hookToExecutePriorToCancel;
 
-	public CancellationTimerTask(String descriptor, Cancelable cancelable, Runnable hookToExecutePriorToInterruption) {
+	public CancellationTimerTask(final String descriptor, final Cancelable cancelable, final Runnable hookToExecutePriorToInterruption) {
 		super(descriptor);
 		this.thingToBeCanceled = cancelable;
 		this.hookToExecutePriorToCancel = hookToExecutePriorToInterruption;
 	}
 
-	public CancellationTimerTask(String descriptor, Cancelable thingToBeCanceled) {
+	public CancellationTimerTask(final String descriptor, final Cancelable thingToBeCanceled) {
 		this(descriptor, thingToBeCanceled, null);
 	}
 
 	public Cancelable getCancelable() {
-		return thingToBeCanceled;
+		return this.thingToBeCanceled;
 	}
 
 	public Runnable getHookToExecutePriorToInterruption() {
-		return hookToExecutePriorToCancel;
+		return this.hookToExecutePriorToCancel;
 	}
 
 	@Override
 	public void run() {
-		if (hookToExecutePriorToCancel != null) {
+		if (this.hookToExecutePriorToCancel != null) {
 			logger.info("Executing pre-interruption hook.");
-			hookToExecutePriorToCancel.run();
+			this.hookToExecutePriorToCancel.run();
 		}
-		logger.info("Executing cancel task {}. Canceling {}", getDescriptor(), thingToBeCanceled);
-		thingToBeCanceled.cancel();
+		logger.info("Executing cancel task {}. Canceling {}", this.getDescriptor(), this.thingToBeCanceled);
+		this.thingToBeCanceled.cancel();
 	}
 }

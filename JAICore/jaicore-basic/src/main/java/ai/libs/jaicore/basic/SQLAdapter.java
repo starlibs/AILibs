@@ -49,6 +49,10 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	private long timestampOfLastAction = Long.MIN_VALUE;
 
+	public SQLAdapter(final IDatabaseConfig config) {
+		this(DB_DRIVER, config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName(), new Properties(), config.getDBSSL());
+	}
+
 	public SQLAdapter(final String host, final String user, final String password, final String database, final boolean ssl) {
 		this(DB_DRIVER, host, user, password, database, new Properties(), ssl);
 	}

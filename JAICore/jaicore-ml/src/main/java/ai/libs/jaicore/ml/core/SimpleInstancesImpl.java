@@ -8,11 +8,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.ml.interfaces.Instance;
 import ai.libs.jaicore.ml.interfaces.Instances;
 
 @SuppressWarnings("serial")
-public class SimpleInstancesImpl extends ASimpleInstancesImpl<Instance> implements Instances<Instance> {
+public class SimpleInstancesImpl extends ASimpleInstancesImpl<SimpleInstanceImpl> implements Instances<SimpleInstanceImpl> {
 
 	public SimpleInstancesImpl() {
 	}
@@ -38,7 +37,7 @@ public class SimpleInstancesImpl extends ASimpleInstancesImpl<Instance> implemen
 	}
 
 	@Override
-	public boolean add(final Instance instance) {
+	public boolean add(final SimpleInstanceImpl instance) {
 
 		/* check instance format */
 		if (this.numColumns < 0) {
@@ -67,7 +66,7 @@ public class SimpleInstancesImpl extends ASimpleInstancesImpl<Instance> implemen
 			throw new IllegalArgumentException("Root node from parsed JSON tree is not an array!");
 		}
 		for (JsonNode instanceAsJson : jsonNode) {
-			Instance instance = new SimpleInstanceImpl(instanceAsJson);
+			SimpleInstanceImpl instance = new SimpleInstanceImpl(instanceAsJson);
 			this.add(instance);
 		}
 	}

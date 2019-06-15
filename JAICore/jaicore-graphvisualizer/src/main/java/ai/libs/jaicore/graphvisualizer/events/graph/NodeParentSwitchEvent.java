@@ -6,9 +6,8 @@ public class NodeParentSwitchEvent<T> extends AAlgorithmEvent implements GraphEv
 	private final T node;
 	private final T oldParent;
 	private final T newParent;
-	public final String name = "NodeParentSwitchEvent";
 
-	public NodeParentSwitchEvent(String algorithmEvent, T node, T oldParent, T newParent) {
+	public NodeParentSwitchEvent(final String algorithmEvent, final T node, final T oldParent, final T newParent) {
 		super(algorithmEvent);
 		this.node = node;
 		this.oldParent = oldParent;
@@ -16,15 +15,15 @@ public class NodeParentSwitchEvent<T> extends AAlgorithmEvent implements GraphEv
 	}
 
 	public T getNode() {
-		return node;
+		return this.node;
 	}
 
 	public T getOldParent() {
-		return oldParent;
+		return this.oldParent;
 	}
 
 	public T getNewParent() {
-		return newParent;
+		return this.newParent;
 	}
 
 }

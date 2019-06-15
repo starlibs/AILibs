@@ -143,7 +143,7 @@ public class WekaConversionTest {
 
 	@Test
 	public void JAICoreInstanceToWeka() throws Exception {
-		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
+		ai.libs.jaicore.ml.interfaces.Instances<SimpleInstanceImpl> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
 		ai.libs.jaicore.ml.interfaces.Instance instance = instances.get(0);
 		Instance wekaInstance = WekaUtil.fromJAICoreInstance(instance);
 		Assert.assertEquals(instance.getNumberOfColumns(), wekaInstance.numAttributes());
@@ -169,7 +169,7 @@ public class WekaConversionTest {
 
 	@Test
 	public void serializeUnserializeJAICoreInstance() throws Exception {
-		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
+		ai.libs.jaicore.ml.interfaces.Instances<SimpleInstanceImpl> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
 		ai.libs.jaicore.ml.interfaces.Instance instance = instances.get(12);
 		String json = instance.toJson();
 		ai.libs.jaicore.ml.interfaces.Instance newInstance = new SimpleInstanceImpl(json);
@@ -178,9 +178,9 @@ public class WekaConversionTest {
 
 	@Test
 	public void serializeUnserializeJAICoreInstances() throws Exception {
-		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
+		ai.libs.jaicore.ml.interfaces.Instances<SimpleInstanceImpl> instances = new SimpleInstancesImpl(VOWEL_UNLABELED);
 		String json = instances.toJson();
-		ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> newInstances = new SimpleInstancesImpl(json);
+		ai.libs.jaicore.ml.interfaces.Instances<SimpleInstanceImpl> newInstances = new SimpleInstancesImpl(json);
 		Assert.assertEquals(newInstances, instances);
 	}
 
