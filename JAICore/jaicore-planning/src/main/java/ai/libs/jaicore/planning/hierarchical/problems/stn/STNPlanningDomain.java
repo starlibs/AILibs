@@ -2,6 +2,7 @@ package ai.libs.jaicore.planning.hierarchical.problems.stn;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,11 +27,11 @@ public class STNPlanningDomain implements Serializable {
 	}
 
 	public Collection<? extends Operation> getOperations() {
-		return this.operations;
+		return Collections.unmodifiableCollection(this.operations);
 	}
 
 	public Collection<? extends Method> getMethods() {
-		return this.methods;
+		return Collections.unmodifiableCollection(this.methods);
 	}
 
 	@Override
