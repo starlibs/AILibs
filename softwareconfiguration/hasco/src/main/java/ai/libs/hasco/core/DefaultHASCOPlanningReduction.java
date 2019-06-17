@@ -6,7 +6,7 @@ import java.util.Map;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
-import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningToGraphSearchReduction;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
@@ -21,11 +21,11 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  * @param <N>
  * @param <A>
  */
-public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPlanningGraphGeneratorDeriver<N, A> {
+public class DefaultHASCOPlanningReduction<N, A> implements IHASCOPlanningReduction<N, A> {
 
-	private final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> wrappedDeriver;
+	private final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends Plan, ? extends GraphSearchInput<N,A>, ? super SearchGraphPath<N, A>> wrappedDeriver;
 
-	public DefaultHASCOPlanningGraphGeneratorDeriver(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> wrappedDeriver) {
+	public DefaultHASCOPlanningReduction(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends Plan, ? extends GraphSearchInput<N,A>, ? super SearchGraphPath<N, A>> wrappedDeriver) {
 		super();
 		this.wrappedDeriver = wrappedDeriver;
 	}
@@ -38,10 +38,6 @@ public class DefaultHASCOPlanningGraphGeneratorDeriver<N, A> implements IHASCOPl
 	@Override
 	public Plan decodeSolution(final SearchGraphPath<N, A> path) {
 		return this.wrappedDeriver.decodeSolution(path);
-	}
-
-	public IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> getWrappedDeriver() {
-		return this.wrappedDeriver;
 	}
 
 	@Override

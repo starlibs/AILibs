@@ -35,8 +35,6 @@ import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.Plan;
-import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
-import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.Node;
 
@@ -220,12 +218,12 @@ public class Util {
 		return objectMap;
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver, final Collection<Component> components,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components,
 			final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
 		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), resolveIntervals);
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver, final Collection<Component> components,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components,
 			final Monom initState, final Node<N, ?> path, final String name, final boolean resolveIntervals) {
 		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), name, resolveIntervals);
 	}

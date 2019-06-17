@@ -50,7 +50,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFac
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
@@ -131,7 +130,7 @@ public class MLPlanBuilder {
 	private MLPlanClassifierConfig algorithmConfig;
 
 	@SuppressWarnings("rawtypes")
-	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<GraphSearchInput<TFDNode, String>, Double>();
+	private HASCOViaFDFactory hascoFactory = new HASCOViaFDFactory<>();
 	private File searchSpaceConfigFile;
 	private Collection<Component> components;
 	private IClassifierFactory classifierFactory;
