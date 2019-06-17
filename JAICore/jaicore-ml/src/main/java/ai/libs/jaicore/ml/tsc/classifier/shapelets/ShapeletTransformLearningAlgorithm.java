@@ -114,7 +114,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	/**
 	 * Log4j logger
 	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ShapeletTransformLearningAlgorithm.class);
+	private static final Logger logger = LoggerFactory.getLogger(ShapeletTransformLearningAlgorithm.class);
 
 	/**
 	 * Quality measure function used to assess shapelets.
@@ -136,6 +136,11 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	 * Strategy used for the minimum distance search.
 	 */
 	private AMinimumDistanceSearchStrategy minDistanceSearchStrategy = new EarlyAbandonMinimumDistanceSearchStrategy(USE_BIAS_CORRECTION);
+
+	/**
+	 * Exception message given when the learning algorithm has been interrupted.
+	 */
+	private static final String INTERRUPTION_MESSAGE = "Interrupted training due to timeout.";
 
 	/**
 	 * Constructs a training algorithm for the {@link ShapeletTransformTSClassifier}
@@ -161,7 +166,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	@Override
 	public ShapeletTransformTSClassifier call() throws AlgorithmException, InterruptedException {
 		if (this.getNumCPUs() > 1) {
-			LOGGER.warn("Multithreading is not supported for LearnShapelets yet. Therefore, the number of CPUs is not considered.");
+			logger.warn("Multithreading is not supported for LearnShapelets yet. Therefore, the number of CPUs is not considered.");
 		}
 		long beginTime = System.currentTimeMillis();
 
@@ -190,11 +195,11 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 
 		// Estimate min and max
 		if (this.getConfig().estimateShapeletLengthBorders()) {
-			LOGGER.debug("Starting min max estimation.");
+			logger.debug("Starting min max estimation.");
 			int[] minMax = this.estimateMinMax(dataMatrix, targetMatrix, beginTime);
 			minShapeletLength = minMax[0];
 			maxShapeletLength = minMax[1];
-			LOGGER.debug("Finished min max estimation. min={}, max={}", minShapeletLength, maxShapeletLength);
+			logger.debug("Finished min max estimation. min={}, max={}", minShapeletLength, maxShapeletLength);
 		} else {
 			if (maxShapeletLength == -1) {
 				maxShapeletLength = timeSeriesLength - 1;
@@ -202,48 +207,48 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		}
 
 		if (maxShapeletLength >= timeSeriesLength) {
-			LOGGER.debug("The maximum shapelet length was larger than the total time series length. Therefore, it will be set to time series length - 1.");
+			logger.debug("The maximum shapelet length was larger than the total time series length. Therefore, it will be set to time series length - 1.");
 			maxShapeletLength = timeSeriesLength - 1;
 		}
 
 		// Determine shapelets
-		LOGGER.debug("Starting cached shapelet selection with min={}, max={} and k={}...", minShapeletLength, maxShapeletLength, this.getConfig().numShapelets());
+		logger.debug("Starting cached shapelet selection with min={}, max={} and k={}...", minShapeletLength, maxShapeletLength, this.getConfig().numShapelets());
 		List<Shapelet> shapelets = null;
 
 		shapelets = this.shapeletCachedSelection(dataMatrix,minShapeletLength, maxShapeletLength, this.getConfig().numShapelets(), targetMatrix, beginTime);
-		LOGGER.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
+		logger.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
 
 		// Cluster shapelets
 		if (this.getConfig().clusterShapelets()) {
-			LOGGER.debug("Starting shapelet clustering...");
+			logger.debug("Starting shapelet clustering...");
 			shapelets = this.clusterShapelets(shapelets, this.getConfig().numClusters(), beginTime);
-			LOGGER.debug("Finished shapelet clustering. Staying with {} shapelets.", shapelets.size());
+			logger.debug("Finished shapelet clustering. Staying with {} shapelets.", shapelets.size());
 		}
 		model.setShapelets(shapelets);
 
 		// Transforming the data using the extracted shapelets
-		LOGGER.debug("Transforming the training data using the extracted shapelets.");
+		logger.debug("Transforming the training data using the extracted shapelets.");
 		TimeSeriesDataset transfTrainingData = shapeletTransform(data, model.getShapelets(), this.getTimeout(), beginTime, this.minDistanceSearchStrategy);
-		LOGGER.debug("Finished transforming the training data.");
+		logger.debug("Finished transforming the training data.");
 
 		// Inititalize Weka ensemble
-		LOGGER.debug("Initializing ensemble classifier...");
+		logger.debug("Initializing ensemble classifier...");
 		Classifier classifier = null;
 		try {
 			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel(seed, this.getConfig().numFolds());
 		} catch (Exception e1) {
 			throw new AlgorithmException(e1, "Could not train model due to ensemble exception.");
 		}
-		LOGGER.debug("Initialized ensemble classifier.");
+		logger.debug("Initialized ensemble classifier.");
 
 		// Train Weka ensemble using the data
-		LOGGER.debug("Starting ensemble training...");
+		logger.debug("Starting ensemble training...");
 		try {
 			WekaUtil.buildWekaClassifierFromSimplifiedTS(classifier, transfTrainingData);
 		} catch (TrainingException e) {
 			throw new AlgorithmException(e, "Could not train classifier due to a training exception.");
 		}
-		LOGGER.debug("Finished ensemble training.");
+		logger.debug("Finished ensemble training.");
 
 		model.setClassifier(classifier);
 
@@ -290,7 +295,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 
 		Shapelet.sortByLengthAsc(shapelets);
 
-		LOGGER.debug("Number of shapelets found in min/max estimation: {}", shapelets.size());
+		logger.debug("Number of shapelets found in min/max estimation: {}", shapelets.size());
 
 		// Min
 		result[0] = shapelets.get(25).getLength();
@@ -315,28 +320,28 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	 *             Thrown when a timeout occurred
 	 */
 	public List<Shapelet> clusterShapelets(final List<Shapelet> shapelets, final int noClusters, final long beginTime) throws InterruptedException {
-		final List<List<Shapelet>> C = new ArrayList<>();
+		final List<List<Shapelet>> clusters = new ArrayList<>();
 		for (final Shapelet shapelet : shapelets) {
 			List<Shapelet> list = new ArrayList<>();
 			list.add(shapelet);
-			C.add(list);
+			clusters.add(list);
 		}
 
 		// Get clusters
-		while (C.size() > noClusters) {
+		while (clusters.size() > noClusters) {
 			if ((System.currentTimeMillis() - beginTime) > this.getTimeout().milliseconds()) {
-				throw new InterruptedException("Interrupted training due to timeout.");
+				throw new InterruptedException(INTERRUPTION_MESSAGE);
 			}
 
-			INDArray M = Nd4j.create(C.size(), C.size());
-			for (int i = 0; i < C.size(); i++) {
-				for (int j = 0; j < C.size(); j++) {
+			INDArray distanceMatrix = Nd4j.create(clusters.size(), clusters.size());
+			for (int i = 0; i < clusters.size(); i++) {
+				for (int j = 0; j < clusters.size(); j++) {
 					double distance = 0;
-					int comparisons = C.get(i).size() * C.get(j).size();
-					for (int l = 0; l < C.get(i).size(); l++) {
-						for (int k = 0; k < C.get(j).size(); k++) {
-							Shapelet cl = C.get(i).get(l);
-							Shapelet ck = C.get(j).get(k);
+					int comparisons = clusters.get(i).size() * clusters.get(j).size();
+					for (int l = 0; l < clusters.get(i).size(); l++) {
+						for (int k = 0; k < clusters.get(j).size(); k++) {
+							Shapelet cl = clusters.get(i).get(l);
+							Shapelet ck = clusters.get(j).get(k);
 
 							if (cl.getLength() > ck.getLength()) {
 								distance += this.minDistanceSearchStrategy.findMinimumDistance(ck, cl.getData());
@@ -346,37 +351,37 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 						}
 					}
 
-					M.putScalar(new int[] { i, j }, distance / comparisons);
+					distanceMatrix.putScalar(new int[] { i, j }, distance / comparisons);
 				}
 			}
 
 			double best = Double.MAX_VALUE;
 			int x = 0;
 			int y = 0;
-			for (int i = 0; i < M.shape()[0]; i++) {
-				for (int j = 0; j < M.shape()[1]; j++) {
-					if (M.getDouble(i, j) < best && i != j) {
+			for (int i = 0; i < distanceMatrix.shape()[0]; i++) {
+				for (int j = 0; j < distanceMatrix.shape()[1]; j++) {
+					if (distanceMatrix.getDouble(i, j) < best && i != j) {
 						x = i;
 						y = j;
-						best = M.getDouble(i, j);
+						best = distanceMatrix.getDouble(i, j);
 					}
 				}
 			}
-			final List<Shapelet> C_prime = C.get(x);
-			C_prime.addAll(C.get(y));
-			Shapelet maxClusterShapelet = Shapelet.getHighestQualityShapeletInList(C_prime);
+			final List<Shapelet> clusterUpdate = clusters.get(x);
+			clusterUpdate.addAll(clusters.get(y));
+			Shapelet maxClusterShapelet = Shapelet.getHighestQualityShapeletInList(clusterUpdate);
 			if (x > y) {
-				C.remove(x);
-				C.remove(y);
+				clusters.remove(x);
+				clusters.remove(y);
 			} else {
-				C.remove(y);
-				C.remove(x);
+				clusters.remove(y);
+				clusters.remove(x);
 			}
-			C.add(Arrays.asList(maxClusterShapelet));
+			clusters.add(Arrays.asList(maxClusterShapelet));
 		}
 
 		// Flatten list
-		return C.stream().flatMap(List::stream).collect(Collectors.toList());
+		return clusters.stream().flatMap(List::stream).collect(Collectors.toList());
 	}
 
 	/**
@@ -409,15 +414,15 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		for (int i = 0; i < numInstances; i++) {
 
 			if ((System.currentTimeMillis() - beginTime) > this.getTimeout().milliseconds()) {
-				throw new InterruptedException("Interrupted training due to timeout.");
+				throw new InterruptedException(INTERRUPTION_MESSAGE);
 			}
 
 			List<Map.Entry<Shapelet, Double>> shapelets = new ArrayList<>();
 			for (int l = min; l < max; l++) {
-				Set<Shapelet> W_il = generateCandidates(data[i], l, i);
-				for (Shapelet s : W_il) {
-					List<Double> D_s = this.findDistances(s, data);
-					double quality = this.qualityMeasure.assessQuality(D_s, classes);
+				Set<Shapelet> candidates = generateCandidates(data[i], l, i);
+				for (Shapelet s : candidates) {
+					List<Double> distances = this.findDistances(s, data);
+					double quality = this.qualityMeasure.assessQuality(distances, classes);
 					s.setDeterminedQuality(quality);
 					shapelets.add(new AbstractMap.SimpleEntry<Shapelet, Double>(s, quality));
 				}
@@ -599,7 +604,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 
 		for (int i = 0; i < timeSeries.length; i++) {
 			if (timeout != null && (System.currentTimeMillis() - beginTime) > timeout.milliseconds()) {
-				throw new InterruptedException("Interrupted training due to timeout.");
+				throw new InterruptedException(INTERRUPTION_MESSAGE);
 			}
 
 			transformedTS[i] = shapeletTransform(timeSeries[i], shapelets, searchStrategy);
