@@ -25,6 +25,8 @@ public class SimpleSLCSplitBasedClassifierEvaluator extends AbstractSplitBasedCl
 
 	@Override
 	public Double evaluateSplit(final Classifier classifier, final Instances trainingData, final Instances validationData) throws ObjectEvaluationFailedException, InterruptedException {
+		List<Double> actual = WekaUtil.getClassesAsList(validationData);
+		List<Double> predicted = new ArrayList<>();
 
 		try {
 			classifier.buildClassifier(trainingData);
@@ -35,7 +37,6 @@ public class SimpleSLCSplitBasedClassifierEvaluator extends AbstractSplitBasedCl
 		}
 
 		try {
-			List<Double> predicted = new ArrayList<>();
 			if (classifier instanceof IInstancesClassifier) {
 				for (double prediction : ((IInstancesClassifier) classifier).classifyInstances(validationData)) {
 					predicted.add(prediction);
@@ -45,12 +46,13 @@ public class SimpleSLCSplitBasedClassifierEvaluator extends AbstractSplitBasedCl
 					predicted.add(classifier.classifyInstance(inst));
 				}
 			}
-			return this.getBasicEvaluator().calculateAvgMeasure(WekaUtil.getClassesAsList(validationData), predicted);
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new ObjectEvaluationFailedException("Could not validate classifier.", e);
 		}
+
+		return this.getBasicEvaluator().calculateAvgMeasure(actual, predicted);
 	}
 
 }

@@ -13,7 +13,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
+import ai.libs.jaicore.basic.algorithm.AlgorithmState;
 import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
@@ -105,7 +105,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.checkAndConductTermination();
-		if (this.getState().equals(EAlgorithmState.CREATED)) {
+		if (this.getState().equals(AlgorithmState.created)) {
 			this.bestFirst.setTimeout(this.getTimeout());
 			return this.activate();
 		}

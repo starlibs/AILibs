@@ -1,11 +1,7 @@
 package ai.libs.mlplan.metamining.similaritymeasures;
 
-import java.util.Random;
-
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.jungblut.math.DoubleVector;
 import de.jungblut.math.dense.DenseDoubleVector;
@@ -14,57 +10,54 @@ import de.jungblut.math.minimize.CostGradientTuple;
 import de.jungblut.math.minimize.GradientDescent;
 
 public class F1Optimizer implements IHeterogenousSimilarityMeasureComputer {
-
-	private Logger logger = LoggerFactory.getLogger(F1Optimizer.class);
-
-	private static final  double ALPHA_START = 0.000000001; // learning rate
-	private static final double ALPHA_MAX = 1e-5;
-	private static final int ITERATIONS_PER_PROBE = 100;
-	private static final int LIMIT = 1; // as long as the solution improves by at least this value, continue
-	private static final double MAX_DESIRED_ERROR = 0;
-
-	private INDArray rrt;
-	private INDArray x;
-	private INDArray u; // the learned matrix
-
-	private final Random rand = new Random();
-
+	private final static double ALPHA_START = 0.000000001; // learning rate
+	private final static double ALPHA_MAX = 1e-5;
+	private final static int ITERATIONS_PER_PROBE = 100;
+	private final static int LIMIT = 1; // as long as the solution improves by at least this value, continue
+	private final static boolean VERBOSE = false;
+	private final static double MAX_DESIRED_ERROR = 0;
+	
+	private INDArray RRT;
+	private INDArray X;
+	private INDArray U; // the learned matrix
+	
 	/**
 	 * Learns a matrix U that minimizes F1 (W is ignored here)
-	 *
+	 * 
 	 * @return
 	 */
-	@Override
-	public void build(final INDArray x, final INDArray w, final INDArray r) {
-		this.rrt = r.mmul(r.transpose());
-		this.x = x;
-
-		final int m = x.columns();
-
+	public void build(INDArray X, INDArray W, INDArray R) {
+		this.RRT = R.mmul(R.transpose());
+		this.X = X;
+		
+		final int m = X.columns();
+		
 		/* generate initial U vector */
 		final int numberOfImplicitFeatures = 1;
 		double[] denseVector = new double[m * numberOfImplicitFeatures];
 		int c = 0;
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < numberOfImplicitFeatures; j++) {
-				denseVector[c++] = (this.rand.nextDouble() - 0.5) * 100;
-			}
-		}
+		for (int i = 0; i < m; i++)
+			for (int j = 0; j < numberOfImplicitFeatures; j++)
+				denseVector[c++] = (Math.random() - 0.5) * 100;
 		DoubleVector currentSolutionAsVector = new DenseDoubleVector(denseVector);
-		INDArray currentSolutionAsMatrix = this.vector2matrix(currentSolutionAsVector, m, numberOfImplicitFeatures);
-		double currentCost = this.getCost(currentSolutionAsMatrix);
-
-		this.logger.debug("X = {}",x);
-		this.logger.debug("randomly initialized U = {}",currentSolutionAsMatrix);
-		this.logger.debug("loss of randomly initialized U: {}",currentCost);
-
-		CostFunction cf = input -> {
-			INDArray uIntermediate = this.vector2matrix(input, x.columns(), numberOfImplicitFeatures);
-			double cost = this.getCost(uIntermediate);
-			INDArray gradientMatrix = this.getGradientAsMatrix(uIntermediate);
-			return new CostGradientTuple(cost, this.matrix2vector(gradientMatrix));
+		INDArray currentSolutionAsMatrix = vector2matrix(currentSolutionAsVector, m, numberOfImplicitFeatures);
+		double currentCost = getCost(currentSolutionAsMatrix);
+		
+		System.out.println("X = " + X);
+		System.out.println("randomly initialized U = " + currentSolutionAsMatrix);
+		System.out.println("loss of randomly initialized U: " + currentCost);
+		CostFunction cf = new CostFunction() {
+			
+			@Override
+			public CostGradientTuple evaluateCost(DoubleVector input) {
+				INDArray U = vector2matrix(input, X.columns(), numberOfImplicitFeatures);
+				double cost = getCost(U);
+				INDArray gradientMatrix = getGradientAsMatrix(U);
+				CostGradientTuple cgt = new CostGradientTuple(cost, matrix2vector(gradientMatrix));
+				return cgt;
+			}
 		};
-
+		
 		/* probe algorithm with different alphas */
 		double alpha = ALPHA_START;
 		while (currentCost > MAX_DESIRED_ERROR) {
@@ -72,154 +65,145 @@ public class F1Optimizer implements IHeterogenousSimilarityMeasureComputer {
 			DoubleVector lastSolution = currentSolutionAsVector;
 			GradientDescent gd = new GradientDescent(alpha, LIMIT);
 			currentSolutionAsVector = gd.minimize(cf, currentSolutionAsVector, ITERATIONS_PER_PROBE, false);
-			currentSolutionAsMatrix = this.vector2matrix(currentSolutionAsVector, m, numberOfImplicitFeatures);
-			currentCost = this.getCost(currentSolutionAsMatrix);
+			currentSolutionAsMatrix = vector2matrix(currentSolutionAsVector, m, numberOfImplicitFeatures);
+			currentCost = getCost(currentSolutionAsMatrix);
 			if (lastCost < currentCost) {
 				currentSolutionAsVector = lastSolution;
 				currentCost = lastCost;
 				alpha /= 2;
 			}
-			else if (lastCost > currentCost) {
+			else if (lastCost > currentCost)
 				alpha *= 2;
-			} else {
+			else
 				break;
-			}
 			alpha = Math.min(alpha, ALPHA_MAX);
-
-			this.logger.debug("Current Cost {} (alpha = {})",currentCost,alpha);
+			System.out.println(currentCost + " (alpha = " + alpha +")");
 		}
-
-		this.u = currentSolutionAsMatrix;
+		U = currentSolutionAsMatrix;
 	}
-
+	
 	/**
 	 * creates a matrix of the Nd4j framework from a vector of Thomas Jungblut's math framework
-	 *
+	 * 
 	 * @param vector
 	 * @param m
 	 * @param n
 	 * @return
 	 */
-	public INDArray vector2matrix(final DoubleVector vector, final int m, final int n) {
+	public INDArray vector2matrix(DoubleVector vector, int m, int n) {
 		double[] inputs = new double[vector.getLength()];
-		for (int i = 0; i < vector.getLength(); i++) {
+		for (int i = 0; i < vector.getLength(); i++)
 			inputs[i] = vector.get(i);
-		}
 		return Nd4j.create(inputs, new int[] {m, n});
 	}
-
+	
 	/**
 	 * collapses a matrix of the Nd4j framework into a double vector of Thomas Jungblut's framework
-	 *
+	 * 
 	 * @param matrix
 	 * @return
 	 */
-	public DoubleVector matrix2vector(final INDArray matrix) {
+	public DoubleVector matrix2vector(INDArray matrix) {
 		int m = matrix.rows();
 		int n = matrix.columns();
 		double[] denseVector = new double[m * n];
 		int c = 0;
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++) {
+		for (int i = 0; i < m; i++)
+			for (int j = 0; j < n; j++)
 				denseVector[c++] = matrix.getDouble(i,j);
-			}
-		}
 		return new DenseDoubleVector(denseVector);
 	}
-
+	
 	/**
 	 * This evaluates F1
-	 *
-	 * @param rrt
-	 * @param u
-	 * @param x
+	 * 
+	 * @param RRT
+	 * @param U
+	 * @param X
 	 * @return
 	 */
-	public double getCost(final INDArray u) {
-		INDArray z1 = this.x.mmul(u);
-		INDArray z2 = z1.transpose();
-		INDArray z = z1.mmul(z2);
-		INDArray q = this.rrt.sub(z);
+	public double getCost(INDArray U) {
+		INDArray Z1 = X.mmul(U);
+		INDArray Z2 = Z1.transpose();
+		INDArray Z = Z1.mmul(Z2);
+		INDArray Q = RRT.sub(Z);
 		double cost = 0;
-		int n = q.columns();
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; j++) {
-				cost += Math.pow(q.getDouble(i,j),2);
-			}
-		}
+		int n = Q.columns();
+		for (int i = 0; i < n; i++)
+			for (int j = 0; j < n; j++)
+				cost += Math.pow(Q.getDouble(i,j),2);
 		return cost;
 	}
-
+	
 	/**
 	 * This computes the gradient of F1 in matrix form
-	 *
+	 * 
 	 * @param R
-	 * @param u
-	 * @param x
+	 * @param U
+	 * @param X
 	 * @return
 	 */
-	public INDArray getGradientAsMatrix(final INDArray u) {
-		int m = this.x.columns();
-		int n = u.columns();
+	public INDArray getGradientAsMatrix(INDArray U) {
+		int m = X.columns();
+		int n = U.columns();
 		float[][] derivatives = new float[m][n];
 		for (int k = 0; k < m; k++) {
 			for (int l = 0; l < n; l++) {
-				derivatives[k][l] = this.getFirstDerivative(u, k, l);
+				derivatives[k][l] = getFirstDerivative(U, k, l);
 			}
 		}
 		return Nd4j.create(derivatives);
 	}
-
+	
 	/**
 	 * This compute the derivative of F1 for the (k,l)-th element of the U matrix
-	 *
-	 * @param rrt
-	 * @param u
-	 * @param x
+	 * 
+	 * @param RRT
+	 * @param U
+	 * @param X
 	 * @param k
 	 * @param l
 	 * @return
 	 */
-	public float getFirstDerivative(final INDArray u, final int k, final int l) {
-
+	public float getFirstDerivative(INDArray U, int k, int l) {
+		
 		/* compute inner product Z := XU(XU)^-1 */
-		INDArray z1 = this.x.mmul(u);
-		INDArray z2 = z1.transpose();
-		INDArray z = z1.mmul(z2);
-
+		INDArray Z1 = X.mmul(U);
+		INDArray Z2 = Z1.transpose();
+		INDArray Z = Z1.mmul(Z2);
+		
 		/* define the difference of RR^-1 and Z in Q */
-		INDArray q = this.rrt.sub(z);
-
+		INDArray Q = RRT.sub(Z);
+		
 		/* now compute the inner product of the i-th row of X and the i-th column of U */
-		int n = this.x.rows();
+		int n = X.rows();
 		float[] sums = new float[n];
-		for (int i = 0; i < n; i++) {
-			sums[i] = this.x.getRow(i).mmul(u.getColumn(l)).getFloat(0,0);
-		}
-
+		for (int i = 0; i < n; i++)
+			sums[i] = X.getRow(i).mmul(U.getColumn(l)).getFloat(0,0);
+		
 		/* now compute the actual derivative */
 		float derivative = 0;
 		for (int i = 0; i < n; i++) {
-			float xik = this.x.getFloat(i,k);
+			float Xik = X.getFloat(i,k);
 			for (int j = 0; j < n; j++) {
-				float sumA = xik * sums[j];
-				float sumB = this.x.getFloat(j,k) * sums[i];
-				derivative += -2 * q.getFloat(i,j) * (sumA + sumB);
+				float sumA = Xik * sums[j];
+				float sumB = X.getFloat(j,k) * sums[i];
+				derivative += -2 * Q.getFloat(i,j) * (sumA + sumB);
 			}
 		}
 		return derivative;
 	}
 
 	@Override
-	public double computeSimilarity(final INDArray x, final INDArray w) {
+	public double computeSimilarity(INDArray x, INDArray w) {
 		return 0;
 	}
 
 	public INDArray getX() {
-		return this.x;
+		return X;
 	}
 
 	public INDArray getU() {
-		return this.u;
+		return U;
 	}
 }

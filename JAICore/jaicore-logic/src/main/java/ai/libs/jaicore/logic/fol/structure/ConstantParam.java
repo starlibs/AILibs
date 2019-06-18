@@ -2,7 +2,7 @@ package ai.libs.jaicore.logic.fol.structure;
 
 /**
  * The constant parameter of a literal.
- *
+ * 
  * @author mbunse
  */
 @SuppressWarnings("serial")
@@ -10,30 +10,24 @@ public class ConstantParam extends LiteralParam {
 
 	private boolean variablesMayBeUnifiedWithThisConstant;
 
-	public ConstantParam(final String name, final boolean pVariablesMayBeUnifiedWithThisConstant) {
+	public ConstantParam(String name, boolean pVariablesMayBeUnifiedWithThisConstant) {
 		super(name);
 		this.variablesMayBeUnifiedWithThisConstant = pVariablesMayBeUnifiedWithThisConstant;
 	}
 
-	public ConstantParam(final String name) {
+	public ConstantParam(String name) {
 		this(name, true);
 	}
 
-	public ConstantParam(final String name, final Type type) {
+	public ConstantParam(String name, Type type) {
 		this(name);
 		this.type = type;
 	}
 
 	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (!(obj instanceof ConstantParam)) {
+	public boolean equals(Object obj) {
+		if (!(obj instanceof ConstantParam))
 			return false;
-		}
 		return super.equals(obj);
 	}
 
@@ -43,6 +37,6 @@ public class ConstantParam extends LiteralParam {
 	}
 
 	public boolean variablesMayBeUnifiedWithThisConstant() {
-		return this.variablesMayBeUnifiedWithThisConstant;
+		return variablesMayBeUnifiedWithThisConstant;
 	}
 }

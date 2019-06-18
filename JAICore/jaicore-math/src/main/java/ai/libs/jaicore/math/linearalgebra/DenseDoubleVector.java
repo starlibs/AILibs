@@ -8,7 +8,7 @@ import no.uib.cipr.matrix.Vector.Norm;
 
 /**
  * Dense vector implementation wrapping the MTJ implementation of a dense vector.
- *
+ * 
  * @author Alexander Hetzer
  */
 public class DenseDoubleVector extends AbstractVector {
@@ -17,32 +17,32 @@ public class DenseDoubleVector extends AbstractVector {
 
 	/**
 	 * Creates a dense vector with the given amount of dimensions, initialized with zeros.
-	 *
+	 * 
 	 * @param numberOfDimensions
 	 *            The number of dimensions of this vector.
 	 */
-	public DenseDoubleVector(final int numberOfDimensions) {
-		this.internalVector = new DenseVector(numberOfDimensions);
+	public DenseDoubleVector(int numberOfDimensions) {
+		internalVector = new DenseVector(numberOfDimensions);
 	}
 
 	/**
 	 * Creates a dense vector from the given data.
-	 *
+	 * 
 	 * @param data
 	 *            A double array, which can be interpreted as a vector.
 	 */
-	public DenseDoubleVector(final double[] data) {
-		this.internalVector = new DenseVector(Arrays.copyOf(data, data.length));
+	public DenseDoubleVector(double[] data) {
+		internalVector = new DenseVector(Arrays.copyOf(data, data.length));
 	}
 
 	/**
 	 * Creates a dense vector from an MTJ vector.
-	 *
+	 * 
 	 * @param vector
 	 *            The MTJ vector.
 	 */
-	public DenseDoubleVector(final no.uib.cipr.matrix.Vector vector) {
-		this.internalVector = vector;
+	public DenseDoubleVector(no.uib.cipr.matrix.Vector vector) {
+		internalVector = vector;
 	}
 
 	/**
@@ -53,79 +53,79 @@ public class DenseDoubleVector extends AbstractVector {
 	 * @param value
 	 *            The value for each entry.
 	 */
-	public DenseDoubleVector(final int size, final double value) {
-		this.internalVector = new DenseVector(size);
-		for (int index = 0; index < this.internalVector.size(); index++) {
-			this.internalVector.set(index, value);
+	public DenseDoubleVector(int size, double value) {
+		internalVector = new DenseVector(size);
+		for (int index = 0; index < internalVector.size(); index++) {
+			internalVector.set(index, value);
 		}
 	}
 
 	@Override
 	public int length() {
-		return this.internalVector.size();
+		return internalVector.size();
 	}
 
 	@Override
-	public double getValue(final int index) {
-		return this.internalVector.get(index);
+	public double getValue(int index) {
+		return internalVector.get(index);
 	}
 
 	@Override
-	public void setValue(final int index, final double value) {
-		this.internalVector.set(index, value);
+	public void setValue(int index, double value) {
+		internalVector.set(index, value);
 	}
 
 	@Override
-	public void addConstant(final double constant) {
-		double[] contantAsVector = new double[this.internalVector.size()];
+	public void addConstant(double constant) {
+		double[] contantAsVector = new double[internalVector.size()];
 		for (int i = 0; i < contantAsVector.length; i++) {
 			contantAsVector[i] = constant;
 		}
-		this.addVector(contantAsVector);
+		addVector(contantAsVector);
 	}
 
 	@Override
-	public void addVector(final Vector vector) {
-		this.internalVector = this.internalVector.add(vector.toDenseVector().internalVector);
+	public void addVector(Vector vector) {
+		internalVector = internalVector.add(vector.toDenseVector().internalVector);
 	}
 
 	@Override
-	public void subtractConstant(final double constant) {
-		this.addConstant(-1 * constant);
+	public void subtractConstant(double constant) {
+		addConstant(-1 * constant);
 	}
 
 	@Override
-	public void subtractVector(final Vector vector) {
-		this.internalVector = this.internalVector.add(-1, vector.toDenseVector().internalVector);
+	public void subtractVector(Vector vector) {
+		internalVector = internalVector.add(-1, vector.toDenseVector().internalVector);
 	}
 
 	@Override
-	public void multiplyByVectorPairwise(final Vector secondVector) {
-		for (int i = 0; i < this.internalVector.size(); i++) {
-			this.internalVector.set(i, this.internalVector.get(i) * secondVector.getValue(i));
+	public void multiplyByVectorPairwise(Vector secondVector) {
+		for (int i = 0; i < internalVector.size(); i++) {
+			internalVector.set(i, internalVector.get(i) * secondVector.getValue(i));
 		}
 	}
 
 	@Override
-	public void multiplyByConstant(final double constant) {
-		this.internalVector = this.internalVector.scale(constant);
+	public void multiplyByConstant(double constant) {
+		internalVector = internalVector.scale(constant);
 	}
 
 	@Override
-	public void divideByVectorPairwise(final Vector secondVector) {
-		for (int i = 0; i < this.internalVector.size(); i++) {
-			this.internalVector.set(i, this.internalVector.get(i) / secondVector.getValue(i));
+	public void divideByVectorPairwise(Vector secondVector) {
+		for (int i = 0; i < internalVector.size(); i++) {
+			internalVector.set(i, internalVector.get(i) / secondVector.getValue(i));
 		}
 	}
 
 	@Override
-	public void divideByConstant(final double constant) {
-		this.internalVector = this.internalVector.scale(1 / constant);
+	public void divideByConstant(double constant) {
+		internalVector = internalVector.scale(1 / constant);
 	}
 
 	@Override
-	public double dotProduct(final Vector vector) {
-		return this.internalVector.dot(vector.toDenseVector().internalVector);
+	public double dotProduct(Vector vector) {
+		return internalVector.dot(vector.toDenseVector().internalVector);
 	}
 
 	@Override
@@ -135,53 +135,53 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public double[] asArray() {
-		double[] result = new double[this.internalVector.size()];
+		double[] result = new double[internalVector.size()];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = this.internalVector.get(i);
+			result[i] = internalVector.get(i);
 		}
 		return result;
 	}
 
 	@Override
-	public void addVector(final double[] vectorAsArray) {
-		this.addVector(new DenseDoubleVector(vectorAsArray));
+	public void addVector(double[] vectorAsArray) {
+		addVector(new DenseDoubleVector(vectorAsArray));
 	}
 
 	@Override
-	public void subtractVector(final double[] vectorAsArray) {
-		this.subtractVector(new DenseDoubleVector(vectorAsArray));
+	public void subtractVector(double[] vectorAsArray) {
+		subtractVector(new DenseDoubleVector(vectorAsArray));
 	}
 
 	@Override
-	public void multiplyByVectorPairwise(final double[] vectorAsArray) {
-		this.multiplyByVectorPairwise(new DenseDoubleVector(vectorAsArray));
+	public void multiplyByVectorPairwise(double[] vectorAsArray) {
+		multiplyByVectorPairwise(new DenseDoubleVector(vectorAsArray));
 	}
 
 	@Override
-	public void divideByVectorPairwise(final double[] vectorAsArray) {
-		this.divideByVectorPairwise(new DenseDoubleVector(vectorAsArray));
+	public void divideByVectorPairwise(double[] vectorAsArray) {
+		divideByVectorPairwise(new DenseDoubleVector(vectorAsArray));
 	}
 
 	@Override
-	public double dotProduct(final double[] vectorAsArray) {
-		return this.dotProduct(new DenseDoubleVector(vectorAsArray));
+	public double dotProduct(double[] vectorAsArray) {
+		return dotProduct(new DenseDoubleVector(vectorAsArray));
 	}
 
 	@Override
 	public Vector duplicate() {
-		return new DenseDoubleVector(this.asArray());
+		return new DenseDoubleVector(asArray());
 	}
 
 	@Override
 	public void normalize() {
-		this.internalVector = this.internalVector.scale(1 / this.internalVector.norm(Norm.Two));
+		internalVector = internalVector.scale(1 / internalVector.norm(Norm.Two));
 	}
 
 	@Override
 	public void fillRandomly() {
-		for (int numberOfAddedValues = 0; numberOfAddedValues < this.internalVector.size(); numberOfAddedValues++) {
+		for (int numberOfAddedValues = 0; numberOfAddedValues < internalVector.size(); numberOfAddedValues++) {
 			double fillValue = RandomGenerator.getRNG().nextDouble();
-			this.internalVector.set(numberOfAddedValues, fillValue);
+			internalVector.set(numberOfAddedValues, fillValue);
 		}
 	}
 
@@ -192,11 +192,7 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public SparseDoubleVector toSparseVector() {
-		return new SparseDoubleVector(this.asArray());
+		return new SparseDoubleVector(asArray());
 	}
 
-	@Override
-	public Vector kroneckerProduct(final double[] vectorAsArray) {
-		return new DenseDoubleVector(this.kroneckerProductInternal(vectorAsArray));
-	}
 }

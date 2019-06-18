@@ -75,7 +75,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<P extends IHTNPlanningProblem,
 		this.logger.debug("I'm being asked whether there is a next solution.");
 
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			this.logger.info("Starting HTN planning process.");
 			if (this.logger.isDebugEnabled()) {
 				StringBuilder opSB = new StringBuilder();
@@ -97,7 +97,7 @@ public class GraphSearchBasedHTNPlanningAlgorithm<P extends IHTNPlanningProblem,
 			this.search.setTimeout(to);
 			return this.activate();
 
-		case ACTIVE:
+		case active:
 			if (this.isCanceled()) {
 				throw new IllegalStateException("The planner has already been canceled. Cannot compute more plans.");
 			}

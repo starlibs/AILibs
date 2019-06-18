@@ -58,7 +58,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 	public AlgorithmEvent nextWithException()
 			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			// Initialize variables.
 			try {
 				this.assigner.setArffHeader(ArffUtilities.extractArffHeader(this.getInput()));
@@ -75,7 +75,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Was not able to count the datapoints.");
 			}
-		case ACTIVE:
+		case active:
 			if (this.streamedDatapoints < this.datapointAmount) {
 				try {
 					// Assign each datapoint to a stratum.
@@ -123,7 +123,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 					}
 				}
 			}
-		case INACTIVE:
+		case inactive:
 			if (this.streamedDatapoints < this.datapointAmount || !this.stratiSamplingStarted
 					|| !this.stratiSamplingFinished) {
 				throw new AlgorithmException("Expected sample size was not reached before termination");

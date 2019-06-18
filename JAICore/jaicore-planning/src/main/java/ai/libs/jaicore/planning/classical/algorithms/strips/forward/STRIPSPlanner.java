@@ -31,7 +31,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPlanningProblem, EvaluatedPlan<V>, V> {
 
 	/* logging */
-	private Logger logger = LoggerFactory.getLogger(STRIPSPlanner.class);
+	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
 	private String loggerName;
 
 	private final IPathInORGraphSearch<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String> search;
@@ -94,14 +94,14 @@ public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPla
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			this.setLoggerOfSearch();
 			this.search.setTimeout(this.getTimeout());
 			if (this.visualize) {
 				throw new UnsupportedOperationException("Currently no visualization supported!");
 			}
 			return this.activate();
-		case ACTIVE:
+		case active:
 
 			/* invoke next step in search algorithm */
 			if (!this.search.hasNext()) {

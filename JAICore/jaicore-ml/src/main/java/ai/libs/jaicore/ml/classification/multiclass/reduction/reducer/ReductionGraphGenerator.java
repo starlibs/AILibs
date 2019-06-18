@@ -29,7 +29,7 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 	private final Random rand;
 	private final Instances data;
 
-	public ReductionGraphGenerator(final Random rand, final Instances data) {
+	public ReductionGraphGenerator(Random rand, Instances data) {
 		super();
 		this.rand = rand;
 		this.data = data;
@@ -39,7 +39,7 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 	public SingleRootGenerator<RestProblem> getRootGenerator() {
 		return () -> {
 			RestProblem root = new RestProblem(null);
-			root.add(new HashSet<>(WekaUtil.getClassesActuallyContainedInDataset(this.data)));
+			root.add(new HashSet<>(WekaUtil.getClassesActuallyContainedInDataset(data)));
 			return root;
 		};
 	}
@@ -50,15 +50,13 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 			List<NodeExpansionDescription<RestProblem, Decision>> restProblems = new ArrayList<>();
 			try {
 				List<String> set = new ArrayList<>(n.get(0));
-				if (set.size() < 2) {
+				if (set.size() < 2)
 					throw new UnsupportedOperationException("Cannot create successor where rest problem consists of only one class.");
-				}
 
 				/* add remaining open problems to node */
 				List<Set<String>> remainingProblems = new ArrayList<>();
-				for (int j = 1; j < n.size(); j++) {
+				for (int j = 1; j < n.size(); j++)
 					remainingProblems.add(n.get(j));
-				}
 
 				/* iterate over all considered classifiers */
 				String[] portfolio = new String[] { "weka.classifiers.trees.RandomForest", "weka.classifiers.functions.SMO", "weka.classifiers.lazy.IBk" };
@@ -66,11 +64,13 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 
 					/* add the simplest option, namely to solve the nodes at once */
 					for (EMCNodeType nodeType : EMCNodeType.values()) {
-						if (nodeType == EMCNodeType.MERGE) {
+						if (nodeType == EMCNodeType.MERGE)
 							continue;
-						}
-						if (this.data.classAttribute().numValues() > 12 && this.data.size() > 1000 && nodeType == EMCNodeType.ALLPAIRS) {
-							continue;
+						if (data.classAttribute().numValues() > 12 && data.size() > 1000) {
+							if (nodeType == EMCNodeType.ALLPAIRS) {
+								System.out.println("Skipping " + nodeType + " with " + classifier + " due to complexity constraints.");
+								continue;
+							}
 						}
 						RestProblem rp = new RestProblem(new Decision(null, null, nodeType, AbstractClassifier.forName(classifier, null)));
 						rp.addAll(remainingProblems);
@@ -82,23 +82,22 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 					Map<ISplitter,Classifier> classifiers = new HashMap<>();
 					for (int i = 0; i < 1; i++) {
 						Classifier c = AbstractClassifier.forName(classifier, null);
-						ISplitter splitter = new RPNDSplitter(this.rand, c);
+						ISplitter splitter = new RPNDSplitter(rand, c);
 						classifiers.put(splitter,c);
 						splitters.add(splitter);
+						// splitters.add(new GreedySplitter(train));
 					}
 					for (ISplitter splitter : splitters) {
-						Collection<Collection<String>> split = splitter.split(this.data);
+						Collection<Collection<String>> split = splitter.split(data);
 						Iterator<Collection<String>> iterator = split.iterator();
 
 						Set<String> c1 = new HashSet<>(iterator.next());
 						Set<String> c2 = new HashSet<>(iterator.next());
 						RestProblem rp = new RestProblem(new Decision(c1, c2, EMCNodeType.DIRECT, classifiers.get(splitter)));
-						if (c1.size() > 1) {
+						if (c1.size() > 1)
 							rp.add(c1);
-						}
-						if (c2.size() > 1) {
+						if (c2.size() > 1)
 							rp.add(c2);
-						}
 						rp.addAll(remainingProblems);
 
 						/* add rest problem */
@@ -116,9 +115,8 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 	public NodeGoalTester<RestProblem> getGoalTester() {
 		return n -> {
 			for (Set<String> open : n) {
-				if (open.size() > 1) {
+				if (open.size() > 1)
 					return false;
-				}
 			}
 			return true;
 		};
@@ -130,7 +128,8 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 	}
 
 	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-		/* do nothing, irrelevant */
+	public void setNodeNumbering(boolean nodenumbering) {
+		// TODO Auto-generated method stub
+		
 	}
 }

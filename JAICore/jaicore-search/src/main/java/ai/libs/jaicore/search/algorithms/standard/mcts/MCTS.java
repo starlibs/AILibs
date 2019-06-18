@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
+import ai.libs.jaicore.basic.algorithm.AlgorithmState;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -346,19 +346,19 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			this.post(new GraphInitializedEvent<N>(this.getId(), this.root));
 			this.logger.info("Starting MCTS with node class {}", this.root.getClass().getName());
 			return this.activate();
 
-		case ACTIVE:
+		case active:
 			if (this.playoutSimulator == null) {
 				throw new IllegalStateException("no simulator has been set!");
 			}
 			this.logger.debug("Next algorithm iteration. Number of unexpanded nodes: {}", this.unexpandedNodes.size());
 			try {
 				this.registerActiveThread();
-				while (this.getState() == EAlgorithmState.ACTIVE) {
+				while (this.getState() == AlgorithmState.active) {
 					this.checkAndConductTermination();
 					if (this.unexpandedNodes.isEmpty()) {
 						AlgorithmEvent finishEvent = this.terminate();

@@ -1,17 +1,15 @@
 package ai.libs.jaicore.ml.core.dataset;
 
-import java.io.Serializable;
 import java.util.List;
 
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
 
-@SuppressWarnings("serial")
-public class InstanceSchema<L> implements Serializable {
+public class InstanceSchema {
 
 	private final List<IAttributeType<?>> attributeTypeList;
-	private final IAttributeType<L> targetType;
+	private final IAttributeType<?> targetType;
 
-	public InstanceSchema(final List<IAttributeType<?>> attributeTypeList, final IAttributeType<L> targetType) {
+	public InstanceSchema(final List<IAttributeType<?>> attributeTypeList, final IAttributeType<?> targetType) {
 		this.attributeTypeList = attributeTypeList;
 		this.targetType = targetType;
 	}
@@ -24,7 +22,11 @@ public class InstanceSchema<L> implements Serializable {
 		return this.attributeTypeList.get(index);
 	}
 
-	public IAttributeType<L> getTargetType() {
+	public <T> IAttributeType<T> getTargetType(final Class<T> type) {
+		return (IAttributeType<T>) this.targetType;
+	}
+
+	public IAttributeType<?> getTargetType() {
 		return this.targetType;
 	}
 

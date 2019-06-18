@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
@@ -42,7 +42,7 @@ public class WekaInstancesUtil {
 
 		for (Instance inst : data) {
 			ArrayList<IAttributeValue<?>> attributeValuesList = new ArrayList<>();
-			String targetValue = null;
+			IAttributeValue<?> targetValue = null;
 
 			int attIx = 0;
 			for (int i = 0; i < inst.numAttributes(); i++) {
@@ -55,7 +55,12 @@ public class WekaInstancesUtil {
 					}
 					attIx++;
 				} else {
-					targetValue = inst.stringValue(i);
+					IAttributeType<?> type = schema.getTargetType();
+					if (type instanceof NumericAttributeType) {
+						targetValue = new NumericAttributeValue((NumericAttributeType) type, inst.value(i));
+					} else if (type instanceof CategoricalAttributeType) {
+						targetValue = new CategoricalAttributeValue((CategoricalAttributeType) type, inst.classAttribute().value((int) inst.value(i)));
+					}
 				}
 			}
 
@@ -66,8 +71,9 @@ public class WekaInstancesUtil {
 		return dataset;
 	}
 
-	public static Instances datasetToWekaInstances(final IOrderedLabeledAttributeArrayDataset<?, ?> dataset) throws UnsupportedAttributeTypeException {
+	public static Instances datasetToWekaInstances(final IDataset<? extends IInstance> dataset) throws UnsupportedAttributeTypeException {
 		List<Attribute> attributes = new LinkedList<>();
+		Attribute classAttribute;
 
 		for (int i = 0; i < dataset.getNumberOfAttributes(); i++) {
 			IAttributeType<?> attType = dataset.getAttributeTypes().get(i);
@@ -81,7 +87,6 @@ public class WekaInstancesUtil {
 		}
 
 		IAttributeType<?> classType = dataset.getTargetType();
-		Attribute classAttribute;
 		if (classType instanceof NumericAttributeType) {
 			classAttribute = new Attribute("class");
 		} else if (classType instanceof CategoricalAttributeType) {
@@ -96,18 +101,26 @@ public class WekaInstancesUtil {
 		Instances wekaInstances = new Instances("weka-instances", attributeList, 0);
 		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
 
-		for (ILabeledAttributeArrayInstance inst : dataset) {
+		for (IInstance inst : dataset) {
 			DenseInstance iNew = new DenseInstance(attributeList.size());
 			iNew.setDataset(wekaInstances);
 
 			for (int i = 0; i < dataset.getNumberOfAttributes(); i++) {
 				if (dataset.getAttributeTypes().get(i) instanceof NumericAttributeType) {
-					IAttributeValue<Double> val = inst.getAttributeValueAtPosition(i, Double.class);
+					IAttributeValue<Double> val = inst.getAttributeValue(i, Double.class);
 					iNew.setValue(i, val.getValue());
 				} else if (dataset.getAttributeTypes().get(i) instanceof CategoricalAttributeType) {
-					IAttributeValue<String> val = inst.getAttributeValueAtPosition(i, String.class);
+					IAttributeValue<String> val = inst.getAttributeValue(i, String.class);
 					iNew.setValue(i, val.getValue());
 				}
+			}
+
+			if (dataset.getTargetType() instanceof NumericAttributeType) {
+				IAttributeValue<Double> val = inst.getTargetValue(Double.class);
+				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
+			} else if (dataset.getTargetType() instanceof CategoricalAttributeType) {
+				IAttributeValue<String> val = inst.getTargetValue(String.class);
+				iNew.setValue(dataset.getNumberOfAttributes(), val.getValue());
 			}
 
 			wekaInstances.add(iNew);
@@ -115,7 +128,8 @@ public class WekaInstancesUtil {
 		return wekaInstances;
 	}
 
-	public static IAttributeType<?> transformWEKAAttributeToAttributeType(final Attribute att) {
+	@SuppressWarnings("rawtypes")
+	public static IAttributeType transformWEKAAttributeToAttributeType(final Attribute att) {
 		if (att.isNumeric()) {
 			return new NumericAttributeType();
 		} else if (att.isNominal()) {

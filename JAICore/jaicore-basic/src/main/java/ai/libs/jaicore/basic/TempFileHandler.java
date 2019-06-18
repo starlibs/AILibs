@@ -21,12 +21,12 @@ import org.slf4j.LoggerFactory;
  * Utility Class for managing temporary files and corresponding readers/writers.
  * A directory for the temporary files can be given, otherwise a new one in the
  * Home Directory is created.
- *
+ * 
  * @author Lukas Brandt
  *
  */
 public class TempFileHandler implements Closeable {
-
+	
 	private static final String ERR_MSG_CANNOT_CLOSE_READER = "Cannot close reader";
 
 	private Logger logger = LoggerFactory.getLogger(TempFileHandler.class);
@@ -41,7 +41,7 @@ public class TempFileHandler implements Closeable {
 	private Map<String, BufferedReader> tempFileReaders;
 	private Map<String, FileWriter> tempFileWriters;
 
-	public TempFileHandler(final File tempFileDirectory) {
+	public TempFileHandler(File tempFileDirectory) {
 		this.tempFileDirectory = tempFileDirectory;
 		this.tempFiles = new HashMap<>();
 		this.tempFileReaders = new HashMap<>();
@@ -54,7 +54,7 @@ public class TempFileHandler implements Closeable {
 
 	/**
 	 * Create a new temporary file in the given directory.
-	 *
+	 * 
 	 * @return UUID associated with the new temporary file.
 	 */
 	public String createTempFile() {
@@ -64,35 +64,35 @@ public class TempFileHandler implements Closeable {
 		FileUtil.touch(path);
 		File file = new File(path);
 		file.deleteOnExit();
-		this.tempFiles.put(uuid, file);
+		tempFiles.put(uuid, file);
 
 		return uuid;
 	}
 
 	/**
 	 * Get the temporary file with the UUID.
-	 *
+	 * 
 	 * @param uuid
 	 *            UUID of the file.
 	 * @return File object associated with the UUID.
 	 */
-	public File getTempFile(final String uuid) {
+	public File getTempFile(String uuid) {
 		return this.tempFiles.get(uuid);
 	}
 
 	/**
 	 * Create or retrieve an existing file reader for a temporary file by UUID.
-	 *
+	 * 
 	 * @param uuid
 	 *            UUID of the temporary file.
 	 * @return An existing or new file reader for the given temporary file.
 	 */
-	public BufferedReader getFileReaderForTempFile(final String uuid) {
+	public BufferedReader getFileReaderForTempFile(String uuid) {
 		if (this.tempFileReaders.containsKey(uuid)) {
 			try {
 				this.tempFileReaders.get(uuid).close();
 			} catch (IOException e) {
-				this.logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
+				logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
 			}
 			this.tempFileReaders.remove(uuid);
 		}
@@ -101,7 +101,7 @@ public class TempFileHandler implements Closeable {
 			this.tempFileReaders.put(uuid, reader);
 			return reader;
 		} catch (FileNotFoundException e) {
-			this.logger.error(String.format("File for UUID %s does not exist!", uuid), e);
+			logger.error(String.format("File for UUID %s does not exist!", uuid), e);
 		}
 
 		return null;
@@ -109,12 +109,12 @@ public class TempFileHandler implements Closeable {
 
 	/**
 	 * Create or retrieve an existing file writer for a temporary file by UUID.
-	 *
+	 * 
 	 * @param uuid
 	 *            UUID of the temporary file.
 	 * @return An existing or new file writer for the given temporary file.
 	 */
-	public FileWriter getFileWriterForTempFile(final String uuid) {
+	public FileWriter getFileWriterForTempFile(String uuid) {
 		if (this.tempFileWriters.containsKey(uuid)) {
 			return this.tempFileWriters.get(uuid);
 		} else {
@@ -123,7 +123,7 @@ public class TempFileHandler implements Closeable {
 				this.tempFileWriters.put(uuid, writer);
 				return writer;
 			} catch (IOException e) {
-				this.logger.error(String.format("Cannot create FileWriter for file with UUID %s", uuid), e);
+				logger.error(String.format("Cannot create FileWriter for file with UUID %s", uuid), e);
 			}
 
 		}
@@ -133,16 +133,16 @@ public class TempFileHandler implements Closeable {
 	/***
 	 * Delete a temporary file by UUID and if created the corresponding
 	 * reader/writer.
-	 *
+	 * 
 	 * @param uuid
 	 *            UUID of the file.
 	 */
-	public void deleteTempFile(final String uuid) {
+	public void deleteTempFile(String uuid) {
 		if (this.tempFileReaders.containsKey(uuid)) {
 			try {
 				this.tempFileReaders.get(uuid).close();
 			} catch (IOException e) {
-				this.logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
+				logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
 			}
 			this.tempFileReaders.remove(uuid);
 		}
@@ -150,7 +150,7 @@ public class TempFileHandler implements Closeable {
 			try {
 				this.tempFileWriters.get(uuid).close();
 			} catch (IOException e) {
-				this.logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
+				logger.error(ERR_MSG_CANNOT_CLOSE_READER, e);
 			}
 			this.tempFileWriters.remove(uuid);
 		}
@@ -158,7 +158,7 @@ public class TempFileHandler implements Closeable {
 			try {
 				Files.delete(this.tempFiles.get(uuid).toPath());
 			} catch (IOException e) {
-				this.logger.error(String.format("Cannot delete file for UUID %s", uuid), e);
+				logger.error(String.format("Cannot delete file for UUID %s", uuid), e);
 			}
 		}
 	}
@@ -175,14 +175,9 @@ public class TempFileHandler implements Closeable {
 
 	@Override
 	public void close() throws IOException {
-		this.cleanUp();
+		cleanUp();
 	}
 
-	/**
-	 * Returns the absolute path of the temporary file directory.
-	 *
-	 * @return The absolute path of the temporary file directory.
-	 */
 	public String getTempFileDirPath() {
 		return this.tempFileDirectory.getAbsolutePath();
 	}

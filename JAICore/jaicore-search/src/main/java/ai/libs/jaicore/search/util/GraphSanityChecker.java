@@ -24,8 +24,8 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 
 	private SanityCheckResult sanityCheckResult;
 	private final int maxNodesToExpand;
-	private boolean detectCycles = true;
-	private boolean detectDeadEnds = true;
+	private final boolean detectCycles = true;
+	private final boolean detectDeadEnds = true;
 
 	public GraphSanityChecker(final GraphSearchInput<N, A> problem, final int maxNodesToExpand) {
 		super(problem);
@@ -35,19 +35,19 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException  {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			return this.activate();
-		case ACTIVE:
+		case active: {
 			int expanded = 0;
 			Stack<Node<N, ?>> open = new Stack<>();
 			N root = ((SingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot();
 			NodeGoalTester<N> goalTester = (NodeGoalTester<N>) this.getGraphGenerator().getGoalTester();
 			open.push(new Node<>(null, root));
-			this.post(new GraphInitializedEvent<N>(this.getId(), root));
+			this.post(new GraphInitializedEvent<N>(getId(), root));
 			while (!open.isEmpty() && expanded < this.maxNodesToExpand) {
 				Node<N, ?> node = open.pop();
 				if (!node.isGoal()) {
-					this.post(new NodeTypeSwitchEvent<>(this.getId(), node, "or_closed"));
+					this.post(new NodeTypeSwitchEvent<>(getId(), node, "or_closed"));
 				}
 				expanded++;
 				List<NodeExpansionDescription<N, A>> successors = this.getGraphGenerator().getSuccessorGenerator().generateSuccessors(node.getPoint());
@@ -65,18 +65,17 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 					Node<N, ?> newNode = new Node<>(node, successor.getTo());
 					newNode.setGoal(goalTester.isGoal(newNode.getPoint()));
 					open.add(newNode);
-					this.post(new NodeAddedEvent<N>(this.getId(), node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
+					this.post(new NodeAddedEvent<N>(getId(), node.getPoint(), successor.getTo(), newNode.isGoal() ? "or_solution" : "or_open"));
 				}
 				if (this.sanityCheckResult != null) {
 					break;
 				}
-				if (expanded % 100 == 0 || expanded == this.maxNodesToExpand) {
-					this.logger.debug("Expanded {}/{} nodes.", expanded, this.maxNodesToExpand);
-				}
+				if (expanded % 100 == 0 || expanded == this.maxNodesToExpand)
+					logger.debug("Expanded {}/{} nodes.", expanded, maxNodesToExpand);
 			}
 			this.shutdown();
-			return this.terminate();
-
+			return terminate();
+		}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());
 		}
@@ -98,21 +97,5 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
 		super.setLoggerName(this.loggerName + "._orgraphsearch");
-	}
-
-	public boolean isDetectCycles() {
-		return this.detectCycles;
-	}
-
-	public void setDetectCycles(final boolean detectCycles) {
-		this.detectCycles = detectCycles;
-	}
-
-	public boolean isDetectDeadEnds() {
-		return this.detectDeadEnds;
-	}
-
-	public void setDetectDeadEnds(final boolean detectDeadEnds) {
-		this.detectDeadEnds = detectDeadEnds;
 	}
 }

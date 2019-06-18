@@ -2,11 +2,6 @@ package ai.libs.jaicore.basic.aggregate.reals;
 
 import java.util.List;
 
-/**
- * The aggregation function "Mean" aggregates the given values with the mean operator, thus, returning the average of a list of values.
- *
- * @author mwever
- */
 public class Mean implements IRealsAggregateFunction {
 
 	@Override

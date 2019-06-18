@@ -3,17 +3,18 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 import java.util.Random;
 
 import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol.LocalCaseControlSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class LocalCaseControlSamplingFactory<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, LocalCaseControlSampling<I, D>> {
+public class LocalCaseControlSamplingFactory<I extends IInstance>
+		implements IRerunnableSamplingAlgorithmFactory<I, LocalCaseControlSampling<I>> {
 
-	private LocalCaseControlSampling<I, D> previousRun = null;
+	private LocalCaseControlSampling<I> previousRun = null;
 	private int preSampleSize = -1;
 
 	@Override
-	public void setPreviousRun(LocalCaseControlSampling<I, D> previousRun) {
+	public void setPreviousRun(LocalCaseControlSampling<I> previousRun) {
 		this.previousRun = previousRun;
 	}
 
@@ -28,8 +29,9 @@ public class LocalCaseControlSamplingFactory<I extends ILabeledAttributeArrayIns
 	}
 
 	@Override
-	public LocalCaseControlSampling<I, D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
-		LocalCaseControlSampling<I, D> localCaseControlSampling = new LocalCaseControlSampling<>(random, this.preSampleSize, inputDataset);
+	public LocalCaseControlSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
+		LocalCaseControlSampling<I> localCaseControlSampling = new LocalCaseControlSampling<>(random,
+				this.preSampleSize, inputDataset);
 		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null) {
 			localCaseControlSampling.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
 			localCaseControlSampling.setChosenInstance(previousRun.getChosenInstance());

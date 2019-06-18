@@ -1,16 +1,15 @@
 package ai.libs.jaicore.experiments;
 
+import org.aeonbits.owner.Mutable;
 import org.aeonbits.owner.Reloadable;
-
-import ai.libs.jaicore.basic.IConfig;
 
 /**
  * Configuration interface to defined the access properties for a database connection
- *
+ * 
  * @author fmohr
  *
  */
-public interface IDatabaseConfig extends IConfig, Reloadable {
+public interface IDatabaseConfig extends Mutable, Reloadable {
 
 	/* The table is the one where the experiments will be maintained */
 	public static final String DB_DRIVER = "db.driver";

@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
+import ai.libs.jaicore.basic.algorithm.AlgorithmState;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 
 /**
  * An abstract class for sampling algorithms providing basic functionality of an
@@ -24,14 +24,14 @@ import ai.libs.jaicore.ml.core.dataset.IDataset;
  * @author Felix Weiland
  * @author jnowack
  */
-public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
+public abstract class ASamplingAlgorithm<I extends IInstance> extends AAlgorithm<IDataset<I>, IDataset<I>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
 	protected Integer sampleSize = null;
-	protected D sample = null;
+	protected IDataset<I> sample = null;
 
-	protected ASamplingAlgorithm(D input) {
+	protected ASamplingAlgorithm(IDataset<I> input) {
 		super(input);
 	}
 
@@ -39,9 +39,8 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		this.sampleSize = size;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public D call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public IDataset<I> call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		Instant timeoutTime = null;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
@@ -58,13 +57,9 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		}
 		if (sampleSize == 0) {
 			LOG.warn("Sample size is 0, so an empty data set is returned!");
-			try {
-				return (D)getInput().createEmpty();
-			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
-			}
+			return getInput().createEmpty();
 		}
-		D dataset = this.getInput();
+		IDataset<I> dataset = this.getInput();
 		if (dataset == null || dataset.isEmpty()) {
 			throw new AlgorithmException("No dataset or an empty dataset was given as an input.");
 		}
@@ -77,7 +72,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 			return dataset;
 		} else {
 			// Working configuration, so create the actual sample.
-			this.setState(EAlgorithmState.CREATED);
+			this.setState(AlgorithmState.created);
 			while (this.hasNext()) {
 				try {
 					checkAndConductTermination();
@@ -104,4 +99,5 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 			return this.terminate();
 		}
 	}
+
 }

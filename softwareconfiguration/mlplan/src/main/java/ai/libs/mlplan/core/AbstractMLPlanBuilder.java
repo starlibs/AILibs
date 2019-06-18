@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
@@ -17,21 +16,18 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.model.Component;
-import ai.libs.hasco.model.Parameter;
-import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.ResourceFile;
-import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.IClassifierEvaluatorFactory;
+import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.MonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
@@ -156,10 +152,6 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 		return new ComponentLoader(this.searchSpaceFile).getComponents();
 	}
 
-	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>> getComponentParameterConfigurations() throws IOException {
-		return new ComponentLoader(this.searchSpaceFile).getParamConfigs();
-	}
-
 	/***********************************************************************************************************************************************************************************************************************/
 	/***********************************************************************************************************************************************************************************************************************/
 	/***********************************************************************************************************************************************************************************************************************/
@@ -192,29 +184,24 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Creates a preferred node evaluator that can be used to prefer components over other components.
-	 *
 	 * @param preferredComponentsFile The file containing a priority list of component names.
-	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
 	 * @return The builder object.
 	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
 	 */
-	public AbstractMLPlanBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+	public AbstractMLPlanBuilder withPreferredComponentsFile(final File preferredComponentsFile) throws IOException {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
 		List<String> ordering;
-		if (preferredComponentsFile instanceof ResourceFile) {
-			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
-		} else if (!preferredComponentsFile.exists()) {
+		if (!preferredComponentsFile.exists()) {
 			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
 			ordering = new ArrayList<>();
 		} else {
 			ordering = FileUtil.readFileAsList(preferredComponentsFile);
 		}
-		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering, preferableCompnentMethodPrefix));
+		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering));
 	}
 
 	/**
 	 * Sets the name of the performance measure that is used.
-	 *
 	 * @param name The name of the performance measure.
 	 */
 	public void setPerformanceMeasureName(final String name) {
@@ -223,7 +210,6 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Set the data for which ML-Plan is supposed to find the best pipeline.
-	 *
 	 * @param dataset The dataset for which ML-Plan is to be run.
 	 * @return The builder object.
 	 */
@@ -260,7 +246,6 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Set the dataset splitter that is used for generating the holdout data portion that is put aside during search.
-	 *
 	 * @param datasetSplitter The dataset splitter to be used.
 	 * @return The builder obect.
 	 */
@@ -347,7 +332,6 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Sets the evaluator factory for the search phase.
-	 *
 	 * @param evaluatorFactory The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
@@ -364,18 +348,16 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Sets the evaluator factory for the selection phase.
-	 *
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withSelectionPhaseEvaluatorFactory(final IClassifierEvaluatorFactory evaluatorFactory) {
+	public AbstractMLPlanBuilder withSelectionPhaseEvaluatorFactory(final MonteCarloCrossValidationEvaluatorFactory evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
 		return this;
 	}
 
 	/**
 	 * Sets the number of cpus that may be used by ML-Plan.
-	 *
 	 * @param numCpus The number of cpus to use.
 	 * @return The builder object.
 	 */
@@ -492,7 +474,6 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Builds an ML-Plan object for the given dataset as input.
-	 *
 	 * @param dataset The dataset for which an ML-Plan object is to be built.
 	 * @return The ML-Plan object configured with this builder.
 	 */
@@ -503,7 +484,6 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 
 	/**
 	 * Builds an ML-Plan object with the dataset provided earlier to this builder.
-	 *
 	 * @return The ML-Plan object configured with this builder.
 	 */
 	public MLPlan build() {

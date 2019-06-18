@@ -3,20 +3,15 @@ package ai.libs.hasco.model;
 import java.util.Arrays;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CategoricalParameterDomain implements IParameterDomain {
 	private final String[] values;
 
-	@JsonCreator
-	public CategoricalParameterDomain(@JsonProperty("values") final String[] values) {
+	public CategoricalParameterDomain(final String[] values) {
 		super();
 		this.values = values;
 	}
 
-	@JsonCreator
-	public CategoricalParameterDomain(@JsonProperty("values") final Collection<String> values) {
+	public CategoricalParameterDomain(final Collection<String> values) {
 		this(values.toArray(new String[] {}));
 	}
 
@@ -69,7 +64,7 @@ public class CategoricalParameterDomain implements IParameterDomain {
 		if (!(otherDomain instanceof CategoricalParameterDomain)) {
 			return false;
 		}
-		CategoricalParameterDomain otherCategoricalDomain = (CategoricalParameterDomain) otherDomain;
+		CategoricalParameterDomain otherCategoricalDomain = (CategoricalParameterDomain)otherDomain;
 		return Arrays.asList(this.values).containsAll(Arrays.asList(otherCategoricalDomain.getValues()));
 	}
 

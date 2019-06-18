@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.Instances;

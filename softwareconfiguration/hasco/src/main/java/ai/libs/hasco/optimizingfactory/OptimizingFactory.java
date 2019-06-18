@@ -50,7 +50,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 
 			/* initialize optimizer */
 			if (this.loggerName != null) {
@@ -62,7 +62,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 			assert initEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the optimizer has not been its AlgorithmInitializationEvent";
 			return this.activate();
 
-		case ACTIVE:
+		case active:
 			C solutionModel = this.optimizer.call();
 			try {
 				this.constructedObject = this.getInput().getBaseFactory().getComponentInstantiation(solutionModel.getComponentInstance());

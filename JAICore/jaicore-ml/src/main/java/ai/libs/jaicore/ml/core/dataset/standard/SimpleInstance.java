@@ -1,39 +1,52 @@
 package ai.libs.jaicore.ml.core.dataset.standard;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 import ai.libs.jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
 
-public class SimpleInstance<L> implements INumericLabeledAttributeArrayInstance<L> {
+public class SimpleInstance implements IInstance {
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -6945848041078727475L;
 
+	private InstanceSchema schema;
+
 	private final OneHotEncodingTransformer oneHotEncoder = new OneHotEncodingTransformer();
 
-	private final List<IAttributeValue<?>> attributeValues;
-	private final L targetValue;
+	private final ArrayList<IAttributeValue<?>> attributeValues;
+	private final IAttributeValue<?> targetValue;
 
-	public SimpleInstance(final List<IAttributeValue<?>> attributeValues, final L targetValue) {
+	public SimpleInstance(final ArrayList<IAttributeValue<?>> attributeValues, final IAttributeValue<?> targetValue) {
 		this.attributeValues = attributeValues;
 		this.targetValue = targetValue;
 	}
 
+	public SimpleInstance(final InstanceSchema schema, final ArrayList<IAttributeValue<?>> attributeValues, final IAttributeValue<?> targetValue) {
+		this(attributeValues, targetValue);
+		this.schema = schema;
+	}
+
 	@Override
-	public <T> IAttributeValue<T> getAttributeValueAtPosition(final int position, final Class<T> type) {
+	public <T> IAttributeValue<T> getAttributeValue(final int position, final Class<T> type) {
 		return (IAttributeValue<T>) this.attributeValues.get(position);
 	}
 
 	@Override
-	public L getTargetValue() {
-		return this.targetValue;
+	public <T> IAttributeValue<T> getTargetValue(final Class<T> type) {
+		return (IAttributeValue<T>) this.targetValue;
+	}
+
+	public void setSchema(final InstanceSchema schema) {
+		this.schema = schema;
 	}
 
 	@Override
@@ -61,22 +74,8 @@ public class SimpleInstance<L> implements INumericLabeledAttributeArrayInstance<
 			sb.append(val.getValue());
 			sb.append(";");
 		}
-		sb.append(this.targetValue);
+		sb.append(this.targetValue.getValue());
 		return sb.toString();
 	}
 
-	@Override
-	public IAttributeValue<Double> getAttributeValue(final int position) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public IAttributeValue<?>[] getAllAttributeValues() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int getNumberOfAttributes() {
-		throw new UnsupportedOperationException();
-	}
 }

@@ -127,10 +127,6 @@ public class ComponentUtil {
 	}
 
 	public static int getNumberOfUnparametrizedCompositions(final Collection<Component> components, final String requiredInterface) {
-		if (hasCycles(components, requiredInterface)) {
-			return -1;
-		}
-
 		Collection<Component> candidates = components.stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
 		int numCandidates = 0;
 		for (Component candidate : candidates) {
@@ -150,30 +146,6 @@ public class ComponentUtil {
 			numCandidates += waysToResolveComponent;
 		}
 		return numCandidates;
-	}
-
-	public static boolean hasCycles(final Collection<Component> components, final String requiredInterface) {
-		return hasCycles(components, requiredInterface, new LinkedList<>());
-	}
-
-	private static boolean hasCycles(final Collection<Component> components, final String requiredInterface, final List<String> componentList) {
-		Collection<Component> candidates = components.stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
-
-		for (Component c : candidates) {
-			if (componentList.contains(c.getName())) {
-				return true;
-			}
-
-			List<String> componentListCopy = new LinkedList<>(componentList);
-			componentListCopy.add(c.getName());
-
-			for (String subRequiredInterface : c.getRequiredInterfaces().values()) {
-				if (hasCycles(components, subRequiredInterface, componentListCopy)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	public static boolean isDefaultConfiguration(final ComponentInstance instance) {

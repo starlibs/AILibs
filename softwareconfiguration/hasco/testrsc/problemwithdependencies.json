@@ -27,7 +27,7 @@
     }, {
       "name" : "d",
       "type" : "cat",
-      "values": [ "none", "red", "green", "blue", "white", "black" ],
+      "values": [ "none" ],
       "default" : "none"
     } ],
     "dependencies" : [ {

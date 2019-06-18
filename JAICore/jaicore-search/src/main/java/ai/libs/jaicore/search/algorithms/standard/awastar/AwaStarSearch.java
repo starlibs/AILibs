@@ -193,7 +193,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			this.logger.debug("Next step in {}. State is {}", this.getId(), this.getState());
 			this.checkAndConductTermination();
 			switch (this.getState()) {
-			case CREATED:
+			case created:
 				T externalRootNode = this.rootNodeGenerator.getRoot();
 				Node<T, V> rootNode = new Node<>(null, externalRootNode);
 				this.logger.info("Initializing graph and OPEN with {}.", rootNode);
@@ -202,7 +202,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
 				return this.activate();
 
-			case ACTIVE:
+			case active:
 				AlgorithmEvent event;
 				this.logger.info("Searching for next solution.");
 

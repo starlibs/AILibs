@@ -6,9 +6,8 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 
 /**
  * Implementation of a sampling method using kmeans-clustering. This algorithm
@@ -17,23 +16,23 @@ import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
  * center is added, otherwise the whole cluster is added to the sample.
  * <p>
  * Caution: This does ignore the given sample size!
- *
+ * 
  * @author jnowack
  *
  */
-public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ClusterSampling<I, D> {
+public class KmeansSampling<I extends IInstance> extends ClusterSampling<I> {
 	/* number of clusters, if -1 use sample size */
 	private int k;
 
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
-	 *
+	 * 
 	 * @param seed
 	 *            RAndom Seed
 	 * @param k
 	 *            number of clusters
 	 */
-	public KmeansSampling(final long seed, final int k, final D input) {
+	public KmeansSampling(long seed, int k, IDataset<I> input) {
 		super(seed, input);
 		this.k = k;
 	}
@@ -41,13 +40,13 @@ public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? ex
 	/**
 	 * Implementation of a sampling method using kmeans-clustering. The sample size
 	 * will be used as the number of clusters.
-	 *
+	 * 
 	 * @param seed
 	 *            Random Seed
 	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
+	public KmeansSampling(long seed, DistanceMeasure dist, IDataset<I> input) {
 		super(seed, dist, input);
 		this.k = -1;
 
@@ -55,7 +54,7 @@ public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? ex
 
 	/**
 	 * Implementation of a sampling method using kmeans-clustering.
-	 *
+	 * 
 	 * @param seed
 	 *            Random Seed
 	 * @param k
@@ -63,7 +62,7 @@ public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? ex
 	 * @param dist
 	 *            {@link DistanceMeasure} to be used
 	 */
-	public KmeansSampling(final long seed, final int k, final DistanceMeasure dist, final D input) {
+	public KmeansSampling(long seed, int k, DistanceMeasure dist, IDataset<I> input) {
 		super(seed, dist, input);
 		this.k = k;
 
@@ -72,31 +71,27 @@ public class KmeansSampling<I extends INumericLabeledAttributeArrayInstance<? ex
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			// Initialize variables
-			try {
-				this.sample = (D)this.getInput().createEmpty();
-			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
-			}
+			this.sample = getInput().createEmpty();
 
 			// create cluster
 			JDKRandomGenerator r = new JDKRandomGenerator();
-			r.setSeed(this.seed);
+			r.setSeed(seed);
 			// update k if k=-1
-			if (this.k == -1) {
-				this.k = this.sampleSize;
+			if (k == -1) {
+				k = sampleSize;
 			}
-			if (this.clusterResults == null) {
-				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<>(this.k, -1, this.distanceMeassure, r);
-				this.clusterResults = kMeansCluster.cluster(this.getInput());
+			if (clusterResults == null) {
+				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<>(k, -1, distanceMeassure, r);
+				clusterResults = kMeansCluster.cluster(getInput());
 			}
 
 			return this.activate();
-		case ACTIVE:
+		case active:
 			this.doAlgorithmStep();
 			break;
-		case INACTIVE:
+		case inactive:
 			this.doInactiveStep();
 			break;
 		default:

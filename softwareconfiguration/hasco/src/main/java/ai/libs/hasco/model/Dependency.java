@@ -2,17 +2,13 @@ package ai.libs.hasco.model;
 
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 
 public class Dependency {
 	private final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise; // semantics are DNF (every entry is an AND-connected constraint)
 	private final Collection<Pair<Parameter, IParameterDomain>> conclusion;
 
-	@JsonCreator
-	public Dependency(@JsonProperty("premise") final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise, @JsonProperty("conclusion") final Collection<Pair<Parameter, IParameterDomain>> conclusion) {
+	public Dependency(final Collection<Collection<Pair<Parameter, IParameterDomain>>> premise, final Collection<Pair<Parameter, IParameterDomain>> conclusion) {
 		super();
 		this.premise = premise;
 		this.conclusion = conclusion;

@@ -3,7 +3,7 @@ package ai.libs.jaicore.search.testproblems.nqueens;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.search.GraphGeneratorTester;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 

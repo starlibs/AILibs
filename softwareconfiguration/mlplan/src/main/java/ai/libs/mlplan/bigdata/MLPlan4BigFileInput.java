@@ -90,7 +90,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 
 			/* first create an intermediate sized downsampled file (10k instances), which is the basis for further operations */
 			this.downsampleData(this.getInput(), this.intermediateSizeDownsampledFile, 10000);
@@ -121,14 +121,14 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				this.mlplan.setLoggerName(this.getLoggerName() + ".mlplan");
 				this.mlplan.registerListener(this);
 				this.mlplan.setTimeout(new TimeOut(this.getTimeout().seconds() - 30, TimeUnit.SECONDS));
-				this.mlplan.setNumCPUs(3);
+				this.mlplan.setNumCPUs(8);
 				this.mlplan.setBuildSelectedClasifierOnGivenData(false); // we will build the classifier, ML-Plan should not waste time with this
 				this.logger.info("ML-Plan initialized, activation finished!");
 				return this.activate();
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Could not initialize ML-Plan!");
 			}
-		case ACTIVE:
+		case active:
 
 			/* run ML-Plan */
 			this.logger.info("Starting ML-Plan.");

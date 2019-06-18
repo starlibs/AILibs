@@ -1,0 +1,278 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>AEvolutionaryAlgorithm (jaicore-ea 0.0.1-SNAPSHOT API)</title>
+<link rel="stylesheet" type="text/css" href="../../../stylesheet.css" title="Style">
+<script type="text/javascript" src="../../../script.js"></script>
+</head>
+<body>
+<script type="text/javascript"><!--
+    try {
+        if (location.href.indexOf('is-external=true') == -1) {
+            parent.document.title="AEvolutionaryAlgorithm (jaicore-ea 0.0.1-SNAPSHOT API)";
+        }
+    }
+    catch(err) {
+    }
+//-->
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar.top">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.top.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-all.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li>Prev&nbsp;Class</li>
+<li><a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmConfig.html" title="interface in jaicore.ea.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?jaicore/ea/algorithm/AEvolutionaryAlgorithm.html" target="_top">Frames</a></li>
+<li><a href="AEvolutionaryAlgorithm.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#methods.inherited.from.class.jaicore.basic.algorithm.AAlgorithm">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Method</li>
+</ul>
+</div>
+<a name="skip.navbar.top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">jaicore.ea.algorithm</div>
+<h2 title="Class AEvolutionaryAlgorithm" class="title">Class AEvolutionaryAlgorithm&lt;P&gt;</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li>jaicore.basic.algorithm.AAlgorithm&lt;<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmProblem.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmProblem</a>,<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmResult.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmResult</a>&lt;P&gt;&gt;</li>
+<li>
+<ul class="inheritance">
+<li>jaicore.ea.algorithm.AEvolutionaryAlgorithm&lt;P&gt;</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>jaicore.basic.algorithm.IAlgorithm&lt;<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmProblem.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmProblem</a>,<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmResult.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmResult</a>&lt;P&gt;&gt;, jaicore.basic.Cancelable, jaicore.basic.ILoggingCustomizable, java.lang.Iterable&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;, java.util.concurrent.Callable&lt;<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmResult.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmResult</a>&lt;P&gt;&gt;, java.util.Iterator&lt;jaicore.basic.algorithm.events.AlgorithmEvent&gt;</dd>
+</dl>
+<dl>
+<dt>Direct Known Subclasses:</dt>
+<dd><a href="../../../jaicore/ea/algorithm/moea/moeaframework/MOEAFrameworkAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">MOEAFrameworkAlgorithm</a></dd>
+</dl>
+<hr>
+<br>
+<pre>public abstract class <span class="typeNameLabel">AEvolutionaryAlgorithm&lt;P&gt;</span>
+extends jaicore.basic.algorithm.AAlgorithm&lt;<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmProblem.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmProblem</a>,<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmResult.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmResult</a>&lt;P&gt;&gt;</pre>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier</th>
+<th class="colLast" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>protected </code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../jaicore/ea/algorithm/AEvolutionaryAlgorithm.html#AEvolutionaryAlgorithm-jaicore.ea.algorithm.IEvolutionaryAlgorithmConfig-jaicore.ea.algorithm.IEvolutionaryAlgorithmProblem-">AEvolutionaryAlgorithm</a></span>(<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmConfig.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmConfig</a>&nbsp;config,
+                      <a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmProblem.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmProblem</a>&nbsp;problem)</code>&nbsp;</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.AAlgorithm">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;jaicore.basic.algorithm.AAlgorithm</h3>
+<code>activate, cancel, checkAndConductTermination, computeTimeoutAware, getActivationTime, getConfig, getId, getInput, getLoggerName, getNumCPUs, getRemainingTimeToDeadline, getState, getTimeout, getTimerAndCreateIfNotExistent, hasNext, hasThreadBeenInterruptedDuringShutdown, isCanceled, isShutdownInitialized, isStopCriterionSatisfied, isTimeouted, iterator, next, post, registerActiveThread, registerListener, setConfig, setLoggerName, setMaxNumThreads, setNumCPUs, setState, setTimeout, setTimeout, shutdown, terminate, unregisterActiveThread, unregisterThreadAndShutdown</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, finalize, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.basic.algorithm.IAlgorithm">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;jaicore.basic.algorithm.IAlgorithm</h3>
+<code>call, nextWithException</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Iterable">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.lang.Iterable</h3>
+<code>forEach, spliterator</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.util.Iterator">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;java.util.Iterator</h3>
+<code>forEachRemaining, remove</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="AEvolutionaryAlgorithm-jaicore.ea.algorithm.IEvolutionaryAlgorithmConfig-jaicore.ea.algorithm.IEvolutionaryAlgorithmProblem-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>AEvolutionaryAlgorithm</h4>
+<pre>protected&nbsp;AEvolutionaryAlgorithm(<a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmConfig.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmConfig</a>&nbsp;config,
+                                 <a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmProblem.html" title="interface in jaicore.ea.algorithm">IEvolutionaryAlgorithmProblem</a>&nbsp;problem)</pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar.bottom">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.bottom.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../index-all.html">Index</a></li>
+<li><a href="../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li>Prev&nbsp;Class</li>
+<li><a href="../../../jaicore/ea/algorithm/IEvolutionaryAlgorithmConfig.html" title="interface in jaicore.ea.algorithm"><span class="typeNameLink">Next&nbsp;Class</span></a></li>
+</ul>
+<ul class="navList">
+<li><a href="../../../index.html?jaicore/ea/algorithm/AEvolutionaryAlgorithm.html" target="_top">Frames</a></li>
+<li><a href="AEvolutionaryAlgorithm.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#methods.inherited.from.class.jaicore.basic.algorithm.AAlgorithm">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li>Method</li>
+</ul>
+</div>
+<a name="skip.navbar.bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

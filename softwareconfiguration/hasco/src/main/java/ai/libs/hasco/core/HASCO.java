@@ -37,7 +37,6 @@ import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
 import ai.libs.jaicore.planning.core.Plan;
-import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemTransformer;
@@ -77,7 +76,6 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 	private int numUnparametrizedSolutions = -1;
 	private final Set<UnparametrizedComponentInstance> returnedUnparametrizedComponentInstances = new HashSet<>();
 	private Map<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>, HASCOSolutionEvent<V>> hascoSolutionEventCache = new ConcurrentHashMap<>();
-	private boolean createComponentInstancesFromNodesInsteadOfPlans = false;
 
 	/* runtime variables of algorithm */
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
@@ -140,7 +138,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 
 		/* act depending on state */
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			this.logger.info("Starting HASCO run.");
 			AlgorithmInitializedEvent event = this.activate();
 
@@ -173,13 +171,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
 					Plan plan = HASCO.this.planningGraphGeneratorDeriver.decodeSolution(searchPath);
-					ComponentInstance objectInstance;
-					if (HASCO.this.createComponentInstancesFromNodesInsteadOfPlans) {
-						objectInstance = Util.getSolutionCompositionFromState(HASCO.this.getInput().getComponents(),
-								((TFDNode) searchPath.getNodes().get(searchPath.getNodes().size() - 1)).getState(), true);
-					} else {
-						objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.getInput().getComponents(), HASCO.this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
-					}
+					ComponentInstance objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.getInput().getComponents(), HASCO.this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
 					HASCO.this.returnedUnparametrizedComponentInstances.add(new UnparametrizedComponentInstance(objectInstance));
 					V score;
 					try {
@@ -213,7 +205,7 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 			this.logger.info("HASCO initialization completed.");
 			return event;
 
-		case ACTIVE:
+		case active:
 
 			/* step search */
 			this.logger.debug("Stepping search algorithm.");
@@ -322,10 +314,6 @@ public class HASCO<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<
 		} else {
 			this.logger.info("The solution evaluator {} does not implement ILoggingCustomizable, so no customization possible.", this.getInput().getCompositionEvaluator().getClass().getName());
 		}
-	}
-
-	public void setCreateComponentInstancesFromNodesInsteadOfPlans(final boolean cIsFromNodes) {
-		this.createComponentInstancesFromNodesInsteadOfPlans = cIsFromNodes;
 	}
 
 	@Override

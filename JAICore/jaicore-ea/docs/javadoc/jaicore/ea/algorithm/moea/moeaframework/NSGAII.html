@@ -1,0 +1,409 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!-- NewPage -->
+<html lang="en">
+<head>
+<title>NSGAII (jaicore-ea 0.0.1-SNAPSHOT API)</title>
+<link rel="stylesheet" type="text/css" href="../../../../../stylesheet.css" title="Style">
+<script type="text/javascript" src="../../../../../script.js"></script>
+</head>
+<body>
+<script type="text/javascript"><!--
+    try {
+        if (location.href.indexOf('is-external=true') == -1) {
+            parent.document.title="NSGAII (jaicore-ea 0.0.1-SNAPSHOT API)";
+        }
+    }
+    catch(err) {
+    }
+//-->
+var methods = {"i0":10,"i1":10,"i2":10};
+var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
+var altColor = "altColor";
+var rowColor = "rowColor";
+var tableTab = "tableTab";
+var activeTableTab = "activeTableTab";
+</script>
+<noscript>
+<div>JavaScript is disabled on your browser.</div>
+</noscript>
+<!-- ========= START OF TOP NAVBAR ======= -->
+<div class="topNav"><a name="navbar.top">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.top" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.top.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../../index-all.html">Index</a></li>
+<li><a href="../../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/MOEAFrameworkAlgorithmResult.html" title="class in jaicore.ea.algorithm.moea.moeaframework"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Next&nbsp;Class</li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../../index.html?jaicore/ea/algorithm/moea/moeaframework/NSGAII.html" target="_top">Frames</a></li>
+<li><a href="NSGAII.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_top">
+<li><a href="../../../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_top");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#fields.inherited.from.class.jaicore.ea.algorithm.moea.moeaframework.AbstractEvolutionaryAlgorithm">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.top">
+<!--   -->
+</a></div>
+<!-- ========= END OF TOP NAVBAR ========= -->
+<!-- ======== START OF CLASS DATA ======== -->
+<div class="header">
+<div class="subTitle">jaicore.ea.algorithm.moea.moeaframework</div>
+<h2 title="Class NSGAII" class="title">Class NSGAII</h2>
+</div>
+<div class="contentContainer">
+<ul class="inheritance">
+<li>java.lang.Object</li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">jaicore.ea.algorithm.moea.moeaframework.AbstractAlgorithm</a></li>
+<li>
+<ul class="inheritance">
+<li><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">jaicore.ea.algorithm.moea.moeaframework.AbstractEvolutionaryAlgorithm</a></li>
+<li>
+<ul class="inheritance">
+<li>jaicore.ea.algorithm.moea.moeaframework.NSGAII</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="description">
+<ul class="blockList">
+<li class="blockList">
+<dl>
+<dt>All Implemented Interfaces:</dt>
+<dd>org.moeaframework.core.Algorithm, org.moeaframework.core.EpsilonBoxEvolutionaryAlgorithm, org.moeaframework.core.EvolutionaryAlgorithm</dd>
+</dl>
+<hr>
+<br>
+<pre>public class <span class="typeNameLabel">NSGAII</span>
+extends <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractEvolutionaryAlgorithm</a>
+implements org.moeaframework.core.EpsilonBoxEvolutionaryAlgorithm</pre>
+<div class="block">Implementation of NSGA-II, with the ability to attach an optional 
+ &epsilon;-dominance archive.
+ <p>
+ References:
+ <ol>
+   <li>Deb, K. et al.  "A Fast Elitist Multi-Objective Genetic Algorithm:
+       NSGA-II."  IEEE Transactions on Evolutionary Computation, 6:182-197, 
+       2000.
+   <li>Kollat, J. B., and Reed, P. M.  "Comparison of Multi-Objective 
+       Evolutionary Algorithms for Long-Term Monitoring Design."  Advances in
+       Water Resources, 29(6):792-807, 2006.
+ </ol></div>
+</li>
+</ul>
+</div>
+<div class="summary">
+<ul class="blockList">
+<li class="blockList">
+<!-- =========== FIELD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="field.summary">
+<!--   -->
+</a>
+<h3>Field Summary</h3>
+<ul class="blockList">
+<li class="blockList"><a name="fields.inherited.from.class.jaicore.ea.algorithm.moea.moeaframework.AbstractEvolutionaryAlgorithm">
+<!--   -->
+</a>
+<h3>Fields inherited from class&nbsp;jaicore.ea.algorithm.moea.moeaframework.<a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractEvolutionaryAlgorithm</a></h3>
+<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#archive">archive</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#initialization">initialization</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#population">population</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="fields.inherited.from.class.jaicore.ea.algorithm.moea.moeaframework.AbstractAlgorithm">
+<!--   -->
+</a>
+<h3>Fields inherited from class&nbsp;jaicore.ea.algorithm.moea.moeaframework.<a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractAlgorithm</a></h3>
+<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#initialized">initialized</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#numberOfEvaluations">numberOfEvaluations</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#problem">problem</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#terminated">terminated</a></code></li>
+</ul>
+</li>
+</ul>
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.summary">
+<!--   -->
+</a>
+<h3>Constructor Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Constructor Summary table, listing constructors, and an explanation">
+<caption><span>Constructors</span><span class="tabEnd">&nbsp;</span></caption>
+<tr>
+<th class="colOne" scope="col">Constructor and Description</th>
+</tr>
+<tr class="altColor">
+<td class="colOne"><code><span class="memberNameLink"><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/NSGAII.html#NSGAII-org.moeaframework.core.Problem-org.moeaframework.core.NondominatedSortingPopulation-org.moeaframework.core.EpsilonBoxDominanceArchive-org.moeaframework.core.Selection-org.moeaframework.core.Variation-org.moeaframework.core.Initialization-">NSGAII</a></span>(org.moeaframework.core.Problem&nbsp;problem,
+      org.moeaframework.core.NondominatedSortingPopulation&nbsp;population,
+      org.moeaframework.core.EpsilonBoxDominanceArchive&nbsp;archive,
+      org.moeaframework.core.Selection&nbsp;selection,
+      org.moeaframework.core.Variation&nbsp;variation,
+      org.moeaframework.core.Initialization&nbsp;initialization)</code>
+<div class="block">Constructs the NSGA-II algorithm with the specified components.</div>
+</td>
+</tr>
+</table>
+</li>
+</ul>
+<!-- ========== METHOD SUMMARY =========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.summary">
+<!--   -->
+</a>
+<h3>Method Summary</h3>
+<table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t2" class="tableTab"><span><a href="javascript:show(2);">Instance Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<tr>
+<th class="colFirst" scope="col">Modifier and Type</th>
+<th class="colLast" scope="col">Method and Description</th>
+</tr>
+<tr id="i0" class="altColor">
+<td class="colFirst"><code>org.moeaframework.core.EpsilonBoxDominanceArchive</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/NSGAII.html#getArchive--">getArchive</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i1" class="rowColor">
+<td class="colFirst"><code>org.moeaframework.core.NondominatedSortingPopulation</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/NSGAII.html#getPopulation--">getPopulation</a></span>()</code>&nbsp;</td>
+</tr>
+<tr id="i2" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/NSGAII.html#iterate--">iterate</a></span>()</code>
+<div class="block">Performs one iteration of the algorithm.</div>
+</td>
+</tr>
+</table>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.ea.algorithm.moea.moeaframework.AbstractEvolutionaryAlgorithm">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;jaicore.ea.algorithm.moea.moeaframework.<a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractEvolutionaryAlgorithm</a></h3>
+<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#getResult--">getResult</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#getState--">getState</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#initialize--">initialize</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#setState-java.lang.Object-">setState</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.jaicore.ea.algorithm.moea.moeaframework.AbstractAlgorithm">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;jaicore.ea.algorithm.moea.moeaframework.<a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractAlgorithm</a></h3>
+<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#evaluate-org.moeaframework.core.Solution-">evaluate</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#evaluateAll-java.lang.Iterable-">evaluateAll</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#evaluateAll-org.moeaframework.core.Solution:A-">evaluateAll</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#finalize--">finalize</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#getNumberOfEvaluations--">getNumberOfEvaluations</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#getProblem--">getProblem</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#isInitialized--">isInitialized</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#isTerminated--">isTerminated</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#step--">step</a>, <a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#terminate--">terminate</a></code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.java.lang.Object">
+<!--   -->
+</a>
+<h3>Methods inherited from class&nbsp;java.lang.Object</h3>
+<code>clone, equals, getClass, hashCode, notify, notifyAll, toString, wait, wait, wait</code></li>
+</ul>
+<ul class="blockList">
+<li class="blockList"><a name="methods.inherited.from.class.org.moeaframework.core.Algorithm">
+<!--   -->
+</a>
+<h3>Methods inherited from interface&nbsp;org.moeaframework.core.Algorithm</h3>
+<code>evaluate, getNumberOfEvaluations, getProblem, getResult, getState, isTerminated, setState, step, terminate</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="details">
+<ul class="blockList">
+<li class="blockList">
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<ul class="blockList">
+<li class="blockList"><a name="constructor.detail">
+<!--   -->
+</a>
+<h3>Constructor Detail</h3>
+<a name="NSGAII-org.moeaframework.core.Problem-org.moeaframework.core.NondominatedSortingPopulation-org.moeaframework.core.EpsilonBoxDominanceArchive-org.moeaframework.core.Selection-org.moeaframework.core.Variation-org.moeaframework.core.Initialization-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>NSGAII</h4>
+<pre>public&nbsp;NSGAII(org.moeaframework.core.Problem&nbsp;problem,
+              org.moeaframework.core.NondominatedSortingPopulation&nbsp;population,
+              org.moeaframework.core.EpsilonBoxDominanceArchive&nbsp;archive,
+              org.moeaframework.core.Selection&nbsp;selection,
+              org.moeaframework.core.Variation&nbsp;variation,
+              org.moeaframework.core.Initialization&nbsp;initialization)</pre>
+<div class="block">Constructs the NSGA-II algorithm with the specified components.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>problem</code> - the problem being solved</dd>
+<dd><code>population</code> - the population used to store solutions</dd>
+<dd><code>archive</code> - the archive used to store the result; can be <code>null</code></dd>
+<dd><code>selection</code> - the selection operator</dd>
+<dd><code>variation</code> - the variation operator</dd>
+<dd><code>initialization</code> - the initialization method</dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+<!-- ============ METHOD DETAIL ========== -->
+<ul class="blockList">
+<li class="blockList"><a name="method.detail">
+<!--   -->
+</a>
+<h3>Method Detail</h3>
+<a name="iterate--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>iterate</h4>
+<pre>public&nbsp;void&nbsp;iterate()</pre>
+<div class="block"><span class="descfrmTypeLabel">Description copied from class:&nbsp;<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#iterate--">AbstractAlgorithm</a></code></span></div>
+<div class="block">Performs one iteration of the algorithm. This method should be
+ overridden by implementations to perform each logical iteration of the
+ algorithm.</div>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html#iterate--">iterate</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractAlgorithm</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getArchive--">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getArchive</h4>
+<pre>public&nbsp;org.moeaframework.core.EpsilonBoxDominanceArchive&nbsp;getArchive()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getArchive</code>&nbsp;in interface&nbsp;<code>org.moeaframework.core.EpsilonBoxEvolutionaryAlgorithm</code></dd>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getArchive</code>&nbsp;in interface&nbsp;<code>org.moeaframework.core.EvolutionaryAlgorithm</code></dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#getArchive--">getArchive</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractEvolutionaryAlgorithm</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="getPopulation--">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>getPopulation</h4>
+<pre>public&nbsp;org.moeaframework.core.NondominatedSortingPopulation&nbsp;getPopulation()</pre>
+<dl>
+<dt><span class="overrideSpecifyLabel">Specified by:</span></dt>
+<dd><code>getPopulation</code>&nbsp;in interface&nbsp;<code>org.moeaframework.core.EvolutionaryAlgorithm</code></dd>
+<dt><span class="overrideSpecifyLabel">Overrides:</span></dt>
+<dd><code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html#getPopulation--">getPopulation</a></code>&nbsp;in class&nbsp;<code><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/AbstractEvolutionaryAlgorithm.html" title="class in jaicore.ea.algorithm.moea.moeaframework">AbstractEvolutionaryAlgorithm</a></code></dd>
+</dl>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<!-- ========= END OF CLASS DATA ========= -->
+<!-- ======= START OF BOTTOM NAVBAR ====== -->
+<div class="bottomNav"><a name="navbar.bottom">
+<!--   -->
+</a>
+<div class="skipNav"><a href="#skip.navbar.bottom" title="Skip navigation links">Skip navigation links</a></div>
+<a name="navbar.bottom.firstrow">
+<!--   -->
+</a>
+<ul class="navList" title="Navigation">
+<li><a href="../../../../../overview-summary.html">Overview</a></li>
+<li><a href="package-summary.html">Package</a></li>
+<li class="navBarCell1Rev">Class</li>
+<li><a href="package-tree.html">Tree</a></li>
+<li><a href="../../../../../deprecated-list.html">Deprecated</a></li>
+<li><a href="../../../../../index-all.html">Index</a></li>
+<li><a href="../../../../../help-doc.html">Help</a></li>
+</ul>
+</div>
+<div class="subNav">
+<ul class="navList">
+<li><a href="../../../../../jaicore/ea/algorithm/moea/moeaframework/MOEAFrameworkAlgorithmResult.html" title="class in jaicore.ea.algorithm.moea.moeaframework"><span class="typeNameLink">Prev&nbsp;Class</span></a></li>
+<li>Next&nbsp;Class</li>
+</ul>
+<ul class="navList">
+<li><a href="../../../../../index.html?jaicore/ea/algorithm/moea/moeaframework/NSGAII.html" target="_top">Frames</a></li>
+<li><a href="NSGAII.html" target="_top">No&nbsp;Frames</a></li>
+</ul>
+<ul class="navList" id="allclasses_navbar_bottom">
+<li><a href="../../../../../allclasses-noframe.html">All&nbsp;Classes</a></li>
+</ul>
+<div>
+<script type="text/javascript"><!--
+  allClassesLink = document.getElementById("allclasses_navbar_bottom");
+  if(window==top) {
+    allClassesLink.style.display = "block";
+  }
+  else {
+    allClassesLink.style.display = "none";
+  }
+  //-->
+</script>
+</div>
+<div>
+<ul class="subNavList">
+<li>Summary:&nbsp;</li>
+<li>Nested&nbsp;|&nbsp;</li>
+<li><a href="#fields.inherited.from.class.jaicore.ea.algorithm.moea.moeaframework.AbstractEvolutionaryAlgorithm">Field</a>&nbsp;|&nbsp;</li>
+<li><a href="#constructor.summary">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.summary">Method</a></li>
+</ul>
+<ul class="subNavList">
+<li>Detail:&nbsp;</li>
+<li>Field&nbsp;|&nbsp;</li>
+<li><a href="#constructor.detail">Constr</a>&nbsp;|&nbsp;</li>
+<li><a href="#method.detail">Method</a></li>
+</ul>
+</div>
+<a name="skip.navbar.bottom">
+<!--   -->
+</a></div>
+<!-- ======== END OF BOTTOM NAVBAR ======= -->
+</body>
+</html>

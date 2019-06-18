@@ -62,19 +62,13 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 		try {
 			return TimedComputation.compute(() -> this.fTimeouted(node, grantedTime), interruptionTime, "Node evaluation has timed out (" + TimeAwareNodeEvaluator.class.getName() + "::" + Thread.currentThread() + "-" + System.currentTimeMillis() + ")");
 		} catch (AlgorithmTimeoutedException e) {
-			this.logger.warn("Computation of f-value for {} failed due to exception {} with message {}", node, e.getClass().getName(), e.getMessage());
+			logger.warn("Computation of f-value for {} failed due to exception {} with message {}", node, e.getClass().getName(), e.getMessage());
 			return this.fallbackNodeEvaluator.f(node);
 		}
-		catch (InterruptedException e) {
-			this.logger.warn("Got interrupted during node evaluation. Throwing an InterruptedException");
-			throw e;
-		}
 		catch (ExecutionException e) {
-			if (e.getCause() instanceof NodeEvaluationException) {
+			if (e.getCause() instanceof NodeEvaluationException)
 				throw (NodeEvaluationException)e.getCause();
-			} else {
-				throw new NodeEvaluationException(e.getCause(), "Could not evaluate path.");
-			}
+			else throw new NodeEvaluationException(e.getCause(), "Could not evaluate path.");
 		}
 	}
 
@@ -96,7 +90,7 @@ public abstract class TimeAwareNodeEvaluator<T, V extends Comparable<V>> impleme
 
 	protected void checkInterruption() throws InterruptedException {
 		boolean interrupted = Thread.currentThread().isInterrupted();
-		this.logger.debug("Checking interruption of RCNE: {}", interrupted);
+		logger.debug("Checking interruption of RCNE: {}", interrupted);
 		if (interrupted) {
 			Thread.interrupted(); // reset flag
 			throw new InterruptedException("Node evaluation of " + this.getClass().getName() + " has been interrupted.");

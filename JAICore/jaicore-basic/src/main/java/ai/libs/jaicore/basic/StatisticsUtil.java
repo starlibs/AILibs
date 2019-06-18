@@ -27,7 +27,7 @@ public class StatisticsUtil {
 	 * @return The maximum value of the provided collection.
 	 */
 	public static double max(final Collection<? extends Number> values) {
-		return values.stream().mapToDouble(Number::doubleValue).max().getAsDouble();
+		return values.stream().mapToDouble(x -> x.doubleValue()).max().getAsDouble();
 	}
 
 	/**
@@ -37,7 +37,7 @@ public class StatisticsUtil {
 	 * @return The minimum value of the provided collection.
 	 */
 	public static double min(final Collection<? extends Number> values) {
-		return values.stream().mapToDouble(Number::doubleValue).min().getAsDouble();
+		return values.stream().mapToDouble(x -> x.doubleValue()).min().getAsDouble();
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class StatisticsUtil {
 	 * @return The mean of the provided values.
 	 */
 	public static double mean(final Collection<? extends Number> values) {
-		return values.stream().mapToDouble(Number::doubleValue).average().getAsDouble();
+		return values.stream().mapToDouble(x -> x.doubleValue()).average().getAsDouble();
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class StatisticsUtil {
 	 * @return The sum of the provided values.
 	 */
 	public static double sum(final Collection<? extends Number> values) {
-		return values.stream().mapToDouble(Number::doubleValue).sum();
+		return values.stream().mapToDouble(x -> x.doubleValue()).sum();
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class StatisticsUtil {
 	 */
 	public static double variance(final Collection<? extends Number> values) {
 		final double mean = mean(values);
-		return values.stream().mapToDouble(Number::doubleValue).map(x -> Math.pow(x - mean, 2) / values.size()).sum();
+		return values.stream().mapToDouble(x -> x.doubleValue()).map(x -> Math.pow(x - mean, 2) / values.size()).sum();
 	}
 
 	/**

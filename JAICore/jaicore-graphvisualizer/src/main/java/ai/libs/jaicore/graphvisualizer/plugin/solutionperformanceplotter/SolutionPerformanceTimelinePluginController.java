@@ -11,35 +11,35 @@ import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 
 public class SolutionPerformanceTimelinePluginController extends ASimpleMVCPluginController<SolutionPerformanceTimelinePluginModel, SolutionPerformanceTimelinePluginView> {
+	
+	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePlugin.class);
 
-	private Logger logger = LoggerFactory.getLogger(SolutionPerformanceTimelinePluginController.class);
-
-	public SolutionPerformanceTimelinePluginController(final SolutionPerformanceTimelinePluginModel model, final SolutionPerformanceTimelinePluginView view) {
+	public SolutionPerformanceTimelinePluginController(SolutionPerformanceTimelinePluginModel model, SolutionPerformanceTimelinePluginView view) {
 		super(model, view);
 	}
 
 	@Override
-	public void handleGUIEvent(final GUIEvent guiEvent) {
+	public void handleGUIEvent(GUIEvent guiEvent) {
 		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
-			this.getModel().clear();
+			getModel().clear();
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void handleAlgorithmEventInternally(final AlgorithmEvent algorithmEvent) {
+	public void handleAlgorithmEventInternally(AlgorithmEvent algorithmEvent) {
 		if (algorithmEvent instanceof ScoredSolutionCandidateFoundEvent) {
-			this.logger.debug("Received solution event {}", algorithmEvent);
+			logger.debug("Received solution event {}", algorithmEvent);
 			ScoredSolutionCandidateFoundEvent<?,?> event = (ScoredSolutionCandidateFoundEvent<?,?>)algorithmEvent;
 			if (!(event.getScore() instanceof Number)) {
-				this.logger.warn("Received SolutionCandidateFoundEvent, but the score is of type {}, which is not a number.", event.getScore().getClass().getName());
+				logger.warn("Received SolutionCandidateFoundEvent, but the score is of type {}, which is not a number.", event.getScore().getClass().getName());
 				return;
 			}
-			this.logger.debug("Adding solution to model and updating view.");
-			this.getModel().addEntry((ScoredSolutionCandidateFoundEvent<?, ? extends Number>)event);
-		} else {
-			this.logger.trace("Received and ignored irrelevant event {}", algorithmEvent);
+			logger.debug("Adding solution to model and updating view.");
+			getModel().addEntry((ScoredSolutionCandidateFoundEvent<?, ? extends Number>)event);
 		}
+		else
+			logger.trace("Received and ignored irrelevant event {}", algorithmEvent);
 	}
 
 }

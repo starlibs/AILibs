@@ -32,8 +32,8 @@ import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
-import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 
 public class ComponentLoader {
 

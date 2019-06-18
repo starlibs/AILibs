@@ -3,22 +3,23 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 import java.util.Random;
 
 import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol.CaseControlSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class CaseControlSamplingFactory<I extends ILabeledInstance<?>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, CaseControlSampling<I, D>> {
+public class CaseControlSamplingFactory<I extends IInstance>
+		implements IRerunnableSamplingAlgorithmFactory<I, CaseControlSampling<I>> {
 
-	private CaseControlSampling<I, D> previousRun = null;
+	private CaseControlSampling<I> previousRun = null;
 
 	@Override
-	public void setPreviousRun(CaseControlSampling<I, D> previousRun) {
+	public void setPreviousRun(CaseControlSampling<I> previousRun) {
 		this.previousRun = previousRun;
 	}
 
 	@Override
-	public CaseControlSampling<I, D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
-		CaseControlSampling<I, D> caseControlSampling = new CaseControlSampling<>(random, inputDataset);
+	public CaseControlSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
+		CaseControlSampling<I> caseControlSampling = new CaseControlSampling<>(random, inputDataset);
 		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null) {
 			caseControlSampling.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
 		}

@@ -1,32 +1,26 @@
 package ai.libs.jaicore.ml.core.predictivemodel;
 
-import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 
 /**
- * The {@link IBatchLearner} models a learning algorithm which works in a batch
- * fashion, i.e. takes a whole {@link AILabeledAttributeArrayDataset} as training input. It can be
- * trained based on an {@link AILabeledAttributeArrayDataset} in order to make predictions.
+ * The {@link IBatchLearner} models a learning algorithm which works in a batch fashion, i.e. takes a whole {@link IDataset} as training input. It can be trained based on an {@link IDataset} in order
+ * to make predictions.
+ * 
+ * @author Alexander Hetzer
  *
- * @author Alexander Hetzer, Julian Lienen
- *
- * @param <T>
+ * @param <TARGET>
  *            The type of the target that this {@link IBatchLearner} predicts.
- * @param <I>
- *            The type of the instances stored in the data set specified by the generic parameter <D>.
- * @param <D>
- *            The type of the data set used to learn from and predict batches.
  */
-public interface IBatchLearner<T, I, D extends IDataset<I>> extends IPredictiveModel<T, I, D> {
+public interface IBatchLearner<TARGET> extends IPredictiveModel<TARGET> {
 
 	/**
-	 * Trains this {@link IBatchLearner} using the given {@link AILabeledAttributeArrayDataset}.
-	 *
+	 * Trains this {@link IBatchLearner} using the given {@link IDataset}.
+	 * 
 	 * @param dataset
-	 *            The {@link AILabeledAttributeArrayDataset} which should be used for the training.
+	 *            The {@link IDataset} which should be used for the training.
 	 * @throws TrainingException
 	 *             If something fails during the training process.
 	 */
-	public void train(D dataset) throws TrainingException;
+	public void train(IDataset dataset) throws TrainingException;
 }

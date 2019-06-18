@@ -4,15 +4,10 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This class solves the following problem: Sometimes you want to use objects of a concrete List class L
@@ -29,35 +24,29 @@ import org.slf4j.LoggerFactory;
  * @param <E>
  */
 public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> implements List<D> {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(ListDecorator.class);
-
 	private final L list;
-	private final Class<E> typeOfDecoratedItems;
-	private final Class<D> typeOfDecoratingItems;
+	private final Class<E> typeOfDecoratedItems = (Class<E>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[1];
+	private final Class<D> typeOfDecoratingItems = (Class<D>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[2];
 	private final Constructor<D> constructorForDecoratedItems;
 
-	@SuppressWarnings("unchecked")
-	public ListDecorator(final L list) throws ClassNotFoundException {
+	public ListDecorator(final L list) {
 		super();
 		this.list = list;
-		Type[] genericTypes = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
-		this.typeOfDecoratedItems = (Class<E>) this.getClassWithoutGenerics(genericTypes[1].getTypeName());
-		this.typeOfDecoratingItems = (Class<D>) this.getClassWithoutGenerics(genericTypes[2].getTypeName());
-		Constructor<D> vConstructorForDecoratedItems = null;
+		Constructor<D> constructorForDecoratedItems = null;
 		try {
-			vConstructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
-		} catch (NoSuchMethodException e) {
-			LOGGER.error("The constructor of the list class couldn ot be invoked.", e); // this should never be thrown
+			constructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
 		}
-		this.constructorForDecoratedItems = vConstructorForDecoratedItems;
+		catch (NoSuchMethodException e) {
+			e.printStackTrace(); // this should never be thrown
+		}
+		this.constructorForDecoratedItems = constructorForDecoratedItems;
 	}
 
 	private D getDecorationForElement(final E element) {
 		try {
 			return this.constructorForDecoratedItems.newInstance(element);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			LOGGER.error("The decoration for the given element could not be obtained.", e);
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -121,7 +110,6 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		return this.getDecorationForElement(this.list.get(index));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public int indexOf(final Object o) {
 		return this.typeOfDecoratingItems.isInstance(o) ? (this.list.indexOf(((D) o).getElement())) : -1;
@@ -136,7 +124,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	public Iterator<D> iterator() {
 		return new Iterator<D>() {
 
-			private Iterator<E> internalIterator = ListDecorator.this.list.iterator();
+			Iterator<E> internalIterator = ListDecorator.this.list.iterator();
 
 			@Override
 			public boolean hasNext() {
@@ -151,7 +139,6 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		};
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public int lastIndexOf(final Object o) {
 		return this.typeOfDecoratingItems.isInstance(o) ? (this.list.lastIndexOf(((D) o).getElement())) : -1;
@@ -166,7 +153,7 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	public ListIterator<D> listIterator(final int index) {
 		return new ListIterator<D>() {
 
-			private ListIterator<E> internalIterator = ListDecorator.this.list.listIterator(index);
+			ListIterator<E> internalIterator = ListDecorator.this.list.listIterator(index);
 
 			@Override
 			public void add(final D arg0) {
@@ -215,10 +202,9 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		};
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean remove(final Object o) {
-		return (this.typeOfDecoratingItems.isInstance(o) && (this.list.remove(((D) o).getElement())));
+		return this.typeOfDecoratingItems.isInstance(o) ? (this.list.remove(((D) o).getElement())) : false;
 	}
 
 	@Override
@@ -239,15 +225,16 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 
 	@Override
 	public boolean retainAll(final Collection<?> c) {
-		Collection<E> elementsToRemove = new HashSet<>();
+		boolean changed = false;
 		for (int i = 0; i < this.list.size(); i++) {
 			D construct = this.getDecorationForElement(this.list.get(i));
 			if (!c.contains(construct)) {
-				elementsToRemove.add(this.list.get(i));
+				this.list.remove(i);
+				i--;
+				changed = true;
 			}
 		}
-		this.list.removeAll(elementsToRemove);
-		return !elementsToRemove.isEmpty();
+		return changed;
 	}
 
 	@Override
@@ -265,33 +252,27 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		throw new UnsupportedOperationException();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Object[] toArray() {
 		Object[] arrayOfInternals = this.list.toArray();
 		Object[] array = new Object[arrayOfInternals.length];
 		for (int i = 0; i < arrayOfInternals.length; i++) {
-			array[i] = this.getDecorationForElement((E) arrayOfInternals[i]);
+			array[i] = this.getDecorationForElement((E)arrayOfInternals[i]);
 		}
 		return array;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T[] toArray(final T[] a) {
 		Object[] arrayOfInternals = this.list.toArray();
 		T[] array = (T[]) Array.newInstance(a.getClass().getComponentType(), arrayOfInternals.length);
 		for (int i = 0; i < arrayOfInternals.length; i++) {
-			array[i] = (T) this.getDecorationForElement((E) arrayOfInternals[i]);
+			array[i] = (T)this.getDecorationForElement((E)arrayOfInternals[i]);
 		}
 		return array;
 	}
 
 	public L getList() {
 		return this.list;
-	}
-
-	private Class<?> getClassWithoutGenerics(final String className) throws ClassNotFoundException {
-		return Class.forName(className.replaceAll("(<[^>*]>)", ""));
 	}
 }

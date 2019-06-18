@@ -2,56 +2,49 @@ package ai.libs.jaicore.logic.fol.structure;
 
 /**
  * A variable parameter of a literal.
- *
+ * 
  * @author mbunse, wever
  */
 @SuppressWarnings("serial")
 public class VariableParam extends LiteralParam {
+	
+	private Type type;
 
-	public VariableParam(final String name, final Type type) {
-		super(name, type);
+	public VariableParam(String name, Type type) {
+		super(name);
+		this.type = type;
 	}
 
-	public VariableParam(final String name) {
+	public VariableParam(String name) {
 		super(name);
 	}
 
-	public VariableParam(final VariableParam toBeCopied) {
-		super(toBeCopied.getName(), toBeCopied.type);
+	public VariableParam(VariableParam toBeCopied) {
+		super(toBeCopied.getName());
+		this.type = toBeCopied.type;
 	}
 
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((this.type == null) ? 0 : this.type.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (!(obj instanceof VariableParam)) {
+	public boolean equals(Object obj) {
+		if (!(obj instanceof VariableParam))
 			return false;
-		}
 		return super.equals(obj);
 	}
 
 	@Override
 	public String toString() {
-		if (this.getType() != null) {
-			return "<" + this.getName() + ":" + this.getType().getName() + ">";
+		if (getType() != null) {
+			return "<" + this.getName() + ":" + getType().getName() + ">";
 		} else {
 			return "<" + this.getName() + ":undefined>";
 		}
 	}
 
-	@Override
 	public Type getType() {
-		return this.type;
+		return type;
 	}
 
-	@Override
-	public void setType(final Type type) {
+	public void setType(Type type) {
 		this.type = type;
 	}
 }

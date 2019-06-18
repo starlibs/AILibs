@@ -7,7 +7,8 @@ import java.io.Serializable;
  *
  * @author wever
  *
- * @param <D> The type of an attribute value.
+ * @param <D>
+ *            The type of an attribute value.
  */
 public interface IAttributeValue<D> extends Serializable {
 
@@ -17,13 +18,9 @@ public interface IAttributeValue<D> extends Serializable {
 	public D getValue();
 
 	/**
-	 * @param value The value of this attribute value.
+	 * @param value
+	 *            The value of this attribute value.
 	 */
 	public void setValue(D value);
-
-	/**
-	 * @return The type of this attribute value.
-	 */
-	public IAttributeType<D> getType();
 
 }

@@ -1,7 +1,7 @@
 package ai.libs.automl;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
-import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public abstract class MLProblemSet extends AAlgorithmTestProblemSet<Pair<DataSource, String>> {

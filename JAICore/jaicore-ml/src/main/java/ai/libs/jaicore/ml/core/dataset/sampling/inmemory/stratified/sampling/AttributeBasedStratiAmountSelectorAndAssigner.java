@@ -23,20 +23,19 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 
 /**
  * This class is responsible for computing the amount of strati in
  * attribute-based stratified sampling and assigning elements to the strati.
- *
+ * 
  * @author Felix Weiland
  *
  */
-public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> implements IStratiAmountSelector<D>, IStratiAssigner<I, D> {
+public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance>
+		implements IStratiAmountSelector<I>, IStratiAssigner<I> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
 
@@ -61,7 +60,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 	private int numCPUs = 1;
 
 	/** The data set which has to be sampled */
-	private D dataset;
+	private IDataset<I> dataset;
 
 	/** Policies for discretization */
 	private Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies;
@@ -87,19 +86,21 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 		this.numberOfCategories = DEFAULT_DISCRETIZATION_CATEGORY_AMOUNT;
 	}
 
-	public AttributeBasedStratiAmountSelectorAndAssigner(final List<Integer> attributeIndices) {
+	public AttributeBasedStratiAmountSelectorAndAssigner(List<Integer> attributeIndices) {
 		this(attributeIndices, null);
 		this.discretizationStrategy = DEFAULT_DISCRETIZATION_STRATEGY;
 		this.numberOfCategories = DEFAULT_DISCRETIZATION_CATEGORY_AMOUNT;
 	}
 
-	public AttributeBasedStratiAmountSelectorAndAssigner(final List<Integer> attributeIndices, final DiscretizationStrategy discretizationStrategy, final int numberOfCategories) {
+	public AttributeBasedStratiAmountSelectorAndAssigner(List<Integer> attributeIndices,
+			DiscretizationStrategy discretizationStrategy, int numberOfCategories) {
 		this(attributeIndices, null);
 		this.discretizationStrategy = discretizationStrategy;
 		this.numberOfCategories = numberOfCategories;
 	}
 
-	public AttributeBasedStratiAmountSelectorAndAssigner(final List<Integer> attributeIndices, final Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies) {
+	public AttributeBasedStratiAmountSelectorAndAssigner(List<Integer> attributeIndices,
+			Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies) {
 		super();
 		// Validate attribute indices
 		if (attributeIndices == null || attributeIndices.isEmpty()) {
@@ -110,11 +111,11 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 	}
 
 	@Override
-	public int selectStratiAmount(final D dataset) {
+	public int selectStratiAmount(IDataset<I> dataset) {
 		this.dataset = dataset;
 
 		// Compute attribute values from data set
-		this.computeAttributeValues();
+		computeAttributeValues();
 
 		// Number of strati is size of the Cartesian product of all attribute values
 		int noStrati = 1;
@@ -141,18 +142,20 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 			// We assume that the last attribute is the target attribute
 			int targetIndex = this.dataset.getNumberOfAttributes();
 			if (LOG.isInfoEnabled()) {
-				LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d", targetIndex));
+				LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d",
+						targetIndex));
 			}
 			this.attributeIndices = Collections.singletonList(targetIndex);
 		}
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Computing attribute values for attribute indices {}", this.attributeIndices);
+			LOG.debug("Computing attribute values for attribute indices {}", attributeIndices);
 		}
 
 		// Check validity of the attribute indices
-		for (int attributeIndex : this.attributeIndices) {
-			if (attributeIndex > this.dataset.getNumberOfAttributes()) {
-				throw new IndexOutOfBoundsException(String.format("Attribute index %d is out of bounds for the delivered data set!", attributeIndex));
+		for (int attributeIndex : attributeIndices) {
+			if (attributeIndex > dataset.getNumberOfAttributes()) {
+				throw new IndexOutOfBoundsException(String
+						.format("Attribute index %d is out of bounds for the delivered data set!", attributeIndex));
 			}
 		}
 
@@ -160,21 +163,21 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 		this.attributeValues = new HashMap<>();
 
 		// Setup map with empty sets
-		for (int attributeIndex : this.attributeIndices) {
-			this.attributeValues.put(attributeIndex, new HashSet<>());
+		for (int attributeIndex : attributeIndices) {
+			attributeValues.put(attributeIndex, new HashSet<>());
 		}
 
 		// Setup parallel computation
-		ExecutorService threadPool = Executors.newFixedThreadPool(this.numCPUs);
+		ExecutorService threadPool = Executors.newFixedThreadPool(numCPUs);
 		List<Future<Map<Integer, Set<Object>>>> futures = new ArrayList<>();
 
 		// Start threads
 		if (LOG.isInfoEnabled()) {
 			LOG.info(String.format("Starting %d threads for computation..", this.numCPUs));
 		}
-		int listSize = this.dataset.size() / this.numCPUs;
-		for (List<I> sublist : Lists.partition(this.dataset, listSize)) {
-			futures.add(threadPool.submit(new ListProcessor<>(sublist, new HashSet<>(this.attributeIndices), this.dataset)));
+		int listSize = dataset.size() / this.numCPUs;
+		for (List<I> sublist : Lists.partition(dataset, listSize)) {
+			futures.add(threadPool.submit(new ListProcessor<I>(sublist, new HashSet<>(attributeIndices), dataset)));
 		}
 
 		// Collect results
@@ -182,8 +185,8 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 			try {
 				// Merge locally computed attribute values into the global list
 				Map<Integer, Set<Object>> localAttributeValues = future.get();
-				for (Entry<Integer, Set<Object>> entry : this.attributeValues.entrySet()) {
-					this.attributeValues.get(entry.getKey()).addAll(localAttributeValues.get(entry.getKey()));
+				for (Entry<Integer, Set<Object>> entry : attributeValues.entrySet()) {
+					attributeValues.get(entry.getKey()).addAll(localAttributeValues.get(entry.getKey()));
 				}
 			} catch (ExecutionException e) {
 				LOG.error("Exception while waiting for future to complete..", e);
@@ -197,25 +200,26 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 		threadPool.shutdown();
 
 		// Discretize
-		DiscretizationHelper<D> discretizationHelper = new DiscretizationHelper<>();
+		DiscretizationHelper<I> discretizationHelper = new DiscretizationHelper<>();
 
 		if (this.discretizationPolicies == null) {
 			LOG.info("No discretization policies provided. Computing defaults..");
-			this.discretizationPolicies = discretizationHelper.createDefaultDiscretizationPolicies(this.dataset, this.attributeIndices, this.attributeValues, this.discretizationStrategy, this.numberOfCategories);
+			this.discretizationPolicies = discretizationHelper.createDefaultDiscretizationPolicies(this.dataset,
+					attributeIndices, attributeValues, discretizationStrategy, numberOfCategories);
 		}
 
-		if (!this.discretizationPolicies.isEmpty()) {
+		if (!discretizationPolicies.isEmpty()) {
 			if (LOG.isInfoEnabled()) {
-				LOG.info("Discretizing numeric attributes using policies: {}", this.discretizationPolicies);
+				LOG.info("Discretizing numeric attributes using policies: {}", discretizationPolicies);
 			}
-			discretizationHelper.discretizeAttributeValues(this.discretizationPolicies, this.attributeValues);
+			discretizationHelper.discretizeAttributeValues(discretizationPolicies, attributeValues);
 		}
 
 		LOG.info("computeAttributeValues(): leave");
 	}
 
 	@Override
-	public void setNumCPUs(final int numberOfCPUs) {
+	public void setNumCPUs(int numberOfCPUs) {
 		if (numberOfCPUs < 1) {
 			throw new IllegalArgumentException("Number of CPU cores must be nonnegative");
 		}
@@ -228,30 +232,30 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 	}
 
 	@Override
-	public void init(final D dataset, final int stratiAmount) {
+	public void init(IDataset<I> dataset, int stratiAmount) {
 		// stratiAmount is not used here since it is computed dynamically
-		this.init(dataset);
+		init(dataset);
 	}
 
 	/**
 	 * Initializes the algorithm for stratum assignment.
-	 *
+	 * 
 	 * @param dataset
 	 */
-	public void init(final D dataset) {
+	public void init(IDataset<I> dataset) {
 		LOG.debug("init(): enter");
 
-		if (this.dataset != null && this.dataset.equals(dataset) && this.attributeValues != null) {
+		if (this.dataset != null && this.dataset.equals(dataset) && attributeValues != null) {
 			LOG.info("No recomputation of the attribute values needed");
 		} else {
 			this.dataset = dataset;
-			this.computeAttributeValues();
+			computeAttributeValues();
 		}
 
 		// Each set represents the set of possible attribute values
-		List<Set<Object>> sets = new ArrayList<>(this.attributeValues.values());
+		List<Set<Object>> sets = new ArrayList<>(attributeValues.values());
 		Set<List<Object>> cartesianProducts = Sets.cartesianProduct(sets);
-		this.stratumAssignments = new MultiKeyMap<>();
+		stratumAssignments = new MultiKeyMap<>();
 
 		LOG.info("There are {} elements in the cartesian product of the attribute values", cartesianProducts.size());
 
@@ -262,43 +266,43 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 			Object[] arr = new Object[cartesianProduct.size()];
 			cartesianProduct.toArray(arr);
 			MultiKey<Object> multiKey = new MultiKey<>(arr);
-			if (this.stratumAssignments.containsKey(multiKey)) {
+			if (stratumAssignments.containsKey(multiKey)) {
 				throw new IllegalStateException(String.format("Mulitkey %s occured twice!", multiKey.toString()));
 			}
-			this.stratumAssignments.put(new MultiKey<>(arr), stratumCounter++);
+			stratumAssignments.put(new MultiKey<>(arr), stratumCounter++);
 		}
 
 		LOG.debug("init(): leave");
 	}
 
 	@Override
-	public int assignToStrati(final I datapoint) {
+	public int assignToStrati(IInstance datapoint) {
+		DiscretizationHelper<I> discretizationHelper = new DiscretizationHelper<>();
 
-		if (this.stratumAssignments == null || this.stratumAssignments.isEmpty()) {
+		if (stratumAssignments == null || stratumAssignments.isEmpty()) {
 			throw new IllegalStateException("StratiAssigner has not been initialized!");
 		}
 
 		// Compute concrete attribute values for the particular instance
-		Object[] instanceAttributeValues = new Object[this.attributeIndices.size()];
-		DiscretizationHelper<D> discretizationHelper = new DiscretizationHelper<>();
-		for (int i = 0; i < this.attributeIndices.size(); i++) {
-			int attributeIndex = this.attributeIndices.get(i);
+		Object[] instanceAttributeValues = new Object[attributeIndices.size()];
+		for (int i = 0; i < attributeIndices.size(); i++) {
+			int attributeIndex = attributeIndices.get(i);
 
 			Object value;
 			// Has value to be discretized?
-			if (this.toBeDiscretized(attributeIndex)) {
+			if (toBeDiscretized(attributeIndex)) {
 				Object raw;
-				if (attributeIndex == this.dataset.getNumberOfAttributes()) {
-					raw = datapoint.getTargetValue();
+				if (attributeIndex == dataset.getNumberOfAttributes()) {
+					raw = datapoint.getTargetValue(Object.class).getValue();
 				} else {
-					raw = datapoint.getAttributeValueAtPosition(attributeIndex, Object.class).getValue();
+					raw = datapoint.getAttributeValue(attributeIndex, Object.class).getValue();
 				}
-				value = discretizationHelper.discretize((double) raw, this.discretizationPolicies.get(attributeIndex));
+				value = discretizationHelper.discretize((double) raw, discretizationPolicies.get(attributeIndex));
 			} else {
-				if (attributeIndex == this.dataset.getNumberOfAttributes()) {
-					value = datapoint.getTargetValue();
+				if (attributeIndex == dataset.getNumberOfAttributes()) {
+					value = datapoint.getTargetValue(Object.class).getValue();
 				} else {
-					value = datapoint.getAttributeValueAtPosition(attributeIndex, Object.class).getValue();
+					value = datapoint.getAttributeValue(attributeIndex, Object.class).getValue();
 				}
 			}
 
@@ -310,17 +314,18 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 
 		// Request mapping for the concrete attribute values
 		MultiKey<Object> multiKey = new MultiKey<>(instanceAttributeValues);
-		if (!this.stratumAssignments.containsKey(multiKey)) {
-			throw new IllegalStateException(String.format("No assignment available for attribute combination %s", Arrays.toString(instanceAttributeValues)));
+		if (!stratumAssignments.containsKey(multiKey)) {
+			throw new IllegalStateException(String.format("No assignment available for attribute combination %s",
+					Arrays.toString(instanceAttributeValues)));
 		}
 
-		int stratum = this.stratumAssignments.get(multiKey);
+		int stratum = stratumAssignments.get(multiKey);
 
 		LOG.debug("Assigned stratum {}", stratum);
 		return stratum;
 	}
 
-	private boolean toBeDiscretized(final int index) {
+	private boolean toBeDiscretized(int index) {
 		return this.discretizationPolicies.containsKey(index);
 	}
 
@@ -329,11 +334,11 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends INumericLab
 /**
  * Helper class which processes a sublist of the original data set and collects
  * the occurring attribute values on this sublist.
- *
+ * 
  * @author Felix Weiland
  *
  */
-class ListProcessor<I extends ILabeledAttributeArrayInstance<?>, D extends AILabeledAttributeArrayDataset<I, ?>> implements Callable<Map<Integer, Set<Object>>> {
+class ListProcessor<I extends IInstance> implements Callable<Map<Integer, Set<Object>>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ListProcessor.class);
 
@@ -341,9 +346,9 @@ class ListProcessor<I extends ILabeledAttributeArrayInstance<?>, D extends AILab
 
 	private Set<Integer> attributeIndices;
 
-	private D dataset;
+	private IDataset<I> dataset;
 
-	public ListProcessor(final List<I> list, final Set<Integer> attributeIndices, final D dataset) {
+	public ListProcessor(List<I> list, Set<Integer> attributeIndices, IDataset<I> dataset) {
 		super();
 		this.list = list;
 		this.attributeIndices = attributeIndices;
@@ -353,27 +358,28 @@ class ListProcessor<I extends ILabeledAttributeArrayInstance<?>, D extends AILab
 	@Override
 	public Map<Integer, Set<Object>> call() {
 		if (LOG.isInfoEnabled()) {
-			LOG.info(String.format("Starting computation on local sublist of length %d", this.list.size()));
+			LOG.info(String.format("Starting computation on local sublist of length %d", list.size()));
 		}
 
 		// Setup local map
 		Map<Integer, Set<Object>> attributeValues = new HashMap<>();
 
 		// Initialize local map with empty sets
-		for (int attributeIndex : this.attributeIndices) {
+		for (int attributeIndex : attributeIndices) {
 			attributeValues.put(attributeIndex, new HashSet<>());
 		}
 
 		// Collect attribute values
-		for (I instance : this.list) {
-			for (int attributeIndex : this.attributeIndices) {
+		for (IInstance instance : list) {
+			for (int attributeIndex : attributeIndices) {
 
-				if (attributeIndex == this.dataset.getNumberOfAttributes()) {
+				if (attributeIndex == dataset.getNumberOfAttributes()) {
 					// Attribute index describes target attribute
-					attributeValues.get(attributeIndex).add(instance.getTargetValue());
+					attributeValues.get(attributeIndex).add(instance.getTargetValue(Object.class).getValue());
 
 				} else {
-					attributeValues.get(attributeIndex).add(instance.getAttributeValueAtPosition(attributeIndex, Object.class).getValue());
+					attributeValues.get(attributeIndex)
+							.add(instance.getAttributeValue(attributeIndex, Object.class).getValue());
 				}
 			}
 		}

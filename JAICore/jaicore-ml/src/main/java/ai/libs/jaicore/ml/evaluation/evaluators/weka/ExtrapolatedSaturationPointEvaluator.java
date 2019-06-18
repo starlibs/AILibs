@@ -8,9 +8,8 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
@@ -31,7 +30,7 @@ import weka.core.Instances;
  *
  * @author Lukas Brandt
  */
-public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> implements IClassifierEvaluator {
+public class ExtrapolatedSaturationPointEvaluator<I extends IInstance> implements IClassifierEvaluator {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExtrapolatedSaturationPointEvaluator.class);
 
@@ -39,15 +38,15 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
-	private D train;
+	private ISamplingAlgorithmFactory<I, ? extends ASamplingAlgorithm<I>> samplingAlgorithmFactory;
+	private IDataset<I> train;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
 
 	// Configuration for the measurement at the saturation point.
 	private double epsilon;
-	private D test;
+	private IDataset<I> test;
 
 	/**
 	 * Create a classifier evaluator with an accuracy measurement at the
@@ -72,8 +71,10 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 	 * @param test
 	 *            Test dataset to measure the accuracy.
 	 */
-	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D train, final double trainSplitForAnchorpointsMeasurement,
-			final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final D test) {
+	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints,
+			final ISamplingAlgorithmFactory<I, ? extends ASamplingAlgorithm<I>> samplingAlgorithmFactory,
+					final IDataset<I> train, final double trainSplitForAnchorpointsMeasurement,
+					final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final IDataset<I> test) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -92,25 +93,29 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 	@Override
 	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
+		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier,
+				this.train, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
 		try {
-			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.train, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
-					this.seed);
 			// Create the extrapolator and calculate sample size of the saturation point
 			// with the given epsilon
-			AnalyticalLearningCurve learningCurve = (AnalyticalLearningCurve) extrapolator.extrapolateLearningCurve();
+			AnalyticalLearningCurve learningCurve = (AnalyticalLearningCurve) extrapolator
+					.extrapolateLearningCurve();
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
-			ASamplingAlgorithm<D> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
-			D saturationPointTrainSet = samplingAlgorithm.call();
-			Instances saturationPointInstances = ((WekaInstances<Object>) saturationPointTrainSet).getList();
+			ASamplingAlgorithm<I> samplingAlgorithm = this.samplingAlgorithmFactory
+					.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
+			IDataset<I> saturationPointTrainSet = samplingAlgorithm.call();
+			Instances saturationPointInstances = ((WekaInstances)saturationPointTrainSet).getList();
 
 			// Measure the accuracy with this subsample
-			Instances testInstances = ((WekaInstances<Object>) this.test).getList();
-			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointInstances, testInstances);
+			Instances testInstances = ((WekaInstances)this.test).getList();
+			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointInstances,
+					testInstances);
 			return evaluator.evaluate(classifier);
-		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException | DatasetCreationException e) {
-			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
+		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException e) {
+			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
+					e.getClass().getName(), e.getMessage());
 			return null;
 		}
 	}

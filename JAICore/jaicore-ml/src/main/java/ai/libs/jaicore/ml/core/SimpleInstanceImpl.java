@@ -2,50 +2,44 @@ package ai.libs.jaicore.ml.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.interfaces.Instance;
 
 @SuppressWarnings("serial")
 public class SimpleInstanceImpl extends ArrayList<Double> implements Instance {
 
-	private static final Logger logger = LoggerFactory.getLogger(SimpleInstanceImpl.class);
-
 	public SimpleInstanceImpl() {
 
 	}
-
-	public SimpleInstanceImpl(final int initialCapacity) {
+	
+	public SimpleInstanceImpl(int initialCapacity) {
 		super(initialCapacity);
 	}
-
-	public SimpleInstanceImpl(final Collection<Double> values) {
+	
+	public SimpleInstanceImpl(Collection<Double> values) {
 		super(values);
 	}
-
-	public SimpleInstanceImpl(final double[] values) {
+	
+	public SimpleInstanceImpl(double[] values) {
 		super(values.length);
-		for (int i = 0; i < values.length; i++) {
+		for (int i = 0; i < values.length; i++)
 			super.add(i, values[i]);
-		}
 	}
 
-	public SimpleInstanceImpl(final String json) throws IOException {
+	public SimpleInstanceImpl(String json) throws IOException {
 		this(new ObjectMapper().readTree(json));
 	}
 
-	public SimpleInstanceImpl(final JsonNode jsonNode) {
+	public SimpleInstanceImpl(JsonNode jsonNode) {
 		this();
 		for (JsonNode val : jsonNode) {
-			this.add(val.asDouble());
+			add(val.asDouble());
 		}
 	}
 
@@ -55,7 +49,7 @@ public class SimpleInstanceImpl extends ArrayList<Double> implements Instance {
 		try {
 			return om.writeValueAsString(this);
 		} catch (JsonProcessingException e) {
-			logger.error(LoggerUtil.getExceptionInfo(e));
+			e.printStackTrace();
 			return null;
 		}
 	}

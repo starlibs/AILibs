@@ -17,7 +17,3 @@
 /.settings/
 /gradle/
 /gradle.properties
-
-
-# Necessary dyad ranking models
-!resources/draco/partial_pipeline_ranking/models/* 

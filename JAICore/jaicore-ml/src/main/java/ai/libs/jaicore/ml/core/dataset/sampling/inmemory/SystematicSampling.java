@@ -5,9 +5,8 @@ import java.util.Random;
 
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.INumericArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
+import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**
@@ -16,10 +15,10 @@ import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  * 
  * @author Lukas Brandt
  */
-public class SystematicSampling<I extends INumericArrayInstance, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
+public class SystematicSampling<I extends IInstance> extends ASamplingAlgorithm<I> {
 
 	private Random random;
-	private D sortedDataset = null;
+	private IDataset<I> sortedDataset = null;
 	private int k;
 	private int startIndex;
 	private int index;
@@ -43,7 +42,7 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 	 * @param random
 	 *            Random Object for determining the sampling start point.
 	 */
-	public SystematicSampling(Random random, D input) {
+	public SystematicSampling(Random random, IDataset<I> input) {
 		super(input);
 		this.random = random;
 	}
@@ -56,7 +55,7 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 	 * @param datapointComparator
 	 *            Comparator to sort the dataset.
 	 */
-	public SystematicSampling(Random random, Comparator<I> datapointComparator, D input) {
+	public SystematicSampling(Random random, Comparator<I> datapointComparator, IDataset<I> input) {
 		super(input);
 		this.random = random;
 		this.datapointComparator = datapointComparator;
@@ -65,23 +64,19 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case CREATED:
+		case created:
 			// Initialize variables and sort dataset.
-			try {
-				this.sample = (D) this.getInput().createEmpty();
-				if (this.sortedDataset == null) {
-					this.sortedDataset = (D) this.getInput().createEmpty();
-					this.sortedDataset.addAll(this.getInput());
-					this.sortedDataset.sort(this.datapointComparator);
-				}
-			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			this.sample = this.getInput().createEmpty();
+			if (this.sortedDataset == null) {
+				this.sortedDataset = this.getInput().createEmpty();
+				this.sortedDataset.addAll(this.getInput());
+				this.sortedDataset.sort(this.datapointComparator);
 			}
 			this.startIndex = this.random.nextInt(this.sortedDataset.size());
 			this.k = this.sortedDataset.size() / this.sampleSize;
 			this.index = 0;
 			return this.activate();
-		case ACTIVE:
+		case active:
 			// If the sample size is not reached yet, add the next datapoint from the
 			// systematic sampling method.
 			if (this.sample.size() < this.sampleSize) {
@@ -91,7 +86,7 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 			} else {
 				return this.terminate();
 			}
-		case INACTIVE:
+		case inactive:
 			this.doInactiveStep();
 			break;
 		default:
@@ -100,11 +95,11 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 		return null;
 	}
 
-	public D getSortedDataset() {
+	public IDataset<I> getSortedDataset() {
 		return sortedDataset;
 	}
 
-	public void setSortedDataset(D sortedDataset) {
+	public void setSortedDataset(IDataset<I> sortedDataset) {
 		this.sortedDataset = sortedDataset;
 	}
 

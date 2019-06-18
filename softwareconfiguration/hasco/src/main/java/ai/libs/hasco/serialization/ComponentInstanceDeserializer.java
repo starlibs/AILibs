@@ -1,17 +1,19 @@
 package ai.libs.hasco.serialization;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
@@ -23,11 +25,8 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 	 */
 	private static final long serialVersionUID = 4216559441244072999L;
 
-	private transient Collection<Component> possibleComponents; // the idea is not to serialize the deserializer, so this can be transient
-
-	public ComponentInstanceDeserializer(Collection<Component> possibleComponents) {
+	public ComponentInstanceDeserializer() {
 		super(ComponentInstance.class);
-		this.possibleComponents = possibleComponents;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -37,10 +36,21 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 		Map<String, String> parameterValues = mapper.treeToValue(p.get("parameterValues"), HashMap.class);
 		// read the component
 
-		String componentName = p.get("component").get("name").toString().replaceAll("\"", "");
+		List<Object> componentList = new ArrayList<>();
+		componentList.add(p.get("component"));
 
-		Component component = possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst()
-				.orElseThrow(NoSuchElementException::new);
+		ComponentLoader loader = new ComponentLoader();
+		ObjectNode node = new ObjectMapper().createObjectNode();
+		node.put("repository", "repository");
+		node.set("components", new ObjectMapper().valueToTree(componentList));
+
+		loader.readFromString(node.toString());
+
+		Collection<Component> components = loader.getComponents();
+		Component component = null;
+		if (!components.isEmpty()) {
+			component = components.iterator().next();
+		}
 
 		Map<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
 		// recursively resolve the requiredInterfaces

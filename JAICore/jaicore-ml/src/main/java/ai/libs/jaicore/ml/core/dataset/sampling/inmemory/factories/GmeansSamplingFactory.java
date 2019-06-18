@@ -6,18 +6,19 @@ import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 
 import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.GmeansSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class GmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, GmeansSampling<I, D>> {
+public class GmeansSamplingFactory<I extends IInstance>
+		implements IRerunnableSamplingAlgorithmFactory<I, GmeansSampling<I>> {
 
-	private GmeansSampling<I, D> previousRun;
+	private GmeansSampling<I> previousRun;
 	private long clusterSeed = System.currentTimeMillis();
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
 
 	@Override
-	public void setPreviousRun(GmeansSampling<I, D> previousRun) {
+	public void setPreviousRun(GmeansSampling<I> previousRun) {
 		this.previousRun = previousRun;
 	}
 
@@ -42,8 +43,8 @@ public class GmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstan
 	}
 
 	@Override
-	public GmeansSampling<I, D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
-		GmeansSampling<I, D> gmeansSampling = new GmeansSampling<>(this.clusterSeed, inputDataset);
+	public GmeansSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
+		GmeansSampling<I> gmeansSampling = new GmeansSampling<>(this.clusterSeed, inputDataset);
 		gmeansSampling.setSampleSize(sampleSize);
 		gmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (previousRun != null && previousRun.getClusterResults() != null) {

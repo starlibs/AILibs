@@ -16,7 +16,7 @@ public class Type implements Serializable {
 	private final List<Type> subTypeOfBuffer;
 	private final List<Type> supTypeOfBuffer;
 
-	Type(final String name, final Collection<Type> parentTypeList) {
+	Type(String name, Collection<Type> parentTypeList) {
 		// call plain constructor
 		this(name);
 
@@ -28,7 +28,7 @@ public class Type implements Serializable {
 		}
 	}
 
-	Type(final String name, final Type parentType) {
+	Type(String name, Type parentType) {
 		// call plain constructor
 		this(name);
 
@@ -38,9 +38,9 @@ public class Type implements Serializable {
 		}
 	}
 
-	public Type(final String name) {
+	public Type(String name) {
 		// no legal type definition
-		if (name.trim().isEmpty()) {
+		if (name.trim() == "") {
 			throw new IllegalArgumentException();
 		}
 
@@ -59,15 +59,14 @@ public class Type implements Serializable {
 		return this.name;
 	}
 
-	public void addSubType(final Type newSubType) {
-		if (this.isSubTypeOf(newSubType)) {
+	public void addSubType(Type newSubType) {
+		if (this.isSubTypeOf(newSubType))
 			throw new IllegalArgumentException("Cannot add " + newSubType + " as a sub-type of " + this + ", because the relation already exists the other way around.");
-		}
 		newSubType.superTypeList.add(this);
 		this.subTypeList.add(newSubType);
 	}
 
-	public void removeSubType(final Type removeSubType) {
+	public void removeSubType(Type removeSubType) {
 		removeSubType.superTypeList.remove(this);
 		this.subTypeList.remove(removeSubType);
 	}
@@ -82,25 +81,24 @@ public class Type implements Serializable {
 		for (Type subType : this.getDirectSubTypes()) {
 			allSubTypeList.addAll(subType.getAllSubTypes());
 		}
-
+		
 		return allSubTypeList;
 	}
 
 	public List<Type> getAllSubTypesIncl() {
-		List<Type> allSubTypeInclList = this.getAllSubTypes();
+		List<Type> allSubTypeInclList = getAllSubTypes();
 		allSubTypeInclList.add(this);
 		return allSubTypeInclList;
 	}
 
-	public void addSuperType(final Type newSuperType) {
-		if (this.isSuperTypeOf(newSuperType)) {
+	public void addSuperType(Type newSuperType) {
+		if (this.isSuperTypeOf(newSuperType))
 			throw new IllegalArgumentException("Cannot add " + newSuperType + " as a super-type of " + this + ", because the relation already exists the other way around.");
-		}
 		newSuperType.subTypeList.add(this);
 		this.superTypeList.add(newSuperType);
 	}
 
-	public void removeSuperType(final Type removeSuperType) {
+	public void removeSuperType(Type removeSuperType) {
 		removeSuperType.subTypeList.remove(this);
 		this.superTypeList.remove(removeSuperType);
 	}
@@ -115,13 +113,13 @@ public class Type implements Serializable {
 
 	/**
 	 * Given the parameter typeToCheck, this method checks whether typeToCheck is actually a sub type of the current object. Thus, it checks whether this is a super type of typeToCheck.
-	 *
+	 * 
 	 * @param typeToCheck
 	 *            A DataType to check whether it is a sub-type of this DataType.
-	 *
+	 * 
 	 * @return It returns true iff the given DataType typeToCheck is a sub-type of this DataType.
 	 */
-	public boolean isSuperTypeOf(final Type typeToCheck) {
+	public boolean isSuperTypeOf(Type typeToCheck) {
 		// robustness check
 		if (typeToCheck == null) {
 			throw new IllegalArgumentException("Null is not a feasible type for this function");
@@ -129,8 +127,8 @@ public class Type implements Serializable {
 		if (typeToCheck == this || this.subTypeOfBuffer.indexOf(typeToCheck) >= 0) {
 			return true;
 		}
-		assert !this.subTypeList.contains(this) : ("Type " + this.getName() + " contains itself as a sub-type!");
-		for (Type subType : this.subTypeList) {
+		assert !subTypeList.contains(this) : ("Type " + this.getName() + " contains itself as a sub-type!");
+		for (Type subType : subTypeList) {
 			if (subType.isSuperTypeOf(typeToCheck)) {
 				this.subTypeOfBuffer.add(typeToCheck);
 				return true;
@@ -141,13 +139,13 @@ public class Type implements Serializable {
 
 	/**
 	 * Given the parameter typeToCheck, this method checks whether typeToCheck is actually a super type of the current object. Thus, it checks whether this is a sub type of typeToCheck.
-	 *
+	 * 
 	 * @param typeToCheck
 	 *            A DataType to check whether it is a super type of this DataType
-	 *
+	 * 
 	 * @return It returns true iff the given DataType typeToCheck is a super type of this DataType.
 	 */
-	public boolean isSubTypeOf(final Type typeToCheck) {
+	public boolean isSubTypeOf(Type typeToCheck) {
 		if (typeToCheck == this || this.supTypeOfBuffer.indexOf(typeToCheck) >= 0) {
 			return true;
 		}
@@ -158,7 +156,6 @@ public class Type implements Serializable {
 		return false;
 	}
 
-	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.name + ";");
@@ -171,7 +168,7 @@ public class Type implements Serializable {
 		return sb.toString();
 	}
 
-	public void addSuperType(final Set<Type> parentTypeCollection) {
+	public void addSuperType(Set<Type> parentTypeCollection) {
 		for (Type superType : parentTypeCollection) {
 			this.addSuperType(superType);
 		}
@@ -179,14 +176,14 @@ public class Type implements Serializable {
 
 	/**
 	 * Searches in data type DAG for a greatest sub type of the given two types.
-	 *
+	 * 
 	 * @param type
 	 *            Type to check for sub type relation.
 	 * @param type2
 	 *            Type to check for sub type relation.
 	 * @return Returns the concreter type if the two types are related to each other. Otherwise, it returns null.
 	 */
-	public static Type getGreatestSubType(final Type type, final Type type2) {
+	public static Type getGreatestSubType(Type type, Type type2) {
 		if (type.isSubTypeOf(type2)) {
 			return type;
 		} else {
@@ -222,7 +219,7 @@ public class Type implements Serializable {
 	}
 
 	@Override
-	public boolean equals(final Object o) {
+	public boolean equals(Object o) {
 		if (!(o instanceof Type)) {
 			return false;
 		}
@@ -231,21 +228,21 @@ public class Type implements Serializable {
 	}
 
 	public List<Type> getAllSuperTypes() {
-		List<Type> superTypes = new LinkedList<>(this.getDirectSuperTypes());
+		List<Type> superTypes = new LinkedList<>(getDirectSuperTypes());
 
-		for(Type superType : this.getDirectSuperTypes()) {
+		for(Type superType : getDirectSuperTypes()) {
 			superTypes.addAll(superType.getAllSuperTypesIncl());
 		}
-
+		
 		return superTypes;
 	}
 
 	public List<Type> getAllSuperTypesIncl() {
-		List<Type> superTypes = new LinkedList<>(this.getAllSuperTypes());
+		List<Type> superTypes = new LinkedList<>(getAllSuperTypes());
 		superTypes.add(this);
 		return superTypes;
 	}
-
+	
 	public String serialize() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.getName());

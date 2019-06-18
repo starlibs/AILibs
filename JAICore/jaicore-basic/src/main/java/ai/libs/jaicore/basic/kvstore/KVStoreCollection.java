@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -409,24 +407,6 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 
 	public KVStoreCollection group(final String... groupingKeys) {
 		return this.group(groupingKeys, new HashMap<>());
-	}
-
-	@Override
-	public boolean equals(final Object obj) {
-		if (!(obj instanceof KVStoreCollection)) {
-			return false;
-		}
-		KVStoreCollection other = (KVStoreCollection) obj;
-		if (new EqualsBuilder().append(this.metaData, other.metaData).isEquals()) {
-			return super.equals(other);
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public int hashCode() {
-		return new HashCodeBuilder().append(this.metaData).append(super.hashCode()).toHashCode();
 	}
 
 }

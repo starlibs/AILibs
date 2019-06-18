@@ -6,6 +6,10 @@ import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 
+import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
+import ai.libs.jaicore.math.linearalgebra.SparseDoubleVector;
+import ai.libs.jaicore.math.linearalgebra.Vector;
+
 /**
  * This class tests every method which can be called on the {@link SparseDoubleVector}.
  * 

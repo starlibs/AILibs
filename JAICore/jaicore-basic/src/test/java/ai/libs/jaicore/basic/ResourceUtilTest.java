@@ -45,21 +45,26 @@ public class ResourceUtilTest {
 	@Test
 	public void test() {
 		ResourceFile resFile = ResourceUtil.getResourceAsFile(RESOURCE_FILE_PATH);
+		this.readRes(resFile.getPathName());
+
 		ResourceFile res2File = new ResourceFile(resFile.getParentFile(), "dummy2.resource");
-		assertEquals(this.readRes(resFile.getPathName()), this.readRes(res2File.getPathName()));
+
+		this.readRes(resFile.getPathName());
+		this.readRes(res2File.getPathName());
 	}
 
-	private String readRes(final String path) {
-		StringBuilder sb = new StringBuilder();
+	private void readRes(final String path) {
+		System.out.println("READ " + path);
+		System.out.println(this.getClass().getClassLoader().getResourceAsStream(path));
+
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream(path)))) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				sb.append(line + "\n");
+				System.out.println(line);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return sb.toString();
 	}
 
 }

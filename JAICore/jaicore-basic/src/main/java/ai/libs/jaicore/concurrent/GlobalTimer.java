@@ -20,8 +20,7 @@ public class GlobalTimer extends Timer {
 		super("Global TimeoutTimer", true);
 
 		/* immediately give the thread of the timer maximum priority */
-		this.refresher = new TimerTask() {
-			@Override
+		refresher = new TimerTask() {
 			public void run() {
 				Thread timerThread = Thread.currentThread();
 				logger.info("Changing global timer thread {} priority from {} to {}", timerThread, timerThread.getPriority(), Thread.MAX_PRIORITY);
@@ -29,13 +28,13 @@ public class GlobalTimer extends Timer {
 				logger.info("Priority of global timer thread {} is now {}", timerThread, timerThread.getPriority());
 			}
 		};
-		this.schedule(this.refresher, 0);
+		this.schedule(refresher, 0);
 	}
-
+	
 	public static GlobalTimer getInstance() {
 		return instance;
 	}
-
+	
 	@Override
 	public void cancel() {
 		throw new UnsupportedOperationException("The TimeoutTimer must not be canceled manually!");
@@ -59,10 +58,10 @@ public class GlobalTimer extends Timer {
 			TimerTask[] tasksAsArray = (TimerTask[]) innerQueueField.get(outerQueueObject);
 			List<TimerTask> tasks = new ArrayList<>();
 			for (TimerTask task : tasksAsArray) {
-				if (task == null || task == this.refresher) {
+				if (task == null || task == refresher)
 					continue;
-				}
-				if (innerScheduledField.getLong(task) >= 0 && innerStateField.getInt(task) == 1) { // state == 1 means that task has been scheduled (in Java 8)
+				if (innerScheduledField.getLong(task) >= 0 && innerStateField.getInt(task) == 1) // state == 1 means that task has been scheduled (in Java 8)
+				{
 					tasks.add(task);
 				}
 			}

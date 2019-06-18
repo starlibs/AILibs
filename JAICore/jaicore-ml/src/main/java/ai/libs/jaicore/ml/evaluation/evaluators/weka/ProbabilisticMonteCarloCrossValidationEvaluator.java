@@ -48,8 +48,8 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		this.bestScore = bestScore;
 	}
 
-	public ProbabilisticMonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final double bestscore, final Instances data,
-			final double trainingPortion, final long seed) {
+	public ProbabilisticMonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double> bridge, final IDatasetSplitter datasetSplitter, final int repeats, final double bestscore, final Instances data, final double trainingPortion,
+			final long seed) {
 		super();
 		this.repeats = repeats;
 		this.bridge = bridge;

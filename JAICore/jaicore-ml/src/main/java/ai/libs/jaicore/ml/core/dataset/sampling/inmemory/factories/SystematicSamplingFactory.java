@@ -3,15 +3,16 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 import java.util.Comparator;
 import java.util.Random;
 
-import ai.libs.jaicore.ml.core.dataset.INumericArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
+import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.SystematicSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class SystematicSamplingFactory<I extends INumericArrayInstance, D extends IOrderedDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, SystematicSampling<I, D>> {
+public class SystematicSamplingFactory<I extends IInstance>
+		implements IRerunnableSamplingAlgorithmFactory<I, SystematicSampling<I>> {
 
 	private Comparator<I> datapointComparator = null;
-	private SystematicSampling<I, D> previousRun = null;
+	private SystematicSampling<I> previousRun = null;
 
 	/**
 	 * Set a custom comparator that will be used to sort the datapoints before
@@ -25,13 +26,13 @@ public class SystematicSamplingFactory<I extends INumericArrayInstance, D extend
 	}
 
 	@Override
-	public void setPreviousRun(SystematicSampling<I, D> previousRun) {
+	public void setPreviousRun(SystematicSampling<I> previousRun) {
 		this.previousRun = previousRun;
 	}
 
 	@Override
-	public SystematicSampling<I, D> getAlgorithm(int sampleSize, D inputDataset, Random random) {
-		SystematicSampling<I, D> systematicSampling;
+	public SystematicSampling<I> getAlgorithm(int sampleSize, IDataset<I> inputDataset, Random random) {
+		SystematicSampling<I> systematicSampling;
 		if (this.datapointComparator != null) {
 			systematicSampling = new SystematicSampling<>(random, this.datapointComparator, inputDataset);
 		} else {

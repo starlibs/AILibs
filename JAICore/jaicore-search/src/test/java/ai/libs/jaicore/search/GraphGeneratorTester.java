@@ -9,7 +9,7 @@ import java.util.Queue;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
@@ -23,16 +23,16 @@ public abstract class GraphGeneratorTester<N, A> {
 	private class Node {
 		N point;
 		int depth;
-		public Node(final N point, final int depth) {
+		public Node(N point, int depth) {
 			super();
 			this.point = point;
 			this.depth = depth;
 		}
 	}
-
+	
 	@Test
 	public void testIdempotency() throws Exception {
-		for (Pair<GraphGenerator<N, A>, Integer> pair : this.getGraphGenerators()) {
+		for (Pair<GraphGenerator<N, A>, Integer> pair : getGraphGenerators()) {
 			GraphGenerator<N, A> g = pair.getX();
 			int maxN = pair.getY();
 			SuccessorGenerator<N, A> s = g.getSuccessorGenerator();
@@ -52,11 +52,10 @@ public abstract class GraphGeneratorTester<N, A> {
 			maxDepth = Integer.MAX_VALUE;
 			while (!open.isEmpty()) {
 				n1 ++;
-				//				System.out.println("G1: Expanding " + n1 + "th node");
+//				System.out.println("G1: Expanding " + n1 + "th node");
 				Node expandedNode = open.poll();
-				if (expandedNode.depth > maxDepth) {
+				if (expandedNode.depth > maxDepth)
 					break;
-				}
 				List<NodeExpansionDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
 				if (maxDepth == Integer.MAX_VALUE && n1 >= maxN) {
 					maxDepth = expandedNode.depth;
@@ -67,7 +66,7 @@ public abstract class GraphGeneratorTester<N, A> {
 					g1.addEdge(nd.getFrom(), nd.getTo(), nd.getAction());
 				});
 			}
-
+			
 			/* run bfs from right */
 			N root2 = ((SingleRootGenerator<N>) g.getRootGenerator()).getRoot();
 			open.clear();
@@ -76,11 +75,10 @@ public abstract class GraphGeneratorTester<N, A> {
 			maxDepth = Integer.MAX_VALUE;
 			while (!open.isEmpty()) {
 				n2 ++;
-				//				System.out.println("G2: Expanding " + n2 + "th node");
+//				System.out.println("G2: Expanding " + n2 + "th node");
 				Node expandedNode = open.poll();
-				if (expandedNode.depth > maxDepth) {
+				if (expandedNode.depth > maxDepth)
 					break;
-				}
 				List<NodeExpansionDescription<N, A>> successors = s.generateSuccessors(expandedNode.point);
 				Collections.reverse(successors);
 				if (maxDepth == Integer.MAX_VALUE && n2 >= maxN) {
@@ -92,7 +90,7 @@ public abstract class GraphGeneratorTester<N, A> {
 					g2.addEdge(nd.getFrom(), nd.getTo(), nd.getAction());
 				});
 			}
-
+			
 			assertEquals(n1, n2);
 			assertEquals(g1, g2);
 		}

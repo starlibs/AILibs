@@ -2,22 +2,20 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 
 import java.util.List;
 
-import org.apache.commons.math3.geometry.euclidean.oned.Interval;
-
 public class AttributeDiscretizationPolicy {
 
 	private List<Interval> intervals;
 
-	public AttributeDiscretizationPolicy(final List<Interval> intervals) {
+	public AttributeDiscretizationPolicy(List<Interval> intervals) {
 		super();
 		this.intervals = intervals;
 	}
 
 	public List<Interval> getIntervals() {
-		return this.intervals;
+		return intervals;
 	}
 
-	public void setIntervals(final List<Interval> intervals) {
+	public void setIntervals(List<Interval> intervals) {
 		this.intervals = intervals;
 	}
 
@@ -25,27 +23,24 @@ public class AttributeDiscretizationPolicy {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.intervals == null) ? 0 : this.intervals.hashCode());
+		result = prime * result + ((intervals == null) ? 0 : intervals.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(final Object obj) {
-		if (this == obj) {
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		}
-		if (obj == null) {
+		if (obj == null)
 			return false;
-		}
-		if (this.getClass() != obj.getClass()) {
+		if (getClass() != obj.getClass())
 			return false;
-		}
 		AttributeDiscretizationPolicy other = (AttributeDiscretizationPolicy) obj;
-		if (this.intervals == null) {
+		if (intervals == null) {
 			if (other.intervals != null) {
 				return false;
 			}
-		} else if (!this.intervals.equals(other.intervals)) {
+		} else if (!intervals.equals(other.intervals)) {
 			return false;
 		}
 		return true;
@@ -53,7 +48,7 @@ public class AttributeDiscretizationPolicy {
 
 	@Override
 	public String toString() {
-		return "AttributeDiscretizationPolicy [intervals=" + this.intervals + "]";
+		return "AttributeDiscretizationPolicy [intervals=" + intervals + "]";
 	}
 
 }

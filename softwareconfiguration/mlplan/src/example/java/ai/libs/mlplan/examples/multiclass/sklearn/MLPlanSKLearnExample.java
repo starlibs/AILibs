@@ -26,8 +26,6 @@ public class MLPlanSKLearnExample {
 
 	private static final TimeOut TIMEOUT = new TimeOut(300, TimeUnit.SECONDS);
 
-	private static final boolean ACTIVATE_VISUALIZATION = false;
-
 	public static void main(final String[] args) throws Exception {
 		Instances data = new Instances(new FileReader(DATASET));
 		data.setClassIndex(data.numAttributes() - 1);
@@ -40,7 +38,7 @@ public class MLPlanSKLearnExample {
 
 		SKLearnMLPlanWekaClassifier mlplan = new SKLearnMLPlanWekaClassifier(builder);
 		mlplan.setLoggerName("sklmlplanc");
-		mlplan.setVisualizationEnabled(ACTIVATE_VISUALIZATION);
+		mlplan.setVisualizationEnabled(true);
 		mlplan.buildClassifier(testSplit.get(0));
 
 		List<Double> actual = Arrays.stream(mlplan.classifyInstances(testSplit.get(1))).mapToObj(x -> x).collect(Collectors.toList());

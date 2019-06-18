@@ -9,22 +9,29 @@ import java.util.Map;
 public class TypeModule {
 
 	private final Map<String, Type> typeMap = new HashMap<>();
-
+	
 	private final Map<String,ConstantParam> constants = new HashMap<>();
 
 	public TypeModule() {}
-
-	public TypeModule(final Collection<Type> types) {
+	
+	public TypeModule(Collection<Type> types) {
 		for (Type type : types) {
 			this.typeMap.put(type.getName(), type);
 		}
 	}
 
-	public Type getType(final String nameOfType) {
-		if (nameOfType.trim().isEmpty()) {
+	public Type getType(String nameOfType) {
+		if (nameOfType.trim().equals("")) {
 			throw new IllegalArgumentException("Empty string is no valid name for a datatype.");
 		}
-		return this.typeMap.computeIfAbsent(nameOfType, Type::new);
+
+		Type resultType = typeMap.get(nameOfType);
+		if (resultType == null) {
+			resultType = new Type(nameOfType);
+			this.typeMap.put(nameOfType, resultType);
+		}
+
+		return resultType;
 	}
 
 	public int size() {
@@ -34,14 +41,14 @@ public class TypeModule {
 	public Collection<Type> getAllTypes() {
 		return this.typeMap.values();
 	}
-
+	
 	public List<Type> getListOfAllTypes() {
 		List<Type> result = new LinkedList<>();
 		result.addAll(this.typeMap.values());
 		return result;
 	}
 
-	public void merge(final TypeModule typeModule) {
+	public void merge(TypeModule typeModule) {
 		for (Type otherType : typeModule.getAllTypes()) {
 			this.getType(otherType.getName());
 		}
@@ -59,18 +66,17 @@ public class TypeModule {
 		return sb.toString();
 	}
 
-	public void setConstantType(final String constant, final Type type) {
-		this.constants.put(constant, new ConstantParam(constant, type));
+	public void setConstantType(String constant, Type type) {
+		constants.put(constant, new ConstantParam(constant, type));
 	}
-
-	public Type getConstantType(final String constant) {
-		if (!this.constants.containsKey(constant)) {
+	
+	public Type getConstantType(String constant) {
+		if (!constants.containsKey(constant))
 			throw new IllegalArgumentException("Constant " + constant + " not found!");
-		}
-		return this.constants.get(constant).getType();
+		return constants.get(constant).getType();
 	}
 
 	public Collection<ConstantParam> getConstants() {
-		return this.constants.values();
+		return constants.values();
 	}
 }
