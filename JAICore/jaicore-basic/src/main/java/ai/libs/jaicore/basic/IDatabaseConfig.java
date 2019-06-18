@@ -1,8 +1,6 @@
-package ai.libs.jaicore.experiments;
+package ai.libs.jaicore.basic;
 
 import org.aeonbits.owner.Reloadable;
-
-import ai.libs.jaicore.basic.IConfig;
 
 /**
  * Configuration interface to defined the access properties for a database connection

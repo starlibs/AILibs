@@ -97,7 +97,6 @@ public class SparseDoubleVector extends AbstractVector {
 		for (int i = 0; i < indexes.length; i++) {
 			vector.set(indexes[i], vector.get(indexes[i]) * vectorAsArray[indexes[i]]);
 		}
-		this.internalVector = vector;
 	}
 
 	@Override
@@ -108,7 +107,6 @@ public class SparseDoubleVector extends AbstractVector {
 		for (int i = 0; i < indexes.length; i++) {
 			vector.set(indexes[i], vector.get(indexes[i]) / vectorAsArray[indexes[i]]);
 		}
-		this.internalVector = vector;
 	}
 
 	@Override
@@ -152,7 +150,6 @@ public class SparseDoubleVector extends AbstractVector {
 		for (int i = 0; i < indexes.length; i++) {
 			sparseVector.set(indexes[i], sparseVector.get(indexes[i]) * secondVector.getValue(indexes[i]));
 		}
-		this.internalVector = sparseVector;
 	}
 
 	@Override
@@ -169,7 +166,6 @@ public class SparseDoubleVector extends AbstractVector {
 		for (int i = 0; i < indexes.length; i++) {
 			sparseVector.set(indexes[i], sparseVector.get(indexes[i]) / secondVector.getValue(indexes[i]));
 		}
-		this.internalVector = sparseVector;
 	}
 
 	@Override

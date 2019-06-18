@@ -5,6 +5,6 @@ import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public interface IHierarchicalPlanningGraphGeneratorDeriver<P extends IHTNPlanningProblem, N, A> extends AlgorithmicProblemReduction<P, Plan, GraphSearchInput<N, A>, SearchGraphPath<N, A>> {
+public interface IHierarchicalPlanningToGraphSearchReduction<N, A, I1 extends IHTNPlanningProblem, O1 extends Plan, I2 extends GraphSearchInput<N, A>, O2 extends SearchGraphPath<N, A>> extends AlgorithmicProblemReduction<I1, O1, I2, O2> {
 
 }

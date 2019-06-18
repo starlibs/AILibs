@@ -14,7 +14,6 @@ import java.util.List;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper.ProblemType;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
@@ -61,7 +60,7 @@ public class ScikitLearnWrapperTest {
 		System.out.println("Build took: " + (System.currentTimeMillis() - startTrain));
 
 		long startVal = System.currentTimeMillis();
-		slw.classifyInstances(stratifiedSplit.get(1));
+		assertNotNull(slw.classifyInstances(stratifiedSplit.get(1)));
 		System.out.println("Validation took: " + (System.currentTimeMillis() - startVal));
 	}
 

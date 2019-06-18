@@ -1,21 +1,21 @@
 package ai.libs.jaicore.basic.sets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
@@ -882,75 +882,35 @@ public class SetUtil {
 		return result;
 	}
 
-	public static <E> int calculateNumberOfTotalOrderings(final PartialOrderedSet<E> set) throws InterruptedException {
-		/*
-		 * Since set sizes of zero or one might cause problems, we catch them here.
-		 */
-		if (set.size() <= 1) {
-			return set.size();
-		}
-		/*
-		 * Calculate all edges that aren't part of the corresponding graph.
-		 */
-		List<Set<E>> possibleEdges = SetUtil.getAllPossibleSubsetsWithSize(set, 2);
-		final Iterator<Set<E>> edgeIt = possibleEdges.iterator();
-		while (edgeIt.hasNext()) {
-			final Iterator<E> it = edgeIt.next().iterator();
-			final E a = it.next();
-			final E b = it.next();
-			if (set.isADirectlyBeforeB(a, b) || set.isADirectlyBeforeB(b, a)) {
-				edgeIt.remove();
-			}
-		}
-		return getNumberOfAllowedPermutations(set, new LinkedList<>(possibleEdges));
+	public static int calculateNumberOfTotalOrderings(final PartialOrderedSet<?> set) throws InterruptedException {
+		return getAllTotalOrderings(set).size();
 	}
 
-	private static <E> int getNumberOfAllowedPermutations(final PartialOrderedSet<E> set, final Queue<Set<E>> possibleEdges) throws InterruptedException {
+	public static <E> Collection<List<E>> getAllTotalOrderings(final PartialOrderedSet<E> set) throws InterruptedException {
 
-		/* if interrupted, return one ordering (which is a lower bound here) */
-		if (Thread.interrupted()) {
-			throw new InterruptedException();
+		/* for an empty set, create a list that only contains the empty list */
+		if (set.isEmpty()) {
+			return Arrays.asList(new ArrayList<>());
 		}
 
-		/*
-		 * If there isn't an edge left, the given partial order actually is a total order.
-		 */
-		if (possibleEdges.isEmpty()) {
-			return 1;
-		}
-		int numberOfAllowedPermutations = 0;
-		boolean atLeastOneWithoutException = false;
-		/*
-		 * We stop the loop if we actually went into the recursion at least once, or the queue is empty.
-		 */
-		while (!atLeastOneWithoutException && !possibleEdges.isEmpty()) {
-			atLeastOneWithoutException = false;
-			Set<E> edgeSet = possibleEdges.poll();
-			assert edgeSet.size() == 2;
-			final Iterator<E> edge = edgeSet.iterator();
-			E a = edge.next();
-			E b = edge.next();
-			final PartialOrderedSet<E> copyOne = new PartialOrderedSet<>(set);
-			final PartialOrderedSet<E> copyTwo = new PartialOrderedSet<>(set);
-			/*
-			 * For edges e1 = (a,b), e2 = (b, a), check whether it is possible to add the edge. If so, continue recursively until a total order (no remaining edges) or a loop in the graph is reached.
-			 */
-			try {
-				copyOne.addABeforeB(a, b);
-				atLeastOneWithoutException = true;
-				numberOfAllowedPermutations += getNumberOfAllowedPermutations(copyOne, new LinkedList<>(possibleEdges));
-			} catch (IllegalStateException isex) {
-				// ignore this exception and simply proceed
-			}
-			try {
-				copyTwo.addABeforeB(b, a);
-				atLeastOneWithoutException = true;
-				numberOfAllowedPermutations += getNumberOfAllowedPermutations(copyTwo, new LinkedList<>(possibleEdges));
-			} catch (IllegalStateException isex) {
-				// ignore this exception and simply proceed
+		/* otherwise get the list of all elements that could be the last item and fix them once */
+		Collection<List<E>> candidates = new ArrayList<>();
+		Map<E, Set<E>> order = new HashMap<>(set.getOrder());
+		set.getLinearization();
+		Collection<E> itemsWithoutSuccessor = set.stream().filter(s -> !order.containsKey(s) || order.get(s).isEmpty()).collect(Collectors.toList());
+		for (E item : itemsWithoutSuccessor) {
+
+			/* create a new set without the item; this basically means that we enforce that it will be the last item */
+			PartialOrderedSet<E> reducedSet = new PartialOrderedSet<>(set);
+			reducedSet.remove(item);
+
+			/* now get all ordering for the reduced set */
+			for (List<E> completionOfReducedSet : getAllTotalOrderings(reducedSet)) {
+				completionOfReducedSet.add(item);
+				candidates.add(completionOfReducedSet);
 			}
 		}
-		return numberOfAllowedPermutations;
+		return candidates;
 	}
 
 	public static String serializeAsSet(final Collection<String> set) {

@@ -10,16 +10,17 @@ public class NodeInfoGUIPluginController<N> implements IGUIPluginController {
 
 	private NodeInfoGUIPluginModel<N> model;
 
-	public NodeInfoGUIPluginController(NodeInfoGUIPluginModel<N> model) {
+	public NodeInfoGUIPluginController(final NodeInfoGUIPluginModel<N> model) {
 		this.model = model;
 	}
 
 	@Override
-	public void handleAlgorithmEvent(AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+	public void handleAlgorithmEvent(final AlgorithmEvent algorithmEvent) throws HandleAlgorithmEventException {
+		/* no updates required */
 	}
 
 	@Override
-	public void handleGUIEvent(GUIEvent guiEvent) {
+	public void handleGUIEvent(final GUIEvent guiEvent) {
 		if (NodeClickedEvent.class.isInstance(guiEvent)) {
 			NodeClickedEvent nodeClickedEvent = (NodeClickedEvent) guiEvent;
 			Object searchGraphNodeCorrespondingToClickedViewGraphNode = nodeClickedEvent.getSearchGraphNode();

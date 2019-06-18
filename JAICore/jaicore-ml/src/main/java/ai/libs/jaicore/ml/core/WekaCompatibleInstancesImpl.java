@@ -6,17 +6,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.interfaces.LabeledInstance;
 
 @SuppressWarnings("serial")
 public class WekaCompatibleInstancesImpl extends SimpleLabeledInstancesImpl {
 
+	private static final String DECLARED_CLASSES = "declaredclasses";
+	private final transient Logger logger = LoggerFactory.getLogger(WekaCompatibleInstancesImpl.class);
 	private final List<String> declaredClasses;
 
 	public WekaCompatibleInstancesImpl(final List<String> declaredClasses) {
@@ -28,15 +34,15 @@ public class WekaCompatibleInstancesImpl extends SimpleLabeledInstancesImpl {
 	}
 
 	public WekaCompatibleInstancesImpl(final JsonNode jsonNode) {
-		if (!jsonNode.has("declaredclasses")) {
+		if (!jsonNode.has(DECLARED_CLASSES)) {
 			throw new IllegalArgumentException("Given JSON serialization does not specify the declared classes, which is required for WEKA compatibility.");
 		}
-		JsonNode declaredClasses = jsonNode.get("declaredclasses");
-		if (!declaredClasses.isArray()) {
+		JsonNode declaredClassesNode = jsonNode.get(DECLARED_CLASSES);
+		if (!declaredClassesNode.isArray()) {
 			throw new IllegalArgumentException("Class declaration in given JSON is not an array, which is required for WEKA compatibility.");
 		}
 		this.declaredClasses = new ArrayList<>();
-		for (JsonNode c : jsonNode.get("declaredclasses")) {
+		for (JsonNode c : jsonNode.get(DECLARED_CLASSES)) {
 			this.declaredClasses.add(c.asText());
 		}
 		this.addAllFromJson(jsonNode);
@@ -63,14 +69,44 @@ public class WekaCompatibleInstancesImpl extends SimpleLabeledInstancesImpl {
 		String json = super.toJson();
 		try {
 			ObjectNode node = (ObjectNode)new ObjectMapper().readTree(json);
-			ArrayNode declaredClasses = node.putArray("declaredclasses");
+			ArrayNode declaredClassesNode = node.putArray(DECLARED_CLASSES);
 			for (String declaredClass : this.declaredClasses) {
-				declaredClasses.add(declaredClass);
+				declaredClassesNode.add(declaredClass);
 			}
 			return node.toString();
 		} catch (IOException e) {
-			e.printStackTrace();
+			this.logger.error(LoggerUtil.getExceptionInfo(e));
 		}
 		throw new IllegalStateException("Could not convert dataset to json");
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.declaredClasses == null) ? 0 : this.declaredClasses.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		WekaCompatibleInstancesImpl other = (WekaCompatibleInstancesImpl) obj;
+		if (this.declaredClasses == null) {
+			if (other.declaredClasses != null) {
+				return false;
+			}
+		} else if (!this.declaredClasses.equals(other.declaredClasses)) {
+			return false;
+		}
+		return true;
 	}
 }

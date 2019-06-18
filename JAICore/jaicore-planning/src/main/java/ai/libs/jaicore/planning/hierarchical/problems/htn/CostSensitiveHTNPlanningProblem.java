@@ -5,31 +5,55 @@ import java.util.Map;
 
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
+import ai.libs.jaicore.logic.fol.structure.CNFFormula;
+import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.hierarchical.problems.stn.STNPlanningDomain;
+import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
-public class CostSensitiveHTNPlanningProblem<IPlanning extends IHTNPlanningProblem, V extends Comparable<V>> {
-	private final IPlanning corePlanningProblem;
+public class CostSensitiveHTNPlanningProblem<P extends IHTNPlanningProblem, V extends Comparable<V>> implements IHTNPlanningProblem {
+	private final P corePlanningProblem;
 	private final IObjectEvaluator<Plan, V> planEvaluator;
 
-	public CostSensitiveHTNPlanningProblem(IPlanning corePlanningProblem, IObjectEvaluator<Plan, V> planEvaluator) {
+	public CostSensitiveHTNPlanningProblem(final P corePlanningProblem, final IObjectEvaluator<Plan, V> planEvaluator) {
 		super();
 		this.corePlanningProblem = corePlanningProblem;
 		this.planEvaluator = planEvaluator;
 	}
 
-	public IPlanning getCorePlanningProblem() {
-		return corePlanningProblem;
+	public P getCorePlanningProblem() {
+		return this.corePlanningProblem;
 	}
 
 	public IObjectEvaluator<Plan, V> getPlanEvaluator() {
-		return planEvaluator;
+		return this.planEvaluator;
 	}
-	
+
 	@Override
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
 		fields.put("corePlanningProblem", this.corePlanningProblem);
 		fields.put("planEvaluator", this.planEvaluator);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	@Override
+	public STNPlanningDomain getDomain() {
+		return this.corePlanningProblem.getDomain();
+	}
+
+	@Override
+	public CNFFormula getKnowledge() {
+		return this.corePlanningProblem.getKnowledge();
+	}
+
+	@Override
+	public Monom getInit() {
+		return this.corePlanningProblem.getInit();
+	}
+
+	@Override
+	public TaskNetwork getNetwork() {
+		return this.corePlanningProblem.getNetwork();
 	}
 }

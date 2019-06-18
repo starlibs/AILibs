@@ -4,9 +4,9 @@ import ai.libs.hasco.core.HASCO;
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class TwoPhaseHASCOFactory<S extends GraphSearchInput<N, A>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
+public class TwoPhaseHASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
 
 	private HASCOFactory<S, N, A, Double> hascoFactory;
 	private TwoPhaseSoftwareConfigurationProblem problem;

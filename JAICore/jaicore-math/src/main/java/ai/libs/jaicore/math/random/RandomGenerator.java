@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This class serves as a way to obtain a globally synchronized random variable. Any part of the system requiring a random number should make use of the random variable provided by this class in order to assure a repeatability of
  * experiments.
- * 
+ *
  * @author Alexander Hetzer
  *
  */
@@ -33,19 +33,21 @@ public class RandomGenerator {
 
 	/**
 	 * Initializes the random generator with the given seed.
-	 * 
+	 *
 	 * @param seed
 	 *            The random seed to use for initialization.
 	 */
-	public static void initializeRNG(long seed) {
+	public static void initializeRNG(final long seed) {
 		RandomGenerator.seed = seed;
 		randomVariable = new Random(seed);
-		LOGGER.debug(String.format(INITIALIZING_THE_RANDOM_GENERATOR_TO_SEED, seed));
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug(String.format(INITIALIZING_THE_RANDOM_GENERATOR_TO_SEED, seed));
+		}
 	}
 
 	/**
 	 * Returns the random variable of this class.
-	 * 
+	 *
 	 * @return The random variable of this class.
 	 */
 	public static Random getRNG() {
@@ -58,7 +60,7 @@ public class RandomGenerator {
 
 	/**
 	 * Returns the seed of the random variable singleton.
-	 * 
+	 *
 	 * @return The seed of the random variable singleton.
 	 */
 	public static long getSeed() {

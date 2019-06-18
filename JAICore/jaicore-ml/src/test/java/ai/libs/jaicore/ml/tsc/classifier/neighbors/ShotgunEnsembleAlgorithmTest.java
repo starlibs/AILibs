@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.tsc.classifier.neighbors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
@@ -83,7 +84,7 @@ public class ShotgunEnsembleAlgorithmTest {
 				assertEquals(2, (int) window.getX());
 				break;
 			default:
-				assertEquals(1, 2);
+				fail("The default case has not been covered!");
 			}
 		}
 	}

@@ -30,7 +30,7 @@ import ai.libs.jaicore.ea.algorithm.AEvolutionaryAlgorithm;
 import ai.libs.jaicore.ea.algorithm.moea.moeaframework.event.MOEAFrameworkAlgorithmResultEvent;
 import ai.libs.jaicore.ea.algorithm.moea.moeaframework.util.MOEAFrameworkUtil;
 
-public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
+public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 
 	private Logger logger = LoggerFactory.getLogger(MOEAFrameworkAlgorithm.class);
 	private Algorithm algorithm;
@@ -46,9 +46,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm {
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.checkAndConductTermination();
 
-		if (this.getClass().getName().equals("ndea.core.simplend.nd.NDOptimizationEA")) {
-			this.logger.info("{} step1: {}", this.getClass().getName(), this.getState());
-		}
+		this.logger.info("{} step1: {}", this.getClass().getName(), this.getState());
 
 		switch (this.getState()) {
 		case CREATED:

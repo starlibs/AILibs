@@ -2,15 +2,18 @@ package ai.libs.jaicore.basic.sets;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A {@link Set} with a partial order added to it.
@@ -26,7 +29,7 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	/**
 	 * The order of this set. For an a the b's with a < b are stored.
 	 */
-	private final transient Map<E, Set<E>> order;
+	private final Map<E, Set<E>> order;
 
 	/**
 	 * Creates a new partial ordered set with the same elements as
@@ -99,6 +102,15 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	public boolean allowsABeforeB(final E a, final E b) {
 		Set<E> transitiveClosure = this.getTransitiveClosure(b);
 		return !transitiveClosure.contains(a);
+	}
+
+	/**
+	 * Returns the map containing the forward dependencies defining the order.
+	 *
+	 * @return The map containing the order.
+	 */
+	public Map<E, Set<E>> getOrder() {
+		return Collections.unmodifiableMap(this.order);
 	}
 
 	/**
@@ -247,7 +259,7 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 			}
 		}
 		sb.append("} with order ");
-
+		sb.append(this.order);
 		it = this.order.keySet().iterator();
 		while (it.hasNext()) {
 			E e = it.next();
@@ -267,9 +279,7 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 				sb.append("; ");
 			}
 		}
-
 		return sb.toString();
-
 	}
 
 	/**
@@ -278,6 +288,11 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	 * @return A list representing a linearization of the partial order set.
 	 */
 	public List<E> getLinearization() {
+
+		if (this.isEmpty()) {
+			return new ArrayList<>();
+		}
+
 		/* create a copy of all elements */
 		List<E> elements = new ArrayList<>();
 		Iterator<E> iterator = super.iterator();
@@ -287,9 +302,15 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 
 		/* compute initial values of working variables */
 		List<E> linearization = new ArrayList<>();
-		Map<E, Set<E>> workingCopyOfOrder = new HashMap<>(this.order);
-		Collection<E> itemsWithoutSuccessor = new HashSet<>(SetUtil.difference(elements, workingCopyOfOrder.keySet()));
+		Map<E, Set<E>> workingCopyOfOrder = new HashMap<>();
+		this.order.forEach((k, v) -> workingCopyOfOrder.put(k, new HashSet<>(v))); // create a deep copy
+		Collection<E> itemsWithoutSuccessor = elements.stream().filter(s -> !workingCopyOfOrder.containsKey(s) || workingCopyOfOrder.get(s).isEmpty()).collect(Collectors.toList());
 		Collection<E> uninsertedItems = new HashSet<>(elements);
+
+		/* if all items have a successor, we have a cycle. Return that order then. */
+		if (itemsWithoutSuccessor.isEmpty()) {
+			throw new IllegalStateException("Partially Oredered Set contains a cycle: " + workingCopyOfOrder);
+		}
 
 		/* now compute the linearization from the back */
 		while (!itemsWithoutSuccessor.isEmpty()) {
@@ -314,8 +335,7 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		}
 
 		/* consistency check */
-		assert linearization.size() == super.size() : "The linearization of " + elements + " has produced another number of elements: " + linearization.toString();
-
+		assert linearization.size() == super.size() : "The linearization of " + elements + " with order " + this.order + " has produced another number of elements: " + linearization.toString();
 		return linearization;
 	}
 
@@ -369,6 +389,14 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 	@Override
 	public boolean remove(final Object e) {
 		this.order.remove(e);
+		List<E> emptyDependencies = new ArrayList<>();
+		for (Entry<E, Set<E>> dependency : this.order.entrySet()) {
+			dependency.getValue().remove(e);
+			if (dependency.getValue().isEmpty()) {
+				emptyDependencies.add(dependency.getKey());
+			}
+		}
+		emptyDependencies.forEach(this.order::remove);
 		return super.remove(e);
 	}
 
@@ -402,5 +430,4 @@ public class PartialOrderedSet<E> extends HashSet<E> {
 		}
 		return true;
 	}
-
 }

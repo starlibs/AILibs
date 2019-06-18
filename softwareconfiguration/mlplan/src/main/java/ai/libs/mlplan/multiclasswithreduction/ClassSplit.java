@@ -2,74 +2,61 @@ package ai.libs.mlplan.multiclasswithreduction;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 public class ClassSplit<T> {
 	private final Collection<T> classes;
-	private final Collection<T> l, r;
+	private final Collection<T> l;
+	private final Collection<T> r;
 
-	public ClassSplit(Collection<T> classes, Collection<T> l, Collection<T> r) {
+	public ClassSplit(final Collection<T> classes, final Collection<T> l, final Collection<T> r) {
 		super();
 		this.classes = classes;
 		this.l = l;
 		this.r = r;
 	}
-	
-	public ClassSplit(ClassSplit<T> split) {
+
+	public ClassSplit(final ClassSplit<T> split) {
 		this(split.getClasses(), new ArrayList<>(split.getL()), new ArrayList<>(split.getR()));
 	}
 
 	public Collection<T> getClasses() {
-		return classes;
+		return this.classes;
 	}
 
 	public Collection<T> getL() {
-		return l;
+		return this.l;
 	}
 
 	public Collection<T> getR() {
-		return r;
+		return this.r;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((classes == null) ? 0 : classes.hashCode());
-		result = prime * result + ((l == null) ? 0 : l.hashCode());
-		result = prime * result + ((r == null) ? 0 : r.hashCode());
-		return result;
+		return new HashCodeBuilder().append(this.classes).append(this.l).append(this.r).toHashCode();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (!(obj instanceof ClassSplit)) {
 			return false;
-		@SuppressWarnings("unchecked")
-		ClassSplit<T> other = (ClassSplit<T>) obj;
-		if (classes == null) {
-			if (other.classes != null)
-				return false;
-		} else if (!classes.equals(other.classes))
-			return false;
-		if (l == null) {
-			if (other.l != null)
-				return false;
-		} else if (!l.equals(other.l))
-			return false;
-		if (r == null) {
-			if (other.r != null)
-				return false;
-		} else if (!r.equals(other.r))
-			return false;
-		return true;
+		}
+		ClassSplit<?> other = (ClassSplit<?>) obj;
+		return new EqualsBuilder().append(other.classes, this.classes).append(other.l, this.l).append(other.r, this.r).isEquals();
+
 	}
 
 	@Override
 	public String toString() {
-		return "ClassSplit [classes=" + classes + ", l=" + l + ", r=" + r + "]";
+		return "ClassSplit [classes=" + this.classes + ", l=" + this.l + ", r=" + this.r + "]";
 	}
-	
+
 }

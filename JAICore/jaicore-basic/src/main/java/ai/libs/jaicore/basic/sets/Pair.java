@@ -1,6 +1,13 @@
 package ai.libs.jaicore.basic.sets;
 
-public class Pair<X,Y> {
+import java.io.Serializable;
+
+
+public class Pair<X,Y> implements Serializable {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 5570679807997613881L;
 	private X x;
 	private Y y;
 

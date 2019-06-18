@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.tsc.classifier;
 
+import static org.junit.Assert.fail;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,36 +10,30 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /**
- * @author Helen
- * DFT JUnit test
+ * @author Helen DFT JUnit test
  *
  */
-@RunWith(JUnit4.class)
 public class BOSSAlgorithmTest {
-	double[] timeseries1;
-	double[] timeseries2;
 
-	TimeSeriesDataset dataset;
+	private TimeSeriesDataset dataset;
 
 	@Before
 	public void setup() {
-		this.timeseries1 = new double [] {1,1,1,1,1,1,1,1};
-		this.timeseries2 = new double[] {1,2,4,3,5,2,4,3};
+		double[] timeseries1 = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 };
+		double[] timeseries2 = new double[] { 1, 2, 4, 3, 5, 2, 4, 3 };
 		double[][] matrix = new double[3][8];
-		matrix[0] = this.timeseries1;
-		matrix[1] = this.timeseries2;
+		matrix[0] = timeseries1;
+		matrix[1] = timeseries2;
 
 		List<double[][]> futureDataSet = new ArrayList<>();
 		futureDataSet.add(matrix);
-		this.dataset = new TimeSeriesDataset(futureDataSet,null, null);
+		this.dataset = new TimeSeriesDataset(futureDataSet, null, null);
 	}
 
 	@Rule
@@ -52,6 +48,7 @@ public class BOSSAlgorithmTest {
 		config.setProperty(IBossAlgorithmConfig.K_MEANCORRECTED, "" + false);
 		BOSSClassifier test2 = new BOSSClassifier(config);
 		test2.train(this.dataset);
+		fail("This is just a reminder that something should be tested here, which is currently not the case!");
 	}
 
 }

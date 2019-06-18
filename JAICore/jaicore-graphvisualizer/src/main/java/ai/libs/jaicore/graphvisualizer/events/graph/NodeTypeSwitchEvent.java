@@ -6,20 +6,19 @@ public class NodeTypeSwitchEvent<T> extends AAlgorithmEvent implements GraphEven
 
 	private final T node;
 	private final String type;
-	public final String name = "NodeTypeSwitchEvent";
 
-	public NodeTypeSwitchEvent(String algorithmId, T node, String type) {
+	public NodeTypeSwitchEvent(final String algorithmId, final T node, final String type) {
 		super(algorithmId);
 		this.node = node;
 		this.type = type;
 	}
 
 	public T getNode() {
-		return node;
+		return this.node;
 	}
 
 	public String getType() {
-		return type;
+		return this.type;
 	}
 
 }

@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.Monom;
@@ -13,50 +16,44 @@ import ai.libs.jaicore.planning.classical.problems.ce.CEOperation;
 
 @SuppressWarnings("serial")
 public class CEOCOperation extends CEOperation {
-	
 	private final List<VariableParam> outputs;
 
-	public CEOCOperation(String name, String params, Monom precondition, Map<CNFFormula, Monom> addLists, Map<CNFFormula, Monom> deleteLists, String  outputs) {
+	public CEOCOperation(final String name, final String params, final Monom precondition, final Map<CNFFormula, Monom> addLists, final Map<CNFFormula, Monom> deleteLists, final String  outputs) {
 		super(name, params, precondition, addLists, deleteLists);
 		this.outputs = Arrays.asList(StringUtil.explode(outputs, ",")).stream().map(s -> new VariableParam(s.trim())).collect(Collectors.toList());
 	}
-	
-	public CEOCOperation(String name, List<VariableParam> params, Monom precondition, Map<CNFFormula, Monom> addLists, Map<CNFFormula, Monom> deleteLists, List<VariableParam> outputs) {
+
+	public CEOCOperation(final String name, final List<VariableParam> params, final Monom precondition, final Map<CNFFormula, Monom> addLists, final Map<CNFFormula, Monom> deleteLists, final List<VariableParam> outputs) {
 		super(name, params, precondition, addLists, deleteLists);
 		this.outputs = outputs;
 	}
 
 	public List<VariableParam> getOutputs() {
-		return outputs;
+		return this.outputs;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
-		return result;
+		return new HashCodeBuilder().append(super.hashCode()).append(this.outputs).toHashCode();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (!(obj instanceof CEOCOperation)) {
 			return false;
+		}
 		CEOCOperation other = (CEOCOperation) obj;
-		if (outputs == null) {
-			if (other.outputs != null)
-				return false;
-		} else if (!outputs.equals(other.outputs))
-			return false;
-		return true;
+		return new EqualsBuilder().append(other.outputs, this.outputs).isEquals();
 	}
 
 	@Override
 	public String toString() {
-		return "CEOCOperation [name=" + getName() + ", params=" + getParams() + ", outputs=" + outputs + ", precondition=" + getPrecondition() + ", addlists=" + getAddLists() + ", dellists=" + getDeleteLists() + "]";
+		return "CEOCOperation [name=" + this.getName() + ", params=" + this.getParams() + ", outputs=" + this.outputs + ", precondition=" + this.getPrecondition() + ", addlists=" + this.getAddLists() + ", dellists=" + this.getDeleteLists() + "]";
 	}
 }

@@ -20,13 +20,24 @@ public class LatexDatasetTableGenerator {
 	private String caption = "Dataset overview";
 	private String label = "tab:datasets";
 
-	public void addLocalFiles(final File... files) throws Exception {
+	@SuppressWarnings("serial")
+	public class DataSourceCreationFailedException extends Exception {
+		public DataSourceCreationFailedException(final Exception e) {
+			super(e);
+		}
+	}
+
+	public void addLocalFiles(final File... files) throws DataSourceCreationFailedException {
 		this.addLocalFiles(Arrays.asList(files));
 	}
 
-	public void addLocalFiles(final List<File> files) throws Exception {
+	public void addLocalFiles(final List<File> files) throws DataSourceCreationFailedException {
 		for (File file : files) {
-			this.datasets.add(new DataSource(file.getCanonicalPath()));
+			try {
+				this.datasets.add(new DataSource(file.getCanonicalPath()));
+			} catch (Exception e) {
+				throw new DataSourceCreationFailedException(e);
+			}
 		}
 	}
 

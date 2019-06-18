@@ -10,16 +10,15 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
-import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningToGraphSearchReduction;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.STNPlanningProblem;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public class ForwardDecompositionReducer<IPlanning extends IHTNPlanningProblem> implements IHierarchicalPlanningGraphGeneratorDeriver<IPlanning, TFDNode, String> {
+public abstract class AForwardDecompositionReducer<I1 extends IHTNPlanningProblem, O1 extends Plan, I2 extends GraphSearchInput<TFDNode, String>, O2 extends SearchGraphPath<TFDNode, String>> implements IHierarchicalPlanningToGraphSearchReduction<TFDNode, String, I1, O1, I2, O2> {
 
-	@Override
-	public GraphSearchInput<TFDNode, String> encodeProblem(final IHTNPlanningProblem planningProblem) {
+	public GraphSearchInput<TFDNode, String> getGraphSearchInput(final I1 planningProblem) {
 		GraphGenerator<TFDNode, String> graphGenerator;
 		if (planningProblem instanceof CEOCIPSTNPlanningProblem) {
 			graphGenerator = new CEOCIPTFDGraphGenerator((CEOCIPSTNPlanningProblem) planningProblem);
@@ -33,8 +32,7 @@ public class ForwardDecompositionReducer<IPlanning extends IHTNPlanningProblem> 
 		return new GraphSearchInput<>(graphGenerator);
 	}
 
-	@Override
-	public Plan decodeSolution(final SearchGraphPath<TFDNode, String> solution) {
+	public Plan getPlanForSolution(final SearchGraphPath<TFDNode, String> solution) {
 		return new Plan(solution.getNodes().stream().filter(n -> n.getAppliedAction() != null).map(TFDNode::getAppliedAction).collect(Collectors.toList()));
 	}
 }

@@ -2,42 +2,40 @@ package ai.libs.jaicore.planning.classical.problems.strips;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 public class PlanningDomain {
 
 	private final Collection<Operation> operations;
 
-	public PlanningDomain(Collection<Operation> operations) {
+	public PlanningDomain(final Collection<Operation> operations) {
 		super();
 		this.operations = operations;
 	}
 
 	public Collection<Operation> getOperations() {
-		return operations;
+		return this.operations;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((operations == null) ? 0 : operations.hashCode());
-		return result;
+		return new HashCodeBuilder().append(this.operations).toHashCode();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (!(obj instanceof PlanningDomain)) {
 			return false;
+		}
 		PlanningDomain other = (PlanningDomain) obj;
-		if (operations == null) {
-			if (other.operations != null)
-				return false;
-		} else if (!operations.equals(other.operations))
-			return false;
-		return true;
+		return new EqualsBuilder().append(other.operations, this.operations).isEquals();
 	}
 
 }

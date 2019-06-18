@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.splitters.ISplitter;
@@ -25,6 +29,7 @@ public class ExperimentRunner<T extends ISplitter> {
 	private final int k;
 	private final int mccvRepeats;
 	private final ISplitterFactory<T> splitterFactory;
+	private final Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
 
 	public ExperimentRunner(final int k, final int mccvRepeats, final ISplitterFactory<T> splitterFactory) {
 		super();
@@ -32,7 +37,6 @@ public class ExperimentRunner<T extends ISplitter> {
 		this.mccvRepeats = mccvRepeats;
 		this.splitterFactory = splitterFactory;
 	}
-
 
 	public Map<String, Object> conductSingleOneStepReductionExperiment(final ReductionExperiment experiment) throws Exception {
 
@@ -56,12 +60,12 @@ public class ExperimentRunner<T extends ISplitter> {
 			List<Collection<String>> classSplit;
 			try {
 				classSplit = new ArrayList<>(splitter.split(outerSplit.get(0)));
-			} catch (Throwable e) {
-				throw new RuntimeException("Could not create a split.", e);
+			} catch (Exception e) {
+				throw new ExperimentEvaluationFailedException("Could not create a split.", e);
 			}
 			MCTreeNodeReD classifier = new MCTreeNodeReD(innerClassifier, classSplit.get(0), leftClassifier, classSplit.get(1), rightClassifier);
 			double loss = mccv.evaluate(classifier);
-			System.out.println("\t\t\tComputed loss " + loss);
+			this.logger.info("\t\t\tComputed loss {}", loss);
 			if (loss < bestFoundScore) {
 				bestFoundScore = loss;
 				bestFoundClassifier = classifier;
@@ -71,9 +75,8 @@ public class ExperimentRunner<T extends ISplitter> {
 		/* train classifier on all data */
 		double loss = new FixedSplitClassifierEvaluator(outerSplit.get(0), outerSplit.get(1)).evaluate(bestFoundClassifier);
 		Map<String, Object> result = new HashMap<>();
-		System.out.println("\t\t\tBest previously observed loss was " + bestFoundScore + ". The retrained classifier achieves " + loss + " on the full data.");
+		this.logger.info("\t\t\tBest previously observed loss was {}. The retrained classifier achieves {} on the full data.", bestFoundScore, loss);
 		result.put("errorRate", loss);
-		//		result.put("trainTime", time);
 		return result;
 	}
 }

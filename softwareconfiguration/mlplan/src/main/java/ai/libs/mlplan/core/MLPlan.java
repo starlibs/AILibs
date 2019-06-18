@@ -32,6 +32,7 @@ import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedE
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
@@ -50,7 +51,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	private final IMLPlanBuilder builder;
 	private final Instances data;
-	private TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> twoPhaseHASCOFactory;
+	private TwoPhaseHASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
 	private boolean buildSelectedClasifierOnGivenData = true;
@@ -144,7 +145,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			/* create 2-phase HASCO */
 			this.logger.info("Creating the twoPhaseHASCOFactory.");
 			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, Classifier, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.builder.getClassifierFactory(), problem);
-			HASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
+			HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
 			this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 
 			this.twoPhaseHASCOFactory.setConfig(this.getConfig());
@@ -316,7 +317,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 		this.post(e);
 	}
 
-	public TwoPhaseHASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String> getTwoPhaseHASCOFactory() {
+	public TwoPhaseHASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> getTwoPhaseHASCOFactory() {
 		return this.twoPhaseHASCOFactory;
 	}
 

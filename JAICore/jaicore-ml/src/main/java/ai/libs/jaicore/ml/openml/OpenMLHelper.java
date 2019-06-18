@@ -31,6 +31,10 @@ import weka.core.converters.ConverterUtils.DataSource;
  */
 public class OpenMLHelper {
 
+	private OpenMLHelper() {
+		/* avoid instantiation */
+	}
+
 	private static final Logger logger = LoggerFactory.getLogger(OpenMLHelper.class);
 
 	private static final String DATASET_INDEX = "resources/datasets";
@@ -54,12 +58,10 @@ public class OpenMLHelper {
 	}
 
 	public static DataSource getDataSourceById(final int dataId) throws IOException {
-		if (API_KEY == null) {
-			try (BufferedReader reader = Files.newBufferedReader(Paths.get(API_KEY), StandardCharsets.UTF_8)) {
-				apiKey = reader.readLine();
-			} catch (IOException e) {
-				logger.error("Failed to read api_key", e);
-			}
+		try (BufferedReader reader = Files.newBufferedReader(Paths.get(API_KEY), StandardCharsets.UTF_8)) {
+			apiKey = reader.readLine();
+		} catch (IOException e) {
+			logger.error("Failed to read api_key", e);
 		}
 
 		// Get dataset from OpenML
@@ -76,14 +78,13 @@ public class OpenMLHelper {
 	}
 
 	/**
-	 * Downloads the data set with the given id and returns the Instances file for
-	 * it. Will save the {@link org.openml.apiconnector.xml.DataSetDescription} and
-	 * the Instances to the location specified in the
+	 * Downloads the data set with the given id and returns the Instances file for it. Will save the {@link org.openml.apiconnector.xml.DataSetDescription} and the Instances to the location specified in the
 	 * {@link org.openml.apiconnector.settings.Settings} Class.
 	 *
 	 * @param dataId
 	 * @return
-	 * @throws IOException if something goes wrong while loading Instances from openml
+	 * @throws IOException
+	 *             if something goes wrong while loading Instances from openml
 	 */
 	public static Instances getInstancesById(final int dataId) throws IOException {
 		Instances dataset = null;
@@ -102,8 +103,7 @@ public class OpenMLHelper {
 	}
 
 	/**
-	 * Creates a list of data sets by id in a file with caps for the maximum of
-	 * features and instances. Caps ignored if set to values <= 0.
+	 * Creates a list of data sets by id in a file with caps for the maximum of features and instances. Caps ignored if set to values <= 0.
 	 *
 	 * @param maxNumFeatures
 	 * @param maxNumInstances
@@ -119,101 +119,90 @@ public class OpenMLHelper {
 		int fitForAnalysis = 0;
 
 		// For saving data sets
-		BufferedWriter writer = Files.newBufferedWriter(
-				FileSystems.getDefault().getPath("resources/datasets_" + maxNumFeatures + "_" + maxNumInstances), StandardCharsets.UTF_8);
+		try (BufferedWriter writer = Files.newBufferedWriter(FileSystems.getDefault().getPath("resources/datasets_" + maxNumFeatures + "_" + maxNumInstances), StandardCharsets.UTF_8)) {
 
-		// OpenML connection
-		OpenmlConnector client = new OpenmlConnector();
+			// OpenML connection
+			OpenmlConnector client = new OpenmlConnector();
 
-		// Get data sets that are active
-		HashMap<String, String> map = new HashMap<>();
-		map.put("status", "active");
-		Data data = client.dataList(map);
-		DataSet[] data_raw = data.getData();
-		unfiltered = data_raw.length;
+			// Get data sets that are active
+			HashMap<String, String> map = new HashMap<>();
+			map.put("status", "active");
+			Data data = client.dataList(map);
+			DataSet[] dataRaw = data.getData();
+			unfiltered = dataRaw.length;
 
-		// Filter out data sets not fit for analysis
-		for (int i = 0; i < data_raw.length; i++) {
-			// Keep track of progress to see if something freezes
-			System.out.println("Progress: " + (Math.round(i * 1.0 / data_raw.length * 100.0)));
+			// Filter out data sets not fit for analysis
+			for (int i = 0; i < dataRaw.length; i++) {
+				// Keep track of progress to see if something freezes
+				logger.info("Progress: {}", (Math.round(i * 1.0 / dataRaw.length * 100.0)));
 
-			// No generated streaming data
-			if (data_raw[i].getName().contains("BNG")) {
-				filteredBNG++;
-				continue;
-			}
-
-			// No non-.ARFF files
-			if (!data_raw[i].getFormat().equals("ARFF")) {
-				filteredARFF++;
-				continue;
-			}
-
-			// Analyze features
-			DataFeature dataFeature = client.dataFeatures(data_raw[i].getDid());
-			Feature[] features = dataFeature.getFeatures();
-			if (maxNumFeatures > 0 && features.length > maxNumFeatures) {
-				continue;
-			}
-
-			boolean noTarget = true;
-			boolean numericTarget = true;
-			for (int j = features.length - 1; j >= 0; j--) {
-				if (features[j].getIs_target()) {
-					noTarget = false;
-					if (features[j].getDataType().equals("numeric")) {
-						numericTarget = false;
-					}
-					break;
-				}
-			}
-
-			// Analyze instances
-			String numInst = data_raw[i].getQualityMap().get("NumberOfInstances");
-			if (numInst == null) {
-				System.out.println("Couldn't get num inst");
-			} else {
-				if (Double.parseDouble(numInst) > maxNumInstances) {
+				// No generated streaming data
+				if (dataRaw[i].getName().contains("BNG")) {
+					filteredBNG++;
 					continue;
 				}
+
+				// No non-.ARFF files
+				if (!dataRaw[i].getFormat().equals("ARFF")) {
+					filteredARFF++;
+					continue;
+				}
+
+				// Analyze features
+				DataFeature dataFeature = client.dataFeatures(dataRaw[i].getDid());
+				Feature[] features = dataFeature.getFeatures();
+				if (maxNumFeatures > 0 && features.length > maxNumFeatures) {
+					continue;
+				}
+
+				boolean noTarget = true;
+				boolean numericTarget = true;
+				for (int j = features.length - 1; j >= 0; j--) {
+					if (features[j].getIs_target()) {
+						noTarget = false;
+						if (features[j].getDataType().equals("numeric")) {
+							numericTarget = false;
+						}
+						break;
+					}
+				}
+
+				// Analyze instances
+				String numInst = dataRaw[i].getQualityMap().get("NumberOfInstances");
+				if (numInst == null) {
+					logger.info("Couldn't get num inst");
+				} else {
+					if (Double.parseDouble(numInst) > maxNumInstances) {
+						continue;
+					}
+				}
+
+				// No non-existent target attributes
+				if (noTarget) {
+					filteredTarget++;
+					continue;
+				}
+
+				// No numeric target attributes
+				if (numericTarget) {
+					filteredNumeric++;
+					continue;
+				}
+
+				// Data is fit for analysis, save
+				writer.write(Integer.toString(dataRaw[i].getDid()));
+				writer.newLine();
+				fitForAnalysis++;
+
 			}
 
-			// No non-existent target attributes
-			if (noTarget) {
-				filteredTarget++;
-				continue;
-			}
-
-			// No numeric target attributes
-			if (numericTarget) {
-				filteredNumeric++;
-				continue;
-			}
-
-			// Data is fit for analysis, save
-			writer.write(Integer.toString(data_raw[i].getDid()));
-			writer.newLine();
-			fitForAnalysis++;
-
-		}
-
-		writer.close();
-
-		// Print statistics
-		System.out.println("Unfiltered: " + unfiltered);
-		System.out.println("BNG: " + filteredBNG);
-		System.out.println("ARFF: " + filteredARFF);
-		System.out.println("No target: " + filteredTarget);
-		System.out.println("Numeric target: " + filteredNumeric);
-		System.out.println("Fit for analysis: " + fitForAnalysis);
-	}
-
-	public static void main (final String[] args) {
-		try {
-			createDataSetIndex(-1, -1);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// Print statistics
+			logger.info("Unfiltered: {}", unfiltered);
+			logger.info("BNG: {}", filteredBNG);
+			logger.info("ARFF: {}", filteredARFF);
+			logger.info("No target: {}", filteredTarget);
+			logger.info("Numeric target: {}", filteredNumeric);
+			logger.info("Fit for analysis: {}", fitForAnalysis);
 		}
 	}
 
