@@ -2,6 +2,7 @@ package ai.libs.jaicore.basic.algorithm;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.Timer;
@@ -28,10 +29,6 @@ import com.google.common.eventbus.Subscribe;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.ExceptionInAlgorithmIterationException;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
@@ -109,7 +106,9 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		CheckingEventListener listener = new CheckingEventListener();
 		algorithm.registerListener(listener);
 		try {
+			this.logger.info("Calling algorithm {}", algorithm.getId());
 			algorithm.call();
+			this.logger.info("Gained back control from algorithm {}", algorithm.getId());
 		} catch (AlgorithmTimeoutedException e) { // it may happen, that no solution has been found within the specified timeout. Then algorithm must, however, have emitted an event
 		}
 		listener.checkState();
@@ -117,7 +116,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	}
 
 	@Test
-	public void testStartAndFinishEventEmissionByIteration() throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException {
+	public void testStartAndFinishEventEmissionByIteration() throws AlgorithmCreationException, AlgorithmTestProblemSetCreationException, InterruptedException {
 		this.checkPreconditionForTest();
 
 		IAlgorithm<?, ?> algorithm = this.getAlgorithm(this.problemSet.getSimpleProblemInputForGeneralTestPurposes());
@@ -430,10 +429,20 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 		this.logger.info("Timeout-Test finished.");
 	}
 
-	protected void checkPreconditionForTest() {
+	protected void checkPreconditionForTest() throws InterruptedException {
 		assert !Thread.currentThread().isInterrupted() : "Execution thread must not be interrupted at start of test!";
-		assert GlobalTimer.getInstance().getNumberOfActiveTasks() == 0 : "Global Timer has still " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs: "
-				+ GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
+		boolean allTasksResolved = GlobalTimer.getInstance().getNumberOfActiveTasks() == 0;
+		if (!allTasksResolved) {
+			String msg = "Global Timer has still " + GlobalTimer.getInstance().getNumberOfActiveTasks() + " active jobs: " + GlobalTimer.getInstance().getActiveTasks().stream().map(t -> "\n\t" + t.toString()).collect(Collectors.joining());
+			while (GlobalTimer.getInstance().getNumberOfActiveTasks() > 0) {
+				this.logger.info("Waiting for timer to shutdown ...");
+				Thread.sleep(100);
+			}
+			fail(msg);
+		}
+
+
+		assert allTasksResolved;
 	}
 
 	private void waitForThreadGroupToBecomeEmpty(final ThreadGroup group) throws InterruptedException {

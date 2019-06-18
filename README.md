@@ -18,14 +18,14 @@ You can resolve each of our projects via a Maven dependency (using Maven central
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>jaicore-ml</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-ml:0.1.3'
+    implementation 'ai.libs:jaicore-ml:0.1.4'
 }
 ```
 
