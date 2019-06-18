@@ -39,7 +39,7 @@ public class OpenMLHelper {
 
 	private static final String DATASET_INDEX = "resources/datasets";
 
-	private static final String API_KEY = "resources/apikey.txt";
+	private static final String API_KEY = "conf/openml-apikey.txt";
 
 	private static String apiKey;
 
