@@ -10,8 +10,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.BOSSLearningAlgorithm.IBossAlgorithmConfig;
@@ -21,7 +19,6 @@ import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
  * @author Helen DFT JUnit test
  *
  */
-@RunWith(JUnit4.class)
 public class BOSSAlgorithmTest {
 
 	private TimeSeriesDataset dataset;

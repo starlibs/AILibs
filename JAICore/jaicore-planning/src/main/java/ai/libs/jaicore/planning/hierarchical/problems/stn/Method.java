@@ -8,9 +8,9 @@ import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 
-@SuppressWarnings("serial")
 public class Method implements Serializable {
 
+	private static final long serialVersionUID = 704153871624796863L;
 	private final String name;
 	private final List<VariableParam> parameters;
 	private final Literal task;

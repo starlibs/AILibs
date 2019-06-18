@@ -5,8 +5,9 @@ import java.util.Collection;
 import ai.libs.jaicore.planning.classical.problems.ceoc.CEOCOperation;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.STNPlanningDomain;
 
-@SuppressWarnings("serial")
 public class CEOCSTNPlanningDomain extends STNPlanningDomain {
+
+	private static final long serialVersionUID = -7462960653106425941L;
 
 	public CEOCSTNPlanningDomain(final Collection<? extends CEOCOperation> operations, final Collection<? extends OCMethod> methods) {
 		super(operations, methods);

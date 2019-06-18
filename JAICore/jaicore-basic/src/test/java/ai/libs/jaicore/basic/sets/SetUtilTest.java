@@ -1,6 +1,7 @@
 package ai.libs.jaicore.basic.sets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -14,8 +15,6 @@ import java.util.Set;
 import org.junit.Test;
 
 public class SetUtilTest {
-
-	// private static final Logger logger = LoggerFactory.getLogger(jaicore.basic.sets.SetUtilTest.class);
 
 	@Test
 	public void testMappingCreation() throws InterruptedException {
@@ -144,7 +143,48 @@ public class SetUtilTest {
 		assertTrue("Difference IS empty, but SetUtil.differenceNotEmpty returns true", !SetUtil.differenceNotEmpty(a, b));
 	}
 
-	// @Test
+	@Test
+	public void testThatConstraintsAreAddedInPartialSet() throws InterruptedException {
+		String a = "a";
+		String b = "b";
+		final PartialOrderedSet<String> set = new PartialOrderedSet<>();
+		set.add(a);
+		set.add(b);
+		set.addABeforeB(a, b);
+		assertTrue(set.getOrder().get(a).size() == 1);
+		assertTrue(set.getOrder().get(a).contains(b));
+	}
+
+	@Test
+	public void testThatObjectRemovalImpliesConstraintRemovalInPartialSet() throws InterruptedException {
+		String a = "a";
+		String b = "b";
+		String c = "c";
+		final PartialOrderedSet<String> set = new PartialOrderedSet<>();
+		set.add(a);
+		set.add(b);
+		set.add(c);
+
+		/* check that the relation is entirely removed if this was the only dependent element */
+		set.addABeforeB(a, b);
+		set.remove(b);
+		assertFalse(set.getOrder().containsKey(a));
+
+		/* check that the element is not in the constrained anymore  */
+		set.add(b);
+		set.addABeforeB(a, b);
+		set.addABeforeB(a, c);
+		set.remove(b);
+		assertFalse(set.getOrder().get(a).contains(b));
+
+		/* check that all forward dependencies are removed if the key is removed */
+		set.add(b);
+		set.addABeforeB(a, b);
+		set.remove(a);
+		assertFalse(set.getOrder().containsKey(a));
+	}
+
+	@Test
 	public void testcalculateNumberOfTotalOrderings() throws InterruptedException {
 		final String a, b, c, d;
 		a = "a";

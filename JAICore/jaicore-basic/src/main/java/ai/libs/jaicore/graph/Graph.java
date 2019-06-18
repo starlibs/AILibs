@@ -14,10 +14,18 @@ import java.util.stream.Collectors;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-@SuppressWarnings("serial")
 public class Graph<T> implements Serializable {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 3912962578399588845L;
+
 	private class Node implements Serializable {
+		/**
+		 *
+		 */
+		private static final long serialVersionUID = 1083239915581499630L;
 		private T t = null;
 		private Set<Node> successors = new HashSet<>();
 		private Set<Node> predecessors = new HashSet<>();

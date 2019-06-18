@@ -154,7 +154,7 @@ public class PerformanceDBAdapter implements Closeable {
 			valueMap.put("score", Double.toString(score));
 			this.sqlAdapter.insert(this.performanceSampleTableName, valueMap);
 		} catch (JsonProcessingException | NoSuchAlgorithmException | SQLException e) {
-			logger.info("Error while storing results: {}", e);
+			logger.warn("Error while storing results: {}", e);
 		}
 	}
 
