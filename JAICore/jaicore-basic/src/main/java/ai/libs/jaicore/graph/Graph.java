@@ -16,15 +16,9 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 
 public class Graph<T> implements Serializable {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = 3912962578399588845L;
 
 	private class Node implements Serializable {
-		/**
-		 *
-		 */
 		private static final long serialVersionUID = 1083239915581499630L;
 		private T t = null;
 		private Set<Node> successors = new HashSet<>();
