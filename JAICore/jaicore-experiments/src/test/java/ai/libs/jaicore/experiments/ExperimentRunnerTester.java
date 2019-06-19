@@ -1,20 +1,34 @@
 package ai.libs.jaicore.experiments;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
+import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
+import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 
 	public static class Generator implements IExperimentJSONKeyGenerator {
@@ -44,25 +58,65 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 			if (!(node instanceof ObjectNode)) {
 				return false;
 			}
-			ObjectNode castedNode = (ObjectNode)node;
+			ObjectNode castedNode = (ObjectNode) node;
 			return castedNode.size() == 1 && castedNode.has("number") && castedNode.get("number").asInt() <= 2;
 		}
 	}
 
-	public static void main(final String[] args) throws Exception {
-		IDatabaseConfig conf = (IDatabaseConfig)ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
-		IExperimentDatabaseHandle handle = new ExperimenterSQLHandle(new SQLAdapter(conf.getDBHost(), conf.getDBUsername(), conf.getDBPassword(), conf.getDBDatabaseName(), conf.getDBSSL()), "resulttable");
-		IExperimentSetConfig config = ConfigCache.getOrCreate(IExperimentTesterConfig.class);
-		IExperimentSetEvaluator evaluator = new ExperimentRunnerTester();
+	private IDatabaseConfig conf = (IDatabaseConfig) ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
+	private IExperimentDatabaseHandle handle = new ExperimenterSQLHandle(new SQLAdapter(this.conf.getDBHost(), this.conf.getDBUsername(), this.conf.getDBPassword(), this.conf.getDBDatabaseName(), this.conf.getDBSSL()), "resulttable");
+	private IExperimentSetConfig config = ConfigCache.getOrCreate(IExperimentTesterConfig.class);
 
-		ExperimentRunner runner = new ExperimentRunner(config, evaluator, handle);
+	@Test
+	public void test1ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
+
+		/* check that running the experiments works */
+		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
 		runner.randomlyConductExperiments(false);
+		Collection<ExperimentDBEntry> conductedExperiments = this.handle.getConductedExperiments();
+		assertEquals(6, conductedExperiments.size());
+
+		/* check results for every experiment */
+		for (ExperimentDBEntry entry : conductedExperiments) {
+			assertEquals(this.computeExperimentValue(entry.getExperiment()), entry.getExperiment().getValuesOfResultFields().get("C"));
+		}
 	}
 
+	@Test
+	public void test2ThatErasureOfSingleExperimentsWorks() throws ExperimentDBInteractionFailedException {
+
+		/* erase all experiments */
+		this.handle.setup(this.config);
+		int n = this.handle.getConductedExperiments().size();
+		assertEquals(6, n); // check that all experiments are still there
+		for (ExperimentDBEntry entry : this.handle.getConductedExperiments()) {
+			this.handle.deleteExperiment(entry);
+			assertEquals(n - 1, this.handle.getConductedExperiments().size());
+			n--;
+		}
+	}
+
+	@Test
+	public void test3Deletion() throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
+		this.handle.deleteDatabase();
+		boolean correctExceptionObserved = false;
+		try {
+			this.handle.createAndGetExperiment(new Experiment(0, 0, new HashMap<>()));
+		}
+		catch (ExperimentDBInteractionFailedException e) {
+			correctExceptionObserved = (e.getCause() instanceof MySQLSyntaxErrorException) && ((MySQLSyntaxErrorException)e.getCause()).getMessage().equals("Table '" + this.conf.getDBDatabaseName() + ".resulttable' doesn't exist");
+		}
+		assertTrue(correctExceptionObserved);
+	}
 
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
-		System.out.println("Running " + experimentEntry);
+		Map<String, Object> results = new HashMap<>();
+		results.put("C", this.computeExperimentValue(experimentEntry.getExperiment()));
+		processor.processResults(results);
 	}
 
+	private String computeExperimentValue(final Experiment exp) {
+		return exp.getValuesOfKeyFields().get("A") + "/" + exp.getValuesOfKeyFields().get("B");
+	}
 }

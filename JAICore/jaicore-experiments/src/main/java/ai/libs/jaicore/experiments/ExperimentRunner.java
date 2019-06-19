@@ -3,7 +3,6 @@ package ai.libs.jaicore.experiments;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,7 +26,7 @@ import ai.libs.jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 
 /**
  * This class is used to run experiments.
- * 
+ *
  * @author fmohr
  *
  */
@@ -37,13 +36,13 @@ public class ExperimentRunner {
 
 	private static final String PROTOCOL_JAVA = "java:";
 	private static final int MAX_MEM_DEVIATION = 50;
-	
+
 	private static final String LOGMESSAGE_CREATEINSTANCE = "Create a new instance of {} and ask it for the number of possible values.";
 
 	private final IExperimentSetConfig config;
 	private final IExperimentSetEvaluator conductor;
 	private final IExperimentDatabaseHandle handle;
-	private final Collection<ExperimentDBEntry> knownExperimentEntries = new HashSet<>();
+	private final Collection<Map<String,String>> keysForWhichResultsAreKnown = new HashSet<>();
 
 	private Map<String, List<String>> valuesForKeyFields = new HashMap<>();
 	private int memoryLimit;
@@ -104,7 +103,7 @@ public class ExperimentRunner {
 		this.handle.setup(this.config);
 		for (ExperimentDBEntry experiment : this.handle.getConductedExperiments()) {
 			if (this.isExperimentInLineWithSetup(experiment.getExperiment())) {
-				this.knownExperimentEntries.add(experiment);
+				this.keysForWhichResultsAreKnown.add(experiment.getExperiment().getValuesOfKeyFields());
 			} else {
 				logger.warn("Experiment with id {} and keys {} seems outdated. The reason can be an illegal key name or an outdated value for one of the keys. Enable DEBUG mode for more details.", experiment.getId(),
 						experiment.getExperiment().getValuesOfKeyFields());
@@ -128,52 +127,47 @@ public class ExperimentRunner {
 		return true;
 	}
 
-	private Experiment getExperimentForNumber(final int id) throws IllegalExperimentSetupException {
-		logger.debug("Computing experiment for id {}", id);
-		if (id < 0) {
-			throw new IllegalArgumentException("Experiment ID must be positive!");
-		}
-		if (id >= this.totalNumberOfExperiments) {
-			throw new IllegalArgumentException("Invalid experiment ID " + id + ". Only " + this.totalNumberOfExperiments + " are possible with the given config.");
-		}
 
-		/* determine the block sizes for the different iterations */
-		Map<String, Integer> blockSizes = new HashMap<>();
-		int size = 1;
-		List<String> keyOrder = new ArrayList<>(this.config.getKeyFields());
-		Collections.reverse(keyOrder);
-		for (String key : keyOrder) {
-			blockSizes.put(key, size);
-			int numValuesForKey = this.getNumberOfValuesForKey(key);
-			if (numValuesForKey < 1) {
-				throw new IllegalExperimentSetupException("Key \"" + key + "\" has no valid values.");
-			}
-			logger.trace("Identified {} possible values for key {}", numValuesForKey, key);
-			size *= numValuesForKey;
-		}
-
-		/* find the correct experiment */
-		Map<String, String> keyFieldValues = new HashMap<>();
-		int k = id;
-		for (String key : this.config.getKeyFields()) {
-			int s = blockSizes.get(key);
-			int index = (int) Math.floor(k / (s * 1f));
-			String value = this.getValueForKey(key, index);
-			logger.trace("Determined value {} for key {}", value, key);
-			keyFieldValues.put(key, value);
-			k = k % s;
-		}
-		assert SetUtil.differenceEmpty(this.config.getKeyFields(), keyFieldValues.keySet());
-		return new Experiment(this.memoryLimit, this.cpuLimit, keyFieldValues);
+	public List<Map<String,String>> getOpenKeyCombination() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException {
+		return SetUtil.difference(this.getAllPossibleKeyCombinations(), this.handle.getConductedExperiments().stream().map(e -> e.getExperiment().getValuesOfKeyFields()).collect(Collectors.toList()));
 	}
-	
-	private void checkUniquenessOfKey(String key) {
+
+	public List<Map<String,String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException {
+		logger.debug("Computing all possible experiments.");
+		this.updateExperimentSetupAccordingToConfig();
+
+		/* build cartesian product over all possible key-value */
+		List<List<String>> values = new ArrayList<>();
+		for (String key : this.config.getKeyFields()) {
+			if (!this.valuesForKeyFields.containsKey(key)) {
+				throw new IllegalStateException("No values for key " + key + " have been defined!");
+			}
+			List<String> valuesForKey = this.getAllValuesForKey(key);
+			logger.debug("Retrieving values for key {}: {}", key, valuesForKey);
+			values.add(valuesForKey);
+		}
+
+		/* create one experiment object from every tuple */
+		logger.debug("Building cartesian product over {}", values);
+		return SetUtil.cartesianProduct(values).stream().map(tuple -> this.mapValuesToKeyValueMap(tuple)).collect(Collectors.toList());
+	}
+
+	private Map<String, String> mapValuesToKeyValueMap(final List<String> values) {
+		Map<String, String> map = new HashMap<>();
+		int i = 0;
+		for (String key : this.config.getKeyFields()) {
+			map.put(key, values.get(i++));
+		}
+		return map;
+	}
+
+	private void checkUniquenessOfKey(final String key) {
 		if (this.valuesForKeyFields.get(key).size() > 1) {
 			throw new UnsupportedOperationException("The value for key " + key + " seems to be a java class, but there are multiple values defined.");
 		}
 	}
-	
-	private void checkKeyGenerator(Class<?> c) throws IllegalKeyDescriptorException {
+
+	private void checkKeyGenerator(final Class<?> c) throws IllegalKeyDescriptorException {
 		if (!IExperimentKeyGenerator.class.isAssignableFrom(c)) {
 			throw new IllegalKeyDescriptorException("The specified class " + c.getName() + " does not implement the " + IExperimentKeyGenerator.class.getName() + " interface.");
 		}
@@ -187,11 +181,11 @@ public class ExperimentRunner {
 		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.size();
 		}
-		checkUniquenessOfKey(key);
-		
+		this.checkUniquenessOfKey(key);
+
 		try {
 			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
-			checkKeyGenerator(c);
+			this.checkKeyGenerator(c);
 			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.newInstance()).getNumberOfValues();
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
@@ -205,10 +199,10 @@ public class ExperimentRunner {
 		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.get(indexOfValue);
 		}
-		checkUniquenessOfKey(key);
+		this.checkUniquenessOfKey(key);
 		try {
 			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
-			checkKeyGenerator(c);
+			this.checkKeyGenerator(c);
 			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			Object value = ((IExperimentKeyGenerator<?>) c.newInstance()).getValue(indexOfValue);
 			if (value == null) {
@@ -220,16 +214,25 @@ public class ExperimentRunner {
 		}
 	}
 
+	public List<String> getAllValuesForKey(final String key) throws IllegalKeyDescriptorException {
+		int n = this.getNumberOfValuesForKey(key);
+		List<String> vals = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			vals.add(this.getValueForKey(key, i));
+		}
+		return vals;
+	}
+
 	private boolean isValueForKeyValid(final String key, final String value) throws IllegalKeyDescriptorException {
 		List<String> possibleValues = this.valuesForKeyFields.get(key);
 		assert !possibleValues.isEmpty() : "No values specified for key " + key;
 		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.contains(value);
 		}
-		checkUniquenessOfKey(key);
+		this.checkUniquenessOfKey(key);
 		try {
 			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
-			checkKeyGenerator(c);
+			this.checkKeyGenerator(c);
 			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
 			return ((IExperimentKeyGenerator<?>) c.newInstance()).isValueValid(value);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
@@ -240,7 +243,7 @@ public class ExperimentRunner {
 	/**
 	 * Conducts a limited number of not yet conducted experiments randomly chosen
 	 * from the grid.
-	 * 
+	 *
 	 * @param maxNumberOfExperiments
 	 *            Limit for the number of experiments
 	 * @param reload
@@ -256,29 +259,34 @@ public class ExperimentRunner {
 			logger.info("Number of total experiments is 0");
 			return;
 		}
-		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.knownExperimentEntries.size(), this.totalNumberOfExperiments);
+		logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.keysForWhichResultsAreKnown.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
-		while (!Thread.interrupted() && this.knownExperimentEntries.size() < this.totalNumberOfExperiments && numberOfConductedExperiments < maxNumberOfExperiments) {
+		while (!Thread.interrupted() && this.keysForWhichResultsAreKnown.size() < this.totalNumberOfExperiments && (maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
 			if (reload) {
 				this.config.reload();
 			}
 			this.updateExperimentSetupAccordingToConfig();
-			int k = random.nextInt(this.totalNumberOfExperiments);
-			logger.info("Now conducting {}/{}", k, this.totalNumberOfExperiments);
-			Experiment exp = this.getExperimentForNumber(k);
+			List<Map<String,String>> openExperiments = this.getOpenKeyCombination();
+			int k = this.random.nextInt(openExperiments.size());
+			logger.info("Now conducting {}th of {} open experiments.", k, openExperiments.size());
+			Experiment exp = new Experiment(this.memoryLimit, this.cpuLimit, openExperiments.get(k));
 			this.checkExperimentValidity(exp);
 			logger.info("Conduct experiment with key values: {}", exp.getValuesOfKeyFields());
-			if (this.conductExperimentIfNotAlreadyConducted(exp)) {
+			try {
+				this.conductExperiment(exp);
 				numberOfConductedExperiments++;
 			}
+			catch (ExperimentAlreadyExistsInDatabaseException e) {
+				logger.warn("Conducted experiment with keys {} for the second time.", exp.getValuesOfKeyFields());
+			}
 		}
-
+		logger.info("Finished experiments. Conducted {}/{}. Known experiment entries: {}", numberOfConductedExperiments, this.totalNumberOfExperiments, this.keysForWhichResultsAreKnown.stream().map(e -> "\n\t" + e).collect(Collectors.joining()));
 	}
 
 	/**
 	 * Conducts an unbound number of randomly chosen experiments from the grid.
-	 * 
+	 *
 	 * @param reload
 	 *            Whether or not the experiment setup should be reloaded between two
 	 *            experiment runs.
@@ -301,20 +309,16 @@ public class ExperimentRunner {
 	 *             here are technical exceptions that occur when arranging the
 	 *             experiment
 	 */
-	public boolean conductExperimentIfNotAlreadyConducted(final Experiment exp) throws ExperimentDBInteractionFailedException {
+	public void conductExperiment(final Experiment exp) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
 
 		/* create experiment entry */
-		ExperimentDBEntry expEntry;
-		try {
-			expEntry = this.handle.createAndGetExperiment(exp);
-		} catch (ExperimentAlreadyExistsInDatabaseException e) {
-			return false;
-		}
+		ExperimentDBEntry expEntry = this.handle.createAndGetExperiment(exp);
 
 		/* run experiment */
 		assert expEntry != null;
 		Throwable error = null;
-		this.knownExperimentEntries.add(expEntry);
+		this.keysForWhichResultsAreKnown.add(expEntry.getExperiment().getValuesOfKeyFields());
+		logger.debug("Added experiment with keys {} to set of known experiments. Now contains {} items.", expEntry.getExperiment().getValuesOfKeyFields(), this.keysForWhichResultsAreKnown.size());
 		try {
 			this.conductor.evaluate(expEntry, m -> {
 				try {
@@ -329,7 +333,6 @@ public class ExperimentRunner {
 			logger.error("Experiment failed due to {}. Message: {}. Stack trace: {}", error.getClass().getName(), error.getMessage(), Arrays.asList(error.getStackTrace()).stream().map(s -> "\n\t" + s).collect(Collectors.toList()));
 		}
 		this.handle.finishExperiment(expEntry, error);
-		return true;
 	}
 
 	/**

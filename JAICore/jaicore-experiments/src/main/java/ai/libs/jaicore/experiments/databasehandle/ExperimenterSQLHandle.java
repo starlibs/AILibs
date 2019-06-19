@@ -15,6 +15,8 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.mysql.jdbc.PreparedStatement;
+
 import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -22,6 +24,7 @@ import ai.libs.jaicore.experiments.Experiment;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
 import ai.libs.jaicore.experiments.IExperimentSetConfig;
+import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 
@@ -105,7 +108,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		sqlMainTable.append("`exception` TEXT NULL,");
 		sqlMainTable.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
 		sqlMainTable.append("PRIMARY KEY (`" + FIELD_ID + "`)");
-		sqlMainTable.append(", UNIQUE KEY `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
+		sqlMainTable.append(", INDEX `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
 		sqlMainTable.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
 		try {
 			this.adapter.update(sqlMainTable.toString(), new String[] {});
@@ -117,18 +120,31 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public Collection<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException {
+		if (this.config == null || this.config.getKeyFields() == null) {
+			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+		}
 		Collection<ExperimentDBEntry> experimentEntries = new HashSet<>();
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM ");
 		queryStringSB.append(this.tablename);
 		try (ResultSet rs = this.adapter.getPreparedStatement(queryStringSB.toString()).executeQuery()) {
 			while (rs.next()) {
+
+				/* get key values for experiment */
 				Map<String, String> keyValues = new HashMap<>();
 				for (String key : this.config.getKeyFields()) {
 					String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
 					keyValues.put(dbKey, rs.getString(dbKey));
 				}
-				experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues)));
+
+				/* get result values for experiment */
+				Map<String, Object> resultValues = new HashMap<>();
+				for (String key : this.config.getResultFields()) {
+					String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
+					resultValues.put(dbKey, rs.getString(dbKey));
+				}
+
+				experimentEntries.add(new ExperimentDBEntry(rs.getInt(FIELD_ID), new Experiment(rs.getInt(FIELD_MEMORY + "_max"), rs.getInt(FIELD_NUMCPUS), keyValues, resultValues)));
 			}
 			this.knownExperimentEntries.addAll(experimentEntries);
 			return experimentEntries;
@@ -137,18 +153,18 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		}
 	}
 
-	public ExperimentDBEntry createAndGetExperiment(final Map<String, String> values) throws ExperimentDBInteractionFailedException{
+	public ExperimentDBEntry createAndGetExperiment(final Map<String, String> values) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
 		return this.createAndGetExperiment(new Experiment(this.config.getMemoryLimitInMB(), this.config.getNumberOfCPUs(), values));
 	}
 
 	@Override
-	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException {
+	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
 		try {
 
 			/* first check whether exactly the same experiment (with the same seed) has been conducted previously */
 			Optional<?> existingExperiment = this.knownExperimentEntries.stream().filter(e -> e.getExperiment().equals(experiment)).findAny();
 			if (existingExperiment.isPresent()) {
-				return null;
+				throw new ExperimentAlreadyExistsInDatabaseException();
 			}
 
 			Map<String, Object> valuesToInsert = new HashMap<>(experiment.getValuesOfKeyFields());
@@ -218,4 +234,25 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	private String getDatabaseFieldnameForConfigEntry(final String configKey) {
 		return configKey.replace("\\.", "_");
 	}
+
+	@Override
+	public void deleteExperiment(final ExperimentDBEntry exp) throws ExperimentDBInteractionFailedException {
+		try (PreparedStatement statement = (PreparedStatement) this.adapter.getPreparedStatement("DELETE FROM `" + this.tablename + "` WHERE experiment_id = ?")) {
+			statement.setInt(1, exp.getId());
+			statement.execute();
+		} catch (SQLException e) {
+			throw new ExperimentDBInteractionFailedException(e);
+		}
+	}
+
+
+	@Override
+	public void deleteDatabase() throws ExperimentDBInteractionFailedException {
+		try (PreparedStatement statement = (PreparedStatement) this.adapter.getPreparedStatement("DROP TABLE `" + this.tablename + "`")) {
+			statement.execute();
+		} catch (SQLException e) {
+			throw new ExperimentDBInteractionFailedException(e);
+		}
+	}
+
 }
