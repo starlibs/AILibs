@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.core.IHASCOPlanningReduction;
 import ai.libs.hasco.core.IsRefinementCompletedPredicate;
 import ai.libs.hasco.core.IsValidParameterRangeRefinementPredicate;
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
@@ -40,7 +41,6 @@ import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlannin
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
-import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 
@@ -130,7 +130,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 					List<LiteralParam> valParams = new ArrayList<>();
 					valParams.add(new VariableParam(paramIdentifier));
 					if (p.isNumeric()) {
-						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
+						standardKnowledgeAboutNewComponent.add(new Literal("parameterFocus(c2, '" + p.getName() + "', '" + this.paramRefinementConfig.get(c).get(p).getFocusPoint() + "')"));
 						NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
 						valParams.add(new ConstantParam("[" + np.getMin() + "," + np.getMax() + "]"));
 					} else {
@@ -274,7 +274,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	 * @param plannerFactory
 	 * @return
 	 */
-	public <T, A> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, T, A> transformer) {
+	public <T, A> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHASCOPlanningReduction<T, A> transformer) {
 		return transformer.encodeProblem(this.getPlanningProblem()).getGraphGenerator();
 	}
 

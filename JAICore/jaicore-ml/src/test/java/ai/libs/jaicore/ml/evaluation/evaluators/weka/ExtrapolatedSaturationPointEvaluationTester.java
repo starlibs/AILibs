@@ -11,12 +11,10 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
-import ai.libs.jaicore.ml.core.dataset.standard.SimpleDataset;
-import ai.libs.jaicore.ml.core.dataset.standard.SimpleInstance;
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstancesUtil;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.ExtrapolatedSaturationPointEvaluator;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.functions.SMO;
@@ -26,7 +24,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class ExtrapolatedSaturationPointEvaluationTester {
 
-	private SimpleDataset train, test;
+	private WekaInstances<Object> train, test;
 
 	@Test
 	public void testClassifierEvaluationAtSaturationPoint() throws Exception {
@@ -40,11 +38,10 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		dataset.setClassIndex(dataset.numAttributes() - 1);
 		Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
 		dataset.setClassIndex(targetAttribute.index());
-		SimpleDataset simpleDataset = WekaInstancesUtil.wekaInstancesToDataset(dataset);
-		this.createSplit(simpleDataset, 0.8, 123l);
+		this.createSplit(new WekaInstances<>(dataset), 0.8, 123l);
 
 		// Test classifier evaluation at saturation point
-		ExtrapolatedSaturationPointEvaluator<SimpleInstance> evaluator = new ExtrapolatedSaturationPointEvaluator<>(
+		ExtrapolatedSaturationPointEvaluator<WekaInstance<Object>, WekaInstances<Object>> evaluator = new ExtrapolatedSaturationPointEvaluator<>(
 				new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), this.train, 0.7,
 				new InversePowerLawExtrapolationMethod(), 123l, this.test);
 		evaluator.setEpsilon(0.0005d);
@@ -52,10 +49,10 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 
-	private void createSplit(SimpleDataset dataset, double trainsplit, long seed) {
+	private void createSplit(WekaInstances<Object> dataset, double trainsplit, long seed) throws DatasetCreationException {
 		this.train = dataset.createEmpty();
 		this.test = dataset.createEmpty();
-		SimpleDataset data = dataset.createEmpty();
+		WekaInstances<Object> data = dataset.createEmpty();
 		data.addAll(dataset);
 
 		// Shuffle the data
@@ -63,14 +60,14 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		Collections.shuffle(data, random);
 
 		// Stratify the data by class
-		Map<Object, SimpleDataset> classStrati = new HashMap<>();
-		dataset.forEach(d -> {
-			Object c = d.getTargetValue(Object.class).getValue();
+		Map<Object, WekaInstances<Object>> classStrati = new HashMap<>();
+		for (WekaInstance<Object> d : dataset) {
+			Object c = d.getTargetValue();
 			if (!classStrati.containsKey(c)) {
 				classStrati.put(c, dataset.createEmpty());
 			}
 			classStrati.get(c).add(d);
-		});
+		};
 
 		// Retrieve strati sizes
 		Map<Object, Integer> classStratiSizes = new HashMap<>(classStrati.size());
@@ -80,7 +77,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 
 		// First assign one item of each class to train and test
 		for (Object c : classStrati.keySet()) {
-			SimpleDataset availableInstances = classStrati.get(c);
+			WekaInstances<Object> availableInstances = classStrati.get(c);
 			if (!availableInstances.isEmpty()) {
 				train.add(availableInstances.get(0));
 				availableInstances.remove(0);
@@ -93,7 +90,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 
 		// Distribute remaining instances over train test
 		for (Object c : classStrati.keySet()) {
-			SimpleDataset availableInstances = classStrati.get(c);
+			WekaInstances<Object> availableInstances = classStrati.get(c);
 			int trainItems = (int) Math.min(availableInstances.size(), Math.ceil(trainsplit * classStratiSizes.get(c)));
 			for (int j = 0; j < trainItems; j++) {
 				this.train.add(availableInstances.get(0));

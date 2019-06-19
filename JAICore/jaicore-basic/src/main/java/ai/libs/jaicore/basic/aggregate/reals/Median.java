@@ -4,6 +4,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * The aggregation function "Median" aggregates the given values with the median operator, thus, returning the median of a list of values.
+ *
+ * @author mwever
+ */
 public class Median implements IRealsAggregateFunction {
 
 	@Override

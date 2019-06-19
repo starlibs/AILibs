@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.interfaces.LearningCurve;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.ConfigurationLearningCurveExtrapolator;
 import weka.classifiers.Classifier;
@@ -25,22 +25,20 @@ import weka.classifiers.Classifier;
 
 public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassifierEvaluator {
 
-	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
+	private Logger logger = LoggerFactory.getLogger(ConfigurationLearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
-	private IDataset<IInstance> dataset;
+	private ISamplingAlgorithmFactory<WekaInstances<Object>, ASamplingAlgorithm<WekaInstances<Object>>> samplingAlgorithmFactory;
+	private WekaInstances<Object> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
 	private String identifier;
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<IInstance, ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory,
-			final IDataset<IInstance> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier,
-			final double[] configurations) {
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstances<Object>, ASamplingAlgorithm<WekaInstances<Object>>> samplingAlgorithmFactory,
+			final WekaInstances<Object> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -58,11 +56,10 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	@Override
 	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
-		ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier,
-				this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed,
-				this.identifier, this.configurations);
-
 		try {
+			ConfigurationLearningCurveExtrapolator<WekaInstance<Object>, WekaInstances<Object>> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement,
+					this.anchorpoints, this.samplingAlgorithmFactory, this.seed, this.identifier, this.configurations);
+
 			// Create the extrapolator and calculate the accuracy the classifier would have
 			// if it was trained on the complete dataset.
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();
@@ -76,8 +73,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
 		} catch (Exception e) {
-			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
-					e.getClass().getName(), e.getMessage());
+			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;
 		}
 	}

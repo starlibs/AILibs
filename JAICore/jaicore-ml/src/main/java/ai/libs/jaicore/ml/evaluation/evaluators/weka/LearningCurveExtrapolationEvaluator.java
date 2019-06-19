@@ -9,8 +9,9 @@ import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.basic.events.IEventEmitter;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
+import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.interfaces.LearningCurve;
@@ -30,14 +31,14 @@ import weka.classifiers.Classifier;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
+public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory;
-	private IDataset<? extends IInstance> dataset;
+	private ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
+	private D dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
@@ -60,7 +61,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	 *            measurements at the anchorpoints.
 	 * @param seed Random seed.
 	 */
-	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<IInstance, ? extends ASamplingAlgorithm<IInstance>> samplingAlgorithmFactory, final IDataset<? extends IInstance> dataset,
+	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D dataset,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -83,12 +84,10 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 
 		// Create the learning curve extrapolator with the given configuration.
 		this.logger.info("Receive request to evaluate classifier {}", classifier);
-		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
-		if (extrapolator instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) extrapolator).setLoggerName(this.getLoggerName() + ".extrapolator");
-		}
-
 		try {
+			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
+			extrapolator.setLoggerName(this.getLoggerName() + ".extrapolator");
+			
 			/* Create the extrapolator and calculate the accuracy the classifier would have if it was trained on the complete dataset. */
 			this.logger.debug("Extrapolating learning curve.");
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();
@@ -105,7 +104,7 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 			Double val = EVALUATE_ACCURACY ? learningCurve.getCurveValue(evaluationPoint) : 1 - learningCurve.getCurveValue(evaluationPoint);
 			this.logger.info("Estimate for performance on full dataset is {}", val);
 			return val;
-		} catch (AlgorithmException | InvalidAnchorPointsException e) {
+		} catch (AlgorithmException | InvalidAnchorPointsException | DatasetCreationException e) {
 			throw new ObjectEvaluationFailedException("Could not compute a score based on the learning curve.", e);
 		}
 	}

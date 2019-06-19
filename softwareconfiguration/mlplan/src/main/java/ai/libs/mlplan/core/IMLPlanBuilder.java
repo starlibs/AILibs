@@ -6,7 +6,7 @@ import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
@@ -36,7 +36,7 @@ public interface IMLPlanBuilder {
 
 	public IClassifierFactory getClassifierFactory();
 
-	public HASCOFactory<GraphSearchInput<TFDNode, String>, TFDNode, String, Double> getHASCOFactory();
+	public HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getHASCOFactory();
 
 	public MLPlanClassifierConfig getAlgorithmConfig();
 

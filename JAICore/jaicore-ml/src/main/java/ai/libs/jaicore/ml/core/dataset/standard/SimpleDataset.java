@@ -5,30 +5,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 import ai.libs.jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
 
-public class SimpleDataset extends LinkedList<SimpleInstance> implements IDataset<SimpleInstance> {
+public class SimpleDataset<L> extends LinkedList<SimpleInstance<L>> implements IOrderedLabeledAttributeArrayDataset<SimpleInstance<L>, L> {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -404523661106060818L;
 
-	private final InstanceSchema instanceSchema;
+	private final InstanceSchema<L> instanceSchema;
 
-	public SimpleDataset(final InstanceSchema instanceSchema) {
+	public SimpleDataset(final InstanceSchema<L> instanceSchema) {
 		this.instanceSchema = instanceSchema;
 	}
 
 	@Override
-	public <T> IAttributeType<T> getTargetType(final Class<T> clazz) {
-		return this.instanceSchema.getTargetType(clazz);
-	}
-
-	@Override
-	public IAttributeType<?> getTargetType() {
+	public IAttributeType<L> getTargetType() {
 		return this.instanceSchema.getTargetType();
 	}
 
@@ -43,12 +38,6 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 	}
 
 	@Override
-	public boolean add(final SimpleInstance instance) {
-		instance.setSchema(this.instanceSchema);
-		return super.add(instance);
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.instanceSchema.toString());
@@ -56,7 +45,7 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 		sb.append("\n");
 		sb.append("%instances");
 		sb.append("\n");
-		for (SimpleInstance inst : this) {
+		for (SimpleInstance<L> inst : this) {
 			sb.append(inst);
 			sb.append("\n");
 		}
@@ -66,41 +55,46 @@ public class SimpleDataset extends LinkedList<SimpleInstance> implements IDatase
 	public String printDoubleRepresentation() throws ContainsNonNumericAttributesException {
 		StringBuilder sb = new StringBuilder();
 
-		for (SimpleInstance inst : this) {
+		for (SimpleInstance<L> inst : this) {
 			sb.append(Arrays.toString(inst.getAsDoubleVector()));
 			sb.append("\n");
 		}
 
 		return sb.toString();
 	}
-	
+
 	@Override
-	public SimpleDataset createEmpty() {
-		return new SimpleDataset(instanceSchema);
+	public SimpleDataset<L> createEmpty() {
+		return new SimpleDataset<>(this.instanceSchema);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((instanceSchema == null) ? 0 : instanceSchema.hashCode());
+		result = prime * result + ((this.instanceSchema == null) ? 0 : this.instanceSchema.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
-		SimpleDataset other = (SimpleDataset) obj;
-		if (instanceSchema == null) {
-			if (other.instanceSchema != null)
+		}
+		SimpleDataset<L> other = (SimpleDataset<L>) obj;
+		if (this.instanceSchema == null) {
+			if (other.instanceSchema != null) {
 				return false;
-		} else if (!instanceSchema.equals(other.instanceSchema))
+			}
+		} else if (!this.instanceSchema.equals(other.instanceSchema)) {
 			return false;
+		}
 		return true;
 	}
 }

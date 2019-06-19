@@ -5,7 +5,9 @@ import java.util.Random;
 
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.ml.core.dataset.*;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
+import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**
@@ -16,7 +18,7 @@ import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  * @param <I>
  *
  */
-public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
+public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	/**
 	 * Constructor
@@ -24,7 +26,7 @@ public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSam
 	 * @param rand
 	 *            RandomObject for reproducibility
 	 */
-	public CaseControlSampling(Random rand, IDataset<I> input) {
+	public CaseControlSampling(Random rand, D input) {
 		super(input);
 		this.rand = rand;
 	}
@@ -32,8 +34,12 @@ public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSam
 	@Override
 	public AlgorithmEvent nextWithException() throws AlgorithmException {
 		switch (this.getState()) {
-		case created:
-			this.sample = getInput().createEmpty();
+		case CREATED:
+			try {
+				this.sample = (D)getInput().createEmpty();
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+			}
 
 			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
 
@@ -45,7 +51,7 @@ public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSam
 				probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
 			}
 			return this.activate();
-		case active:
+		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
 				I choosenInstance = null;
 				double r;
@@ -66,7 +72,7 @@ public class CaseControlSampling<I extends IInstance> extends CaseControlLikeSam
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:

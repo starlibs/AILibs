@@ -46,16 +46,7 @@
     </layout>
   </appender>
 
-  <logger name="ai.libs.mlplan">
-    <level value="warn" />
-    <appender-ref ref="console" />
-    <appender-ref ref="infoFileAppender" />
-    <appender-ref ref="warnFileAppender" />
-    <appender-ref ref="errFileAppender" />
-    <appender-ref ref="traceFileAppender" />
-  </logger>
-  
-  <logger name="ai.libs.jaicore">
+  <logger name="ai.libs">
     <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -66,18 +57,6 @@
   
   <logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
    <level value="trace" />
-  </logger>
-    
-  <logger name="ai.libs.automl.AutoMLAlgorithmTester">
-    <level value="info" />
-  </logger>
-  
-  <logger name="ai.libs.automl.AutoMLAlgorithmResultProductionTester">
-    <level value="info" />
-  </logger>
-    
-  <logger name="ai.libs.mlplan.core">
-  	 <level value="debug" />
   </logger>
   
   <logger name="MLPlanCLI">
@@ -96,7 +75,7 @@
     <level value="warn" />
   </logger>
   
-  <logger name="ai.libs.hasco">
+  <logger name="hasco">
     <level value="warn" />
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -138,11 +117,11 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="ai.libs.hasco.core.Util">
+  <logger name="hasco.core.Util">
   	 <level value="warn" />
   </logger>
   
-  <logger name="ai.libs.hasco.core.IsRefinementCompletedPredicate">
+  <logger name="hasco.core.IsRefinementCompletedPredicate">
   	 <level value="warn" />
   </logger>
   
@@ -182,12 +161,8 @@
     <level value="warn" />
   </logger>
   
-  <logger name="ai.libs.hasco.core.isValidParameterRangeRefinementPredicate">
+  <logger name="hasco.core.isValidParameterRangeRefinementPredicate">
   	<level value="warn" />
-  </logger>
-  
-  <logger name="ai.libs.mlplan.examples.multilabel.meka.ML2PlanAutoMLCExperimenter">
-  	<level value="info" />
   </logger>
   
   <!-- configuration for ML-Plan Test logging -->

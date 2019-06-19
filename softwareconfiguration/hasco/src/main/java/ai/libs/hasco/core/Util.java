@@ -27,16 +27,14 @@ import ai.libs.hasco.model.IParameterDomain;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.Plan;
-import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
-import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningGraphGeneratorDeriver;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.Node;
 
@@ -207,7 +205,8 @@ public class Util {
 			for (Parameter p : object.getComponent().getParameters()) {
 
 				assert parameterContainerMap.containsKey(objectName) : "No parameter container map has been defined for object " + objectName + " of component " + object.getComponent().getName() + "!";
-				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: " + state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
+				assert parameterContainerMap.get(objectName).containsKey(p.getName()) : "The data container for parameter " + p.getName() + " of " + object.getComponent().getName() + " is not defined! State: "
+				+ state.stream().sorted().map(l -> "\n\t" + l).collect(Collectors.joining());
 				String paramContainerName = parameterContainerMap.get(objectName).get(p.getName());
 				if (overwrittenDatacontainers.contains(paramContainerName)) {
 					String assignedValue = parameterValues.get(paramContainerName);
@@ -219,12 +218,12 @@ public class Util {
 		return objectMap;
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver, final Collection<Component> components,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components,
 			final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
 		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), resolveIntervals);
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHierarchicalPlanningGraphGeneratorDeriver<CEOCIPSTNPlanningProblem, N, A> planningGraphDeriver, final Collection<Component> components,
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components,
 			final Monom initState, final Node<N, ?> path, final String name, final boolean resolveIntervals) {
 		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), name, resolveIntervals);
 	}
@@ -251,6 +250,31 @@ public class Util {
 
 	public static ComponentInstance getComponentInstanceFromState(final Collection<Component> components, final Monom state, final String name, final boolean resolveIntervals) {
 		return Util.getGroundComponentsFromState(state, components, resolveIntervals).get(name);
+	}
+
+	/**
+	 * Computes a list of all component instances of the given composition.
+	 *
+	 * @param composition
+	 * @return List of components in right to left depth-first order
+	 */
+	public static List<ComponentInstance> getComponentInstancesOfComposition(final ComponentInstance composition) {
+		List<ComponentInstance> components = new LinkedList<>();
+		Deque<ComponentInstance> componentInstances = new ArrayDeque<>();
+		componentInstances.push(composition);
+		ComponentInstance curInstance;
+		while (!componentInstances.isEmpty()) {
+			curInstance = componentInstances.pop();
+			components.add(curInstance);
+			Map<String, String> requiredInterfaces = curInstance.getComponent().getRequiredInterfaces();
+			// This set should be ordered
+			Set<String> requiredInterfaceNames = requiredInterfaces.keySet();
+			for (String requiredInterfaceName : requiredInterfaceNames) {
+				ComponentInstance instance = curInstance.getSatisfactionOfRequiredInterfaces().get(requiredInterfaceName);
+				componentInstances.push(instance);
+			}
+		}
+		return components;
 	}
 
 	/**
@@ -352,10 +376,10 @@ public class Util {
 	}
 
 	private static String getParamValue(final Parameter p, final String assignedValue, final boolean resolveIntervals) {
-		String interpretedValue = "";
 		if (assignedValue == null) {
 			throw new IllegalArgumentException("Cannot determine true value for assigned param value " + assignedValue + " for parameter " + p.getName());
 		}
+		String interpretedValue = "";
 		if (p.isNumeric()) {
 			if (resolveIntervals) {
 				NumericParameterDomain np = (NumericParameterDomain) p.getDefaultDomain();
@@ -364,7 +388,7 @@ public class Util {
 				if (np.isInteger()) {
 					interpretedValue = String.valueOf((int) Math.round(interval.getBarycenter()));
 				} else {
-					interpretedValue = String.valueOf(interval.checkPoint((double)p.getDefaultValue(), 0.001) == Location.INSIDE ? (double)p.getDefaultValue() : interval.getBarycenter());
+					interpretedValue = String.valueOf(interval.checkPoint((double) p.getDefaultValue(), 0.001) == Location.INSIDE ? (double) p.getDefaultValue() : interval.getBarycenter());
 				}
 			} else {
 				interpretedValue = assignedValue;
@@ -437,15 +461,15 @@ public class Util {
 
 	public static boolean isDependencyConditionSatisfied(final Collection<Pair<Parameter, IParameterDomain>> condition, final Map<Parameter, IParameterDomain> values) {
 		for (Pair<Parameter, IParameterDomain> conditionItem : condition) {
-			IParameterDomain requiredDomain = conditionItem.getY();
 			Parameter param = conditionItem.getX();
-			IParameterDomain actualDomain = values.get(param);
 			if (!values.containsKey(param)) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is not defined in " + values);
 			}
 			if (values.get(param) == null) {
 				throw new IllegalArgumentException("Cannot check condition " + condition + " as the value for parameter " + param.getName() + " is NULL in " + values);
 			}
+			IParameterDomain requiredDomain = conditionItem.getY();
+			IParameterDomain actualDomain = values.get(param);
 			if (!requiredDomain.subsumes(actualDomain)) {
 				return false;
 			}

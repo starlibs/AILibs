@@ -1,6 +1,5 @@
 /**
- * Package containing the handling of MLPipeline characterization with the help
- * of an ontology and pattern recognition.
+ * Package containing the handling of MLPipeline characterization
  * 
  * @author Helena Graf
  *

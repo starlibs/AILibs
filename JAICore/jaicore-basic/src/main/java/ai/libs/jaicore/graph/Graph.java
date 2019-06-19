@@ -1,5 +1,6 @@
 package ai.libs.jaicore.graph;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,15 +11,18 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
 
-public class Graph<T> {
+public class Graph<T> implements Serializable {
 
-	private class Node {
-		T t = null;
-		Set<Node> successors = new HashSet<>();
-		Set<Node> predecessors = new HashSet<>();
+	private static final long serialVersionUID = 3912962578399588845L;
+
+	private class Node implements Serializable {
+		private static final long serialVersionUID = 1083239915581499630L;
+		private T t = null;
+		private Set<Node> successors = new HashSet<>();
+		private Set<Node> predecessors = new HashSet<>();
 	}
 
 	private final Map<T, Node> nodes = new HashMap<>();
@@ -55,8 +59,9 @@ public class Graph<T> {
 		Node n = new Node();
 		n.t = item;
 		this.nodes.put(item, n);
-		if (!this.hasItem(n.t))
+		if (!this.hasItem(n.t)) {
 			throw new IllegalStateException("Just added node " + item + " does not respond positively on a call to hasItem");
+		}
 	}
 
 	public Set<T> getItems() {
@@ -244,14 +249,14 @@ public class Graph<T> {
 		boolean allNodesContained = this.nodes.keySet().stream().allMatch(this::hasItem);
 		if (!allNodesContained) {
 			assert allNodesContained : "Not every node n in the node map have positive responses for a call of hasItem(n)";
-			return false;
+		return false;
 		}
 
 		/* check that all successors are contained */
 		boolean allSuccessorsContained = this.nodes.keySet().stream().allMatch(n -> this.getSuccessors(n).stream().allMatch(this::hasItem));
 		if (!allSuccessorsContained) {
 			assert allSuccessorsContained : "There is a node in the graph such that not every successor n of it has a positive response for a call of hasItem(n)";
-			return false;
+		return false;
 		}
 
 		/* check that all predecessors are contained */

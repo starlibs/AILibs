@@ -4,10 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public interface Instances extends List<Instance> {
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+public interface Instances<I> extends List<I> {
 	public int getNumberOfRows();
 	public int getNumberOfColumns();
-	public String toJson();
+	public String toJson() throws JsonProcessingException;
 	public void addAllFromJson(String jsonString) throws IOException;
 	public void addAllFromJson(File jsonFile) throws IOException;
 }

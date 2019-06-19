@@ -22,7 +22,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
-import ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
+import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.core.interfaces.PathUnifyingGraphGenerator;
 import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.model.travesaltree.NodeType;
@@ -30,8 +30,7 @@ import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
 import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-@SuppressWarnings("serial")
-public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
+public class TFDGraphGenerator implements GraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
 
 	private static Logger logger = LoggerFactory.getLogger(TFDGraphGenerator.class);
 	protected TaskPlannerUtil util = new TaskPlannerUtil(null);
@@ -77,9 +76,6 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 			}
 			boolean doubleUseDetected = usedMethods.contains(mi.getMethod());
 			assert !doubleUseDetected : "Lonely method " + mi.getMethod() + " has been generated several times as being applicable!";
-			if (doubleUseDetected) {
-				return false;
-			}
 			usedMethods.add(mi.getMethod());
 		}
 		return true;
@@ -87,7 +83,7 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 
 	protected List<Literal> stripTNPrefixes(final List<Literal> taskList) {
 		return taskList.stream().map(l -> {
-			String taskName = l.getPropertyName().substring(l.getPropertyName().indexOf("-") + 1, l.getPropertyName().length());
+			String taskName = l.getPropertyName().substring(l.getPropertyName().indexOf('-') + 1, l.getPropertyName().length());
 			return new Literal(taskName, l.getParameters(), l.isPositive());
 		}).collect(Collectors.toList());
 	}
@@ -114,8 +110,7 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 
 	@Override
 	public SingleRootGenerator<TFDNode> getRootGenerator() {
-		TaskPlannerUtil util = new TaskPlannerUtil(null);
-		return () -> new TFDNode(this.problem.getInit(), this.stripTNPrefixes(util.getTaskChainOfTotallyOrderedNetwork(this.problem.getNetwork())));
+		return () -> new TFDNode(this.problem.getInit(), this.stripTNPrefixes(new TaskPlannerUtil(null).getTaskChainOfTotallyOrderedNetwork(this.problem.getNetwork())));
 	}
 
 	@Override
@@ -138,7 +133,7 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 			logger.info("Node generation finished and took {}ms", System.currentTimeMillis() - creationStartTime);
 
 			/* change order in remaining tasks based on numbered prefixes */
-			successors = successors.stream().map(s -> this.orderRemainingTasksByPriority(s)).collect(Collectors.toList());
+			successors = successors.stream().map(this::orderRemainingTasksByPriority).collect(Collectors.toList());
 
 			/* derive successor descriptions from the nodes */
 			return successors.stream().map(n -> new NodeExpansionDescription<TFDNode, String>(l, n, n.getAppliedAction() != null ? n.getAppliedAction().getEncoding() : n.getAppliedMethodInstance().getEncoding(), NodeType.OR)).collect(Collectors.toList());
@@ -154,7 +149,7 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 		node.getRemainingTasks().forEach(t -> {
 			Matcher m = p.matcher(t.getPropertyName());
 			if (m.find()) {
-				int order = Integer.valueOf(m.group(1));
+				int order = Integer.parseInt(m.group(1));
 				if (!orderedLiterals.containsKey(order)) {
 					orderedLiterals.put(order, new ArrayList<>());
 				}
@@ -184,7 +179,7 @@ public class TFDGraphGenerator implements SerializableGraphGenerator<TFDNode, St
 
 	@Override
 	public void setNodeNumbering(final boolean nodenumbering) {
-
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

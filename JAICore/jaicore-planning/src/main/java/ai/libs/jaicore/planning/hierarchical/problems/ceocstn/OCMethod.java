@@ -2,6 +2,9 @@ package ai.libs.jaicore.planning.hierarchical.problems.ceocstn;
 
 import java.util.List;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
@@ -13,38 +16,33 @@ public class OCMethod extends Method {
 
 	private final List<VariableParam> outputs;
 
-	public OCMethod(String name, List<VariableParam> parameters, Literal task, Monom precondition, TaskNetwork network, boolean lonely, List<VariableParam> outputs) {
+	public OCMethod(final String name, final List<VariableParam> parameters, final Literal task, final Monom precondition, final TaskNetwork network, final boolean lonely, final List<VariableParam> outputs) {
 		super(name, parameters, task, precondition, network, lonely);
 		this.outputs = outputs;
 	}
 
 	public List<VariableParam> getOutputs() {
-		return outputs;
+		return this.outputs;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((outputs == null) ? 0 : outputs.hashCode());
-		return result;
+		return new HashCodeBuilder().append(super.hashCode()).append(this.outputs).toHashCode();
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (!super.equals(obj))
+		}
+		if (!super.equals(obj)) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (!(obj instanceof OCMethod)) {
 			return false;
+		}
 		OCMethod other = (OCMethod) obj;
-		if (outputs == null) {
-			if (other.outputs != null)
-				return false;
-		} else if (!outputs.equals(other.outputs))
-			return false;
-		return true;
+		return new EqualsBuilder().append(this.outputs, other.outputs).isEquals();
 	}
 
 }

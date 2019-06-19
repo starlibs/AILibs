@@ -4,8 +4,8 @@ import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.core.Action;
 
 /**
- * We only store the difference to the init state, i.e. what needs to be added or remove from the init state to get the state 
- * 
+ * We only store the difference to the init state, i.e. what needs to be added or remove from the init state to get the state
+ *
  * @author fmohr
  *
  */
@@ -15,67 +15,78 @@ public class StripsForwardPlanningNode {
 	private final Monom del;
 	private final Action actionToReachState;
 
-	public StripsForwardPlanningNode(Monom add, Monom del, Action actionToReachState) {
+	public StripsForwardPlanningNode(final Monom add, final Monom del, final Action actionToReachState) {
 		super();
-		assert add != null;
-		assert del != null;
+		if (add == null) {
+			throw new IllegalArgumentException("Add list must not be NULL");
+		}
+		if (del == null) {
+			throw new IllegalArgumentException("Del list must not be NULL");
+		}
 		this.add = add;
 		this.del = del;
 		this.actionToReachState = actionToReachState;
 	}
 
 	public Monom getAdd() {
-		return add;
+		return this.add;
 	}
 
 	public Monom getDel() {
-		return del;
+		return this.del;
 	}
-	
-	public Monom getStateRelativeToInitState(Monom initState) {
+
+	public Monom getStateRelativeToInitState(final Monom initState) {
 		Monom state = new Monom(initState);
-		state.removeAll(del);
-		state.addAll(add);
+		state.removeAll(this.del);
+		state.addAll(this.add);
 		return state;
 	}
 
 	public Action getActionToReachState() {
-		return actionToReachState;
+		return this.actionToReachState;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((add == null) ? 0 : add.hashCode());
-		result = prime * result + ((del == null) ? 0 : del.hashCode());
+		result = prime * result + ((this.add == null) ? 0 : this.add.hashCode());
+		result = prime * result + ((this.del == null) ? 0 : this.del.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		StripsForwardPlanningNode other = (StripsForwardPlanningNode) obj;
-		if (add == null) {
-			if (other.add != null)
+		if (this.add == null) {
+			if (other.add != null) {
 				return false;
-		} else if (!add.equals(other.add))
+			}
+		} else if (!this.add.equals(other.add)) {
 			return false;
-		if (del == null) {
-			if (other.del != null)
+		}
+		if (this.del == null) {
+			if (other.del != null) {
 				return false;
-		} else if (!del.equals(other.del))
+			}
+		} else if (!this.del.equals(other.del)) {
 			return false;
+		}
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "StripsForwardPlanningNode [addSize=" + add.size() + ", delSize=" + del.size() + ", actionToReachState=" + (actionToReachState != null ? actionToReachState.getEncoding() : null) + "]";
+		return "StripsForwardPlanningNode [addSize=" + this.add.size() + ", delSize=" + this.del.size() + ", actionToReachState=" + (this.actionToReachState != null ? this.actionToReachState.getEncoding() : null) + "]";
 	}
 }

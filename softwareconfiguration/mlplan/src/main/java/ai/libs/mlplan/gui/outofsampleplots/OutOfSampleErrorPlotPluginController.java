@@ -18,58 +18,59 @@ import weka.core.Instances;
 
 public class OutOfSampleErrorPlotPluginController extends ASimpleMVCPluginController<OutOfSampleErrorPlotPluginModel, OutOfSampleErrorPlotPluginView> {
 
-	private Instances train, test;
-	private Logger logger = LoggerFactory.getLogger(OutOfSampleErrorPlotPlugin.class);
+	private Instances train;
+	private Instances test;
+	private Logger logger = LoggerFactory.getLogger(OutOfSampleErrorPlotPluginController.class);
 
-	public OutOfSampleErrorPlotPluginController(OutOfSampleErrorPlotPluginModel model, OutOfSampleErrorPlotPluginView view) {
+	public OutOfSampleErrorPlotPluginController(final OutOfSampleErrorPlotPluginModel model, final OutOfSampleErrorPlotPluginView view) {
 		super(model, view);
 	}
 
 	public Instances getTrain() {
-		return train;
+		return this.train;
 	}
 
-	public void setTrain(Instances train) {
+	public void setTrain(final Instances train) {
 		this.train = train;
 	}
 
 	public Instances getTest() {
-		return test;
+		return this.test;
 	}
 
-	public void setTest(Instances test) {
+	public void setTest(final Instances test) {
 		this.test = test;
 	}
 
 	@Override
-	public void handleGUIEvent(GUIEvent guiEvent) {
+	public void handleGUIEvent(final GUIEvent guiEvent) {
 		if (guiEvent instanceof ResetEvent || guiEvent instanceof GoToTimeStepEvent) {
-			getModel().clear();
+			this.getModel().clear();
 		}
 	}
 
 	@Override
-	public void handleAlgorithmEventInternally(AlgorithmEvent algorithmEvent) {
+	public void handleAlgorithmEventInternally(final AlgorithmEvent algorithmEvent) {
 		if (algorithmEvent instanceof ClassifierFoundEvent) {
 			try {
-				logger.debug("Received classifier found event {}", algorithmEvent);
+				this.logger.debug("Received classifier found event {}", algorithmEvent);
 				ClassifierFoundEvent event = (ClassifierFoundEvent) algorithmEvent;
-				Classifier classifier = (Classifier) event.getSolutionCandidate();
-				logger.debug("Building classifier");
-				classifier.buildClassifier(train);
-				Evaluation eval = new Evaluation(train);
+				Classifier classifier = event.getSolutionCandidate();
+				this.logger.debug("Building classifier");
+				classifier.buildClassifier(this.train);
+				Evaluation eval = new Evaluation(this.train);
 				List<Double> performances = new ArrayList<>();
 				performances.add(event.getScore());
-				eval.evaluateModel(classifier, test);
+				eval.evaluateModel(classifier, this.test);
 				performances.add(eval.errorRate());
-				logger.debug("Adding solution to model and updating view.");
-				getModel().addEntry(event.getTimestamp(), classifier, performances);
+				this.logger.debug("Adding solution to model and updating view.");
+				this.getModel().addEntry(event.getTimestamp(), classifier, performances);
 			} catch (Exception e) {
-				logger.error("Could not train classifier! " + e.toString());
-				e.printStackTrace();
+				this.logger.error("Could not train classifier: {}", e);
 			}
-		} else
-			logger.trace("Received and ignored irrelevant event {}", algorithmEvent);
+		} else {
+			this.logger.trace("Received and ignored irrelevant event {}", algorithmEvent);
+		}
 	}
 
 }

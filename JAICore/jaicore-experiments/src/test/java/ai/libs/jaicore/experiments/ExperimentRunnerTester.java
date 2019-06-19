@@ -1,21 +1,17 @@
 package ai.libs.jaicore.experiments;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.aeonbits.owner.ConfigCache;
+import org.aeonbits.owner.ConfigFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.experiments.ExperimentDBEntry;
-import ai.libs.jaicore.experiments.ExperimentRunner;
-import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
-import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
-import ai.libs.jaicore.experiments.IExperimentJSONKeyGenerator;
-import ai.libs.jaicore.experiments.IExperimentSetConfig;
-import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 
@@ -54,8 +50,8 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	public static void main(final String[] args) throws Exception {
-		//		IExperimentDatabaseHandle handle = new ExperimenterFileDBHandle(new File("testrsc/experiments.db"));
-		IExperimentDatabaseHandle handle = new ExperimenterSQLHandle(new SQLAdapter("isys-db.cs.upb.de", "results", "Hallo333!", "test", false), "resulttable");
+		IDatabaseConfig conf = (IDatabaseConfig)ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
+		IExperimentDatabaseHandle handle = new ExperimenterSQLHandle(new SQLAdapter(conf.getDBHost(), conf.getDBUsername(), conf.getDBPassword(), conf.getDBDatabaseName(), conf.getDBSSL()), "resulttable");
 		IExperimentSetConfig config = ConfigCache.getOrCreate(IExperimentTesterConfig.class);
 		IExperimentSetEvaluator evaluator = new ExperimentRunnerTester();
 

@@ -1,13 +1,14 @@
 package ai.libs.mlpipeline_evaluation;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.File;
+
+import org.junit.Test;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.mlpipeline_evaluation.DatasetOrigin;
-import ai.libs.mlpipeline_evaluation.PipelineEvaluationCache;
-import ai.libs.mlpipeline_evaluation.PipelineEvaluationCacheConfigBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.OneRAttributeEval;
@@ -24,7 +25,8 @@ import weka.classifiers.trees.RandomForest;
  */
 public class CacheTest {
 
-	public static void main(final String[] args) throws Exception {
+	@Test
+	public void testCache() throws Exception {
 		String datasetId = "40677";
 		DatasetOrigin datasetOrigin = DatasetOrigin.OPENML_DATASET_ID;
 		String testEvaluationTechnique = "single";
@@ -45,7 +47,7 @@ public class CacheTest {
 		MLPipelineComponentInstanceFactory factory = new MLPipelineComponentInstanceFactory(loader.getComponents());
 		ComponentInstance cI = factory.convertToComponentInstance(new MLPipeline(new Ranker(), new OneRAttributeEval(), new RandomForest()));
 		cache.configureValidation("3MCCV_0.8", "multi", 12);
-		System.out.println("Cache result: " + cache.getResultOrExecuteEvaluation(cI));
+		assertNotNull(cache.getResultOrExecuteEvaluation(cI));
 	}
 
 }

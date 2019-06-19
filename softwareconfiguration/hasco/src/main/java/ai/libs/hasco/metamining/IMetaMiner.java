@@ -3,8 +3,9 @@ package ai.libs.hasco.metamining;
 import ai.libs.hasco.model.ComponentInstance;
 
 /**
- * Used to score a given {@link ComponentInstance} based on meta feature of the
- * ComponentInstance and possibly also its application context.
+ * Used to to compute a score for a given {@link ComponentInstance} based on
+ * meta features of the ComponentInstance and possibly also its application
+ * context.
  * 
  * @author Helena Graf
  *

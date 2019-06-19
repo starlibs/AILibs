@@ -11,7 +11,7 @@ public class RTNPlanningProblem {
 
 	private final TaskNetwork network;
 
-	public RTNPlanningProblem(RTNPlanningDomain domain, Monom init, TaskNetwork network) {
+	public RTNPlanningProblem(final RTNPlanningDomain domain, final Monom init, final TaskNetwork network) {
 		super();
 		this.domain = domain;
 		this.init = init;
@@ -19,52 +19,61 @@ public class RTNPlanningProblem {
 	}
 
 	public RTNPlanningDomain getDomain() {
-		return domain;
+		return this.domain;
 	}
 
 	public Monom getInit() {
-		return init;
+		return this.init;
 	}
 
 	public TaskNetwork getNetwork() {
-		return network;
+		return this.network;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((domain == null) ? 0 : domain.hashCode());
-		result = prime * result + ((init == null) ? 0 : init.hashCode());
-		result = prime * result + ((network == null) ? 0 : network.hashCode());
+		result = prime * result + ((this.domain == null) ? 0 : this.domain.hashCode());
+		result = prime * result + ((this.init == null) ? 0 : this.init.hashCode());
+		result = prime * result + ((this.network == null) ? 0 : this.network.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		RTNPlanningProblem other = (RTNPlanningProblem) obj;
-		if (domain == null) {
-			if (other.domain != null)
+		if (this.domain == null) {
+			if (other.domain != null) {
 				return false;
-		} else if (!domain.equals(other.domain))
+			}
+		} else if (!this.domain.equals(other.domain)) {
 			return false;
-		if (init == null) {
-			if (other.init != null)
+		}
+		if (this.init == null) {
+			if (other.init != null) {
 				return false;
-		} else if (!init.equals(other.init))
+			}
+		} else if (!this.init.equals(other.init)) {
 			return false;
-		if (network == null) {
-			if (other.network != null)
+		}
+		if (this.network == null) {
+			if (other.network != null) {
 				return false;
-		} else if (!network.equals(other.network))
+			}
+		} else if (!this.network.equals(other.network)) {
 			return false;
+		}
 		return true;
 	}
-	
+
 }

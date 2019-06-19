@@ -10,8 +10,9 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
+import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
+import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.classifiers.Classifier;
@@ -34,7 +35,7 @@ import weka.core.Instances;
  * @param <I>
  */
 
-public class ClassifierWeightedSampling<I extends IInstance> extends CaseControlLikeSampling<I> {
+public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends IOrderedDataset<I>> extends CaseControlLikeSampling<I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
 
@@ -43,7 +44,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 	private double addForRightClassification;
 	private double baseValue;
 
-	public ClassifierWeightedSampling(final Random rand, final Instances instances, final IDataset<I> input) {
+	public ClassifierWeightedSampling(final Random rand, final Instances instances, final D input) {
 		super(input);
 		this.rand = rand;
 		this.pilotEstimator = new NaiveBayes();
@@ -59,20 +60,22 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException()
-			throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		switch (this.getState()) {
-		case created:
-			this.sample = this.getInput().createEmpty();
-			IDataset<I> sampleCopy = this.getInput().createEmpty();
-			for (I instance : this.getInput()) {
-				sampleCopy.add(instance);
+		case CREATED:
+			try {
+				this.sample = (D) this.getInput().createEmpty();
+				D sampleCopy = (D) this.getInput().createEmpty();
+				for (I instance : this.getInput()) {
+					sampleCopy.add(instance);
+				}
+				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(((WekaInstances<?>) sampleCopy).getList(), this.pilotEstimator);
+				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
+			} catch (DatasetCreationException e) {
+				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
-			this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(
-					((WekaInstances)sampleCopy).getList(), this.pilotEstimator);
-			this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			return this.activate();
-		case active:
+		case ACTIVE:
 			I choosenInstance;
 			if (this.sample.size() < this.sampleSize) {
 				do {
@@ -83,7 +86,7 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 			} else {
 				return this.terminate();
 			}
-		case inactive:
+		case INACTIVE:
 			this.doInactiveStep();
 			break;
 		default:
@@ -92,15 +95,13 @@ public class ClassifierWeightedSampling<I extends IInstance> extends CaseControl
 		return null;
 	}
 
-	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(final Instances instances,
-			final Classifier pilotEstimator) {
+	private EnumeratedIntegerDistribution calculateFinalInstanceBoundariesWithDiscaring(final Instances instances, final Classifier pilotEstimator) {
 		double[] weights = new double[instances.size()];
 		for (int i = 0; i < instances.size(); i++) {
 			try {
 				double clazz = this.pilotEstimator.classifyInstance(instances.get(i));
 				if (clazz == instances.get(i).classValue()) {
-					weights[i] = this.addForRightClassification - pilotEstimator
-							.distributionForInstance(instances.get(i))[(int) instances.get(i).classValue()];
+					weights[i] = this.addForRightClassification - pilotEstimator.distributionForInstance(instances.get(i))[(int) instances.get(i).classValue()];
 				} else {
 					weights[i] = this.baseValue + pilotEstimator.distributionForInstance(instances.get(i))[(int) clazz];
 				}

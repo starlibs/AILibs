@@ -1,21 +1,21 @@
 package ai.libs.jaicore.basic.sets;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 
@@ -30,67 +30,8 @@ import ai.libs.jaicore.basic.MathExt;
 public class SetUtil {
 	private static final String DEFAULT_LIST_ITEM_SEPARATOR = ",";
 
-	public static class Pair<X, Y> {
-		private X x;
-		private Y y;
-
-		public Pair(final X x, final Y y) {
-			super();
-			this.x = x;
-			this.y = y;
-		}
-
-		public X getX() {
-			return this.x;
-		}
-
-		public Y getY() {
-			return this.y;
-		}
-
-		@Override
-		public String toString() {
-			return "<" + this.x + ", " + this.y + ">";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((this.x == null) ? 0 : this.x.hashCode());
-			result = prime * result + ((this.y == null) ? 0 : this.y.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(final Object obj) {
-			if (this == obj) {
-				return true;
-			}
-			if (obj == null) {
-				return false;
-			}
-			if (this.getClass() != obj.getClass()) {
-				return false;
-			}
-			@SuppressWarnings("unchecked")
-			Pair<X, Y> other = (Pair<X, Y>) obj;
-			if (this.x == null) {
-				if (other.x != null) {
-					return false;
-				}
-			} else if (!this.x.equals(other.x)) {
-				return false;
-			}
-			if (this.y == null) {
-				if (other.y != null) {
-					return false;
-				}
-			} else if (!this.y.equals(other.y)) {
-				return false;
-			}
-			return true;
-		}
+	private SetUtil() {
+		// prevent instantiation of this util class
 	}
 
 	/* BASIC SET OPERATIONS */
@@ -149,7 +90,7 @@ public class SetUtil {
 	}
 
 	public static <T> Collection<Collection<T>> getPotenceOfSet(final Collection<T> set, final byte exponent) {
-		Collection<Collection<T>> items = new ArrayList<Collection<T>>();
+		Collection<Collection<T>> items = new ArrayList<>();
 		for (byte i = 0; i < exponent; i++) {
 			items.add(set);
 		}
@@ -160,13 +101,13 @@ public class SetUtil {
 
 		/* recursion abortion */
 		if (items.isEmpty()) {
-			return new ArrayList<Collection<T>>();
+			return new ArrayList<>();
 		}
 		if (items.size() == 1) {
-			Collection<Collection<T>> tuples = new ArrayList<Collection<T>>();
+			Collection<Collection<T>> tuples = new ArrayList<>();
 			for (Collection<T> set : items) { // only one run exists here
 				for (T value : set) {
-					Collection<T> trivialTuple = new ArrayList<T>();
+					Collection<T> trivialTuple = new ArrayList<>();
 					trivialTuple.add(value);
 					tuples.add(trivialTuple);
 				}
@@ -175,9 +116,10 @@ public class SetUtil {
 		}
 
 		/* compute cartesian product of n-1 */
-		Collection<Collection<T>> subproblem = new ArrayList<Collection<T>>();
+		Collection<Collection<T>> subproblem = new ArrayList<>();
 		Collection<T> unconsideredDomain = null;
-		int i = 0, limit = items.size();
+		int i = 0;
+		int limit = items.size();
 		for (Collection<T> set : items) {
 			if (i < limit - 1) {
 				subproblem.add(set);
@@ -190,10 +132,10 @@ public class SetUtil {
 		Collection<Collection<T>> subsolution = getCartesianProductOfSetsOfSameClass(subproblem);
 
 		/* compute solution */
-		Collection<Collection<T>> solution = new ArrayList<Collection<T>>();
+		Collection<Collection<T>> solution = new ArrayList<>();
 		for (Collection<T> tuple : subsolution) {
 			for (T value : unconsideredDomain) {
-				List<T> newTuple = new ArrayList<T>();
+				List<T> newTuple = new ArrayList<>();
 				newTuple.addAll(tuple);
 				newTuple.add(value);
 				solution.add(newTuple);
@@ -206,14 +148,14 @@ public class SetUtil {
 	public static <T> Collection<Collection<T>> powerset(final Collection<T> items) throws InterruptedException {
 		/* |M| = 0 */
 		if (items.isEmpty()) {
-			Collection<Collection<T>> setWithEmptySet = new ArrayList<Collection<T>>();
+			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
 			setWithEmptySet.add(new ArrayList<T>());
 			return setWithEmptySet;
 		}
 
 		/* |M| >= 1 */
 		T baseElement = null;
-		Collection<T> restList = new ArrayList<T>();
+		Collection<T> restList = new ArrayList<>();
 		int i = 0;
 		for (T item : items) {
 			if (i == 0) {
@@ -223,13 +165,13 @@ public class SetUtil {
 			}
 			i++;
 		}
-		Collection<Collection<T>> subsets = powerset(restList);
-		Collection<Collection<T>> toAdd = new ArrayList<Collection<T>>();
+		Collection<Collection<T>> toAdd = new ArrayList<>();
 		if (Thread.currentThread().isInterrupted()) {
 			throw new InterruptedException("Interrupted during calculation of power set");
 		}
+		Collection<Collection<T>> subsets = powerset(restList);
 		for (Collection<T> existingSubset : subsets) {
-			Collection<T> additionalList = new ArrayList<T>();
+			Collection<T> additionalList = new ArrayList<>();
 			additionalList.addAll(existingSubset);
 			additionalList.add(baseElement);
 			toAdd.add(additionalList);
@@ -242,14 +184,14 @@ public class SetUtil {
 
 		/* |M| = 0 */
 		if (items.isEmpty()) {
-			Collection<Collection<T>> setWithEmptySet = new ArrayList<Collection<T>>();
+			Collection<Collection<T>> setWithEmptySet = new ArrayList<>();
 			setWithEmptySet.add(new ArrayList<T>());
 			return setWithEmptySet;
 		}
 
 		/* |M| >= 1 */
 		T baseElement = null;
-		Collection<T> restList = new ArrayList<T>();
+		Collection<T> restList = new ArrayList<>();
 		int i = 0;
 		for (T item : items) {
 			if (i == 0) {
@@ -260,9 +202,9 @@ public class SetUtil {
 			i++;
 		}
 		Collection<Collection<T>> subsets = getAllPossibleSubsets(restList);
-		Collection<Collection<T>> toAdd = new ArrayList<Collection<T>>();
+		Collection<Collection<T>> toAdd = new ArrayList<>();
 		for (Collection<T> existingSubset : subsets) {
-			Collection<T> additionalList = new ArrayList<T>();
+			Collection<T> additionalList = new ArrayList<>();
 			additionalList.addAll(existingSubset);
 			additionalList.add(baseElement);
 			toAdd.add(additionalList);
@@ -279,7 +221,8 @@ public class SetUtil {
 		private int idx;
 		private Set<T> current;
 		private List<Set<T>> allSolutions;
-		private Semaphore semThreads, semComplete;
+		private Semaphore semThreads;
+		private Semaphore semComplete;
 		private long goalSize;
 
 		public SubSetComputer(final List<T> superSet, final int k, final int idx, final Set<T> current, final List<Set<T>> allSolutions, final ExecutorService pool, final Semaphore sem, final long goalSize, final Semaphore semComplete) {
@@ -353,7 +296,7 @@ public class SetUtil {
 
 	public static <T> Collection<Set<T>> subsetsOfSize(final Collection<T> set, final int size) throws InterruptedException {
 		List<Set<T>> subsets = new ArrayList<>();
-		List<T> setAsList = new ArrayList<T>(); // for easier access
+		List<T> setAsList = new ArrayList<>(); // for easier access
 		setAsList.addAll(set);
 		getSubsetOfSizeRec(setAsList, size, 0, new HashSet<T>(), subsets);
 		return subsets;
@@ -381,19 +324,15 @@ public class SetUtil {
 		getSubsetOfSizeRec(superSet, k, idx + 1, current, solution);
 	}
 
-	public static <T> List<Set<T>> getAllPossibleSubsetsWithSizeParallely(final Collection<T> superSet, final int k) {
+	public static <T> List<Set<T>> getAllPossibleSubsetsWithSizeParallely(final Collection<T> superSet, final int k) throws InterruptedException {
 		List<Set<T>> res = new ArrayList<>();
 		int n = 1;
 		ExecutorService pool = Executors.newFixedThreadPool(n);
 		Semaphore solutionSemaphore = new Semaphore(1);
-		try {
-			solutionSemaphore.acquire();
-			pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
-			solutionSemaphore.acquire();
-			pool.shutdown();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		solutionSemaphore.acquire();
+		pool.submit(new SubSetComputer<T>(new ArrayList<>(superSet), k, 0, new HashSet<T>(), res, pool, new Semaphore(n - 1), MathExt.binomial(superSet.size(), k), solutionSemaphore));
+		solutionSemaphore.acquire();
+		pool.shutdown();
 		return res;
 	}
 
@@ -587,7 +526,7 @@ public class SetUtil {
 		List<S> setAsList = new ArrayList<>(set);
 		if (number <= 1) {
 			for (S elem : set) {
-				List<S> tuple = new ArrayList<S>();
+				List<S> tuple = new ArrayList<>();
 				tuple.add(elem);
 				product.add(tuple);
 			}
@@ -620,7 +559,7 @@ public class SetUtil {
 		Collection<Pair<K, V>> relation = new HashSet<>();
 		for (K key : keys) {
 			for (V val : values) {
-				Pair<K, V> p = new Pair<K, V>(key, val);
+				Pair<K, V> p = new Pair<>(key, val);
 				if (relationPredicate.test(p)) {
 					relation.add(p);
 				}
@@ -634,7 +573,7 @@ public class SetUtil {
 		for (K key : keys) {
 			relation.put(key, new HashSet<>());
 			for (V val : values) {
-				Pair<K, V> p = new Pair<K, V>(key, val);
+				Pair<K, V> p = new Pair<>(key, val);
 				if (relationPredicate.test(p)) {
 					relation.get(key).add(val);
 				}
@@ -812,26 +751,26 @@ public class SetUtil {
 	}
 
 	/* ORDER OPERATIONS (SHUFFLE, SORT, PERMUTATE) */
-	public static <T> void shuffle(final List<T> list) {
+	public static <T> void shuffle(final List<T> list, final long seed) {
 
 		/* preliminaries */
-		List<Integer> unusedItems = new ArrayList<Integer>();
+		List<Integer> unusedItems = new ArrayList<>();
 		for (int i = 0; i < list.size(); i++) {
 			unusedItems.add(i);
 		}
-		List<T> copy = new ArrayList<T>();
+		List<T> copy = new ArrayList<>();
 		copy.addAll(list);
 		list.clear();
 
 		/* select randomly from unusedItems until unusedItems is empty */
 		while (!unusedItems.isEmpty()) {
-			int index = (int) Math.floor(Math.random() * unusedItems.size());
+			int index = new Random(seed).nextInt(unusedItems.size());
 			list.add(copy.get(unusedItems.get(index)));
 		}
 	}
 
-	public static <T> T getRandomElement(final Collection<T> set) {
-		int choice = (int) Math.floor(Math.random() * set.size());
+	public static <T> T getRandomElement(final Collection<T> set, final long seed) {
+		int choice = new Random(seed).nextInt(set.size());
 		if (set instanceof List) {
 			return ((List<T>) set).get(choice);
 		}
@@ -846,16 +785,17 @@ public class SetUtil {
 
 	public static <T extends Comparable<T>> List<T> mergeSort(final Collection<T> set) {
 		if (set.isEmpty()) {
-			return new ArrayList<T>();
+			return new ArrayList<>();
 		}
 		if (set.size() == 1) {
-			List<T> result = new ArrayList<T>();
+			List<T> result = new ArrayList<>();
 			result.addAll(set);
 			return result;
 		}
 
 		/* create sublists */
-		List<T> sublist1 = new ArrayList<T>(), sublist2 = new ArrayList<T>();
+		List<T> sublist1 = new ArrayList<>();
+		List<T> sublist2 = new ArrayList<>();
 		int mid = (int) Math.ceil(set.size() / 2.0);
 		int i = 0;
 		for (T elem : set) {
@@ -871,7 +811,7 @@ public class SetUtil {
 	}
 
 	private static <T extends Comparable<T>> List<T> mergeLists(final List<T> list1, final List<T> list2) {
-		List<T> result = new ArrayList<T>();
+		List<T> result = new ArrayList<>();
 		while (!list1.isEmpty() && !list2.isEmpty()) {
 			if (list1.get(0).compareTo(list2.get(0)) < 0) {
 				result.add(list1.get(0));
@@ -894,16 +834,17 @@ public class SetUtil {
 
 	public static <K, V extends Comparable<V>> List<K> keySetSortedByValues(final Map<K, V> map, final boolean asc) {
 		if (map.isEmpty()) {
-			return new ArrayList<K>();
+			return new ArrayList<>();
 		}
 		if (map.size() == 1) {
-			List<K> result = new ArrayList<K>();
+			List<K> result = new ArrayList<>();
 			result.addAll(map.keySet());
 			return result;
 		}
 
 		/* create submaps */
-		Map<K, V> submap1 = new Hashtable<K, V>(), submap2 = new Hashtable<K, V>();
+		Map<K, V> submap1 = new HashMap<>();
+		Map<K, V> submap2 = new HashMap<>();
 		int mid = (int) Math.ceil(map.size() / 2.0);
 		int i = 0;
 		for (Entry<K, V> entry : map.entrySet()) {
@@ -919,7 +860,7 @@ public class SetUtil {
 	}
 
 	private static <K, V extends Comparable<V>> List<K> mergeMaps(final List<K> keys1, final List<K> keys2, final Map<K, V> map, final boolean asc) {
-		List<K> result = new ArrayList<K>();
+		List<K> result = new ArrayList<>();
 		while (!keys1.isEmpty() && !keys2.isEmpty()) {
 			double comp = map.get(keys1.get(0)).compareTo(map.get(keys2.get(0)));
 			if (asc && comp < 0 || !asc && comp >= 0) {
@@ -941,78 +882,35 @@ public class SetUtil {
 		return result;
 	}
 
-	public static <E> int calculateNumberOfTotalOrderings(final PartialOrderedSet<E> set) throws InterruptedException {
-		/*
-		 * Since set sizes of zero or one might cause problems, we catch them here.
-		 */
-		if (set.size() == 1) {
-			return 1;
-		}
-		if (set.size() == 0) {
-			return 0;
-		}
-		/*
-		 * Calculate all edges that aren't part of the corresponding graph.
-		 */
-		List<Set<E>> possibleEdges = SetUtil.getAllPossibleSubsetsWithSize(set, 2);
-		final Iterator<Set<E>> edgeIt = possibleEdges.iterator();
-		while (edgeIt.hasNext()) {
-			final Iterator<E> it = edgeIt.next().iterator();
-			final E a = it.next();
-			final E b = it.next();
-			if (set.isADirectlyBeforeB(a, b)) {
-				edgeIt.remove();
-			} else if (set.isADirectlyBeforeB(b, a)) {
-				edgeIt.remove();
-			}
-		}
-		return getNumberOfAllowedPermutations(set, new LinkedList<>(possibleEdges));
+	public static int calculateNumberOfTotalOrderings(final PartialOrderedSet<?> set) throws InterruptedException {
+		return getAllTotalOrderings(set).size();
 	}
 
-	private static <E> int getNumberOfAllowedPermutations(final PartialOrderedSet<E> set, final Queue<Set<E>> possibleEdges) throws InterruptedException {
+	public static <E> Collection<List<E>> getAllTotalOrderings(final PartialOrderedSet<E> set) throws InterruptedException {
 
-		/* if interrupted, return one ordering (which is a lower bound here) */
-		if (Thread.interrupted()) {
-			throw new InterruptedException();
+		/* for an empty set, create a list that only contains the empty list */
+		if (set.isEmpty()) {
+			return Arrays.asList(new ArrayList<>());
 		}
 
-		/*
-		 * If there isn't an edge left, the given partial order actually is a total order.
-		 */
-		if (possibleEdges.size() == 0) {
-			return 1;
-		}
-		int numberOfAllowedPermutations = 0;
-		boolean atLeastOneWithoutException = false;
-		/*
-		 * We stop the loop if we actually went into the recursion at least once, or the queue is empty.
-		 */
-		while (!atLeastOneWithoutException && !possibleEdges.isEmpty()) {
-			atLeastOneWithoutException = false;
-			Set<E> edgeSet = possibleEdges.poll();
-			assert edgeSet.size() == 2;
-			final Iterator<E> edge = edgeSet.iterator();
-			E a = edge.next();
-			E b = edge.next();
-			final PartialOrderedSet<E> copyOne = new PartialOrderedSet<>(set);
-			final PartialOrderedSet<E> copyTwo = new PartialOrderedSet<>(set);
-			/*
-			 * For edges e1 = (a,b), e2 = (b, a), check whether it is possible to add the edge. If so, continue recursively until a total order (no remaining edges) or a loop in the graph is reached.
-			 */
-			try {
-				copyOne.addABeforeB(a, b);
-				atLeastOneWithoutException = true;
-				numberOfAllowedPermutations += getNumberOfAllowedPermutations(copyOne, new LinkedList<>(possibleEdges));
-			} catch (IllegalStateException isex) {
-			}
-			try {
-				copyTwo.addABeforeB(b, a);
-				atLeastOneWithoutException = true;
-				numberOfAllowedPermutations += getNumberOfAllowedPermutations(copyTwo, new LinkedList<>(possibleEdges));
-			} catch (IllegalStateException isex) {
+		/* otherwise get the list of all elements that could be the last item and fix them once */
+		Collection<List<E>> candidates = new ArrayList<>();
+		Map<E, Set<E>> order = new HashMap<>(set.getOrder());
+		set.getLinearization();
+		Collection<E> itemsWithoutSuccessor = set.stream().filter(s -> !order.containsKey(s) || order.get(s).isEmpty()).collect(Collectors.toList());
+		for (E item : itemsWithoutSuccessor) {
+
+			/* create a new set without the item; this basically means that we enforce that it will be the last item */
+			PartialOrderedSet<E> reducedSet = new PartialOrderedSet<>(set);
+			reducedSet.remove(item);
+
+			/* now get all ordering for the reduced set */
+			for (List<E> completionOfReducedSet : getAllTotalOrderings(reducedSet)) {
+				completionOfReducedSet.add(item);
+				candidates.add(completionOfReducedSet);
 			}
 		}
-		return numberOfAllowedPermutations;
+		return candidates;
 	}
 
 	public static String serializeAsSet(final Collection<String> set) {
@@ -1047,7 +945,7 @@ public class SetUtil {
 
 	public static Interval unserializeInterval(final String intervalDescriptor) {
 		List<String> interval = unserializeList(intervalDescriptor);
-		double min = Double.valueOf(interval.get(0));
+		double min = Double.parseDouble(interval.get(0));
 		return new Interval(min, interval.size() == 1 ? min : Double.valueOf(interval.get(1)));
 	}
 
@@ -1123,5 +1021,16 @@ public class SetUtil {
 		}
 
 		return sb.toString();
+	}
+
+	public static boolean doesStringCollectionOnlyContainNumbers(final Collection<String> strings) {
+		try {
+			for (String s : strings) {
+				Double.parseDouble(s);
+			}
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
 	}
 }

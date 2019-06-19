@@ -3,6 +3,7 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
  */
 public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBestFirst<T, A, Double> {
 
-	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
+	private Logger logger = LoggerFactory.getLogger(BestFirstEpsilon.class);
 	private String loggerName;
 
 	private final INodeEvaluator<T, W> secondaryNodeEvaluator;
@@ -47,22 +48,25 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 			focal.stream().filter(n -> !BestFirstEpsilon.this.secondaryCache.containsKey(n)).forEach(n -> {
 				try {
 					BestFirstEpsilon.this.secondaryCache.put(n, BestFirstEpsilon.this.secondaryNodeEvaluator.f(n));
-				} catch (Throwable e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					BestFirstEpsilon.this.logger.error("Observed exception during computation of f: {}", e);
 				}
 			});
-			Node<T, Double> choice = focal.stream().min((p1, p2) -> BestFirstEpsilon.this.secondaryCache.get(p1).compareTo(BestFirstEpsilon.this.secondaryCache.get(p2))).get();
-			BestFirstEpsilon.this.logger.info("Best score is {}. Threshold for focal is {}. Choose node with f1 {} and best f2 {}. Size of focal was {}.", best, threshold, choice.getInternalLabel(),
-					BestFirstEpsilon.this.secondaryCache.get(choice), focal.size());
-			return choice;
+			Optional<Node<T, Double>> choice = focal.stream().min((p1, p2) -> BestFirstEpsilon.this.secondaryCache.get(p1).compareTo(BestFirstEpsilon.this.secondaryCache.get(p2)));
+			if (!choice.isPresent()) {
+				throw new IllegalStateException("No choice found!");
+			}
+			BestFirstEpsilon.this.logger.info("Best score is {}. Threshold for focal is {}. Choose node with f1 {} and best f2 {}. Size of focal was {}.", best, threshold, choice.get().getInternalLabel(),
+					BestFirstEpsilon.this.secondaryCache.get(choice.get()), focal.size());
+			return choice.get();
 		}
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final int epsilon) {
 		this(problem, pSecondaryNodeEvaluator, epsilon, true);
 	}
 
-	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) throws InterruptedException {
+	public BestFirstEpsilon(final GraphSearchWithSubpathEvaluationsInput<T, A, Double> problem, final INodeEvaluator<T, W> pSecondaryNodeEvaluator, final double epsilon, final boolean absolute) {
 		super(problem);
 		this.secondaryNodeEvaluator = pSecondaryNodeEvaluator;
 		this.epsilon = epsilon;

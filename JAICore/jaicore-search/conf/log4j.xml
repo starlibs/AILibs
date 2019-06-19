@@ -59,6 +59,10 @@
 	 <level value="warn" />
 	</logger>
 	
+	<logger name="ai.libs.jaicore.search.evaluationproblems">
+		<level value="info" />
+	</logger>
+	
   <logger name="testedalgorithm">
     <level value="trace" />
     
@@ -86,14 +90,18 @@
   </logger>
   
   <logger name="ai.libs.jaicore.interrupt">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.timing">
-    <level value="debug" />
+    <level value="warn" />
   </logger>
   
   <logger name="ai.libs.jaicore.concurrent">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.RandomCompletionNodeEvaluatorTester">
     <level value="debug" />
   </logger>
   

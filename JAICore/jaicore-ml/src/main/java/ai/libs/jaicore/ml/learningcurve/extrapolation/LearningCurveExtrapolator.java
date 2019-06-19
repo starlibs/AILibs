@@ -15,8 +15,9 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
+import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
@@ -36,16 +37,16 @@ import weka.core.UnsupportedAttributeTypeException;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingCustomizable {
+public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolator.class);
 
 	protected Classifier learner;
-	protected IDataset<I> dataset;
-	protected IDataset<I> train;
-	protected IDataset<I> test;
-	protected ISamplingAlgorithmFactory<I, ? extends ASamplingAlgorithm<I>> samplingAlgorithmFactory;
-	protected ASamplingAlgorithm<I> samplingAlgorithm;
+	protected D dataset;
+	protected D train;
+	protected D test;
+	protected ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
+	protected ASamplingAlgorithm<D> samplingAlgorithm;
 	protected Random random;
 	protected LearningCurveExtrapolationMethod extrapolationMethod;
 	private final int[] anchorPoints;
@@ -69,9 +70,10 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 	 *            with.
 	 * @param seed
 	 *            Random seed.
+	 * @throws DatasetCreationException
 	 */
-	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final Classifier learner, final IDataset<I> dataset, final double trainsplit, final int[] anchorPoints,
-			final ISamplingAlgorithmFactory<I, ? extends ASamplingAlgorithm<I>> samplingAlgorithmFactory, final long seed) {
+	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final Classifier learner, final D dataset, final double trainsplit, final int[] anchorPoints,
+			final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final long seed) throws DatasetCreationException {
 		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;
@@ -104,22 +106,22 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 	@SuppressWarnings("unchecked")
 	public LearningCurve extrapolateLearningCurve() throws InvalidAnchorPointsException, AlgorithmException, InterruptedException {
 		try {
-			Instances testInstances = ((WekaInstances) this.test).getList();
+			Instances testInstances = ((WekaInstances<Object>) this.test).getList();
 
 			// Create subsamples at the anchorpoints and measure the accuracy there.
 			for (int i = 0; i < this.anchorPoints.length; i++) {
 
 				// If it is a rerunnable factory, set the previous run.
 				if (this.samplingAlgorithmFactory instanceof IRerunnableSamplingAlgorithmFactory && this.samplingAlgorithm != null) {
-					((IRerunnableSamplingAlgorithmFactory<I, ASamplingAlgorithm<I>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
+					((IRerunnableSamplingAlgorithmFactory<D, ASamplingAlgorithm<D>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
 				}
 				this.samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(this.anchorPoints[i], this.train, this.random);
-				IDataset<I> subsampledDataset = this.samplingAlgorithm.call();
+				IOrderedLabeledAttributeArrayDataset<?, ?> subsampledDataset = this.samplingAlgorithm.call();
 
 				// Train classifier on subsample.
 				this.logger.debug("Running classifier with {} data points.", this.anchorPoints[i]);
 				long start = System.currentTimeMillis();
-				this.learner.buildClassifier(((WekaInstances) subsampledDataset).getList());
+				this.learner.buildClassifier(((WekaInstances<Object>) subsampledDataset).getList());
 				this.trainingTimes[i] = (int) (System.currentTimeMillis() - start);
 
 				// Measure accuracy of the trained learner on test split.
@@ -132,7 +134,9 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 				this.yValues[i] = correctCounter / testInstances.size();
 				this.logger.debug("Training finished. Observed learning curve value (accuracy) of {}.", this.yValues[i]);
 			}
-			this.logger.info("Computed accuracies of {} for anchor points {}. Now extrapolating a curve from these observations.", Arrays.toString(this.yValues), Arrays.toString(this.anchorPoints));
+			if (this.logger.isInfoEnabled()) {
+				this.logger.info("Computed accuracies of {} for anchor points {}. Now extrapolating a curve from these observations.", Arrays.toString(this.yValues), Arrays.toString(this.anchorPoints));
+			}
 			return this.extrapolationMethod.extrapolateLearningCurveFromAnchorPoints(this.anchorPoints, this.yValues, this.dataset.size());
 		} catch (UnsupportedAttributeTypeException e) {
 			throw new AlgorithmException(e, "Error during convertion of the dataset to WEKA instances");
@@ -148,37 +152,38 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 
 	}
 
-	private void createSplit(final double trainsplit, final long seed) {
+	@SuppressWarnings("unchecked")
+	private void createSplit(final double trainsplit, final long seed) throws DatasetCreationException {
 		long start = System.currentTimeMillis();
 		this.logger.debug("Creating split with training portion {} and seed {}", trainsplit, seed);
-		this.train = this.dataset.createEmpty();
-		this.test = this.dataset.createEmpty();
-		IDataset<I> data = this.dataset.createEmpty();
+		Random r = new Random(seed);
+		this.train = (D) this.dataset.createEmpty();
+		this.test = (D) this.dataset.createEmpty();
+		D data = (D) this.dataset.createEmpty();
 		data.addAll(this.dataset);
 
 		// Shuffle the data
-		Random r = new Random(seed);
 		Collections.shuffle(data, r);
 
 		// Stratify the data by class
-		Map<Object, IDataset<I>> classStrati = new HashMap<>();
-		this.dataset.forEach(d -> {
-			Object c = d.getTargetValue(Object.class).getValue();
+		Map<Object, D> classStrati = new HashMap<>();
+		for (I d : this.dataset) {
+			Object c = d.getTargetValue();
 			if (!classStrati.containsKey(c)) {
-				classStrati.put(c, this.dataset.createEmpty());
+				classStrati.put(c, (D) this.dataset.createEmpty());
 			}
 			classStrati.get(c).add(d);
-		});
+		}
 
 		// Retrieve strati sizes
 		Map<Object, Integer> classStratiSizes = new HashMap<>(classStrati.size());
-		for (Entry<Object, IDataset<I>> entry : classStrati.entrySet()) {
+		for (Entry<Object, D> entry : classStrati.entrySet()) {
 			classStratiSizes.put(entry.getKey(), classStrati.get(entry.getKey()).size());
 		}
 
 		// First assign one item of each class to train and test
-		for (Entry<Object, IDataset<I>> entry : classStrati.entrySet()) {
-			IDataset<I> availableInstances = classStrati.get(entry.getKey());
+		for (Entry<Object, D> entry : classStrati.entrySet()) {
+			D availableInstances = classStrati.get(entry.getKey());
 			if (!availableInstances.isEmpty()) {
 				this.train.add(availableInstances.get(0));
 				availableInstances.remove(0);
@@ -190,8 +195,8 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 		}
 
 		// Distribute remaining instances over train test
-		for (Entry<Object, IDataset<I>> entry : classStrati.entrySet()) {
-			IDataset<I> availableInstances = classStrati.get(entry.getKey());
+		for (Entry<Object, D> entry : classStrati.entrySet()) {
+			D availableInstances = classStrati.get(entry.getKey());
 			int trainItems = (int) Math.min(availableInstances.size(), Math.ceil(trainsplit * classStratiSizes.get(entry.getKey())));
 			for (int j = 0; j < trainItems; j++) {
 				this.train.add(availableInstances.get(0));
@@ -209,13 +214,14 @@ public class LearningCurveExtrapolator<I extends IInstance> implements ILoggingC
 		Collections.shuffle(this.train, r);
 		Collections.shuffle(this.test, r);
 		this.logger.debug("Finished split creation after {}ms", System.currentTimeMillis() - start);
+
 	}
 
 	public Classifier getLearner() {
 		return this.learner;
 	}
 
-	public IDataset<I> getDataset() {
+	public D getDataset() {
 		return this.dataset;
 	}
 

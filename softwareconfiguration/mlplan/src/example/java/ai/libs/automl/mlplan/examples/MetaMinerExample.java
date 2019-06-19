@@ -1,73 +1,63 @@
 package ai.libs.automl.mlplan.examples;
-//package de.upb.crc901.mlplan.examples;
-//
-//import java.io.BufferedReader;
-//import java.io.File;
-//import java.io.FileReader;
-//import java.util.List;
-//import java.util.Random;
-//
-//import org.openml.apiconnector.io.OpenmlConnector;
-//import org.openml.apiconnector.xml.DataSetDescription;
-//
-//import de.upb.crc901.automl.hascoml.supervised.multiclass.weka.HASCOForWekaML;
-//import hasco.reduction.HASCOReduction;
-//import hasco.serialization.ComponentLoader;
-//import jaicore.graphvisualizer.SimpleGraphVisualizationWindow;
-//import jaicore.ml.WekaUtil;
-//import jaicore.planning.algorithms.forwarddecomposition.ForwardDecompositionHTNPlannerFactory;
-//import jaicore.planning.graphgenerators.task.tfd.TFDNode;
-//import jaicore.search.algorithms.standard.bestfirst.BestFirst;
-//import jaicore.search.core.interfaces.GraphGenerator;
-//import weka.core.Instances;
-//
-///**
-// * Illustrates the usage of the WEKAMetaMiner.
-// *
-// * @author Helena Graf
-// *
-// */
-//public class MetaMinerExample {
-//
-//	public static void main(final String[] args) throws Exception {
-//		/* load data for segment dataset and create a train-test-split */
-//		OpenmlConnector connector = new OpenmlConnector();
-//		DataSetDescription ds = connector.dataGet(40983);
-//		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
-//		Instances data = new Instances(new BufferedReader(new FileReader(file)));
-//		data.setClassIndex(data.numAttributes() - 1);
-//		List<Instances> instances = WekaUtil.getStratifiedSplit(data, new Random(0), .7f);
-//
-//		/* initialize mlplan, and let it run for 30 seconds */
-//		File configFile = new File("model/weka/weka-all-autoweka.json");
-//		HASCOForWekaML hasco = new HASCOForWekaML();
-//		ComponentLoader componentLoader = hasco.getComponentLoader();
-//
-//		/* get the graph generator from the reduction */
-//		HASCOReduction reduction = new HASCOReduction(configFile, "AbstractClassifier", true);
-//		GraphGenerator<TFDNode, String> graphGenerator = reduction.getGraphGeneratorUsedByHASCOForSpecificPlanner(new ForwardDecompositionHTNPlannerFactory<Double>());
-//		BestFirst<TFDNode, String> bf = new BestFirst<>(graphGenerator, n -> n.externalPath().size() * -1.0);
-//		new SimpleGraphVisualizationWindow<>(bf);
-//		while (true) {
-//			bf.nextSolution();
-//		}
-//
-//		// System.out.println(hasco.getGraphGenerator());
-//
-//		// WEKAMetaminer metaMiner = new WEKAMetaminer(data);
-//		// metaMiner.build();
-//		// MetaMinerBasedSorter comparator = new MetaMinerBasedSorter(metaMiner,
-//		// componentLoader);
-//		// mlplan.get.setOrGraphSearchFactory(new
-//		// ImprovedLimitedDiscrepancySearchFactory(comparator));
-//
-//		// mlplan.buildClassifier(split.get(0));
-//
-//		/* evaluate solution produced by mlplan */
-//		// Evaluation eval = new Evaluation(split.get(0));
-//		// eval.evaluateModel(mlplan, split.get(1));
-//		// System.out.println("Error Rate of the solution produced by ML-Plan: " + (100
-//		// - eval.pctCorrect()) / 100f);
-//	}
-//
-//}
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.List;
+
+import org.apache.commons.lang3.time.StopWatch;
+import org.openml.apiconnector.io.OpenmlConnector;
+import org.openml.apiconnector.xml.DataSetDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.mlplan.metamining.MetaMLPlan;
+import weka.classifiers.Evaluation;
+import weka.core.Instances;
+
+/**
+ * Illustrates the usage of the WEKAMetaMiner.
+ * 
+ * @author Helena Graf
+ *
+ */
+public class MetaMinerExample {
+	
+	private static Logger logger = LoggerFactory.getLogger(MetaMinerExample.class);
+
+	public static void main(String[] args) throws Exception {
+		// Load data for a data set and create a train-test-split
+		logger.info("Load data.");
+		OpenmlConnector connector = new OpenmlConnector();
+		DataSetDescription ds = connector.dataGet(40984);
+		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		Instances data = new Instances(new BufferedReader(new FileReader(file)));
+		data.setClassIndex(data.numAttributes() - 1);
+		List<Instances> split = WekaUtil.getStratifiedSplit(data,0, .7f);
+
+		// Initialize meta mlplan and let it run for 2 minutes
+		logger.info("Configure ML-Plan");
+		MetaMLPlan metaMLPlan = new MetaMLPlan(data);
+		metaMLPlan.setCPUs(4);
+		metaMLPlan.setTimeOutInSeconds(60);
+		metaMLPlan.setMetaFeatureSetName("all");
+		metaMLPlan.setDatasetSetName("metaminer_standard");
+		// Limit results to 20 pipelines so that the conversion / downloading doesn't take too long
+		logger.info("Build meta components");
+		StopWatch watch = new StopWatch();
+		watch.start();
+		metaMLPlan.buildMetaComponents(args[0], args[1], args[2], 5);
+		watch.stop();
+		logger.info("Find solution");
+		metaMLPlan.buildClassifier(split.get(0));
+
+		// Evaluate solution produced by meta mlplan
+		logger.info("Evaluate.");
+		Evaluation eval = new Evaluation(split.get(0));
+		eval.evaluateModel(metaMLPlan, split.get(1));
+		logger.info("Error Rate of the solution produced by Meta ML-Plan: {}",(100 - eval.pctCorrect()) / 100f);
+		logger.info("Time in Seconds: {}",watch.getTime()/1000);
+	}
+
+}

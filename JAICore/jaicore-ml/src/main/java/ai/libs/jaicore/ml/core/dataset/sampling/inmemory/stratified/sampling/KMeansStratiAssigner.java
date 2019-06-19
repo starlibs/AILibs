@@ -3,9 +3,11 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.INumericArrayInstance;
 
 /**
  * Cluster the data set with k-means into k Clusters, where each cluster stands
@@ -14,8 +16,9 @@ import ai.libs.jaicore.ml.core.dataset.IInstance;
  * 
  * @author Lukas Brandt
  */
-public class KMeansStratiAssigner<I extends IInstance> extends ClusterStratiAssigner<I> {
+public class KMeansStratiAssigner<I extends INumericArrayInstance, D extends IDataset<I>> extends ClusterStratiAssigner<I, D> {
 
+	private Logger logger = LoggerFactory.getLogger(KMeansStratiAssigner.class);
 	/**
 	 * Constructor for KMeansStratiAssigner.
 	 * 
@@ -31,13 +34,14 @@ public class KMeansStratiAssigner<I extends IInstance> extends ClusterStratiAssi
 	}
 
 	@Override
-	public void init(IDataset<I> dataset, int stratiAmount) {
+	public void init(D dataset, int stratiAmount) {
 		// Perform initial Clustering of the dataset.
 		JDKRandomGenerator rand = new JDKRandomGenerator();
 		rand.setSeed(this.randomSeed);
-		KMeansPlusPlusClusterer<I> clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure,
-				rand);
+		KMeansPlusPlusClusterer<I> clusterer = new KMeansPlusPlusClusterer<>(stratiAmount, -1, this.distanceMeasure, rand);
+		logger.info("Clustering dataset with {} instances.", dataset.size());
 		this.clusters = clusterer.cluster(dataset);
+		logger.info("Finished clustering");
 	}
 
 }

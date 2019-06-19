@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -28,9 +28,9 @@ public class OpenMLProblemSet extends MLProblemSet {
 		OpenmlConnector connector = new OpenmlConnector();
 		this.problemPair = new Pair<>(OpenMLHelper.getDataSourceById(id), connector.dataGet(id).getDefault_target_attribute());
 	}
-	
+
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	@Override

@@ -5,32 +5,30 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.GmeansSamplingFactory;
 
-public class GMeansSamplingTester<I extends IInstance> extends GeneralSamplingTester<I> {
+public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 
-	private static long SEED = 1;
+	private static final long SEED = 1;
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
-	public void testSampleSizeLargeProblem() throws Exception {
+	public void testSampleSizeLargeProblem() {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
-	public void testSampleSizeSmallProblem() throws Exception {
+	public void testSampleSizeSmallProblem() {
 		// Sample Size is not supported for GMeansSampling
 		assertTrue(true);
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
-		@SuppressWarnings("unchecked")
-		IDataset<I> dataset = (IDataset<I>) problem;
-		GmeansSamplingFactory<I> factory = new GmeansSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number> dataset) {
+		GmeansSamplingFactory<INumericLabeledAttributeArrayInstance<Number>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number>> factory = new GmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) dataset.size());

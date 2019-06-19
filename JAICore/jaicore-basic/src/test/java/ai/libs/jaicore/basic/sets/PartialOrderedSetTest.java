@@ -16,10 +16,10 @@ import org.junit.Test;
  */
 public class PartialOrderedSetTest {
 
-	private final String a = "a";
-	private final String b = "b";
-	private final String c = "c";
-	private final String d = "d";
+	private static final String A = "a";
+	private static final String B = "b";
+	private static final String C = "c";
+	private static final String D = "d";
 	private PartialOrderedSet<String> set;
 	private Set<String> transitiveClosureOfA = new HashSet<>();
 	private Set<String> transitiveClosureOfB = new HashSet<>();
@@ -33,23 +33,23 @@ public class PartialOrderedSetTest {
 	@Before
 	public void prepareSet() {
 		this.set = new PartialOrderedSet<>();
-		this.set.addABeforeB(this.a, this.b);
-		this.set.addABeforeB(this.a, this.c);
-		this.set.addABeforeB(this.b, this.c);
-		this.set.addABeforeB(this.c, this.d);
-		this.transitiveClosureOfA.add(this.a);
-		this.transitiveClosureOfA.add(this.b);
-		this.transitiveClosureOfA.add(this.c);
-		this.transitiveClosureOfA.add(this.d);
+		this.set.addABeforeB(A, B);
+		this.set.addABeforeB(A, C);
+		this.set.addABeforeB(B, C);
+		this.set.addABeforeB(C, D);
+		this.transitiveClosureOfA.add(A);
+		this.transitiveClosureOfA.add(B);
+		this.transitiveClosureOfA.add(C);
+		this.transitiveClosureOfA.add(D);
 
-		this.transitiveClosureOfB.add(this.b);
-		this.transitiveClosureOfB.add(this.c);
-		this.transitiveClosureOfB.add(this.d);
+		this.transitiveClosureOfB.add(B);
+		this.transitiveClosureOfB.add(C);
+		this.transitiveClosureOfB.add(D);
 
-		this.transitiveClosureOfC.add(this.c);
-		this.transitiveClosureOfC.add(this.d);
+		this.transitiveClosureOfC.add(C);
+		this.transitiveClosureOfC.add(D);
 
-		this.transitiveClosureOfD.add(this.d);
+		this.transitiveClosureOfD.add(D);
 	}
 
 	/**
@@ -61,22 +61,22 @@ public class PartialOrderedSetTest {
 	public void testClear() {
 		this.set.clear();
 		assertTrue("Even after clear the set wasn't empty.", this.set.isEmpty());
-		assertTrue("Empty set should allow a before a, but doesn't.", !this.set.allowsABeforeB(this.a, this.a));
-		assertTrue("Empty set should allow a before b, but doesn't.", this.set.allowsABeforeB(this.a, this.b));
-		assertTrue("Empty set should allow a before c, but doesn't.", this.set.allowsABeforeB(this.a, this.c));
-		assertTrue("Empty set should allow a before d, but doesn't.", this.set.allowsABeforeB(this.a, this.d));
-		assertTrue("Empty set should allow b before a, but doesn't.", this.set.allowsABeforeB(this.b, this.a));
-		assertTrue("Empty set should allow b before b, but doesn't.", !this.set.allowsABeforeB(this.b, this.b));
-		assertTrue("Empty set should allow b before c, but doesn't.", this.set.allowsABeforeB(this.b, this.c));
-		assertTrue("Empty set should allow b before d, but doesn't.", this.set.allowsABeforeB(this.b, this.d));
-		assertTrue("Empty set should allow c before a, but doesn't.", this.set.allowsABeforeB(this.c, this.a));
-		assertTrue("Empty set should allow c before b, but doesn't.", this.set.allowsABeforeB(this.c, this.b));
-		assertTrue("Empty set should allow c before c, but doesn't.", !this.set.allowsABeforeB(this.c, this.c));
-		assertTrue("Empty set should allow c before d, but doesn't.", this.set.allowsABeforeB(this.c, this.d));
-		assertTrue("Empty set should allow d before a, but doesn't.", this.set.allowsABeforeB(this.d, this.a));
-		assertTrue("Empty set should allow d before b, but doesn't.", this.set.allowsABeforeB(this.d, this.b));
-		assertTrue("Empty set should allow d before c, but doesn't.", this.set.allowsABeforeB(this.d, this.c));
-		assertTrue("Empty set should allow d before d, but doesn't.", !this.set.allowsABeforeB(this.d, this.d));
+		assertTrue("Empty set should allow a before a, but doesn't.", !this.set.allowsABeforeB(A, A));
+		assertTrue("Empty set should allow a before b, but doesn't.", this.set.allowsABeforeB(A, B));
+		assertTrue("Empty set should allow a before c, but doesn't.", this.set.allowsABeforeB(A, C));
+		assertTrue("Empty set should allow a before d, but doesn't.", this.set.allowsABeforeB(A, D));
+		assertTrue("Empty set should allow b before a, but doesn't.", this.set.allowsABeforeB(B, A));
+		assertTrue("Empty set should allow b before b, but doesn't.", !this.set.allowsABeforeB(B, B));
+		assertTrue("Empty set should allow b before c, but doesn't.", this.set.allowsABeforeB(B, C));
+		assertTrue("Empty set should allow b before d, but doesn't.", this.set.allowsABeforeB(B, D));
+		assertTrue("Empty set should allow c before a, but doesn't.", this.set.allowsABeforeB(C, A));
+		assertTrue("Empty set should allow c before b, but doesn't.", this.set.allowsABeforeB(C, B));
+		assertTrue("Empty set should allow c before c, but doesn't.", !this.set.allowsABeforeB(C, C));
+		assertTrue("Empty set should allow c before d, but doesn't.", this.set.allowsABeforeB(C, D));
+		assertTrue("Empty set should allow d before a, but doesn't.", this.set.allowsABeforeB(D, A));
+		assertTrue("Empty set should allow d before b, but doesn't.", this.set.allowsABeforeB(D, B));
+		assertTrue("Empty set should allow d before c, but doesn't.", this.set.allowsABeforeB(D, C));
+		assertTrue("Empty set should allow d before d, but doesn't.", !this.set.allowsABeforeB(D, D));
 	}
 
 	/**
@@ -87,15 +87,15 @@ public class PartialOrderedSetTest {
 	@Test(expected = IllegalStateException.class)
 	public void testAddABeforeB() {
 		String e = "e";
-		this.set.addABeforeB(this.a, e);
-		this.set.addABeforeB(e, this.b);
-		assertTrue("Since a before e was added, this should also be allowed.", this.set.allowsABeforeB(this.a, e));
-		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, this.b));
-		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, this.c));
-		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, this.d));
+		this.set.addABeforeB(A, e);
+		this.set.addABeforeB(e, B);
+		assertTrue("Since a before e was added, this should also be allowed.", this.set.allowsABeforeB(A, e));
+		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, B));
+		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, C));
+		assertTrue("Since e before b was added, this should also be allowed.", this.set.allowsABeforeB(e, D));
 
 		// negative test, because by transitivity this shouldn't be allowed.
-		this.set.addABeforeB(this.c, e);
+		this.set.addABeforeB(C, e);
 	}
 
 	/**
@@ -105,18 +105,18 @@ public class PartialOrderedSetTest {
 	 */
 	@Test
 	public void testAllowsABeforeB() {
-		assertTrue(this.set.allowsABeforeB(this.a, this.b));
-		assertTrue(this.set.allowsABeforeB(this.a, this.c));
-		assertTrue(this.set.allowsABeforeB(this.a, this.d));
-		assertTrue(this.set.allowsABeforeB(this.b, this.c));
-		assertTrue(this.set.allowsABeforeB(this.b, this.d));
-		assertTrue(this.set.allowsABeforeB(this.c, this.d));
-		assertFalse(this.set.allowsABeforeB(this.b, this.a));
-		assertFalse(this.set.allowsABeforeB(this.c, this.a));
-		assertFalse(this.set.allowsABeforeB(this.d, this.a));
-		assertFalse(this.set.allowsABeforeB(this.c, this.b));
-		assertFalse(this.set.allowsABeforeB(this.d, this.b));
-		assertFalse(this.set.allowsABeforeB(this.d, this.c));
+		assertTrue(this.set.allowsABeforeB(A, B));
+		assertTrue(this.set.allowsABeforeB(A, C));
+		assertTrue(this.set.allowsABeforeB(A, D));
+		assertTrue(this.set.allowsABeforeB(B, C));
+		assertTrue(this.set.allowsABeforeB(B, D));
+		assertTrue(this.set.allowsABeforeB(C, D));
+		assertFalse(this.set.allowsABeforeB(B, A));
+		assertFalse(this.set.allowsABeforeB(C, A));
+		assertFalse(this.set.allowsABeforeB(D, A));
+		assertFalse(this.set.allowsABeforeB(C, B));
+		assertFalse(this.set.allowsABeforeB(D, B));
+		assertFalse(this.set.allowsABeforeB(D, C));
 	}
 
 	/**
@@ -126,10 +126,10 @@ public class PartialOrderedSetTest {
 	 */
 	@Test
 	public void testGetTransitiveClosureE() {
-		assertTrue(this.set.getTransitiveClosure(this.a).equals(this.transitiveClosureOfA));
-		assertTrue(this.set.getTransitiveClosure(this.b).equals(this.transitiveClosureOfB));
-		assertTrue(this.set.getTransitiveClosure(this.c).equals(this.transitiveClosureOfC));
-		assertTrue(this.set.getTransitiveClosure(this.d).equals(this.transitiveClosureOfD));
+		assertTrue(this.set.getTransitiveClosure(A).equals(this.transitiveClosureOfA));
+		assertTrue(this.set.getTransitiveClosure(B).equals(this.transitiveClosureOfB));
+		assertTrue(this.set.getTransitiveClosure(C).equals(this.transitiveClosureOfC));
+		assertTrue(this.set.getTransitiveClosure(D).equals(this.transitiveClosureOfD));
 	}
 
 	/**
@@ -140,24 +140,24 @@ public class PartialOrderedSetTest {
 	@Test
 	public void testGetTransitiveClosureSetOfE() throws InterruptedException {
 		Set<String> everything = new HashSet<>();
-		everything.add(this.a);
-		everything.add(this.b);
-		everything.add(this.c);
-		everything.add(this.d);
+		everything.add(A);
+		everything.add(B);
+		everything.add(C);
+		everything.add(D);
 
 		for (Collection<String> subsetAsCollection : SetUtil.powerset(everything)) {
 			Set<String> subset = new HashSet<>(subsetAsCollection);
 			Set<String> expectedTransitiveClosure = new HashSet<>();
-			if (subset.contains(this.a)) {
+			if (subset.contains(A)) {
 				expectedTransitiveClosure.addAll(this.transitiveClosureOfA);
 			}
-			if (subset.contains(this.b)) {
+			if (subset.contains(B)) {
 				expectedTransitiveClosure.addAll(this.transitiveClosureOfB);
 			}
-			if (subset.contains(this.c)) {
+			if (subset.contains(C)) {
 				expectedTransitiveClosure.addAll(this.transitiveClosureOfC);
 			}
-			if (subset.contains(this.d)) {
+			if (subset.contains(D)) {
 				expectedTransitiveClosure.addAll(this.transitiveClosureOfD);
 			}
 			assertTrue("Expedted transitive closure of " + subset.toString() + " is " + expectedTransitiveClosure.toString() + " but calculated was " + this.set.getTransitiveClosure(subset),
@@ -183,16 +183,16 @@ public class PartialOrderedSetTest {
 	@Test
 	public void testRemoveAllCollectionOfQ() {
 		Set<String> remover = new HashSet<>();
-		remover.add(this.a);
-		remover.add(this.c);
+		remover.add(A);
+		remover.add(C);
 		this.set.removeAll(remover);
 
-		assertTrue("b wasn't removed but either anyway isn't part of the set.", this.set.contains(this.b));
-		assertTrue("d wasn't removed but either anyway isn't part of the set.", this.set.contains(this.d));
-		assertFalse("a was removed but is still part of the set.", this.set.contains(this.a));
-		assertFalse("c was removed but is still part of the set.", this.set.contains(this.c));
+		assertTrue("b wasn't removed but either anyway isn't part of the set.", this.set.contains(B));
+		assertTrue("d wasn't removed but either anyway isn't part of the set.", this.set.contains(D));
+		assertFalse("a was removed but is still part of the set.", this.set.contains(A));
+		assertFalse("c was removed but is still part of the set.", this.set.contains(C));
 
-		assertTrue("Since c was removed d before b should be allowed now.", this.set.allowsABeforeB(this.d, this.b));
+		assertTrue("Since c was removed d before b should be allowed now.", this.set.allowsABeforeB(D, B));
 
 	}
 
@@ -205,22 +205,22 @@ public class PartialOrderedSetTest {
 	public void testRetainAllCollectionOfQ() {
 		Set<String> remainingCollection = new HashSet<>();
 
-		remainingCollection.add(this.b);
-		remainingCollection.add(this.d);
+		remainingCollection.add(B);
+		remainingCollection.add(D);
 
 		this.set.retainAll(remainingCollection);
 		Set<String> remover = new HashSet<>();
-		remover.add(this.a);
-		remover.add(this.c);
+		remover.add(A);
+		remover.add(C);
 
 		this.set.removeAll(remover);
 
-		assertTrue("b wasn't removed but either anyway isn't part of the set.", this.set.contains(this.b));
-		assertTrue("d wasn't removed but either anyway isn't part of the set.", this.set.contains(this.d));
-		assertFalse("a was removed but is still part of the set.", this.set.contains(this.a));
-		assertFalse("c was removed but is still part of the set.", this.set.contains(this.c));
+		assertTrue("b wasn't removed but either anyway isn't part of the set.", this.set.contains(B));
+		assertTrue("d wasn't removed but either anyway isn't part of the set.", this.set.contains(D));
+		assertFalse("a was removed but is still part of the set.", this.set.contains(A));
+		assertFalse("c was removed but is still part of the set.", this.set.contains(C));
 
-		assertTrue("Since c was removed, d before b should be allowed now.", this.set.allowsABeforeB(this.d, this.b));
+		assertTrue("Since c was removed, d before b should be allowed now.", this.set.allowsABeforeB(D, B));
 
 	}
 
@@ -233,8 +233,8 @@ public class PartialOrderedSetTest {
 	public void testRemoveIf() {
 		this.set.removeIf(s -> "c".equals(s));
 		assertFalse("c was removed but contains still says it's in.", this.set.contains("c"));
-		assertTrue("Since c was removed from the set, d before a should be allowed but isn't.", this.set.allowsABeforeB(this.d, this.a));
-		assertTrue("Since c was removed from the set, d before b should be allowed but isn't.", this.set.allowsABeforeB(this.d, this.b));
+		assertTrue("Since c was removed from the set, d before a should be allowed but isn't.", this.set.allowsABeforeB(D, A));
+		assertTrue("Since c was removed from the set, d before b should be allowed but isn't.", this.set.allowsABeforeB(D, B));
 	}
 
 	/**
@@ -244,11 +244,11 @@ public class PartialOrderedSetTest {
 	 */
 	@Test
 	public void testRemoveObject() {
-		this.set.remove(this.c);
+		this.set.remove(C);
 
 		assertFalse("c was removed but contains still says it's in.", this.set.contains("c"));
-		assertTrue("Since c was removed from the set, d before a should be allowed but isn't.", this.set.allowsABeforeB(this.d, this.a));
-		assertTrue("Since c was removed from the set, d before b should be allowed but isn't.", this.set.allowsABeforeB(this.d, this.b));
+		assertTrue("Since c was removed from the set, d before a should be allowed but isn't.", this.set.allowsABeforeB(D, A));
+		assertTrue("Since c was removed from the set, d before b should be allowed but isn't.", this.set.allowsABeforeB(D, B));
 	}
 
 }

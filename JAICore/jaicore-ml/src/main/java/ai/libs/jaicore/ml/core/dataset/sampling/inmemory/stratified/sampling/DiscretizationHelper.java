@@ -8,24 +8,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+import org.apache.commons.math3.geometry.partitioning.Region.Location;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
 import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 
 /**
  * This helper class provides methods that are required in order to discretize
  * numeric attributes.
- * 
+ *
  * @author Felix Weiland
  *
  * @param <I>
  *            The instance type
  */
-public class DiscretizationHelper<I extends IInstance> {
+public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
 
@@ -41,7 +42,7 @@ public class DiscretizationHelper<I extends IInstance> {
 	 * This method creates a default discretization policy for each numeric
 	 * attribute in the attributes that have to be considered for stratum
 	 * assignment.
-	 * 
+	 *
 	 * @param dataset
 	 *            The data set that has to be sampled
 	 * @param indices
@@ -56,9 +57,9 @@ public class DiscretizationHelper<I extends IInstance> {
 	 *            assigned
 	 * @return
 	 */
-	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(IDataset<I> dataset,
-			List<Integer> indices, Map<Integer, Set<Object>> attributeValues,
-			DiscretizationStrategy discretizationStrategy, int numberOfCategories) {
+	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(final D dataset,
+			final List<Integer> indices, final Map<Integer, Set<Object>> attributeValues,
+			final DiscretizationStrategy discretizationStrategy, final int numberOfCategories) {
 		Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies = new HashMap<>();
 
 		// Only consider numeric attributes
@@ -66,7 +67,7 @@ public class DiscretizationHelper<I extends IInstance> {
 		indicesToConsider.retainAll(indices);
 		for (int index : indicesToConsider) {
 			// Get the (distinct) values in sorted order
-			List<Double> numericValues = getSortedNumericValues(attributeValues, index);
+			List<Double> numericValues = this.getSortedNumericValues(attributeValues, index);
 
 			// No discretization needed if there are more categories than values
 			if (numericValues.size() <= numberOfCategories) {
@@ -75,10 +76,10 @@ public class DiscretizationHelper<I extends IInstance> {
 			}
 			switch (discretizationStrategy) {
 			case EQUAL_SIZE:
-				discretizationPolicies.put(index, equalSizePolicy(numericValues, numberOfCategories));
+				discretizationPolicies.put(index, this.equalSizePolicy(numericValues, numberOfCategories));
 				break;
 			case EQUAL_LENGTH:
-				discretizationPolicies.put(index, equalLengthPolicy(numericValues, numberOfCategories));
+				discretizationPolicies.put(index, this.equalLengthPolicy(numericValues, numberOfCategories));
 				break;
 			default:
 				throw new IllegalArgumentException(String.format("Invalid strategy: %s", discretizationStrategy));
@@ -94,7 +95,7 @@ public class DiscretizationHelper<I extends IInstance> {
 	 * number of categories. An equal size policy is a policy where the length of
 	 * the intervals is chosen such that in each interval there are equally many
 	 * values.
-	 * 
+	 *
 	 * @param numericValues
 	 *            Distinct attribute values in ascending order
 	 * @param numberOfCategories
@@ -102,7 +103,7 @@ public class DiscretizationHelper<I extends IInstance> {
 	 * @return The created discretization policy consisting of one interval per
 	 *         category
 	 */
-	public AttributeDiscretizationPolicy equalSizePolicy(List<Double> numericValues, int numberOfCategories) {
+	public AttributeDiscretizationPolicy equalSizePolicy(final List<Double> numericValues, final int numberOfCategories) {
 		if (numericValues.isEmpty()) {
 			throw new IllegalArgumentException("No values provided");
 		}
@@ -130,7 +131,7 @@ public class DiscretizationHelper<I extends IInstance> {
 	 * Creates an equal length policy for the given values with respect to the given
 	 * number of categories. An equal length policy is a policy where the length of
 	 * the intervals is the same for all intervals.
-	 * 
+	 *
 	 * @param numericValues
 	 *            Distinct attribute values in ascending order
 	 * @param numberOfCategories
@@ -138,15 +139,15 @@ public class DiscretizationHelper<I extends IInstance> {
 	 * @return The created discretization policy consisting of one interval per
 	 *         category
 	 */
-	public AttributeDiscretizationPolicy equalLengthPolicy(List<Double> numericValues, int numberOfCategories) {
+	public AttributeDiscretizationPolicy equalLengthPolicy(final List<Double> numericValues, final int numberOfCategories) {
 		List<Interval> intervals = new ArrayList<>();
 
 		double max = Collections.max(numericValues);
 		double min = Collections.min(numericValues);
-		double stepwidth = Math.abs(max - min) / (double) numberOfCategories;
+		double stepwidth = Math.abs(max - min) / numberOfCategories;
 		for (int i = 0; i < numberOfCategories; i++) {
-			double lower = min + ((double) i * stepwidth);
-			double upper = min + ((double) (i + 1)) * stepwidth;
+			double lower = min + (i * stepwidth);
+			double upper = min + (i + 1) * stepwidth;
 			intervals.add(new Interval(lower, upper));
 		}
 
@@ -155,12 +156,12 @@ public class DiscretizationHelper<I extends IInstance> {
 
 	/**
 	 * Returns an ascending list of attribute values for the given attribute
-	 * 
+	 *
 	 * @param attributeValues
 	 * @param attributeIndex
 	 * @return
 	 */
-	private List<Double> getSortedNumericValues(Map<Integer, Set<Object>> attributeValues, int attributeIndex) {
+	private List<Double> getSortedNumericValues(final Map<Integer, Set<Object>> attributeValues, final int attributeIndex) {
 		Set<Object> values = attributeValues.get(attributeIndex);
 		List<Double> toReturn = new ArrayList<>();
 		values.forEach(v -> toReturn.add((Double) v));
@@ -170,11 +171,11 @@ public class DiscretizationHelper<I extends IInstance> {
 
 	/**
 	 * Returns the set of attribute indices belonging to numeric attributes
-	 * 
+	 *
 	 * @param dataset
 	 * @return
 	 */
-	private Set<Integer> getNumericIndicesFromDataset(IDataset<I> dataset) {
+	private Set<Integer> getNumericIndicesFromDataset(final D dataset) {
 		Set<Integer> numericAttributes = new HashSet<>();
 		List<IAttributeType<?>> attributeTypes = new ArrayList<>(dataset.getAttributeTypes());
 		attributeTypes.add(dataset.getTargetType());
@@ -189,19 +190,19 @@ public class DiscretizationHelper<I extends IInstance> {
 
 	/**
 	 * Discretizes the given attribute values with respect to the provided policies
-	 * 
+	 *
 	 * @param discretizationPolicies
 	 * @param attributeValues
 	 */
-	protected void discretizeAttributeValues(Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies,
-			Map<Integer, Set<Object>> attributeValues) {
+	protected void discretizeAttributeValues(final Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies,
+			final Map<Integer, Set<Object>> attributeValues) {
 		Set<Integer> numericIndices = discretizationPolicies.keySet();
 		for (int index : numericIndices) {
 			Set<Object> originalValues = attributeValues.get(index);
 			Set<Object> discretizedValues = new HashSet<>();
 			for (Object value : originalValues) {
 				double d = (double) value;
-				discretizedValues.add(discretize(d, discretizationPolicies.get(index)));
+				discretizedValues.add(this.discretize(d, discretizationPolicies.get(index)));
 			}
 			LOG.info("Attribute index {}: Reduced values from {} to {}", index, originalValues.size(),
 					discretizedValues.size());
@@ -213,18 +214,18 @@ public class DiscretizationHelper<I extends IInstance> {
 	 * Discretizes the particular provided value. Discretization in this case means
 	 * to replace the original value by a categorical value. The categorical value
 	 * is simply the index of the interval the value was assigned to.
-	 * 
+	 *
 	 * @param value
 	 *            The (numeric) value to be discretized
 	 * @param policy
 	 *            The policy that has to be used for discretization
 	 * @return
 	 */
-	protected int discretize(double value, AttributeDiscretizationPolicy policy) {
+	protected int discretize(final double value, final AttributeDiscretizationPolicy policy) {
 		List<Interval> intervals = policy.getIntervals();
 		// Find the interval to which the value belongs
 		for (Interval i : intervals) {
-			if (i.contains(value)) {
+			if (i.checkPoint(value, 0) != Location.OUTSIDE) {
 				return intervals.indexOf(i);
 			}
 		}

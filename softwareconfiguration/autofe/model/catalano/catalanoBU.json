@@ -1,0 +1,71 @@
+{
+	"repository" : "Catalano image filters",
+	"include": ["./catalano-filters.json"],
+	"components" : [ {
+	  	    "name" : "pipeline",
+	  	    "providedInterface" : [ "FilterPipeline" ],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "pipe",
+	  	    		"name": "AbstractFilter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    },{
+	  	    "name" : "autofe.MakeUnion",
+	  	    "providedInterface" : [ "AbstractFilter", "MakeUnion"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "filter1",
+	  	    		"name": "AbstractPipeline"
+	  	    	},
+	  	    	{
+	  	    		"id": "filter2",
+	  	    		"name": "AbstractFilter"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }, {
+	  	    "name" : "AbstractPipe",
+	  	    "providedInterface" : [ "AbstractFilter", "AbstractPipeline"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "extractor",
+	  	    		"name": "BasicExtractor"
+	  	    	},
+	  	    	{
+	  	    		"id": "preprocessors",
+	  	    		"name": "Preprocessor"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }, {
+	  	    "name" : "PrepPipe",
+	  	    "providedInterface" : [ "PrepPipe", "Preprocessor"],
+	  	    "requiredInterface" : [
+	  	    	{
+	  	    		"id": "preprocessor",
+	  	    		"name": "BasicPreprocessor"
+	  	    	},
+	  	    	{
+	  	    		"id": "further",
+	  	    		"name": "Preprocessor"
+	  	    	}
+			],
+	    	"parameter" : [ ]
+	    }, {
+	    	"name": "NNPipe",
+	    	"providedInterface" : [ "AbstractFilter", "AbstractPipeline"],
+	    	"requiredInterface" : [
+	    		{
+	  	    		"id": "net",
+	  	    		"name": "PretrainedNN"
+	  	    	},
+	  	    	{
+	  	    		"id": "preprocessors",
+	  	    		"name": "Preprocessor"
+	  	    	}
+			],
+			"parameter" : [ ]
+	    }]
+}

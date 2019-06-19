@@ -4,44 +4,50 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ai.libs.jaicore.basic.sets.SetUtil.Pair;
+import ai.libs.jaicore.basic.sets.Pair;
 
 public class LoggerUtil {
 
-	public static String getExceptionInfo(Throwable e) {
+	private static final String INDENTED_LINEBREAK = "\n\t\t";
+
+	private LoggerUtil() {
+		/* avoid instantiation */
+	}
+
+	public static String getExceptionInfo(final Throwable e) {
 		return getExceptionInfo(e, new ArrayList<>());
 	}
 
-	public static String getExceptionInfo(Throwable e, List<Pair<String, Object>> additionalInformationObjects) {
+	public static String getExceptionInfo(final Throwable e, final List<Pair<String, Object>> additionalInformationObjects) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("\n\tError class: ");
 		sb.append(e.getClass().getName());
 		sb.append("\n\tError message: ");
 		if (e.getMessage() != null) {
-			sb.append(e.getMessage().replace("\n", "\n\t\t"));
+			sb.append(e.getMessage().replace("\n", INDENTED_LINEBREAK));
 		} else {
 			sb.append("NaN");
 		}
 		sb.append("\n\tError trace:");
-		Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
-		while (e.getCause() != null) {
-			e = e.getCause();
-			sb.append("\n\tCaused by " + e.getClass().getName() + " with message " + e.getMessage()
-					+ ". Stack trace of the cause:");
-			Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append("\n\t\t" + ste.toString()));
+		Arrays.asList(e.getStackTrace()).forEach(ste -> sb.append(INDENTED_LINEBREAK + ste.toString()));
+		Throwable current = e;
+		while (current.getCause() != null) {
+			current = current.getCause();
+			sb.append("\n\tCaused by " + current.getClass().getName() + " with message " + current.getMessage() + ". Stack trace of the cause:");
+			Arrays.asList(current.getStackTrace()).forEach(ste -> sb.append(INDENTED_LINEBREAK + ste.toString()));
 		}
 
 		/* if additional objects are given, add their content */
 		if (additionalInformationObjects != null) {
 			for (Pair<String, Object> additionalObject : additionalInformationObjects) {
-				sb.append("\n\t" + additionalObject.getX() + "\n\t\t");
-				sb.append(additionalObject.getY().toString().replaceAll("\n", "\n\t\t"));
+				sb.append("\n\t" + additionalObject.getX() + INDENTED_LINEBREAK);
+				sb.append(additionalObject.getY().toString().replaceAll("\n", INDENTED_LINEBREAK));
 			}
 		}
 		return sb.toString();
 	}
 
-	public static String logException(Throwable e) {
+	public static String logException(final Throwable e) {
 		return getExceptionInfo(e, new ArrayList<>());
 	}
 }

@@ -1,6 +1,5 @@
 package ai.libs.jaicore.planning.hierarchical.problems.stn;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,12 +12,7 @@ import ai.libs.jaicore.logic.fol.structure.Literal;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 
-public class MethodInstance implements Serializable {
-
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 8957990820135975139L;
+public class MethodInstance {
 	private final Method method;
 	private final Map<VariableParam, ConstantParam> grounding;
 	private final Monom precondition;
@@ -47,7 +41,7 @@ public class MethodInstance implements Serializable {
 	}
 
 	public List<ConstantParam> getParameters() {
-		return this.method.getParameters().stream().map(p -> this.grounding.get(p)).collect(Collectors.toList());
+		return this.method.getParameters().stream().map(this.grounding::get).collect(Collectors.toList());
 	}
 
 	public TaskNetwork getNetwork() {
@@ -105,7 +99,6 @@ public class MethodInstance implements Serializable {
 		fields.put("grounding", this.grounding);
 		fields.put("precondition", this.precondition);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
-		// return "MethodInstance [method=" + this.method + ", grounding=" + this.grounding + ", precondition=" + this.precondition + "]";
 	}
 
 	public String getEncoding() {

@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * This class describes the request that is sent to an Extrapolation Service. It
  * contains the x- and y-values of the anchor points.
- * 
+ *
  * @author Felix Weiland
  *
  */
@@ -18,26 +18,26 @@ public class ExtrapolationRequest {
 	private Integer numSamples;
 
 	public List<Integer> getxValues() {
-		return xValues;
+		return this.xValues;
 	}
 
-	public void setxValues(List<Integer> xValues) {
+	public void setxValues(final List<Integer> xValues) {
 		this.xValues = xValues;
 	}
 
 	public List<Double> getyValues() {
-		return yValues;
+		return this.yValues;
 	}
 
-	public void setyValues(List<Double> yValues) {
+	public void setyValues(final List<Double> yValues) {
 		this.yValues = yValues;
 	}
 
 	public Integer getNumSamples() {
-		return numSamples;
+		return this.numSamples;
 	}
 
-	public void setNumSamples(Integer numSamples) {
+	public void setNumSamples(final Integer numSamples) {
 		this.numSamples = numSamples;
 	}
 
@@ -45,40 +45,43 @@ public class ExtrapolationRequest {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((numSamples == null) ? 0 : numSamples.hashCode());
-		result = prime * result + ((xValues == null) ? 0 : xValues.hashCode());
-		result = prime * result + ((yValues == null) ? 0 : yValues.hashCode());
+		result = prime * result + ((this.numSamples == null) ? 0 : this.numSamples.hashCode());
+		result = prime * result + ((this.xValues == null) ? 0 : this.xValues.hashCode());
+		result = prime * result + ((this.yValues == null) ? 0 : this.yValues.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean equals(final Object obj) {
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (this.getClass() != obj.getClass()) {
 			return false;
+		}
 		ExtrapolationRequest other = (ExtrapolationRequest) obj;
-		if (numSamples == null) {
+		if (this.numSamples == null) {
 			if (other.numSamples != null) {
 				return false;
 			}
-		} else if (!numSamples.equals(other.numSamples)) {
+		} else if (!this.numSamples.equals(other.numSamples)) {
 			return false;
 		}
-		if (xValues == null) {
+		if (this.xValues == null) {
 			if (other.xValues != null) {
 				return false;
 			}
-		} else if (!xValues.equals(other.xValues)) {
+		} else if (!this.xValues.equals(other.xValues)) {
 			return false;
 		}
-		if (yValues == null) {
+		if (this.yValues == null) {
 			if (other.yValues != null) {
 				return false;
 			}
-		} else if (!yValues.equals(other.yValues)) {
+		} else if (!this.yValues.equals(other.yValues)) {
 			return false;
 		}
 		return true;
@@ -86,7 +89,7 @@ public class ExtrapolationRequest {
 
 	@Override
 	public String toString() {
-		return "ExtrapolationRequest [xValues=" + xValues + ", yValues=" + yValues + ", numSamples=" + numSamples + "]";
+		return "ExtrapolationRequest [xValues=" + this.xValues + ", yValues=" + this.yValues + ", numSamples=" + this.numSamples + "]";
 	}
 
 }
