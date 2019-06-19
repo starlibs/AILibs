@@ -5,23 +5,21 @@ import java.net.UnknownHostException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.Experiment;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
-import ai.libs.jaicore.experiments.IDatabaseConfig;
 import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
 import ai.libs.jaicore.experiments.IExperimentSetConfig;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
@@ -30,7 +28,7 @@ import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExperimenterSQLHandle.class);
-	
+
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_HOST = "host";
@@ -44,7 +42,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	private final Collection<ExperimentDBEntry> knownExperimentEntries = new HashSet<>();
 
 	private IExperimentSetConfig config;
-	
+
 	public ExperimenterSQLHandle(final SQLAdapter adapter, final String tablename) {
 		super();
 		this.adapter = adapter;
@@ -74,9 +72,9 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	@Override
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
 		this.config = config;
-		
+
 		/* first create tables for complex keys */
-		
+
 		/* creates basic table creation statement */
 		StringBuilder sqlMainTable = new StringBuilder();
 		StringBuilder keyFields = new StringBuilder();
@@ -91,7 +89,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		sqlMainTable.append("`" + FIELD_HOST + "` varchar(255) NOT NULL,");
 		sqlMainTable.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
 		sqlMainTable.append("`" + FIELD_TIME + "_start` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,");
-		
+
 		/* add columns for result fields */
 		for (String result : this.config.getResultFields()) {
 			sqlMainTable.append("`" + result + "` VARCHAR(500) NULL,");
@@ -102,7 +100,7 @@ public class ExperimenterSQLHandle implements IExperimentDatabaseHandle {
 				sqlMainTable.append("`" + result + "_" + FIELD_MEMORY + "` int(6) NULL,");
 			}
 		}
-		
+
 		/* exception field and keys */
 		sqlMainTable.append("`exception` TEXT NULL,");
 		sqlMainTable.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");

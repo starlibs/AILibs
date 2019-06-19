@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.com/fmohr/AILibs.svg?branch=dev)](https://travis-ci.com/fmohr/AILibs)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=alert_status)](https://sonarcloud.io/dashboard/index/starlibs.ailibs)
+[![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=coverage)](https://sonarcloud.io/component_measures?id=starlibs.ailibs&metric=coverage&view=list)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/ai.libs/jaicore-basic/badge.svg)](https://search.maven.org/#search%7Cgav%7C1%7Cg%3A"ai.libs)
 [![Javadocs](https://javadoc.io/badge/ai.libs/jaicore-basic.svg)](https://javadoc.io/doc/ai.libs/jaicore-basic)
 
 
@@ -16,14 +18,14 @@ You can resolve each of our projects via a Maven dependency (using Maven central
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>jaicore-ml</artifactId>
-  <version>0.1.3</version>
+  <version>0.1.4</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-ml:0.1.3'
+    implementation 'ai.libs:jaicore-ml:0.1.4'
 }
 ```
 

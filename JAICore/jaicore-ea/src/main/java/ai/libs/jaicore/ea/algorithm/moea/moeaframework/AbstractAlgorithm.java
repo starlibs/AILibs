@@ -1,20 +1,20 @@
 /* Copyright 2009-2016 David Hadka
-*
-* This file is part of the MOEA Framework.
-*
-* The MOEA Framework is free software: you can redistribute it and/or modify
-* it under the terms of the GNU Lesser General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or (at your
-* option) any later version.
-*
-* The MOEA Framework is distributed in the hope that it will be useful, but
-* WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-* or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-* License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with the MOEA Framework.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ *
+ * This file is part of the MOEA Framework.
+ *
+ * The MOEA Framework is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * The MOEA Framework is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with the MOEA Framework.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package ai.libs.jaicore.ea.algorithm.moea.moeaframework;
 
 import java.io.NotSerializableException;
@@ -30,15 +30,15 @@ import org.moeaframework.core.Problem;
 import org.moeaframework.core.Solution;
 
 /**
-* Abstract class providing default implementations for several
-* {@link Algorithm} methods. All method extending this class must use the
-* {@link #evaluate} method to evaluate a solution. This is mandatory to ensure
-* the {@link #getNumberOfEvaluations()} method returns the correct result.
-* <p>
-* Subclasses should avoid overriding the {@link #step()} method and instead
-* override the {@link #initialize()} and {@link #iterate()} methods
-* individually.
-*/
+ * Abstract class providing default implementations for several
+ * {@link Algorithm} methods. All method extending this class must use the
+ * {@link #evaluate} method to evaluate a solution. This is mandatory to ensure
+ * the {@link #getNumberOfEvaluations()} method returns the correct result.
+ * <p>
+ * Subclasses should avoid overriding the {@link #step()} method and instead
+ * override the {@link #initialize()} and {@link #iterate()} methods
+ * individually.
+ */
 public abstract class AbstractAlgorithm implements Algorithm {
 
 	/**
@@ -65,7 +65,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 
 	/**
 	 * Constructs an abstract algorithm for solving the specified problem.
-	 * 
+	 *
 	 * @param problem the problem being solved
 	 */
 	public AbstractAlgorithm(final Problem problem) {
@@ -78,7 +78,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * {@link #evaluate(Solution)} on each of the solutions. Subclasses should
 	 * prefer calling this method over {@code evaluate} whenever possible,
 	 * as this ensures the solutions can be evaluated in parallel.
-	 * 
+	 *
 	 * @param solutions the solutions to evaluate
 	 */
 	public void evaluateAll(final Iterable<Solution> solutions) {
@@ -99,7 +99,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	/**
 	 * Evaluates the specified solutions.  This method is equivalent to
 	 * {@code evaluateAll(Arrays.asList(solutions))}.
-	 * 
+	 *
 	 * @param solutions the solutions to evaluate
 	 */
 	public void evaluateAll(final Solution[] solutions) {
@@ -129,7 +129,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * of {@code step}. Implementations should always invoke
 	 * {@code super.initialize()} to ensure the hierarchy is initialized
 	 * correctly.
-	 * 
+	 *
 	 * @throws AlgorithmInitializationException if the algorithm has already
 	 *         been initialized
 	 */
@@ -144,7 +144,7 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	/**
 	 * Returns {@code true} if the {@link #initialize()} method has been
 	 * invoked; {@code false} otherwise.
-	 * 
+	 *
 	 * @return {@code true} if the {@link #initialize()} method has been
 	 *         invoked; {@code false} otherwise
 	 */
@@ -158,8 +158,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * {@code step} invoke {@link #iterate()}. Implementations should override
 	 * the {@code initialize} and {@code iterate} methods in preference to
 	 * modifying this method.
-	 * 
-	 * @throws AlgorithmTerminationException if the algorithm has already 
+	 *
+	 * @throws AlgorithmTerminationException if the algorithm has already
 	 *         terminated
 	 */
 	@Override
@@ -190,8 +190,8 @@ public abstract class AbstractAlgorithm implements Algorithm {
 	 * the hierarchy is terminated correctly. This method is automatically
 	 * invoked during finalization, and need only be called directly if
 	 * non-Java resources are in use.
-	 * 
-	 * @throws AlgorithmTerminationException if the algorithm has already 
+	 *
+	 * @throws AlgorithmTerminationException if the algorithm has already
 	 *         terminated
 	 */
 	@Override
@@ -201,17 +201,6 @@ public abstract class AbstractAlgorithm implements Algorithm {
 		}
 
 		this.terminated = true;
-	}
-
-	@Override
-	protected void finalize() throws Throwable {
-		try {
-			if (!this.isTerminated()) {
-				this.terminate();
-			}
-		} finally {
-			super.finalize();
-		}
 	}
 
 	@Override

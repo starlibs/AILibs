@@ -7,17 +7,21 @@ import org.aeonbits.owner.ConfigFactory;
 
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningToGraphSearchReduction;
 import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class HASCOFactory<S extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
+public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
-	private IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver;
+	private IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
 	private IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory;
-	private AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer;
+	private AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer;
 	private HASCOConfig hascoConfig;
 
 	public void setProblemInput(final RefinementConfiguredSoftwareConfigurationProblem<V> problemInput) {
@@ -49,12 +53,12 @@ public class HASCOFactory<S extends GraphSearchInput<N, A>, N, A, V extends Comp
 		return new HASCO<>(this.hascoConfig, problem, this.planningGraphGeneratorDeriver, this.searchFactory, this.searchProblemTransformer);
 	}
 
-	public IHASCOPlanningGraphGeneratorDeriver<N, A> getPlanningGraphGeneratorDeriver() {
+	public IHASCOPlanningReduction<N, A> getPlanningGraphGeneratorDeriver() {
 		return this.planningGraphGeneratorDeriver;
 	}
 
-	public void setPlanningGraphGeneratorDeriver(final IHASCOPlanningGraphGeneratorDeriver<N, A> planningGraphGeneratorDeriver) {
-		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
+	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends Plan, ? extends GraphSearchInput<N,A>, ? super SearchGraphPath<N,A>> planningGraphGeneratorDeriver) {
+		this.planningGraphGeneratorDeriver = (planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>)planningGraphGeneratorDeriver : new DefaultHASCOPlanningReduction<N,A>(planningGraphGeneratorDeriver);
 	}
 
 	public IOptimalPathInORGraphSearchFactory<S, N, A, V> getSearchFactory() {
@@ -65,16 +69,16 @@ public class HASCOFactory<S extends GraphSearchInput<N, A>, N, A, V extends Comp
 		this.searchFactory = searchFactory;
 	}
 
-	public AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> getSearchProblemTransformer() {
+	public AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> getSearchProblemTransformer() {
 		return this.searchProblemTransformer;
 	}
 
-	public void setSearchProblemTransformer(final AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
+	public void setSearchProblemTransformer(final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
 		this.searchProblemTransformer = searchProblemTransformer;
 	}
-	
+
 	public void withDefaultAlgorithmConfig() {
-		withAlgorithmConfig(ConfigCache.getOrCreate(HASCOConfig.class));
+		this.withAlgorithmConfig(ConfigCache.getOrCreate(HASCOConfig.class));
 	}
 
 	public void withAlgorithmConfig(final HASCOConfig hascoConfig) {

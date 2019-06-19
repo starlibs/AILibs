@@ -26,7 +26,7 @@ public class Literal implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(Literal.class);
 	private String property;
-	protected List<LiteralParam> parameters;
+	private List<LiteralParam> parameters;
 
 	public Literal(final Literal l, final Map<? extends LiteralParam, ? extends LiteralParam> map) {
 		this(l.getProperty());
@@ -97,9 +97,7 @@ public class Literal implements Serializable {
 					int index = propertyWithParams.indexOf('(');
 					this.property = propertyWithParams.substring(0, index);
 					if (index < propertyWithParams.length() - 2) {
-						this.parameters.addAll(Arrays.asList(StringUtil.explode(propertyWithParams.substring(index + 1, propertyWithParams.length() - 1), ",")).stream().map(s -> {
-							return LogicUtil.parseParamName(s.trim());
-						}).collect(Collectors.toList()));
+						this.parameters.addAll(Arrays.asList(StringUtil.explode(propertyWithParams.substring(index + 1, propertyWithParams.length() - 1), ",")).stream().map(s -> LogicUtil.parseParamName(s.trim())).collect(Collectors.toList()));
 					}
 				}
 			} else {

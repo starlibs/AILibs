@@ -80,11 +80,11 @@ public class InterpretedLiteral extends Literal {
 		for (LiteralParam v : this.getParameters()) {
 			if (v instanceof VariableParam) {
 				if (mapping != null && mapping.containsKey(v)) {
-					logger.trace("Params: {}", clone.parameters);
+					logger.trace("Params: {}", clone.getParameters());
 				}
-				clone.parameters.add((mapping != null && mapping.containsKey(v)) ? mapping.get(v) : v);
+				clone.getParameters().add((mapping != null && mapping.containsKey(v)) ? mapping.get(v) : v);
 			} else {
-				clone.parameters.add(v);
+				clone.getParameters().add(v);
 			}
 		}
 		logger.debug("finished cloning");

@@ -2,6 +2,9 @@ package ai.libs.jaicore.ml;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -12,7 +15,7 @@ public class SubInstances extends Instances {
 	private final Instances supset;
 	private final int[] indices;
 
-	public SubInstances(Instances dataset, int[] indices) {
+	public SubInstances(final Instances dataset, final int[] indices) {
 		super(dataset.relationName(), new ArrayList<>(WekaUtil.getAttributes(dataset,true)), indices.length);
 		this.supset = dataset;
 		this.indices = indices;
@@ -21,98 +24,121 @@ public class SubInstances extends Instances {
 	}
 
 	@Override
-	public boolean add(/* @non_null@ */Instance instance) {
-		throwError();
+	public boolean add(/* @non_null@ */final Instance instance) {
+		this.throwError();
 		return false;
 	}
 
 	@Override
-	public void add(int index, /* @non_null@ */Instance instance) {
-		throwError();
+	public void add(final int index, /* @non_null@ */final Instance instance) {
+		this.throwError();
 	}
 
+	@Override
 	public void delete() {
-		throwError();
+		this.throwError();
 	}
 
-	public void deleteAttributeAt(int position) {
-		throwError();
+	@Override
+	public void deleteAttributeAt(final int position) {
+		this.throwError();
 	}
 
 	@Override
 	public/* @non_null pure@ */Instance firstInstance() {
-		return supset.get(indices[0]);
-	}
-	
-	@Override
-	public/* @non_null pure@ */Instance instance(int index) {
-		return supset.get(indices[index]);
+		return this.supset.get(this.indices[0]);
 	}
 
 	@Override
-	public/* @non_null pure@ */Instance get(int index) {
-
-		return supset.get(indices[index]);
+	public/* @non_null pure@ */Instance instance(final int index) {
+		return this.supset.get(this.indices[index]);
 	}
-	
+
+	@Override
+	public/* @non_null pure@ */Instance get(final int index) {
+
+		return this.supset.get(this.indices[index]);
+	}
+
 	@Override
 	public/* @pure@ */int numInstances() {
 
-		return indices.length;
+		return this.indices.length;
 	}
-	
+
 	@Override
 	public/* @pure@ */int size() {
-		return indices.length;
+		return this.indices.length;
 	}
 
 	@Override
-	public Instance remove(int index) {
-		throwError();
+	public Instance remove(final int index) {
+		this.throwError();
 		return null;
 	}
 
 	@Override
-	public Instance set(int index, /* @non_null@ */Instance instance) {
-		throwError();
+	public Instance set(final int index, /* @non_null@ */final Instance instance) {
+		this.throwError();
 		return null;
 	}
 
 	@Override
-	public void stratify(int numFolds) {
-		throwError();
+	public void stratify(final int numFolds) {
+		this.throwError();
 	}
 
 	/**
 	 * Returns the dataset as a string in ARFF format. Strings are quoted if they contain whitespace characters, or if they are a question mark.
-	 * 
+	 *
 	 * @return the dataset in ARFF format as a string
 	 */
 	@Override
 	public String toString() {
 
-		StringBuffer text = new StringBuffer();
+		StringBuilder text = new StringBuilder();
 
-		text.append(ARFF_RELATION).append(" ").append(Utils.quote(m_RelationName)).append("\n\n");
-		for (int i = 0; i < numAttributes(); i++) {
-			text.append(attribute(i)).append("\n");
+		text.append(ARFF_RELATION).append(" ").append(Utils.quote(this.m_RelationName)).append("\n\n");
+		for (int i = 0; i < this.numAttributes(); i++) {
+			text.append(this.attribute(i)).append("\n");
 		}
 		text.append("\n").append(ARFF_DATA).append("\n");
 
-		text.append(stringWithoutHeader());
+		text.append(this.stringWithoutHeader());
 		return text.toString();
 	}
 
-	protected void stratStep(int numFolds) {
-		throwError();
+	@Override
+	protected void stratStep(final int numFolds) {
+		this.throwError();
 	}
 
 	@Override
-	public void swap(int i, int j) {
-		throwError();
+	public void swap(final int i, final int j) {
+		this.throwError();
 	}
 
 	private void throwError() {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(super.hashCode()).append(this.supset).append(this.indices).toHashCode();
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		SubInstances other = (SubInstances) obj;
+		return new EqualsBuilder().append(other.indices, this.indices).append(other.supset, this.supset).isEquals();
 	}
 }

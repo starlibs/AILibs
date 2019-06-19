@@ -2,7 +2,7 @@ package ai.libs.mlplan.examples.multiclass.weka;
 
 import org.aeonbits.owner.Config.Sources;
 
-import ai.libs.jaicore.experiments.IDatabaseConfig;
+import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.ml.experiments.IMultiClassClassificationExperimentConfig;
 
 @Sources({ "file:conf/mlplan-weka-eval.properties" })

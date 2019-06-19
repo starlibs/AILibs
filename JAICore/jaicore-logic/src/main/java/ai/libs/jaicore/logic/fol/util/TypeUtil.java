@@ -11,9 +11,14 @@ import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.TypeModule;
 
 public class TypeUtil {
-	private final static Logger LOGGER = LoggerFactory.getLogger(TypeUtil.class);
 
-	public final static String GODFATHER_TYPE = "Thing";
+	private TypeUtil() {
+		/* avoid instantiation */
+	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TypeUtil.class);
+
+	public static final String GODFATHER_TYPE = "Thing";
 
 	private static TypeModule typeMod;
 
@@ -24,9 +29,8 @@ public class TypeUtil {
 	public static void defineGodfatherDataTypes(final Literal l) {
 		checkTypeModule();
 		for (LiteralParam p : l.getParameters()) {
-			LiteralParam pCast = (LiteralParam)p;
-			if (pCast.getType() == null) {
-				pCast.setType(typeMod.getType(GODFATHER_TYPE));
+			if (p.getType() == null) {
+				p.setType(typeMod.getType(GODFATHER_TYPE));
 			}
 		}
 	}

@@ -21,31 +21,28 @@ public class AllPairsTable {
 	private final Map<String, Map<String, Double>> separabilities = new HashMap<>();
 	private final int sum;
 
-	public AllPairsTable(final Instances training, final Instances validation, final Classifier c) {
+	public AllPairsTable(final Instances training, final Instances validation, final Classifier c) throws Exception {
 		Collection<String> classes = WekaUtil.getClassesActuallyContainedInDataset(training);
 		for (Collection<String> set : SetUtil.getAllPossibleSubsetsWithSize(classes, 2)) {
-			try {
-				List<String> pair = set.stream().sorted().collect(Collectors.toList());
-				String a = pair.get(0);
-				String b = pair.get(1);
-				Instances trainingData = WekaUtil.getInstancesOfClass(training, a);
-				trainingData.addAll(WekaUtil.getInstancesOfClass(training, b));
+			List<String> pair = set.stream().sorted().collect(Collectors.toList());
+			String a = pair.get(0);
+			String b = pair.get(1);
+			Instances trainingData = WekaUtil.getInstancesOfClass(training, a);
+			trainingData.addAll(WekaUtil.getInstancesOfClass(training, b));
 
-				c.buildClassifier(trainingData);
+			c.buildClassifier(trainingData);
 
-				Instances validationData = WekaUtil.getInstancesOfClass(validation, a);
-				validationData.addAll(WekaUtil.getInstancesOfClass(validation, b));
-				Evaluation eval = new Evaluation(trainingData);
-				eval.evaluateModel(c, validationData);
+			Instances validationData = WekaUtil.getInstancesOfClass(validation, a);
+			validationData.addAll(WekaUtil.getInstancesOfClass(validation, b));
+			Evaluation eval = new Evaluation(trainingData);
+			eval.evaluateModel(c, validationData);
 
 
-				if (!this.separabilities.containsKey(a)) {
-					this.separabilities.put(a, new HashMap<>());
-				}
-				this.separabilities.get(a).put(b, eval.pctCorrect() / 100);
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (!this.separabilities.containsKey(a)) {
+				this.separabilities.put(a, new HashMap<>());
 			}
+			this.separabilities.get(a).put(b, eval.pctCorrect() / 100);
+
 		}
 		this.classCount = WekaUtil.getNumberOfInstancesPerClass(training);
 		this.sum = training.size();

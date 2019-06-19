@@ -31,6 +31,10 @@ import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
  */
 public class SimplifiedTimeSeriesLoader {
 
+	private SimplifiedTimeSeriesLoader() {
+		/* avoid instantiation */
+	}
+
 	/**
 	 * Log4j logger.
 	 */
@@ -53,13 +57,6 @@ public class SimplifiedTimeSeriesLoader {
 	 * Flag indicating the start of the data block in arff files.
 	 */
 	private static final String ARFF_DATA_FLAG = "@data";
-
-	/**
-	 * Epsilon used for target array comparisons (e. g. used when reading
-	 * multivariate time series which must share their targets among all the
-	 * series).
-	 */
-	private static final double TARGET_EQUALS_EPS = 0.01;
 
 	/**
 	 * Loads a univariate time series dataset from the given arff file. Assumes the

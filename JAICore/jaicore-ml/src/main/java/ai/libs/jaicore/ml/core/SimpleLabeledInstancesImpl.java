@@ -21,7 +21,7 @@ import ai.libs.jaicore.ml.interfaces.LabeledInstance;
 import ai.libs.jaicore.ml.interfaces.LabeledInstances;
 
 @SuppressWarnings("serial")
-public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String>> implements LabeledInstances<String> {
+public class SimpleLabeledInstancesImpl extends ASimpleInstancesImpl<LabeledInstance<String>> implements LabeledInstances<String> {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleLabeledInstancesImpl.class);
 
 	private int numColumns = -1;
@@ -55,16 +55,6 @@ public class SimpleLabeledInstancesImpl extends ArrayList<LabeledInstance<String
 		this.occurringLabels.add(instance.getLabel());
 
 		return super.add(instance);
-	}
-
-	@Override
-	public int getNumberOfRows() {
-		return this.size();
-	}
-
-	@Override
-	public int getNumberOfColumns() {
-		return this.numColumns;
 	}
 
 	@Override

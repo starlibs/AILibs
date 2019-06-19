@@ -1,12 +1,13 @@
 package ai.libs.jaicore.ml.core.dataset.attribute.transformer;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
 import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
 
 public class OneHotEncodingTransformerTest {
 
@@ -27,8 +28,8 @@ public class OneHotEncodingTransformerTest {
 
 		OneHotEncodingTransformer transformer = new OneHotEncodingTransformer();
 		double[] actual = transformer.transformAttribute(value);
-
 		System.out.println("Actual: " + Arrays.toString(actual));
+		assertNotNull(actual);
 	}
 
 }

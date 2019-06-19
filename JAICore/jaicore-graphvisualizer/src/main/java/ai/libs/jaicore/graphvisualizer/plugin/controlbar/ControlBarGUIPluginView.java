@@ -21,25 +21,19 @@ public class ControlBarGUIPluginView implements IGUIPluginView {
 	public Node getNode() {
 		ToolBar topButtonToolBar = new ToolBar();
 
-		startButton = new Button("Play");
-		startButton.setOnMouseClicked(event -> handleStartButtonClick());
-		topButtonToolBar.getItems().add(startButton);
+		this.startButton = new Button("Play");
+		this.startButton.setOnMouseClicked(event -> this.handleStartButtonClick());
+		topButtonToolBar.getItems().add(this.startButton);
 
 		Button pauseButton = new Button("Pause");
-		pauseButton.setOnMouseClicked(event -> handlePauseButtonClick());
+		pauseButton.setOnMouseClicked(event -> this.handlePauseButtonClick());
 		topButtonToolBar.getItems().add(pauseButton);
 
 		Button resetButton = new Button("Reset");
-		resetButton.setOnMouseClicked(event -> handleResetButtonClick());
+		resetButton.setOnMouseClicked(event -> this.handleResetButtonClick());
 		topButtonToolBar.getItems().add(resetButton);
 
 		topButtonToolBar.getItems().add(new Separator());
-
-		// Button saveReplayButton = new Button("Save History");
-		// topButtonToolBar.getItems().add(saveReplayButton);
-		//
-		// Button loadReplayButton = new Button("Load History");
-		// topButtonToolBar.getItems().add(loadReplayButton);
 		return topButtonToolBar;
 	}
 
@@ -57,12 +51,12 @@ public class ControlBarGUIPluginView implements IGUIPluginView {
 
 	@Override
 	public void update() {
-		if (model.isPaused()) {
-			startButton.setText("Resume");
-			startButton.setDisable(false);
+		if (this.model.isPaused()) {
+			this.startButton.setText("Resume");
+			this.startButton.setDisable(false);
 		} else {
-			startButton.setText("Play");
-			startButton.setDisable(true);
+			this.startButton.setText("Play");
+			this.startButton.setDisable(true);
 		}
 	}
 
@@ -72,7 +66,7 @@ public class ControlBarGUIPluginView implements IGUIPluginView {
 	}
 
 	public ControlBarGUIPluginModel getModel() {
-		return model;
+		return this.model;
 	}
 
 }

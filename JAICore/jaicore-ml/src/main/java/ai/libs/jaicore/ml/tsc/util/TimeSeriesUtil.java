@@ -23,6 +23,10 @@ import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
  */
 public class TimeSeriesUtil {
 
+	private TimeSeriesUtil() {
+		/* avoid instantiation */
+	}
+
 	/**
 	 * Checks, whether given INDArray are valid time series.
 	 *

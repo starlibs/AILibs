@@ -20,25 +20,24 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.ceocstn.CEOCSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
 
-@SuppressWarnings("serial")
 public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
-	
-	private final static Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
 
-	public CEOCTFDGraphGenerator(CEOCSTNPlanningProblem problem) {
+	private static final Logger logger = LoggerFactory.getLogger(CEOCTFDGraphGenerator.class);
+
+	public CEOCTFDGraphGenerator(final CEOCSTNPlanningProblem problem) {
 		super(problem);
 	}
 
 	@Override
-	protected TFDNode postProcessPrimitiveTaskNode(TFDNode node) {
+	protected TFDNode postProcessPrimitiveTaskNode(final TFDNode node) {
 		Monom state = node.getState();
 		state.getParameters().stream().filter(p -> p.getName().startsWith("newVar") && !state.contains(new Literal("def('" + p.getName() + "')")))
-				.forEach(p -> state.add(new Literal("def('" + p.getName() + "')")));
+		.forEach(p -> state.add(new Literal("def('" + p.getName() + "')")));
 		return node;
 	}
-	
+
 	@Override
-	public boolean isPathSemanticallySubsumed(List<TFDNode> path, List<TFDNode> compl) throws InterruptedException {
+	public boolean isPathSemanticallySubsumed(final List<TFDNode> path, final List<TFDNode> compl) throws InterruptedException {
 		if (compl.size() < path.size()) {
 			logger.debug("Ignoring this partial path, because its completion is shorter than the path we already have.");
 			return false;
@@ -90,11 +89,13 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 
 			/* compute substitutions of new vars */
 			Collection<ConstantParam> varsInCurrent = new HashSet<>(current.getState().getConstantParams());
-			for (Literal l : current.getRemainingTasks())
+			for (Literal l : current.getRemainingTasks()) {
 				varsInCurrent.addAll(l.getConstantParams());
+			}
 			Collection<ConstantParam> varsInPartner = new HashSet<>(partner.getState().getConstantParams());
-			for (Literal l : partner.getRemainingTasks())
+			for (Literal l : partner.getRemainingTasks()) {
 				varsInPartner.addAll(l.getConstantParams());
+			}
 			Collection<ConstantParam> unboundVars = SetUtil.difference(varsInCurrent, map.keySet());
 			Collection<ConstantParam> possibleTargets = SetUtil.difference(varsInPartner, map.values());
 			for (ConstantParam p : new ArrayList<>(unboundVars)) {
@@ -107,10 +108,10 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 
 			/* if the relation between vars in the nodes is completely known, we can easily decide whether they are unifiable */
 			if (unboundVars.isEmpty()) {
-				if (getRenamedState(current.getState(), map).equals(partner.getState())
-						&& getRenamedRemainingList(current.getRemainingTasks(), map).equals(partner.getRemainingTasks()))
+				if (this.getRenamedState(current.getState(), map).equals(partner.getState())
+						&& this.getRenamedRemainingList(current.getRemainingTasks(), map).equals(partner.getRemainingTasks())) {
 					continue;
-				else {
+				} else {
 					allUnifiable = false;
 					break;
 				}
@@ -122,14 +123,16 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 			for (Map<ConstantParam, ConstantParam> mappingCompletion : possibleMappingCompletions) {
 
 				/* first check whether the state is equal */
-				Monom copy = getRenamedState(current.getState(), mappingCompletion);
-				if (!copy.equals(partner.getState()))
+				Monom copy = this.getRenamedState(current.getState(), mappingCompletion);
+				if (!copy.equals(partner.getState())) {
 					continue;
+				}
 
 				/* if this is the case, check whether the remaining tasks are equal */
-				List<Literal> copyOfTasks = getRenamedRemainingList(current.getRemainingTasks(), mappingCompletion);
-				if (!copyOfTasks.equals(partner.getRemainingTasks()))
+				List<Literal> copyOfTasks = this.getRenamedRemainingList(current.getRemainingTasks(), mappingCompletion);
+				if (!copyOfTasks.equals(partner.getRemainingTasks())) {
 					continue;
+				}
 
 				/* now we know that this node can be unified. We add the respective map and quit the current node pair */
 				map.putAll(mappingCompletion);
@@ -146,19 +149,18 @@ public class CEOCTFDGraphGenerator extends TFDGraphGenerator {
 		if (allUnifiable) {
 			logger.info("Returning true, because this path is unifiable with the given one.");
 			return true;
-		}
-		else
+		} else {
 			return false;
-	}
-	
-
-	
-	private Monom getRenamedState(Monom state, Map<ConstantParam, ConstantParam> map) {
-		Monom copy = new Monom(state, map);
-		return copy;
+		}
 	}
 
-	private List<Literal> getRenamedRemainingList(List<Literal> remainingList, Map<ConstantParam, ConstantParam> map) {
+
+
+	private Monom getRenamedState(final Monom state, final Map<ConstantParam, ConstantParam> map) {
+		return new Monom(state, map);
+	}
+
+	private List<Literal> getRenamedRemainingList(final List<Literal> remainingList, final Map<ConstantParam, ConstantParam> map) {
 		List<Literal> copyOfTasks = new ArrayList<>();
 		for (Literal l : remainingList) {
 			copyOfTasks.add(new Literal(l, map));

@@ -7,6 +7,8 @@ import ai.libs.jaicore.search.model.travesaltree.Node;
 
 public class RandomComparator<T, V extends Comparable<V>> implements Comparator<Node<T, V>> {
 
+	private final Random random = new Random(System.currentTimeMillis());
+
 	/**
 	 * Randomly outputs a negative or positive integer. (Never zero).
 	 * @param first
@@ -15,8 +17,7 @@ public class RandomComparator<T, V extends Comparable<V>> implements Comparator<
 	 */
 	@Override
 	public int compare(final Node<T, V> first, final Node<T, V> second) {
-		Random random = new Random();
-		int r = random.nextInt(2); // This is either 0 or 1.
+		int r = this.random.nextInt(2); // This is either 0 or 1.
 		if (r == 0) {
 			return -1;
 		} else {

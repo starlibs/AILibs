@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
@@ -23,24 +26,26 @@ import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
 public class TFDNodeUtil {
 
 	private static Map<List<TFDNode>, Integer> cache = new HashMap<>();
+	private Logger logger = LoggerFactory.getLogger(TFDNodeUtil.class);
 	private final TaskPlannerUtil util;
-	
-	public TFDNodeUtil(Map<String, EvaluablePredicate> evaluablePlanningPredicates) {
+	private boolean checkArguments = true;
+
+	public TFDNodeUtil(final Map<String, EvaluablePredicate> evaluablePlanningPredicates) {
 		super();
-		util = new TaskPlannerUtil(evaluablePlanningPredicates);
+		this.util = new TaskPlannerUtil(evaluablePlanningPredicates);
 	}
 
-	private boolean checkDoubleRestProblemComputationOccurrence(List<TFDNode> path) {
+	private boolean checkDoubleRestProblemComputationOccurrence(final List<TFDNode> path) {
 		if (cache.containsKey(path)) {
-			System.out.println("already seen path " + cache.get(path) + " times");
+			this.logger.info("already seen path {} times", cache.get(path));
 			return false;
 		}
 		cache.put(path, 0);
 		return true;
 	}
-	
-	public List<TFDNode> getPathOfNode(TFDNode node, Map<TFDNode, TFDNode> parentMap) {
-		
+
+	public List<TFDNode> getPathOfNode(final TFDNode node, final Map<TFDNode, TFDNode> parentMap) {
+
 		/* compute path for node */
 		List<TFDNode> path = new ArrayList<>();
 		TFDNode current = node;
@@ -53,16 +58,19 @@ public class TFDNodeUtil {
 		return path;
 	}
 
-	public TFDRestProblem getRestProblem(List<TFDNode> path) {
+	public TFDRestProblem getRestProblem(final List<TFDNode> path) {
 
 		/* get last node in list with explicit rest problem formulation */
-		assert checkDoubleRestProblemComputationOccurrence(path) : "We must not generate the information of a node twice!";
+		if (this.checkArguments && !this.checkDoubleRestProblemComputationOccurrence(path)) {
+			throw new IllegalArgumentException("We must not generate the information of a node twice!");
+		}
 
 		/* identify latest node that has an explicit rest problem attached */
 		TFDNode latest = null;
 		for (TFDNode n : path) {
-			if (n.getProblem() != null)
+			if (n.getProblem() != null) {
 				latest = n;
+			}
 		}
 
 		/* set iterator to the last check point node */
@@ -70,8 +78,9 @@ public class TFDNodeUtil {
 		TFDNode init = null;
 		do {
 			TFDNode n = i.next();
-			if (n == latest)
+			if (n == latest) {
 				init = n;
+			}
 		} while (init == null);
 
 		/* compute the rest problem going from there */
@@ -91,7 +100,7 @@ public class TFDNodeUtil {
 			MethodInstance appliedMethodInstance = n.getAppliedMethodInstance();
 			if (appliedMethodInstance != null) {
 				int j = 0;
-				for (Literal remainingTask : util.getTaskChainOfTotallyOrderedNetwork(appliedMethodInstance.getNetwork())) {
+				for (Literal remainingTask : this.util.getTaskChainOfTotallyOrderedNetwork(appliedMethodInstance.getNetwork())) {
 					remainingTasks.add(j++, remainingTask);
 				}
 			}
@@ -99,12 +108,12 @@ public class TFDNodeUtil {
 		return new TFDRestProblem(state, new ArrayList<>(remainingTasks));
 	}
 
-	public Monom getState(List<TFDNode> path) {
-		return getRestProblem(path).getState();
+	public Monom getState(final List<TFDNode> path) {
+		return this.getRestProblem(path).getState();
 	}
 
 	@SuppressWarnings("unused")
-	private boolean checkConsistency(Monom state, Map<CNFFormula, Monom> addLists) {
+	private boolean checkConsistency(final Monom state, final Map<CNFFormula, Monom> addLists) {
 		for (Literal lit : state) {
 			if (lit.getPropertyName().equals("cluster")) {
 				String clusterName = lit.getConstantParams().get(0).getName();
@@ -119,15 +128,11 @@ public class TFDNodeUtil {
 						params.add(new ConstantParam(clusterName));
 						Literal lit3 = new Literal("in", params);
 						if (!state.contains(lit3)) {
-							throw new IllegalStateException(
-									"Smallest item in cluster " + clusterName + " is " + smallestItem + ", which is not even contained according to state " + state + "!");
+							throw new IllegalStateException("Smallest item in cluster " + clusterName + " is " + smallestItem + ", which is not even contained according to state " + state + "!");
 						}
 						for (Literal lit4 : state) {
-							if (lit4.getPropertyName().equals("in") && lit4.getConstantParams().get(1).getName().equals(clusterName)) {
-								if (state.contains(new Literal("bigger('" + smallestItem + "','" + lit4.getConstantParams().get(0).getName() + "')"))) {
-									throw new IllegalStateException("Cluster " + clusterName + " has " + smallestItem + " as smallest item, but "
-											+ lit4.getConstantParams().get(0).getName() + " is smaller");
-								}
+							if (lit4.getPropertyName().equals("in") && lit4.getConstantParams().get(1).getName().equals(clusterName) && state.contains(new Literal("bigger('" + smallestItem + "','" + lit4.getConstantParams().get(0).getName() + "')"))) {
+								throw new IllegalStateException("Cluster " + clusterName + " has " + smallestItem + " as smallest item, but " + lit4.getConstantParams().get(0).getName() + " is smaller");
 							}
 						}
 						break;
@@ -138,13 +143,6 @@ public class TFDNodeUtil {
 					}
 				}
 				if (!foundSmallest && !foundRepresentant) {
-					// for (CNFFormula condition : addLists.keySet()) {
-					// CNFFormula evaledCondition = LogicUtil.evalEqualityLiteralsUnderUNA(condition);
-					// System.out.println(evaledCondition + ": " + (evaledCondition.isConsistent() && state.containsAll(evaledCondition)));
-					// if (evaledCondition.isConsistent())
-					// System.out.println(state);
-					// }
-					// System.err.println(logger.toString());
 					throw new IllegalStateException("State " + state + " does not specify a smallest element for cluster " + clusterName + " after applying addList " + addLists);
 				}
 			}
@@ -152,7 +150,7 @@ public class TFDNodeUtil {
 		return true;
 	}
 
-	public List<Literal> getRemainingTasks(List<TFDNode> path) {
-		return getRestProblem(path).getRemainingTasks();
+	public List<Literal> getRemainingTasks(final List<TFDNode> path) {
+		return this.getRestProblem(path).getRemainingTasks();
 	}
 }

@@ -222,17 +222,6 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 	}
 
 	/**
-	 * Predicts on a multivariate instance. This is not supported yet.
-	 *
-	 * @param multivInstance The multivariate instance.
-	 * @return Class prediciton for the instance.
-	 */
-	@Override
-	public Integer predict(final List<double[]> multivInstance) throws PredictionException {
-		throw new PredictionException("Can't predict on multivariate data yet.");
-	}
-
-	/**
 	 * Predicts on a dataset.
 	 *
 	 * @param dataset The dataset.
@@ -240,15 +229,7 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 	 */
 	@Override
 	public List<Integer> predict(final TimeSeriesDataset dataset) throws PredictionException {
-		// Parameter checks.
-		if (dataset == null) {
-			throw new IllegalArgumentException("Dataset must not be null.");
-		}
-		double[][] testInstances = dataset.getValuesOrNull(0);
-		if (testInstances == null) {
-			throw new PredictionException("Can't predict on empty dataset.");
-		}
-		// Calculate predictions.
+		this.checkWhetherPredictionIsPossible(dataset);
 		Map<Integer, List<Integer>> windowLengthPredicitions = this.calculateWindowLengthPredictions(dataset);
 		return this.mostFrequentLabelsFromWindowLengthPredicitions(windowLengthPredicitions);
 	}

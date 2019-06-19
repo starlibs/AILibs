@@ -33,26 +33,8 @@ import ai.libs.jaicore.ml.tsc.filter.transform.CosineTransform;
  *
  * @author fischor
  */
-public class TransformDistance implements ITimeSeriesDistance {
+public class TransformDistance extends AWeightedTrigometricDistance {
 
-	/**
-	 * Alpha value that adjusts the parameters {@link a} and {@link b}, that is
-	 * <code>a=cos(alpha)</code> and <code>b=sin(alpha)</code>. It holds, that
-	 * <code>0 <= alpha <= pi/2</code>.
-	 */
-	private double alpha;
-
-	/**
-	 * Determines the influence of distance of the function values to the overall
-	 * distance measure.
-	 */
-	private double a;
-
-	/**
-	 * Determines the influence of distance of the transform values to the overall
-	 * distance measure.
-	 */
-	private double b;
 
 	/** The transform calculation to use. */
 	private ATransformFilter transform;
@@ -80,10 +62,7 @@ public class TransformDistance implements ITimeSeriesDistance {
 	 *            distance of the transform values.
 	 */
 	public TransformDistance(final double alpha, final ATransformFilter transform, final ITimeSeriesDistance timeSeriesDistance, final ITimeSeriesDistance transformDistance) {
-		// Parameter checks.
-		if (alpha > Math.PI / 2 || alpha < 0) {
-			throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
-		}
+		super(alpha);
 		if (transform == null) {
 			throw new IllegalArgumentException("Parameter transform must not be null.");
 		}
@@ -93,8 +72,6 @@ public class TransformDistance implements ITimeSeriesDistance {
 		if (transformDistance == null) {
 			throw new IllegalArgumentException("Parameter transformDistance must not be null.");
 		}
-
-		this.setAlpha(alpha);
 		this.transform = transform;
 		this.timeSeriesDistance = timeSeriesDistance;
 		this.baseTransformDistance = transformDistance;
@@ -143,50 +120,16 @@ public class TransformDistance implements ITimeSeriesDistance {
 		this(alpha, new CosineTransform(), distance);
 	}
 
+
+	/**
+	 * @param a The influence of distance of the function values to the overall distance measure.
+	 * @param b The influence of distance of the transform values to the overall distance measure.
+	 *
+	 */
 	@Override
 	public double distance(final double[] a, final double[] b) {
 		double[] transformA = this.transform.transform(a);
 		double[] transformB = this.transform.transform(b);
-
-		return this.a * this.timeSeriesDistance.distance(a, b) + this.b * this.baseTransformDistance.distance(transformA, transformB);
+		return this.getA() * this.timeSeriesDistance.distance(a, b) + this.getB() * this.baseTransformDistance.distance(transformA, transformB);
 	}
-
-	/**
-	 * Sets the alpha value and adjusts the measurement parameters
-	 * <code>a = cos(alpha)<code> and <code>b = sin(alpha)</code> accordingly.
-	 *
-	 * @param alpha The alpha value, <code>0 <= alpha <= pi/2</code>.
-	 */
-	public void setAlpha(final double alpha) {
-		// Parameter checks.
-		if (alpha > Math.PI / 2 || alpha < 0) {
-			throw new IllegalArgumentException("Parameter alpha has to be between 0 (inclusive) and pi/2 (inclusive).");
-		}
-
-		this.alpha = alpha;
-		this.a = Math.cos(alpha);
-		this.b = Math.sin(alpha);
-	}
-
-	/**
-	 * Getter for the alpha value. It holds, that <code>0 <= alpha <= pi/2</code>.
-	 */
-	public double getAlpha() {
-		return this.alpha;
-	}
-
-	/**
-	 * Getter for the <code>a</code> parameter. @see #a
-	 */
-	public double getA() {
-		return this.a;
-	}
-
-	/**
-	 * Getter for the <code>a</code> parameter. @see #b
-	 */
-	public double getB() {
-		return this.b;
-	}
-
 }

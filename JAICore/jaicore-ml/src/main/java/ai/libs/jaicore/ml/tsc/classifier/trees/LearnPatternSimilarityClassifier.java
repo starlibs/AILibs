@@ -189,19 +189,10 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	 */
 	@Override
 	public List<Integer> predict(final TimeSeriesDataset dataset) throws PredictionException {
-		if (!this.isTrained()) {
-			throw new PredictionException("Model has not been built before!");
-		}
-
-		if (dataset == null || dataset.isEmpty()) {
-			throw new IllegalArgumentException("Dataset to be predicted must not be null or empty!");
-		}
-
+		double[][] data = this.checkWhetherPredictionIsPossible(dataset);
 		if (dataset.isMultivariate()) {
 			throw new UnsupportedOperationException("Multivariate instances are not supported yet.");
 		}
-
-		double[][] data = dataset.getValuesOrNull(0);
 		List<Integer> predictions = new ArrayList<>();
 		LOGGER.debug("Starting prediction...");
 		for (int i = 0; i < data.length; i++) {

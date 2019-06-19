@@ -586,7 +586,6 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 				Iterator<Integer> tmpIt = roundRobinIt.next();
 				if (!tmpIt.hasNext()) {
 					tmpCounter++;
-					continue;
 				} else {
 					resultList.add(tmpIt.next());
 					break;

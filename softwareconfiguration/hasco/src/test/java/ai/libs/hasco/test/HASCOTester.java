@@ -29,12 +29,13 @@ import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
+import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.util.CycleDetectedResult;
 import ai.libs.jaicore.search.util.DeadEndDetectedResult;
 import ai.libs.jaicore.search.util.GraphSanityChecker;
 import ai.libs.jaicore.search.util.SanityCheckResult;
 
-public abstract class HASCOTester<S extends GraphSearchInput<N, A>, N, A> extends SoftwareConfigurationAlgorithmTester {
+public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends SoftwareConfigurationAlgorithmTester {
 
 	private Logger logger = LoggerFactory.getLogger(HASCOTester.class);
 
@@ -68,7 +69,7 @@ public abstract class HASCOTester<S extends GraphSearchInput<N, A>, N, A> extend
 		Collection<Pair<HASCO<S, N, A, Double>, Integer>> hascoObjects = new ArrayList<>();
 		hascoObjects.add(new Pair<>(this.getHASCOForSimpleProblem(), 6));
 		hascoObjects.add(new Pair<>(this.getHASCOForDifficultProblem(), -1));
-		hascoObjects.add(new Pair<>(this.getHASCOForProblemWithDependencies(), 12));
+		hascoObjects.add(new Pair<>(this.getHASCOForProblemWithDependencies(), 17));
 		return hascoObjects;
 	}
 
