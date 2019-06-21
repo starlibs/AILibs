@@ -1,6 +1,6 @@
 package ai.libs.jaicore.experiments;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
@@ -24,23 +24,64 @@ public interface IExperimentDatabaseHandle {
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException;
 
 	/**
-	 * Returns a list of all experiments contained in the database. There is no need for those to be in line with the latest configuration.
+	 * Returns a list of all experiments contained in the database
 	 *
 	 * @return List of all experiments
 	 * @throws ExperimentDBInteractionFailedException
 	 */
-	public Collection<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException;
+	public List<ExperimentDBEntry> getAllExperiments() throws ExperimentDBInteractionFailedException;
 
 	/**
-	 * * Creates a new experiment entry and returns it.
+	 * Returns a list of all experiments contained in the database marked as being conducted.
 	 *
-	 * @param experiment
+	 * @return List of all experiments conducted so far
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException;
+
+	/**
+	 * Returns a list of all experiments contained in the database that have not been started yet.
+	 *
+	 * @return List of all experiments conducted so far
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> getOpenExperiments() throws ExperimentDBInteractionFailedException;
+
+	/**
+	 * Returns a list of all experiments that are currently being conducted.
+	 *
+	 * @return List of all experiments conducted so far
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException;
+
+	/**
+	 * Creates a new experiment entry and returns it.
+	 *
 	 * @param experiment
 	 * @return The id of the created experiment
 	 * @throws ExperimentDBInteractionFailedException
 	 * @throws ExperimentAlreadyExistsInDatabaseException
 	 */
 	public ExperimentDBEntry createAndGetExperiment(final Experiment experiment) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException;
+
+	/**
+	 * Creates a new experiment entry and returns it.
+	 *
+	 * @param experiments the experiments to be created
+	 * @return The id of the created experiment
+	 * @throws ExperimentDBInteractionFailedException
+	 * @throws ExperimentAlreadyExistsInDatabaseException
+	 */
+	public List<ExperimentDBEntry> createAndGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException;
+
+	/**
+	 * Updates non-keyfield values of the experiment.
+	 *
+	 * @param exp The experiment that is started on the current machine
+	 * @throws ExperimentUpdateFailedException
+	 */
+	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException;
 
 	/**
 	 * Updates non-keyfield values of the experiment.

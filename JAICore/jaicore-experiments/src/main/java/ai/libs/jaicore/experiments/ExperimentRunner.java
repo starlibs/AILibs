@@ -42,9 +42,12 @@ public class ExperimentRunner {
 	private final IExperimentSetConfig config;
 	private final IExperimentSetEvaluator conductor;
 	private final IExperimentDatabaseHandle handle;
-	private final Collection<Map<String,String>> keysForWhichResultsAreKnown = new HashSet<>();
+	private final Collection<Map<String, String>> keysForWhichResultsAreKnown = new HashSet<>();
 
-	private Map<String, List<String>> valuesForKeyFields = new HashMap<>();
+	private List<Map<String, String>> possibleKeyCombinations;
+
+	private final Map<String, IExperimentKeyGenerator<?>> valueGeneratorsPerKey = new HashMap<>();
+	private final Map<String, List<String>> valuesForKeyFields = new HashMap<>();
 	private int memoryLimit;
 	private int cpuLimit;
 	private int totalNumberOfExperiments;
@@ -76,6 +79,22 @@ public class ExperimentRunner {
 		this.handle = databaseHandle;
 	}
 
+	public List<ExperimentDBEntry> createExperiments() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException {
+
+		/* compute all experiments */
+		List<Map<String, String>> tmpPossibleKeyCombinations = this.getAllPossibleKeyCombinations();
+		logger.debug("Determined {} possible combinations. Will now remove keys that are already contained.", tmpPossibleKeyCombinations.size());
+		for (ExperimentDBEntry experiment : this.handle.getConductedExperiments()) {
+			tmpPossibleKeyCombinations.remove(experiment.getExperiment().getValuesOfKeyFields());
+		}
+		logger.debug("Number of experiments that will be created now is {}.", tmpPossibleKeyCombinations.size());
+
+		/* create experiments */
+		List<ExperimentDBEntry> entries = this.handle.createAndGetExperiments(tmpPossibleKeyCombinations.stream().map(t -> new Experiment(this.memoryLimit, this.cpuLimit, t)).collect(Collectors.toList()));
+		logger.info("Ids of {} inserted entries: {}", entries.size(), entries.stream().map(ExperimentDBEntry::getId).collect(Collectors.toList()));
+		return entries;
+	}
+
 	private void updateExperimentSetupAccordingToConfig() throws IllegalKeyDescriptorException, ExperimentDBInteractionFailedException {
 		if (this.condMemoryLimitCheck) {
 			if (Math.abs((int) (Runtime.getRuntime().maxMemory() / 1024 / 1024) - this.config.getMemoryLimitInMB()) > MAX_MEM_DEVIATION) {
@@ -89,6 +108,7 @@ public class ExperimentRunner {
 
 		/* create map of possible values for each key field */
 		for (String key : this.config.getKeyFields()) {
+
 			/* this is a hack needed because one cannot retrieve generic configs */
 			String propertyVals = this.config.removeProperty(key);
 			if (propertyVals == null) {
@@ -127,29 +147,28 @@ public class ExperimentRunner {
 		return true;
 	}
 
+	public List<Map<String, String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException {
+		if (this.possibleKeyCombinations == null) {
 
-	public List<Map<String,String>> getOpenKeyCombination() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException {
-		return SetUtil.difference(this.getAllPossibleKeyCombinations(), this.handle.getConductedExperiments().stream().map(e -> e.getExperiment().getValuesOfKeyFields()).collect(Collectors.toList()));
-	}
+			logger.debug("Computing all possible experiments.");
+			this.updateExperimentSetupAccordingToConfig();
 
-	public List<Map<String,String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException {
-		logger.debug("Computing all possible experiments.");
-		this.updateExperimentSetupAccordingToConfig();
-
-		/* build cartesian product over all possible key-value */
-		List<List<String>> values = new ArrayList<>();
-		for (String key : this.config.getKeyFields()) {
-			if (!this.valuesForKeyFields.containsKey(key)) {
-				throw new IllegalStateException("No values for key " + key + " have been defined!");
+			/* build cartesian product over all possible key-value */
+			List<List<String>> values = new ArrayList<>();
+			for (String key : this.config.getKeyFields()) {
+				if (!this.valuesForKeyFields.containsKey(key)) {
+					throw new IllegalStateException("No values for key " + key + " have been defined!");
+				}
+				List<String> valuesForKey = this.getAllValuesForKey(key);
+				logger.debug("Retrieving values for key {}: {}", key, valuesForKey);
+				values.add(valuesForKey);
 			}
-			List<String> valuesForKey = this.getAllValuesForKey(key);
-			logger.debug("Retrieving values for key {}: {}", key, valuesForKey);
-			values.add(valuesForKey);
-		}
 
-		/* create one experiment object from every tuple */
-		logger.debug("Building cartesian product over {}", values);
-		return SetUtil.cartesianProduct(values).stream().map(tuple -> this.mapValuesToKeyValueMap(tuple)).collect(Collectors.toList());
+			/* create one experiment object from every tuple */
+			logger.debug("Building cartesian product with {} items from {}", values.stream().mapToInt(Collection::size).reduce(1, (a, b) -> a * b), values);
+			this.possibleKeyCombinations = SetUtil.cartesianProduct(values).stream().map(this::mapValuesToKeyValueMap).collect(Collectors.toList());
+		}
+		return this.possibleKeyCombinations;
 	}
 
 	private Map<String, String> mapValuesToKeyValueMap(final List<String> values) {
@@ -193,25 +212,31 @@ public class ExperimentRunner {
 		}
 	}
 
-	private String getValueForKey(final String key, final int indexOfValue) throws IllegalKeyDescriptorException {
+	private String getValueForKey(final String key, final int indexOfValue) {
 		List<String> possibleValues = this.valuesForKeyFields.get(key);
 		assert !possibleValues.isEmpty() : "No values specified for key " + key;
 		if (!possibleValues.get(0).startsWith(PROTOCOL_JAVA)) {
 			return possibleValues.get(indexOfValue);
 		}
 		this.checkUniquenessOfKey(key);
-		try {
-			Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
-			this.checkKeyGenerator(c);
-			logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
-			Object value = ((IExperimentKeyGenerator<?>) c.newInstance()).getValue(indexOfValue);
-			if (value == null) {
-				throw new NoSuchElementException("No value could be found for index " + indexOfValue + " in keyfield " + key);
+
+		/* determine the generator for this key if this has not happened before */
+		IExperimentKeyGenerator<?> keyGenerator = this.valueGeneratorsPerKey.computeIfAbsent(key, k -> {
+			try {
+				Class<?> c = Class.forName(possibleValues.get(0).substring(5).trim());
+				this.checkKeyGenerator(c);
+				logger.trace(LOGMESSAGE_CREATEINSTANCE, c.getName());
+				return (IExperimentKeyGenerator<?>) c.newInstance();
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalKeyDescriptorException e) {
+				throw new IllegalArgumentException(e);
 			}
-			return value.toString();
-		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-			throw new IllegalKeyDescriptorException(e);
+		});
+
+		Object value = keyGenerator.getValue(indexOfValue);
+		if (value == null) {
+			throw new NoSuchElementException("No value could be found for index " + indexOfValue + " in keyfield " + key);
 		}
+		return value.toString();
 	}
 
 	public List<String> getAllValuesForKey(final String key) throws IllegalKeyDescriptorException {
@@ -253,7 +278,9 @@ public class ExperimentRunner {
 	 * @throws IllegalExperimentSetupException
 	 */
 	public void randomlyConductExperiments(final int maxNumberOfExperiments, final boolean reload) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
+		logger.info("Starting to run up to {} experiments. Reload: {}", maxNumberOfExperiments, reload);
 		this.updateExperimentSetupAccordingToConfig();
+		logger.debug("Experiment setup updated");
 
 		if (this.totalNumberOfExperiments <= 0) {
 			logger.info("Number of total experiments is 0");
@@ -267,21 +294,23 @@ public class ExperimentRunner {
 				this.config.reload();
 			}
 			this.updateExperimentSetupAccordingToConfig();
-			List<Map<String,String>> openExperiments = this.getOpenKeyCombination();
+			List<ExperimentDBEntry> openExperiments = this.handle.getOpenExperiments();
 			int k = this.random.nextInt(openExperiments.size());
 			logger.info("Now conducting {}th of {} open experiments.", k, openExperiments.size());
-			Experiment exp = new Experiment(this.memoryLimit, this.cpuLimit, openExperiments.get(k));
-			this.checkExperimentValidity(exp);
-			logger.info("Conduct experiment with key values: {}", exp.getValuesOfKeyFields());
+			ExperimentDBEntry exp = openExperiments.get(k);
+			this.checkExperimentValidity(exp.getExperiment());
+			logger.info("Conduct experiment with key values: {}", exp.getExperiment().getValuesOfKeyFields());
 			try {
 				this.conductExperiment(exp);
 				numberOfConductedExperiments++;
-			}
-			catch (ExperimentAlreadyExistsInDatabaseException e) {
-				logger.warn("Conducted experiment with keys {} for the second time.", exp.getValuesOfKeyFields());
+			} catch (ExperimentAlreadyExistsInDatabaseException e) {
+				logger.warn("Conducted experiment with keys {} for the second time.", exp.getExperiment().getValuesOfKeyFields());
 			}
 		}
-		logger.info("Finished experiments. Conducted {}/{}. Known experiment entries: {}", numberOfConductedExperiments, this.totalNumberOfExperiments, this.keysForWhichResultsAreKnown.stream().map(e -> "\n\t" + e).collect(Collectors.joining()));
+		if (logger.isInfoEnabled()) {
+			logger.info("Finished experiments. Conducted {}/{}. Known experiment entries: {}", numberOfConductedExperiments, this.totalNumberOfExperiments,
+					this.keysForWhichResultsAreKnown.stream().map(e -> "\n\t" + e).collect(Collectors.joining()));
+		}
 	}
 
 	/**
@@ -309,10 +338,7 @@ public class ExperimentRunner {
 	 *             here are technical exceptions that occur when arranging the
 	 *             experiment
 	 */
-	public void conductExperiment(final Experiment exp) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
-
-		/* create experiment entry */
-		ExperimentDBEntry expEntry = this.handle.createAndGetExperiment(exp);
+	public void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
 
 		/* run experiment */
 		assert expEntry != null;
@@ -320,6 +346,7 @@ public class ExperimentRunner {
 		this.keysForWhichResultsAreKnown.add(expEntry.getExperiment().getValuesOfKeyFields());
 		logger.debug("Added experiment with keys {} to set of known experiments. Now contains {} items.", expEntry.getExperiment().getValuesOfKeyFields(), this.keysForWhichResultsAreKnown.size());
 		try {
+			this.handle.startExperiment(expEntry);
 			this.conductor.evaluate(expEntry, m -> {
 				try {
 					this.handle.updateExperiment(expEntry, m);

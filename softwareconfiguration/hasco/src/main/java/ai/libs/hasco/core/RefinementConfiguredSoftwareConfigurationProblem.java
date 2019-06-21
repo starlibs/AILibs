@@ -33,14 +33,14 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 	}
 
 	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>>  getParamRefinementConfig() {
-		return paramRefinementConfig;
+		return this.paramRefinementConfig;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((paramRefinementConfig == null) ? 0 : paramRefinementConfig.hashCode());
+		//		int result = super.hashCode();
+		int result = prime  + ((this.paramRefinementConfig == null) ? 0 : this.paramRefinementConfig.hashCode());
 		return result;
 	}
 
@@ -49,18 +49,18 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
+		if (!super.equals(obj)) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		RefinementConfiguredSoftwareConfigurationProblem other = (RefinementConfiguredSoftwareConfigurationProblem) obj;
-		if (paramRefinementConfig == null) {
+		if (this.paramRefinementConfig == null) {
 			if (other.paramRefinementConfig != null) {
 				return false;
 			}
-		} else if (!paramRefinementConfig.equals(other.paramRefinementConfig)) {
+		} else if (!this.paramRefinementConfig.equals(other.paramRefinementConfig)) {
 			return false;
 		}
 		return true;

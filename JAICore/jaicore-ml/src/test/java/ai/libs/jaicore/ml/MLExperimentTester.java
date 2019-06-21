@@ -11,17 +11,14 @@ import java.util.Map;
 import org.aeonbits.owner.ConfigCache;
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentRunner;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
-import ai.libs.jaicore.experiments.IExperimentSetConfig;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
-import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
-import ai.libs.jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.SingleRandomSplitClassifierEvaluator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -68,7 +65,7 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 
 	@Test
 	public void testExperimentRunnerForMLExperiment() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
-		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTester(), new ExperimenterSQLHandle(config));
+		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTester(), new ExperimenterMySQLHandle(config));
 		runner.randomlyConductExperiments(true);
 		assertTrue(this.conductedExperiment);
 	}

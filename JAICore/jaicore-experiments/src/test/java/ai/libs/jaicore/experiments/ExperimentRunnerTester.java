@@ -22,7 +22,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
@@ -64,11 +64,25 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	private IDatabaseConfig conf = (IDatabaseConfig) ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
-	private IExperimentDatabaseHandle handle = new ExperimenterSQLHandle(new SQLAdapter(this.conf.getDBHost(), this.conf.getDBUsername(), this.conf.getDBPassword(), this.conf.getDBDatabaseName(), this.conf.getDBSSL()), "resulttable");
+	private IExperimentDatabaseHandle handle = new ExperimenterMySQLHandle(new SQLAdapter(this.conf.getDBHost(), this.conf.getDBUsername(), this.conf.getDBPassword(), this.conf.getDBDatabaseName(), this.conf.getDBSSL()), "resulttable");
 	private IExperimentSetConfig config = ConfigCache.getOrCreate(IExperimentTesterConfig.class);
 
 	@Test
-	public void test1ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
+	public void test1ThatAllExperimentsAreCreated() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException {
+
+		int n = 6;
+
+		/* check that running the experiments works */
+		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
+		Collection<ExperimentDBEntry> experimentDBEntries = runner.createExperiments();
+		assertEquals(n, experimentDBEntries.size());
+
+		Collection<ExperimentDBEntry> experiments = this.handle.getAllExperiments();
+		assertEquals(n, experiments.size());
+	}
+
+	@Test
+	public void test2ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 
 		/* check that running the experiments works */
 		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
@@ -83,7 +97,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	@Test
-	public void test2ThatErasureOfSingleExperimentsWorks() throws ExperimentDBInteractionFailedException {
+	public void test3ThatErasureOfSingleExperimentsWorks() throws ExperimentDBInteractionFailedException {
 
 		/* erase all experiments */
 		this.handle.setup(this.config);
@@ -97,7 +111,8 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	@Test
-	public void test3Deletion() throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
+	public void test4Deletion() throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
+		this.handle.setup(this.config);
 		this.handle.deleteDatabase();
 		boolean correctExceptionObserved = false;
 		try {

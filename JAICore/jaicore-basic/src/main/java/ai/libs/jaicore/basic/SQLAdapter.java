@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,6 +204,21 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		return this.insert(insertStatement.getX(), insertStatement.getY());
 	}
 
+	public List<Integer> insertMultiple(final String table, final List<String> keys, final List<List<?>> datarows) throws SQLException {
+		List<Integer> ids = new ArrayList<>(datarows.size());
+		String sql = this.getSQLForMultiInsert(table, keys, datarows);
+		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			stmt.executeUpdate();
+
+			try (ResultSet rs = stmt.getGeneratedKeys()) {
+				while (rs.next()) {
+					ids.add(rs.getInt(1));
+				}
+			}
+			return ids;
+		}
+	}
+
 	public void insertNoNewValues(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -229,11 +245,44 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			sb2.append("?");
 			values.add(entry.getValue());
 		}
-
 		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
-
 		return new Pair<>(statement, values);
+	}
 
+	private String getSQLForMultiInsert(final String table, final List<String> keys, final List<List<?>> datarows) {
+		StringBuilder sbMain = new StringBuilder();
+		StringBuilder sbKeys = new StringBuilder();
+		StringBuilder sbValues = new StringBuilder();
+
+		/* create command phrase */
+		sbMain.append("INSERT INTO `");
+		sbMain.append(table);
+		sbMain.append("` (");
+
+		/* create key phrase */
+		for (String key : keys) {
+			if (sbKeys.length() != 0) {
+				sbKeys.append(", ");
+			}
+			sbKeys.append(key);
+		}
+		sbMain.append(sbKeys);
+		sbMain.append(") VALUES\n");
+
+		/* create value phrases */
+		for(List<?> datarow : datarows) {
+			if (datarow.contains(null)) { // the rule that fires here is wrong! The list CAN contain a null element
+				throw new IllegalArgumentException("Row " + datarow + " contains null element!");
+			}
+			if (sbValues.length() > 0) {
+				sbValues.append(",\n ");
+			}
+			sbValues.append("(");
+			sbValues.append(datarow.stream().map(s -> "\"" + s.toString().replace("\"", "\\\"") + "\"").collect(Collectors.joining(", ")));
+			sbValues.append(")");
+		}
+		sbMain.append(sbValues);
+		return sbMain.toString();
 	}
 
 	public void insertNoNewValues(final String table, final Map<String, ? extends Object> map) throws SQLException {

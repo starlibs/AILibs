@@ -12,7 +12,7 @@ import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentRunner;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
-import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
@@ -51,7 +51,7 @@ public class MachineLearningExperimenter {
 				results.put("loss", loss);
 				processor.processResults(results);
 			}
-		}, new ExperimenterSQLHandle(dbconfig));
+		}, new ExperimenterMySQLHandle(dbconfig));
 		runner.randomlyConductExperiments(true);
 	}
 
