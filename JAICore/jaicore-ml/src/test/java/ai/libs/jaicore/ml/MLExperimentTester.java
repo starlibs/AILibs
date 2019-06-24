@@ -66,7 +66,7 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 	@Test
 	public void testExperimentRunnerForMLExperiment() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTester(), new ExperimenterMySQLHandle(config));
-		runner.randomlyConductExperiments(true);
+		runner.randomlyConductExperiments();
 		assertTrue(this.conductedExperiment);
 	}
 }

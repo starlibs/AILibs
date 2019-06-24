@@ -2,6 +2,7 @@ package ai.libs.jaicore.experiments.databasehandle;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -15,8 +16,6 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.mysql.jdbc.PreparedStatement;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.SQLAdapter;
@@ -108,7 +107,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		sqlMainTable.append("`exception` TEXT NULL,");
 		sqlMainTable.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
 		sqlMainTable.append("PRIMARY KEY (`" + FIELD_ID + "`)");
-		//		sqlMainTable.append(", INDEX `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
+		// sqlMainTable.append(", INDEX `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
 		sqlMainTable.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
 		try {
 			this.adapter.update(sqlMainTable.toString(), new String[] {});
@@ -118,7 +117,44 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		}
 	}
 
+	@Override
+	public Collection<String> getConsideredValuesForKey(final String key) throws ExperimentDBInteractionFailedException {
+		if (this.config == null || this.config.getKeyFields() == null) {
+			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+		}
+		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append("SELECT DISTINCT(`" + key + "`) FROM ");
+		queryStringSB.append(this.tablename);
+		try (PreparedStatement stmt = this.adapter.getPreparedStatement(queryStringSB.toString())) {
+			try (ResultSet rs = stmt.executeQuery()) {
+				List<String> values = new ArrayList<>();
+				while (rs.next()) {
+					values.add(rs.getString(1));
+				}
+				return values;
+			}
+		} catch (SQLException e) {
+			throw new ExperimentDBInteractionFailedException(e);
+		}
+	}
 
+	@Override
+	public int getNumberOfAllExperiments() throws ExperimentDBInteractionFailedException {
+		if (this.config == null || this.config.getKeyFields() == null) {
+			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+		}
+		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append("SELECT COUNT(*) FROM ");
+		queryStringSB.append(this.tablename);
+		try (PreparedStatement stmt = this.adapter.getPreparedStatement(queryStringSB.toString())) {
+			try (ResultSet rs = stmt.executeQuery()) {
+				rs.next();
+				return rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			throw new ExperimentDBInteractionFailedException(e);
+		}
+	}
 
 	@Override
 	public List<ExperimentDBEntry> getAllExperiments() throws ExperimentDBInteractionFailedException {
@@ -144,6 +180,23 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		queryStringSB.append("SELECT * FROM `");
 		queryStringSB.append(this.tablename);
 		queryStringSB.append("` WHERE time_started IS NULL");
+		try {
+			return this.getExperimentsForSQLQuery(queryStringSB.toString());
+		} catch (SQLException e) {
+			throw new ExperimentDBInteractionFailedException(e);
+		}
+	}
+
+	@Override
+	public List<ExperimentDBEntry> getRandomOpenExperiments(final int limit) throws ExperimentDBInteractionFailedException {
+		if (this.config == null || this.config.getKeyFields() == null) {
+			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+		}
+		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append("SELECT * FROM `");
+		queryStringSB.append(this.tablename);
+		queryStringSB.append("` WHERE time_started IS NULL");
+		queryStringSB.append(" ORDER BY RAND() LIMIT " + limit);
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
 		} catch (SQLException e) {
@@ -184,14 +237,18 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	}
 
 	private List<ExperimentDBEntry> getExperimentsForSQLQuery(final String sql) throws SQLException {
+		logger.debug("Executing query {}", sql);
 		try (ResultSet rs = this.adapter.getPreparedStatement(sql).executeQuery()) {
+			logger.debug("Obtained results, now building experiment objects.");
 			return this.getAllFromResultSet(rs);
 		}
 	}
 
 	private List<ExperimentDBEntry> getAllFromResultSet(final ResultSet rs) throws SQLException {
-		List<ExperimentDBEntry> experimentEntries = new ArrayList<>(rs.getFetchSize());
+		List<ExperimentDBEntry> experimentEntries = new ArrayList<>();
+		int i = 0;
 		while (rs.next()) {
+			logger.debug("Building {}-th object.", ++i);
 			experimentEntries.add(this.getCurrentFromResultSet(rs));
 		}
 		return experimentEntries;
@@ -276,7 +333,6 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		}
 	}
 
-
 	@Override
 	public void updateExperiment(final ExperimentDBEntry exp, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException {
 		Collection<String> writableFields = this.config.getResultFields();
@@ -305,8 +361,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		where.put(FIELD_ID, String.valueOf(exp.getId()));
 		try {
 			this.adapter.update(this.tablename, valuesToWrite, where);
-		}
-		catch (SQLException e) {
+		} catch (SQLException e) {
 			throw new ExperimentUpdateFailedException(e);
 		}
 	}
@@ -337,7 +392,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public void deleteExperiment(final ExperimentDBEntry exp) throws ExperimentDBInteractionFailedException {
-		try (PreparedStatement statement = (PreparedStatement) this.adapter.getPreparedStatement("DELETE FROM `" + this.tablename + "` WHERE experiment_id = ?")) {
+		try (PreparedStatement statement = this.adapter.getPreparedStatement("DELETE FROM `" + this.tablename + "` WHERE experiment_id = ?")) {
 			statement.setInt(1, exp.getId());
 			statement.execute();
 		} catch (SQLException e) {
@@ -345,10 +400,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		}
 	}
 
-
 	@Override
 	public void deleteDatabase() throws ExperimentDBInteractionFailedException {
-		try (PreparedStatement statement = (PreparedStatement) this.adapter.getPreparedStatement("DROP TABLE `" + this.tablename + "`")) {
+		try (PreparedStatement statement = this.adapter.getPreparedStatement("DROP TABLE `" + this.tablename + "`")) {
 			statement.execute();
 		} catch (SQLException e) {
 			throw new ExperimentDBInteractionFailedException(e);

@@ -1,14 +1,18 @@
 package ai.libs.jaicore.ml.cache;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ai.libs.jaicore.ml.core.dataset.IDataset;
 
 /**
  * Instruction for loss computation.
- * 
+ *
  * @author jnowack
  *
  */
-public class ComputeLossInstruction extends Instruction {
+public class ComputeLossInstruction<I, D extends IDataset<I>> extends Instruction<I, D> {
 
 	/**
 	 * @param algorithm
@@ -18,12 +22,16 @@ public class ComputeLossInstruction extends Instruction {
 	 * @param seed
 	 *            random seed
 	 */
-	public ComputeLossInstruction(@JsonProperty("algorithm") String algorithm,
-			@JsonProperty("trainingPortion") double trainingPortion, @JsonProperty("seed") long seed) {
-		command = "computeLoss";
-		inputs.put("algorithm", algorithm);
-		inputs.put("trainingPortion", "" + trainingPortion);
-		inputs.put("seed", "" + seed);
+	public ComputeLossInstruction(@JsonProperty("algorithm") final String algorithm,
+			@JsonProperty("trainingPortion") final double trainingPortion, @JsonProperty("seed") final long seed) {
+		this.command = "computeLoss";
+		this.parameters.put("algorithm", algorithm);
+		this.parameters.put("trainingPortion", "" + trainingPortion);
+		this.parameters.put("seed", "" + seed);
 	}
 
+	@Override
+	public D getOutputInstances(final List<D> inputs) throws InstructionFailedException, InterruptedException {
+		throw new UnsupportedOperationException();
+	}
 }

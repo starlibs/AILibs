@@ -3,12 +3,20 @@ package ai.libs.jaicore.ml.cache;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import org.apache.commons.lang3.reflect.MethodUtils;
+
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;
 
@@ -40,29 +48,94 @@ public class ReproducibleInstances extends Instances {
 	 * @param apiKey apiKey in case openml.org is used
 	 * @return new {@link ReproducibleInstances} object
 	 * @throws IOException if something goes wrong while loading Instances from openml or when reading arff file
+	 * @throws ClassNotFoundException
+	 * @throws SecurityException
+	 * @throws NoSuchMethodException
+	 * @throws InvocationTargetException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
 	 */
-	public static ReproducibleInstances fromHistory(final List<Instruction> history, final String apiKey) throws IOException {
+	public static ReproducibleInstances fromHistory(final List<Instruction> history, final String apiKey) throws IOException, ClassNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		ReproducibleInstances instances = null;
+		history.forEach(i -> System.out.println("\t" + i));
 		for (int i = 0; i < history.size(); i++) {
 			Instruction inst = history.get(i);
 			switch (inst.command) {
 			case LoadDataSetInstruction.COMMAND_NAME:
 				// load openml or local dataset
-				if(inst.inputs.get("provider").equals("openml.org")) {
-					instances = fromOpenML(inst.inputs.get("id"), apiKey);
+				if(inst.inputs.get("provider").equals("openml.org") || inst.inputs.get("provider").equals(DataProvider.OPENML.toString())) {
+					instances = fromOpenML((String)inst.inputs.get("id"), apiKey);
 				}
-				else if(inst.inputs.get("provider").startsWith("local")) {
-					instances = fromARFF(inst.inputs.get("id"));
+				else if(((String)inst.inputs.get("provider")).startsWith("local")) {
+					instances = fromARFF((String)inst.inputs.get("id"));
+				}
+				else {
+					throw new IllegalArgumentException("Cannot load data from provider " + inst.inputs.get("provider"));
 				}
 				break;
 			case FoldBasedSubsetInstruction.COMMAND_NAME:
-				// create split
-				String[] ratiosAsStrings = inst.getInputs().get("ratios").split(",");
-				double[] ratios = new double[ratiosAsStrings.length];
-				for (int j = 0; j < ratiosAsStrings.length; j++) {
-					ratios[j] = Double.parseDouble(ratiosAsStrings[j].trim().substring(1, ratiosAsStrings[j].length()-1));
+
+				/* get inputs */
+				String foldTechnique = (String)inst.getParameters().get("foldTechnique");
+				int[] outIndices = (int[])inst.getParameters().get("outInstances");
+
+				/* identify class and method for split by reflection */
+				Matcher m = Pattern.compile("([^:]*)::([^(]*)\\(([^)]*)\\)").matcher(foldTechnique);
+				if (!m.find()) {
+					throw new IllegalArgumentException("fold technique " + foldTechnique + " does not have the right format!");
 				}
-				instances = WekaUtil.getStratifiedSplit(instances, Long.parseLong(inst.inputs.get("seed")), ratios).get( Integer.parseInt(inst.getInputs().get("outIndex")));
+				Class<?> className = Class.forName(m.group(1));
+				String[] args = m.group(3).split(",");
+				Class<?>[] argTypes = new Class<?>[args.length];
+				Object[] transformedArgs = new Object[args.length];
+				for (int j = 0; j < args.length; j++) {
+					String val = args[j].trim();
+					if (val.equals("<IN>")) {
+						if (instances == null) {
+							throw new IllegalStateException("Cannot use previous instances here, because no were created in the history.");
+						}
+						transformedArgs[j] = instances; // must be the data from the previous iteration
+						argTypes[j] = ReproducibleInstances.class;
+					}
+					else {
+						try {
+							transformedArgs[j] = Integer.parseInt(val);
+							argTypes[j] = Integer.class;
+						}
+						catch (NumberFormatException e) {
+							try {
+								transformedArgs[j] = Double.parseDouble(val);
+								argTypes[j] = Double.class;
+							}
+							catch (NumberFormatException f) {
+								argTypes[j] = String.class;
+							}
+						}
+					}
+
+					/* check type! */
+					if (!argTypes[j].isInstance(transformedArgs[j])) {
+						throw new IllegalStateException(transformedArgs[j] + " is not of the correct type " + argTypes[j]);
+					}
+				}
+
+				System.out.println(Arrays.toString(argTypes));
+				Method method = MethodUtils.getMatchingAccessibleMethod(className, m.group(2), argTypes);
+				System.out.println(className + "/" + method);
+				//				System.out.println(Arrays.toString(transformedArgs));
+
+				/* check whether the last argument of the method is an array argument */
+				if (method.getParameters()[method.getParameterCount() - 1].getType().isArray()) {
+					int n = transformedArgs.length;
+					Object tmp = transformedArgs[n - 1];
+					transformedArgs[n - 1] = Array.newInstance(argTypes[n - 1], 1);
+					Array.set(transformedArgs[n - 1], 0, tmp);
+				}
+
+				/* invoke method */
+				System.out.println("Invoking " + method + " with args " + Arrays.asList(transformedArgs).stream().map(Object::getClass).collect(Collectors.toList()));
+				instances = (ReproducibleInstances)method.invoke(null, transformedArgs);
+				System.out.println("ready");
 				break;
 			default:
 				break;
@@ -78,10 +151,10 @@ public class ReproducibleInstances extends Instances {
 		Iterator<Instruction> iterator = dataset.history.iterator();
 		while(iterator.hasNext()) {
 			Instruction i = iterator.next();
-			history.add(i);
+			this.history.add(i);
 		}
-		cacheLookup = dataset.cacheLookup;
-		cacheStorage = dataset.cacheStorage;
+		this.cacheLookup = dataset.cacheLookup;
+		this.cacheStorage = dataset.cacheStorage;
 	}
 
 	/**
@@ -125,8 +198,8 @@ public class ReproducibleInstances extends Instances {
 	 * @return the ordered lists of instructions or null if cache is not used
 	 */
 	public List<Instruction> getInstructions() {
-		if(cacheLookup || cacheStorage) {
-			return history;
+		if(this.cacheLookup || this.cacheStorage) {
+			return this.history;
 		}
 		else {
 			return null;
@@ -139,7 +212,7 @@ public class ReproducibleInstances extends Instances {
 	 * @param i - new Instruction
 	 */
 	public void addInstruction(final Instruction i) {
-		history.add(i);
+		this.history.add(i);
 	}
 
 	/** If true signifies that performance evaluation should be stored.
@@ -147,7 +220,7 @@ public class ReproducibleInstances extends Instances {
 	 * @return true if performance should be saved
 	 */
 	public boolean isCacheStorage() {
-		return cacheStorage;
+		return this.cacheStorage;
 	}
 
 	/** If set to true, signifies that performance evaluation should be stored.
@@ -164,7 +237,7 @@ public class ReproducibleInstances extends Instances {
 	 * @return true if lookup should be performed
 	 */
 	public boolean isCacheLookup() {
-		return cacheLookup;
+		return this.cacheLookup;
 	}
 
 	/**

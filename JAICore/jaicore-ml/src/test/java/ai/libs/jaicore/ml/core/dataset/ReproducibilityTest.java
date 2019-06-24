@@ -20,7 +20,7 @@ public class ReproducibilityTest {
 		List<ReproducibleInstances> outerSplit = WekaUtil.getStratifiedSplit(instances, 5, 0.7);
 		List<ReproducibleInstances> innerSplit = WekaUtil.getStratifiedSplit(outerSplit.get(1), 3, 0.7);
 
-		innerSplit.get(0).getInstructions().forEach(i -> logger.info("Commands: {}({})", i.getCommand(), i.getInputs()));
+		innerSplit.get(0).getInstructions().forEach(i -> logger.info("Commands: {}({})", i.getCommand(), i.getParameters()));
 		logger.info("First fold has {}/{} instances", innerSplit.get(0).size(), instances.size());
 	}
 

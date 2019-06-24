@@ -2,6 +2,8 @@ package ai.libs.jaicore.ml.cache;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
+
 /**
  * Instruction to track a fold-based subset computation for a {@link ReproducibleInstances} object.
  * The original dataset is split into folds using the specified fold technique, e.g., 10-fold cross validation or a simple stratified split.
@@ -12,10 +14,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author fmohr, jnowack
  *
  */
-public class FoldBasedSubsetInstruction extends Instruction {
+public abstract class FoldBasedSubsetInstruction<I, D extends IOrderedDataset<I>> extends Instruction<I, D> {
 
 	/** Constant string to identify this instruction. */
 	public static final String COMMAND_NAME = "buildSubsetViaFolds";
+
+	protected final int[] outIndices;
 
 	/**
 	 * Constructor to create a split Instruction that can be converted into json.
@@ -26,17 +30,9 @@ public class FoldBasedSubsetInstruction extends Instruction {
 	 *            index of the portion to use in the following
 	 */
 	public FoldBasedSubsetInstruction(@JsonProperty("foldTechnique") final String foldTechnique, @JsonProperty("outIndices") final int... outIndices) {
-		command = COMMAND_NAME;
-		inputs.put("foldTechnique", "" + foldTechnique);
-		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		for (int index : outIndices) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-			sb.append(index);
-		}
-		sb.append("]");
-		inputs.put("outIndices", sb.toString());
+		this.command = COMMAND_NAME;
+		this.parameters.put("foldTechnique", "" + foldTechnique);
+		this.parameters.put("outIndices", outIndices);
+		this.outIndices = outIndices;
 	}
 }

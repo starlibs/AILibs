@@ -1,7 +1,7 @@
 package ai.libs.jaicore.experiments;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
 
-public interface IExperimentJSONKeyGenerator extends IExperimentKeyGenerator<ObjectNode> {
+public interface IExperimentJSONKeyGenerator extends IExperimentKeyGenerator<JsonNode> {
 
 }

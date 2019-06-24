@@ -86,7 +86,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 
 		/* check that running the experiments works */
 		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
-		runner.randomlyConductExperiments(false);
+		runner.randomlyConductExperiments();
 		Collection<ExperimentDBEntry> conductedExperiments = this.handle.getConductedExperiments();
 		assertEquals(6, conductedExperiments.size());
 

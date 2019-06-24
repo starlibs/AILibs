@@ -52,7 +52,7 @@ public class MachineLearningExperimenter {
 				processor.processResults(results);
 			}
 		}, new ExperimenterMySQLHandle(dbconfig));
-		runner.randomlyConductExperiments(true);
+		runner.randomlyConductExperiments();
 	}
 
 }

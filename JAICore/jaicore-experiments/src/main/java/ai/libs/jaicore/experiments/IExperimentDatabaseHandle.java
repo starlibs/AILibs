@@ -1,5 +1,6 @@
 package ai.libs.jaicore.experiments;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +25,26 @@ public interface IExperimentDatabaseHandle {
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException;
 
 	/**
+	 *
+	 * @param key The key attribute
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public Collection<String> getConsideredValuesForKey(final String key) throws ExperimentDBInteractionFailedException;
+
+	/**
 	 * Returns a list of all experiments contained in the database
 	 *
 	 * @return List of all experiments
 	 * @throws ExperimentDBInteractionFailedException
 	 */
 	public List<ExperimentDBEntry> getAllExperiments() throws ExperimentDBInteractionFailedException;
+
+	/**
+	 * Returns a list of all experiments contained in the database
+	 *
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public int getNumberOfAllExperiments() throws ExperimentDBInteractionFailedException;
 
 	/**
 	 * Returns a list of all experiments contained in the database marked as being conducted.
@@ -46,6 +61,15 @@ public interface IExperimentDatabaseHandle {
 	 * @throws ExperimentDBInteractionFailedException
 	 */
 	public List<ExperimentDBEntry> getOpenExperiments() throws ExperimentDBInteractionFailedException;
+
+	/**
+	 * Returns a list of all experiments contained in the database that have not been started yet.
+	 *
+	 * @param limit Maximum number of open experiments that should be returned
+	 * @return List of all experiments conducted so far
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public List<ExperimentDBEntry> getRandomOpenExperiments(int limit) throws ExperimentDBInteractionFailedException;
 
 	/**
 	 * Returns a list of all experiments that are currently being conducted.

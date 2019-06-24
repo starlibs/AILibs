@@ -237,7 +237,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
 		IExperimentDatabaseHandle dbHandle = new ExperimenterMySQLHandle(CONFIG);
 		ExperimentRunner runner = new ExperimentRunner(CONFIG, new ML2PlanAutoMLCExperimenter(), dbHandle);
-		runner.randomlyConductExperiments(1, false);
+		runner.randomlyConductExperiments(1);
 		System.exit(0);
 	}
 
