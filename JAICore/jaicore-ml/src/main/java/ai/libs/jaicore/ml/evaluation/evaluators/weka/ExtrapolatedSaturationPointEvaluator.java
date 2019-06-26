@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
@@ -109,7 +110,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 			Instances testInstances = ((WekaInstances<Object>) this.test).getList();
 			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointInstances, testInstances);
 			return evaluator.evaluate(classifier);
-		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException | DatasetCreationException e) {
+		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException | DatasetCreationException | AlgorithmTimeoutedException e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;
 		}

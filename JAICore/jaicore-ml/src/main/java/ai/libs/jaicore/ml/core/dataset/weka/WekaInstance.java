@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset.weka;
 
 import ai.libs.jaicore.basic.sets.ElementDecorator;
+import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
 import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
@@ -43,7 +44,8 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 	@Override
 	public L getTargetValue() {
 		IAttributeType<L> t = (IAttributeType<L>)WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().classAttribute());
-		return t.buildAttributeValue(this.getElement().classValue()).getValue();
+		double classValueAsDouble = this.getElement().classValue();
+		return t.buildAttributeValue((t instanceof CategoricalAttributeType) ? WekaUtil.getClassName(this.getElement()) : classValueAsDouble).getValue();
 	}
 
 	@Override

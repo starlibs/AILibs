@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -262,7 +263,11 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 
 	@Override
 	public List<D> subList(final int fromIndex, final int toIndex) {
-		throw new UnsupportedOperationException();
+		List<D> subList = new ArrayList<>(toIndex - fromIndex);
+		for (int i = fromIndex; i < toIndex; i++) {
+			subList.add(this.get(i));
+		}
+		return subList;
 	}
 
 	@SuppressWarnings("unchecked")

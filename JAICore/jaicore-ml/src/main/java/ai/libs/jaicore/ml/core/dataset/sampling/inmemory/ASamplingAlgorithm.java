@@ -31,35 +31,35 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 	protected Integer sampleSize = null;
 	protected D sample = null;
 
-	protected ASamplingAlgorithm(D input) {
+	protected ASamplingAlgorithm(final D input) {
 		super(input);
 	}
 
-	public void setSampleSize(int size) {
+	public void setSampleSize(final int size) {
 		this.sampleSize = size;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public D call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public D call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		Instant timeoutTime = null;
 		if (this.getTimeout().milliseconds() <= 0) {
 			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
 			timeoutTime = Instant.MAX;
 		} else {
-			timeoutTime = Instant.now().plus(getTimeout().milliseconds(), ChronoUnit.MILLIS);
+			timeoutTime = Instant.now().plus(this.getTimeout().milliseconds(), ChronoUnit.MILLIS);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Set timeout to {}", timeoutTime);
 			}
 		}
 		// Check missing or invalid configuration.
-		if (sampleSize == null) {
+		if (this.sampleSize == null) {
 			throw new AlgorithmException("No valid sample size specified");
 		}
-		if (sampleSize == 0) {
+		if (this.sampleSize == 0) {
 			LOG.warn("Sample size is 0, so an empty data set is returned!");
 			try {
-				return (D)getInput().createEmpty();
+				return (D)this.getInput().createEmpty();
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
@@ -80,7 +80,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 			this.setState(EAlgorithmState.CREATED);
 			while (this.hasNext()) {
 				try {
-					checkAndConductTermination();
+					this.checkAndConductTermination();
 				} catch (AlgorithmTimeoutedException e) {
 					throw new AlgorithmException(e.getMessage());
 				}
@@ -89,10 +89,10 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 					this.cancel();
 					throw new AlgorithmException("Algorithm is running even though it has been timeouted");
 				} else {
-					this.next();
+					this.nextWithException();
 				}
 			}
-			return sample;
+			return this.sample;
 		}
 
 	}

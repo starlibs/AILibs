@@ -1,30 +1,41 @@
 package ai.libs.jaicore.ml.cache;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import ai.libs.jaicore.ml.core.dataset.IDataset;
+import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSplitSubsetInstruction<I extends ILabeledAttributeArrayInstance<L>, L> extends FoldBasedSubsetInstruction<I, IOrderedLabeledAttributeArrayDataset<I,L>> {
+/**
+ * Computes a two-fold split
+ *
+ * @author fmohr
+ */
+public class StratifiedSplitSubsetInstruction extends SplitInstruction {
 
-	private static final String NAME = "MCCV";
-	private final int seed;
-	private final double[] ratios;
+	private static final String NAME = "Stratified";
 
-	public StratifiedSplitSubsetInstruction(final int seed, final double[] ratios, final int[] outIndices) {
-		super(NAME, outIndices);
+	@JsonProperty
+	private final long seed;
+
+
+
+	public StratifiedSplitSubsetInstruction(@JsonProperty("seed") final long seed, @JsonProperty("ratios") final double ratios) {
+		super(NAME, ratios);
 		this.seed = seed;
-		this.ratios = ratios;
 	}
 
 	@Override
-	public IOrderedLabeledAttributeArrayDataset<I,L> getOutputInstances(final List<IOrderedLabeledAttributeArrayDataset<I,L>> inputs) throws InstructionFailedException, InterruptedException {
+	public List<IDataset> getOutputInstances(final List<IDataset> inputs) throws InstructionFailedException, InterruptedException {
 
 		/* there must be exactly one input */
 		if (inputs.size() != 1) {
@@ -32,27 +43,35 @@ public class StratifiedSplitSubsetInstruction<I extends ILabeledAttributeArrayIn
 		}
 
 		/* compute sub-sample, which constitutes the first fold of a two-fold split (the second is the complement) */
-		IOrderedLabeledAttributeArrayDataset<I,L> input = inputs.get(0);
-		AttributeBasedStratiAmountSelectorAndAssigner<I, IOrderedLabeledAttributeArrayDataset<I, L>> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
-		StratifiedSampling<I, IOrderedLabeledAttributeArrayDataset<I, L>> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, new Random(this.seed), input);
+		IOrderedDataset input = (IOrderedDataset)inputs.get(0);
+		AttributeBasedStratiAmountSelectorAndAssigner stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner();
+		StratifiedSampling sampler = new StratifiedSampling(stratiBuilder, stratiBuilder, new Random(this.seed), input);
+		sampler.setSampleSize((int)Math.ceil(input.size() * this.getPortionOfFirstFold()));
+		List<IDataset> output = new ArrayList<>(2);
 		try {
-			IOrderedLabeledAttributeArrayDataset<I,L> subsample = sampler.call();
+			IOrderedDataset subsample = (IOrderedDataset)sampler.call();
+			output.add(subsample);
 
-			if (this.outIndices[0] == 0) {
-				return subsample;
-			}
-			else {
-				IOrderedLabeledAttributeArrayDataset<I,L> complement = (IOrderedLabeledAttributeArrayDataset<I,L>)input.createEmpty();
-				for (I instance : input) {
-					if (!subsample.contains(instance)) {
-						complement.add(instance);
-					}
+			IOrderedDataset complement = (IOrderedDataset)input.createEmpty();
+			for (Object instance : input) {
+				if (!subsample.contains(instance)) {
+					complement.add(instance);
 				}
-				return complement;
 			}
+			output.add(complement);
+			return output;
 		}
-		catch (AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {
+		catch (AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException | AlgorithmTimeoutedException e) {
 			throw new InstructionFailedException(e);
 		}
+	}
+
+	public long getSeed() {
+		return this.seed;
+	}
+
+	@Override
+	public Instruction clone() {
+		return new StratifiedSplitSubsetInstruction(this.seed, this.getPortionOfFirstFold());
 	}
 }

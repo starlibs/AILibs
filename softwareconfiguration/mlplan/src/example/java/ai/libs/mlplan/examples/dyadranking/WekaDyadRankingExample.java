@@ -24,7 +24,7 @@ import weka.core.Instances;
 
 /**
  * Demonstrated the usage of ML-Plan with a dyad ranked OPEN list
- * 
+ *
  * @author Helena Graf
  *
  */
@@ -34,15 +34,15 @@ public class WekaDyadRankingExample {
 
 	public static void main(final String[] args) throws Exception {
 		long starttime = System.currentTimeMillis();
-		ReproducibleInstances data = ReproducibleInstances.fromOpenML("40983", "4350e421cdc16404033ef1812ea38c01");
+		ReproducibleInstances data = ReproducibleInstances.fromOpenML(40983, "4350e421cdc16404033ef1812ea38c01");
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit((Instances) data, (new Random(0)).nextLong(), 0.7d);
 
 		WEKADyadRankedNodeQueueConfig openConfig = new WEKADyadRankedNodeQueueConfig();
 		MLPlanWekaBuilder builder = AbstractMLPlanBuilder.forWeka();
 		builder.withSearchSpaceConfigFile(new File("resources/automl/searchmodels/weka/weka-approach-5-autoweka.json"))
-				.withAlgorithmConfigFile(new File("conf/mlplan.properties"))
-				.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> 1.0)).withPreferredNodeEvaluator(n -> 1.0);
+		.withAlgorithmConfigFile(new File("conf/mlplan.properties"))
+		.withSearchFactory(new DyadRankedBestFirstFactory<>(openConfig), new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> 1.0)).withPreferredNodeEvaluator(n -> 1.0);
 
 		MLPlanWekaClassifier mlplan = new WekaMLPlanWekaClassifier(builder);
 		openConfig.setComponents(mlplan.getComponents());

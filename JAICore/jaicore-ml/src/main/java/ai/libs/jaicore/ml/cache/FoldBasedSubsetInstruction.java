@@ -1,8 +1,10 @@
 package ai.libs.jaicore.ml.cache;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Instruction to track a fold-based subset computation for a {@link ReproducibleInstances} object.
@@ -14,25 +16,26 @@ import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
  * @author fmohr, jnowack
  *
  */
-public abstract class FoldBasedSubsetInstruction<I, D extends IOrderedDataset<I>> extends Instruction<I, D> {
-
-	/** Constant string to identify this instruction. */
-	public static final String COMMAND_NAME = "buildSubsetViaFolds";
-
-	protected final int[] outIndices;
+public abstract class FoldBasedSubsetInstruction extends Instruction {
 
 	/**
 	 * Constructor to create a split Instruction that can be converted into json.
 	 *
 	 * @param foldTechnique
 	 *            method used to compute the folds
-	 * @param outIndex
-	 *            index of the portion to use in the following
 	 */
-	public FoldBasedSubsetInstruction(@JsonProperty("foldTechnique") final String foldTechnique, @JsonProperty("outIndices") final int... outIndices) {
-		this.command = COMMAND_NAME;
-		this.parameters.put("foldTechnique", "" + foldTechnique);
-		this.parameters.put("outIndices", outIndices);
-		this.outIndices = outIndices;
+	public FoldBasedSubsetInstruction(@JsonProperty("foldTechnique") final String foldTechnique) {
+	}
+
+	public static FoldBasedSubsetInstruction getInstruction(final String constructor) throws ClassNotFoundException {
+		Pattern p = Pattern.compile("([^(]*)\\([^)]*)");
+		Matcher m = p.matcher(constructor);
+		if (!m.find()) {
+			throw new IllegalArgumentException("Invalid syntax for fold-based instruction.");
+		}
+		Class<?> clazz = Class.forName(m.group(1));
+		Object[] args = m.group(2).split(",");
+		System.out.println(Arrays.toString(args));
+		return null;
 	}
 }

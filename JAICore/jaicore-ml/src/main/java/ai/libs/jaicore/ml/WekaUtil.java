@@ -36,8 +36,9 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.sets.CartesianProductComputationProblem;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
+import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
-import ai.libs.jaicore.ml.cache.SplitInstruction;
+import ai.libs.jaicore.ml.cache.StratifiedSplitSubsetInstruction;
 import ai.libs.jaicore.ml.core.SimpleInstanceImpl;
 import ai.libs.jaicore.ml.core.SimpleInstancesImpl;
 import ai.libs.jaicore.ml.core.SimpleLabeledInstanceImpl;
@@ -891,7 +892,7 @@ public class WekaUtil {
 		shuffledData.randomize(rand);
 		List<ReproducibleInstances> instances = new ArrayList<>();
 		ReproducibleInstances emptyInstances = new ReproducibleInstances(data);
-		emptyInstances.clear(); // leaves History untouched
+		emptyInstances.clear(); // leaves History and output unit untouched
 
 		/* compute instances per class */
 		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
@@ -932,9 +933,10 @@ public class WekaUtil {
 		}
 
 		/* update ReproducibleInstanes history */
-		String ratiosAsString = Arrays.toString(portions);
+		instances.get(0).getInstructions().addNode("stratified split", new StratifiedSplitSubsetInstruction(seed, portions[0]), Arrays.asList(instances.get(0).getOutputUnit())); // changes all simultanously
 		for (int i = 0; i < instances.size(); i++) {
-			instances.get(i).addInstruction(new SplitInstruction(ratiosAsString, seed, i));
+			ReproducibleInstances fold = instances.get(i);
+			fold.setOutputUnitWithoutRecomputation(new Pair<>("stratified split", i));
 		}
 		return instances;
 	}

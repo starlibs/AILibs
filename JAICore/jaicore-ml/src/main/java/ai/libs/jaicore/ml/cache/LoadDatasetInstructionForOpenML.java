@@ -1,30 +1,45 @@
 package ai.libs.jaicore.ml.cache;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import ai.libs.jaicore.ml.core.dataset.IDataset;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;
 
-public class LoadDatasetInstructionForOpenML<L> extends LoadDataSetInstruction<WekaInstance<L>, WekaInstances<L>> {
+@JsonIgnoreProperties({ "provider" })
+public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
 
-	public LoadDatasetInstructionForOpenML(final String apiKey, final String id) {
-		super(DataProvider.OPENML, id);
-		this.parameters.put("apikey", apiKey);
+	private final String apiKey;
+
+	public LoadDatasetInstructionForOpenML(@JsonProperty("apiKey") final String apiKey, @JsonProperty("id") final int id) {
+		super(DataProvider.OPENML, String.valueOf(id));
+		this.apiKey = apiKey;
 	}
 
 	@Override
-	public WekaInstances<L> getOutputInstances(final List<WekaInstances<L>> inputs) throws InstructionFailedException, InterruptedException {
+	public List<IDataset> getOutputInstances(final List<IDataset> inputs) throws InstructionFailedException, InterruptedException {
 
 		// load openml or local dataset
-		OpenMLHelper.setApiKey((String)this.parameters.get("apiKey"));
+		OpenMLHelper.setApiKey(this.apiKey);
 		try {
-			Instances instances = OpenMLHelper.getInstancesById(Integer.parseInt((String)this.parameters.get("id")));
-			return new WekaInstances<>(instances);
+			Instances instances = OpenMLHelper.getInstancesById(Integer.valueOf(this.getId()));
+			return Arrays.asList(new WekaInstances<>(instances));
 		} catch (NumberFormatException | IOException | ClassNotFoundException e) {
 			throw new InstructionFailedException(e);
 		}
 	}
-}
+
+	public String getApiKey() {
+		return this.apiKey;
+	}
+
+	@Override
+	public Instruction clone() {
+		return new LoadDatasetInstructionForOpenML(this.apiKey, Integer.valueOf(this.getId()));
+	}}

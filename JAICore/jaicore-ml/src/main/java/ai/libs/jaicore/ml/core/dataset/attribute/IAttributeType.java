@@ -39,4 +39,5 @@ public interface IAttributeType<D> extends Serializable {
 	 */
 	public IAttributeValue<D> buildAttributeValue(String stringDescription);
 
+	public String getStringDescriptionOfDomain();
 }

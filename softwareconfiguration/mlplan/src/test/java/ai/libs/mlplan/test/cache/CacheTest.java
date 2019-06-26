@@ -1,6 +1,6 @@
 package ai.libs.mlplan.test.cache;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,7 +18,7 @@ import weka.core.Instances;
 /**
  * Tests the functionality of {@link ReproducibleInstances}, by creating one an
  * using its history to recreate it. Fails if these two are not the same.
- * 
+ *
  * @author jnowack
  */
 public class CacheTest {
@@ -37,7 +37,7 @@ public class CacheTest {
 			Instances i = WekaUtil.getStratifiedSplit(data, 45, 0.7).get(0);
 
 			//
-			ReproducibleInstances rData = ReproducibleInstances.fromOpenML("40983", "4350e421cdc16404033ef1812ea38c01");
+			ReproducibleInstances rData = ReproducibleInstances.fromOpenML(40983, "4350e421cdc16404033ef1812ea38c01");
 
 			// perform a split
 			ReproducibleInstances ri0 = WekaUtil.getStratifiedSplit(rData, new Random(45), 0.1).get(0);
