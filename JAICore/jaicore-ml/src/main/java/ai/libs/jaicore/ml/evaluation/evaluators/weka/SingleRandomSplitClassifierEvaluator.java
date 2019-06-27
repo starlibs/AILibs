@@ -5,6 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
@@ -16,41 +17,42 @@ public class SingleRandomSplitClassifierEvaluator implements IClassifierEvaluato
 	private final Instances data;
 	private int seed;
 	private float trainingPortion = 0.7f;
-	
-	public SingleRandomSplitClassifierEvaluator(Instances data) {
+
+	public SingleRandomSplitClassifierEvaluator(final Instances data) {
 		super();
 		this.data = data;
 	}
 
 	@Override
-	public Double evaluate(Classifier c) throws InterruptedException {
-		List<Instances> split = WekaUtil.getStratifiedSplit(data, seed >= 0 ? seed : System.currentTimeMillis(), trainingPortion);
+	public Double evaluate(final Classifier c) throws InterruptedException, ObjectEvaluationFailedException {
+		List<Instances> split;
 		try {
+			split = WekaUtil.getStratifiedSplit(this.data, this.seed >= 0 ? this.seed : System.currentTimeMillis(), this.trainingPortion);
 			c.buildClassifier(split.get(0));
 			Evaluation eval = new Evaluation(split.get(0));
 			eval.evaluateModel(c, split.get(1));
-			Double score = eval.pctIncorrect();
-			return score;
-		} catch (Throwable e) {
-			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
-					e.getClass().getName(), e.getMessage());
-			return null;
+			return eval.pctIncorrect();
+		} catch (InterruptedException e) {
+			throw e;
+		}catch (Exception e) {
+			throw new ObjectEvaluationFailedException("Evaluation failed!", e);
 		}
+
 	}
 
 	public int getSeed() {
-		return seed;
+		return this.seed;
 	}
 
-	public void setSeed(int seed) {
+	public void setSeed(final int seed) {
 		this.seed = seed;
 	}
 
 	public float getTrainingPortion() {
-		return trainingPortion;
+		return this.trainingPortion;
 	}
 
-	public void setTrainingPortion(float trainingPortion) {
+	public void setTrainingPortion(final float trainingPortion) {
 		this.trainingPortion = trainingPortion;
 	}
 }

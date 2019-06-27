@@ -40,7 +40,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory;
 	private D train;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
@@ -73,7 +73,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 	 * @param test
 	 *            Test dataset to measure the accuracy.
 	 */
-	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D train, final double trainSplitForAnchorpointsMeasurement,
+	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory, final D train, final double trainSplitForAnchorpointsMeasurement,
 			final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final D test) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -102,7 +102,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
-			ASamplingAlgorithm<D> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
+			ASamplingAlgorithm<I, D> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
 			D saturationPointTrainSet = samplingAlgorithm.call();
 			Instances saturationPointInstances = ((WekaInstances<Object>) saturationPointTrainSet).getList();
 

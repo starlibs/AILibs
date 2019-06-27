@@ -18,7 +18,7 @@ import weka.classifiers.Classifier;
 
 public class ConfigurationLearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> extends LearningCurveExtrapolator<I, D> {
 
-	public ConfigurationLearningCurveExtrapolator(final Classifier learner, final D dataset, final double trainsplit, final int[] anchorpoints, final ISamplingAlgorithmFactory<D, ASamplingAlgorithm<D>> samplingAlgorithmFactory,
+	public ConfigurationLearningCurveExtrapolator(final Classifier learner, final D dataset, final double trainsplit, final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<I, D>> samplingAlgorithmFactory,
 			final long seed, final String identifier, final double[] configurations) throws DatasetCreationException {
 		super(null, learner, dataset, trainsplit, anchorpoints, samplingAlgorithmFactory, seed);
 		this.extrapolationMethod = new LCNetExtrapolationMethod(identifier);

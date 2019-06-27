@@ -2,6 +2,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +27,7 @@ import ai.libs.jaicore.ml.core.dataset.IDataset;
  * @author Felix Weiland
  * @author jnowack
  */
-public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
+public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
@@ -103,5 +106,56 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		} else {
 			return this.terminate();
 		}
+	}
+
+	/**
+	 * Gets the data point contained in the original data that are not part of the
+	 * @return
+	 * @throws DatasetCreationException
+	 */
+	public D getComplement() throws DatasetCreationException {
+
+		if (this.sample == null) {
+			throw new IllegalStateException("Sample computation has not started yet.");
+		}
+		D input = this.getInput();
+
+		/* compute frequencies (necessary, because items could occur several times) */
+		Map<Object, Integer> frequenciesInInput = new HashMap<>();
+		Map<Object, Integer> frequenciesInSubSample = new HashMap<>();
+		Map<Object, Integer> frequenciesInComplement = new HashMap<>();
+		for (Object instance : input) {
+			frequenciesInInput.put(instance, frequenciesInInput.computeIfAbsent(instance, k -> 0) + 1);
+			frequenciesInComplement.put(instance, 0);
+			frequenciesInSubSample.put(instance, 0);
+		}
+		for (Object instance : this.sample) {
+			frequenciesInSubSample.put(instance, frequenciesInSubSample.get(instance) + 1);
+		}
+
+		/* now compute complement */
+		D complement = (D)input.createEmpty();
+		for (I instance : input) {
+			int frequencyInComplement = frequenciesInComplement.get(instance);
+			if (frequenciesInSubSample.get(instance) + frequencyInComplement < frequenciesInInput.get(instance)) {
+				complement.add(instance);
+				frequenciesInComplement.put(instance, frequencyInComplement + 1);
+			}
+		}
+
+		/* check plausibility (sizes should sum up) */
+		if (this.sample.size() + complement.size() != input.size()) {
+			throw new IllegalStateException("The input set of size " + input.size() + " has been reduced to " + this.sample.size() + " + " + complement.size() + ". This is not plausible.");
+		}
+		else {
+			for (Entry<Object, Integer> instanceWithFrequency : frequenciesInInput.entrySet()) {
+				Object inst = instanceWithFrequency.getKey();
+				int frequencyNow = frequenciesInSubSample.get(inst) + frequenciesInComplement.get(inst);
+				if (instanceWithFrequency.getValue() != frequencyNow) {
+					throw new IllegalStateException("Frequency of instance " + inst + " was " + instanceWithFrequency.getValue() + " but is now " + frequencyNow);
+				}
+			}
+		}
+		return complement;
 	}
 }

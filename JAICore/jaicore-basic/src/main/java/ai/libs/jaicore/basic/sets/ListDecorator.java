@@ -101,10 +101,21 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		this.list.clear();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean contains(final Object o) {
-		return this.typeOfDecoratingItems.isInstance(o) && this.list.contains(((D) o).getElement());
+		if (!this.typeOfDecoratingItems.isInstance(o)) {
+			return false;
+		}
+
+		/* This is on purpose not realized with contains on the original list
+		 * The reason is that the decorating class may overwrite the equals method,
+		 * and it is the decorated elements we want to compare. */
+		for (D item : this) {
+			if (item.equals(o)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

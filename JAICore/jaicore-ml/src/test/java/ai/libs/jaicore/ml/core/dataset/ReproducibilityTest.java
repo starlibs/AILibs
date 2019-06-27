@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.List;
@@ -15,6 +16,7 @@ import ai.libs.jaicore.ml.cache.InstructionFailedException;
 import ai.libs.jaicore.ml.cache.InstructionGraph;
 import ai.libs.jaicore.ml.cache.InstructionNode;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
+import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 
 public class ReproducibilityTest {
 
@@ -31,7 +33,7 @@ public class ReproducibilityTest {
 	}
 
 	@Test
-	public void testStratifiedSplit() throws InstructionFailedException, InterruptedException {
+	public void testStratifiedSplit() throws InstructionFailedException, InterruptedException, SplitFailedException {
 		ReproducibleInstances instances = ReproducibleInstances.fromOpenML(3, "");
 		int n = instances.size();
 		List<ReproducibleInstances> outerSplit = WekaUtil.getStratifiedSplit(instances, 5, 0.7);
@@ -44,8 +46,11 @@ public class ReproducibilityTest {
 		assertEquals("stratified split", lastNodeOfFirstInOuter.getName());
 		assertEquals(new Pair<>("stratified split", 0), outerSplit.get(0).getOutputUnit());
 		assertEquals(new Pair<>("stratified split", 1), outerSplit.get(1).getOutputUnit());
+		assertTrue(n >= outerSplit.get(0).size());
+		assertTrue(n >= outerSplit.get(1).size());
+		assertEquals(n, outerSplit.get(0).size() + outerSplit.get(1).size());
 		assertEquals((int)Math.ceil(n * 0.7), outerSplit.get(0).size());
-		assertEquals((int)Math.ceil(n * 0.3), outerSplit.get(1).size());
+		assertEquals((int)Math.floor(n * 0.3), outerSplit.get(1).size());
 
 		innerSplit.get(0).getInstructions().forEach(i -> logger.info("Commands: {}({})", i.getName(), i.getInstruction()));
 		logger.info("First fold has {}/{} instances", innerSplit.get(0).size(), instances.size());

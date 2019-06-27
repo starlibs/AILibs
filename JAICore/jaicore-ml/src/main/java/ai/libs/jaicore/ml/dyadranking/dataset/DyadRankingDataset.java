@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
+import ai.libs.jaicore.ml.core.dataset.IInstance;
 import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledDataset;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 
@@ -208,5 +209,10 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 	@Override
 	public DyadRankingDataset createEmpty() {
 		return new DyadRankingDataset();
+	}
+
+	@Override
+	public int getFrequency(final IDyadRankingInstance instance) {
+		return (int)this.stream().filter(instance::equals).count();
 	}
 }

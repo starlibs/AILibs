@@ -2,8 +2,10 @@ package ai.libs.jaicore.ml.cache;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;
@@ -128,4 +130,22 @@ public class ReproducibleInstances extends Instances {
 		this.cacheLookup = cacheLookup;
 	}
 
+	/**
+	 * Creates a reduced version of the dataset by using an instruction with one input and one output
+	 *
+	 * @param nameOfRefinementInstruction
+	 * @param instruction
+	 * @param outputOfRefinementInstruction
+	 * @return
+	 * @throws InterruptedException
+	 * @throws InstructionFailedException
+	 * @throws ClassNotFoundException
+	 */
+	public ReproducibleInstances reduceWithInstruction(final String nameOfRefinementInstruction, final Instruction instruction, final int outputOfRefinementInstruction) throws ClassNotFoundException, InstructionFailedException, InterruptedException {
+		this.history.addNode(nameOfRefinementInstruction, instruction, Arrays.asList(this.getOutputUnit()));
+		this.outputUnitOfHistory = new Pair<>(nameOfRefinementInstruction, outputOfRefinementInstruction);
+		WekaInstances<Object> remainingData = ((WekaInstances<Object>)instruction.getOutputInstances(Arrays.asList(new WekaInstances<>(this))).get(outputOfRefinementInstruction));
+		this.removeIf(i -> !remainingData.contains(new WekaInstance<>(i)));
+		return this;
+	}
 }

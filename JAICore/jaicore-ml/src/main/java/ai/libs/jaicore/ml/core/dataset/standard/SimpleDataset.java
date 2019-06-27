@@ -97,4 +97,9 @@ public class SimpleDataset<L> extends LinkedList<SimpleInstance<L>> implements I
 		}
 		return true;
 	}
+
+	@Override
+	public int getFrequency(final SimpleInstance<L> instance) {
+		return (int)this.stream().filter(instance::equals).count();
+	}
 }
