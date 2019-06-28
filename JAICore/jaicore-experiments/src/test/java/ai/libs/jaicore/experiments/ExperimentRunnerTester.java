@@ -121,8 +121,8 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	public void test1ThatAllExperimentsAreCreated() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* check that running the experiments works */
-		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
-		Collection<ExperimentDBEntry> experimentDBEntries = runner.createExperiments();
+		ExperimentDatabasePreparer preparer = new ExperimentDatabasePreparer(this.config, this.handle);
+		Collection<ExperimentDBEntry> experimentDBEntries = preparer.synchronizeExperiments();
 		assertEquals(this.numberOfTotalExperiments, experimentDBEntries.size());
 
 		Collection<ExperimentDBEntry> experiments = this.handle.getAllExperiments();

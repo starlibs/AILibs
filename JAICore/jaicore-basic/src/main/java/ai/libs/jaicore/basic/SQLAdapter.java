@@ -29,7 +29,7 @@ import ai.libs.jaicore.basic.sets.Pair;
  *
  */
 @SuppressWarnings("serial")
-public class SQLAdapter implements Serializable, AutoCloseable {
+public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomizable {
 
 	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
@@ -208,8 +208,8 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		List<Integer> ids = new ArrayList<>(datarows.size());
 		String sql = this.getSQLForMultiInsert(table, keys, datarows);
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			this.logger.debug("Executing statement: {}", sql);
 			stmt.executeUpdate();
-
 			try (ResultSet rs = stmt.getGeneratedKeys()) {
 				while (rs.next()) {
 					ids.add(rs.getInt(1));
@@ -408,5 +408,15 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public String getDriver() {
 		return this.driver;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

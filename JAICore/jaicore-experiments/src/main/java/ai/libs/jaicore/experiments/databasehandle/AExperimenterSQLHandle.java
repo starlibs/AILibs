@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
+import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.Experiment;
@@ -29,9 +31,9 @@ import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 
-public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
+public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggingCustomizable {
 
-	private static final Logger logger = LoggerFactory.getLogger(AExperimenterSQLHandle.class);
+	private Logger logger = LoggerFactory.getLogger(AExperimenterSQLHandle.class);
 
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
@@ -43,6 +45,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	private final String tablename;
 
 	private IExperimentSetConfig config;
+
+	private String[] keyFields;
+	private String[] resultFields;
 
 	public AExperimenterSQLHandle(final SQLAdapter adapter, final String tablename) {
 		super();
@@ -76,13 +81,15 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	@Override
 	public void setup(final IExperimentSetConfig config) throws ExperimentDBInteractionFailedException {
 		this.config = config;
+		this.keyFields = config.getKeyFields().toArray(new String[] {}); // redundant to increase performance
+		this.resultFields = config.getResultFields().toArray(new String[] {}); // redundant to increase performance
 
 		/* creates basic table creation statement */
 		StringBuilder sqlMainTable = new StringBuilder();
 		StringBuilder keyFields = new StringBuilder();
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + this.tablename + "` (");
 		sqlMainTable.append("`" + FIELD_ID + "` int(10) NOT NULL AUTO_INCREMENT,");
-		for (String key : this.config.getKeyFields()) {
+		for (String key : this.keyFields) {
 			String shortKey = this.getDatabaseFieldnameForConfigEntry(key);
 			sqlMainTable.append("`" + shortKey + "` VARCHAR(1000) NOT NULL,");
 			keyFields.append("`" + shortKey + "`,");
@@ -94,7 +101,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		sqlMainTable.append("`" + FIELD_TIME + "_started` TIMESTAMP NULL,");
 
 		/* add columns for result fields */
-		for (String result : this.config.getResultFields()) {
+		for (String result : this.resultFields) {
 			sqlMainTable.append("`" + result + "` VARCHAR(500) NULL,");
 			if (this.config.getFieldsForWhichToIgnoreTime() == null || !this.config.getFieldsForWhichToIgnoreTime().contains(result)) {
 				sqlMainTable.append("`" + result + "_" + FIELD_TIME + "` TIMESTAMP NULL,");
@@ -113,14 +120,14 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		try {
 			this.adapter.update(sqlMainTable.toString(), new String[] {});
 		} catch (SQLException e) {
-			logger.error("An SQL exception occured with the following query: {}", sqlMainTable);
+			this.logger.error("An SQL exception occured with the following query: {}", sqlMainTable);
 			throw new ExperimentDBInteractionFailedException(e);
 		}
 	}
 
 	@Override
 	public Collection<String> getConsideredValuesForKey(final String key) throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.config.getKeyFields() == null) {
+		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
 		}
 		StringBuilder queryStringSB = new StringBuilder();
@@ -141,7 +148,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public int getNumberOfAllExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.config.getKeyFields() == null) {
+		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
 		}
 		StringBuilder queryStringSB = new StringBuilder();
@@ -159,7 +166,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public List<ExperimentDBEntry> getAllExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.config.getKeyFields() == null) {
+		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
 		}
 		StringBuilder queryStringSB = new StringBuilder();
@@ -174,7 +181,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public List<ExperimentDBEntry> getOpenExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.config.getKeyFields() == null) {
+		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
 		}
 		StringBuilder queryStringSB = new StringBuilder();
@@ -190,7 +197,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public List<ExperimentDBEntry> getRandomOpenExperiments(final int limit) throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.config.getKeyFields() == null) {
+		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
 		}
 		StringBuilder queryStringSB = new StringBuilder();
@@ -207,7 +214,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.config.getKeyFields() == null) {
+		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
 		}
 		StringBuilder queryStringSB = new StringBuilder();
@@ -223,7 +230,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public List<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.config.getKeyFields() == null) {
+		if (this.config == null || this.keyFields == null) {
 			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
 		}
 		StringBuilder queryStringSB = new StringBuilder();
@@ -238,9 +245,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	}
 
 	private List<ExperimentDBEntry> getExperimentsForSQLQuery(final String sql) throws SQLException {
-		logger.debug("Executing query {}", sql);
+		this.logger.debug("Executing query {}", sql);
 		try (ResultSet rs = this.adapter.getPreparedStatement(sql).executeQuery()) {
-			logger.debug("Obtained results, now building experiment objects.");
+			this.logger.debug("Obtained results, now building experiment objects.");
 			return this.getAllFromResultSet(rs);
 		}
 	}
@@ -249,8 +256,10 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		List<ExperimentDBEntry> experimentEntries = new ArrayList<>();
 		int i = 0;
 		while (rs.next()) {
-			logger.debug("Building {}-th object.", ++i);
-			experimentEntries.add(this.getCurrentFromResultSet(rs));
+			long start = System.currentTimeMillis();
+			ExperimentDBEntry entry = this.getCurrentFromResultSet(rs);
+			this.logger.trace("Building {}-th object took {}ms.", ++i, System.currentTimeMillis() - start);
+			experimentEntries.add(entry);
 		}
 		return experimentEntries;
 	}
@@ -259,14 +268,15 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 		/* get key values for experiment */
 		Map<String, String> keyValues = new HashMap<>();
-		for (String key : this.config.getKeyFields()) {
+		for (String key : this.keyFields) {
 			String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
 			keyValues.put(dbKey, rs.getString(dbKey));
+			rs.getString(key);
 		}
 
 		/* get result values for experiment */
 		Map<String, Object> resultValues = new HashMap<>();
-		for (String key : this.config.getResultFields()) {
+		for (String key : this.resultFields) {
 			String dbKey = this.getDatabaseFieldnameForConfigEntry(key);
 			resultValues.put(dbKey, rs.getString(dbKey));
 		}
@@ -291,7 +301,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 			Map<String, Object> valuesToInsert = new HashMap<>(experiment.getValuesOfKeyFields());
 			valuesToInsert.put(FIELD_MEMORY + "_max", experiment.getMemoryInMB());
 			valuesToInsert.put(FIELD_NUMCPUS, experiment.getNumCPUs());
-			logger.debug("Inserting mem: {}, cpus: {}, host: {}, and key fields: {}", experiment.getMemoryInMB(), experiment.getNumCPUs(), valuesToInsert.get(FIELD_HOST), experiment.getValuesOfKeyFields());
+			this.logger.debug("Inserting mem: {}, cpus: {}, host: {}, and key fields: {}", experiment.getMemoryInMB(), experiment.getNumCPUs(), valuesToInsert.get(FIELD_HOST), experiment.getValuesOfKeyFields());
 			int id = this.adapter.insert(this.tablename, valuesToInsert);
 			return new ExperimentDBEntry(id, experiment);
 		} catch (SQLException e) {
@@ -302,19 +312,24 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	@Override
 	public List<ExperimentDBEntry> createAndGetExperiments(final List<Experiment> experiments) throws ExperimentDBInteractionFailedException, ExperimentAlreadyExistsInDatabaseException {
 
+		if (experiments == null || experiments.isEmpty()) {
+			throw new IllegalArgumentException();
+		}
+
 		/* derive input for insertion */
 		List<String> keys = new ArrayList<>();
 		keys.add(FIELD_MEMORY + "_max");
 		keys.add(FIELD_NUMCPUS);
-		keys.addAll(this.config.getKeyFields());
+		for (String key : this.keyFields) {
+			keys.add(key);
+		}
 
-		this.config.getKeyFields();
 		List<List<?>> values = new ArrayList<>();
 		for (Experiment exp : experiments) {
 			List<String> datarow = new ArrayList<>(keys.size());
 			datarow.add("" + exp.getMemoryInMB());
 			datarow.add("" + exp.getNumCPUs());
-			for (String key : this.config.getKeyFields()) {
+			for (String key : this.keyFields) {
 				datarow.add(exp.getValuesOfKeyFields().get(key));
 			}
 			values.add(datarow);
@@ -341,7 +356,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public boolean updateExperimentConditionally(final ExperimentDBEntry exp, final Map<String, String> conditions, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException {
-		Collection<String> writableFields = this.config.getResultFields();
+		Collection<String> writableFields = Arrays.asList(this.resultFields);
+		Collection<String> resultFieldsAsList = Arrays.asList(this.resultFields);
 		writableFields.add(FIELD_HOST);
 		writableFields.add(FIELD_TIME + "_started");
 		writableFields.add("exception");
@@ -354,7 +370,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		Map<String, String> valuesToWrite = new HashMap<>();
 		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
 		for (String result : values.keySet()) {
-			if (this.config.getResultFields().contains(result)) {
+			if (resultFieldsAsList.contains(result)) {
 				if (this.config.getFieldsForWhichToIgnoreTime() == null || !this.config.getFieldsForWhichToIgnoreTime().contains(result)) {
 					valuesToWrite.put(result + "_" + FIELD_TIME, now);
 				}
@@ -430,5 +446,16 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		if (!this.updateExperimentConditionally(exp, condition, initValues)) {
 			throw new ExperimentAlreadyStartedException();
 		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		this.adapter.setLoggerName(name + ".adapter");
 	}
 }

@@ -30,6 +30,10 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 		this.possibleComponents = possibleComponents;
 	}
 
+	public ComponentInstance readFromJson(final String json) throws IOException {
+		return this.readAsTree(new ObjectMapper().readTree(json));
+	}
+
 	@SuppressWarnings("unchecked")
 	public ComponentInstance readAsTree(final TreeNode p) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();

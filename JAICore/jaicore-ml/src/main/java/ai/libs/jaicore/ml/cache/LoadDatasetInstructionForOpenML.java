@@ -42,4 +42,5 @@ public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
 	@Override
 	public Instruction clone() {
 		return new LoadDatasetInstructionForOpenML(this.apiKey, Integer.valueOf(this.getId()));
-	}}
+	}
+}
