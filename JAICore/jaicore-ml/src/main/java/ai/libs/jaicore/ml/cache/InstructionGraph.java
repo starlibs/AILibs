@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.cache;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,9 @@ import java.util.stream.Collectors;
 
 import com.clearspring.analytics.util.Lists;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -22,6 +26,10 @@ public class InstructionGraph extends ArrayList<InstructionNode> {
 
 	public InstructionGraph() {
 		super();
+	}
+
+	public static InstructionGraph fromJson(final String jsonRepresentation) throws JsonParseException, JsonMappingException, IOException {
+		return new ObjectMapper().readValue(jsonRepresentation, InstructionGraph.class);
 	}
 
 	public InstructionGraph(final InstructionGraph toClone) {
@@ -48,49 +56,6 @@ public class InstructionGraph extends ArrayList<InstructionNode> {
 	public InstructionNode getNodeByName(final String name) {
 		return this.nodeMap.get(name);
 	}
-
-	//	public InstructionGraph(final List<Instruction> linearHistory) {
-	//		for (Instruction instruction : linearHistory) {
-	//			InstructionNode<I,D> unitLayer = new InstructionNode<>(this, lastLayer);
-	//			unitLayer.add(instruction);
-	//			this.add(unitLayer);
-	//			lastLayer = unitLayer;
-	//		}
-	//	}
-
-	//	public InstructionGraph getSubgraphForOutputUnit(final Collection<Pair<String, Integer>> idsOfUnits) {
-	//		InstructionGraph subgraph = new InstructionGraph();
-	//		int n = this.size();
-	//
-	//		/* for each layer, compute the subset of elements that are required by the subsequent layer */
-	//		Collection<Integer> indicesOfUnitsToBeIncludedIntoTheCurrentLayer;
-	//		Collection<Integer> indicesOfUnitsToBeIncludedIntoTheNextLayer = idsOfUnits;
-	//		InstructionNode<I, D> lastLayer = null;
-	//		for (int i = n - 1; i >= 0; i--) {
-	//			indicesOfUnitsToBeIncludedIntoTheCurrentLayer = indicesOfUnitsToBeIncludedIntoTheNextLayer;
-	//			indicesOfUnitsToBeIncludedIntoTheNextLayer = new HashSet<>();
-	//			InstructionNode<I, D> currentLayer = this.get(i);
-	//			InstructionNode<I, D> subLayer = new InstructionNode<>(subgraph, null);
-	//			subgraph.add(subLayer);
-	//
-	//			/* make sure that the pointer to the new layer is added to the one inserted before */
-	//			if (lastLayer != null) {
-	//				lastLayer.setPreceedingLayer(subLayer);
-	//			}
-	//			lastLayer = subLayer;
-	//
-	//			for (int index : indicesOfUnitsToBeIncludedIntoTheCurrentLayer) {
-	//				Instruction<I, D> instruction = currentLayer.get(index);
-	//				subLayer.add(instruction);
-	//				if (currentLayer.getInputConnections().containsKey(index)) {
-	//					for (int srcUnit : currentLayer.getInputConnections().get(index)) {
-	//						indicesOfUnitsToBeIncludedIntoTheNextLayer.add(srcUnit);
-	//					}
-	//				}
-	//			}
-	//		}
-	//		return subgraph;
-	//	}
 
 	private void synchronizeNodeMap() {
 

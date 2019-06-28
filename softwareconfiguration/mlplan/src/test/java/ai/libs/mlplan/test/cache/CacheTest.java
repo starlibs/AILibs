@@ -53,8 +53,7 @@ public class CacheTest {
 			}
 
 			// test reproduction
-			ReproducibleInstances r = ReproducibleInstances.fromHistory(ri0.getInstructions(),
-					"4350e421cdc16404033ef1812ea38c01");
+			ReproducibleInstances r = ReproducibleInstances.fromHistory(ri0.getInstructions(), ri0.getOutputUnit());
 
 			if (ri0.size() != r.size()) {
 				fail("wrong number of instructions");

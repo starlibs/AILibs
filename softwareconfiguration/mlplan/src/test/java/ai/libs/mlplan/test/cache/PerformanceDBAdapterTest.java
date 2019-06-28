@@ -41,7 +41,7 @@ public class PerformanceDBAdapterTest {
 			ComponentInstance composition1 = factory.convertToComponentInstance(new MLPipeline(new Ranker(), new OneRAttributeEval(), new RandomForest()));
 
 			ReproducibleInstances reproducibleInstances1 = ReproducibleInstances.fromOpenML(40983, "4350e421cdc16404033ef1812ea38c01");
-			List<ReproducibleInstances> instances1 = WekaUtil.getStratifiedSplit(reproducibleInstances1, 5, 0.7, 0.3);
+			List<ReproducibleInstances> instances1 = WekaUtil.getStratifiedSplit(reproducibleInstances1, 5, 0.7);
 			String className1 = ZeroOneLoss.class.getName();
 			double score = Math.PI / 5.0;
 
@@ -52,8 +52,8 @@ public class PerformanceDBAdapterTest {
 			// started
 			ComponentInstance composition2 = factory.convertToComponentInstance(new MLPipeline(new Ranker(), new OneRAttributeEval(), new MultilayerPerceptron()));
 			ReproducibleInstances reproducibleInstances2 = ReproducibleInstances.fromOpenML(181, "4350e421cdc16404033ef1812ea38c01");
-			List<ReproducibleInstances> instances2 = WekaUtil.getStratifiedSplit(reproducibleInstances2, 5, 0.7, 0.3);
-			List<ReproducibleInstances> instances3 = WekaUtil.getStratifiedSplit(reproducibleInstances1, 4, 0.7, 0.3);
+			List<ReproducibleInstances> instances2 = WekaUtil.getStratifiedSplit(reproducibleInstances2, 5, 0.7);
+			List<ReproducibleInstances> instances3 = WekaUtil.getStratifiedSplit(reproducibleInstances1, 4, 0.7);
 			String className2 = F1MacroAverageL.class.getName();
 
 			// This is a different dataset

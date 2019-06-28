@@ -290,25 +290,25 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this.insertNoNewValues(insertStatement.getX(), insertStatement.getY());
 	}
 
-	public void update(final String sql) throws SQLException {
-		this.update(sql, new ArrayList<String>());
+	public int update(final String sql) throws SQLException {
+		return this.update(sql, new ArrayList<String>());
 	}
 
-	public void update(final String sql, final String[] values) throws SQLException {
-		this.update(sql, Arrays.asList(values));
+	public int update(final String sql, final String[] values) throws SQLException {
+		return this.update(sql, Arrays.asList(values));
 	}
 
-	public void update(final String sql, final List<? extends Object> values) throws SQLException {
+	public int update(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
 			for (int i = 1; i <= values.size(); i++) {
 				stmt.setString(i, values.get(i - 1).toString());
 			}
-			stmt.executeUpdate();
+			return stmt.executeUpdate();
 		}
 	}
 
-	public void update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
+	public int update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
 		StringBuilder updateSB = new StringBuilder();
 		List<Object> values = new ArrayList<>();
@@ -325,8 +325,14 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			if (conditionSB.length() > 0) {
 				conditionSB.append(" AND ");
 			}
-			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
-			values.add(entry.getValue());
+			if (entry.getValue() != null) {
+				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+				values.add(entry.getValue());
+			}
+			else {
+				conditionSB.append(entry.getKey());
+				conditionSB.append(" IS NULL");
+			}
 		}
 
 		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
@@ -334,7 +340,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			for (int i = 1; i <= values.size(); i++) {
 				this.setValue(stmt, i, values.get(i - 1));
 			}
-			stmt.executeUpdate();
+			return stmt.executeUpdate();
 		}
 	}
 

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
+import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
@@ -327,8 +328,12 @@ public class ExperimentRunner {
 			ExperimentDBEntry exp = this.handle.getRandomOpenExperiments(1).get(0);
 			this.checkExperimentValidity(exp.getExperiment());
 			logger.info("Conduct experiment with key values: {}", exp.getExperiment().getValuesOfKeyFields());
-			this.conductExperiment(exp);
-			numberOfConductedExperiments++;
+			try {
+				this.conductExperiment(exp);
+				numberOfConductedExperiments++;
+			} catch (ExperimentAlreadyStartedException e) {
+				logger.warn("Experiment was conducted in the meanwhile.");
+			}
 		}
 		if (logger.isInfoEnabled()) {
 			logger.info("Finished experiments. Conducted {}/{}. Known experiment entries: {}", numberOfConductedExperiments, this.totalNumberOfExperiments,
@@ -355,13 +360,14 @@ public class ExperimentRunner {
 	 * @param exp
 	 * @throws ExperimentAlreadyExistsInDatabaseException
 	 * @throws ExperimentDBInteractionFailedException
+	 * @throws ExperimentAlreadyStartedException
 	 * @throws Exception.
 	 *             These are not the exceptions thrown by the experiment itself,
 	 *             because these are logged into the database. Exceptions thrown
 	 *             here are technical exceptions that occur when arranging the
 	 *             experiment
 	 */
-	public void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException {
+	public void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException, ExperimentAlreadyStartedException {
 
 		/* run experiment */
 		if (expEntry == null) {

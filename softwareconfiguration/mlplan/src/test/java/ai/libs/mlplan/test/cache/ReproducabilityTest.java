@@ -6,17 +6,23 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.serialization.HASCOJacksonModule;
-import ai.libs.jaicore.ml.cache.Instruction;
+import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.ml.cache.InstructionFailedException;
+import ai.libs.jaicore.ml.cache.InstructionGraph;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import ai.libs.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
@@ -26,51 +32,60 @@ import weka.classifiers.Classifier;
 /**
  * Test to ensure that saved {@link ReproducibleInstances} and Solutions can be
  * reproduced and create the same performance value every time.
- * 
- * @author jmhansel
+ *
+ * @author jmhansel, fmohr
  *
  */
+@RunWith(Parameterized.class)
 public class ReproducabilityTest {
 
-	@Test
-	public void test() throws URISyntaxException, IOException {
-		String trainJson = "[{\"inputs\": {\"id\": \"40983\", \"provider\": \"openml.org\"}, \"command\": \"loadDataset\"}, {\"inputs\": {\"seed\": \"-4962768465676381896\", \"ratios\": \"[0.7]\", \"outIndex\": \"0\"}, \"command\": \"split\"}, {\"inputs\": {\"seed\": \"0\", \"ratios\": \"[0.3]\", \"outIndex\": \"1\"}, \"command\": \"split\"}, {\"inputs\": {\"seed\": \"1534718591\", \"ratios\": \"[0.7]\", \"outIndex\": \"0\"}, \"command\": \"split\"}]";
-		String validationJson = "[{\"inputs\": {\"id\": \"40983\", \"provider\": \"openml.org\"}, \"command\": \"loadDataset\"}, {\"inputs\": {\"seed\": \"-4962768465676381896\", \"ratios\": \"[0.7]\", \"outIndex\": \"0\"}, \"command\": \"split\"}, {\"inputs\": {\"seed\": \"0\", \"ratios\": \"[0.3]\", \"outIndex\": \"1\"}, \"command\": \"split\"}, {\"inputs\": {\"seed\": \"1534718591\", \"ratios\": \"[0.7]\", \"outIndex\": \"1\"}, \"command\": \"split\"}]";
-		String compositionJson = "{\"component\": {\"name\": \"weka.classifiers.bayes.NaiveBayesMultinomial\", \"parameters\": [], \"dependencies\": [], \"providedInterfaces\": [\"weka.classifiers.bayes.NaiveBayesMultinomial\", \"AbstractClassifier\", \"WekaBaseClassifier\", \"BaseClassifier\"], \"requiredInterfaces\": {}}, \"parameterValues\": {}, \"satisfactionOfRequiredInterfaces\": {}, \"parametersThatHaveBeenSetExplicitly\": [], \"parametersThatHaveNotBeenSetExplicitly\": []}";
+	private static final double[] expectedResults = { 0.04548587181254307, 0.05444521019986216, 0.05513439007580979, 0.048242591316333565, 0.05651274982770503 };
 
-		File jsonFile = Paths.get(getClass().getClassLoader()
-				.getResource(Paths.get("automl", "searchmodels", "weka", "weka-all-autoweka.json").toString()).toURI())
-				.toFile();
+	@Parameterized.Parameters
+	public static Collection<Object[]> setData(){
+
+		Collection<Object[]> params = new ArrayList<>();
+		for (int seed = 0; seed < 5; seed ++) {
+			params.add(new Object[] {seed});
+		}
+		return params;
+	}
+
+	private int seed;
+
+	public ReproducabilityTest(final int seed){
+		this.seed = seed;
+	}
+
+	@Test
+	public void testResultReproducibility() throws URISyntaxException, IOException, InstructionFailedException, InterruptedException, ComponentInstantiationFailedException, ObjectEvaluationFailedException {
+
+		/* define serializations of data and the algorithm */
+		String dataset = "[{\"name\":\"load\",\"instruction\":{\"command\":\"LoadDatasetInstructionForOpenML\",\"apiKey\":\"\",\"id\":\"40983\"},\"inputs\":[]},{\"name\":\"split\",\"instruction\":{\"command\":\"StratifiedSplitSubsetInstruction\",\"seed\": "
+				+ this.seed + ",\"portionOfFirstFold\":0.7},\"inputs\":[{\"x\":\"load\",\"y\":0}]}]";
+		String algorithm = "{\"component\":\"weka.classifiers.functions.SMO\",\"params\":{\"C\":\"0.1\",\"M\":\"false\",\"N\":\"1\"},\"requiredInterfaces\":{\"K\":{\"component\":\"weka.classifiers.functions.supportVector.PolyKernel\",\"params\":{\"E\":\"3\"},\"requiredInterfaces\":{}}}}";
+
+		/* get algorithm */
+		File jsonFile = Paths.get(this.getClass().getClassLoader().getResource(Paths.get("automl", "searchmodels", "weka", "weka-all-autoweka.json").toString()).toURI()).toFile();
 
 		ComponentLoader loader = new ComponentLoader(jsonFile);
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.registerModule(new HASCOJacksonModule(loader.getComponents()));
 
-		try {
-			List<Instruction> trainHistory = mapper.readValue(trainJson, new TypeReference<List<Instruction>>() {
-			});
-			List<Instruction> validationHistory = mapper.readValue(validationJson,
-					new TypeReference<List<Instruction>>() {
-					});
-			ComponentInstance composition = mapper.readValue(compositionJson, ComponentInstance.class);
-			ReproducibleInstances trainInstances = ReproducibleInstances.fromHistory(trainHistory,
-					"4350e421cdc16404033ef1812ea38c01");
-			ReproducibleInstances validationInstances = ReproducibleInstances.fromHistory(validationHistory,
-					"4350e421cdc16404033ef1812ea38c01");
-			ZeroOneLoss basicEvaluator = new ZeroOneLoss();
-			CacheEvaluatorMeasureBridge bridge = new CacheEvaluatorMeasureBridge(basicEvaluator, null);
-			trainInstances.setCacheLookup(false);
-			validationInstances.setCacheLookup(false);
-			trainInstances.setCacheStorage(false);
-			validationInstances.setCacheStorage(false);
-			WEKAPipelineFactory factory = new WEKAPipelineFactory();
-			Classifier pipeline = factory.getComponentInstantiation(composition);
-			Double score = bridge.evaluateSplit(pipeline, trainInstances, validationInstances);
-			
-			assertEquals(0.2909604519774011, score, 0.0001);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		ComponentInstance composition = mapper.readValue(algorithm, ComponentInstance.class);
+		InstructionGraph dsHistory = InstructionGraph.fromJson(dataset);
+		ReproducibleInstances trainInstances = ReproducibleInstances.fromHistory(dsHistory, new Pair<>("split", 0));
+		ReproducibleInstances validationInstances = ReproducibleInstances.fromHistory(dsHistory, new Pair<>("split", 1));
+		ZeroOneLoss basicEvaluator = new ZeroOneLoss();
+		CacheEvaluatorMeasureBridge bridge = new CacheEvaluatorMeasureBridge(basicEvaluator, null);
+		trainInstances.setCacheLookup(false);
+		validationInstances.setCacheLookup(false);
+		trainInstances.setCacheStorage(false);
+		validationInstances.setCacheStorage(false);
+		WEKAPipelineFactory factory = new WEKAPipelineFactory();
+		Classifier pipeline = factory.getComponentInstantiation(composition);
+		Double score = bridge.evaluateSplit(pipeline, trainInstances, validationInstances);
+
+		assertEquals(expectedResults[this.seed], score, 0.0001);
 	}
 }

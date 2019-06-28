@@ -51,6 +51,26 @@ public class ReproducibleInstances extends Instances {
 	 * @throws InterruptedException
 	 * @throws InstructionFailedException
 	 */
+	public static ReproducibleInstances fromHistory(final InstructionGraph history, final Pair<String, Integer> outputUnitOfHistory) throws InstructionFailedException, InterruptedException {
+		ReproducibleInstances result = new ReproducibleInstances( ((WekaInstances<Object>)history.getDataForUnit(outputUnitOfHistory)).getList());
+		result.history = history;
+		result.outputUnitOfHistory = outputUnitOfHistory;
+		result.cacheLookup = true;
+		result.cacheStorage = true;
+		return result;
+	}
+
+	/**
+	 * Creates a new {@link ReproducibleInstances} object. Data is loaded from
+	 * openml.org.
+	 *
+	 * @param id The id of the openml dataset
+	 * @param apiKey apikey to use
+	 * @return new {@link ReproducibleInstances} object
+	 * @throws IOException if something goes wrong while loading Instances from openml
+	 * @throws InterruptedException
+	 * @throws InstructionFailedException
+	 */
 	public static ReproducibleInstances fromOpenML(final int id, final String apiKey) throws InstructionFailedException, InterruptedException {
 		OpenMLHelper.setApiKey(apiKey);
 		InstructionGraph graph = new InstructionGraph();

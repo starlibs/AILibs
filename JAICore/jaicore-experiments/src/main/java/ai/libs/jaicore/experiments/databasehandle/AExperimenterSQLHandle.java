@@ -25,6 +25,7 @@ import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
 import ai.libs.jaicore.experiments.IExperimentSetConfig;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
+import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 
@@ -335,6 +336,11 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 
 	@Override
 	public void updateExperiment(final ExperimentDBEntry exp, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException {
+		this.updateExperimentConditionally(exp, new HashMap<>(), values);
+	}
+
+	@Override
+	public boolean updateExperimentConditionally(final ExperimentDBEntry exp, final Map<String, String> conditions, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException {
 		Collection<String> writableFields = this.config.getResultFields();
 		writableFields.add(FIELD_HOST);
 		writableFields.add(FIELD_TIME + "_started");
@@ -358,9 +364,10 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 			}
 		}
 		Map<String, String> where = new HashMap<>();
+		where.putAll(conditions);
 		where.put(FIELD_ID, String.valueOf(exp.getId()));
 		try {
-			this.adapter.update(this.tablename, valuesToWrite, where);
+			return this.adapter.update(this.tablename, valuesToWrite, where) >= 1;
 		} catch (SQLException e) {
 			throw new ExperimentUpdateFailedException(e);
 		}
@@ -410,7 +417,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 	}
 
 	@Override
-	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException {
+	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException, ExperimentAlreadyStartedException {
 		Map<String, Object> initValues = new HashMap<>();
 		initValues.put(FIELD_TIME + "_started", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 		try {
@@ -418,6 +425,10 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle {
 		} catch (UnknownHostException e) {
 			throw new ExperimentUpdateFailedException(e);
 		}
-		this.updateExperiment(exp, initValues);
+		Map<String, String> condition = new HashMap<>();
+		condition.put(FIELD_TIME + "_started", null);
+		if (!this.updateExperimentConditionally(exp, condition, initValues)) {
+			throw new ExperimentAlreadyStartedException();
+		}
 	}
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
+import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentUpdateFailedException;
 
@@ -105,7 +106,7 @@ public interface IExperimentDatabaseHandle {
 	 * @param exp The experiment that is started on the current machine
 	 * @throws ExperimentUpdateFailedException
 	 */
-	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException;
+	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentAlreadyStartedException, ExperimentUpdateFailedException;
 
 	/**
 	 * Updates non-keyfield values of the experiment.
@@ -115,6 +116,8 @@ public interface IExperimentDatabaseHandle {
 	 * @throws ExperimentUpdateFailedException
 	 */
 	public void updateExperiment(final ExperimentDBEntry exp, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException;
+
+	public boolean updateExperimentConditionally(final ExperimentDBEntry exp, final Map<String, String> conditions, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException;
 
 	/**
 	 * Signals that an experiment has been finished successfully.

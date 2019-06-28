@@ -8,6 +8,7 @@ import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.LearningCurveExtrapolationEvaluatorFactory;
@@ -76,7 +77,7 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 	 * @param trainSplitForAnchorpointsMeasurement The training fold size for measuring the acnhorpoints.
 	 * @param extrapolationMethod The method to be used in order to extrapolate the learning curve from the anchorpoints.
 	 */
-	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstances<Object>, ? extends ASamplingAlgorithm<WekaInstances<Object>>> subsamplingAlgorithmFactory,
+	public void withLearningCurveExtrapolationEvaluation(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ? extends ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> subsamplingAlgorithmFactory,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		this.withSearchPhaseEvaluatorFactory(new LearningCurveExtrapolationEvaluatorFactory(anchorpoints, subsamplingAlgorithmFactory, trainSplitForAnchorpointsMeasurement, extrapolationMethod));
 		this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(3).withTrainFoldSize(.7).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss())));
