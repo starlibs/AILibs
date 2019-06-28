@@ -5,15 +5,21 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
-import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,27 +28,39 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
+@RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ExperimentRunnerTester implements IExperimentSetEvaluator {
+
+	@Parameters(name = "config = {0}")
+	public static Collection<Object[]> setData(){
+
+		Collection<Object[]> params = new ArrayList<>();
+		params.add(new Object[] { new File("testrsc/experiment-constrained.cfg") });
+		params.add(new Object[] { new File("testrsc/experiment-unconstrained.cfg") });
+		return params;
+	}
 
 	public static class Generator implements IExperimentJSONKeyGenerator {
 
 		@Override
 		public int getNumberOfValues() {
-			return 2;
+			return 7;
 		}
 
 		@Override
 		public ObjectNode getValue(final int i) {
 			ObjectMapper om = new ObjectMapper();
 			ObjectNode node = om.createObjectNode();
-			node.put("number", i);
+			node.put("number", i % 2 == 0 ? i / 2 : (i - 1) / (-2)); // even numbers will be positive (halved); odd numbers will be negated
 			return node;
 		}
 
@@ -63,22 +81,52 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 		}
 	}
 
-	private IDatabaseConfig conf = (IDatabaseConfig) ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
-	private IExperimentDatabaseHandle handle = new ExperimenterMySQLHandle(new SQLAdapter(this.conf.getDBHost(), this.conf.getDBUsername(), this.conf.getDBPassword(), this.conf.getDBDatabaseName(), this.conf.getDBSSL()), "resulttable");
-	private IExperimentSetConfig config = ConfigCache.getOrCreate(IExperimentTesterConfig.class);
+	public static class Constraint implements Predicate<List<String>> {
+
+		private static final List<String> VALID_VALUES_A = Arrays.asList("0", "2");
+
+		@Override
+		public boolean test(final List<String> t) {
+			if (t.isEmpty()) {
+				return true;
+			}
+			if (!VALID_VALUES_A.contains(t.get(0))) {
+				return false;
+			}
+			if (t.size() < 2) {
+				return true;
+			}
+			try {
+				ObjectNode node = (ObjectNode)(new ObjectMapper().readTree(t.get(1)));
+				return Math.abs(node.get("number").asInt() - Integer.valueOf(t.get(0))) == 1;
+			} catch (IOException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+	}
+
+	private final IDatabaseConfig conf = (IDatabaseConfig) ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
+	private final IExperimentDatabaseHandle handle = new ExperimenterMySQLHandle(new SQLAdapter(this.conf.getDBHost(), this.conf.getDBUsername(), this.conf.getDBPassword(), this.conf.getDBDatabaseName(), this.conf.getDBSSL()), "resulttable");
+	private final IExperimentSetConfig config;
+	private final int numberOfTotalExperiments;
+
+	public ExperimentRunnerTester(final File configFile) {
+		super();
+		this.config = (IExperimentSetConfig)ConfigFactory.create(IExperimentSetConfig.class).loadPropertiesFromFile(configFile);
+		this.numberOfTotalExperiments = this.config.getConstraints() == null ? (3 * new Generator().getNumberOfValues()) : 4;
+	}
 
 	@Test
-	public void test1ThatAllExperimentsAreCreated() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException {
-
-		int n = 6;
+	public void test1ThatAllExperimentsAreCreated() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* check that running the experiments works */
 		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
 		Collection<ExperimentDBEntry> experimentDBEntries = runner.createExperiments();
-		assertEquals(n, experimentDBEntries.size());
+		assertEquals(this.numberOfTotalExperiments, experimentDBEntries.size());
 
 		Collection<ExperimentDBEntry> experiments = this.handle.getAllExperiments();
-		assertEquals(n, experiments.size());
+		assertEquals(this.numberOfTotalExperiments, experiments.size());
 	}
 
 	@Test
@@ -88,7 +136,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
 		runner.randomlyConductExperiments();
 		Collection<ExperimentDBEntry> conductedExperiments = this.handle.getConductedExperiments();
-		assertEquals(6, conductedExperiments.size());
+		assertEquals(this.numberOfTotalExperiments, conductedExperiments.size());
 
 		/* check results for every experiment */
 		for (ExperimentDBEntry entry : conductedExperiments) {
@@ -102,7 +150,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 		/* erase all experiments */
 		this.handle.setup(this.config);
 		int n = this.handle.getConductedExperiments().size();
-		assertEquals(6, n); // check that all experiments are still there
+		assertEquals(this.numberOfTotalExperiments, n); // check that all experiments are still there
 		for (ExperimentDBEntry entry : this.handle.getConductedExperiments()) {
 			this.handle.deleteExperiment(entry);
 			assertEquals(n - 1, this.handle.getConductedExperiments().size());

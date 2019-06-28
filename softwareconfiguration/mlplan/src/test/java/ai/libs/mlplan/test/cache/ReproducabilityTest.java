@@ -12,6 +12,7 @@ import java.util.Collection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,7 +42,7 @@ public class ReproducabilityTest {
 
 	private static final double[] expectedResults = { 0.04548587181254307, 0.05444521019986216, 0.05513439007580979, 0.048242591316333565, 0.05651274982770503 };
 
-	@Parameterized.Parameters
+	@Parameters(name = "seed = {0}")
 	public static Collection<Object[]> setData(){
 
 		Collection<Object[]> params = new ArrayList<>();

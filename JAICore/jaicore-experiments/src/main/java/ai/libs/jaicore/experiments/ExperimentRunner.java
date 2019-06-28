@@ -9,12 +9,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.StringUtil;
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.sets.LDSRelationComputer;
+import ai.libs.jaicore.basic.sets.RelationComputationProblem;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyStartedException;
@@ -81,7 +86,7 @@ public class ExperimentRunner {
 		logger.info("Successfully created and initialized ExperimentRunner.");
 	}
 
-	public List<ExperimentDBEntry> createExperiments() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException {
+	public List<ExperimentDBEntry> createExperiments() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* compute all experiments */
 		List<Map<String, String>> tmpPossibleKeyCombinations = this.getAllPossibleKeyCombinations();
@@ -97,7 +102,7 @@ public class ExperimentRunner {
 		return entries;
 	}
 
-	private void updateExperimentSetupAccordingToConfigFromDatabase() throws IllegalKeyDescriptorException, ExperimentDBInteractionFailedException {
+	private void updateExperimentSetupAccordingToConfigFromDatabase() throws ExperimentDBInteractionFailedException {
 		if (this.condMemoryLimitCheck) {
 			if (Math.abs((int) (Runtime.getRuntime().maxMemory() / 1024 / 1024) - this.config.getMemoryLimitInMB()) > MAX_MEM_DEVIATION) {
 				logger.error("The true memory limit is {}, which differs from the {} specified in the config by more than the allowed {}MB!", this.memoryLimit, this.config.getMemoryLimitInMB(), MAX_MEM_DEVIATION);
@@ -185,7 +190,7 @@ public class ExperimentRunner {
 		return true;
 	}
 
-	public List<Map<String, String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException {
+	public List<Map<String, String>> getAllPossibleKeyCombinations() throws IllegalExperimentSetupException, ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		if (this.possibleKeyCombinations == null) {
 
 			logger.debug("Computing all possible experiments.");
@@ -202,9 +207,26 @@ public class ExperimentRunner {
 				values.add(valuesForKey);
 			}
 
+			/* get constraints */
+			List<Predicate<List<String>>> constraints = new ArrayList<>();
+			if (this.config.getConstraints() != null) {
+				for (String p : this.config.getConstraints()) {
+					if (!p.startsWith(PROTOCOL_JAVA)) {
+						logger.warn("Ignoring constraint {} since currently only java constraints are allowed.", p);
+						continue;
+					}
+					try {
+						constraints.add((Predicate<List<String>>)Class.forName(p.substring(PROTOCOL_JAVA.length()).trim()).newInstance());
+					} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+						logger.error("Error in loading constraint {}: {}", p, e);
+					}
+				}
+			}
+
 			/* create one experiment object from every tuple */
-			logger.debug("Building cartesian product with {} items from {}", values.stream().mapToInt(Collection::size).reduce(1, (a, b) -> a * b), values);
-			this.possibleKeyCombinations = SetUtil.cartesianProduct(values).stream().map(this::mapValuesToKeyValueMap).collect(Collectors.toList());
+			logger.debug("Building relation from {} with {} constraints.", values, constraints.size());
+			RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(values, constraints.get(0));
+			this.possibleKeyCombinations = new LDSRelationComputer<>(problem).call().stream().map(this::mapValuesToKeyValueMap).collect(Collectors.toList());
 		}
 		return this.possibleKeyCombinations;
 	}
@@ -325,7 +347,12 @@ public class ExperimentRunner {
 
 		int numberOfConductedExperiments = 0;
 		while (!Thread.interrupted() && this.keysForWhichResultsAreKnown.size() < this.totalNumberOfExperiments && (maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
-			ExperimentDBEntry exp = this.handle.getRandomOpenExperiments(1).get(0);
+			List<ExperimentDBEntry> openRandomExperiments = this.handle.getRandomOpenExperiments(1);
+			if (openRandomExperiments.isEmpty()) {
+				logger.info("No more open experiments found.");
+				break;
+			}
+			ExperimentDBEntry exp = openRandomExperiments.get(0);
 			this.checkExperimentValidity(exp.getExperiment());
 			logger.info("Conduct experiment with key values: {}", exp.getExperiment().getValuesOfKeyFields());
 			try {
