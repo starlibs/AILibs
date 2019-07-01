@@ -356,8 +356,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public boolean updateExperimentConditionally(final ExperimentDBEntry exp, final Map<String, String> conditions, final Map<String, ? extends Object> values) throws ExperimentUpdateFailedException {
-		Collection<String> writableFields = Arrays.asList(this.resultFields);
 		Collection<String> resultFieldsAsList = Arrays.asList(this.resultFields);
+		Collection<String> writableFields = new ArrayList<>(resultFieldsAsList);
 		writableFields.add(FIELD_HOST);
 		writableFields.add(FIELD_TIME + "_started");
 		writableFields.add("exception");
@@ -457,5 +457,21 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 		this.adapter.setLoggerName(name + ".adapter");
+	}
+
+	@Override
+	public ExperimentDBEntry getExperimentWithId(final int id) throws ExperimentDBInteractionFailedException {
+		if (this.config == null || this.keyFields == null) {
+			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+		}
+		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append("SELECT * FROM `");
+		queryStringSB.append(this.tablename);
+		queryStringSB.append("` WHERE experiment_id = " + id);
+		try {
+			return this.getExperimentsForSQLQuery(queryStringSB.toString()).get(0);
+		} catch (SQLException e) {
+			throw new ExperimentDBInteractionFailedException(e);
+		}
 	}
 }

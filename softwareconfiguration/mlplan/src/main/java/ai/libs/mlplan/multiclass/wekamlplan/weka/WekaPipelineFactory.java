@@ -21,9 +21,9 @@ import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.OptionHandler;
 
-public class WEKAPipelineFactory implements IClassifierFactory {
+public class WekaPipelineFactory implements IClassifierFactory {
 
-	private Logger logger = LoggerFactory.getLogger(WEKAPipelineFactory.class);
+	private Logger logger = LoggerFactory.getLogger(WekaPipelineFactory.class);
 
 	private static final String L_CLASSIFIER = "classifier";
 

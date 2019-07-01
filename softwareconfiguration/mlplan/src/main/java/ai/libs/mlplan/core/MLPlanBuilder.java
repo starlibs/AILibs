@@ -58,7 +58,7 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import ai.libs.mlplan.multilabel.MekaPipelineFactory;
 import weka.core.Instances;
@@ -238,13 +238,13 @@ public class MLPlanBuilder {
 	}
 
 	public MLPlanBuilder withAutoWEKAConfiguration() throws IOException {
-		this.classifierFactory = new WEKAPipelineFactory();
+		this.classifierFactory = new WekaPipelineFactory();
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
 		return this.withDefaultConfiguration(EDefaultConfig.AUTO_WEKA);
 	}
 
 	public MLPlanBuilder withTinyTestConfiguration() throws IOException {
-		this.classifierFactory = new WEKAPipelineFactory();
+		this.classifierFactory = new WekaPipelineFactory();
 		this.pipelineValidityCheckingNodeEvaluator = new WekaPipelineValidityCheckingNodeEvaluator();
 		return this.withDefaultConfiguration(EDefaultConfig.TINYTEST);
 	}

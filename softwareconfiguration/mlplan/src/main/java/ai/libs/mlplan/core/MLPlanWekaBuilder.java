@@ -19,7 +19,7 @@ import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 
 public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 
@@ -35,7 +35,7 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
 
 	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new MulticlassClassStratifiedSplitter();
-	private static final IClassifierFactory DEF_CLASSIFIER_FACTORY = new WEKAPipelineFactory();
+	private static final IClassifierFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_PREFERRED_COMPONENTS, FS_PREFERRED_COMPONENTS);
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_WEKA_COMPLETE, FS_SSC_WEKA);
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE)

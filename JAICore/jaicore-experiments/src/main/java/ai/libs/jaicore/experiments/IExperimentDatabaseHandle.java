@@ -80,6 +80,16 @@ public interface IExperimentDatabaseHandle {
 	 */
 	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException;
 
+
+	/**
+	 * Gets the experiment with the given id.
+	 *
+	 * @param id
+	 * @return
+	 * @throws ExperimentDBInteractionFailedException
+	 */
+	public ExperimentDBEntry getExperimentWithId(int id) throws ExperimentDBInteractionFailedException;
+
 	/**
 	 * Creates a new experiment entry and returns it.
 	 *

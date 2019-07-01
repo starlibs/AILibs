@@ -1,10 +1,7 @@
 package ai.libs.jaicore.experiments;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -28,15 +25,12 @@ import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 public class ExperimentRunner implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(ExperimentRunner.class);
-	private static final int MAX_MEM_DEVIATION = 50;
+	private static final double MAX_MEM_DEVIATION = .15;
 
 	private final IExperimentSetConfig config;
 	private final IExperimentSetEvaluator conductor;
 	private final IExperimentDatabaseHandle handle;
-	private final Collection<Map<String, String>> keysForWhichResultsAreKnown = new HashSet<>();
-
-	private int totalNumberOfExperiments;
-
+	private final int availableMemoryInMB;
 
 	public ExperimentRunner(final IExperimentSetConfig config, final IExperimentSetEvaluator conductor, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
 
@@ -46,6 +40,8 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		this.handle = databaseHandle;
 		this.logger.debug("Created ExperimentRunner. Now updating its configuration from the database.");
 		this.logger.info("Successfully created and initialized ExperimentRunner.");
+		this.handle.setup(config);
+		this.availableMemoryInMB = (int)(Runtime.getRuntime().maxMemory() / 1024 / 1024);
 	}
 
 	/**
@@ -62,14 +58,9 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 */
 	public void randomlyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException {
 		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
-		if (this.totalNumberOfExperiments <= 0) {
-			this.logger.info("Number of total experiments is 0");
-			return;
-		}
-		this.logger.info("Now conducting new experiment. {}/{} experiments have already been started or even been completed", this.keysForWhichResultsAreKnown.size(), this.totalNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
-		while (!Thread.interrupted() && this.keysForWhichResultsAreKnown.size() < this.totalNumberOfExperiments && (maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
+		while (!Thread.interrupted() && (maxNumberOfExperiments <= 0 || numberOfConductedExperiments < maxNumberOfExperiments)) {
 			List<ExperimentDBEntry> openRandomExperiments = this.handle.getRandomOpenExperiments(1);
 			if (openRandomExperiments.isEmpty()) {
 				this.logger.info("No more open experiments found.");
@@ -85,10 +76,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				this.logger.warn("Experiment was conducted in the meanwhile.");
 			}
 		}
-		if (this.logger.isInfoEnabled()) {
-			this.logger.info("Finished experiments. Conducted {}/{}. Known experiment entries: {}", numberOfConductedExperiments, this.totalNumberOfExperiments,
-					this.keysForWhichResultsAreKnown.stream().map(e -> "\n\t" + e).collect(Collectors.joining()));
-		}
+		this.logger.info("Successfully finished {} experiments.", numberOfConductedExperiments);
 	}
 
 	/**
@@ -124,9 +112,14 @@ public class ExperimentRunner implements ILoggingCustomizable {
 			throw new IllegalArgumentException("Cannot conduct NULL experiment!");
 		}
 		Throwable error = null;
-		this.keysForWhichResultsAreKnown.add(expEntry.getExperiment().getValuesOfKeyFields());
-		this.logger.debug("Added experiment with keys {} to set of known experiments. Now contains {} items.", expEntry.getExperiment().getValuesOfKeyFields(), this.keysForWhichResultsAreKnown.size());
 		try {
+			double memoryDeviation = Math.abs(expEntry.getExperiment().getMemoryInMB() - this.availableMemoryInMB) * 1f / expEntry.getExperiment().getMemoryInMB();
+			if (memoryDeviation > MAX_MEM_DEVIATION) {
+				throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because the available memory is " + this.availableMemoryInMB + " where declared is " + expEntry.getExperiment().getMemoryInMB() + ". Deviation: " + memoryDeviation);
+			}
+			if (expEntry.getExperiment().getNumCPUs() > Runtime.getRuntime().availableProcessors()) {
+				throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
+			}
 			this.handle.startExperiment(expEntry);
 			this.conductor.evaluate(expEntry, m -> {
 				try {
@@ -142,7 +135,6 @@ public class ExperimentRunner implements ILoggingCustomizable {
 		}
 		this.handle.finishExperiment(expEntry, error);
 	}
-
 
 	private void checkExperimentValidity(final Experiment experiment) {
 		if (SetUtil.differenceNotEmpty(this.config.getKeyFields(), experiment.getValuesOfKeyFields().keySet())) {

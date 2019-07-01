@@ -27,7 +27,7 @@ import ai.libs.jaicore.ml.cache.InstructionGraph;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import ai.libs.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.Classifier;
 
 /**
@@ -83,7 +83,7 @@ public class ReproducabilityTest {
 		validationInstances.setCacheLookup(false);
 		trainInstances.setCacheStorage(false);
 		validationInstances.setCacheStorage(false);
-		WEKAPipelineFactory factory = new WEKAPipelineFactory();
+		WekaPipelineFactory factory = new WekaPipelineFactory();
 		Classifier pipeline = factory.getComponentInstantiation(composition);
 		Double score = bridge.evaluateSplit(pipeline, trainInstances, validationInstances);
 

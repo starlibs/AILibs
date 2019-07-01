@@ -27,7 +27,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
-import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
@@ -107,7 +106,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	private final IDatabaseConfig conf = (IDatabaseConfig) ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(new File("testrsc/dbconfig.properties"));
-	private final IExperimentDatabaseHandle handle = new ExperimenterMySQLHandle(new SQLAdapter(this.conf.getDBHost(), this.conf.getDBUsername(), this.conf.getDBPassword(), this.conf.getDBDatabaseName(), this.conf.getDBSSL()), "resulttable");
+	private final IExperimentDatabaseHandle handle = new ExperimenterMySQLHandle(this.conf);
 	private final IExperimentSetConfig config;
 	private final int numberOfTotalExperiments;
 
