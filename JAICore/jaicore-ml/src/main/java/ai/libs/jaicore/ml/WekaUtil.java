@@ -662,10 +662,14 @@ public class WekaUtil {
 	}
 
 	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException  {
+		return getStratifiedSplit(data, new Random(seed), portionOfFirstFold);
+	}
+
+	public static List<Instances> getStratifiedSplit(final Instances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException  {
 		try {
 			List<Instances> split = new ArrayList<>();
 			AttributeBasedStratiAmountSelectorAndAssigner<WekaInstance<Object>, WekaInstances<Object>> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
-			StratifiedSampling<WekaInstance<Object>, WekaInstances<Object>> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, new Random(seed), new WekaInstances<>(data));
+			StratifiedSampling<WekaInstance<Object>, WekaInstances<Object>> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, new WekaInstances<>(data));
 			sampler.setSampleSize((int)Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
 			split.add(sampler.getComplement().getList());
