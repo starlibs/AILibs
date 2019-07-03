@@ -1,6 +1,5 @@
 package autofe.db.sql;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AttributeType;
 import autofe.db.model.database.BackwardFeature;
@@ -95,12 +95,11 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 
 			instances = this.setupInstances(features, target);
 			LOGGER.debug("Loading instances from DB using sql: {}", sql);
-			ResultSet rs = this.sqlAdapter.getResultsOfQuery(sql.toString());
-			while (rs.next()) {
-				Instance instance = this.createInstance(rs, features, target, instances);
+			List<IKVStore> rs = this.sqlAdapter.getResultsOfQuery(sql.toString());
+			for (IKVStore store : rs) {
+				Instance instance = this.createInstance(store, features, target, instances);
 				instances.add(instance);
 			}
-			rs.close();
 			instances = this.finalizeInstances(instances);
 
 		} catch (Exception e) {
@@ -172,11 +171,10 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		boolean exists = false;
 		String tableName = SqlUtils.getTableNameForFeature(feature);
 		String sql = String.format("SELECT name FROM sqlite_master WHERE type='table' AND name='%s'", tableName);
-		ResultSet rs = this.sqlAdapter.getResultsOfQuery(sql);
-		if (rs.next()) {
+		List<IKVStore> rs = this.sqlAdapter.getResultsOfQuery(sql);
+		if (!rs.isEmpty()) {
 			exists = true;
 		}
-		rs.close();
 		return exists;
 	}
 
@@ -224,20 +222,18 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		return instances;
 	}
 
-	private Instance createInstance(final ResultSet rs, final List<AbstractFeature> features, final autofe.db.model.database.Attribute target, final Instances instances) throws SQLException {
+	private Instance createInstance(final IKVStore rs, final List<AbstractFeature> features, final autofe.db.model.database.Attribute target, final Instances instances) {
 		Instance instance = new DenseInstance(features.size() + 1);
 		instance.setDataset(instances);
 		for (int i = 0; i < features.size(); i++) {
 			AbstractFeature feature = features.get(i);
 			if (feature.getType() == AttributeType.TEXT) {
-				String value = rs.getString(i + 2);
-				if (value != null) {
-					instance.setValue(i, value);
+				if (!rs.isNull(feature.getName())) {
+					instance.setValue(i, rs.getAsString(feature.getName()));
 				}
 			} else if (feature.getType() == AttributeType.NUMERIC) {
-				long value = rs.getLong(i + 2);
-				if (!rs.wasNull()) {
-					instance.setValue(i, value);
+				if (!rs.isNull(feature.getName())) {
+					instance.setValue(i, rs.getAsLong(feature.getName()));
 				}
 			} else {
 				throw new UnsupportedAttributeTypeException("Unsupported attribute type " + feature.getType());
@@ -245,12 +241,10 @@ public class DatabaseConnectorImpl implements DatabaseConnector {
 		}
 
 		// Add class value (last column in result set)
-		if (target.getType() == AttributeType.TEXT)
-
-		{
-			instance.setClassValue(rs.getString(features.size() + 2));
+		if (target.getType() == AttributeType.TEXT) {
+			instance.setClassValue(rs.getAsString(target.getName()));
 		} else if (target.getType() == AttributeType.NUMERIC) {
-			instance.setClassValue(rs.getDouble(features.size() + 2));
+			instance.setClassValue(rs.getAsDouble(target.getName()));
 		} else {
 			throw new UnsupportedAttributeTypeException("Unsupported attribute type for target " + target.getType());
 		}

@@ -237,4 +237,11 @@ public interface IKVStore extends Map<String, Object> {
 	 */
 	public void removeAll(final String[] removeKeys);
 
+	/**
+	 * Checks whether the value for the requested key is null.
+	 * @param key The key for which the value is to be checked.
+	 * @return True iff the value is null.
+	 */
+	public boolean isNull(String key);
+
 }

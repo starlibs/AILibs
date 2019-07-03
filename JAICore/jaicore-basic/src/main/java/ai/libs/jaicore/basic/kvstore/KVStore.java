@@ -451,4 +451,9 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 		return super.equals(obj);
 	}
 
+	@Override
+	public boolean isNull(final String key) {
+		return (this.get(key) == null || this.getAsString(key).equals("null"));
+	}
+
 }
