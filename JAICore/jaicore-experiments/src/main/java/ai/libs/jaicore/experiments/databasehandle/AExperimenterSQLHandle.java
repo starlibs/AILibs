@@ -255,11 +255,15 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	private List<ExperimentDBEntry> getAllFromResultSet(final ResultSet rs) throws SQLException {
 		List<ExperimentDBEntry> experimentEntries = new ArrayList<>();
 		int i = 0;
+		long startAll = System.currentTimeMillis();
 		while (rs.next()) {
 			long start = System.currentTimeMillis();
 			ExperimentDBEntry entry = this.getCurrentFromResultSet(rs);
 			this.logger.trace("Building {}-th object took {}ms.", ++i, System.currentTimeMillis() - start);
 			experimentEntries.add(entry);
+			if (i % 1000 == 0) {
+				this.logger.debug("{} objects have been built within {}ms.", i, System.currentTimeMillis() - startAll);
+			}
 		}
 		return experimentEntries;
 	}
@@ -337,7 +341,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 		/* conduct insertion */
 		try {
+			this.logger.debug("Inserting {} entries", values.size());
 			List<Integer> ids = this.adapter.insertMultiple(this.tablename, keys, values);
+			this.logger.debug("Inserted {} entries", ids.size());
 			int n = ids.size();
 			List<ExperimentDBEntry> entries = new ArrayList<>(n);
 			for (int i = 0; i < n; i++) {

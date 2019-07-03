@@ -94,7 +94,9 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 		List<Map<String, String>> tmpPossibleKeyCombinations = this.getAllPossibleKeyCombinations();
 		this.logger.debug("Determined {} possible combinations. Will now remove keys that are already contained.", tmpPossibleKeyCombinations.size());
 		int removed = 0;
-		for (ExperimentDBEntry experiment : this.handle.getAllExperiments()) {
+		Collection<ExperimentDBEntry> installedExperiments = this.handle.getAllExperiments();
+		this.logger.debug("Identified {} installed experiments. Removing these from the list of all possible experiments.", installedExperiments.size());
+		for (ExperimentDBEntry experiment : installedExperiments) {
 			tmpPossibleKeyCombinations.remove(experiment.getExperiment().getValuesOfKeyFields());
 			removed ++;
 		}

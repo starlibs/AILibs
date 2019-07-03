@@ -130,7 +130,7 @@ public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgo
 			frequenciesInSubSample.put(instance, 0);
 		}
 		for (Object instance : this.sample) {
-			frequenciesInSubSample.put(instance, frequenciesInSubSample.get(instance) + 1);
+			frequenciesInSubSample.put(instance, frequenciesInSubSample.computeIfAbsent(instance, k -> 0) + 1); // inserts 0 if, for some reason, the value has not been defined before
 		}
 
 		/* now compute complement */

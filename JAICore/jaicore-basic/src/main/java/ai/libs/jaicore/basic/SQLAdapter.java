@@ -191,7 +191,6 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 				this.setValue(stmt, i, values.get(i - 1));
 			}
 			stmt.executeUpdate();
-
 			try (ResultSet rs = stmt.getGeneratedKeys()) {
 				rs.next();
 				return rs.getInt(1);
@@ -204,12 +203,25 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 		return this.insert(insertStatement.getX(), insertStatement.getY());
 	}
 
-	public List<Integer> insertMultiple(final String table, final List<String> keys, final List<List<?>> datarows) throws SQLException {
-		List<Integer> ids = new ArrayList<>(datarows.size());
-		String sql = this.getSQLForMultiInsert(table, keys, datarows);
-		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-			this.logger.debug("Executing statement: {}", sql);
-			stmt.executeUpdate();
+	public List<Integer> insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows) throws SQLException {
+		return this.insertMultiple(table, keys, datarows, 10000);
+	}
+
+	public List<Integer> insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows, final int chunkSize) throws SQLException {
+		int n = datarows.size();
+		List<Integer> ids = new ArrayList<>(n);
+		try (Statement stmt = this.connect.createStatement()) {
+			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
+				int startIndex = i * chunkSize;
+				int endIndex = Math.min((i + 1) * chunkSize, n);
+				String sql = this.getSQLForMultiInsert(table, keys, datarows.subList(startIndex, endIndex));
+				this.logger.debug("Created SQL for {} entries", endIndex - startIndex);
+				this.logger.trace("Adding sql statement {} to batch", sql);
+				stmt.addBatch(sql);
+			}
+			this.logger.debug("Start batch execution.");
+			stmt.executeBatch();
+			this.logger.debug("Finished batch execution.");
 			try (ResultSet rs = stmt.getGeneratedKeys()) {
 				while (rs.next()) {
 					ids.add(rs.getInt(1));
@@ -249,6 +261,23 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 		return new Pair<>(statement, values);
 	}
 
+	private String buildFinalInsertStatement(final String table, final Map<String, ? extends Object> map) {
+		StringBuilder sb1 = new StringBuilder();
+		StringBuilder sb2 = new StringBuilder();
+		for (Entry<String, ? extends Object> entry : map.entrySet()) {
+			if (entry.getValue() == null) {
+				continue;
+			}
+			if (sb1.length() != 0) {
+				sb1.append(", ");
+				sb2.append(", ");
+			}
+			sb1.append(entry.getKey());
+			sb2.append("\"" + entry.getValue().toString().replace("\"", "\\\"") + "\"");
+		}
+		return "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
+	}
+
 	private String getSQLForMultiInsert(final String table, final List<String> keys, final List<List<?>> datarows) {
 		StringBuilder sbMain = new StringBuilder();
 		StringBuilder sbKeys = new StringBuilder();
@@ -270,7 +299,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 		sbMain.append(") VALUES\n");
 
 		/* create value phrases */
-		for(List<?> datarow : datarows) {
+		for (List<?> datarow : datarows) {
 			if (datarow.contains(null)) { // the rule that fires here is wrong! The list CAN contain a null element
 				throw new IllegalArgumentException("Row " + datarow + " contains null element!");
 			}
@@ -328,8 +357,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 			if (entry.getValue() != null) {
 				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
 				values.add(entry.getValue());
-			}
-			else {
+			} else {
 				conditionSB.append(entry.getKey());
 				conditionSB.append(" IS NULL");
 			}
