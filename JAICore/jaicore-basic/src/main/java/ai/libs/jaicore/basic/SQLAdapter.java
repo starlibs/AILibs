@@ -1,5 +1,6 @@
 package ai.libs.jaicore.basic;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -18,7 +19,9 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.db.sql.ResultSetToKVStoreSerializer;
 
 /**
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
@@ -142,11 +145,11 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this.timestampOfLastAction = System.currentTimeMillis();
 	}
 
-	public ResultSet getRowsOfTable(final String table) throws SQLException {
+	public List<IKVStore> getRowsOfTable(final String table) throws SQLException {
 		return this.getRowsOfTable(table, new HashMap<>());
 	}
 
-	public ResultSet getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
+	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
 		StringBuilder conditionSB = new StringBuilder();
 		List<String> values = new ArrayList<>();
 		for (Entry<String, String> entry : conditions.entrySet()) {
@@ -161,21 +164,23 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		return this.getResultsOfQuery("SELECT * FROM `" + table + "`" + conditionSB.toString(), values);
 	}
 
-	public ResultSet getResultsOfQuery(final String query) throws SQLException {
+	public List<IKVStore> getResultsOfQuery(final String query) throws SQLException {
 		return this.getResultsOfQuery(query, new ArrayList<>());
 	}
 
-	public ResultSet getResultsOfQuery(final String query, final String[] values) throws SQLException {
+	public List<IKVStore> getResultsOfQuery(final String query, final String[] values) throws SQLException {
 		return this.getResultsOfQuery(query, Arrays.asList(values));
 	}
 
-	public ResultSet getResultsOfQuery(final String query, final List<String> values) throws SQLException {
+	public List<IKVStore> getResultsOfQuery(final String query, final List<String> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement statement = this.connect.prepareStatement(query)) {
 			for (int i = 1; i <= values.size(); i++) {
 				statement.setString(i, values.get(i - 1));
 			}
-			return statement.executeQuery();
+			return new ResultSetToKVStoreSerializer().serialize(statement.executeQuery());
+		} catch (IOException e) {
+			throw new SQLException("Could not serialize result set to KVStoreCollection.", e);
 		}
 	}
 
@@ -261,6 +266,8 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public void update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
+
+		// build the update mapping.
 		StringBuilder updateSB = new StringBuilder();
 		List<Object> values = new ArrayList<>();
 		for (Entry<String, ? extends Object> entry : updateValues.entrySet()) {
@@ -271,6 +278,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			values.add(entry.getValue());
 		}
 
+		// build the condition restricting the elements which are affected by the update.
 		StringBuilder conditionSB = new StringBuilder();
 		for (Entry<String, ? extends Object> entry : conditions.entrySet()) {
 			if (conditionSB.length() > 0) {
@@ -280,8 +288,16 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			values.add(entry.getValue());
 		}
 
-		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
-		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
+		// Build query for the update command.
+		StringBuilder sqlBuilder = new StringBuilder();
+		sqlBuilder.append("UPDATE ");
+		sqlBuilder.append(table);
+		sqlBuilder.append(" SET ");
+		sqlBuilder.append(updateSB.toString());
+		sqlBuilder.append(" WHERE ");
+		sqlBuilder.append(conditionSB.toString());
+
+		try (PreparedStatement stmt = this.connect.prepareStatement(sqlBuilder.toString())) {
 			for (int i = 1; i <= values.size(); i++) {
 				this.setValue(stmt, i, values.get(i - 1));
 			}

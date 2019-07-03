@@ -1,16 +1,17 @@
 package ai.libs.reduction.single.homogeneous.bestofkatrandom;
 
 import java.io.File;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.splitters.RandomSplitter;
 import ai.libs.reduction.single.BestOfKAtRandomExperiment;
 import ai.libs.reduction.single.ExperimentRunner;
@@ -34,9 +35,10 @@ public class MySQLReductionExperimentRunnerWrapper {
 
 	public Collection<MySQLReductionExperiment> getConductedExperiments() throws SQLException {
 		Collection<MySQLReductionExperiment> experiments = new HashSet<>();
-		ResultSet rs = this.adapter.getRowsOfTable(TABLE_NAME);
-		while (rs.next()) {
-			experiments.add(new MySQLReductionExperiment(rs.getInt("evaluation_id"), new BestOfKAtRandomExperiment(rs.getInt("seed"), rs.getString("dataset"),  rs.getString(KEY_CLASSIFIER),  rs.getString(KEY_CLASSIFIER), rs.getString(KEY_CLASSIFIER), rs.getInt("k"), rs.getInt("mccvrepeats"))));
+		List<IKVStore> rslist = this.adapter.getRowsOfTable(TABLE_NAME);
+		for (IKVStore rs : rslist) {
+			experiments.add(new MySQLReductionExperiment(rs.getAsInt("evaluation_id"), new BestOfKAtRandomExperiment(rs.getAsInt("seed"), rs.getAsString("dataset"), rs.getAsString(KEY_CLASSIFIER), rs.getAsString(KEY_CLASSIFIER),
+					rs.getAsString(KEY_CLASSIFIER), rs.getAsInt("k"), rs.getAsInt("mccvrepeats"))));
 		}
 		return experiments;
 	}
@@ -60,15 +62,15 @@ public class MySQLReductionExperimentRunnerWrapper {
 		return new MySQLReductionExperiment(id, exp);
 	}
 
-	private void updateExperiment(final MySQLReductionExperiment exp, final Map<String,? extends Object> values) throws SQLException {
-		Map<String,String> where = new HashMap<>();
+	private void updateExperiment(final MySQLReductionExperiment exp, final Map<String, ? extends Object> values) throws SQLException {
+		Map<String, String> where = new HashMap<>();
 		where.put("evaluation_id", String.valueOf(exp.getId()));
 		this.adapter.update(TABLE_NAME, values, where);
 	}
 
 	public void conductExperiment(final MySQLReductionExperiment exp) throws Exception {
 		ExperimentRunner<RandomSplitter> runner = new ExperimentRunner<>(this.k, this.mccvrepeats, seed -> new RandomSplitter(new Random(seed)));
-		Map<String,Object> results = runner.conductSingleOneStepReductionExperiment(exp.getExperiment());
+		Map<String, Object> results = runner.conductSingleOneStepReductionExperiment(exp.getExperiment());
 		this.updateExperiment(exp, results);
 	}
 

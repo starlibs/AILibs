@@ -28,7 +28,7 @@ public class KVStoreUtil {
 	public static String kvStoreCollectionToLaTeXTable(final KVStoreCollection kvStoreCollection, final String rowIndex, final String columnIndex) {
 		StringBuilder sb = new StringBuilder();
 		Table<String> table = new Table<>();
-		for (KVStore store : kvStoreCollection) {
+		for (IKVStore store : kvStoreCollection) {
 			String rowValue = store.getAsString(rowIndex).replaceAll("\\_", "\\\\_");
 			String columnValue = store.getAsString(columnIndex).replaceAll("\\_", "\\\\_");
 			String tableEntry = ValueUtil.valueToString(store.getAsDouble("meanAccuracy"), 2) + "+-" + ValueUtil.valueToString(store.getAsDouble("stdAccuracy"), 2);
@@ -42,7 +42,7 @@ public class KVStoreUtil {
 
 		StringBuilder sb = new StringBuilder();
 		Table<String> table = new Table<>();
-		for (KVStore store : kvStoreCollection) {
+		for (IKVStore store : kvStoreCollection) {
 
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
@@ -69,7 +69,7 @@ public class KVStoreUtil {
 
 		StringBuilder sb = new StringBuilder();
 		Table<String> table = new Table<>();
-		for (KVStore store : kvStoreCollection) {
+		for (IKVStore store : kvStoreCollection) {
 
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
@@ -96,7 +96,7 @@ public class KVStoreUtil {
 
 		StringBuilder sb = new StringBuilder();
 		Table<String> table = new Table<>();
-		for (KVStore store : kvStoreCollection) {
+		for (IKVStore store : kvStoreCollection) {
 
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
@@ -121,7 +121,7 @@ public class KVStoreUtil {
 
 	public static Table<String> kvStoreCollectionToTable(final KVStoreCollection kvStoreCollection, final String rowIndex, final String columnIndex, final String cellFormatting, final String standardValue) {
 		Table<String> table = new Table<>();
-		for (KVStore store : kvStoreCollection) {
+		for (IKVStore store : kvStoreCollection) {
 
 			String[] cellFormattingSplit = store.getAsString(cellFormatting).split("#");
 			List<String> cleanedCellFormatting = Arrays.stream(cellFormattingSplit).filter(x -> !x.equals("")).collect(Collectors.toList());
@@ -250,9 +250,27 @@ public class KVStoreUtil {
 		return kvStoreCollection;
 	}
 
-	public static KVStoreCollection readFromMySQLTable(final SQLAdapter adapter, final String table, final Map<String, String> commonFields) throws Exception {
-		return readFromMySQLResultSet(adapter.getRowsOfTable(table), commonFields);
+	public static KVStoreCollection readFromMySQLQuery(final SQLAdapter adapter, final String query, final Map<String, String> commonFields) throws Exception {
+		return addCommonFields(new KVStoreCollection(adapter.getResultsOfQuery(query)), commonFields);
+	}
 
+	/**
+	 * Reads all rows of an SQL table into a collection of {@link IKVStore}s where each row corresponds to a IKVStore in this collection.
+	 *
+	 * @param adapter An {@link SQLAdapter} to issue the query to the database.
+	 * @param table The table from which to read in the rows.
+	 * @param commonFields Static key-value pairs which should be added to all read-in {@link IKVStore}s.
+	 * @return
+	 * @throws Exception
+	 */
+	public static KVStoreCollection readFromMySQLTable(final SQLAdapter adapter, final String table, final Map<String, String> commonFields) throws Exception {
+		return addCommonFields(new KVStoreCollection(adapter.getRowsOfTable(table)), commonFields);
+
+	}
+
+	private static KVStoreCollection addCommonFields(final KVStoreCollection collection, final Map<String, String> commonFields) {
+		collection.stream().forEach(x -> x.putAll(commonFields));
+		return collection;
 	}
 
 }

@@ -1,6 +1,5 @@
 package ai.libs.mlpipeline_evaluation;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.CompositionSerializer;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
 import weka.classifiers.Classifier;
@@ -119,9 +119,9 @@ public class PipelineEvaluationCache {
 		}
 
 		try {
-			ResultSet resultSet = this.config.getAdapter().getResultsOfQuery(query, values);
-			if (resultSet.next()) {
-				return resultSet.getDouble("error_rate");
+			List<IKVStore> resultSet = this.config.getAdapter().getResultsOfQuery(query, values);
+			if (!resultSet.isEmpty()) {
+				return resultSet.get(0).getAsDouble("error_rate");
 			} else {
 				return null;
 			}

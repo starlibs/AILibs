@@ -69,7 +69,7 @@ public class KVStoreStatisticsUtil {
 		TwoLayerKVStoreCollectionPartition partition = new TwoLayerKVStoreCollectionPartition(setting, sampleID, grouped);
 
 		for (Entry<String, Map<String, KVStoreCollection>> partitionEntry : partition) {
-			List<KVStore> competitorList = new LinkedList<>();
+			List<IKVStore> competitorList = new LinkedList<>();
 			partitionEntry.getValue().values().stream().map(x -> x.get(0)).forEach(competitorList::add);
 			Collections.sort(competitorList, (o1, o2) -> (minimize) ? Double.compare(StatisticsUtil.mean(o1.getAsDoubleList(sampledValues)), StatisticsUtil.mean(o2.getAsDoubleList(sampledValues)))
 					: Double.compare(StatisticsUtil.mean(o2.getAsDoubleList(sampledValues)), StatisticsUtil.mean(o1.getAsDoubleList(sampledValues))));
@@ -140,7 +140,7 @@ public class KVStoreStatisticsUtil {
 
 			if (bestValue.isPresent()) {
 				double best = bestValue.getAsDouble();
-				for (KVStore store : entry.getValue()) {
+				for (IKVStore store : entry.getValue()) {
 
 					if (store.get(sampledValues) != null) {
 						store.put(output, StatisticsUtil.mean(store.getAsDoubleList(sampledValues)) == best);
@@ -178,7 +178,7 @@ public class KVStoreStatisticsUtil {
 
 		for (Entry<String, Map<String, KVStoreCollection>> settingToSampleWisePartition : settingAndSampleWisePartition) {
 			/* Description of the ground truth. */
-			KVStore onesStore = settingToSampleWisePartition.getValue().get(nameOfTestPopulation).get(0);
+			IKVStore onesStore = settingToSampleWisePartition.getValue().get(nameOfTestPopulation).get(0);
 			if (onesStore == null) {
 				continue;
 			}
@@ -191,7 +191,7 @@ public class KVStoreStatisticsUtil {
 					continue;
 				}
 
-				KVStore otherStore = sampleData.getValue().get(0);
+				IKVStore otherStore = sampleData.getValue().get(0);
 
 				Map<String, Double> sampleMapOfOther = toSampleMap(otherStore.getAsStringList(pairingIndex, ","), otherStore.getAsDoubleList(sampledValues, ","));
 
@@ -264,7 +264,7 @@ public class KVStoreStatisticsUtil {
 				if (otherEntry.getKey().equals(nameOfTestPopulation)) {
 					continue;
 				}
-				KVStore otherStore = otherEntry.getValue().get(0);
+				IKVStore otherStore = otherEntry.getValue().get(0);
 				List<Double> otherValues = otherStore.getAsDoubleList(sampledValues);
 				annotateSigTestResult(otherStore, output, StatisticsUtil.mannWhitneyTwoSidedSignificance(testValues, otherValues), StatisticsUtil.mean(otherValues), StatisticsUtil.mean(testValues));
 			}
@@ -320,7 +320,7 @@ public class KVStoreStatisticsUtil {
 				continue;
 			}
 
-			KVStore testStore = testCollection.get(0);
+			IKVStore testStore = testCollection.get(0);
 			double testMean = StatisticsUtil.mean(testStore.getAsDoubleList(sampledValues));
 			annotateSigTestResult(testStore, output, false, 0, 0);
 
@@ -328,7 +328,7 @@ public class KVStoreStatisticsUtil {
 				if (comparedEntry.getKey().equals(nameOfTestPopulation) || comparedEntry.getValue().isEmpty()) { // skip the test population itself.
 					continue;
 				}
-				KVStore otherStore = comparedEntry.getValue().get(0);
+				IKVStore otherStore = comparedEntry.getValue().get(0);
 				annotateSigTestResult(otherStore, output, StatisticsUtil.twoSampleTTestSignificance(testStore.getAsDoubleList(sampledValues), otherStore.getAsDoubleList(sampledValues)),
 						StatisticsUtil.mean(otherStore.getAsDoubleList(sampledValues)), testMean);
 			}
@@ -358,7 +358,7 @@ public class KVStoreStatisticsUtil {
 	 */
 	public static void bestFilter(final KVStoreCollection collection, final String setting, final String sampleID, final String sampledValues, final String output) {
 		best(collection, setting, sampleID, sampledValues, output);
-		List<KVStore> distinctTasks = new ArrayList<>();
+		List<IKVStore> distinctTasks = new ArrayList<>();
 		Set<String> consideredKeys = new HashSet<>();
 		collection.forEach(t -> {
 			String keyValue = t.getAsString(setting);
@@ -394,7 +394,7 @@ public class KVStoreStatisticsUtil {
 	 * @param meanOfStore The mean of the store to be annotated.
 	 * @param meanOfCompared The mean of the store to which storeToAnnotate is compared to.
 	 */
-	private static void annotateSigTestResult(final KVStore storeToAnnotate, final String output, final boolean sig, final double meanOfStore, final double meanOfCompared) {
+	private static void annotateSigTestResult(final IKVStore storeToAnnotate, final String output, final boolean sig, final double meanOfStore, final double meanOfCompared) {
 		if (sig) {
 			if (meanOfStore < meanOfCompared) {
 				storeToAnnotate.put(output, ESignificanceTestResult.SUPERIOR);
@@ -435,7 +435,7 @@ public class KVStoreStatisticsUtil {
 	public static Map<String, DescriptiveStatistics> averageRank(final KVStoreCollection groupedAll, final String sampleIDs, final String rank) {
 		Map<String, DescriptiveStatistics> averageRanks = new HashMap<>();
 
-		for (KVStore s : groupedAll) {
+		for (IKVStore s : groupedAll) {
 			DescriptiveStatistics stats = averageRanks.get(s.getAsString(sampleIDs));
 			if (stats == null) {
 				stats = new DescriptiveStatistics();

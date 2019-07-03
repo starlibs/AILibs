@@ -3,16 +3,17 @@ package ai.libs.reduction.single.heterogeneous.bestofkrandom;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.splitters.RandomSplitter;
 import ai.libs.reduction.single.BestOfKAtRandomExperiment;
 import ai.libs.reduction.single.ExperimentRunner;
@@ -26,73 +27,76 @@ public class MySQLReductionExperimentRunnerWrapper {
 	private final int k;
 	private final int mccvrepeats;
 
-	public MySQLReductionExperimentRunnerWrapper(String host, String user, String password, String database, int k, int mccvRepeats) {
-		adapter = new SQLAdapter(host, user, password, database);
+	public MySQLReductionExperimentRunnerWrapper(final String host, final String user, final String password, final String database, final int k, final int mccvRepeats) {
+		this.adapter = new SQLAdapter(host, user, password, database);
 		this.k = k;
 		this.mccvrepeats = mccvRepeats;
 		try {
-			knownExperiments.addAll(getConductedExperiments());
+			this.knownExperiments.addAll(this.getConductedExperiments());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Collection<MySQLReductionExperiment> getConductedExperiments() throws SQLException {
 		Collection<MySQLReductionExperiment> experiments = new HashSet<>();
-		ResultSet rs = adapter.getRowsOfTable(TABLE_NAME);
-		while (rs.next()) {
-			experiments.add(new MySQLReductionExperiment(rs.getInt("evaluation_id"), new BestOfKAtRandomExperiment(rs.getInt("seed"), rs.getString("dataset"),  rs.getString("left_classifier"),  rs.getString("inner_classifier"), rs.getString("right_classifier"), rs.getInt("k"), rs.getInt("mccvrepeats"))));
+		List<IKVStore> rslist = this.adapter.getRowsOfTable(TABLE_NAME);
+		for (IKVStore rs : rslist) {
+			experiments.add(new MySQLReductionExperiment(rs.getAsInt("evaluation_id"), new BestOfKAtRandomExperiment(rs.getAsInt("seed"), rs.getAsString("dataset"), rs.getAsString("left_classifier"), rs.getAsString("inner_classifier"),
+					rs.getAsString("right_classifier"), rs.getAsInt("k"), rs.getAsInt("mccvrepeats"))));
 		}
 		return experiments;
 	}
 
-	public MySQLReductionExperiment createAndGetExperimentIfNotConducted(int seed, File dataFile, String nameOfLeftClassifier, String nameOfInnerClassifier, String nameOfRightClassifier) throws FileNotFoundException, IOException {
-		
+	public MySQLReductionExperiment createAndGetExperimentIfNotConducted(final int seed, final File dataFile, final String nameOfLeftClassifier, final String nameOfInnerClassifier, final String nameOfRightClassifier)
+			throws FileNotFoundException, IOException {
+
 		/* first check whether exactly the same experiment (with the same seed) has been conducted previously */
-		BestOfKAtRandomExperiment exp = new BestOfKAtRandomExperiment(seed, dataFile.getAbsolutePath(), nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier, k, mccvrepeats);
-		Optional<MySQLReductionExperiment> existingExperiment = knownExperiments.stream().filter(e -> e.getExperiment().equals(exp)).findAny();
-		if (existingExperiment.isPresent())
+		BestOfKAtRandomExperiment exp = new BestOfKAtRandomExperiment(seed, dataFile.getAbsolutePath(), nameOfLeftClassifier, nameOfInnerClassifier, nameOfRightClassifier, this.k, this.mccvrepeats);
+		Optional<MySQLReductionExperiment> existingExperiment = this.knownExperiments.stream().filter(e -> e.getExperiment().equals(exp)).findAny();
+		if (existingExperiment.isPresent()) {
 			return null;
-		
+		}
+
 		Map<String, Object> map = new HashMap<>();
 		map.put("seed", seed);
 		map.put("dataset", dataFile.getAbsolutePath());
 		map.put("left_classifier", nameOfLeftClassifier);
 		map.put("inner_classifier", nameOfInnerClassifier);
 		map.put("right_classifier", nameOfRightClassifier);
-		map.put("k", k);
-		map.put("mccvrepeats", mccvrepeats);
+		map.put("k", this.k);
+		map.put("mccvrepeats", this.mccvrepeats);
 		try {
-			int id = adapter.insert(TABLE_NAME, map);
+			int id = this.adapter.insert(TABLE_NAME, map);
 			return new MySQLReductionExperiment(id, exp);
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
 			return null;
 		}
 	}
-	
-	private void updateExperiment(MySQLReductionExperiment exp, Map<String,? extends Object> values) throws SQLException {
-		Map<String,String> where = new HashMap<>();
+
+	private void updateExperiment(final MySQLReductionExperiment exp, final Map<String, ? extends Object> values) throws SQLException {
+		Map<String, String> where = new HashMap<>();
 		where.put("evaluation_id", String.valueOf(exp.getId()));
-		adapter.update(TABLE_NAME, values, where);
+		this.adapter.update(TABLE_NAME, values, where);
 	}
-	
-	public void conductExperiment(MySQLReductionExperiment exp) throws Exception {
-		ExperimentRunner<RandomSplitter> runner = new ExperimentRunner<RandomSplitter>(k, mccvrepeats, (seed) -> new RandomSplitter(new Random(seed)));
-		Map<String,Object> results = runner.conductSingleOneStepReductionExperiment(exp.getExperiment());
-		updateExperiment(exp, results);
+
+	public void conductExperiment(final MySQLReductionExperiment exp) throws Exception {
+		ExperimentRunner<RandomSplitter> runner = new ExperimentRunner<RandomSplitter>(this.k, this.mccvrepeats, (seed) -> new RandomSplitter(new Random(seed)));
+		Map<String, Object> results = runner.conductSingleOneStepReductionExperiment(exp.getExperiment());
+		this.updateExperiment(exp, results);
 	}
-	
-	public void markExperimentAsUnsolvable(MySQLReductionExperiment exp) throws SQLException {
+
+	public void markExperimentAsUnsolvable(final MySQLReductionExperiment exp) throws SQLException {
 		Map<String, String> values = new HashMap<>();
 		values.put("errorRate", "-1");
-		updateExperiment(exp, values);
+		this.updateExperiment(exp, values);
 	}
-	
-	public void associateExperimentWithException(MySQLReductionExperiment exp, Throwable e) throws SQLException {
+
+	public void associateExperimentWithException(final MySQLReductionExperiment exp, final Throwable e) throws SQLException {
 		Map<String, String> values = new HashMap<>();
-		 values.put("errorRate", "-1");
+		values.put("errorRate", "-1");
 		values.put("exception", e.getClass().getName() + "\n" + e.getMessage());
-		updateExperiment(exp, values);
+		this.updateExperiment(exp, values);
 	}
 }

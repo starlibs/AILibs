@@ -1,7 +1,6 @@
 package ai.libs.reduction.ensemble.simple;
 
 import java.io.File;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.reduction.Util;
 
 public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
@@ -32,9 +32,10 @@ public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
 
 	public Collection<MySQLEnsembleOfSimpleOneStepReductionsExperiment> getConductedExperiments() throws SQLException {
 		Collection<MySQLEnsembleOfSimpleOneStepReductionsExperiment> experiments = new HashSet<>();
-		ResultSet rs = this.adapter.getRowsOfTable(TABLE_NAME);
-		while (rs.next()) {
-			experiments.add(new MySQLEnsembleOfSimpleOneStepReductionsExperiment(rs.getInt("evaluation_id"), new EnsembleOfSimpleOneStepReductionsExperiment(rs.getInt("seed"), rs.getString("dataset"), rs.getString("classifier"), rs.getInt("size"), rs.getDouble(KEY_ERROR_RATE), rs.getString("exception"))));
+		List<IKVStore> rs = this.adapter.getRowsOfTable(TABLE_NAME);
+		for (IKVStore store : rs) {
+			experiments.add(new MySQLEnsembleOfSimpleOneStepReductionsExperiment(store.getAsInt("evaluation_id"), new EnsembleOfSimpleOneStepReductionsExperiment(store.getAsInt("seed"), store.getAsString("dataset"),
+					store.getAsString("classifier"), store.getAsInt("size"), store.getAsDouble(KEY_ERROR_RATE), store.getAsString("exception"))));
 		}
 		return experiments;
 	}
@@ -62,19 +63,19 @@ public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
 		return new MySQLEnsembleOfSimpleOneStepReductionsExperiment(id, exp);
 	}
 
-	private void updateExperiment(final MySQLEnsembleOfSimpleOneStepReductionsExperiment exp, final Map<String,? extends Object> values) throws SQLException {
-		Map<String,String> where = new HashMap<>();
+	private void updateExperiment(final MySQLEnsembleOfSimpleOneStepReductionsExperiment exp, final Map<String, ? extends Object> values) throws SQLException {
+		Map<String, String> where = new HashMap<>();
 		where.put("evaluation_id", String.valueOf(exp.getId()));
 		this.adapter.update(TABLE_NAME, values, where);
 	}
 
 	public void conductExperiment(final MySQLEnsembleOfSimpleOneStepReductionsExperiment exp) throws Exception {
-		List<Map<String,Object>> mccvResults = Util.conductEnsembleOfOneStepReductionsExperiment(exp.getExperiment());
+		List<Map<String, Object>> mccvResults = Util.conductEnsembleOfOneStepReductionsExperiment(exp.getExperiment());
 		DescriptiveStatistics errorRate = new DescriptiveStatistics();
 		DescriptiveStatistics runtime = new DescriptiveStatistics();
-		for (Map<String,Object> result : mccvResults) {
-			errorRate.addValue((double)result.get(KEY_ERROR_RATE));
-			runtime.addValue((long)result.get("trainTime"));
+		for (Map<String, Object> result : mccvResults) {
+			errorRate.addValue((double) result.get(KEY_ERROR_RATE));
+			runtime.addValue((long) result.get("trainTime"));
 		}
 
 		/* prepapre values for experiment update */
@@ -85,7 +86,7 @@ public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
 
 	public void markExperimentAsUnsolvable(final MySQLEnsembleOfSimpleOneStepReductionsExperiment exp) throws SQLException {
 		Map<String, String> values = new HashMap<>();
-		for (String key : new String[] {KEY_ERROR_RATE }) {
+		for (String key : new String[] { KEY_ERROR_RATE }) {
 			values.put(key, "-1");
 		}
 		this.updateExperiment(exp, values);
@@ -93,7 +94,7 @@ public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
 
 	public void associateExperimentWithException(final MySQLEnsembleOfSimpleOneStepReductionsExperiment exp, final Throwable e) throws SQLException {
 		Map<String, String> values = new HashMap<>();
-		for (String key : new String[] {KEY_ERROR_RATE }) {
+		for (String key : new String[] { KEY_ERROR_RATE }) {
 			values.put(key, "-1");
 		}
 		values.put("exception", e.getClass().getName() + "\n" + e.getMessage());

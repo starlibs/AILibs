@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
 import meka.core.Result;
 import weka.classifiers.Classifier;
@@ -129,11 +129,11 @@ public class ClassifierDBConnection implements Serializable {
 		// Check for setting id
 		String query = "SELECT setting_id FROM setting WHERE dataset=? AND test_split_tech=? AND test_fold=? AND val_split_tech=? AND val_fold=? AND test_seed = ? AND val_seed=?";
 		List<String> values = Arrays.asList(dataset, test_split_tech, test_fold, val_split_tech, val_fold, testSeed, valSeed);
-		ResultSet resultSet = adapter.getResultsOfQuery(query, values);
+		List<IKVStore> resultSet = adapter.getResultsOfQuery(query, values);
 
-		if (resultSet.next()) {
+		if (!resultSet.isEmpty()) {
 			// Get setting
-			this.settingId = resultSet.getInt(COLUMN_SETTING_ID);
+			this.settingId = resultSet.get(0).getAsInt(COLUMN_SETTING_ID);
 		} else {
 			// Add setting
 			HashMap<String, Object> map = new HashMap<>();
@@ -182,9 +182,9 @@ public class ClassifierDBConnection implements Serializable {
 		String query = String.format("SELECT %s FROM %s WHERE metric_id = ?", COLUMN_SORT_ORDER, TABLE_METRIC);
 		List<String> values = Arrays.asList(String.valueOf(metricID));
 
-		ResultSet resultSet = adapter.getResultsOfQuery(query, values);
-		if (resultSet.next()) {
-			this.metricSortOrder = resultSet.getString(COLUMN_SORT_ORDER);
+		List<IKVStore> resultSet = adapter.getResultsOfQuery(query, values);
+		if (!resultSet.isEmpty()) {
+			this.metricSortOrder = resultSet.get(0).getAsString(COLUMN_SORT_ORDER);
 		} else {
 			throw new NoSuchElementException("Given metric is not in data base!");
 		}
@@ -198,9 +198,9 @@ public class ClassifierDBConnection implements Serializable {
 		String query = String.format("SELECT %s FROM %s WHERE metric_id = ?", COLUMN_SORT_ORDER, TABLE_METRIC);
 		List<String> values = Arrays.asList(String.valueOf(metricId));
 
-		ResultSet resultSet = adapter.getResultsOfQuery(query, values);
-		if (resultSet.next()) {
-			this.metricSortOrder = resultSet.getString(COLUMN_SORT_ORDER);
+		List<IKVStore> resultSet = adapter.getResultsOfQuery(query, values);
+		if (!resultSet.isEmpty()) {
+			this.metricSortOrder = resultSet.get(0).getAsString(COLUMN_SORT_ORDER);
 		} else {
 			throw new NoSuchElementException("Given metric is not in data base!");
 		}
@@ -289,12 +289,12 @@ public class ClassifierDBConnection implements Serializable {
 	 *             If the classifier object cannot be recreated from the database
 	 */
 	protected Classifier getSingleLabelClassifier(final int label, final String query, final List<String> values) throws SQLException, IOException, ClassNotFoundException {
-		ResultSet resultSet = this.adapter.getResultsOfQuery(query, values);
+		List<IKVStore> resultSet = this.adapter.getResultsOfQuery(query, values);
 
 		// If fitting classifiers in db, just take the first one
-		if (resultSet.next()) {
-			this.lastClassifierId = resultSet.getInt(COLUMN_CLASSIFIER_ID);
-			Object obj = this.readBytesToObject(resultSet.getBytes(COLUMN_CLASSIFIER_OBJECT));
+		if (!resultSet.isEmpty()) {
+			this.lastClassifierId = resultSet.get(0).getAsInt(COLUMN_CLASSIFIER_ID);
+			Object obj = this.readBytesToObject(resultSet.get(0).getAsBytes(COLUMN_CLASSIFIER_OBJECT));
 			return (Classifier) obj;
 		}
 
@@ -319,12 +319,12 @@ public class ClassifierDBConnection implements Serializable {
 		// Get fitting classifier from db
 		String query = "SELECT * FROM classifier WHERE classifier_type=\"multilabel\" AND classifier_name=? AND setting_id=?";
 		List<String> values = Arrays.asList(classifierName, String.valueOf(this.settingId));
-		ResultSet resultSet = this.adapter.getResultsOfQuery(query, values);
+		List<IKVStore> resultSet = this.adapter.getResultsOfQuery(query, values);
 
 		// If fitting classifiers in db, just take the first one
-		if (resultSet.next()) {
-			this.lastClassifierId = resultSet.getInt(COLUMN_CLASSIFIER_ID);
-			return this.readBytesToObject(resultSet.getBytes(COLUMN_CLASSIFIER_OBJECT));
+		if (!resultSet.isEmpty()) {
+			this.lastClassifierId = resultSet.get(0).getAsInt(COLUMN_CLASSIFIER_ID);
+			return this.readBytesToObject(resultSet.get(0).getAsBytes(COLUMN_CLASSIFIER_OBJECT));
 		} else {
 			this.lastClassifierId = -1;
 		}
@@ -359,9 +359,9 @@ public class ClassifierDBConnection implements Serializable {
 		String query = "SELECT A.classifier_id, classifier_object, updated_at FROM (SELECT classifier_object, classifier_id, updated_at FROM classifier WHERE setting_id=? AND label_index=? AND classifier_type=\"multilabel\" AND classifier_name=?) AS A INNER JOIN (SELECT classifier_id, measured_value FROM measurement WHERE metric_id=? AND measurement_type=?) AS B ON A.classifier_id=B.classifier_id ORDER BY measured_value "
 				+ this.metricSortOrder;
 		List<String> values = Arrays.asList(String.valueOf(this.settingId), String.valueOf(-1), classifierName, String.valueOf(this.metricID));
-		ResultSet resultSet = this.adapter.getResultsOfQuery(query, values);
+		List<IKVStore> resultSet = this.adapter.getResultsOfQuery(query, values);
 
-		if (resultSet.next()) {
+		if (!resultSet.isEmpty()) {
 			// If exists, check if it might be outdated (check if there exists a later
 			// version of a single label classifier in the same setting -> this means there
 			// might be a better multilabel classifier possible now.)
@@ -372,13 +372,13 @@ public class ClassifierDBConnection implements Serializable {
 					COLUMN_CLASSIFIER_TYPE, //
 					CLASSIFIER_TYPE_SINGLELABEL);
 			values = Arrays.asList(String.valueOf(this.settingId));
-			ResultSet singlelableResultSet = this.adapter.getResultsOfQuery(query, values);
+			List<IKVStore> singlelableResultSet = this.adapter.getResultsOfQuery(query, values);
 
-			Timestamp singleLabelTimestamp = singlelableResultSet.getTimestamp(COLUMN_UPDATED_AT);
-			Timestamp multiLabelTimestamp = resultSet.getTimestamp(COLUMN_UPDATED_AT);
+			Timestamp singleLabelTimestamp = (Timestamp) singlelableResultSet.get(0).get(COLUMN_UPDATED_AT);
+			Timestamp multiLabelTimestamp = (Timestamp) resultSet.get(0).get(COLUMN_UPDATED_AT);
 			if (multiLabelTimestamp.after(singleLabelTimestamp)) {
-				this.lastClassifierId = resultSet.getInt(COLUMN_CLASSIFIER_ID);
-				return this.readBytesToObject(resultSet.getBytes(COLUMN_CLASSIFIER_OBJECT));
+				this.lastClassifierId = resultSet.get(0).getAsInt(COLUMN_CLASSIFIER_ID);
+				return this.readBytesToObject(resultSet.get(0).getAsBytes(COLUMN_CLASSIFIER_OBJECT));
 			}
 			LOGGER.debug("Multilabel Classifier {} is old.", classifierName);
 		}
@@ -470,10 +470,10 @@ public class ClassifierDBConnection implements Serializable {
 					COLUMN_CLASSIFIER_TYPE, //
 					CLASSIFIER_TYPE_SINGLELABEL);
 			List<String> values = Arrays.asList(String.valueOf(this.settingId), String.valueOf(label_index), classifier.getClass().getName());
-			ResultSet res = this.adapter.getResultsOfQuery(queryString, values);
+			List<IKVStore> res = this.adapter.getResultsOfQuery(queryString, values);
 
-			if (res.next()) {
-				return res.getInt(COLUMN_CLASSIFIER_ID);
+			if (!res.isEmpty()) {
+				return res.get(0).getAsInt(COLUMN_CLASSIFIER_ID);
 			} else {
 				map.put(COLUMN_CLASSIFIER_OBJECT, this.objectToByteArray(null));
 			}
@@ -524,11 +524,11 @@ public class ClassifierDBConnection implements Serializable {
 		// Get fitting classifier from db
 		String query = "SELECT * FROM classifier WHERE classifier_type=\"multilabel\" AND classifier_name=? AND setting_id=?";
 		List<String> values = Arrays.asList(classifierName, String.valueOf(this.settingId));
-		ResultSet resultSet = this.adapter.getResultsOfQuery(query, values);
+		List<IKVStore> resultSet = this.adapter.getResultsOfQuery(query, values);
 
 		// If fitting classifiers in db, just take the first one
-		if (resultSet.next()) {
-			this.lastClassifierId = resultSet.getInt(COLUMN_CLASSIFIER_ID);
+		if (!resultSet.isEmpty()) {
+			this.lastClassifierId = resultSet.get(0).getAsInt(COLUMN_CLASSIFIER_ID);
 			return this.lastClassifierId;
 		} else {
 			this.lastClassifierId = -1;
@@ -730,12 +730,12 @@ public class ClassifierDBConnection implements Serializable {
 		this.addModeToValuesList(values);
 
 		// Remove all metrics that are already in the database from the map
-		ResultSet resultSet = this.adapter.getResultsOfQuery(builder.toString(), values);
+		List<IKVStore> resultSet = this.adapter.getResultsOfQuery(builder.toString(), values);
 		Map<Integer, String> selectedMetric = new HashMap<>();
 		selectedMetric.putAll(metricNames);
 
-		while (resultSet.next()) {
-			selectedMetric.remove(resultSet.getInt(COLUMN_METRIC_ID));
+		while (!resultSet.isEmpty()) {
+			selectedMetric.remove(resultSet.get(0).getAsInt(COLUMN_METRIC_ID));
 		}
 		return selectedMetric;
 	}
@@ -779,11 +779,11 @@ public class ClassifierDBConnection implements Serializable {
 		// Get metric
 		String query = String.format("SELECT %s FROM %s WHERE %s=? ORDER BY %s DESC", COLUMN_METRIC_ID, TABLE_METRIC, COLUMN_METRIC_NAME, COLUMN_UPDATED_AT);
 		List<String> values = Arrays.asList(metricName);
-		ResultSet resultSet = this.adapter.getResultsOfQuery(query, values);
+		List<IKVStore> resultSet = this.adapter.getResultsOfQuery(query, values);
 
 		// Return latest
-		if (resultSet.next()) {
-			return resultSet.getInt(COLUMN_METRIC_ID);
+		if (!resultSet.isEmpty()) {
+			return resultSet.get(0).getAsInt(COLUMN_METRIC_ID);
 		} else {
 			LOGGER.warn("Requested metric with name {} which is not present in the db.", metricName);
 			return null;

@@ -4,13 +4,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 
 /**
@@ -45,12 +46,16 @@ public class PerformanceDBAdapter implements Closeable {
 
 		/* initialize tables if not existent */
 		try {
-			ResultSet rs = sqlAdapter.getResultsOfQuery("SHOW TABLES");
+			List<IKVStore> rs = sqlAdapter.getResultsOfQuery("SHOW TABLES");
 			boolean hasPerformanceTable = false;
-			while (rs.next()) {
-				String tableName = rs.getString(1);
-				if (tableName.equals(this.performanceSampleTableName)) {
-					hasPerformanceTable = true;
+
+			for (IKVStore store : rs) {
+				Optional<String> tableNameKeyOpt = rs.get(0).keySet().stream().filter(x -> x.startsWith("Tables_in")).findFirst();
+				if (tableNameKeyOpt.isPresent()) {
+					String tableName = store.getAsString(tableNameKeyOpt.get());
+					if (tableName.equals(this.performanceSampleTableName)) {
+						hasPerformanceTable = true;
+					}
 				}
 			}
 
@@ -62,7 +67,7 @@ public class PerformanceDBAdapter implements Closeable {
 						"CREATE TABLE `" + this.performanceSampleTableName + "` (\r\n" + " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `composition` json NOT NULL,\r\n" + " `train_trajectory` json NOT NULL,\r\n"
 								+ " `test_trajectory` json NOT NULL,\r\n" + " `loss_function` varchar(200) NOT NULL,\r\n" + " `score` double NOT NULL,\r\n" + " `evaluation_time_ms` bigint NOT NULL,\r\n"
 								+ "`evaluation_date` timestamp NULL DEFAULT NULL," + "`hash_value` char(64) NOT NULL," + " PRIMARY KEY (`evaluation_id`)\r\n" + ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
-								new ArrayList<>());
+						new ArrayList<>());
 			}
 
 		} catch (SQLException e) {
@@ -99,9 +104,9 @@ public class PerformanceDBAdapter implements Closeable {
 			md.update(className.getBytes());
 			byte[] digest = md.digest();
 			String hexHash = (new HexBinaryAdapter()).marshal(digest);
-			ResultSet rs = this.sqlAdapter.getResultsOfQuery("SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
-			while (rs.next()) {
-				double score = rs.getDouble("score");
+			List<IKVStore> rs = this.sqlAdapter.getResultsOfQuery("SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
+			for (IKVStore store : rs) {
+				double score = store.getAsDouble("score");
 				opt = Optional.of(score);
 			}
 		} catch (JsonProcessingException | SQLException | NoSuchAlgorithmException e) {
@@ -139,8 +144,8 @@ public class PerformanceDBAdapter implements Closeable {
 			md.update(className.getBytes());
 			byte[] digest = md.digest();
 			String hexHash = (new HexBinaryAdapter()).marshal(digest);
-			ResultSet rs = this.sqlAdapter.getResultsOfQuery("SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
-			if (rs.next()) {
+			List<IKVStore> rs = this.sqlAdapter.getResultsOfQuery("SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
+			if (!rs.isEmpty()) {
 				return;
 			}
 			Map<String, String> valueMap = new HashMap<>();

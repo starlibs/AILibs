@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
@@ -231,5 +233,20 @@ public class StringUtil {
 			return str;
 		}
 		return str.substring(0, limit - 4) + " ...";
+	}
+
+	/**
+	 * Finds the first String starting with the given prefix in a collection of Strings.
+	 * @param collection The collection of Strings to search in.
+	 * @param prefix The prefix of the searched-for element.
+	 * @return The first element of the collection starting with the desired prefix.
+	 */
+	public static String firstElementWithPrefix(final Collection<String> collection, final String prefix) {
+		Optional<String> resultOpt = collection.stream().filter(x -> x.startsWith(prefix)).findFirst();
+		if (resultOpt.isPresent()) {
+			return resultOpt.get();
+		} else {
+			throw new NoSuchElementException("Could not find an element with prefix " + prefix + " in the given collection.");
+		}
 	}
 }
