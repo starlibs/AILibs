@@ -673,7 +673,9 @@ public class WekaUtil {
 			sampler.setSampleSize((int)Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
 			split.add(sampler.getComplement().getList());
-			assert split.get(0).size() + split.get(1).size() == data.size();
+			if (split.get(0).size() + split.get(1).size() != data.size()) {
+				throw new IllegalStateException("The sum of fold sizes does not correspond to the size of the original dataset!");
+			}
 			return split;
 		}
 		catch (ClassCastException | AlgorithmTimeoutedException |  AlgorithmExecutionCanceledException | AlgorithmException | ClassNotFoundException | DatasetCreationException e) {

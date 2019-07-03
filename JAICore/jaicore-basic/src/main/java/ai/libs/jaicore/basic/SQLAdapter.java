@@ -261,7 +261,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 		return new Pair<>(statement, values);
 	}
 
-	private String buildFinalInsertStatement(final String table, final Map<String, ? extends Object> map) {
+	protected String buildFinalInsertStatement(final String table, final Map<String, ? extends Object> map) {
 		StringBuilder sb1 = new StringBuilder();
 		StringBuilder sb2 = new StringBuilder();
 		for (Entry<String, ? extends Object> entry : map.entrySet()) {

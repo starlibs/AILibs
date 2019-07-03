@@ -1,9 +1,5 @@
 package ai.libs.jaicore.ml.cache;
 
-import java.util.Arrays;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -25,17 +21,5 @@ public abstract class FoldBasedSubsetInstruction extends Instruction {
 	 *            method used to compute the folds
 	 */
 	public FoldBasedSubsetInstruction(@JsonProperty("foldTechnique") final String foldTechnique) {
-	}
-
-	public static FoldBasedSubsetInstruction getInstruction(final String constructor) throws ClassNotFoundException {
-		Pattern p = Pattern.compile("([^(]*)\\([^)]*)");
-		Matcher m = p.matcher(constructor);
-		if (!m.find()) {
-			throw new IllegalArgumentException("Invalid syntax for fold-based instruction.");
-		}
-		Class<?> clazz = Class.forName(m.group(1));
-		Object[] args = m.group(2).split(",");
-		System.out.println(Arrays.toString(args));
-		return null;
 	}
 }

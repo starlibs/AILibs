@@ -35,11 +35,15 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	private Logger logger = LoggerFactory.getLogger(AExperimenterSQLHandle.class);
 
+	private static final String ERROR_NOSETUP = "No key fields defined. Setup the handler before using it.";
 	private static final String FIELD_ID = "experiment_id";
 	private static final String FIELD_MEMORY = "memory";
 	private static final String FIELD_HOST = "host";
 	private static final String FIELD_NUMCPUS = "cpus";
 	private static final String FIELD_TIME = "time";
+	private static final String FIELD_TIME_START = FIELD_TIME + "_started";
+	private static final String FIELD_TIME_END = FIELD_TIME + "_end";
+	private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	private final SQLAdapter adapter;
 	private final String tablename;
@@ -86,13 +90,13 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 		/* creates basic table creation statement */
 		StringBuilder sqlMainTable = new StringBuilder();
-		StringBuilder keyFields = new StringBuilder();
+		StringBuilder keyFieldsSB = new StringBuilder();
 		sqlMainTable.append("CREATE TABLE IF NOT EXISTS `" + this.tablename + "` (");
 		sqlMainTable.append("`" + FIELD_ID + "` int(10) NOT NULL AUTO_INCREMENT,");
 		for (String key : this.keyFields) {
 			String shortKey = this.getDatabaseFieldnameForConfigEntry(key);
 			sqlMainTable.append("`" + shortKey + "` VARCHAR(1000) NOT NULL,");
-			keyFields.append("`" + shortKey + "`,");
+			keyFieldsSB.append("`" + shortKey + "`,");
 		}
 		sqlMainTable.append("`" + FIELD_NUMCPUS + "` int(2) NOT NULL,");
 		sqlMainTable.append("`" + FIELD_MEMORY + "_max` int(6) NOT NULL,");
@@ -115,7 +119,6 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		sqlMainTable.append("`exception` TEXT NULL,");
 		sqlMainTable.append("`" + FIELD_TIME + "_end` TIMESTAMP NULL,");
 		sqlMainTable.append("PRIMARY KEY (`" + FIELD_ID + "`)");
-		// sqlMainTable.append(", INDEX `keyFields` (" + keyFields.toString() + "`" + FIELD_NUMCPUS + "`, `" + FIELD_MEMORY + "_max`)");
 		sqlMainTable.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin");
 		try {
 			this.adapter.update(sqlMainTable.toString(), new String[] {});
@@ -125,10 +128,18 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		}
 	}
 
+	private String getSQLPrefixForSelectQuery() {
+		StringBuilder queryStringSB = new StringBuilder();
+		queryStringSB.append("SELECT * FROM `");
+		queryStringSB.append(this.tablename);
+		queryStringSB.append("` ");
+		return queryStringSB.toString();
+	}
+
 	@Override
 	public Collection<String> getConsideredValuesForKey(final String key) throws ExperimentDBInteractionFailedException {
 		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+			throw new IllegalStateException(ERROR_NOSETUP);
 		}
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT DISTINCT(`" + key + "`) FROM ");
@@ -149,7 +160,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public int getNumberOfAllExperiments() throws ExperimentDBInteractionFailedException {
 		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+			throw new IllegalStateException(ERROR_NOSETUP);
 		}
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT COUNT(*) FROM ");
@@ -166,14 +177,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> getAllExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
-		}
-		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM ");
-		queryStringSB.append(this.tablename);
 		try {
-			return this.getExperimentsForSQLQuery(queryStringSB.toString());
+			return this.getExperimentsForSQLQuery(this.getSQLPrefixForSelectQuery());
 		} catch (SQLException e) {
 			throw new ExperimentDBInteractionFailedException(e);
 		}
@@ -181,13 +186,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> getOpenExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
-		}
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM `");
-		queryStringSB.append(this.tablename);
-		queryStringSB.append("` WHERE time_started IS NULL");
+		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append("WHERE time_started IS NULL");
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
 		} catch (SQLException e) {
@@ -197,13 +198,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> getRandomOpenExperiments(final int limit) throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
-		}
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM `");
-		queryStringSB.append(this.tablename);
-		queryStringSB.append("` WHERE time_started IS NULL");
+		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append("WHERE time_started IS NULL");
 		queryStringSB.append(" ORDER BY RAND() LIMIT " + limit);
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
@@ -214,13 +211,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> getRunningExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
-		}
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM `");
-		queryStringSB.append(this.tablename);
-		queryStringSB.append("` WHERE time_started IS NOT NULL AND time_end IS NULL");
+		queryStringSB.append(this.getSQLPrefixForSelectQuery());
+		queryStringSB.append("WHERE time_started IS NOT NULL AND time_end IS NULL");
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
 		} catch (SQLException e) {
@@ -230,12 +223,8 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 
 	@Override
 	public List<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException {
-		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
-		}
 		StringBuilder queryStringSB = new StringBuilder();
-		queryStringSB.append("SELECT * FROM `");
-		queryStringSB.append(this.tablename);
+		queryStringSB.append(this.getSQLPrefixForSelectQuery());
 		queryStringSB.append("` WHERE time_started IS NOT NULL");
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
@@ -245,6 +234,9 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	}
 
 	private List<ExperimentDBEntry> getExperimentsForSQLQuery(final String sql) throws SQLException {
+		if (this.config == null || this.keyFields == null) {
+			throw new IllegalStateException(ERROR_NOSETUP);
+		}
 		this.logger.debug("Executing query {}", sql);
 		try (ResultSet rs = this.adapter.getPreparedStatement(sql).executeQuery()) {
 			this.logger.debug("Obtained results, now building experiment objects.");
@@ -365,13 +357,13 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		Collection<String> resultFieldsAsList = Arrays.asList(this.resultFields);
 		Collection<String> writableFields = new ArrayList<>(resultFieldsAsList);
 		writableFields.add(FIELD_HOST);
-		writableFields.add(FIELD_TIME + "_started");
+		writableFields.add(FIELD_TIME_START);
 		writableFields.add("exception");
-		writableFields.add(FIELD_TIME + "_end");
+		writableFields.add(FIELD_TIME_END);
 		if (!writableFields.containsAll(values.keySet())) {
 			throw new IllegalArgumentException("The value set contains non-result fields: " + SetUtil.difference(values.keySet(), writableFields));
 		}
-		String now = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+		String now = new SimpleDateFormat(DATE_FORMAT).format(new Date());
 		String memoryUsageInMB = String.valueOf((int) Runtime.getRuntime().totalMemory() / 1024 / 1024);
 		Map<String, String> valuesToWrite = new HashMap<>();
 		values.keySet().forEach(k -> valuesToWrite.put(k, values.get(k).toString()));
@@ -406,7 +398,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			}
 			valuesToAddAfterRun.put("exception", exceptionEntry.toString());
 		}
-		valuesToAddAfterRun.put(FIELD_TIME + "_end", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+		valuesToAddAfterRun.put(FIELD_TIME_END, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
 		this.updateExperiment(expEntry, valuesToAddAfterRun);
 	}
 
@@ -441,14 +433,14 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public void startExperiment(final ExperimentDBEntry exp) throws ExperimentUpdateFailedException, ExperimentAlreadyStartedException {
 		Map<String, Object> initValues = new HashMap<>();
-		initValues.put(FIELD_TIME + "_started", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+		initValues.put(FIELD_TIME_START, new SimpleDateFormat(DATE_FORMAT).format(new Date()));
 		try {
 			initValues.put(FIELD_HOST, InetAddress.getLocalHost().getHostName());
 		} catch (UnknownHostException e) {
 			throw new ExperimentUpdateFailedException(e);
 		}
 		Map<String, String> condition = new HashMap<>();
-		condition.put(FIELD_TIME + "_started", null);
+		condition.put(FIELD_TIME_START, null);
 		if (!this.updateExperimentConditionally(exp, condition, initValues)) {
 			throw new ExperimentAlreadyStartedException();
 		}
@@ -468,7 +460,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	@Override
 	public ExperimentDBEntry getExperimentWithId(final int id) throws ExperimentDBInteractionFailedException {
 		if (this.config == null || this.keyFields == null) {
-			throw new IllegalStateException("No key fields defined. Setup the handler before using it.");
+			throw new IllegalStateException(ERROR_NOSETUP);
 		}
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append("SELECT * FROM `");

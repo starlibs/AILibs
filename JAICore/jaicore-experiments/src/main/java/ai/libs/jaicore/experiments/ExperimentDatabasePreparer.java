@@ -233,7 +233,9 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 			}
 
 			/* create one experiment object from every tuple */
-			this.logger.debug("Building relation from {} cartesian product with {} constraints.", values.stream().map(l -> "" + l.size()).collect(Collectors.joining(" x ")), constraints.size());
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Building relation from {} cartesian product with {} constraints.", values.stream().map(l -> "" + l.size()).collect(Collectors.joining(" x ")), constraints.size());
+			}
 			RelationComputationProblem<String> problem = constraints.isEmpty() ? new RelationComputationProblem<>(values) : new RelationComputationProblem<>(values, constraints.get(0));
 			LDSRelationComputer<String> lc = new LDSRelationComputer<>(problem);
 			lc.setLoggerName(this.getLoggerName() + ".relationcomputer");
