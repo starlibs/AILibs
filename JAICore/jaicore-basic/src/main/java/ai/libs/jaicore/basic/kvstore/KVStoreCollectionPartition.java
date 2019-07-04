@@ -4,10 +4,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
-
-import java.util.Set;
 
 /**
  * Automatically partitions a KVStoreCollection according to the values of the partitioning key when KVStores or KVStoreCollections are added.
@@ -47,7 +46,7 @@ public class KVStoreCollectionPartition implements Iterable<Entry<String, KVStor
 		 * Adds a signle {@link KVStore} to this {@link KVStoreCollectionPartition}.
 		 * @param store
 		 */
-	void add(final KVStore store) {
+	void add(final IKVStore store) {
 		/* First ensure that nested maps contain the required keys and KVStoreCollection respectively. */
 		String keyForPartition = store.getAsString(this.partitionKey);
 		if (!this.data.containsKey(keyForPartition)) {

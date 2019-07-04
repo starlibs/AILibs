@@ -1,7 +1,6 @@
 package ai.libs.hasco.knowledgebase;
 
 import java.io.IOException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,6 +31,8 @@ import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.serialization.ParameterDeserializer;
 import ai.libs.hasco.serialization.ParameterDomainDeserializer;
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.StringUtil;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -288,10 +289,10 @@ public class PerformanceKnowledgeBase {
 	public void initializeDBTables() {
 		/* initialize tables if not existent */
 		try {
-			ResultSet rs = this.sqlAdapter.getResultsOfQuery("SHOW TABLES");
+			List<IKVStore> rs = this.sqlAdapter.getResultsOfQuery("SHOW TABLES");
 			boolean havePerformanceTable = false;
-			while (rs.next()) {
-				String tableName = rs.getString(1);
+			for (IKVStore store : rs) {
+				String tableName = store.getAsString(StringUtil.firstElementWithPrefix(store.keySet(), "Tables_in"));
 				if (tableName.equals("performance_samples_J48")) {
 					havePerformanceTable = true;
 				}
@@ -382,11 +383,11 @@ public class PerformanceKnowledgeBase {
 			throw new IllegalArgumentException("No SQLAdapter set.");
 		}
 		try {
-			ResultSet rs = this.sqlAdapter.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples_J48");
+			List<IKVStore> rslist = this.sqlAdapter.getResultsOfQuery("SELECT dataset, composition, error_rate FROM performance_samples_J48");
 			ObjectMapper mapper = new ObjectMapper();
-			while (rs.next()) {
-				String benchmarkName = rs.getString(1);
-				String ciString = rs.getString(2);
+			for (IKVStore rs : rslist) {
+				String benchmarkName = rs.getAsString("dataset");
+				String ciString = rs.getAsString("composition");
 				if (!benchmarkName.equals("test")) {
 					SimpleModule parameterModule = new SimpleModule();
 					ParameterDeserializer des = new ParameterDeserializer();
@@ -397,7 +398,7 @@ public class PerformanceKnowledgeBase {
 					parameterDomainModule.addDeserializer(Dependency.class, parameterDomainDes);
 
 					ComponentInstance composition = mapper.readValue(ciString, ComponentInstance.class);
-					double score = rs.getDouble(3);
+					double score = rs.getAsDouble("error_rate");
 					this.addPerformanceSample(benchmarkName, composition, score, false);
 				}
 			}

@@ -4,13 +4,13 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 
 /**
@@ -45,12 +46,16 @@ public class PerformanceDBAdapter implements Closeable {
 
 		/* initialize tables if not existent */
 		try {
-			ResultSet rs = sqlAdapter.getResultsOfQuery("SHOW TABLES");
+			List<IKVStore> rs = sqlAdapter.getResultsOfQuery("SHOW TABLES");
 			boolean hasPerformanceTable = false;
-			while (rs.next()) {
-				String tableName = rs.getString(1);
-				if (tableName.equals(this.performanceSampleTableName)) {
-					hasPerformanceTable = true;
+
+			for (IKVStore store : rs) {
+				Optional<String> tableNameKeyOpt = rs.get(0).keySet().stream().filter(x -> x.startsWith("Tables_in")).findFirst();
+				if (tableNameKeyOpt.isPresent()) {
+					String tableName = store.getAsString(tableNameKeyOpt.get());
+					if (tableName.equals(this.performanceSampleTableName)) {
+						hasPerformanceTable = true;
+					}
 				}
 			}
 
@@ -62,7 +67,7 @@ public class PerformanceDBAdapter implements Closeable {
 						"CREATE TABLE `" + this.performanceSampleTableName + "` (\r\n" + " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `composition` json NOT NULL,\r\n" + " `train_trajectory` json NOT NULL,\r\n"
 								+ " `test_trajectory` json NOT NULL,\r\n" + " `loss_function` varchar(200) NOT NULL,\r\n" + " `score` double NOT NULL,\r\n" + " `evaluation_time_ms` bigint NOT NULL,\r\n"
 								+ "`evaluation_date` timestamp NULL DEFAULT NULL," + "`hash_value` char(64) NOT NULL," + " PRIMARY KEY (`evaluation_id`)\r\n" + ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
-								new ArrayList<>());
+						new ArrayList<>());
 			}
 
 		} catch (SQLException e) {
@@ -87,27 +92,37 @@ public class PerformanceDBAdapter implements Closeable {
 	 */
 	public Optional<Double> exists(final ComponentInstance composition, final ReproducibleInstances reproducibleInstances, final ReproducibleInstances testData, final String className) {
 		Optional<Double> opt = Optional.empty();
-		ObjectMapper mapper = new ObjectMapper();
 		try {
-			String compositionString = mapper.writeValueAsString(composition);
-			String trainTrajectoryString = mapper.writeValueAsString(reproducibleInstances.getInstructions());
-			String testTrajectoryString = mapper.writeValueAsString(testData.getInstructions());
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(compositionString.getBytes());
-			md.update(trainTrajectoryString.getBytes());
-			md.update(testTrajectoryString.getBytes());
-			md.update(className.getBytes());
-			byte[] digest = md.digest();
-			String hexHash = (new HexBinaryAdapter()).marshal(digest);
-			ResultSet rs = this.sqlAdapter.getResultsOfQuery("SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
-			while (rs.next()) {
-				double score = rs.getDouble("score");
+			List<IKVStore> rs = this.getScoreOfCompositions(composition, reproducibleInstances, testData, className);
+			for (IKVStore store : rs) {
+				double score = store.getAsDouble("score");
 				opt = Optional.of(score);
 			}
 		} catch (JsonProcessingException | SQLException | NoSuchAlgorithmException e) {
 			logger.error("Observed exception during existence check: {}", e);
 		}
 		return opt;
+	}
+
+	private List<IKVStore> getScoreOfCompositions(final ComponentInstance composition, final ReproducibleInstances reproducibleInstances, final ReproducibleInstances testData, final String className)
+			throws SQLException, JsonProcessingException, NoSuchAlgorithmException {
+		String hexHash = this.getHexHash(this.getSettingObjectsAsString(composition, reproducibleInstances, testData), className);
+		return this.sqlAdapter.getResultsOfQuery("SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
+	}
+
+	private String getHexHash(final String[] settingValuesAsString, final String className) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		md.update(settingValuesAsString[0].getBytes());
+		md.update(settingValuesAsString[1].getBytes());
+		md.update(settingValuesAsString[2].getBytes());
+		md.update(className.getBytes());
+		byte[] digest = md.digest();
+		return (new HexBinaryAdapter()).marshal(digest);
+	}
+
+	private String[] getSettingObjectsAsString(final ComponentInstance composition, final ReproducibleInstances reproducibleInstances, final ReproducibleInstances testData) throws JsonProcessingException {
+		ObjectMapper mapper = new ObjectMapper();
+		return new String[] { mapper.writeValueAsString(composition), mapper.writeValueAsString(reproducibleInstances.getInstructions()), mapper.writeValueAsString(testData.getInstructions()) };
 	}
 
 	/**
@@ -127,30 +142,20 @@ public class PerformanceDBAdapter implements Closeable {
 	 *            - The time it took for the corresponding evaluation in milliseconds
 	 */
 	public void store(final ComponentInstance composition, final ReproducibleInstances reproducibleInstances, final ReproducibleInstances testData, final double score, final String className, final long evaluationTime) {
-		ObjectMapper mapper = new ObjectMapper();
 		try {
-			String compositionString = mapper.writeValueAsString(composition);
-			String trainTrajectoryString = mapper.writeValueAsString(reproducibleInstances.getInstructions());
-			String testTrajectoryString = mapper.writeValueAsString(testData.getInstructions());
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			md.update(compositionString.getBytes());
-			md.update(trainTrajectoryString.getBytes());
-			md.update(testTrajectoryString.getBytes());
-			md.update(className.getBytes());
-			byte[] digest = md.digest();
-			String hexHash = (new HexBinaryAdapter()).marshal(digest);
-			ResultSet rs = this.sqlAdapter.getResultsOfQuery("SELECT score FROM " + this.performanceSampleTableName + " WHERE hash_value = '" + hexHash + "'");
-			if (rs.next()) {
+			List<IKVStore> rs = this.getScoreOfCompositions(composition, reproducibleInstances, testData, className);
+			if (!rs.isEmpty()) {
 				return;
 			}
 			Map<String, String> valueMap = new HashMap<>();
-			valueMap.put("composition", compositionString);
-			valueMap.put("train_trajectory", trainTrajectoryString);
-			valueMap.put("test_trajectory", testTrajectoryString);
+			String[] settingObjectStrings = this.getSettingObjectsAsString(composition, reproducibleInstances, testData);
+			valueMap.put("composition", settingObjectStrings[0]);
+			valueMap.put("train_trajectory", settingObjectStrings[1]);
+			valueMap.put("test_trajectory", settingObjectStrings[2]);
 			valueMap.put("loss_function", className);
 			valueMap.put("evaluation_date", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date.from(Instant.now())));
 			valueMap.put("evaluation_time_ms", Long.toString(evaluationTime));
-			valueMap.put("hash_value", hexHash);
+			valueMap.put("hash_value", this.getHexHash(settingObjectStrings, className));
 			valueMap.put("score", Double.toString(score));
 			this.sqlAdapter.insert(this.performanceSampleTableName, valueMap);
 		} catch (JsonProcessingException | NoSuchAlgorithmException | SQLException e) {

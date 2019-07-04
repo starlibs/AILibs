@@ -103,17 +103,17 @@ uploadArchives {
   	}
 }
 
-task mlplanCLIjar(type: Jar) {
-	zip64 = true
-    manifest {
-        attributes 'Main-Class': 'de.upb.crc901.mlplan.cli.MLPlanCLI'
-    }
-    destinationDir = file("${projectDir}/cli")
-    archivesBaseName="mlplancli"
-    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
-    from sourceSets.main.allSource
-    from { (configurations.compile)
-            .collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-}
+//task mlplanCLIjar(type: Jar) {
+//	zip64 = true
+//    manifest {
+//        attributes 'Main-Class': 'de.upb.crc901.mlplan.cli.MLPlanCLI'
+//    }
+//    destinationDir = file("${projectDir}/cli")
+//    archivesBaseName="mlplancli"
+//    exclude ('META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA')
+//    from sourceSets.main.allSource
+//    from { (configurations.compile)
+//            .collect { it.isDirectory() ? it : zipTree(it) } }
+//    with jar
+//}
 
