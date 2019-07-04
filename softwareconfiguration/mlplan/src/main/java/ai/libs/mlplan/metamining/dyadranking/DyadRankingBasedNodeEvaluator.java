@@ -49,6 +49,7 @@ import ai.libs.jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
 import ai.libs.jaicore.ml.dyadranking.util.DyadMinMaxScaler;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.FixedSplitClassifierEvaluator;
 import ai.libs.jaicore.ml.metafeatures.LandmarkerCharacterizer;
+import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
@@ -510,27 +511,28 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 	 * @param dataset
 	 */
 	public void setDataset(final Instances dataset) {
-
-		// first we split the dataset into train & testdata
-		if (this.useLandmarkers) {
-			List<Instances> split = WekaUtil.getStratifiedSplit(dataset, 42l, 0.8d);
-			Instances trainData = split.get(0);
-			this.evaluationDataset = split.get(1);
-			Map<String, Double> metaFeatures;
-			try {
+		try {
+			if (this.useLandmarkers) {
+				List<Instances> split;
+				split = WekaUtil.getStratifiedSplit(dataset, 42l, 0.8);
+				Instances trainData = split.get(0);
+				this.evaluationDataset = split.get(1);
+				Map<String, Double> metaFeatures;
 				metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
 				this.datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
-			} catch (Exception e) {
-				logger.error("Failed to characterize the dataset", e);
-			}
-			this.setUpLandmarkingDatasets(dataset, trainData);
-		} else {
-			try {
+				this.setUpLandmarkingDatasets(dataset, trainData);
+			} else {
 				Map<String, Double> metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
 				this.datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
-			} catch (Exception e) {
-				logger.error("Failed to characterize the dataset", e);
 			}
+		} catch (SplitFailedException e) {
+			throw new IllegalArgumentException(e);
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		catch (Exception e) {
+			logger.error("Failed to characterize the dataset", e);
 		}
 	}
 

@@ -37,7 +37,7 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArra
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory;
 	private D dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
@@ -61,7 +61,7 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArra
 	 *            measurements at the anchorpoints.
 	 * @param seed Random seed.
 	 */
-	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D dataset,
+	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory, final D dataset,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -87,7 +87,7 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArra
 		try {
 			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
 			extrapolator.setLoggerName(this.getLoggerName() + ".extrapolator");
-			
+
 			/* Create the extrapolator and calculate the accuracy the classifier would have if it was trained on the complete dataset. */
 			this.logger.debug("Extrapolating learning curve.");
 			LearningCurve learningCurve = extrapolator.extrapolateLearningCurve();

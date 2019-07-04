@@ -11,22 +11,24 @@ public class FixedSplitClassifierEvaluator implements IClassifierEvaluator {
 
 	private final static Logger logger = LoggerFactory.getLogger(FixedSplitClassifierEvaluator.class);
 	private final Instances train, validate;
-	
-	public FixedSplitClassifierEvaluator(Instances train, Instances validate) {
+
+	public FixedSplitClassifierEvaluator(final Instances train, final Instances validate) {
 		super();
 		this.train = train;
 		this.validate = validate;
 	}
 
 	@Override
-	public Double evaluate(Classifier c) throws InterruptedException {
+	public Double evaluate(final Classifier c) throws InterruptedException {
 		try {
-			c.buildClassifier(train);
-			Evaluation eval = new Evaluation(train);
-			eval.evaluateModel(c, validate);
-			Double score = eval.pctIncorrect();
-			return score;
-		} catch (Throwable e) {
+			c.buildClassifier(this.train);
+			Evaluation eval = new Evaluation(this.train);
+			eval.evaluateModel(c, this.validate);
+			return eval.errorRate();
+		} catch (InterruptedException e) {
+			throw e;
+		}
+		catch (Exception e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
 					e.getClass().getName(), e.getMessage());
 			return null;
@@ -34,10 +36,10 @@ public class FixedSplitClassifierEvaluator implements IClassifierEvaluator {
 	}
 
 	public Instances getTrain() {
-		return train;
+		return this.train;
 	}
 
 	public Instances getValidate() {
-		return validate;
+		return this.validate;
 	}
 }

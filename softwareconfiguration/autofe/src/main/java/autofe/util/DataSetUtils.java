@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,6 +30,7 @@ import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.FastBitmap.ColorSpace;
 import Catalano.Imaging.Filters.Crop;
 import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -382,29 +382,27 @@ public final class DataSetUtils {
 		logger.debug("Performed cropping.");
 	}
 
-	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final double... portions) {
-		return getStratifiedSplit(data, rand, false, portions);
+	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final double trainingPortion) throws SplitFailedException, InterruptedException {
+		return getStratifiedSplit(data, rand, false, trainingPortion);
 	}
 
-	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final boolean onlyKeepFirst, final double... portions) {
-		final List<DataSet> splits = new LinkedList<>();
+	public static List<DataSet> getStratifiedSplit(final DataSet data, final Random rand, final boolean onlyKeepFirst, final double trainingPortion) throws SplitFailedException, InterruptedException {
 
-		Collection<Integer>[] indices = WekaUtil.getStratifiedSplitIndices(data.getInstances(), rand, portions);
+		final List<DataSet> splits = new LinkedList<>();
+		List<Instances> wekaSplits = WekaUtil.getStratifiedSplit(data.getInstances(), rand, trainingPortion);
 
 		if (onlyKeepFirst) {
-			@SuppressWarnings("unchecked")
-			Collection<Integer>[] tmpIndices = new Collection[1];
-			tmpIndices[0] = indices[0];
-			indices = tmpIndices;
+			wekaSplits = Arrays.asList(wekaSplits.get(0));
 		}
 
-		for (final Collection<Integer> splitIndices : indices) {
+		for (final Instances fold : wekaSplits) {
 			final List<INDArray> indArray = new LinkedList<>();
 			final Instances refInstances = new Instances(data.getInstances(), 0);
 
-			for (final Integer index : splitIndices) {
+			for (final Instance inst : fold) {
+				int index = data.getInstances().indexOf(inst);
 				indArray.add(data.getIntermediateInstances().get(index));
-				refInstances.add(data.getInstances().get(index));
+				refInstances.add(inst);
 			}
 
 			splits.add(new DataSet(refInstances, indArray));
@@ -438,8 +436,10 @@ public final class DataSetUtils {
 	 * @param minInstances Minimum amount of instances to keep
 	 * @param random Randomization
 	 * @return Returns the subsampled data set
+	 * @throws InterruptedException
+	 * @throws SplitFailedException
 	 */
-	public static DataSet subsample(final DataSet originalData, final double subsampleRatio, final int minInstances, final Random random) {
+	public static DataSet subsample(final DataSet originalData, final double subsampleRatio, final int minInstances, final Random random) throws SplitFailedException, InterruptedException {
 		return subsample(originalData, subsampleRatio, minInstances, random, 1d);
 	}
 
@@ -456,8 +456,10 @@ public final class DataSetUtils {
 	 * @param random Randomization
 	 * @param factor Factor multiplied to the subsampling ratio to determine final size
 	 * @return Returns the subsampled data set
+	 * @throws InterruptedException
+	 * @throws SplitFailedException
 	 */
-	public static DataSet subsample(final DataSet originalData, final double subsampleRatio, final int minInstances, final Random random, final double factor) {
+	public static DataSet subsample(final DataSet originalData, final double subsampleRatio, final int minInstances, final Random random, final double factor) throws SplitFailedException, InterruptedException {
 
 		if (subsampleRatio >= 1d || minInstances >= originalData.getInstances().numInstances()) {
 			logger.debug("Subsampling is not performed.");

@@ -36,7 +36,7 @@ import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;
 import ai.libs.mlplan.metamining.databaseconnection.ExperimentRepository;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
@@ -54,7 +54,7 @@ public class MetaMLPlan extends AbstractClassifier {
 	// Search components
 	private transient BestFirstLimitedDiscrepancySearch<TFDNode, String, NodeOrderList> lds;
 	private transient WEKAMetaminer metaMiner;
-	private transient WEKAPipelineFactory factory = new WEKAPipelineFactory();
+	private transient WekaPipelineFactory factory = new WekaPipelineFactory();
 
 	// Search configuration
 	private long timeoutInSeconds = 60;

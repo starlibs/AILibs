@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ import ai.libs.jaicore.basic.sets.Pair;
  *
  */
 @SuppressWarnings("serial")
-public class SQLAdapter implements Serializable, AutoCloseable {
+public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomizable {
 
 	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
@@ -190,7 +191,6 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				this.setValue(stmt, i, values.get(i - 1));
 			}
 			stmt.executeUpdate();
-
 			try (ResultSet rs = stmt.getGeneratedKeys()) {
 				rs.next();
 				return rs.getInt(1);
@@ -201,6 +201,34 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	public int insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
 		Pair<String, List<Object>> insertStatement = this.buildInsertStatement(table, map);
 		return this.insert(insertStatement.getX(), insertStatement.getY());
+	}
+
+	public List<Integer> insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows) throws SQLException {
+		return this.insertMultiple(table, keys, datarows, 10000);
+	}
+
+	public List<Integer> insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows, final int chunkSize) throws SQLException {
+		int n = datarows.size();
+		List<Integer> ids = new ArrayList<>(n);
+		try (Statement stmt = this.connect.createStatement()) {
+			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
+				int startIndex = i * chunkSize;
+				int endIndex = Math.min((i + 1) * chunkSize, n);
+				String sql = this.getSQLForMultiInsert(table, keys, datarows.subList(startIndex, endIndex));
+				this.logger.debug("Created SQL for {} entries", endIndex - startIndex);
+				this.logger.trace("Adding sql statement {} to batch", sql);
+				stmt.addBatch(sql);
+			}
+			this.logger.debug("Start batch execution.");
+			stmt.executeBatch();
+			this.logger.debug("Finished batch execution.");
+			try (ResultSet rs = stmt.getGeneratedKeys()) {
+				while (rs.next()) {
+					ids.add(rs.getInt(1));
+				}
+			}
+			return ids;
+		}
 	}
 
 	public void insertNoNewValues(final String sql, final List<? extends Object> values) throws SQLException {
@@ -229,11 +257,61 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			sb2.append("?");
 			values.add(entry.getValue());
 		}
-
 		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
-
 		return new Pair<>(statement, values);
+	}
 
+	protected String buildFinalInsertStatement(final String table, final Map<String, ? extends Object> map) {
+		StringBuilder sb1 = new StringBuilder();
+		StringBuilder sb2 = new StringBuilder();
+		for (Entry<String, ? extends Object> entry : map.entrySet()) {
+			if (entry.getValue() == null) {
+				continue;
+			}
+			if (sb1.length() != 0) {
+				sb1.append(", ");
+				sb2.append(", ");
+			}
+			sb1.append(entry.getKey());
+			sb2.append("\"" + entry.getValue().toString().replace("\"", "\\\"") + "\"");
+		}
+		return "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
+	}
+
+	private String getSQLForMultiInsert(final String table, final List<String> keys, final List<List<?>> datarows) {
+		StringBuilder sbMain = new StringBuilder();
+		StringBuilder sbKeys = new StringBuilder();
+		StringBuilder sbValues = new StringBuilder();
+
+		/* create command phrase */
+		sbMain.append("INSERT INTO `");
+		sbMain.append(table);
+		sbMain.append("` (");
+
+		/* create key phrase */
+		for (String key : keys) {
+			if (sbKeys.length() != 0) {
+				sbKeys.append(", ");
+			}
+			sbKeys.append(key);
+		}
+		sbMain.append(sbKeys);
+		sbMain.append(") VALUES\n");
+
+		/* create value phrases */
+		for (List<?> datarow : datarows) {
+			if (datarow.contains(null)) { // the rule that fires here is wrong! The list CAN contain a null element
+				throw new IllegalArgumentException("Row " + datarow + " contains null element!");
+			}
+			if (sbValues.length() > 0) {
+				sbValues.append(",\n ");
+			}
+			sbValues.append("(");
+			sbValues.append(datarow.stream().map(s -> "\"" + s.toString().replace("\"", "\\\"") + "\"").collect(Collectors.joining(", ")));
+			sbValues.append(")");
+		}
+		sbMain.append(sbValues);
+		return sbMain.toString();
 	}
 
 	public void insertNoNewValues(final String table, final Map<String, ? extends Object> map) throws SQLException {
@@ -241,25 +319,25 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this.insertNoNewValues(insertStatement.getX(), insertStatement.getY());
 	}
 
-	public void update(final String sql) throws SQLException {
-		this.update(sql, new ArrayList<String>());
+	public int update(final String sql) throws SQLException {
+		return this.update(sql, new ArrayList<String>());
 	}
 
-	public void update(final String sql, final String[] values) throws SQLException {
-		this.update(sql, Arrays.asList(values));
+	public int update(final String sql, final String[] values) throws SQLException {
+		return this.update(sql, Arrays.asList(values));
 	}
 
-	public void update(final String sql, final List<? extends Object> values) throws SQLException {
+	public int update(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
 			for (int i = 1; i <= values.size(); i++) {
 				stmt.setString(i, values.get(i - 1).toString());
 			}
-			stmt.executeUpdate();
+			return stmt.executeUpdate();
 		}
 	}
 
-	public void update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
+	public int update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
 		StringBuilder updateSB = new StringBuilder();
 		List<Object> values = new ArrayList<>();
@@ -276,8 +354,13 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			if (conditionSB.length() > 0) {
 				conditionSB.append(" AND ");
 			}
-			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
-			values.add(entry.getValue());
+			if (entry.getValue() != null) {
+				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+				values.add(entry.getValue());
+			} else {
+				conditionSB.append(entry.getKey());
+				conditionSB.append(" IS NULL");
+			}
 		}
 
 		String sql = "UPDATE " + table + " SET " + updateSB.toString() + " WHERE " + conditionSB.toString();
@@ -285,7 +368,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			for (int i = 1; i <= values.size(); i++) {
 				this.setValue(stmt, i, values.get(i - 1));
 			}
-			stmt.executeUpdate();
+			return stmt.executeUpdate();
 		}
 	}
 
@@ -353,5 +436,15 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	public String getDriver() {
 		return this.driver;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

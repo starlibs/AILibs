@@ -19,6 +19,9 @@ public interface IDatabaseConfig extends IConfig, Reloadable {
 	public static final String DB_TABLE = "db.table";
 	public static final String DB_SSL = "db.ssl";
 
+	@Key(DB_DRIVER)
+	public String getDBDriver();
+
 	@Key(DB_HOST)
 	public String getDBHost();
 

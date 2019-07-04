@@ -34,4 +34,9 @@ public class NumericAttributeType implements IPrimitiveAttributeType<Double> {
 	public String toString() {
 		return "NUM";
 	}
+
+	@Override
+	public String getStringDescriptionOfDomain() {
+		return "{x : x is a double}";
+	}
 }

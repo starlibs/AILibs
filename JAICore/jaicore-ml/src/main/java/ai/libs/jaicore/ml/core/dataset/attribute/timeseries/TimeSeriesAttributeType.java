@@ -66,4 +66,9 @@ public class TimeSeriesAttributeType implements IAttributeType<INDArray> {
 		this.length = length;
 	}
 
+	@Override
+	public String getStringDescriptionOfDomain() {
+		return "INDArrays of rank 1 and length " + this.length;
+	}
+
 }

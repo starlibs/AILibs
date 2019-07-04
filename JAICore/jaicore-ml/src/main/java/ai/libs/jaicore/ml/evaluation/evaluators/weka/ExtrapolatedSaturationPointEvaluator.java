@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
@@ -39,7 +40,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory;
 	private D train;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
@@ -72,7 +73,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 	 * @param test
 	 *            Test dataset to measure the accuracy.
 	 */
-	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D train, final double trainSplitForAnchorpointsMeasurement,
+	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory, final D train, final double trainSplitForAnchorpointsMeasurement,
 			final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final D test) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -101,7 +102,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
-			ASamplingAlgorithm<D> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
+			ASamplingAlgorithm<I, D> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
 			D saturationPointTrainSet = samplingAlgorithm.call();
 			Instances saturationPointInstances = ((WekaInstances<Object>) saturationPointTrainSet).getList();
 
@@ -109,7 +110,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledAttributeArr
 			Instances testInstances = ((WekaInstances<Object>) this.test).getList();
 			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointInstances, testInstances);
 			return evaluator.evaluate(classifier);
-		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException | DatasetCreationException e) {
+		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException | DatasetCreationException | AlgorithmTimeoutedException e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;
 		}

@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -100,10 +101,21 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 		this.list.clear();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean contains(final Object o) {
-		return this.typeOfDecoratingItems.isInstance(o) && this.list.contains(((D) o).getElement());
+		if (!this.typeOfDecoratingItems.isInstance(o)) {
+			return false;
+		}
+
+		/* This is on purpose not realized with contains on the original list
+		 * The reason is that the decorating class may overwrite the equals method,
+		 * and it is the decorated elements we want to compare. */
+		for (D item : this) {
+			if (item.equals(o)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -262,7 +274,11 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 
 	@Override
 	public List<D> subList(final int fromIndex, final int toIndex) {
-		throw new UnsupportedOperationException();
+		List<D> subList = new ArrayList<>(toIndex - fromIndex);
+		for (int i = fromIndex; i < toIndex; i++) {
+			subList.add(this.get(i));
+		}
+		return subList;
 	}
 
 	@SuppressWarnings("unchecked")

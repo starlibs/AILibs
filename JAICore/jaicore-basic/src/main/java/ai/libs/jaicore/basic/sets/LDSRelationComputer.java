@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
@@ -91,6 +92,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 	private List<Node> recycledNodes = new ArrayList<>();
 	private int numRecycledNodes;
 	private int numCreatedNodes;
+	private int reportRate = 1000; // number of tuples after which a message is sent to the logger
 
 	public LDSRelationComputer(final List<Collection<T>> sets) {
 		this(new RelationComputationProblem<>(sets));
@@ -140,6 +142,7 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 					assert (System.currentTimeMillis() - innerTimePoint) < 5 : "Copying the " + (next.indexOfSet) + "-tuple " + this.currentTuple + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
 					innerTimePoint = System.currentTimeMillis();
 					boolean adopt = this.prefixFilter.test(this.currentTuple);
+					this.logger.debug("Prefix filter outputs {} tuple {}", adopt, this.currentTuple);
 					assert (System.currentTimeMillis() - innerTimePoint) < 1000 : "Testing the " + (next.indexOfSet) + "-tuple " + this.currentTuple + " took " + (System.currentTimeMillis() - innerTimePoint) + "ms, which is way too much!";
 					if (adopt) {
 						innerTimePoint = System.currentTimeMillis();
@@ -169,6 +172,9 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 				return this.terminate();
 			}
 			this.computedTuples++;
+			if (this.computedTuples % this.reportRate == 0) {
+				this.logger.info("Status report: {} have been created.", this.computedTuples);
+			}
 
 			/* load tuple of selected leaf node */
 			next.fillTupleArrayWithValues(this.currentTuple);
@@ -231,6 +237,9 @@ public class LDSRelationComputer<T> extends AAlgorithm<RelationComputationProble
 		super.setLoggerName(name + "._algorithm");
 		this.logger = LoggerFactory.getLogger(name);
 		this.logger.info("Switched logger to {}", name);
+		if (this.prefixFilter instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.prefixFilter).setLoggerName(name + ".filter");
+		}
 	}
 
 	@Override
