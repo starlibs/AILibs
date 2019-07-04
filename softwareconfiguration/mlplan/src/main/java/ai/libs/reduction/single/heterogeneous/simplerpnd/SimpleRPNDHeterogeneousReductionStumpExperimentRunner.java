@@ -17,7 +17,7 @@ import ai.libs.reduction.Util;
 import ai.libs.reduction.single.MySQLReductionExperiment;
 import ai.libs.reduction.single.ReductionExperiment;
 
-public class MySQLExperimentRunner {
+public class SimpleRPNDHeterogeneousReductionStumpExperimentRunner {
 
 	private static final String ERROR_RATE_MIN = "error_rate_min";
 	private static final String ERROR_RATE_MAX = "error_rate_max";
@@ -32,7 +32,7 @@ public class MySQLExperimentRunner {
 	private final SQLAdapter adapter;
 	private final Collection<MySQLReductionExperiment> knownExperiments = new HashSet<>();
 
-	public MySQLExperimentRunner(final String host, final String user, final String password, final String database) throws SQLException {
+	public SimpleRPNDHeterogeneousReductionStumpExperimentRunner(final String host, final String user, final String password, final String database) throws SQLException {
 		this.adapter = new SQLAdapter(host, user, password, database);
 		this.knownExperiments.addAll(this.getConductedExperiments());
 	}

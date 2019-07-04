@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -231,7 +232,7 @@ public class KVStoreUtil {
 		return (line.trim().equals("") || line.trim().startsWith("#"));
 	}
 
-	public static KVStoreCollection readFromMySQLResultSet(final ResultSet rs, final Map<String, String> commonFields) throws Exception {
+	public static KVStoreCollection readFromMySQLResultSet(final ResultSet rs, final Map<String, String> commonFields) throws SQLException {
 		KVStoreCollection kvStoreCollection = new KVStoreCollection();
 		int n = rs.getMetaData().getColumnCount();
 		while (rs.next()) {
@@ -250,7 +251,7 @@ public class KVStoreUtil {
 		return kvStoreCollection;
 	}
 
-	public static KVStoreCollection readFromMySQLQuery(final SQLAdapter adapter, final String query, final Map<String, String> commonFields) throws Exception {
+	public static KVStoreCollection readFromMySQLQuery(final SQLAdapter adapter, final String query, final Map<String, String> commonFields) throws SQLException {
 		return addCommonFields(new KVStoreCollection(adapter.getResultsOfQuery(query)), commonFields);
 	}
 
@@ -261,9 +262,10 @@ public class KVStoreUtil {
 	 * @param table The table from which to read in the rows.
 	 * @param commonFields Static key-value pairs which should be added to all read-in {@link IKVStore}s.
 	 * @return
+	 * @throws SQLException
 	 * @throws Exception
 	 */
-	public static KVStoreCollection readFromMySQLTable(final SQLAdapter adapter, final String table, final Map<String, String> commonFields) throws Exception {
+	public static KVStoreCollection readFromMySQLTable(final SQLAdapter adapter, final String table, final Map<String, String> commonFields) throws SQLException {
 		return addCommonFields(new KVStoreCollection(adapter.getRowsOfTable(table)), commonFields);
 
 	}
