@@ -16,7 +16,7 @@ navigation_active: overview
 
 
 # Overview
-Bla
+Bla now with project layout
 
 # Installation
 
