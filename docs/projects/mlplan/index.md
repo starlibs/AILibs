@@ -1,6 +1,7 @@
 ---
 layout: project
 title: ML-Plan
+subtitle: ML-Plan subtitle
 navigation_mode: anchor
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
