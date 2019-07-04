@@ -13,7 +13,7 @@ import weka.core.Instances;
 
 public class SingleRandomSplitClassifierEvaluator implements IClassifierEvaluator {
 
-	private final static Logger logger = LoggerFactory.getLogger(SingleRandomSplitClassifierEvaluator.class);
+	private static final Logger logger = LoggerFactory.getLogger(SingleRandomSplitClassifierEvaluator.class);
 	private final Instances data;
 	private int seed;
 	private float trainingPortion = 0.7f;
@@ -25,6 +25,7 @@ public class SingleRandomSplitClassifierEvaluator implements IClassifierEvaluato
 
 	@Override
 	public Double evaluate(final Classifier c) throws InterruptedException, ObjectEvaluationFailedException {
+		logger.info("Evaluating classifier {}", c.getClass().getName());
 		List<Instances> split;
 		try {
 			split = WekaUtil.getStratifiedSplit(this.data, this.seed >= 0 ? this.seed : System.currentTimeMillis(), this.trainingPortion);

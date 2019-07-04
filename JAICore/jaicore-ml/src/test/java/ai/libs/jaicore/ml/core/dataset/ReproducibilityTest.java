@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -25,11 +26,17 @@ public class ReproducibilityTest {
 	@Test
 	public void testLoadingARFF() throws InstructionFailedException, InterruptedException {
 		ReproducibleInstances instances = ReproducibleInstances.fromARFF(new File("testrsc/ml/orig/letter.arff"));
+		assertNotNull(instances);
+		assertEquals(20000, instances.size());
+		assertEquals(26, instances.numClasses());
 	}
 
 	@Test
 	public void testLoadingOpenML() throws InstructionFailedException, InterruptedException {
-		ReproducibleInstances instances = ReproducibleInstances.fromOpenML(3, "");
+		ReproducibleInstances instances = ReproducibleInstances.fromOpenML(6, "");
+		assertNotNull(instances);
+		assertEquals(20000, instances.size());
+		assertEquals(26, instances.numClasses());
 	}
 
 	@Test

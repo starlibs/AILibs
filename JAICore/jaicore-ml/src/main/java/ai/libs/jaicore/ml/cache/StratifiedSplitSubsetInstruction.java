@@ -48,10 +48,8 @@ public class StratifiedSplitSubsetInstruction extends SplitInstruction {
 		StratifiedSampling sampler = new StratifiedSampling(stratiBuilder, stratiBuilder, new Random(this.seed), input);
 		sampler.setSampleSize((int)Math.ceil(input.size() * this.getPortionOfFirstFold()));
 		List<IDataset> output = new ArrayList<>(2);
-
-
 		try {
-			IOrderedDataset subsample = (IOrderedDataset)sampler.call();
+			IDataset subsample = sampler.call();
 			output.add(subsample);
 			output.add(sampler.getComplement());
 			return output;

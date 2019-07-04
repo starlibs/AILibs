@@ -511,36 +511,28 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 	 * @param dataset
 	 */
 	public void setDataset(final Instances dataset) {
-
-		// first we split the dataset into train & testdata
-		if (this.useLandmarkers) {
-			List<Instances> split;
-			try {
+		try {
+			if (this.useLandmarkers) {
+				List<Instances> split;
 				split = WekaUtil.getStratifiedSplit(dataset, 42l, 0.8);
 				Instances trainData = split.get(0);
 				this.evaluationDataset = split.get(1);
 				Map<String, Double> metaFeatures;
-				try {
-					metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
-					this.datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
-				} catch (Exception e) {
-					logger.error("Failed to characterize the dataset", e);
-				}
+				metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
+				this.datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
 				this.setUpLandmarkingDatasets(dataset, trainData);
-			} catch (SplitFailedException e) {
-				throw new IllegalArgumentException(e);
-			}
-			catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-				return;
-			}
-		} else {
-			try {
+			} else {
 				Map<String, Double> metaFeatures = new LandmarkerCharacterizer().characterize(dataset);
 				this.datasetMetaFeatures = metaFeatures.entrySet().stream().mapToDouble(Map.Entry::getValue).toArray();
-			} catch (Exception e) {
-				logger.error("Failed to characterize the dataset", e);
 			}
+		} catch (SplitFailedException e) {
+			throw new IllegalArgumentException(e);
+		}
+		catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		catch (Exception e) {
+			logger.error("Failed to characterize the dataset", e);
 		}
 	}
 

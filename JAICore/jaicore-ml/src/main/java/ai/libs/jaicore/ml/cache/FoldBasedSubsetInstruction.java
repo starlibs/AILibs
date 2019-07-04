@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public abstract class FoldBasedSubsetInstruction extends Instruction {
 
+	private static final long serialVersionUID = 8257396124624005977L;
+
 	/**
 	 * Constructor to create a split Instruction that can be converted into json.
 	 *

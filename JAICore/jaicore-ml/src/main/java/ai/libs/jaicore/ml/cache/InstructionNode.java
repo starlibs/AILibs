@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.cache;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -7,12 +8,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import ai.libs.jaicore.basic.sets.Pair;
 
-public class InstructionNode {
+public class InstructionNode implements Serializable {
 
 	private static final long serialVersionUID = -347708788723924559L;
 	private String name;
 	private Instruction instruction;
-	public List<Pair<String, Integer>> inputs;
+	private List<Pair<String, Integer>> inputs;
 
 	@JsonIgnore
 	private InstructionGraph graph;
@@ -52,16 +53,4 @@ public class InstructionNode {
 	public InstructionGraph getGraph() {
 		return this.graph;
 	}
-
-	//	public D getOutputInstances(final int outputUnit) throws InstructionFailedException, InterruptedException {
-	//
-	//		/* first get inputs recursively */
-	//		List<D> inputs = new ArrayList<>();
-	//		for (int src : this.inputConnections.get(outputUnit)) {
-	//			inputs.add(this.preceedingLayer.getOutputInstances(src));
-	//		}
-	//
-	//		/* now compute the data of this unit */
-	//		return this.get(outputUnit).getOutputInstances(inputs);
-	//	}
 }

@@ -15,6 +15,7 @@ import weka.core.Instances;
 @JsonIgnoreProperties({ "provider" })
 public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
 
+	private static final long serialVersionUID = 2125875356626308199L;
 	private final String apiKey;
 
 	public LoadDatasetInstructionForOpenML(@JsonProperty("apiKey") final String apiKey, @JsonProperty("id") final int id) {

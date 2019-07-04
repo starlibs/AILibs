@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.cache;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -24,7 +25,9 @@ import ai.libs.jaicore.ml.core.dataset.IDataset;
 	@Type(value = FoldBasedSubsetInstruction.class, name = "split"),
 	@Type(value = StratifiedSplitSubsetInstruction.class)
 })
-public abstract class Instruction {
+public abstract class Instruction implements Serializable {
+
+	private static final long serialVersionUID = -3263546321197292929L;
 
 	/**
 	 * Provides the instances induced by this instruction node

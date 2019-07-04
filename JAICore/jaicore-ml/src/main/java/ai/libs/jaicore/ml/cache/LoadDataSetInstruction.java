@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public abstract class LoadDataSetInstruction extends Instruction {
 
+	private static final long serialVersionUID = 7408937429274201748L;
 	private final DataProvider provider;
 	private final String id;
 

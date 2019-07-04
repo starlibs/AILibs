@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+
 import com.clearspring.analytics.util.Lists;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.sets.Pair;
@@ -28,7 +28,7 @@ public class InstructionGraph extends ArrayList<InstructionNode> {
 		super();
 	}
 
-	public static InstructionGraph fromJson(final String jsonRepresentation) throws JsonParseException, JsonMappingException, IOException {
+	public static InstructionGraph fromJson(final String jsonRepresentation) throws IOException {
 		return new ObjectMapper().readValue(jsonRepresentation, InstructionGraph.class);
 	}
 
@@ -87,5 +87,28 @@ public class InstructionGraph extends ArrayList<InstructionNode> {
 			}
 		}
 		return node.getInstruction().getOutputInstances(inputs).get(unit.getY());
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + this.nodeMap.hashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		InstructionGraph other = (InstructionGraph) obj;
+		return new EqualsBuilder().append(this.nodeMap, other.nodeMap).isEquals();
 	}
 }

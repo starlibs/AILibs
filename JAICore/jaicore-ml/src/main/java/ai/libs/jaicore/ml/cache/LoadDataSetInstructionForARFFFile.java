@@ -12,8 +12,16 @@ import weka.core.Instances;
 
 public class LoadDataSetInstructionForARFFFile extends LoadDataSetInstruction {
 
+	private static final long serialVersionUID = -9005760846394433953L;
+	private final int classIndex;
+
 	public LoadDataSetInstructionForARFFFile(final File file) {
+		this(file, -1);
+	}
+
+	public LoadDataSetInstructionForARFFFile(final File file, final int classIndex) {
 		super(DataProvider.ARFFFILE, file.getAbsolutePath());
+		this.classIndex = classIndex;
 	}
 
 	@Override
@@ -22,6 +30,7 @@ public class LoadDataSetInstructionForARFFFile extends LoadDataSetInstruction {
 		// load openml or local dataset
 		try {
 			Instances data = new Instances(new FileReader(new File(this.getId())));
+			data.setClassIndex(this.classIndex >= 0 ? this.classIndex : data.numAttributes() - 1);
 			return Arrays.asList(new WekaInstances<>(data));
 		} catch (NumberFormatException | IOException | ClassNotFoundException e) {
 			throw new InstructionFailedException(e);
