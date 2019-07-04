@@ -298,7 +298,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 			valuesToInsert.put(FIELD_MEMORY + "_max", experiment.getMemoryInMB());
 			valuesToInsert.put(FIELD_NUMCPUS, experiment.getNumCPUs());
 			this.logger.debug("Inserting mem: {}, cpus: {}, host: {}, and key fields: {}", experiment.getMemoryInMB(), experiment.getNumCPUs(), valuesToInsert.get(FIELD_HOST), experiment.getValuesOfKeyFields());
-			int id = this.adapter.insert(this.tablename, valuesToInsert);
+			int id = this.adapter.insert(this.tablename, valuesToInsert)[0];
 			return new ExperimentDBEntry(id, experiment);
 		} catch (SQLException e) {
 			throw new ExperimentDBInteractionFailedException(e);
@@ -334,12 +334,12 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 		/* conduct insertion */
 		try {
 			this.logger.debug("Inserting {} entries", values.size());
-			List<Integer> ids = this.adapter.insertMultiple(this.tablename, keys, values);
-			this.logger.debug("Inserted {} entries", ids.size());
-			int n = ids.size();
+			int[] ids = this.adapter.insertMultiple(this.tablename, keys, values);
+			this.logger.debug("Inserted {} entries", ids.length);
+			int n = ids.length;
 			List<ExperimentDBEntry> entries = new ArrayList<>(n);
 			for (int i = 0; i < n; i++) {
-				entries.add(new ExperimentDBEntry(ids.get(i), experiments.get(i)));
+				entries.add(new ExperimentDBEntry(ids[i], experiments.get(i)));
 			}
 			return entries;
 		} catch (SQLException e) {

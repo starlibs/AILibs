@@ -1,13 +1,14 @@
 package ai.libs.hasco.eventlogger;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import ai.libs.hasco.events.HASCORunStartedEvent;
 import ai.libs.hasco.events.HASCORunTerminatedEvent;
 import ai.libs.hasco.events.HASCOSolutionEvaluationEvent;
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 
 public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 
@@ -33,15 +35,18 @@ public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 
 		/* initialize tables if not existent */
 		try {
-			ResultSet rs = sqlAdapter.getResultsOfQuery("SHOW TABLES");
+			List<IKVStore> rs = sqlAdapter.getResultsOfQuery("SHOW TABLES");
 			boolean haveRunTable = false;
 			boolean haveEvaluationTable = false;
-			while (rs.next()) {
-				String tableName = rs.getString(1);
-				if (tableName.equals("runs")) {
-					haveRunTable = true;
-				} else if (tableName.equals("evaluations")) {
-					haveEvaluationTable = true;
+			for (IKVStore store : rs) {
+				Optional<String> tableNameKeyOpt = store.keySet().stream().filter(x -> x.startsWith("Table_in")).findFirst();
+				if (tableNameKeyOpt.isPresent()) {
+					String tableName = store.getAsString(tableNameKeyOpt.get());
+					if (tableName.equals("runs")) {
+						haveRunTable = true;
+					} else if (tableName.equals("evaluations")) {
+						haveEvaluationTable = true;
+					}
 				}
 			}
 
@@ -53,10 +58,8 @@ public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 			}
 			if (!haveEvaluationTable) {
 				this.logger.info("Creating table for evaluations");
-				sqlAdapter.update(
-						"CREATE TABLE `evaluations` (\r\n" + " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `run_id` int(8) NOT NULL,\r\n" + " `composition` json NOT NULL,\r\n"
-								+ " `score` double NOT NULL,\r\n" + " PRIMARY KEY (`evaluation_id`)\r\n" + ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
-								new ArrayList<>());
+				sqlAdapter.update("CREATE TABLE `evaluations` (\r\n" + " `evaluation_id` int(10) NOT NULL AUTO_INCREMENT,\r\n" + " `run_id` int(8) NOT NULL,\r\n" + " `composition` json NOT NULL,\r\n" + " `score` double NOT NULL,\r\n"
+						+ " PRIMARY KEY (`evaluation_id`)\r\n" + ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_bin", new ArrayList<>());
 			}
 
 		} catch (SQLException e) {
@@ -72,7 +75,7 @@ public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 			map.put("timeout", "" + event.getTimeout());
 			map.put("CPUs", "" + event.getNumberOfCPUS());
 			map.put("benchmark", event.getBenchmark().toString());
-			this.runId = this.sqlAdapter.insert("runs", map);
+			this.runId = this.sqlAdapter.insert("runs", map)[0];
 		} catch (Exception e) {
 			this.logger.error(MSG_EXCEPTION, e);
 		}
