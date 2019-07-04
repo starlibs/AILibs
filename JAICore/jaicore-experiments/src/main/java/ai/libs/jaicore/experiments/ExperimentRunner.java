@@ -118,7 +118,7 @@ public class ExperimentRunner implements ILoggingCustomizable {
 				throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because the available memory is " + this.availableMemoryInMB + " where declared is " + expEntry.getExperiment().getMemoryInMB() + ". Deviation: " + memoryDeviation);
 			}
 			if (expEntry.getExperiment().getNumCPUs() > Runtime.getRuntime().availableProcessors()) {
-				throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
+				throw new IllegalStateException("Cannot conduct experiment " + expEntry.getExperiment() + ", because only " + Runtime.getRuntime().availableProcessors() + " CPU cores are available where declared is " + expEntry.getExperiment().getNumCPUs());
 			}
 			this.handle.startExperiment(expEntry);
 			this.conductor.evaluate(expEntry, m -> {

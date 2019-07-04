@@ -225,7 +225,7 @@ public class AExperimenterSQLHandle implements IExperimentDatabaseHandle, ILoggi
 	public List<ExperimentDBEntry> getConductedExperiments() throws ExperimentDBInteractionFailedException {
 		StringBuilder queryStringSB = new StringBuilder();
 		queryStringSB.append(this.getSQLPrefixForSelectQuery());
-		queryStringSB.append("` WHERE time_started IS NOT NULL");
+		queryStringSB.append("WHERE time_started IS NOT NULL");
 		try {
 			return this.getExperimentsForSQLQuery(queryStringSB.toString());
 		} catch (SQLException e) {

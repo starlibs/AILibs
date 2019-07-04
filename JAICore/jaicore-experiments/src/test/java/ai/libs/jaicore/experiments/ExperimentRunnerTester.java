@@ -2,6 +2,7 @@ package ai.libs.jaicore.experiments;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -129,7 +130,7 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 	}
 
 	@Test
-	public void test2ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
+	public void test2ThatAllExperimentsAreConducted() throws ExperimentDBInteractionFailedException {
 
 		/* check that running the experiments works */
 		ExperimentRunner runner = new ExperimentRunner(this.config, this, this.handle);
@@ -164,9 +165,10 @@ public class ExperimentRunnerTester implements IExperimentSetEvaluator {
 		boolean correctExceptionObserved = false;
 		try {
 			this.handle.createAndGetExperiment(new Experiment(0, 0, new HashMap<>()));
+			fail("The create statement should throw an exception.");
 		}
 		catch (ExperimentDBInteractionFailedException e) {
-			correctExceptionObserved = (e.getCause() instanceof MySQLSyntaxErrorException) && ((MySQLSyntaxErrorException)e.getCause()).getMessage().equals("Table '" + this.conf.getDBDatabaseName() + ".resulttable' doesn't exist");
+			correctExceptionObserved = (e.getCause() instanceof MySQLSyntaxErrorException) && ((MySQLSyntaxErrorException)e.getCause()).getMessage().equals("Table '" + this.conf.getDBDatabaseName() + "." + this.conf.getDBTableName() + "' doesn't exist");
 		}
 		assertTrue(correctExceptionObserved);
 	}
