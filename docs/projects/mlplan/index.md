@@ -5,7 +5,7 @@ subtitle: ML-Plan subtitle
 navigation_mode: anchor
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
-	- { id: "installation", link: "installation", title: "Installation" }
+    - { id: "installation", link: "installation", title: "Installation" }
 navigation_active: overview
 ---
 [![Build Status](https://travis-ci.com/fmohr/AILibs.svg?branch=dev)](https://travis-ci.com/fmohr/AILibs)
