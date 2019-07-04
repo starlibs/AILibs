@@ -1,7 +1,7 @@
 ---
 layout: default
 ---
-      <header>        
+      <div style="width: 270px; float: left; position: fixed;">
         {% if site.logo %}
           <a href="{{ "/" | absolute_url }}"><img src="{{site.logo | relative_url}}" alt="Logo" /></a>
         {% endif %}
@@ -10,8 +10,10 @@ layout: default
 		
 		AILibs Projects
 		<h3>JAICore</h3>
-		<ul>
-		<h4><a href="projects/jaicore-basic">jaicore-basic</a></h4>
+		<ul style="margin-top: -10px;">
+		<li><h3 style="margin: 8px 0px;"><a href="projects/jaicore-basic">jaicore-basic</a></h3></li>
+		<li><h3 style="margin: 8px 0px;"><a href="projects/jaicore-ml">jaicore-ml</a></h3></li>
+		<li><h3 style="margin: 8px 0px;"><a href="projects/jaicore-search">jaicore-search</a></h3></li>
 		</ul>
 		<h3><a href="projects/mlplan">ML-Plan</a></h3>
 	
@@ -31,7 +33,7 @@ layout: default
           <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
         </ul>
         {% endif %}
-      </header>
-      <section>
+      </div>
+      <section style="width: 900px;">
 		{{ content }}
       </section>

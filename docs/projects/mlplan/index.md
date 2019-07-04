@@ -9,6 +9,7 @@ navigation:
     - { id: "installation", link: "installation", title: "Installation" }
     - { id: "usage", link: "usage", title: "Usage" }
     - { id: "javadoc", link: "javadoc", title: "JavaDoc" }
+    - { id: "contribute", link: "contribute", title: "Contribute" }
 navigation_active: overview
 ---
 ## Overview
@@ -135,3 +136,13 @@ Classifier chosenClassifier = mlplan.call();
 
 ### JavaDoc
 JavaDoc is available [here](https://javadoc.io/doc/ai.libs/mlplan/).
+
+### Contribute
+ML-Plan is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan).
+
+We welcome contributions to ML-Plan given that the code quality meets our standards.
+If you would like to add changes to ML-Plan, feel free to create a pull request on the `dev` branch.
+
+Please consider the following points:
+ * provide a comprehensive description of your changes and why they are helpful
+ * we cannot leave any copyright to third party authors. Creating the pull request, you accept to transfer the copyright to AILibs for being published under its current license (AGPL for now)

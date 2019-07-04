@@ -3,8 +3,9 @@ layout: default
 ---
 				<header>
 				    {% if page.logo %}
-                       <a href="{{ "/" | absolute_url }}"><img src="./img/{{page.logo | relative_url}}" alt="{{  page.title}}" /></a>
+                       <a href="{{ "/" | absolute_url }}"><img src="./img/{{ page.logo }}" alt="{{  page.title}}" /></a>
 					{% endif %}
+					<p>This is an <a href="/{{ relative_url }}">AILibs</a> library</p>
         <h1>{{ page.title }}</h1>
     
             
