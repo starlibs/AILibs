@@ -79,8 +79,8 @@ public class ProbabilisticMonteCarloCrossValidationEvaluator implements IClassif
 		this.logger.info("Starting evaluation of {}", pl);
 		for (int i = 0; i < this.repeats && !this.canceled && !Thread.currentThread().isInterrupted(); i++) {
 			this.logger.debug("Obtaining predictions of {} for split #{}/{}", pl, i + 1, this.repeats);
-			List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 			try {
+				List<Instances> split = this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion);
 				double score = this.bridge.evaluateSplit(pl, split.get(0), split.get(1));
 				this.logger.info("Score for evaluation of {} with split #{}/{}: {}", pl, i + 1, this.repeats, score);
 				stats.addValue(score);

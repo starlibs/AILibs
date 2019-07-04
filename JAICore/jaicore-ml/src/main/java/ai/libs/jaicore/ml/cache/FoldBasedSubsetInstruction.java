@@ -12,31 +12,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author fmohr, jnowack
  *
  */
-public class FoldBasedSubsetInstruction extends Instruction {
+public abstract class FoldBasedSubsetInstruction extends Instruction {
 
-	/** Constant string to identify this instruction. */
-	public static final String COMMAND_NAME = "buildSubsetViaFolds";
+	private static final long serialVersionUID = 8257396124624005977L;
 
 	/**
 	 * Constructor to create a split Instruction that can be converted into json.
 	 *
 	 * @param foldTechnique
 	 *            method used to compute the folds
-	 * @param outIndex
-	 *            index of the portion to use in the following
 	 */
-	public FoldBasedSubsetInstruction(@JsonProperty("foldTechnique") final String foldTechnique, @JsonProperty("outIndices") final int... outIndices) {
-		command = COMMAND_NAME;
-		inputs.put("foldTechnique", "" + foldTechnique);
-		StringBuilder sb = new StringBuilder();
-		sb.append("[");
-		for (int index : outIndices) {
-			if (sb.length() > 1) {
-				sb.append(", ");
-			}
-			sb.append(index);
-		}
-		sb.append("]");
-		inputs.put("outIndices", sb.toString());
+	public FoldBasedSubsetInstruction(@JsonProperty("foldTechnique") final String foldTechnique) {
 	}
 }

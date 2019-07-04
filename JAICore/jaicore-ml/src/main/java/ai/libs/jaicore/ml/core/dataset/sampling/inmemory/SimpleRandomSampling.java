@@ -8,13 +8,13 @@ import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
-public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
+public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {
 
 	private Random random;
 
 	private D copyDataset;
 
-	public SimpleRandomSampling(Random random, D input) {
+	public SimpleRandomSampling(final Random random, final D input) {
 		super(input);
 		this.random = random;
 	}
@@ -24,7 +24,7 @@ public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamp
 		switch (this.getState()) {
 		case CREATED:
 			try {
-				this.sample = (D) getInput().createEmpty();
+				this.sample = (D) this.getInput().createEmpty();
 				this.copyDataset = (D) this.getInput().createEmpty();
 				this.copyDataset.addAll(this.getInput());
 			} catch (DatasetCreationException e) {
@@ -33,10 +33,10 @@ public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamp
 			return this.activate();
 		case ACTIVE:
 			if (this.sample.size() < this.sampleSize) {
-				int i = random.nextInt(this.copyDataset.size());
+				int i = this.random.nextInt(this.copyDataset.size());
 				this.sample.add(this.copyDataset.get(i));
 				this.copyDataset.remove(i);
-				return new SampleElementAddedEvent(getId());
+				return new SampleElementAddedEvent(this.getId());
 			} else {
 				return this.terminate();
 			}

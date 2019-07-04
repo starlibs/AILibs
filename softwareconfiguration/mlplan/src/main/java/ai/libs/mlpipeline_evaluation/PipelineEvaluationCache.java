@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.CompositionSerializer;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.WEKAPipelineFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.Classifier;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -134,7 +134,7 @@ public class PipelineEvaluationCache {
 
 	private double evaluate(final ComponentInstance cI) throws Exception {
 		// Get dataset
-		Classifier classifier = new WEKAPipelineFactory().getComponentInstantiation(cI);
+		Classifier classifier = new WekaPipelineFactory().getComponentInstantiation(cI);
 		if (this.doNotValidate()) {
 			return ConsistentMLPipelineEvaluator.evaluateClassifier(this.config.getTestSplitTechnique(), this.config.getTestEvaluationTechnique(), this.config.getTestSeed(), this.config.getData(), classifier);
 		} else {
