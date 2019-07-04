@@ -9,7 +9,6 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.hasco.serialization.ComponentLoader;
-import ai.libs.hasco.serialization.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.basic.IObjectEvaluator;
 
 /**
@@ -22,7 +21,7 @@ import ai.libs.jaicore.basic.IObjectEvaluator;
 public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparable<V>> extends SoftwareConfigurationProblem<V> {
 	private final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramRefinementConfig;
 
-	public RefinementConfiguredSoftwareConfigurationProblem(final File configurationFile, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException, UnresolvableRequiredInterfaceException {
+	public RefinementConfiguredSoftwareConfigurationProblem(final File configurationFile, final String requiredInterface, final IObjectEvaluator<ComponentInstance, V> compositionEvaluator) throws IOException {
 		super(configurationFile, requiredInterface, compositionEvaluator);
 		this.paramRefinementConfig = new ComponentLoader(configurationFile).getParamConfigs();
 	}
@@ -33,15 +32,13 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 	}
 
 	public Map<Component, Map<Parameter, ParameterRefinementConfiguration>>  getParamRefinementConfig() {
-		return paramRefinementConfig;
+		return this.paramRefinementConfig;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((paramRefinementConfig == null) ? 0 : paramRefinementConfig.hashCode());
-		return result;
+		return prime  + ((this.paramRefinementConfig == null) ? 0 : this.paramRefinementConfig.hashCode());
 	}
 
 	@Override
@@ -49,18 +46,18 @@ public class RefinementConfiguredSoftwareConfigurationProblem<V extends Comparab
 		if (this == obj) {
 			return true;
 		}
-		if (obj == null) {
+		if (!super.equals(obj)) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		RefinementConfiguredSoftwareConfigurationProblem other = (RefinementConfiguredSoftwareConfigurationProblem) obj;
-		if (paramRefinementConfig == null) {
+		if (this.paramRefinementConfig == null) {
 			if (other.paramRefinementConfig != null) {
 				return false;
 			}
-		} else if (!paramRefinementConfig.equals(other.paramRefinementConfig)) {
+		} else if (!this.paramRefinementConfig.equals(other.paramRefinementConfig)) {
 			return false;
 		}
 		return true;

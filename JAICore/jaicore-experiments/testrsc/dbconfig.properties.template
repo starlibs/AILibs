@@ -1,0 +1,7 @@
+db.driver = mysql
+db.host = <yourhost>
+db.username = <youruser>
+db.password = <yourpassword>
+db.database = <yourdatabase>
+db.ssl = true
+db.table = testtable

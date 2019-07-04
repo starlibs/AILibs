@@ -45,8 +45,8 @@ public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<
 	protected D dataset;
 	protected D train;
 	protected D test;
-	protected ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
-	protected ASamplingAlgorithm<D> samplingAlgorithm;
+	protected ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory;
+	protected ASamplingAlgorithm<I, D> samplingAlgorithm;
 	protected Random random;
 	protected LearningCurveExtrapolationMethod extrapolationMethod;
 	private final int[] anchorPoints;
@@ -73,7 +73,7 @@ public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<
 	 * @throws DatasetCreationException
 	 */
 	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final Classifier learner, final D dataset, final double trainsplit, final int[] anchorPoints,
-			final ISamplingAlgorithmFactory<D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final long seed) throws DatasetCreationException {
+			final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory, final long seed) throws DatasetCreationException {
 		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;
@@ -113,7 +113,7 @@ public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<
 
 				// If it is a rerunnable factory, set the previous run.
 				if (this.samplingAlgorithmFactory instanceof IRerunnableSamplingAlgorithmFactory && this.samplingAlgorithm != null) {
-					((IRerunnableSamplingAlgorithmFactory<D, ASamplingAlgorithm<D>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
+					((IRerunnableSamplingAlgorithmFactory<I, D, ASamplingAlgorithm<I, D>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
 				}
 				this.samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(this.anchorPoints[i], this.train, this.random);
 				IOrderedLabeledAttributeArrayDataset<?, ?> subsampledDataset = this.samplingAlgorithm.call();

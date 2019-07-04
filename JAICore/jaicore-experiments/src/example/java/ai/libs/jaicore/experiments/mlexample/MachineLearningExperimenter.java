@@ -3,56 +3,79 @@ package ai.libs.jaicore.experiments.mlexample;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
+import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
+import ai.libs.jaicore.experiments.ExperimentDatabasePreparer;
 import ai.libs.jaicore.experiments.ExperimentRunner;
+import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
-import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
+import ai.libs.jaicore.experiments.exceptions.ExperimentAlreadyExistsInDatabaseException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 
 public class MachineLearningExperimenter {
 
-	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
-		File configFile = new File("testrsc/mlexample/setup.properties");
-		IExampleMCCConfig m = (IExampleMCCConfig)ConfigCache.getOrCreate(IExampleMCCConfig.class).loadPropertiesFromFile(configFile);
-		IDatabaseConfig dbconfig = (IDatabaseConfig)ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(configFile);
-		if (m.getDatasetFolder() == null || !m.getDatasetFolder().exists()) {
-			throw new IllegalArgumentException("config specifies invalid dataset folder " + m.getDatasetFolder());
-		}
+	/**
+	 * Variables for the experiment and database setup
+	 */
+	private static final File configFile = new File("testrsc/mlexample/setup.properties");
+	private static final IExampleMCCConfig m = (IExampleMCCConfig)ConfigCache.getOrCreate(IExampleMCCConfig.class).loadPropertiesFromFile(configFile);
+	private static final IDatabaseConfig dbconfig = (IDatabaseConfig)ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(configFile);
+	private static final IExperimentDatabaseHandle dbHandle = new ExperimenterMySQLHandle(dbconfig);
+	private static final Logger logger = LoggerFactory.getLogger(MachineLearningExperimenter.class);
 
+	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, InterruptedException, AlgorithmExecutionCanceledException {
+		runExperiments();
+	}
+
+	public static void createTableWithExperiments() throws ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, InterruptedException, AlgorithmExecutionCanceledException {
+		ExperimentDatabasePreparer preparer = new ExperimentDatabasePreparer(m, dbHandle);
+		preparer.synchronizeExperiments();
+	}
+
+	public static void deleteTable() throws ExperimentDBInteractionFailedException {
+		dbHandle.deleteDatabase();
+	}
+
+	public static void runExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+		Random r = new Random(System.currentTimeMillis());
 		ExperimentRunner runner = new ExperimentRunner(m, new IExperimentSetEvaluator() {
 
 			@Override
-			public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) {
+			public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws InterruptedException {
 
 				/* get experiment setup */
 				Map<String, String> description = experimentEntry.getExperiment().getValuesOfKeyFields();
 				String classifierName = description.get("classifier");
 				String datasetName = description.get("dataset");
-				int seed = Integer.valueOf(description.get("seed"));
+				int seed = Integer.parseInt(description.get("seed"));
 
 				/* create objects for experiment */
-				// load instances for datasetName
-				// build Classifier
-				// Evaluate Clasifier
-				System.out.println("Evaluate " + classifierName + " for dataset " + datasetName + " and seed " + seed);
+				logger.info("Evaluate {} for dataset {} and seed {}", classifierName, datasetName, seed);
 
-				/* run experiment */
+				/* run fictive experiment */
 				Map<String, Object> results = new HashMap<>();
-				double loss = 0.1;
+				long timeStartTraining = System.currentTimeMillis();
+				Thread.sleep(r.nextInt(10));
+				results.put("traintime", System.currentTimeMillis() - timeStartTraining);
 
 				/* report results */
+				double loss = r.nextDouble();
 				results.put("loss", loss);
 				processor.processResults(results);
 			}
-		}, new ExperimenterSQLHandle(dbconfig));
-		runner.randomlyConductExperiments(true);
+		}, dbHandle);
+		runner.randomlyConductExperiments(10);
 	}
-
 }

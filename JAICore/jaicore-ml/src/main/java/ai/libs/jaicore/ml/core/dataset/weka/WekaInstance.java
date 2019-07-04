@@ -1,8 +1,15 @@
 package ai.libs.jaicore.ml.core.dataset.weka;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import ai.libs.jaicore.basic.sets.ElementDecorator;
+import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
 import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
@@ -43,7 +50,8 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 	@Override
 	public L getTargetValue() {
 		IAttributeType<L> t = (IAttributeType<L>)WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().classAttribute());
-		return t.buildAttributeValue(this.getElement().classValue()).getValue();
+		double classValueAsDouble = this.getElement().classValue();
+		return t.buildAttributeValue((t instanceof CategoricalAttributeType) ? WekaUtil.getClassName(this.getElement()) : classValueAsDouble).getValue();
 	}
 
 	@Override
@@ -56,6 +64,17 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 		throw new UnsupportedOperationException();
 	}
 
+	public InstanceSchema<L> getSchema() {
+		List<IAttributeType<?>> attributeTypeList = new LinkedList<>();
+		for (int i = 0; i < this.getElement().numAttributes(); i++) {
+			if (i != this.getElement().classIndex()) {
+				attributeTypeList.add(WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().attribute(i)));
+			}
+		}
+		IAttributeType<L> targetType = (IAttributeType<L>) WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().classAttribute());
+		return new InstanceSchema<>(attributeTypeList, targetType);
+	}
+
 	@Override
 	public IAttributeValue<?>[] getAllAttributeValues() {
 		throw new UnsupportedOperationException();
@@ -64,5 +83,24 @@ public class WekaInstance<L> extends ElementDecorator<Instance> implements INume
 	@Override
 	public int getNumberOfAttributes() {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder().append(this.getElement().toDoubleArray()).toHashCode();
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof WekaInstance)) {
+			return false;
+		}
+		return WekaUtil.areInstancesEqual(this.getElement(), ((WekaInstance<?>)obj).getElement());
 	}
 }
