@@ -11,6 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -52,22 +53,63 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	private long timestampOfLastAction = Long.MIN_VALUE;
 
+	/**
+	 * Standard c'tor.
+	 *
+	 * @param config The database configuration including a definition of host, user, password, database and whether to connect to the server via SSL.
+	 */
 	public SQLAdapter(final IDatabaseConfig config) {
 		this(DB_DRIVER, config.getDBHost(), config.getDBUsername(), config.getDBPassword(), config.getDBDatabaseName(), new Properties(), config.getDBSSL());
 	}
 
+	/**
+	 * Constructor for an SQLAdapter.
+	 *
+	 * @param host The host of the (remote) database server.
+	 * @param user The username for logging into the database server.
+	 * @param password The password corresponding to the username.
+	 * @param database The name of the database to connect to.
+	 * @param ssl Flag whether the connection must be ssl encrypted or not.
+	 */
 	public SQLAdapter(final String host, final String user, final String password, final String database, final boolean ssl) {
 		this(DB_DRIVER, host, user, password, database, new Properties(), ssl);
 	}
 
+	/**
+	 * Constructor for an SQLAdapter. The connection is by default SSL encrypted.
+	 *
+	 * @param host The host of the (remote) database server.
+	 * @param user The username for logging into the database server.
+	 * @param password The password corresponding to the username.
+	 * @param database The name of the database to connect to.
+	 */
 	public SQLAdapter(final String host, final String user, final String password, final String database) {
 		this(DB_DRIVER, host, user, password, database, new Properties());
 	}
 
+	/**
+	 * Constructor for an SQLAdapter. The connection is by default SSL encrypted.
+	 *
+	 * @param host The host of the (remote) database server.
+	 * @param user The username for logging into the database server.
+	 * @param password The password corresponding to the username.
+	 * @param database The name of the database to connect to.
+	 * @param connectionProperties In these properties additional properties for the SQL connection may be defined.
+	 */
 	public SQLAdapter(final String driver, final String host, final String user, final String password, final String database, final Properties connectionProperties) {
 		this(driver, host, user, password, database, connectionProperties, true);
 	}
 
+	/**
+	 * Constructor for an SQLAdapter.
+	 *
+	 * @param host The host of the (remote) database server.
+	 * @param user The username for logging into the database server.
+	 * @param password The password corresponding to the username.
+	 * @param database The name of the database to connect to.
+	 * @param connectionProperties In these properties additional properties for the SQL connection may be defined.
+	 * @param ssl Flag whether the connection must be ssl encrypted or not.
+	 */
 	public SQLAdapter(final String driver, final String host, final String user, final String password, final String database, final Properties connectionProperties, final boolean ssl) {
 		super();
 		this.ssl = ssl;
@@ -131,11 +173,21 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		System.exit(1);
 	}
 
+	/**
+	 * Returns a prepared statement for the given query so that any placeholder may be filled into the prepared statement.
+	 * @param query The query for which a prepared statement shall be returned.
+	 * @return The prepared statement for the given query.
+	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
+	 */
 	public PreparedStatement getPreparedStatement(final String query) throws SQLException {
 		this.checkConnection();
 		return this.connect.prepareStatement(query);
 	}
 
+	/**
+	 * Checks whether the connection to the database is still alive and re-establishs the connection if it is not.
+	 * @throws SQLException Thrown, if there was an issue with reconnecting to the database server.
+	 */
 	public synchronized void checkConnection() throws SQLException {
 		int renewAfterSeconds = 5 * 60;
 		if (this.timestampOfLastAction + renewAfterSeconds * 1000 < System.currentTimeMillis()) {
@@ -145,10 +197,23 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		this.timestampOfLastAction = System.currentTimeMillis();
 	}
 
+	/**
+	 * Retrieves all rows of a table.
+	 * @param table The table for which all entries shall be returned.
+	 * @return A list of {@link IKVStore}s containing the data of the table.
+	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
+	 */
 	public List<IKVStore> getRowsOfTable(final String table) throws SQLException {
 		return this.getRowsOfTable(table, new HashMap<>());
 	}
 
+	/**
+	 * Retrieves all rows of a table which satisfy certain conditions (WHERE clause).
+	 * @param table The table for which all entries shall be returned.
+	 * @param conditions The conditions a result entry must satisfy.
+	 * @return A list of {@link IKVStore}s containing the data of the table.
+	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
+	 */
 	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
 		StringBuilder conditionSB = new StringBuilder();
 		List<String> values = new ArrayList<>();
@@ -164,14 +229,34 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		return this.getResultsOfQuery("SELECT * FROM `" + table + "`" + conditionSB.toString(), values);
 	}
 
+	/**
+	 * Retrieves the select result for the given query.
+	 * @param query The SQL query which is to be executed.
+	 * @return A list of {@link IKVStore}s containing the result data of the query.
+	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
+	 */
 	public List<IKVStore> getResultsOfQuery(final String query) throws SQLException {
 		return this.getResultsOfQuery(query, new ArrayList<>());
 	}
 
+	/**
+	 * Retrieves the select result for the given query that can have placeholders.
+	 * @param query The SQL query which is to be executed (with placeholders).
+	 * @param values An array of placeholder values that need to be filled in.
+	 * @return A list of {@link IKVStore}s containing the result data of the query.
+	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
+	 */
 	public List<IKVStore> getResultsOfQuery(final String query, final String[] values) throws SQLException {
 		return this.getResultsOfQuery(query, Arrays.asList(values));
 	}
 
+	/**
+	 * Retrieves the select result for the given query that can have placeholders.
+	 * @param query The SQL query which is to be executed (with placeholders).
+	 * @param values A list of placeholder values that need to be filled in.
+	 * @return A list of {@link IKVStore}s containing the result data of the query.
+	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
+	 */
 	public List<IKVStore> getResultsOfQuery(final String query, final List<String> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement statement = this.connect.prepareStatement(query)) {
@@ -184,11 +269,25 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		}
 	}
 
-	public int insert(final String sql, final String[] values) throws SQLException {
+	/**
+	 * Executes an insert query and returns the row ids of the created entries.
+	 * @param sql The insert statement which shall be executed that may have placeholders.
+	 * @param values The values for the placeholders.
+	 * @return An array of the row ids of the inserted entries.
+	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
+	 */
+	public int[] insert(final String sql, final String[] values) throws SQLException {
 		return this.insert(sql, Arrays.asList(values));
 	}
 
-	public int insert(final String sql, final List<? extends Object> values) throws SQLException {
+	/**
+	 * Executes an insert query and returns the row ids of the created entries.
+	 * @param sql The insert statement which shall be executed that may have placeholders.
+	 * @param values A list of values for the placeholders.
+	 * @return An array of the row ids of the inserted entries.
+	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
+	 */
+	public int[] insert(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			for (int i = 1; i <= values.size(); i++) {
@@ -196,26 +295,26 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			}
 			stmt.executeUpdate();
 
+			List<Integer> generatedKeys = new LinkedList<>();
 			try (ResultSet rs = stmt.getGeneratedKeys()) {
-				rs.next();
-				return rs.getInt(1);
+				while (rs.next()) {
+					generatedKeys.add(rs.getInt(1));
+				}
 			}
+			return generatedKeys.stream().mapToInt(x -> x).toArray();
 		}
 	}
 
-	public int insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
+	/**
+	 * Creates and executes an insert query for the given table and the values as specified in the map.
+	 * @param table The table where to insert the data.
+	 * @param map The map of key:value pairs to be inserted into the table.
+	 * @return An array of the row ids of the inserted entries.
+	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
+	 */
+	public int[] insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
 		Pair<String, List<Object>> insertStatement = this.buildInsertStatement(table, map);
 		return this.insert(insertStatement.getX(), insertStatement.getY());
-	}
-
-	public void insertNoNewValues(final String sql, final List<? extends Object> values) throws SQLException {
-		this.checkConnection();
-		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-			for (int i = 1; i <= values.size(); i++) {
-				this.setValue(stmt, i, values.get(i - 1));
-			}
-			stmt.executeUpdate();
-		}
 	}
 
 	private Pair<String, List<Object>> buildInsertStatement(final String table, final Map<String, ? extends Object> map) {
@@ -241,30 +340,53 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 
 	}
 
-	public void insertNoNewValues(final String table, final Map<String, ? extends Object> map) throws SQLException {
-		Pair<String, List<Object>> insertStatement = this.buildInsertStatement(table, map);
-		this.insertNoNewValues(insertStatement.getX(), insertStatement.getY());
+	/**
+	 * Execute the given sql statement as an update.
+	 * @param sql The sql statement to be executed.
+	 * @return The number of rows affected by the update statement.
+	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
+	 */
+	public int update(final String sql) throws SQLException {
+		return this.update(sql, new ArrayList<String>());
 	}
 
-	public void update(final String sql) throws SQLException {
-		this.update(sql, new ArrayList<String>());
+	/**
+	 * Execute the given sql statement with placeholders as an update filling the placeholders with the given values beforehand.
+	 * @param sql The sql statement with placeholders to be executed.
+	 * @param sql Array of values for the respective placeholders.
+	 * @return The number of rows affected by the update statement.
+	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
+	 */
+	public int update(final String sql, final String[] values) throws SQLException {
+		return this.update(sql, Arrays.asList(values));
 	}
 
-	public void update(final String sql, final String[] values) throws SQLException {
-		this.update(sql, Arrays.asList(values));
-	}
-
-	public void update(final String sql, final List<? extends Object> values) throws SQLException {
+	/**
+	 * Execute the given sql statement with placeholders as an update filling the placeholders with the given values beforehand.
+	 * @param sql The sql statement with placeholders to be executed.
+	 * @param sql List of values for the respective placeholders.
+	 * @return The number of rows affected by the update statement.
+	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
+	 */
+	public int update(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
 			for (int i = 1; i <= values.size(); i++) {
 				stmt.setString(i, values.get(i - 1).toString());
 			}
-			stmt.executeUpdate();
+			return stmt.executeUpdate();
 		}
 	}
 
-	public void update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
+	/**
+	 * Create and execute an update statement for some table updating the values as described in <code>updateValues</code> and only affect those entries satisfying the <code>conditions</code>.
+	 * @param table The table which is to be updated.
+	 * @param updateValues The description how entries are to be updated.
+	 * @param conditions The description of the where-clause, conditioning the entries which are to be updated.
+	 * @return The number of rows affected by the update statement.
+	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
+	 */
+	public int update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
 
 		// build the update mapping.
@@ -301,7 +423,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			for (int i = 1; i <= values.size(); i++) {
 				this.setValue(stmt, i, values.get(i - 1));
 			}
-			stmt.executeUpdate();
+			return stmt.executeUpdate();
 		}
 	}
 
@@ -367,6 +489,10 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		}
 	}
 
+	/**
+	 * Getter for the sql database driver.
+	 * @return The name of the database driver.
+	 */
 	public String getDriver() {
 		return this.driver;
 	}

@@ -69,7 +69,7 @@ public class ResultsDBConnection {
 			map.put("found_by", this.algorithmName);
 			map.put(LABEL_METRIC_ID, this.getLatestIdForMetric(entry.getKey()));
 			map.put("value", entry.getValue());
-			this.adapter.insertNoNewValues(this.finalMeasurementsTableName, map);
+			this.adapter.insert(this.finalMeasurementsTableName, map);
 		}
 		LOGGER.debug("Done adding final measurements to db.");
 	}
@@ -83,7 +83,7 @@ public class ResultsDBConnection {
 		map.put("generation", generation);
 		map.put("classifier_string", classifier);
 		map.put("value", value);
-		this.adapter.insertNoNewValues(this.intermediateMeasurementsTableName, map);
+		this.adapter.insert(this.intermediateMeasurementsTableName, map);
 		LOGGER.debug("Done adding intermediate measurement to db");
 	}
 

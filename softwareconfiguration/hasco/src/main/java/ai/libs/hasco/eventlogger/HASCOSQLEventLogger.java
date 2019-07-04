@@ -75,7 +75,7 @@ public class HASCOSQLEventLogger<T, V extends Comparable<V>> {
 			map.put("timeout", "" + event.getTimeout());
 			map.put("CPUs", "" + event.getNumberOfCPUS());
 			map.put("benchmark", event.getBenchmark().toString());
-			this.runId = this.sqlAdapter.insert("runs", map);
+			this.runId = this.sqlAdapter.insert("runs", map)[0];
 		} catch (Exception e) {
 			this.logger.error(MSG_EXCEPTION, e);
 		}

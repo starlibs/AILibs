@@ -144,7 +144,7 @@ public class ClassifierDBConnection implements Serializable {
 			map.put("val_fold", val_fold);
 			map.put("test_seed", testSeed);
 			map.put("val_seed", valSeed);
-			this.settingId = adapter.insert("setting", map);
+			this.settingId = adapter.insert("setting", map)[0];
 		}
 	}
 
@@ -430,7 +430,7 @@ public class ClassifierDBConnection implements Serializable {
 		map.put(COLUMN_CLASSIFIER_NAME, classifierName);
 		map.put(COLUMN_CLASSIFIER_OBJECT, this.objectToByteArray(classifier));
 		map.put(COLUMN_CLASSIFIER_TYPE, CLASSIFIER_TYPE_MULTILABEL);
-		return this.adapter.insert(TABLE_CLASSIFIER, map);
+		return this.adapter.insert(TABLE_CLASSIFIER, map)[0];
 	}
 
 	/**
@@ -478,7 +478,7 @@ public class ClassifierDBConnection implements Serializable {
 				map.put(COLUMN_CLASSIFIER_OBJECT, this.objectToByteArray(null));
 			}
 		}
-		return this.adapter.insert(TABLE_CLASSIFIER, map);
+		return this.adapter.insert(TABLE_CLASSIFIER, map)[0];
 	}
 
 	/**
@@ -504,7 +504,7 @@ public class ClassifierDBConnection implements Serializable {
 			map.put(COLUMN_CLASSIFIER_NAME, classifierName);
 			map.put(COLUMN_CLASSIFIER_OBJECT, this.objectToByteArray(null));
 			map.put(COLUMN_CLASSIFIER_TYPE, CLASSIFIER_TYPE_MULTILABEL);
-			return this.adapter.insert(TABLE_CLASSIFIER, map);
+			return this.adapter.insert(TABLE_CLASSIFIER, map)[0];
 		} else {
 			return id;
 		}

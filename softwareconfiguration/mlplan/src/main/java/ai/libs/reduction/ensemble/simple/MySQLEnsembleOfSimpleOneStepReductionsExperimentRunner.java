@@ -59,8 +59,8 @@ public class MySQLEnsembleOfSimpleOneStepReductionsExperimentRunner {
 		map.put("dataset", dataFile.getAbsolutePath());
 		map.put("classifier", nameOfClassifier);
 		map.put("size", size);
-		int id = this.adapter.insert(TABLE_NAME, map);
-		return new MySQLEnsembleOfSimpleOneStepReductionsExperiment(id, exp);
+		int[] id = this.adapter.insert(TABLE_NAME, map);
+		return new MySQLEnsembleOfSimpleOneStepReductionsExperiment(id[0], exp);
 	}
 
 	private void updateExperiment(final MySQLEnsembleOfSimpleOneStepReductionsExperiment exp, final Map<String, ? extends Object> values) throws SQLException {

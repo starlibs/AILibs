@@ -52,7 +52,7 @@ public class BestOfKHomogeneousReductionStumpExperimentRunnerWrapper extends ABe
 		map.put(KEY_CLASSIFIER, nameOfClassifier);
 		map.put("k", this.getK());
 		map.put("mccvrepeats", this.getMCCVRepeats());
-		int id = this.getAdapter().insert(TABLE_NAME, map);
+		int id = this.getAdapter().insert(TABLE_NAME, map)[0];
 		return new MySQLReductionExperiment(id, exp);
 	}
 

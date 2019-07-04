@@ -63,7 +63,7 @@ public class SimpleRPNDHeterogeneousReductionStumpExperimentRunner {
 		map.put("left_classifier", nameOfLeftClassifier);
 		map.put("inner_classifier", nameOfInnerClassifier);
 		map.put("right_classifier", nameOfRightClassifier);
-		int id = this.adapter.insert(TABLE_NAME, map);
+		int id = this.adapter.insert(TABLE_NAME, map)[0];
 		return new MySQLReductionExperiment(id, exp);
 
 	}

@@ -62,7 +62,7 @@ public class BestOfKHeterogeneousReductionStumpExperimentRunnerWrapper extends A
 		map.put("k", this.getK());
 		map.put("mccvrepeats", this.getMCCVRepeats());
 		try {
-			int id = this.getAdapter().insert(TABLE_NAME, map);
+			int id = this.getAdapter().insert(TABLE_NAME, map)[0];
 			return new MySQLReductionExperiment(id, exp);
 		} catch (SQLException e) {
 			LOGGER.error("Could not create experiment entry", e);
