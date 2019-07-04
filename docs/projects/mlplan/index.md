@@ -15,9 +15,9 @@ navigation_active: overview
 [![Javadocs](https://javadoc.io/badge/ai.libs/jaicore-basic.svg)](https://javadoc.io/doc/ai.libs/jaicore-basic)
 
 
-# Overview
+## Overview
 Bla now with project layout
 
-# Installation
+## Installation
 
 Setup
