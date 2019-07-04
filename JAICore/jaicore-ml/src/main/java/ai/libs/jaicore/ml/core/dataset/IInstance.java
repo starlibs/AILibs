@@ -9,7 +9,7 @@ import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
  *
  * @author wever
  */
-public interface IInstance extends Clusterable{
+public interface IInstance extends Clusterable {
 
 	/**
 	 * Getter for the value of an attribute for the given position.
@@ -49,5 +49,5 @@ public interface IInstance extends Clusterable{
 			throw new UnsupportedOperationException(e);
 		}
 	}
-	
+
 }

@@ -22,18 +22,18 @@ public class DataSet {
 	}
 
 	public Instances getInstances() {
-		return instances;
+		return this.instances;
 	}
 
-	public void setInstances(Instances instances) {
+	public void setInstances(final Instances instances) {
 		this.instances = instances;
 	}
 
 	public List<INDArray> getIntermediateInstances() {
-		return intermediateInstances;
+		return this.intermediateInstances;
 	}
 
-	public void setIntermediateInstances(List<INDArray> intermediateInstances) {
+	public void setIntermediateInstances(final List<INDArray> intermediateInstances) {
 		this.intermediateInstances = intermediateInstances;
 	}
 

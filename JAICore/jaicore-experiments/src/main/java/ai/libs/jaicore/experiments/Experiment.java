@@ -11,17 +11,31 @@ import java.util.Map;
 public class Experiment {
 	private final int memoryInMB;
 	private final int numCPUs;
-	private Map<String,String> valuesOfKeyFields;
+	private Map<String, String> valuesOfKeyFields;
+	private Map<String, Object> valuesOfResultFields;
 
 	public Experiment(final int memoryInMB, final int numCPUs, final Map<String, String> valuesOfKeyFields) {
+		this(memoryInMB, numCPUs, valuesOfKeyFields, null);
+	}
+
+	public Experiment(final int memoryInMB, final int numCPUs, final Map<String, String> valuesOfKeyFields, final Map<String, Object> valuesOfResultFields) {
 		super();
 		this.memoryInMB = memoryInMB;
 		this.numCPUs = numCPUs;
 		this.valuesOfKeyFields = valuesOfKeyFields;
+		this.valuesOfResultFields = valuesOfResultFields;
 	}
 
 	public Map<String, String> getValuesOfKeyFields() {
 		return this.valuesOfKeyFields;
+	}
+
+	public Map<String, Object> getValuesOfResultFields() {
+		return this.valuesOfResultFields;
+	}
+
+	public void setValuesOfResultFields(final Map<String, Object> valuesOfResultFields) {
+		this.valuesOfResultFields = valuesOfResultFields;
 	}
 
 	public void setKeys(final Map<String, String> keys) {
@@ -40,9 +54,10 @@ public class Experiment {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.valuesOfKeyFields == null) ? 0 : this.valuesOfKeyFields.hashCode());
 		result = prime * result + this.memoryInMB;
 		result = prime * result + this.numCPUs;
+		result = prime * result + ((this.valuesOfKeyFields == null) ? 0 : this.valuesOfKeyFields.hashCode());
+		result = prime * result + ((this.valuesOfResultFields == null) ? 0 : this.valuesOfResultFields.hashCode());
 		return result;
 	}
 
@@ -58,6 +73,12 @@ public class Experiment {
 			return false;
 		}
 		Experiment other = (Experiment) obj;
+		if (this.memoryInMB != other.memoryInMB) {
+			return false;
+		}
+		if (this.numCPUs != other.numCPUs) {
+			return false;
+		}
 		if (this.valuesOfKeyFields == null) {
 			if (other.valuesOfKeyFields != null) {
 				return false;
@@ -65,9 +86,13 @@ public class Experiment {
 		} else if (!this.valuesOfKeyFields.equals(other.valuesOfKeyFields)) {
 			return false;
 		}
-		if (this.memoryInMB != other.memoryInMB) {
+		if (this.valuesOfResultFields == null) {
+			if (other.valuesOfResultFields != null) {
+				return false;
+			}
+		} else if (!this.valuesOfResultFields.equals(other.valuesOfResultFields)) {
 			return false;
 		}
-		return this.numCPUs == other.numCPUs;
+		return true;
 	}
 }

@@ -1,11 +1,13 @@
-mem.max = 4098
+mem.max = 2048
 cpu.max = 1
 
-db.host = isys-db.cs.upb.de
-db.username = johndoe
-db.password = NYpYtgpGD37OerWD
-db.database = johndoe
+db.driver = mysql
+db.host = <yourhost>
+db.username = <youruser>
+db.password = <yourpassword>
+db.database = <yourdatabase>
 db.table = results
+db.ssl = true
 
 keyfields = datasets, classifiers, seeds
 resultfields = loss, traintime
@@ -13,5 +15,3 @@ resultfields = loss, traintime
 seeds = 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30
 classifiers = weka.classifiers.trees.J48, weka.classifiers.functions.SMO
 datasets = autos,car,glass
-
-datasetfolder = ./testrsc/mlexample/data

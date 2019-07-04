@@ -6,6 +6,6 @@ import weka.core.Instances;
 
 public interface IDatasetSplitter {
 
-	public List<Instances> split(Instances data, long seed, double... portions);
+	public List<Instances> split(Instances data, long seed, double portions) throws SplitFailedException, InterruptedException;
 
 }

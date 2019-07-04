@@ -1,14 +1,12 @@
 package ai.libs.jaicore.ml.cache;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Arrays;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;
 
@@ -25,7 +23,8 @@ import weka.core.Instances;
 public class ReproducibleInstances extends Instances {
 
 	private static final long serialVersionUID = 4318807226111536282L;
-	private List<Instruction> history = new LinkedList<>();
+	private InstructionGraph history;
+	private Pair<String, Integer> outputUnitOfHistory;
 	private boolean cacheStorage = true;
 	private boolean cacheLookup = true;
 
@@ -33,55 +32,12 @@ public class ReproducibleInstances extends Instances {
 		super(dataset);
 	}
 
-	/**
-	 * Creates a {@link ReproducibleInstances} Object based on the given History. Instructions that no not modify the Instances will be ignored (No evaluation will be done).
-	 *
-	 * @param history List of Instructions used to create the original Instances
-	 * @param apiKey apiKey in case openml.org is used
-	 * @return new {@link ReproducibleInstances} object
-	 * @throws IOException if something goes wrong while loading Instances from openml or when reading arff file
-	 */
-	public static ReproducibleInstances fromHistory(final List<Instruction> history, final String apiKey) throws IOException {
-		ReproducibleInstances instances = null;
-		for (int i = 0; i < history.size(); i++) {
-			Instruction inst = history.get(i);
-			switch (inst.command) {
-			case LoadDataSetInstruction.COMMAND_NAME:
-				// load openml or local dataset
-				if(inst.inputs.get("provider").equals("openml.org")) {
-					instances = fromOpenML(inst.inputs.get("id"), apiKey);
-				}
-				else if(inst.inputs.get("provider").startsWith("local")) {
-					instances = fromARFF(inst.inputs.get("id"));
-				}
-				break;
-			case FoldBasedSubsetInstruction.COMMAND_NAME:
-				// create split
-				String[] ratiosAsStrings = inst.getInputs().get("ratios").split(",");
-				double[] ratios = new double[ratiosAsStrings.length];
-				for (int j = 0; j < ratiosAsStrings.length; j++) {
-					ratios[j] = Double.parseDouble(ratiosAsStrings[j].trim().substring(1, ratiosAsStrings[j].length()-1));
-				}
-				instances = WekaUtil.getStratifiedSplit(instances, Long.parseLong(inst.inputs.get("seed")), ratios).get( Integer.parseInt(inst.getInputs().get("outIndex")));
-				break;
-			default:
-				break;
-			}
-		}
-		return instances;
-	}
-
-
-
 	public ReproducibleInstances(final ReproducibleInstances dataset) {
-		super(dataset);
-		Iterator<Instruction> iterator = dataset.history.iterator();
-		while(iterator.hasNext()) {
-			Instruction i = iterator.next();
-			history.add(i);
-		}
-		cacheLookup = dataset.cacheLookup;
-		cacheStorage = dataset.cacheStorage;
+		this((Instances)dataset);
+		this.history = new InstructionGraph(dataset.history);
+		this.outputUnitOfHistory = new Pair<>(dataset.outputUnitOfHistory.getX(), dataset.outputUnitOfHistory.getY());
+		this.cacheLookup = dataset.cacheLookup;
+		this.cacheStorage = dataset.cacheStorage;
 	}
 
 	/**
@@ -92,29 +48,49 @@ public class ReproducibleInstances extends Instances {
 	 * @param apiKey apikey to use
 	 * @return new {@link ReproducibleInstances} object
 	 * @throws IOException if something goes wrong while loading Instances from openml
+	 * @throws InterruptedException
+	 * @throws InstructionFailedException
 	 */
-	public static ReproducibleInstances fromOpenML(final String id, final String apiKey) throws IOException {
-		OpenMLHelper.setApiKey(apiKey);
-		ReproducibleInstances result = new ReproducibleInstances(OpenMLHelper.getInstancesById(Integer.parseInt(id)));
-		result.history.add(new LoadDataSetInstruction(DataProvider.OPENML, id));
+	public static ReproducibleInstances fromHistory(final InstructionGraph history, final Pair<String, Integer> outputUnitOfHistory) throws InstructionFailedException, InterruptedException {
+		ReproducibleInstances result = new ReproducibleInstances( ((WekaInstances<Object>)history.getDataForUnit(outputUnitOfHistory)).getList());
+		result.history = history;
+		result.outputUnitOfHistory = outputUnitOfHistory;
 		result.cacheLookup = true;
 		result.cacheStorage = true;
 		return result;
 	}
 
 	/**
-	 * Creates a new {@link ReproducibleInstances} object. Data is loaded from a local arff file.
+	 * Creates a new {@link ReproducibleInstances} object. Data is loaded from
+	 * openml.org.
 	 *
-	 * @param path path to the dataset
+	 * @param id The id of the openml dataset
+	 * @param apiKey apikey to use
 	 * @return new {@link ReproducibleInstances} object
-	 * @throws IOException if the ARFF file is not read successfully
+	 * @throws IOException if something goes wrong while loading Instances from openml
+	 * @throws InterruptedException
+	 * @throws InstructionFailedException
 	 */
-	public static ReproducibleInstances fromARFF(final String path) throws IOException {
-		Instances data = new Instances(new FileReader(path));
-		data.setClassIndex(data.numAttributes() - 1);
-		ReproducibleInstances result = new ReproducibleInstances(data);
-		InetAddress addr = InetAddress.getLocalHost();
-		result.history.add(new LoadDataSetInstruction(DataProvider.ARFFFILE, "file://" + addr.getHostName() + File.separator + new File(path).getAbsolutePath()));
+	public static ReproducibleInstances fromOpenML(final int id, final String apiKey) throws InstructionFailedException, InterruptedException {
+		OpenMLHelper.setApiKey(apiKey);
+		InstructionGraph graph = new InstructionGraph();
+		graph.addNode("load", new LoadDatasetInstructionForOpenML(apiKey, id));
+		Pair<String, Integer> outputUnit = new Pair<>("load", 0);
+		ReproducibleInstances result = new ReproducibleInstances(((WekaInstances<Object>)graph.getDataForUnit(outputUnit)).getList());
+		result.history = graph;
+		result.outputUnitOfHistory = outputUnit;
+		result.cacheLookup = true;
+		result.cacheStorage = true;
+		return result;
+	}
+
+	public static ReproducibleInstances fromARFF(final File arffFile) throws InstructionFailedException, InterruptedException {
+		InstructionGraph graph = new InstructionGraph();
+		graph.addNode("load", new LoadDataSetInstructionForARFFFile(arffFile));
+		Pair<String, Integer> outputUnit = new Pair<>("load", 0);
+		ReproducibleInstances result = new ReproducibleInstances(((WekaInstances<Object>)graph.getDataForUnit(outputUnit)).getList());
+		result.history = graph;
+		result.outputUnitOfHistory = outputUnit;
 		result.cacheLookup = true;
 		result.cacheStorage = true;
 		return result;
@@ -124,22 +100,21 @@ public class ReproducibleInstances extends Instances {
 	 *
 	 * @return the ordered lists of instructions or null if cache is not used
 	 */
-	public List<Instruction> getInstructions() {
-		if(cacheLookup || cacheStorage) {
-			return history;
+	public InstructionGraph getInstructions() {
+		if(this.cacheLookup || this.cacheStorage) {
+			return this.history;
 		}
 		else {
 			return null;
 		}
 	}
 
-	/**
-	 * Adds a new Instruction to the history of these Instances
-	 *
-	 * @param i - new Instruction
-	 */
-	public void addInstruction(final Instruction i) {
-		history.add(i);
+	public Pair<String, Integer> getOutputUnit() {
+		return this.outputUnitOfHistory;
+	}
+
+	public void setOutputUnitWithoutRecomputation(final Pair<String, Integer> outputUnit) {
+		this.outputUnitOfHistory = outputUnit;
 	}
 
 	/** If true signifies that performance evaluation should be stored.
@@ -147,7 +122,7 @@ public class ReproducibleInstances extends Instances {
 	 * @return true if performance should be saved
 	 */
 	public boolean isCacheStorage() {
-		return cacheStorage;
+		return this.cacheStorage;
 	}
 
 	/** If set to true, signifies that performance evaluation should be stored.
@@ -164,7 +139,7 @@ public class ReproducibleInstances extends Instances {
 	 * @return true if lookup should be performed
 	 */
 	public boolean isCacheLookup() {
-		return cacheLookup;
+		return this.cacheLookup;
 	}
 
 	/**
@@ -175,4 +150,22 @@ public class ReproducibleInstances extends Instances {
 		this.cacheLookup = cacheLookup;
 	}
 
+	/**
+	 * Creates a reduced version of the dataset by using an instruction with one input and one output
+	 *
+	 * @param nameOfRefinementInstruction
+	 * @param instruction
+	 * @param outputOfRefinementInstruction
+	 * @return
+	 * @throws InterruptedException
+	 * @throws InstructionFailedException
+	 * @throws ClassNotFoundException
+	 */
+	public ReproducibleInstances reduceWithInstruction(final String nameOfRefinementInstruction, final Instruction instruction, final int outputOfRefinementInstruction) throws ClassNotFoundException, InstructionFailedException, InterruptedException {
+		this.history.addNode(nameOfRefinementInstruction, instruction, Arrays.asList(this.getOutputUnit()));
+		this.outputUnitOfHistory = new Pair<>(nameOfRefinementInstruction, outputOfRefinementInstruction);
+		WekaInstances<Object> remainingData = ((WekaInstances<Object>)instruction.getOutputInstances(Arrays.asList(new WekaInstances<>(this))).get(outputOfRefinementInstruction));
+		this.removeIf(i -> !remainingData.contains(new WekaInstance<>(i)));
+		return this;
+	}
 }

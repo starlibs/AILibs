@@ -43,6 +43,7 @@ import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
@@ -127,7 +128,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		}
 	}
 
-	private AlgorithmEvent setupSearch() throws AlgorithmException {
+	private AlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
 
 		/* check whether data has been set */
 		if (this.data == null) {
@@ -143,7 +144,12 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		logger.info("Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...",
 				this.config.subsamplingRatio(), this.config.minInstances(), this.data.getInstances().numInstances(),
 				this.data.getInstances().numAttributes());
-		DataSet dataForFE = DataSetUtils.subsample(this.data, this.config.subsamplingRatio(), this.config.minInstances(), new Random(this.config.randomSeed()));
+		DataSet dataForFE;
+		try {
+			dataForFE = DataSetUtils.subsample(this.data, this.config.subsamplingRatio(), this.config.minInstances(), new Random(this.config.randomSeed()));
+		} catch (SplitFailedException e1) {
+			throw new AlgorithmException(e1, "Could not create sample.");
+		}
 		logger.info("Finished subsampling.");
 
 		// Apply subsampling of images

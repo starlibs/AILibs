@@ -8,10 +8,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author jnowack
  *
  */
-public class LoadDataSetInstruction extends Instruction {
+public abstract class LoadDataSetInstruction extends Instruction {
 
-	/** Constant String to Identify this Instruction */
-	public static final String COMMAND_NAME = "loadDataset";
+	private static final long serialVersionUID = 7408937429274201748L;
+	private final DataProvider provider;
+	private final String id;
 
 	/**
 	 * Constructor to create an instruction for loading a dataset that can be converted to json.
@@ -20,15 +21,21 @@ public class LoadDataSetInstruction extends Instruction {
 	 * @param id used to identify dataset
 	 */
 	public LoadDataSetInstruction(@JsonProperty("provider") final DataProvider provider, @JsonProperty("id") final String id) {
-		this.command = COMMAND_NAME;
 		if (provider == null) {
 			throw new IllegalArgumentException("Provider must not be null!");
 		}
 		if (id == null) {
 			throw new IllegalArgumentException("id must not be null!");
 		}
-		this.inputs.put("provider", provider.name());
-		this.inputs.put("id", id);
+		this.provider = provider;
+		this.id = id;
 	}
 
+	public DataProvider getProvider() {
+		return this.provider;
+	}
+
+	public String getId() {
+		return this.id;
+	}
 }

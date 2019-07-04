@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +29,11 @@ import ai.libs.jaicore.db.sql.ResultSetToKVStoreSerializer;
  * This is a simple util class for easy database access and query execution in sql. You need to make sure that the respective JDBC connector is in the class path. By default, the adapter uses the mysql driver, but any jdbc driver can be
  * used.
  *
- * @author fmohr
+ * @author fmohr, mwever
  *
  */
 @SuppressWarnings("serial")
-public class SQLAdapter implements Serializable, AutoCloseable {
+public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomizable {
 
 	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
@@ -294,7 +295,6 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 				this.setValue(stmt, i, values.get(i - 1));
 			}
 			stmt.executeUpdate();
-
 			List<Integer> generatedKeys = new LinkedList<>();
 			try (ResultSet rs = stmt.getGeneratedKeys()) {
 				while (rs.next()) {
@@ -317,6 +317,51 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 		return this.insert(insertStatement.getX(), insertStatement.getY());
 	}
 
+	/**
+	 * Creates a multi-insert statement and executes it. The returned array contains the row id's of the inserted rows. (By default it creates chunks of size 10.000 rows per query to be inserted.)
+	 * @param table The table to which the rows are to be added.
+	 * @param keys The list of column keys for which values are set.
+	 * @param datarows The list of value lists to be filled into the table.
+	 * @return An array of row id's of the inserted rows.
+	 * @throws SQLException Thrown, if the sql statement was malformed, could not be executed, or the connection to the database failed.
+	 */
+	public int[] insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows) throws SQLException {
+		return this.insertMultiple(table, keys, datarows, 10000);
+	}
+
+	/**
+	 * Creates a multi-insert statement and executes it. The returned array contains the row id's of the inserted rows.
+	 * @param table The table to which the rows are to be added.
+	 * @param keys The list of column keys for which values are set.
+	 * @param datarows The list of value lists to be filled into the table.
+	 * @param chunkSize The number of rows which are added within one single database transaction. (10,000 seems to be a good value for this)
+	 * @return An array of row id's of the inserted rows.
+	 * @throws SQLException Thrown, if the sql statement was malformed, could not be executed, or the connection to the database failed.
+	 */
+	public int[] insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows, final int chunkSize) throws SQLException {
+		int n = datarows.size();
+		List<Integer> ids = new ArrayList<>(n);
+		try (Statement stmt = this.connect.createStatement()) {
+			for (int i = 0; i < Math.ceil(n * 1.0 / chunkSize); i++) {
+				int startIndex = i * chunkSize;
+				int endIndex = Math.min((i + 1) * chunkSize, n);
+				String sql = this.getSQLForMultiInsert(table, keys, datarows.subList(startIndex, endIndex));
+				this.logger.debug("Created SQL for {} entries", endIndex - startIndex);
+				this.logger.trace("Adding sql statement {} to batch", sql);
+				stmt.addBatch(sql);
+			}
+			this.logger.debug("Start batch execution.");
+			stmt.executeBatch();
+			this.logger.debug("Finished batch execution.");
+			try (ResultSet rs = stmt.getGeneratedKeys()) {
+				while (rs.next()) {
+					ids.add(rs.getInt(1));
+				}
+			}
+			return ids.stream().mapToInt(x -> x).toArray();
+		}
+	}
+
 	private Pair<String, List<Object>> buildInsertStatement(final String table, final Map<String, ? extends Object> map) {
 		StringBuilder sb1 = new StringBuilder();
 		StringBuilder sb2 = new StringBuilder();
@@ -333,11 +378,61 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			sb2.append("?");
 			values.add(entry.getValue());
 		}
-
 		String statement = "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
-
 		return new Pair<>(statement, values);
+	}
 
+	protected String buildFinalInsertStatement(final String table, final Map<String, ? extends Object> map) {
+		StringBuilder sb1 = new StringBuilder();
+		StringBuilder sb2 = new StringBuilder();
+		for (Entry<String, ? extends Object> entry : map.entrySet()) {
+			if (entry.getValue() == null) {
+				continue;
+			}
+			if (sb1.length() != 0) {
+				sb1.append(", ");
+				sb2.append(", ");
+			}
+			sb1.append(entry.getKey());
+			sb2.append("\"" + entry.getValue().toString().replace("\"", "\\\"") + "\"");
+		}
+		return "INSERT INTO " + table + " (" + sb1.toString() + ") VALUES (" + sb2.toString() + ")";
+	}
+
+	private String getSQLForMultiInsert(final String table, final List<String> keys, final List<List<?>> datarows) {
+		StringBuilder sbMain = new StringBuilder();
+		StringBuilder sbKeys = new StringBuilder();
+		StringBuilder sbValues = new StringBuilder();
+
+		/* create command phrase */
+		sbMain.append("INSERT INTO `");
+		sbMain.append(table);
+		sbMain.append("` (");
+
+		/* create key phrase */
+		for (String key : keys) {
+			if (sbKeys.length() != 0) {
+				sbKeys.append(", ");
+			}
+			sbKeys.append(key);
+		}
+		sbMain.append(sbKeys);
+		sbMain.append(") VALUES\n");
+
+		/* create value phrases */
+		for (List<?> datarow : datarows) {
+			if (datarow.contains(null)) { // the rule that fires here is wrong! The list CAN contain a null element
+				throw new IllegalArgumentException("Row " + datarow + " contains null element!");
+			}
+			if (sbValues.length() > 0) {
+				sbValues.append(",\n ");
+			}
+			sbValues.append("(");
+			sbValues.append(datarow.stream().map(s -> "\"" + s.toString().replace("\"", "\\\"") + "\"").collect(Collectors.joining(", ")));
+			sbValues.append(")");
+		}
+		sbMain.append(sbValues);
+		return sbMain.toString();
 	}
 
 	/**
@@ -364,7 +459,7 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	/**
 	 * Execute the given sql statement with placeholders as an update filling the placeholders with the given values beforehand.
 	 * @param sql The sql statement with placeholders to be executed.
-	 * @param sql List of values for the respective placeholders.
+	 * @param values List of values for the respective placeholders.
 	 * @return The number of rows affected by the update statement.
 	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
 	 */
@@ -406,8 +501,13 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 			if (conditionSB.length() > 0) {
 				conditionSB.append(" AND ");
 			}
-			conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
-			values.add(entry.getValue());
+			if (entry.getValue() != null) {
+				conditionSB.append(entry.getKey() + KEY_EQUALS_VALUE_TO_BE_SET);
+				values.add(entry.getValue());
+			} else {
+				conditionSB.append(entry.getKey());
+				conditionSB.append(" IS NULL");
+			}
 		}
 
 		// Build query for the update command.
@@ -495,5 +595,15 @@ public class SQLAdapter implements Serializable, AutoCloseable {
 	 */
 	public String getDriver() {
 		return this.driver;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }
