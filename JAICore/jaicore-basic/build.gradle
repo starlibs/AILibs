@@ -1,19 +1,23 @@
 dependencies {
-  compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
-  compile group: 'it.unimi.dsi', name: 'fastutil', version: '8.2.1'
-  compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.7'
+  compile ('org.apache.commons:commons-math3:3.6.1')
+  compile ('org.apache.commons:commons-lang3:3.9')
+  compile ('it.unimi.dsi:fastutil:8.2.1')
+  compile ('com.fasterxml.jackson.core:jackson-databind:2.9.7')
   testCompile 'org.awaitility:awaitility:3.1.6'
 }
 
 uploadArchives {
 	repositories {
 		mavenDeployer {
+			def ossrhUsername =  project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : ""
+			def ossrhPassword = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : ""
+		
 			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+        		authentication(userName: ossrhUsername, password: ossrhPassword)
       		}	
       		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+        		authentication(userName: ossrhUsername, password: ossrhPassword)
       		}
 
       		pom.project {
@@ -49,8 +53,8 @@ uploadArchives {
           			}
           			developer {
           			    id 'ahetzer'
-          			    name 'Alexander Hetzer'
-          			    email 'alexander.hetzer@upb.de'
+          			    name 'Alexander Tornede'
+          			    email 'alexander.tornede@upb.de'
           			}
         		}
       		}

@@ -6,6 +6,7 @@ sourceSets {
     }
 }
 
+
 dependencies {
   	// basic dependencies
 	compile project(':hasco')
@@ -20,12 +21,14 @@ dependencies {
 
 
 	// OWL API
-	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.0'
+	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
 	// TreeMiner
-	compile 'com.github.helegraf:TreeMiner:df764c7b13'
+	compile 'com.github.helegraf:TreeMiner:ed1071c4ef'
+    compile 'com.github.helegraf:data-handling:bd4f875ad5'
+	
 	// linear algebra
-	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '0.9.1'
-	compile group: 'org.nd4j', name: 'nd4j-api', version: '0.9.1'
+	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta2'
+	compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta2'
 	
 	// gradient descent (but forbid that the guy uses his log4j-stuff, which we will bride to slf4j)
 	compile ('de.jungblut.common:thomasjungblut-common:1.1') {
@@ -41,9 +44,7 @@ dependencies {
 
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
-	
 }
-
 
 configurations.all {
     exclude module: 'weka-dev'

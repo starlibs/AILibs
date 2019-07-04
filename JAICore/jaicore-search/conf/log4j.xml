@@ -46,7 +46,7 @@
 		</layout>
 	</appender>
 
-	<logger name="jaicore">
+	<logger name="ai.libs.jaicore">
 		<level value="warn" />
 		<appender-ref ref="console" />
 		<appender-ref ref="infoFileAppender" />
@@ -55,8 +55,12 @@
 		<appender-ref ref="traceFileAppender" />
 	</logger>
 	
-	<logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+	<logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
 	 <level value="warn" />
+	</logger>
+	
+	<logger name="ai.libs.jaicore.search.evaluationproblems">
+		<level value="info" />
 	</logger>
 	
   <logger name="testedalgorithm">
@@ -77,23 +81,27 @@
     <level value="warn" />
   </logger>
   
-  <logger name="jaicore.basic.algorithm.GeneralAlgorithmTester">
+  <logger name="ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester">
     <level value="info" />
   </logger>
   
-  <logger name="jaicore.basic.algorithm.SolutionCandidateIteratorTester">
+  <logger name="ai.libs.jaicore.basic.algorithm.SolutionCandidateIteratorTester">
     <level value="info" />
   </logger>
   
-  <logger name="jaicore.interrupt">
-    <level value="debug" />
+  <logger name="ai.libs.jaicore.interrupt">
+    <level value="warn" />
   </logger>
   
-  <logger name="jaicore.timing">
-    <level value="debug" />
+  <logger name="ai.libs.jaicore.timing">
+    <level value="warn" />
   </logger>
   
-  <logger name="jaicore.concurrent">
+  <logger name="ai.libs.jaicore.concurrent">
+    <level value="warn" />
+  </logger>
+  
+  <logger name="ai.libs.jaicore.search.algorithms.standard.bestfirst.RandomCompletionNodeEvaluatorTester">
     <level value="debug" />
   </logger>
   

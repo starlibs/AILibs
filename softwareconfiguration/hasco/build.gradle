@@ -1,9 +1,11 @@
 dependencies {
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-logic')
+	compile project(':JAICore:jaicore-ml')
 	compile project(':JAICore:jaicore-graphvisualizer')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
+	compile project(':JAICore:jaicore-ml')
 	
 	// basic dependencies
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
@@ -12,15 +14,19 @@ dependencies {
 	
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
+			
 uploadArchives {
 	repositories {
 		mavenDeployer {
+			def ossrhUsername =  project.hasProperty('ossrhUsername') ? project.property('ossrhUsername') : ""
+			def ossrhPassword = project.hasProperty('ossrhPassword') ? project.property('ossrhPassword') : ""
+		
 			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+        		authentication(userName: ossrhUsername, password: ossrhPassword)
       		}	
       		snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-        		authentication(userName: "${ossrhUsername}", password: "${ossrhPassword}")
+        		authentication(userName: ossrhUsername, password: ossrhPassword)
       		}
 
       		pom.project {
@@ -56,8 +62,8 @@ uploadArchives {
           			}
           			developer {
           			    id 'ahetzer'
-          			    name 'Alexander Hetzer'
-          			    email 'alexander.hetzer@upb.de'
+          			    name 'Alexander Tornede'
+          			    email 'alexander.tornede@upb.de'
           			}
         		}
       		}
