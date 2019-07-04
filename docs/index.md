@@ -1,3 +1,6 @@
+---
+layout: main
+---
 [![Build Status](https://travis-ci.com/fmohr/AILibs.svg?branch=dev)](https://travis-ci.com/fmohr/AILibs)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=alert_status)](https://sonarcloud.io/dashboard/index/starlibs.ailibs)
 [![SonarCloud Coverage](https://sonarcloud.io/api/project_badges/measure?project=starlibs.ailibs&metric=coverage)](https://sonarcloud.io/component_measures?id=starlibs.ailibs&metric=coverage&view=list)

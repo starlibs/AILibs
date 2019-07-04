@@ -1,31 +1,25 @@
-<div id="hook-outer">
-    <div id="subheader" class="container">
-        <h1>{{ page.title }} <small>- {{ page.subtitle }}</small></h1>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row">
-        <div class="col-md-3">
-            <div class="sidebar hidden-print" role="complementary">
+---
+layout: default
+---
+				<header>
+				    {% if page.logo %}
+                       <a href="{{ "/" | absolute_url }}"><img src="./img/{{page.logo | relative_url}}" alt="{{  page.title}}" /></a>
+					{% endif %}
+        <h1>{{ page.title }}</h1>
+    
+            
                 {% if page.navigation %}
-                <ul class="nav">
+
                     {% for item in page.navigation %}
-                        <li {% if page.navigation_active == item.id %}class="active"{% endif %}>
+                        <h3 {% if page.navigation_active == item.id %}class="active"{% endif %}>
                             {% if page.navigation_mode == 'anchor' %}
                                 <a href="#{{ item.link }}" > {{ item.title }}</a>
                             {% else %}
                                 <a href="{{ item.link }}#content" > {{ item.title }}</a>
                             {% endif %}
-                            </li>
+                            </h3>
                         {% endfor %}
-                </ul>
                 {% endif %}
-            </div>
-        </div>
-        <div class="col-md-9" role="main">
-            <div class="section">{{ content }}</div>
-            <hr/>
-        </div>
-    </div>
-</div>
+
+				</header>
+            <section style="width: 900px;">{{ content }}</section>
