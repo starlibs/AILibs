@@ -27,7 +27,6 @@ import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
@@ -234,7 +233,7 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 		}
 	}
 
-	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
+	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, InterruptedException {
 		IExperimentDatabaseHandle dbHandle = new ExperimenterMySQLHandle(CONFIG);
 		ExperimentRunner runner = new ExperimentRunner(CONFIG, new ML2PlanAutoMLCExperimenter(), dbHandle);
 		runner.randomlyConductExperiments(1);

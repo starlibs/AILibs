@@ -54,9 +54,10 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 *            Whether or not the experiment setup should be reloaded between two
 	 *            experiment runs.
 	 * @throws ExperimentDBInteractionFailedException
+	 * @throws InterruptedException
 	 * @throws IllegalExperimentSetupException
 	 */
-	public void randomlyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException {
+	public void randomlyConductExperiments(final int maxNumberOfExperiments) throws ExperimentDBInteractionFailedException, InterruptedException {
 		this.logger.info("Starting to run up to {} experiments.", maxNumberOfExperiments);
 
 		int numberOfConductedExperiments = 0;
@@ -87,8 +88,9 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 *            experiment runs.
 	 * @throws IllegalExperimentSetupException
 	 * @throws ExperimentDBInteractionFailedException
+	 * @throws InterruptedException
 	 */
-	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException {
+	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
 		this.randomlyConductExperiments(-1);
 	}
 
@@ -99,13 +101,14 @@ public class ExperimentRunner implements ILoggingCustomizable {
 	 * @throws ExperimentAlreadyExistsInDatabaseException
 	 * @throws ExperimentDBInteractionFailedException
 	 * @throws ExperimentAlreadyStartedException
+	 * @throws InterruptedException
 	 * @throws Exception.
 	 *             These are not the exceptions thrown by the experiment itself,
 	 *             because these are logged into the database. Exceptions thrown
 	 *             here are technical exceptions that occur when arranging the
 	 *             experiment
 	 */
-	public void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException, ExperimentAlreadyStartedException {
+	public void conductExperiment(final ExperimentDBEntry expEntry) throws ExperimentDBInteractionFailedException, ExperimentAlreadyStartedException, InterruptedException {
 
 		/* run experiment */
 		if (expEntry == null) {
