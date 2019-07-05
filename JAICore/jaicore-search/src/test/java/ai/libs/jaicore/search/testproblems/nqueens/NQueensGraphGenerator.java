@@ -38,7 +38,7 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 					throw new InterruptedException("Successor generation has been interrupted.");
 				}
 				if (!n.attack(currentRow, i)) {
-					l.add(new NodeExpansionDescription<>(n, new QueenNode(n, i), "" + i, NodeType.OR));
+					l.add(new NodeExpansionDescription<>(new QueenNode(n, i), "" + i, NodeType.OR));
 				}
 			}
 			return l;

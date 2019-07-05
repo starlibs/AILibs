@@ -31,8 +31,8 @@ public class DistributedBestFirstClusterTesterGenerator implements SerializableG
 			TestNode parent = n;
 			if (parent.min < parent.max) {
 				int split = (int) Math.floor((parent.min + parent.max) / 2f);
-				l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.min, split), "edge label", NodeType.OR));
-				l.add(new NodeExpansionDescription<>(parent, new TestNode(split + 1, parent.max), "edge label", NodeType.OR));
+				l.add(new NodeExpansionDescription<>(new TestNode(parent.min, split), "edge label", NodeType.OR));
+				l.add(new NodeExpansionDescription<>(new TestNode(split + 1, parent.max), "edge label", NodeType.OR));
 			}
 			return l;
 		};

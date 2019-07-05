@@ -98,7 +98,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 						final List<Literal> remainingTasks = new ArrayList<>(currentlyRemainingTasks);
 						remainingTasks.remove(0);
 						boolean isAndNode = this.remainingTasksInitializeANDNode(remainingTasks);
-						successors.add(new NodeExpansionDescription<>(l, new RTNNode(isAndNode, updatedState, remainingTasks), new RTNEdge(null, null, relevantAction), null));
+						successors.add(new NodeExpansionDescription<>(new RTNNode(isAndNode, updatedState, remainingTasks), new RTNEdge(null, null, relevantAction), null));
 					}
 					assert checkDoubleNodes(successors);
 					logger.info("Computed {} successors", successors.size());
@@ -136,7 +136,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 
 						/* hard code the and-or-stuff for a moment */
 						boolean isAndNode = this.remainingTasksInitializeANDNode(remainingTasks);
-						successors.add(new NodeExpansionDescription<>(l, new RTNNode(isAndNode, state, remainingTasks), new RTNEdge(null, instance, null), null));
+						successors.add(new NodeExpansionDescription<>(new RTNNode(isAndNode, state, remainingTasks), new RTNEdge(null, instance, null), null));
 					}
 				}
 			}
@@ -224,12 +224,12 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 					}
 
 					remainingTask.add(new Literal(task.getPropertyName().substring(task.getPropertyName().indexOf('-') + 1), paramsForTask));
-					successors.add(new NodeExpansionDescription<>(l, new RTNNode(false, reducedState, remainingTask), new RTNEdge(mapping, null, null), null));
+					successors.add(new NodeExpansionDescription<>(new RTNNode(false, reducedState, remainingTask), new RTNEdge(mapping, null, null), null));
 				}
 
 				/* now create one node for the remaining tasks */
 				if (!tasksForLastNode.isEmpty()) {
-					successors.add(new NodeExpansionDescription<>(l, new RTNNode(false, state, tasksForLastNode), new RTNEdge(null, null, null), null));
+					successors.add(new NodeExpansionDescription<>(new RTNNode(false, state, tasksForLastNode), new RTNEdge(null, null, null), null));
 				}
 			}
 

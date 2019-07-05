@@ -111,13 +111,13 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 					if (successor == null) {
 						continue;
 					}
-					assert this.exploredGraph.hasItem(successor.getFrom()) : "Parent node of successor is not part of the explored graph.";
+					assert this.exploredGraph.hasItem(node) : "Parent node of successor is not part of the explored graph.";
 					if (this.exploredGraph.getSuccessors(node).contains(successor.getTo())) {
 						this.logger.trace("Single node evaluator has generated a known successor. Generating another candidate.");
 						continue;
 					}
 					assert !this.exploredGraph.hasItem(successor.getTo()) : "Successor " + successor.getTo() + " has been reached before. Predecessors of that node are: " + this.exploredGraph.getPredecessors(successor.getTo());
-					this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
+					this.addNodeToLocalModel(node, successor.getTo());
 					nodeAdded = true;
 				}
 
@@ -138,7 +138,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 						lastTerminationCheck = System.currentTimeMillis();
 					}
 					if (!knownSuccessors.contains(successor.getTo())) {
-						this.addNodeToLocalModel(successor.getFrom(), successor.getTo());
+						this.addNodeToLocalModel(node, successor.getTo());
 					}
 				}
 				this.logger.debug("{} nodes have been added to the local model. Now checking prioritization.", successors.size());

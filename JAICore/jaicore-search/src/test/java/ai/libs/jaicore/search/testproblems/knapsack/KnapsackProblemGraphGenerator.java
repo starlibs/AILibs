@@ -108,7 +108,7 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 
 			double usedCapacity = node.getUsedCapacity() + KnapsackProblemGraphGenerator.this.problem.getWeights().get(object);
 			KnapsackConfiguration newNode = new KnapsackConfiguration(packedObjects, remainingObjects, usedCapacity);
-			return new NodeExpansionDescription<>(node, newNode, "(" + node.getPackedObjects() + ", " + object + ")", NodeType.OR);
+			return new NodeExpansionDescription<>(newNode, "(" + node.getPackedObjects() + ", " + object + ")", NodeType.OR);
 		}
 
 		@Override

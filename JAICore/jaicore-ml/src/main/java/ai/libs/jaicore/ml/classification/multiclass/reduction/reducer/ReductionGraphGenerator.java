@@ -78,7 +78,7 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 						}
 						RestProblem rp = new RestProblem(new Decision(null, null, nodeType, AbstractClassifier.forName(classifier, null)));
 						rp.addAll(remainingProblems);
-						restProblems.add(new NodeExpansionDescription<>(n, rp, rp.getEdgeToParent(), NodeType.OR));
+						restProblems.add(new NodeExpansionDescription<>(rp, rp.getEdgeToParent(), NodeType.OR));
 					}
 
 					/* now go for splits (here we always apply direct) */
@@ -106,7 +106,7 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 						rp.addAll(remainingProblems);
 
 						/* add rest problem */
-						restProblems.add(new NodeExpansionDescription<>(n, rp, rp.getEdgeToParent(), NodeType.OR));
+						restProblems.add(new NodeExpansionDescription<>(rp, rp.getEdgeToParent(), NodeType.OR));
 					}
 				}
 			} catch (Exception e) {

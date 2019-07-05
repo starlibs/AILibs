@@ -38,7 +38,6 @@ import ai.libs.jaicore.search.structure.graphgenerator.PathGoalTester;
 import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
 import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.TimeAwareSuccessorGenerator;
 
 /**
  * MCTS algorithm implementation.
@@ -196,7 +195,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 
 		/* if the current node is not a leaf (of the traversal tree, i.e. has no children generated yet), it must have untried successors */
 		assert childrenOfCurrent == null || SetUtil.differenceNotEmpty(childrenOfCurrent, this.nodesExplicitlyAdded) : "The current node has " + childrenOfCurrent.size()
-				+ " successors and all of them have been considered in at least one playout. In spite of this, the tree policy has not been used to choose a child, but it should have been used.";
+		+ " successors and all of them have been considered in at least one playout. In spite of this, the tree policy has not been used to choose a child, but it should have been used.";
 
 		/* if the current node has at least one child, all child nodes must have been marked as dead ends */
 		assert childrenOfCurrent == null || SetUtil.differenceNotEmpty(childrenOfCurrent, this.deadLeafNodes) : "Flag that current node is dead end is set, but there are successors that are not yet marked as dead-ends.";
@@ -300,17 +299,17 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 		Collection<NodeExpansionDescription<N, A>> availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
 		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toSet())
 				.size() : "The actions under this node don't have unique names";
-		Map<A, N> successorStates = new HashMap<>();
-		for (NodeExpansionDescription<N, A> d : availableActions) {
-			this.checkAndConductTermination();
-			successorStates.put(d.getAction(), d.getTo());
-			this.logger.trace("Adding edge {} -> {} with label {}", d.getFrom(), d.getTo(), d.getAction());
-			this.exploredGraph.addItem(d.getTo());
-			this.unexpandedNodes.add(d.getTo());
-			this.exploredGraph.addEdge(d.getFrom(), d.getTo(), d.getAction());
-			this.post(new NodeAddedEvent<>(this.getId(), d.getFrom(), d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
-		}
-		return successorStates;
+				Map<A, N> successorStates = new HashMap<>();
+				for (NodeExpansionDescription<N, A> d : availableActions) {
+					this.checkAndConductTermination();
+					successorStates.put(d.getAction(), d.getTo());
+					this.logger.trace("Adding edge {} -> {} with label {}", node, d.getTo(), d.getAction());
+					this.exploredGraph.addItem(d.getTo());
+					this.unexpandedNodes.add(d.getTo());
+					this.exploredGraph.addEdge(node, d.getTo(), d.getAction());
+					this.post(new NodeAddedEvent<>(this.getId(), node, d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
+				}
+				return successorStates;
 	}
 
 	private boolean isGoal(final N node) {
@@ -395,11 +394,11 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 							}
 						} else {
 							assert !this.forbidDoublePaths : "Second time path " + this.getActionListForPath(path) + " has been generated even though double paths are forbidden!";
-							this.logger.warn("Path {} has already been observed in the past.", this.getActionListForPath(path));
-							V playoutScore = this.scoreCache.get(path);
-							this.logger.debug("Looking up score {} for the already evaluated path {}", playoutScore, path);
-							this.treePolicy.updatePath(path, playoutScore);
-							this.closePath(path); // visualize that path rollout has been completed
+						this.logger.warn("Path {} has already been observed in the past.", this.getActionListForPath(path));
+						V playoutScore = this.scoreCache.get(path);
+						this.logger.debug("Looking up score {} for the already evaluated path {}", playoutScore, path);
+						this.treePolicy.updatePath(path, playoutScore);
+						this.closePath(path); // visualize that path rollout has been completed
 						}
 					}
 

@@ -136,7 +136,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode, String>, PathU
 			successors = successors.stream().map(this::orderRemainingTasksByPriority).collect(Collectors.toList());
 
 			/* derive successor descriptions from the nodes */
-			return successors.stream().map(n -> new NodeExpansionDescription<TFDNode, String>(l, n, n.getAppliedAction() != null ? n.getAppliedAction().getEncoding() : n.getAppliedMethodInstance().getEncoding(), NodeType.OR)).collect(Collectors.toList());
+			return successors.stream().map(n -> new NodeExpansionDescription<>(n, n.getAppliedAction() != null ? n.getAppliedAction().getEncoding() : n.getAppliedMethodInstance().getEncoding(), NodeType.OR)).collect(Collectors.toList());
 		};
 	}
 

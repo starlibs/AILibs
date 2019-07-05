@@ -82,7 +82,7 @@ public class VersionedGraphGenerator<T, A> implements VersionedGraphGeneratorInt
 			List<NodeExpansionDescription<VersionedDomainNode<T>, A>> versionedDescriptions = new ArrayList<>();
 
 			successorDescriptions.stream()
-			.forEach(description -> versionedDescriptions.add(new NodeExpansionDescription<>(nodeToExpand, new VersionedDomainNode<>(description.getTo(), this.getNextID()), description.getAction(), description.getTypeOfToNode())));
+			.forEach(description -> versionedDescriptions.add(new NodeExpansionDescription<>(new VersionedDomainNode<>(description.getTo(), this.getNextID()), description.getAction(), description.getTypeOfToNode())));
 			return versionedDescriptions;
 		};
 	}

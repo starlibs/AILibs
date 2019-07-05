@@ -50,19 +50,19 @@ public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, Strin
 
 			// Possible successors
 			if (n.getEmptyX() > 0) {
-				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n, this.move(n, "l"), "l", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "l"), "l", NodeType.OR));
 			}
 
 			if (n.getEmptyX() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n, this.move(n, "r"), "r", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "r"), "r", NodeType.OR));
 			}
 
 			if (n.getEmptyY() > 0) {
-				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n, this.move(n, "u"), "u", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "u"), "u", NodeType.OR));
 			}
 
 			if (n.getEmptyY() < this.dimension - 1) {
-				successors.add(new NodeExpansionDescription<NPuzzleState, String>(n, this.move(n, "d"), "d", NodeType.OR));
+				successors.add(new NodeExpansionDescription<>(this.move(n, "d"), "d", NodeType.OR));
 			}
 
 			return successors;

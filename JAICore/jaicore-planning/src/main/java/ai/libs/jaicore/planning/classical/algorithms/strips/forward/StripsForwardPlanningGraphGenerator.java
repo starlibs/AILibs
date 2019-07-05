@@ -83,7 +83,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 					add.addAll(action.getAddList());
 
 					StripsForwardPlanningNode newNode = new StripsForwardPlanningNode(add, del, action);
-					successors.add(new NodeExpansionDescription<>(node, newNode, "edge label", NodeType.OR));
+					successors.add(new NodeExpansionDescription<>(newNode, "edge label", NodeType.OR));
 					if (logger.isTraceEnabled()) {
 						logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(StripsForwardPlanningGraphGenerator.this.initState).size());
 					}
@@ -167,7 +167,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 				add.removeAll(action.getDeleteList());
 				add.addAll(action.getAddList());
 				StripsForwardPlanningNode newNode = new StripsForwardPlanningNode(add, del, action);
-				NodeExpansionDescription<StripsForwardPlanningNode, String> successor = new NodeExpansionDescription<>(node, newNode, "edge label", NodeType.OR);
+				NodeExpansionDescription<StripsForwardPlanningNode, String> successor = new NodeExpansionDescription<>(newNode, "edge label", NodeType.OR);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Created the node expansion description within {}ms. New state size is {}.", System.currentTimeMillis() - t, newNode.getStateRelativeToInitState(StripsForwardPlanningGraphGenerator.this.initState).size());
 				}
