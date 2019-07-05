@@ -13,10 +13,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyProcessedAlgorithmEventHistory;
 
+/**
+ * An {@link AlgorithmEventHistorySerializer} can be used to read and store {@link AlgorithmEventHistory}s in the form of JSON files.
+ * 
+ * @author atornede
+ *
+ */
 public class AlgorithmEventHistorySerializer {
 
 	private ObjectMapper objectMapper;
 
+	/**
+	 * Creates a new {@link AlgorithmEventHistorySerializer}.
+	 */
 	public AlgorithmEventHistorySerializer() {
 		initializeObjectMapper();
 	}
@@ -32,6 +41,13 @@ public class AlgorithmEventHistorySerializer {
 		objectMapper.enableDefaultTyping();
 	}
 
+	/**
+	 * Serializes the given {@link AlgorithmEventHistory} into a JSON {@link String}.
+	 * 
+	 * @param algorithmEventHistory The {@link AlgorithmEventHistory} to be serialized.
+	 * @return The JSON {@link String} representing the serialized {@link AlgorithmEventHistory}.
+	 * @throws JsonProcessingException If something went wrong during the transformation to JSON.
+	 */
 	public String serializeAlgorithmEventHistory(AlgorithmEventHistory algorithmEventHistory) throws JsonProcessingException {
 
 		List<AlgorithmEventHistoryEntry> algorithmEventHistoryEntries = new LinkedList<>();
@@ -44,6 +60,15 @@ public class AlgorithmEventHistorySerializer {
 		return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(serializableAlgorithmEventHistory);
 	}
 
+	/**
+	 * Deserializes the given JSON {@link String} into an {@link AlgorithmEventHistory} assuming it represents such an {@link AlgorithmEventHistory}.
+	 * 
+	 * @param serializedAlgorithmEventHistory A JSON {@link String} representing an {@link AlgorithmEventHistory}.
+	 * @return An {@link AlgorithmEventHistory} constructed from the given serialized algorithm event history.
+	 * @throws JsonParseException If something went wrong during the transformation to JSON.
+	 * @throws JsonMappingException If something went wrong during the transformation to JSON.
+	 * @throws IOException If something went wrong during the transformation to JSON.
+	 */
 	public AlgorithmEventHistory deserializeAlgorithmEventHistory(String serializedAlgorithmEventHistory) throws JsonParseException, JsonMappingException, IOException {
 		PropertyProcessedAlgorithmEventHistory serializableAlgorithmEventHistory = objectMapper.readValue(serializedAlgorithmEventHistory, PropertyProcessedAlgorithmEventHistory.class);
 

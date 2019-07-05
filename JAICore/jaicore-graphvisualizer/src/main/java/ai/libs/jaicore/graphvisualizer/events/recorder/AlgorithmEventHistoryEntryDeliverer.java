@@ -23,7 +23,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
  * The {@link AlgorithmEventHistoryEntryDeliverer} is {@link Thread} constantly pulling events from a given {@link AlgorithmEventHistory} and sending these to all registered
  * {@link AlgorithmEventListener}s.
  *
- * @author ahetzer
+ * @author atornede
  *
  */
 public class AlgorithmEventHistoryEntryDeliverer extends Thread implements PropertyProcessedAlgorithmEventSource, GUIEventListener {
@@ -38,6 +38,12 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 	private boolean paused;
 	private double sleepTimeMultiplier;
 
+	/**
+	 * Creates a new {@link AlgorithmEventHistoryEntryDeliverer} with the given {@link AlgorithmEventHistory} and the maximum sleep time between checking for new events from the history and sending them to the registered listeners.
+	 * 
+	 * @param eventHistory The {@link AlgorithmEventHistory} from which the events are pulled.
+	 * @param maximumSleepTimeInMilliseconds The maximum sleep time between checking for new events from the history and sending them to the registered listeners
+	 */
 	public AlgorithmEventHistoryEntryDeliverer(final AlgorithmEventHistory eventHistory, final int maximumSleepTimeInMilliseconds) {
 		this.eventHistory = eventHistory;
 		this.maximumSleepTimeInMilliseconds = maximumSleepTimeInMilliseconds;
@@ -50,6 +56,11 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 		this.logger.info("{} started with thread {}", this.getClass().getSimpleName(), this.getName());
 	}
 
+	/**
+	 * Creates a new {@link AlgorithmEventHistoryEntryDeliverer} with the given {@link AlgorithmEventHistory}.
+	 * 
+	 * @param eventHistory The {@link AlgorithmEventHistory} from which the events are pulled.
+	 */
 	public AlgorithmEventHistoryEntryDeliverer(final AlgorithmEventHistory eventHistory) {
 		this(eventHistory, 30);
 	}

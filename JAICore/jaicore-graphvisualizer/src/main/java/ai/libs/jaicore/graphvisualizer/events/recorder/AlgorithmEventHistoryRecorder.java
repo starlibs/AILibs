@@ -16,6 +16,13 @@ import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputationFailedException;
 
+/**
+ * An {@link AlgorithmEventHistoryRecorder} is responsible for recording {@link AlgorithmEvent}s and storing them in the form of {@link PropertyProcessedAlgorithmEvent}s. For doing so it requires a list of
+ * {@link AlgorithmEventPropertyComputer}s which can extract information from {@link AlgorithmEvent}s which in turn is stored in the {@link PropertyProcessedAlgorithmEvent}s.
+ * 
+ * @author atornede
+ *
+ */
 public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(AlgorithmEventHistoryRecorder.class);
@@ -24,6 +31,11 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 
 	private List<AlgorithmEventPropertyComputer> eventPropertyComputers;
 
+	/**
+	 * Creates a new {@link AlgorithmEventHistoryRecorder} with the given {@link AlgorithmEventPropertyComputer}s.
+	 * 
+	 * @param eventPropertyComputers A list of {@link AlgorithmEventPropertyComputer}s which can extract information from {@link AlgorithmEvent}s which in turn is stored in the {@link PropertyProcessedAlgorithmEvent}s.
+	 */
 	public AlgorithmEventHistoryRecorder(List<AlgorithmEventPropertyComputer> eventPropertyComputers) {
 		this.algorithmEventHistory = new AlgorithmEventHistory();
 		this.eventPropertyComputers = eventPropertyComputers;
@@ -55,6 +67,11 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 		return new DefaultPropertyProcessedAlgorithmEvent(algorithmEvent.getClass().getSimpleName(), properties, algorithmEvent, algorithmEvent.getTimestamp());
 	}
 
+	/**
+	 * Returns the {@link AlgorithmEventHistory} which is produced up to this point by this {@link AlgorithmEventHistoryRecorder}.
+	 * 
+	 * @return The {@link AlgorithmEventHistory} which is produced up to this point by this {@link AlgorithmEventHistoryRecorder}.
+	 */
 	public AlgorithmEventHistory getHistory() {
 		return algorithmEventHistory;
 	}

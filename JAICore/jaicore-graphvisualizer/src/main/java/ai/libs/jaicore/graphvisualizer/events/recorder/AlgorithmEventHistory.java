@@ -10,8 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.ILoggingCustomizable;
+import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 
+/**
+ * An {@link AlgorithmEventHistory} stores {@link AlgorithmEventHistoryEntry}s constructed from {@link PropertyProcessedAlgorithmEvent}s representing the recorded behavior of an {@link IAlgorithm}. Such an {@link AlgorithmEventHistory} can
+ * be stored and loaded using an
+ * {@link AlgorithmEventHistorySerializer}.
+ * 
+ * @author atornede
+ *
+ */
 public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable {
 
 	private static final long serialVersionUID = 8500970353937357648L;
@@ -21,10 +30,18 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 
 	private List<AlgorithmEventHistoryEntry> entries;
 
+	/**
+	 * Creates a new {@link AlgorithmEventHistory}.
+	 */
 	public AlgorithmEventHistory() {
 		this.entries = Collections.synchronizedList(new ArrayList<>());
 	}
 
+	/**
+	 * Creates a new {@link AlgorithmEventHistory} with the given {@link List} of {@link AlgorithmEventHistoryEntry}s.
+	 * 
+	 * @param algorithmEventHistoryEntries The list of {@link AlgorithmEventHistoryEntry}s to be stored in the history.
+	 */
 	public AlgorithmEventHistory(List<AlgorithmEventHistoryEntry> algorithmEventHistoryEntries) {
 		this();
 		for (AlgorithmEventHistoryEntry entry : algorithmEventHistoryEntries) {
@@ -32,6 +49,11 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 		}
 	}
 
+	/**
+	 * Adds the given {@link PropertyProcessedAlgorithmEvent} to this {@link AlgorithmEventHistoryEntry}.
+	 * 
+	 * @param propertyProcessedAlgorithmEvent The {@link PropertyProcessedAlgorithmEvent} to be added to this history.
+	 */
 	public void addEvent(final PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
 		AlgorithmEventHistoryEntry entry = this.generateHistoryEntry(propertyProcessedAlgorithmEvent);
 		this.entries.add(entry);
@@ -46,6 +68,12 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 		return System.currentTimeMillis();
 	}
 
+	/**
+	 * Returns the {@link AlgorithmEventHistoryEntry} at the given timestep.
+	 * 
+	 * @param timestep The timestep for which the {@link AlgorithmEventHistoryEntry} has to be returned.
+	 * @return The {@link AlgorithmEventHistoryEntry} at the given timestep.
+	 */
 	public AlgorithmEventHistoryEntry getEntryAtTimeStep(final int timestep) {
 		return this.entries.get(timestep);
 	}
