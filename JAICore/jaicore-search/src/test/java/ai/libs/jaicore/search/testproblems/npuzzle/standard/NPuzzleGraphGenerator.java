@@ -90,12 +90,6 @@ public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, Strin
 		};
 	}
 
-	@Override
-	public boolean isSelfContained() {
-
-		return false;
-	}
-
 	/**
 	 * Moves the empty tile to another location.
 	 * The possible parameters to move the empty tiles are:
@@ -158,12 +152,6 @@ public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, Strin
 		b[eY + y][eX + x] = 0;
 
 		return new NPuzzleState(b, eX + x, eY + y);
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
-		/* not applicable */
 	}
 
 }

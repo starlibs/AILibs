@@ -38,7 +38,7 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 	public SingleRootGenerator<KnapsackConfiguration> getRootGenerator() {
 		return () -> new KnapsackConfiguration(new HashSet<>(), this.problem.getObjects(), 0.0);
 	}
-	
+
 	class KnapsackSuccessorGenerator implements SingleSuccessorGenerator<KnapsackConfiguration, String> {
 		private Map<KnapsackConfiguration, Set<Integer>> expandedChildren = new HashMap<>();
 
@@ -65,7 +65,7 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 				if (System.currentTimeMillis() - lastSleep > 10) {
 					Thread.sleep(1);
 					lastSleep = System.currentTimeMillis();
-					logger.info("Sleeping");
+					KnapsackProblemGraphGenerator.this.logger.info("Sleeping");
 				}
 				l.add(this.generateSuccessor(node, possibleDestinations, i));
 			}
@@ -73,7 +73,7 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 		}
 
 		public NodeExpansionDescription<KnapsackConfiguration, String> generateSuccessor(final KnapsackConfiguration node, final List<String> objetcs, final int i) throws InterruptedException {
-			logger.debug("Generating successor #{} of {}", i, node);
+			KnapsackProblemGraphGenerator.this.logger.debug("Generating successor #{} of {}", i, node);
 			if (Thread.interrupted()) { // reset interrupted flag prior to throwing the exception (Java convention)
 				KnapsackProblemGraphGenerator.this.logger.info("Successor generation has been interrupted.");
 				throw new InterruptedException("Successor generation interrupted");
@@ -83,13 +83,13 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 			}
 			int n = objetcs.size();
 			if (n == 0) {
-				logger.debug("No objects left, quitting.");
+				KnapsackProblemGraphGenerator.this.logger.debug("No objects left, quitting.");
 				return null;
 			}
 			int j = i % n;
 			this.expandedChildren.get(node).add(j);
 			String object = objetcs.get(j);
-			logger.trace("Creating set of remaining objects when choosing {}.", object);
+			KnapsackProblemGraphGenerator.this.logger.trace("Creating set of remaining objects when choosing {}.", object);
 			Set<String> packedObjects = new HashSet<>();
 			Set<String> remainingObjects = new HashSet<>();
 			boolean foundRemoved = false;
@@ -104,8 +104,8 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 				}
 			}
 			packedObjects.addAll(node.getPackedObjects());
-			logger.trace("Ready.");
-			
+			KnapsackProblemGraphGenerator.this.logger.trace("Ready.");
+
 			double usedCapacity = node.getUsedCapacity() + KnapsackProblemGraphGenerator.this.problem.getWeights().get(object);
 			KnapsackConfiguration newNode = new KnapsackConfiguration(packedObjects, remainingObjects, usedCapacity);
 			return new NodeExpansionDescription<>(node, newNode, "(" + node.getPackedObjects() + ", " + object + ")", NodeType.OR);
@@ -137,17 +137,6 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 			}
 			return true;
 		};
-	}
-
-	@Override
-	public boolean isSelfContained() {
-		return true;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
-		/* this is not relevant for this node generator */
 	}
 
 	@Override

@@ -111,15 +111,6 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 	}
 
 	@Override
-	public boolean isSelfContained() {
-		return true;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-	}
-
-	@Override
 	public String getLoggerName() {
 		return this.logger.getName();
 	}

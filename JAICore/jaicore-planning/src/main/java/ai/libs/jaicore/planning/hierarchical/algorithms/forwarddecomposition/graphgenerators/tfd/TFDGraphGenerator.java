@@ -173,16 +173,6 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode, String>, PathU
 	}
 
 	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public boolean isPathSemanticallySubsumed(final List<TFDNode> path, final List<TFDNode> potentialSuperPath) throws InterruptedException {
 		int n = path.size();
 		for (int i = 0; i < n; i++) {

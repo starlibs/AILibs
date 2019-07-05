@@ -258,14 +258,4 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 		}
 		return true;
 	}
-
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-		throw new UnsupportedOperationException();
-	}
 }

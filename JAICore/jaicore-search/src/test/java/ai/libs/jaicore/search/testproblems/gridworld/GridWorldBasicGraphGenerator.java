@@ -80,14 +80,4 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 			}
 		};
 	}
-
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
-	}
 }

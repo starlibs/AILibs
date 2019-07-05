@@ -59,12 +59,6 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode, String> {
 		};
 	}
 
-	@Override
-	public boolean isSelfContained() {
-
-		return false;
-	}
-
 	/**
 	 * Moves the empty tile to another location.
 	 * The possible parameters to move the empty tiles are:
@@ -128,11 +122,4 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode, String> {
 
 		return new PDPuzzleNode(b, eX + x, eY + y);
 	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
-		/* not required */
-	}
-
 }
