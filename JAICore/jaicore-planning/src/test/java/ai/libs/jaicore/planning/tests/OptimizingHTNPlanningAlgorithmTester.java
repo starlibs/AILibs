@@ -6,18 +6,21 @@ import java.util.List;
 
 import org.junit.runners.Parameterized.Parameters;
 
+import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import ai.libs.jaicore.basic.algorithm.IOptimizationAlgorithm;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
+import ai.libs.jaicore.planning.hierarchical.problems.htn.UniformCostHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.testproblems.dockworker.STNDockworkerProblemSet;
 import ai.libs.jaicore.planning.hierarchical.testproblems.nesteddichotomies.CEOCSTNNestedDichotomyProblemSet;
 
-public abstract class HTNPlanningAlgorithmTester extends GeneralAlgorithmTester {
+public abstract class OptimizingHTNPlanningAlgorithmTester extends GeneralAlgorithmTester {
 
 	// creates the test data
 	@Parameters(name = "{0}")
 	public static Collection<Object[]> data() {
-		List<Object> problemSets = new ArrayList<>();
+		List<AAlgorithmTestProblemSet<?>> problemSets = new ArrayList<>();
 		problemSets.add(new STNDockworkerProblemSet());
 		problemSets.add(new CEOCSTNNestedDichotomyProblemSet());
 		Object[][] data = new Object[problemSets.size()][1];
@@ -29,8 +32,8 @@ public abstract class HTNPlanningAlgorithmTester extends GeneralAlgorithmTester 
 
 	@Override
 	public final IAlgorithm<?, ?> getAlgorithm(final Object problem) {
-		return this.getPlanningAlgorithm((IHTNPlanningProblem) problem);
+		return this.getPlanningAlgorithm(new UniformCostHTNPlanningProblem((IHTNPlanningProblem) problem));
 	}
 
-	public abstract IAlgorithm<?, ?> getPlanningAlgorithm(IHTNPlanningProblem planningProblem);
+	public abstract IOptimizationAlgorithm<?, ?, ?> getPlanningAlgorithm(UniformCostHTNPlanningProblem planningProblem);
 }
