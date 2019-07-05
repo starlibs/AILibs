@@ -46,11 +46,11 @@ import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
  *
  * @author Felix Mohr
  */
-public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V> implements IPolicy<N, A, V> {
+public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V> implements IPolicy<N, A, V> {
 
 	private static final String NODESTATE_ROLLOUT = "or_rollout";
 
-	private Logger logger = LoggerFactory.getLogger(MCTS.class);
+	private Logger logger = LoggerFactory.getLogger(MCTSPathSearch.class);
 	private String loggerName;
 
 	/* communication */
@@ -79,7 +79,7 @@ public class MCTS<N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSe
 
 	private final boolean forbidDoublePaths;
 
-	public MCTS(final GraphSearchWithPathEvaluationsInput<N, A, V> problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy, final V penaltyForFailedEvaluation, final boolean forbidDoublePaths) {
+	public MCTSPathSearch(final GraphSearchWithPathEvaluationsInput<N, A, V> problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy, final V penaltyForFailedEvaluation, final boolean forbidDoublePaths) {
 		super(problem);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();

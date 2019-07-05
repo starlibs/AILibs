@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
-public class UCTFactory<T, A> extends MCTSFactory<T, A, Double> {
+public class UCTPathSearchFactory<T, A> extends MCTSPathSearchFactory<T, A, Double> {
 	private int seed;
 
 	public int getSeed() {
@@ -12,8 +12,8 @@ public class UCTFactory<T, A> extends MCTSFactory<T, A, Double> {
 	}
 
 	@Override
-	public UCT<T, A> getAlgorithm() {
+	public UCTPathSearch<T, A> getAlgorithm() {
 		assert getEvaluationFailurePenalty() != null : "The evaluationFailurePenalty must not be null!";
-		return new UCT<>(getInput(), seed, getEvaluationFailurePenalty(), isForbidDoublePaths());
+		return new UCTPathSearch<>(getInput(), seed, getEvaluationFailurePenalty(), isForbidDoublePaths());
 	}
 }
