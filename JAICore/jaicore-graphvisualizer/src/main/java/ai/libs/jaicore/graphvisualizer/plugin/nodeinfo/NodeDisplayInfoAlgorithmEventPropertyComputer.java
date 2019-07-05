@@ -16,6 +16,7 @@ public class NodeDisplayInfoAlgorithmEventPropertyComputer<N> implements Algorit
 		this.nodeInfoGenerator = nodeInfoGenerator;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String computeAlgorithmEventProperty(AlgorithmEvent algorithmEvent) throws PropertyComputationFailedException {
 		String nodeInfo = null;

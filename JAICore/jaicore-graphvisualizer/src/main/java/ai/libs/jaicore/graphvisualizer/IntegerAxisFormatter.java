@@ -12,9 +12,8 @@ public class IntegerAxisFormatter extends StringConverter<Number> {
 			String str = String.valueOf(val);
 			str = str.substring(0, str.indexOf('.'));
 			return str;
-		} else {
-			return "";
 		}
+		return "";
 	}
 
 	@Override
