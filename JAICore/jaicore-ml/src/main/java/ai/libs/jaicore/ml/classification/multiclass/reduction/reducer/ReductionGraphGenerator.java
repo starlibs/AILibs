@@ -127,14 +127,4 @@ public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Deci
 			return true;
 		};
 	}
-
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-		/* do nothing, irrelevant */
-	}
 }
