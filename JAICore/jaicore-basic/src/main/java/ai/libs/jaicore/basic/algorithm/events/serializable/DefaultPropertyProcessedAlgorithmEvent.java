@@ -74,7 +74,7 @@ public class DefaultPropertyProcessedAlgorithmEvent implements PropertyProcessed
 	}
 
 	@Override
-	public boolean correspondsToEventOfClass(Class<?> eventClass) {
+	public boolean correspondsToEventOfClass(Class<? extends AlgorithmEvent> eventClass) {
 		return eventClass.getSimpleName().equals(getEventName()) || eventClass.isAssignableFrom(getClassOfOriginalEvent());
 	}
 
