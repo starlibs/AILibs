@@ -87,7 +87,7 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 			}
 
 			public NodeExpansionDescription<EnhancedTTSPNode, String> generateSuccessor(final EnhancedTTSPNode n, final short destination) {
-				return new NodeExpansionDescription<>(n, EnhancedTTSPGraphGenerator.this.problem.computeSuccessorState(n, destination), n.getCurLocation() + " -> " + destination, NodeType.OR);
+				return new NodeExpansionDescription<>(EnhancedTTSPGraphGenerator.this.problem.computeSuccessorState(n, destination), n.getCurLocation() + " -> " + destination, NodeType.OR);
 			}
 
 			@Override
@@ -108,15 +108,6 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 		return n -> {
 			return n.getCurTour().size() >= this.problem.getPossibleDestinations().size() && n.getCurLocation() == this.problem.getStartLocation();
 		};
-	}
-
-	@Override
-	public boolean isSelfContained() {
-		return true;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
 	}
 
 	@Override

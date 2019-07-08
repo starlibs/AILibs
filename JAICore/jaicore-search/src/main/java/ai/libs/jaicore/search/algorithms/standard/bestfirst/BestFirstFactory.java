@@ -61,6 +61,9 @@ implements IOptimalPathInORGraphSearchFactory<P, N, A, V> {
 
 	@Override
 	public BestFirst<P, N, A, V> getAlgorithm(final P problem) {
+		if (problem.getNodeEvaluator() == null) {
+			throw new IllegalArgumentException("Cannot create BestFirst algorithm for node evaluator NULL");
+		}
 		BestFirst<P, N, A, V> search = new BestFirst<>(problem);
 		this.setupAlgorithm(search);
 		return search;
