@@ -29,7 +29,7 @@ allprojects {
 	//Other
 	apply plugin: "maven"
 	apply plugin: "jacoco"
-	//apply plugin: "signing"
+	apply plugin: "signing"
 
 	//Nebula
 	apply plugin: 'nebula.project'
@@ -173,11 +173,11 @@ allprojects {
 //		failOnError = true
     	}
 	
+	signing {
+		sign configurations.archives
+	}
 }
 
-//signing {
-//	sign configurations.archives
-//}
 
 
 dependencies{
