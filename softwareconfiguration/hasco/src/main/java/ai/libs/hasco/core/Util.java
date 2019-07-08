@@ -34,7 +34,7 @@ import ai.libs.jaicore.logic.fol.structure.LiteralParam;
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 import ai.libs.jaicore.planning.core.Action;
-import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.Node;
 
@@ -228,7 +228,7 @@ public class Util {
 		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), name, resolveIntervals);
 	}
 
-	public static Monom getFinalStateOfPlan(final Monom initState, final Plan plan) {
+	public static Monom getFinalStateOfPlan(final Monom initState, final IPlan plan) {
 		Monom state = new Monom(initState);
 		for (Action a : plan.getActions()) {
 			StripsUtil.updateState(state, a);
@@ -236,11 +236,11 @@ public class Util {
 		return state;
 	}
 
-	public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final Plan plan, final boolean resolveIntervals) {
+	public static ComponentInstance getSolutionCompositionForPlan(final Collection<Component> components, final Monom initState, final IPlan plan, final boolean resolveIntervals) {
 		return getSolutionCompositionFromState(components, getFinalStateOfPlan(initState, plan), resolveIntervals);
 	}
 
-	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final Plan plan, final String name, final boolean resolveIntervals) {
+	public static ComponentInstance getComponentInstanceForPlan(final Collection<Component> components, final Monom initState, final IPlan plan, final String name, final boolean resolveIntervals) {
 		return getComponentInstanceFromState(components, getFinalStateOfPlan(initState, plan), name, resolveIntervals);
 	}
 

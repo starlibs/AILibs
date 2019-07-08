@@ -9,6 +9,14 @@ public class Parameter {
 	private final String name;
 	private final IParameterDomain defaultDomain;
 	private final Object defaultValue;
+	
+	@SuppressWarnings("unused")
+	private Parameter() {
+		// for serialization purposes
+		name = null;
+		defaultDomain = null;
+		defaultValue = null;
+	}
 
 	@JsonCreator
 	public Parameter(@JsonProperty("name") final String name, @JsonProperty("defaultDomain") final IParameterDomain defaultDomain,@JsonProperty("defaultValue") final Object defaultValue) {

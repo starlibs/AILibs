@@ -22,17 +22,10 @@ import ai.libs.jaicore.basic.sets.PartialOrderedSet;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 /**
- * A <code>Component</code> is described by
- * - a name
- * - a collection of provided interfaces
- * - a list of required interfaces
- * - a set of parameters
- * - a list of dependencies
- * and can be used to describe any kind of components and model complex multi-component systems.
- * More specifically, <code>Component</code>s are used to model the search space of HASCO. By recursively
- * resolving required interfaces until there are no open choices left, HASCO may transform your component
- * description automatically into an HTN planning problem to automatically optimize a component setup
- * for a specific task.
+ * A <code>Component</code> is described by - a name - a collection of provided interfaces - a list of required interfaces - a set of parameters - a list of dependencies and can be used to describe
+ * any kind of components and model complex multi-component systems. More specifically, <code>Component</code>s are used to model the search space of HASCO. By recursively resolving required
+ * interfaces until there are no open choices left, HASCO may transform your component description automatically into an HTN planning problem to automatically optimize a component setup for a specific
+ * task.
  *
  * @author fmohr, wever
  */
@@ -45,13 +38,15 @@ public class Component {
 	/* Description of the component. */
 	private final String name;
 	private Collection<String> providedInterfaces = new ArrayList<>();
-	private LinkedHashMap<String, String> requiredInterfaces = new LinkedHashMap<>();
+	private Map<String, String> requiredInterfaces = new LinkedHashMap<>();
 	private PartialOrderedSet<Parameter> parameters = new PartialOrderedSet<>();
 	private Collection<Dependency> dependencies = new ArrayList<>();
 
 	/**
 	 * Constructor creating an empty <code>Component</code> with a specific name.
-	 * @param name The name of the <code>Component</code>.
+	 * 
+	 * @param name
+	 *            The name of the <code>Component</code>.
 	 */
 	public Component(final String name) {
 		super();
@@ -61,15 +56,43 @@ public class Component {
 
 	/**
 	 * Constructor for a component giving the provided and required interfaces, the collection of parameters and a list of dependencies.
-	 * @param name The name of the <code>Component</code>.
-	 * @param providedInterfaces The collection of provided interfaces.
-	 * @param requiredInterfaces The list of required interfaces.
-	 * @param parameters Parameters of the <code>Component</code>.
-	 * @param dependencies A list of dependencies to constrain the values of parameters (may be empty).
+	 * 
+	 * @param name
+	 *            The name of the <code>Component</code>.
+	 * @param providedInterfaces
+	 *            The collection of provided interfaces.
+	 * @param requiredInterfaces
+	 *            The list of required interfaces.
+	 * @param parameters
+	 *            Parameters of the <code>Component</code>.
+	 * @param dependencies
+	 *            A list of dependencies to constrain the values of parameters (may be empty).
 	 */
 	@JsonCreator
-	public Component(@JsonProperty("name") final String name, @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces, @JsonProperty("requiredInterfaces") final List<Map<String, String>> requiredInterfaces,
-			@JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters, @JsonProperty("dependencies") final List<Dependency> dependencies) {
+	public Component(@JsonProperty("name") final String name, @JsonProperty("providedInterfaces") final Collection<String> providedInterfaces, @JsonProperty("requiredInterfaces") final Map<String, String> requiredInterfaces,
+			@JsonProperty("parameters") final PartialOrderedSet<Parameter> parameters, @JsonProperty("dependencies") final Collection<Dependency> dependencies) {
+		this(name);
+		this.providedInterfaces = providedInterfaces;
+		this.requiredInterfaces = new LinkedHashMap<>(requiredInterfaces);
+		this.parameters = parameters;
+		this.dependencies = new ArrayList<>(dependencies);
+	}
+
+	/**
+	 * Constructor for a component giving the provided and required interfaces, the collection of parameters and a list of dependencies.
+	 * 
+	 * @param name
+	 *            The name of the <code>Component</code>.
+	 * @param providedInterfaces
+	 *            The collection of provided interfaces.
+	 * @param requiredInterfaces
+	 *            The list of required interfaces.
+	 * @param parameters
+	 *            Parameters of the <code>Component</code>.
+	 * @param dependencies
+	 *            A list of dependencies to constrain the values of parameters (may be empty).
+	 */
+	public Component(final String name, final Collection<String> providedInterfaces, final List<Map<String, String>> requiredInterfaces, final PartialOrderedSet<Parameter> parameters, final List<Dependency> dependencies) {
 		this(name);
 		this.providedInterfaces = providedInterfaces;
 		this.requiredInterfaces = new LinkedHashMap<>();
@@ -108,7 +131,9 @@ public class Component {
 
 	/**
 	 * Returns the parameter for a given name.
-	 * @param paramName The name of the parameter to be returned.
+	 * 
+	 * @param paramName
+	 *            The name of the parameter to be returned.
 	 * @return The parameter for the given name.
 	 */
 	public Parameter getParameterWithName(final String paramName) {
@@ -128,7 +153,9 @@ public class Component {
 
 	/**
 	 * Adds another provided interface to the collection of provided interfaces.
-	 * @param interfaceName The interface to be added to the provided interfaces.
+	 * 
+	 * @param interfaceName
+	 *            The interface to be added to the provided interfaces.
 	 */
 	public boolean addProvidedInterface(final String interfaceName) {
 		if (!this.providedInterfaces.contains(interfaceName)) {
@@ -140,8 +167,11 @@ public class Component {
 
 	/**
 	 * Adds an additional required interface with an ID (local identifier) and an interface name (provided interface of another Component) to the required interfaces of this Component.
-	 * @param interfaceID The local identifier to reference the specific required interface.
-	 * @param interfaceName The provided interface of another component.
+	 * 
+	 * @param interfaceID
+	 *            The local identifier to reference the specific required interface.
+	 * @param interfaceName
+	 *            The provided interface of another component.
 	 */
 	public void addRequiredInterface(final String interfaceID, final String interfaceName) {
 		this.requiredInterfaces.put(interfaceID, interfaceName);
@@ -149,7 +179,9 @@ public class Component {
 
 	/**
 	 * Adds a parameter to the set of parameters iff the parameter or another parameter with the same name does not yet exist.
-	 * @param param The parameter to be added.
+	 * 
+	 * @param param
+	 *            The parameter to be added.
 	 */
 	public void addParameter(final Parameter param) {
 		if (this.parameters.stream().anyMatch(p -> p.getName().equals(param.getName()))) {
@@ -160,7 +192,9 @@ public class Component {
 
 	/**
 	 * Adds a dependency constraint to the dependencies of this Component.
-	 * @param dependency The dependency to be added.
+	 * 
+	 * @param dependency
+	 *            The dependency to be added.
 	 */
 	public void addDependency(final Dependency dependency) {
 		/*

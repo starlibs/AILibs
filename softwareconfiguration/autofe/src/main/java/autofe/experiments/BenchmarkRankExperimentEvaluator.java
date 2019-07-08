@@ -1,9 +1,9 @@
 package autofe.experiments;
 
 import java.io.File;
-import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
@@ -54,13 +55,12 @@ public class BenchmarkRankExperimentEvaluator implements IExperimentSetEvaluator
 
 		// Read prior ranking
 		try {
-			ResultSet mlPlanScores = this.adapter.getResultsOfQuery("SELECT score FROM mlplanRanking WHERE seed = " + seed + " and dataset = \"" + dataSet + "\" ORDER BY variation ASC");
+			List<IKVStore> mlPlanScores = this.adapter.getResultsOfQuery("SELECT score FROM mlplanRanking WHERE seed = " + seed + " and dataset = \"" + dataSet + "\" ORDER BY variation ASC");
 
 			// Retrieve prior ranking from data base
 			double[] priorRanking = new double[MAX_COUNT_VARIATIONS];
 			for (int i = 0; i < priorRanking.length; i++) {
-				mlPlanScores.next();
-				double varScore = mlPlanScores.getDouble(1);
+				double varScore = mlPlanScores.get(i).getAsDouble("score");
 				priorRanking[i] = varScore;
 
 			}

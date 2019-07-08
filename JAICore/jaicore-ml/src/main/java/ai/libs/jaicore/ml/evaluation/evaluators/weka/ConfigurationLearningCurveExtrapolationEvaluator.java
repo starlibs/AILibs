@@ -29,7 +29,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<WekaInstances<Object>, ASamplingAlgorithm<WekaInstances<Object>>> samplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> samplingAlgorithmFactory;
 	private WekaInstances<Object> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
@@ -37,7 +37,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstances<Object>, ASamplingAlgorithm<WekaInstances<Object>>> samplingAlgorithmFactory,
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> samplingAlgorithmFactory,
 			final WekaInstances<Object> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;

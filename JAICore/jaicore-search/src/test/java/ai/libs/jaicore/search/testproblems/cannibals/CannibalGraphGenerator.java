@@ -28,7 +28,7 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 
 			@Override
 			public CannibalProblem getRoot() {
-				return initState;
+				return CannibalGraphGenerator.this.initState;
 			}
 		};
 	}
@@ -49,37 +49,37 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 				if (node.isBoatOnLeft()) {
 					if (ml >= 2) {
 						CannibalProblem candidate = new CannibalProblem(false, ml - 2, cl, mr + 2, cr);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "2m->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2m->", NodeType.OR));
 						}
 					}
 					if (ml >= 1) {
 						CannibalProblem candidate = new CannibalProblem(false, ml - 1, cl, mr + 1, cr);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "1m->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m->", NodeType.OR));
 						}
 					}
 					if (cl >= 1) {
 						CannibalProblem candidate = new CannibalProblem(false, ml, cl - 1, mr, cr + 1);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "1c->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1c->", NodeType.OR));
 						}
 					}
 					if (ml >= 1 && cl >= 1) {
 						CannibalProblem candidate = new CannibalProblem(false, ml - 1, cl - 1, mr + 1, cr + 1);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "1m1c->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m1c->", NodeType.OR));
 						}
 					}
 					if (cl >= 2) {
 						CannibalProblem candidate = new CannibalProblem(false, ml, cl - 2, mr, cr + 2);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "2c->", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2c->", NodeType.OR));
 						}
 					}
 				}
@@ -88,37 +88,37 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 				else {
 					if (mr >= 2) {
 						CannibalProblem candidate = new CannibalProblem(true, ml + 2, cl, mr - 2, cr);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "2m<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2m<-", NodeType.OR));
 						}
 					}
 					if (mr >= 1) {
 						CannibalProblem candidate = new CannibalProblem(true, ml + 1, cl, mr - 1, cr);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "1m<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m<-", NodeType.OR));
 						}
 					}
 					if (cr >= 1) {
 						CannibalProblem candidate = new CannibalProblem(true, ml, cl + 1, mr, cr - 1);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "1c<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1c<-", NodeType.OR));
 						}
 					}
 					if (mr >= 1 && cr >= 1) {
 						CannibalProblem candidate = new CannibalProblem(true, ml + 1, cl + 1, mr - 1, cr - 1);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "1m1c<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "1m1c<-", NodeType.OR));
 						}
 					}
 					if (cr >= 2) {
 						CannibalProblem candidate = new CannibalProblem(true, ml, cl + 2, mr, cr - 2);
-						checkThatNumberOfPeopleHasNotChanged(node, candidate);
+						CannibalGraphGenerator.this.checkThatNumberOfPeopleHasNotChanged(node, candidate);
 						if (!candidate.isLost()) {
-							successors.add(new NodeExpansionDescription<CannibalProblem, String>(node, candidate, "2c<-", NodeType.OR));
+							successors.add(new NodeExpansionDescription<>(candidate, "2c<-", NodeType.OR));
 						}
 					}
 				}
@@ -135,23 +135,6 @@ public class CannibalGraphGenerator implements GraphGenerator<CannibalProblem, S
 
 	@Override
 	public GoalTester<CannibalProblem> getGoalTester() {
-		return new NodeGoalTester<CannibalProblem>() {
-
-			@Override
-			public boolean isGoal(final CannibalProblem node) {
-				return node.isWon();
-			}
-		};
+		return (NodeGoalTester<CannibalProblem>)(CannibalProblem::isWon);
 	}
-
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
-	}
-
 }

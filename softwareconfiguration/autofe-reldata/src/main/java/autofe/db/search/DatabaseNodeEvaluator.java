@@ -118,16 +118,6 @@ public class DatabaseNodeEvaluator implements INodeEvaluator<DatabaseNode, Doubl
 					}
 				};
 			}
-
-			@Override
-			public boolean isSelfContained() {
-				return false;
-			}
-
-			@Override
-			public void setNodeNumbering(final boolean nodenumbering) {
-				// intentionally left blank
-			}
 		});
 
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> randomCompletionSearch = new RandomizedDepthFirstSearch<>(problem, this.random);

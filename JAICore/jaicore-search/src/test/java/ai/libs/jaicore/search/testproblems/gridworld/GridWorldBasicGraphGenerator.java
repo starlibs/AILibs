@@ -63,7 +63,7 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 					int newPosX = node.getX() + dx;
 					int newPosY = node.getY() + dy;
 					if (newPosX < GridWorldBasicGraphGenerator.this.problem.getGrid().length && newPosY < GridWorldBasicGraphGenerator.this.problem.getGrid()[0].length) {
-						succ.add(new NodeExpansionDescription<>(node, new GridWorldNode(GridWorldBasicGraphGenerator.this.problem, newPosX, newPosY), Integer.toString(a), NodeType.OR));
+						succ.add(new NodeExpansionDescription<>(new GridWorldNode(GridWorldBasicGraphGenerator.this.problem, newPosX, newPosY), Integer.toString(a), NodeType.OR));
 					}
 				}
 				return succ;
@@ -79,15 +79,5 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 				return node.getX() == GridWorldBasicGraphGenerator.this.problem.getGoalX() && node.getY() == GridWorldBasicGraphGenerator.this.problem.getGoaly();
 			}
 		};
-	}
-
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
 	}
 }
