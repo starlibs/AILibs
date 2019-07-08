@@ -1,11 +1,11 @@
 ---
 layout: default
 ---
-				<header>
+				<header style="width: 300px;">
 				    {% if page.logo %}
-                       <a href="{{ "/" | absolute_url }}"><img src="./img/{{ page.logo }}" alt="{{  page.title}}" /></a>
+                       <a href="{{ "/" | absolute_url }}"><img src="./img/{{ page.logo }}" alt="{{  page.title}}" style="width: 270px;" /></a>
 					{% else %}
-					   <a href="{{ "/" | absolute_url }}"><img src="{{site.logo | relative_url}}" alt="Logo" /></a>
+					   <a href="{{ "/" | absolute_url }}"><img src="{{site.logo | relative_url}}" alt="Logo" style="width: 270px;" /></a>
 					{% endif %}
 					<p>{{ page.title }} is an <a href="{{ "/" | absolute_url }}">AILibs</a> library</p>
 					<h1>{{ page.title }}</h1>

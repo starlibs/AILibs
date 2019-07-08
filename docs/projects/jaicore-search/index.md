@@ -1,6 +1,7 @@
 ---
 layout: project
 title: jaicore-search
+version: 0.1.5
 navigation_mode: anchor
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
@@ -29,15 +30,15 @@ You can bind in jaicore-search via a Maven dependency (using Maven central as re
 ```
 <dependency>
   <groupId>ai.libs</groupId>
-  <artifactId>jaicore-search</artifactId>
-  <version>0.1.4</version>
+  <artifactId>{{ page.title }}</artifactId>
+  <version>{{ page.version }}</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-search:0.1.4'
+    implementation 'ai.libs:{{ page.title }}:{{ page.version }}'
 }
 ```
 
@@ -129,7 +130,7 @@ for (AlgorithmEvent e : bf) {
 }
 ```
 In this example, we only consider events that indicate the encounter of a solution, but there are many more events that you can react to.
-A list of supported events per algorithm is given in the table below.
+A list of supported events per algorithm is given in the documentation of the respective algorithm.
 
 You may note that the library adopts Java Generics in a very exhaustive way, and that class names appear sometimes quite complicated (long).
 In AILibs, we are trading off readibility, reliability, reusability, and API comfort.
@@ -144,8 +145,8 @@ Our general approach is to try to hide as much of the generics as possible in in
 | ------------- |-------------|-----|-----|
 | DepthFirstSearch | GraphSearchInput      |   SearchGraphPath |
 | RandomSearch |  GraphSearchInput | SearchGraphPath |
-| MCTS |   GraphSearchWithPathEvaluationsInput | EvaluatedSearchGraphPath |
-| UCT |   GraphSearchWithPathEvaluationsInput | EvaluatedSearchGraphPath |
+| MCTSPathSearch |   GraphSearchWithPathEvaluationsInput | EvaluatedSearchGraphPath |
+| UCTPathSearch |   GraphSearchWithPathEvaluationsInput | EvaluatedSearchGraphPath |
 | StandardBestFirst |  GraphSearchWithSubpathEvaluationsInput | EvaluatedSearchGraphPath |
 | AStar | GraphSearchWithNumberBasedAdditivePathEvaluation | EvaluatedSearchGraphPath |
 | RStar | GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic | EvaluatedSearchGraphPath |
@@ -157,5 +158,5 @@ Our general approach is to try to hide as much of the generics as possible in in
 JavaDoc is available [here](https://javadoc.io/doc/ai.libs/jaicore-search/).
 
 ## Contribute
-jaci is currently developed in the [softwareconfiguration folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan).
+jaicore-search is currently developed in the [JAICore/jaicore-search folder of AILibs on github.com](https://github.com/fmohr/AILibs/tree/master/JAICore/jaicore-search).
 

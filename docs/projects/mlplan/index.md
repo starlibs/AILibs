@@ -4,6 +4,7 @@ logo: mlplan-logo.png
 title: ML-Plan
 subtitle: ML-Plan subtitle
 navigation_mode: anchor
+version: 0.1.5
 navigation:
     - { id: "overview", link: "overview", title: "Overview" }
     - { id: "installation", link: "installation", title: "Installation" }
@@ -43,14 +44,14 @@ You can bind in ML-Plan via a Maven dependency (using Maven central as repositor
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>mlplan</artifactId>
-  <version>0.1.4</version>
+  <version>{{ page.version }}</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:mlplan:0.1.4'
+    implementation 'ai.libs:mlplan:{{ page.version }}'
 }
 ```
 
