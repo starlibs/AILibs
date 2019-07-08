@@ -14,7 +14,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseGraphGenerator.class);
 	private Database database;
 
-	public DatabaseGraphGenerator(Database database) {
+	public DatabaseGraphGenerator(final Database database) {
 		super();
 		this.database = database;
 	}
@@ -33,7 +33,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 
 	@Override
 	public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
-		return new DatabaseSuccessorGenerator(database);
+		return new DatabaseSuccessorGenerator(this.database);
 	}
 
 	@Override
@@ -48,18 +48,8 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 		};
 	}
 
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
-		throw new UnsupportedOperationException("This operation is not implemented yet.");
-	}
-
 	public Database getDatabase() {
-		return database;
+		return this.database;
 	}
 
 }

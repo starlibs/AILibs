@@ -3,19 +3,20 @@ package ai.libs.jaicore.planning.hierarchical.problems.htn;
 import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.EvaluatedPlan;
-import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.core.interfaces.IEvaluatedPlan;
+import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 public class CostSensitivePlanningToSearchProblemReduction<N, A, V extends Comparable<V>, I1 extends IHTNPlanningProblem, I2 extends GraphSearchWithPathEvaluationsInput<N, A, V>, O2 extends EvaluatedSearchGraphPath<N, A, V>>
-implements IHierarchicalPlanningToGraphSearchReduction<N, A, CostSensitiveHTNPlanningProblem<I1, V>, EvaluatedPlan<V>, I2, O2> {
+implements IHierarchicalPlanningToGraphSearchReduction<N, A, CostSensitiveHTNPlanningProblem<I1, V>, IEvaluatedPlan<V>, I2, O2> {
 
-	private final IHierarchicalPlanningToGraphSearchReduction<N, A, I1, Plan, GraphSearchInput<N, A>, SearchGraphPath<N, A>> baseReduction;
+	private final IHierarchicalPlanningToGraphSearchReduction<N, A, I1, IPlan, GraphSearchInput<N, A>, SearchGraphPath<N, A>> baseReduction;
 	private final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, I2, O2> forwardReduction;
 
-	public CostSensitivePlanningToSearchProblemReduction(final IHierarchicalPlanningToGraphSearchReduction<N, A, I1, Plan, GraphSearchInput<N, A>, SearchGraphPath<N, A>> baseReduction,
+	public CostSensitivePlanningToSearchProblemReduction(final IHierarchicalPlanningToGraphSearchReduction<N, A, I1, IPlan, GraphSearchInput<N, A>, SearchGraphPath<N, A>> baseReduction,
 			final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, I2, O2> forwardReduction) {
 		super();
 		this.baseReduction = baseReduction;
@@ -37,7 +38,7 @@ implements IHierarchicalPlanningToGraphSearchReduction<N, A, CostSensitiveHTNPla
 	}
 
 	@Override
-	public EvaluatedPlan<V> decodeSolution(final O2 solution) {
+	public IEvaluatedPlan<V> decodeSolution(final O2 solution) {
 		return new EvaluatedPlan<>(this.baseReduction.decodeSolution(solution), solution.getScore());
 	}
 }

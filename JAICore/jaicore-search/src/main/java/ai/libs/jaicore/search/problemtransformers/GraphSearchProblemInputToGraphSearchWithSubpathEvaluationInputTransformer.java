@@ -28,8 +28,9 @@ implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A,
 		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), this.nodeEvaluator);
 	}
 
-	public void setNodeEvaluator(final INodeEvaluator<N, V> nodeEvaluator) {
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V> setNodeEvaluator(final INodeEvaluator<N, V> nodeEvaluator) {
 		this.nodeEvaluator = nodeEvaluator;
+		return this;
 	}
 
 

@@ -10,8 +10,6 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 public class ForwardDecompositionHTNPlannerBasedOnBestFirst<V extends Comparable<V>> extends ForwardDecompositionHTNPlanner<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem, V>, V, GraphSearchWithSubpathEvaluationsInput<TFDNode, String, V>> {
 
 	public ForwardDecompositionHTNPlannerBasedOnBestFirst(final CostSensitiveHTNPlanningProblem<IHTNPlanningProblem, V> problem, final INodeEvaluator<TFDNode, V> nodeEvaluator) {
-		super(problem, new BestFirstForwardDecompositionReducer<V>(), new BestFirstFactory<>());
-		BestFirstForwardDecompositionReducer<V> reducer = (BestFirstForwardDecompositionReducer<V>)this.getProblemTransformer();
-		reducer.getTransformer().setNodeEvaluator(nodeEvaluator);
+		super(problem, new BestFirstForwardDecompositionReducer<>(nodeEvaluator), new BestFirstFactory<>());
 	}
 }

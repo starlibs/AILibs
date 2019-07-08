@@ -16,7 +16,7 @@ import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * node only has 1 successor. Usage: Create a new ReducedGraphGenerator object
  * and swap all ocurrences of the graph generator it uses as a basis with the
  * reduced graph generator.
- * 
+ *
  * @author Helena Graf
  *
  * @param <T>
@@ -29,52 +29,52 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 	/**
 	 * Create a new ReducedGraphGenerator that uses the given graph generator as a
 	 * basis.
-	 * 
+	 *
 	 * @param basis
 	 *            the graph generator to use as a basis
 	 */
-	public ReducedGraphGenerator(GraphGenerator<T, A> basis) {
+	public ReducedGraphGenerator(final GraphGenerator<T, A> basis) {
 		this.basis = basis;
 	}
 
 	@Override
 	public RootGenerator<T> getRootGenerator() {
-		return basis.getRootGenerator();
+		return this.basis.getRootGenerator();
 	}
 
 	@Override
 	public SuccessorGenerator<T, A> getSuccessorGenerator() {
 		return new SuccessorGenerator<T, A>() {
 
-			private SuccessorGenerator<T, A> generator = basis.getSuccessorGenerator();
+			private SuccessorGenerator<T, A> generator = ReducedGraphGenerator.this.basis.getSuccessorGenerator();
 
 			/**
 			 * Expands the node recursively while it only has one successor, until the end
 			 * of the branch or a split point in the graph is reached.
-			 * 
+			 *
 			 * @param node
 			 *            The node to expand
 			 * @return The fully refined node
 			 * @throws InterruptedException
 			 */
-			public NodeExpansionDescription<T, A> reduce(NodeExpansionDescription<T, A> node)
+			public NodeExpansionDescription<T, A> reduce(final NodeExpansionDescription<T, A> node)
 					throws InterruptedException {
-				List<NodeExpansionDescription<T, A>> sucessors = generator.generateSuccessors(node.getTo());
+				List<NodeExpansionDescription<T, A>> sucessors = this.generator.generateSuccessors(node.getTo());
 				List<NodeExpansionDescription<T, A>> previous = Arrays.asList(node);
 				while (sucessors.size() == 1) {
 					previous = sucessors;
-					sucessors = generator.generateSuccessors(sucessors.get(0).getTo());
+					sucessors = this.generator.generateSuccessors(sucessors.get(0).getTo());
 				}
 				return previous.get(0);
 			}
 
 			@Override
-			public List<NodeExpansionDescription<T, A>> generateSuccessors(T node) throws InterruptedException {
-				List<NodeExpansionDescription<T, A>> successors = generator.generateSuccessors(node);
+			public List<NodeExpansionDescription<T, A>> generateSuccessors(final T node) throws InterruptedException {
+				List<NodeExpansionDescription<T, A>> successors = this.generator.generateSuccessors(node);
 				// Skip through nodes with 1 successor to find
 				while (successors.size() == 1) {
 					List<NodeExpansionDescription<T, A>> previous = successors;
-					successors = generator.generateSuccessors(successors.get(0).getTo());
+					successors = this.generator.generateSuccessors(successors.get(0).getTo());
 					if (successors.isEmpty()) {
 						return previous;
 					}
@@ -82,7 +82,7 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 
 				List<NodeExpansionDescription<T, A>> reducedSuccessors = new ArrayList<>();
 				for (NodeExpansionDescription<T, A> successor : successors) {
-					reducedSuccessors.add(reduce(successor));
+					reducedSuccessors.add(this.reduce(successor));
 				}
 				return reducedSuccessors;
 			}
@@ -91,17 +91,6 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 
 	@Override
 	public GoalTester<T> getGoalTester() {
-		return basis.getGoalTester();
+		return this.basis.getGoalTester();
 	}
-
-	@Override
-	public boolean isSelfContained() {
-		return basis.isSelfContained();
-	}
-
-	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
-		basis.setNodeNumbering(nodenumbering);
-	}
-
 }

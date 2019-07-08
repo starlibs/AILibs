@@ -7,7 +7,7 @@ import org.aeonbits.owner.ConfigFactory;
 
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningToGraphSearchReduction;
 import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
@@ -57,8 +57,8 @@ public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>
 		return this.planningGraphGeneratorDeriver;
 	}
 
-	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends Plan, ? extends GraphSearchInput<N,A>, ? super SearchGraphPath<N,A>> planningGraphGeneratorDeriver) {
-		this.planningGraphGeneratorDeriver = (planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>)planningGraphGeneratorDeriver : new DefaultHASCOPlanningReduction<N,A>(planningGraphGeneratorDeriver);
+	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N,A>, ? super SearchGraphPath<N,A>> planningGraphGeneratorDeriver) {
+		this.planningGraphGeneratorDeriver = (planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>)planningGraphGeneratorDeriver : new DefaultHASCOPlanningReduction<>(planningGraphGeneratorDeriver);
 	}
 
 	public IOptimalPathInORGraphSearchFactory<S, N, A, V> getSearchFactory() {

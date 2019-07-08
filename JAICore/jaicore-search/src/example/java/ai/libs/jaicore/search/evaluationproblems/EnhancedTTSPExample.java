@@ -17,7 +17,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.UCT;
+import ai.libs.jaicore.search.algorithms.standard.mcts.UCTPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.algorithms.standard.rdfs.RandomizedDepthFirstSearch;
 import ai.libs.jaicore.search.core.interfaces.IPathInORGraphSearch;
@@ -96,7 +96,7 @@ public class EnhancedTTSPExample {
 	}
 
 	public void testMCTS() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
-		this.runAlgorithm("MCTS", new UCT<EnhancedTTSPNode, String>(new GraphSearchWithPathEvaluationsInput<>(graphGenerator, n -> ttsp.getSolutionEvaluator().evaluate(reducer.decodeSolution(n))), 0, 0, false), false);
+		this.runAlgorithm("MCTS", new UCTPathSearch<EnhancedTTSPNode, String>(new GraphSearchWithPathEvaluationsInput<>(graphGenerator, n -> ttsp.getSolutionEvaluator().evaluate(reducer.decodeSolution(n))), 0, 0, false), false);
 	}
 
 	public void testRandomSearch() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
