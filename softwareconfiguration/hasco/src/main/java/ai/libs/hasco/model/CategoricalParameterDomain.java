@@ -8,6 +8,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CategoricalParameterDomain implements IParameterDomain {
 	private final String[] values;
+	
+	@SuppressWarnings("unused")
+	private CategoricalParameterDomain() {
+		// for serialization
+		values = null;
+	}
 
 	@JsonCreator
 	public CategoricalParameterDomain(@JsonProperty("values") final String[] values) {

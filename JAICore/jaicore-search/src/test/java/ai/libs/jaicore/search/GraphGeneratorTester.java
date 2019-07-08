@@ -52,7 +52,6 @@ public abstract class GraphGeneratorTester<N, A> {
 			maxDepth = Integer.MAX_VALUE;
 			while (!open.isEmpty()) {
 				n1 ++;
-				//				System.out.println("G1: Expanding " + n1 + "th node");
 				Node expandedNode = open.poll();
 				if (expandedNode.depth > maxDepth) {
 					break;
@@ -64,7 +63,7 @@ public abstract class GraphGeneratorTester<N, A> {
 				successors.forEach(nd -> {
 					open.add(new Node(nd.getTo(), expandedNode.depth + 1));
 					g1.addItem(nd.getTo());
-					g1.addEdge(nd.getFrom(), nd.getTo(), nd.getAction());
+					g1.addEdge(expandedNode.point, nd.getTo(), nd.getAction());
 				});
 			}
 
@@ -76,7 +75,6 @@ public abstract class GraphGeneratorTester<N, A> {
 			maxDepth = Integer.MAX_VALUE;
 			while (!open.isEmpty()) {
 				n2 ++;
-				//				System.out.println("G2: Expanding " + n2 + "th node");
 				Node expandedNode = open.poll();
 				if (expandedNode.depth > maxDepth) {
 					break;
@@ -89,7 +87,7 @@ public abstract class GraphGeneratorTester<N, A> {
 				successors.forEach(nd -> {
 					open.add(new Node(nd.getTo(), expandedNode.depth + 1));
 					g2.addItem(nd.getTo());
-					g2.addEdge(nd.getFrom(), nd.getTo(), nd.getAction());
+					g2.addEdge(expandedNode.point, nd.getTo(), nd.getAction());
 				});
 			}
 

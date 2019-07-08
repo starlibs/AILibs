@@ -26,7 +26,7 @@ public class MLPlanOpenMLExample {
 
 	public static void main(final String[] args) throws Exception {
 
-		ReproducibleInstances data = ReproducibleInstances.fromOpenML("3", "4350e421cdc16404033ef1812ea38c01");
+		ReproducibleInstances data = ReproducibleInstances.fromOpenML(3, "4350e421cdc16404033ef1812ea38c01");
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit((Instances) data, (new Random(0)).nextLong(), 0.7d);
 

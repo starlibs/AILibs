@@ -1,6 +1,5 @@
 package ai.libs.mlplan.examples.multilabel.meka;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
+import ai.libs.jaicore.basic.kvstore.IKVStore;
 
 /**
 * Connection for uploading results of AutoMLC experiments.
@@ -69,7 +69,7 @@ public class ResultsDBConnection {
 			map.put("found_by", this.algorithmName);
 			map.put(LABEL_METRIC_ID, this.getLatestIdForMetric(entry.getKey()));
 			map.put("value", entry.getValue());
-			this.adapter.insertNoNewValues(this.finalMeasurementsTableName, map);
+			this.adapter.insert(this.finalMeasurementsTableName, map);
 		}
 		LOGGER.debug("Done adding final measurements to db.");
 	}
@@ -83,7 +83,7 @@ public class ResultsDBConnection {
 		map.put("generation", generation);
 		map.put("classifier_string", classifier);
 		map.put("value", value);
-		this.adapter.insertNoNewValues(this.intermediateMeasurementsTableName, map);
+		this.adapter.insert(this.intermediateMeasurementsTableName, map);
 		LOGGER.debug("Done adding intermediate measurement to db");
 	}
 
@@ -101,11 +101,11 @@ public class ResultsDBConnection {
 		// Get metric
 		String query = String.format("SELECT %s FROM %s WHERE %s=? ORDER BY %s DESC", LABEL_METRIC_ID, this.metricIdsTableName, "metric_name", "updated_at");
 		List<String> values = Arrays.asList(metricName);
-		ResultSet resultSet = this.adapter.getResultsOfQuery(query, values);
+		List<IKVStore> resultSet = this.adapter.getResultsOfQuery(query, values);
 
 		// Return latest
-		if (resultSet.next()) {
-			return resultSet.getInt(LABEL_METRIC_ID);
+		if (!resultSet.isEmpty()) {
+			return resultSet.get(0).getAsInt(LABEL_METRIC_ID);
 		} else {
 			LOGGER.warn("Requested metric with name {} which is not present in the db.", metricName);
 			return null;

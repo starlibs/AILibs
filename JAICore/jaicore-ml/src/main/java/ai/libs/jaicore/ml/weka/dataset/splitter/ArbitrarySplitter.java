@@ -14,7 +14,7 @@ import weka.core.Instances;
 public class ArbitrarySplitter implements IDatasetSplitter {
 
 	@Override
-	public List<Instances> split(final Instances data, final long seed, final double... portions) {
+	public List<Instances> split(final Instances data, final long seed, final double portions) {
 		return WekaUtil.realizeSplit(data, WekaUtil.getArbitrarySplit(data, new Random(seed), portions));
 	}
 

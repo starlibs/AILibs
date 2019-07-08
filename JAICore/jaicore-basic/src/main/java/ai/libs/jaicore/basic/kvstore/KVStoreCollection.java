@@ -23,7 +23,7 @@ import ai.libs.jaicore.basic.Maps;
 import ai.libs.jaicore.basic.StatisticsUtil;
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-public class KVStoreCollection extends LinkedList<KVStore> {
+public class KVStoreCollection extends LinkedList<IKVStore> {
 
 	/** Logger for controlled output. */
 	private static final Logger logger = LoggerFactory.getLogger(KVStoreCollection.class);
@@ -55,7 +55,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 		this.readFrom(taskChunkDescription);
 	}
 
-	public KVStoreCollection(final KVStoreCollection other) {
+	public KVStoreCollection(final List<IKVStore> other) {
 		this.addAll(other);
 	}
 
@@ -87,7 +87,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 
 	public KVStoreCollection select(final Map<String, String> selection) {
 		KVStoreCollection selectedCollection = new KVStoreCollection();
-		for (KVStore store : this) {
+		for (IKVStore store : this) {
 			if (store.matches(selection)) {
 				selectedCollection.add(store);
 			}
@@ -97,7 +97,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 
 	public KVStoreCollection filter(final String[] filterKeys) {
 		KVStoreCollection filteredCollection = new KVStoreCollection();
-		for (KVStore store : this) {
+		for (IKVStore store : this) {
 			store.project(filterKeys);
 			filteredCollection.add(store);
 		}
@@ -134,7 +134,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(this.metaData.toString() + "\n");
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			sb.append(t.toString() + "\n");
 		}
 		return sb.toString();
@@ -145,8 +145,8 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	}
 
 	public void removeAny(final String[] value, final boolean or) {
-		List<KVStore> tasksToRemove = new LinkedList<>();
-		for (KVStore t : this) {
+		List<IKVStore> tasksToRemove = new LinkedList<>();
+		for (IKVStore t : this) {
 			if (or) {
 				for (String v : value) {
 					if (t.toString().contains(v)) {
@@ -202,7 +202,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 			group.renameKey(LABEL_GROUP_SIZE, "size");
 			group = group.group(groupingKeys, new HashMap<>());
 
-			for (KVStore t : group) {
+			for (IKVStore t : group) {
 				List<Integer> sizeList = t.getAsIntList("size", ",").stream().filter(x -> x > currentMinLength).collect(Collectors.toList());
 				logger.debug("{} {} {}", currentMinLength, sizeList, t.getAsIntList("size", ","));
 				if (sizeList.size() > 0) {
@@ -218,7 +218,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	}
 
 	public void renameKey(final String keyName, final String newKeyName) {
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			t.renameKey(keyName, newKeyName);
 		}
 	}
@@ -226,15 +226,15 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	public KVStoreCollection group(final String[] groupingKeys, final Map<String, EGroupMethod> groupingHandler) {
 		KVStoreCollection tempCollection = new KVStoreCollection();
 		tempCollection.setCollectionID(this.getCollectionID());
-		Map<String, List<KVStore>> groupedTasks = new HashMap<>();
+		Map<String, List<IKVStore>> groupedTasks = new HashMap<>();
 
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			StringBuilder sb = new StringBuilder();
 			for (String key : groupingKeys) {
 				sb.append(t.getAsString(key) + "#");
 			}
 
-			List<KVStore> groupedTaskList = groupedTasks.get(sb.toString());
+			List<IKVStore> groupedTaskList = groupedTasks.get(sb.toString());
 			if (groupedTaskList == null) {
 				groupedTaskList = new LinkedList<>();
 				groupedTasks.put(sb.toString(), groupedTaskList);
@@ -243,14 +243,14 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 			groupedTaskList.add(t);
 		}
 
-		for (Entry<String, List<KVStore>> groupedTaskEntry : groupedTasks.entrySet()) {
-			List<KVStore> groupedTaskList = groupedTaskEntry.getValue();
-			KVStore groupedTask = new KVStore(groupedTaskList.get(0));
+		for (Entry<String, List<IKVStore>> groupedTaskEntry : groupedTasks.entrySet()) {
+			List<IKVStore> groupedTaskList = groupedTaskEntry.getValue();
+			IKVStore groupedTask = new KVStore(groupedTaskList.get(0));
 			groupedTask.put(LABEL_GROUP_SIZE, groupedTaskList.size());
 
 			Map<String, List<Object>> values = new HashMap<>();
 
-			for (KVStore t : groupedTaskList) {
+			for (IKVStore t : groupedTaskList) {
 				for (Entry<String, Object> e : t.entrySet()) {
 					boolean containedInGrouping = false;
 					for (String groupingKey : groupingKeys) {
@@ -341,28 +341,28 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	}
 
 	public void merge(final String[] fieldKeys, final String separator, final String newFieldName) {
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			t.merge(fieldKeys, separator, newFieldName);
 		}
 	}
 
 	public void project(final String[] keepKeys) {
 		this.metaData.project(keepKeys);
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			t.project(keepKeys);
 		}
 	}
 
 	public void projectRemove(final String... removeKeys) {
 		this.metaData.removeAll(removeKeys);
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			t.removeAll(removeKeys);
 		}
 	}
 
 	public void applyFilter(final Map<String, IKVFilter> filterMap) {
 		this.metaData.filter(filterMap);
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			t.filter(filterMap);
 		}
 	}
@@ -374,7 +374,7 @@ public class KVStoreCollection extends LinkedList<KVStore> {
 	}
 
 	public void mergeTasks(final KVStore other, final Map<String, String> combineMap) {
-		for (KVStore t : this) {
+		for (IKVStore t : this) {
 			boolean equals = true;
 			for (Entry<String, String> combineEntry : combineMap.entrySet()) {
 				if (!t.containsKey(combineEntry.getKey()) || !other.containsKey(combineEntry.getValue()) || !t.getAsString(combineEntry.getKey()).equals(other.getAsString(combineEntry.getValue()))) {

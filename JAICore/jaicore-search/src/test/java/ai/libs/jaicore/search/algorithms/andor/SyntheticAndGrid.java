@@ -12,27 +12,27 @@ import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
 import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
-	
+
 	private int k = 10;
 	private int b = 3;
 	private int depth = 10;
 
-	
+
 	public class NodeLabel {
 		int depth;
 		int task;
-		public NodeLabel(int depth, int task) {
+		public NodeLabel(final int depth, final int task) {
 			super();
 			this.depth = depth;
 			this.task = task;
 		}
 	}
-	
+
 	public SyntheticAndGrid() {
-		
+
 	}
-	
-	public SyntheticAndGrid(int k, int b, int depth) {
+
+	public SyntheticAndGrid(final int k, final int b, final int depth) {
 		super();
 		this.k = k;
 		this.b = b;
@@ -48,11 +48,12 @@ public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
 	public SuccessorGenerator<NodeLabel, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<NodeLabel,String>> l = new ArrayList<>();
-			if (n.depth == depth)
+			if (n.depth == this.depth) {
 				return l;
-			boolean finalLayer = n.depth >= depth - 2;
-			for (int i = 0; i < (finalLayer ? k : b); i++) {
-				l.add(new NodeExpansionDescription<NodeLabel, String>(n, new NodeLabel(n.depth + 1, i), "" + i, finalLayer ? NodeType.OR : NodeType.AND));
+			}
+			boolean finalLayer = n.depth >= this.depth - 2;
+			for (int i = 0; i < (finalLayer ? this.k : this.b); i++) {
+				l.add(new NodeExpansionDescription<>(new NodeLabel(n.depth + 1, i), "" + i, finalLayer ? NodeType.OR : NodeType.AND));
 			}
 			return l;
 		};
@@ -60,18 +61,6 @@ public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
 
 	@Override
 	public NodeGoalTester<NodeLabel> getGoalTester() {
-		return n -> n.depth == depth;
+		return n -> n.depth == this.depth;
 	}
-
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
-		// TODO Auto-generated method stub
-		
-	}
-	
 }

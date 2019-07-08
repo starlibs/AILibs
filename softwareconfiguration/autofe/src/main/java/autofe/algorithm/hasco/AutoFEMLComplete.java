@@ -44,6 +44,7 @@ import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
@@ -198,7 +199,8 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		}
 	}
 
-	private AlgorithmEvent setupSearch() throws AlgorithmException {
+	private AlgorithmEvent setupSearch() throws AlgorithmException, InterruptedException {
+
 		/* check whether data has been set */
 		if (this.data == null) {
 			throw new IllegalArgumentException("Data to work on is still NULL");
@@ -211,7 +213,12 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 
 		/* Subsample dataset to reduce computational effort. */
 		this.logger.debug("Subsampling...");
-		DataSet dataForComplete = DataSetUtils.subsample(this.data, this.subsampleRatio, this.minInstances, this.rand, this.mlplanSubsampleRatioFactor);
+		DataSet dataForComplete;
+		try {
+			dataForComplete = DataSetUtils.subsample(this.data, this.subsampleRatio, this.minInstances, this.rand, this.mlplanSubsampleRatioFactor);
+		} catch (SplitFailedException e2) {
+			throw new AlgorithmException(e2, "Could not create sample.");
+		}
 		dataForComplete.updateInstances();
 		this.logger.debug("Finished subsampling.");
 
@@ -219,7 +226,12 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		double selectionDataPortion = this.config.dataPortionForSelection();
 		Instances dataShownToSearch;
 		if (selectionDataPortion > 0) {
-			List<Instances> selectionSplit = WekaUtil.getStratifiedSplit(dataForComplete.getInstances(), this.config.randomSeed(), selectionDataPortion);
+			List<Instances> selectionSplit;
+			try {
+				selectionSplit = WekaUtil.getStratifiedSplit(dataForComplete.getInstances(), this.config.randomSeed(), selectionDataPortion);
+			} catch (SplitFailedException e) {
+				throw new AlgorithmException(e, "Search setup failed due to SplitException.");
+			}
 			dataShownToSearch = selectionSplit.get(1);
 		} else {
 			dataShownToSearch = dataForComplete.getInstances();

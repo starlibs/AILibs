@@ -36,7 +36,8 @@ import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedExceptio
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.EvaluatedSearchGraphBasedPlan;
-import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
+import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
@@ -171,7 +172,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 				public void receiveSolutionCandidateFoundEvent(final EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> solutionEvent) throws InterruptedException, TimeoutException, AlgorithmException {
 
 					EvaluatedSearchGraphPath<N, A, V> searchPath = solutionEvent.getSolutionCandidate();
-					Plan plan = HASCO.this.planningGraphGeneratorDeriver.decodeSolution(searchPath);
+					IPlan plan = HASCO.this.planningGraphGeneratorDeriver.decodeSolution(searchPath);
 					ComponentInstance objectInstance;
 					if (HASCO.this.createComponentInstancesFromNodesInsteadOfPlans) {
 						objectInstance = Util.getSolutionCompositionFromState(HASCO.this.getInput().getComponents(),
@@ -193,7 +194,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 					}
 					HASCO.this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score,
 							HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);
-					EvaluatedSearchGraphBasedPlan<V, N> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
+					IEvaluatedGraphSearchBasedPlan<N, A, V> evaluatedPlan = new EvaluatedSearchGraphBasedPlan<>(plan, score, searchPath);
 					HASCOSolutionCandidate<V> solution = new HASCOSolutionCandidate<>(objectInstance, evaluatedPlan, HASCO.this.timeGrabbingEvaluationWrapper.getEvaluationTimeForComponentInstance(objectInstance));
 					HASCO.this.updateBestSeenSolution(solution);
 					HASCO.this.listOfAllRecognizedSolutions.add(solution);

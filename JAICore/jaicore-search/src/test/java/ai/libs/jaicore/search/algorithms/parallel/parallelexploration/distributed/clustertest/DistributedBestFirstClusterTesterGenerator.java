@@ -17,42 +17,34 @@ public class DistributedBestFirstClusterTesterGenerator implements SerializableG
 	private SerializableRootGenerator<TestNode> rootGenerator;
 	private int target;
 
-	public DistributedBestFirstClusterTesterGenerator(int size, int target) {
+	public DistributedBestFirstClusterTesterGenerator(final int size, final int target) {
 		super();
 		this.target = target;
-		rootGenerator =  () -> new TestNode(0, size);
+		this.rootGenerator =  () -> new TestNode(0, size);
 		System.out.println("Trying to find " + target + " within a space of " + size + " items.");
 	}
 
+	@Override
 	public SuccessorGenerator<TestNode, String> getSuccessorGenerator() {
 		return n -> {
 			List<NodeExpansionDescription<TestNode, String>> l = new ArrayList<>();
 			TestNode parent = n;
 			if (parent.min < parent.max) {
 				int split = (int) Math.floor((parent.min + parent.max) / 2f);
-				l.add(new NodeExpansionDescription<>(parent, new TestNode(parent.min, split), "edge label", NodeType.OR));
-				l.add(new NodeExpansionDescription<>(parent, new TestNode(split + 1, parent.max), "edge label", NodeType.OR));
+				l.add(new NodeExpansionDescription<>(new TestNode(parent.min, split), "edge label", NodeType.OR));
+				l.add(new NodeExpansionDescription<>(new TestNode(split + 1, parent.max), "edge label", NodeType.OR));
 			}
 			return l;
 		};
 	}
 
+	@Override
 	public NodeGoalTester<TestNode> getGoalTester() {
-		return n -> (n.min == n.max && n.min == target);
+		return n -> (n.min == n.max && n.min == this.target);
 	}
 
+	@Override
 	public RootGenerator<TestNode> getRootGenerator() {
-		return rootGenerator;
-	}
-	
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(boolean nodenumbering) {
-		// TODO Auto-generated method stub
-		
+		return this.rootGenerator;
 	}
 }

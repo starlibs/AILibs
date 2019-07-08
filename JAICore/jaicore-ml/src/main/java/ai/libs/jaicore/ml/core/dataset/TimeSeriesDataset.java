@@ -343,4 +343,9 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	public List<TimeSeriesInstance<L>> subList(final int arg0, final int arg1) {
 		throw new UnsupportedOperationException();
 	}
+
+	@Override
+	public int getFrequency(final TimeSeriesInstance<L> instance) {
+		return (int)this.stream().filter(instance::equals).count();
+	}
 }

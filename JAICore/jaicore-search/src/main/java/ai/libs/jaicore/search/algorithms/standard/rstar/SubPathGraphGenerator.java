@@ -34,16 +34,4 @@ public class SubPathGraphGenerator<N, A> implements GraphGenerator<N, A> {
 	public GoalTester<N> getGoalTester() {
 		return (NodeGoalTester<N>)(n -> n.equals(this.to));
 	}
-
-	@Override
-	public boolean isSelfContained() {
-		return false;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
-		/* does not matter */
-	}
-
 }

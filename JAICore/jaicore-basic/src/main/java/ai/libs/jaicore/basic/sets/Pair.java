@@ -2,14 +2,19 @@ package ai.libs.jaicore.basic.sets;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 public class Pair<X,Y> implements Serializable {
 
 	private static final long serialVersionUID = 5570679807997613881L;
+
+	@JsonProperty
 	private X x;
+	@JsonProperty
 	private Y y;
 
-	public Pair(final X x, final Y y) {
+	public Pair(@JsonProperty("x") final X x, @JsonProperty("y") final Y y) {
 		super();
 		this.x = x;
 		this.y = y;

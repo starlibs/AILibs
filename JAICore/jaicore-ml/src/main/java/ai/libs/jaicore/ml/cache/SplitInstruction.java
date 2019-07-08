@@ -7,29 +7,21 @@ import ai.libs.jaicore.ml.WekaUtil;
 /**
  * Instruction to track a split for a {@link ReproducibleInstances} object. Performns a stratified split from {@link WekaUtil} based on the given ratios and seed. The index gives the split to be used by the {@link ReproducibleInstances}.
  *
- * @author jnowack
+ * @author fmohr
  *
  */
-public class SplitInstruction extends Instruction {
+public abstract class SplitInstruction extends FoldBasedSubsetInstruction {
+	private static final long serialVersionUID = 995533570402743259L;
 
-	/** Constant string to identify this instruction. */
-	public static final String COMMAND_NAME = "split";
+	@JsonProperty
+	private final double portionOfFirstFold;
 
-	/**
-	 * Constructor to create a split Instruction that can be converted into json.
-	 *
-	 * @param ratios
-	 *            ratios for the split
-	 * @param seed
-	 *            random seed
-	 * @param outIndex
-	 *            index of the portion to use in the following
-	 */
-	public SplitInstruction(@JsonProperty("ratios") final String ratios, @JsonProperty("seed") final long seed, @JsonProperty("outIndex") final int outIndex) {
-		this.command = COMMAND_NAME;
-		this.inputs.put("ratios", "" + ratios);
-		this.inputs.put("seed", "" + seed);
-		this.inputs.put("outIndex", "" + outIndex);
+	public SplitInstruction(final String name, @JsonProperty("portionOfFirstFold") final double portionOfFirstFold) {
+		super(name);
+		this.portionOfFirstFold = portionOfFirstFold;
 	}
 
+	public double getPortionOfFirstFold() {
+		return this.portionOfFirstFold;
+	}
 }
