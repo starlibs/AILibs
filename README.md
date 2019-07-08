@@ -6,10 +6,12 @@
 
 
 # AILibs
-AILibs is a collection of Java libraries related to automated decision making. It currently consists of two building blocks. It is also home of the current version of the AutoML-tool [ML-Plan](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan).
+AILibs is a collection of Java libraries related to automated decision making. It currently consists of two building blocks. It is also home of the current version of the AutoML-tool [ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/).
 
 * **JAICore** (Java AI Core) is a collection of projects with basic general purpose AI algorithms mainly in the area of logic reasoning, heuristic search, and machine learning
-* **softwareconfiguration** is a collection of projects related to automatically configuring software systems. Here we also maintain the code for our AutoML flagship **[ML-Plan](https://github.com/fmohr/AILibs/tree/master/softwareconfiguration/mlplan)**
+* **softwareconfiguration** is a collection of projects related to automatically configuring software systems. Here we also maintain the code for our AutoML flagship **[ML-Plan](https://fmohr.github.io/AILibs/projects/mlplan/)**
+
+**[Find out more about AILibs and how to use it.](https://fmohr.github.io/AILibs/)
 
 ## Using AILibs in your project
 You can resolve each of our projects via a Maven dependency (using Maven central as repository).
@@ -18,14 +20,14 @@ You can resolve each of our projects via a Maven dependency (using Maven central
 <dependency>
   <groupId>ai.libs</groupId>
   <artifactId>jaicore-ml</artifactId>
-  <version>0.1.4</version>
+  <version>0.1.5</version>
 </dependency>
 ```
 
 ### Gradle 
 ```gradle
 dependencies {
-    implementation 'ai.libs:jaicore-ml:0.1.4'
+    implementation 'ai.libs:jaicore-ml:0.1.5'
 }
 ```
 
