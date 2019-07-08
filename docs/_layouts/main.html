@@ -1,0 +1,47 @@
+---
+layout: default
+---
+      <div style="width: 300px; float: left; position: fixed;">
+        {% if site.logo %}
+          <a href="{{ "/" | absolute_url }}"><img src="{{site.logo | relative_url}}" alt="Logo" /></a>
+        {% endif %}
+
+		<h2>AILibs Projects</h2>
+		<ul style="margin: -10px;">
+		<li>
+		  <h3>JAICore</h3>
+		  <ul style="margin-top: -10px;">
+		  <li><h3 style="margin: 8px 0px;">jaicore-algorithminspector</h3></li>
+		  <li><h3 style="margin: 8px 0px;">jaicore-basic</h3></li>
+		  <li><h3 style="margin: 8px 0px;">jaicore-ea</h3></li>
+		  <li><h3 style="margin: 8px 0px;">jaicore-experiments</h3></li>
+		  <li><h3 style="margin: 8px 0px;">jaicore-logic</h3></li>
+		  <li><h3 style="margin: 8px 0px;">jaicore-math</h3></li>
+		  <li><h3 style="margin: 8px 0px;">jaicore-ml</h3></li>
+		  <li><h3 style="margin: 8px 0px;">jaicore-planning</h3></li>
+		  <li><h3 style="margin: 8px 0px;"><a href="projects/jaicore-search">jaicore-search</a></h3></li>
+		  </ul>
+		</li>
+		<li><h3>HASCO</h3></li>
+		<li><h3><a href="projects/mlplan">ML-Plan</a></h3></li>
+	
+		
+        {% if site.github.is_project_page %}
+        <p class="view"><a href="{{ site.github.repository_url }}">View the Project on GitHub <small>{{ site.github.repository_nwo }}</small></a></p>
+        {% endif %}
+
+        {% if site.github.is_user_page %}
+        <p class="view"><a href="{{ site.github.owner_url }}">View My GitHub Profile</a></p>
+        {% endif %}
+
+        {% if site.show_downloads %}
+        <ul class="downloads">
+          <li><a href="{{ site.github.zip_url }}">Download <strong>ZIP File</strong></a></li>
+          <li><a href="{{ site.github.tar_url }}">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="{{ site.github.repository_url }}">View On <strong>GitHub</strong></a></li>
+        </ul>
+        {% endif %}
+      </div>
+      <section style="width: 1000px;">
+		{{ content }}
+      </section>
