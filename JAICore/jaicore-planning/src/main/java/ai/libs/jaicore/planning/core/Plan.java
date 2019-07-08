@@ -6,8 +6,9 @@ import java.util.Map;
 
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
+import ai.libs.jaicore.planning.core.interfaces.IPlan;
 
-public class Plan {
+public class Plan implements IPlan {
 	private final List<Action> actions;
 	private final Map<String,Object> annotations;
 
@@ -21,6 +22,7 @@ public class Plan {
 		this.annotations = annotations;
 	}
 
+	@Override
 	public List<Action> getActions() {
 		return this.actions;
 	}

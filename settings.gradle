@@ -4,9 +4,9 @@ def configPrefix = 'softwareconfiguration/'
 // JAICore
 
 include ":JAICore:jaicore-basic"
+include ":JAICore:jaicore-algorithminspector"
 include ":JAICore:jaicore-ea"
 include ":JAICore:jaicore-experiments"
-include ":JAICore:jaicore-graphvisualizer"
 include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-math"
 include ":JAICore:jaicore-ml"

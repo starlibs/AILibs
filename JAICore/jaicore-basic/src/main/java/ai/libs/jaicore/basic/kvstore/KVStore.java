@@ -30,7 +30,7 @@ import ai.libs.jaicore.basic.sets.SetUtil;
  *
  * @author mwever
  */
-public class KVStore extends HashMap<String, Object> implements Serializable {
+public class KVStore extends HashMap<String, Object> implements IKVStore, Serializable {
 	/**
 	 * Auto-generated standard serial version UID.
 	 */
@@ -81,16 +81,11 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	 * @param keyValueStoreToCopy
 	 *            The KVStore to make a deep copy from.
 	 */
-	public KVStore(final KVStore keyValueStoreToCopy) {
+	public KVStore(final IKVStore keyValueStoreToCopy) {
 		this(keyValueStoreToCopy.toString());
 	}
 
-	/**
-	 * Returns a value as string for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public String getAsString(final String key) {
 		Object value = this.get(key);
 		if (value == null) {
@@ -104,12 +99,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Returns a value as boolean for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public Boolean getAsBoolean(final String key) {
 		Object value = this.get(key);
 		if (value instanceof Boolean) {
@@ -121,12 +111,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Returns a value as integer for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public Integer getAsInt(final String key) {
 		Object value = this.get(key);
 		if (value instanceof Integer) {
@@ -138,12 +123,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Returns a value as double for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public Double getAsDouble(final String key) {
 		Object value = this.get(key);
 		if (value instanceof Double) {
@@ -157,12 +137,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Returns a value as long for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public Long getAsLong(final String key) {
 		Object value = this.get(key);
 		if (value instanceof Long) {
@@ -174,12 +149,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Returns a value as short for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public Short getAsShort(final String key) {
 		Object value = this.get(key);
 		if (value instanceof Short) {
@@ -191,12 +161,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Returns a value as byte for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public Byte getAsByte(final String key) {
 		Object value = this.get(key);
 		if (value instanceof Byte) {
@@ -208,32 +173,22 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Returns a value as object for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public Object getAsObject(final String key, final Class<?> objectClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
 		return objectClass.getConstructor().newInstance(this.get(key));
 	}
 
-	/**
-	 * Returns a value as double list for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
+	public byte[] getAsBytes(final String columnClassifierObject) {
+		return (byte[]) this.get(columnClassifierObject);
+	}
+
+	@Override
 	public List<Double> getAsDoubleList(final String key) {
 		return this.getAsDoubleList(key, DEFAULT_LIST_SEP);
 	}
 
-	/**
-	 * Returns a value as double list for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public List<Double> getAsDoubleList(final String key, final String separator) {
 		if (this.get(key) == null) {
 			return new LinkedList<>();
@@ -241,70 +196,37 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		return Stream.of(this.getAsString(key).split(separator)).map(Double::valueOf).collect(Collectors.toList());
 	}
 
-	/**
-	 * Returns a value as integer list for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public List<Integer> getAsIntList(final String key) {
 		return this.getAsIntList(key, DEFAULT_LIST_SEP);
 	}
 
-	/**
-	 * Returns a value as integer list for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public List<Integer> getAsIntList(final String key, final String separator) {
 		return Stream.of(this.getAsString(key).split(separator)).map(Integer::valueOf).collect(Collectors.toList());
 	}
 
-	/**
-	 * Returns a value as string list for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
+	public List<String> getAsStringList(final String key) {
+		return this.getAsStringList(key, DEFAULT_LIST_SEP);
+	}
+
+	@Override
 	public List<String> getAsStringList(final String key, final String separator) {
 		return Stream.of(this.getAsString(key).split(separator)).map(this::trimString).collect(Collectors.toList());
 	}
 
-	/**
-	 * Takes a String, trims and returns it.
-	 * @param x The string to be trimmed.
-	 * @return The trimmed string.
-	 */
-	private String trimString(final String x) {
-		return x.trim();
-	}
-
-	/**
-	 * Returns a value as boolean list for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public List<Boolean> getAsBooleanList(final String key) {
 		return this.getAsBooleanList(key, DEFAULT_LIST_SEP);
 	}
 
-	/**
-	 * Returns a value as boolean list for the given key.
-	 *
-	 * @param key
-	 *            Key for which the value shall be returned.
-	 */
+	@Override
 	public List<Boolean> getAsBooleanList(final String key, final String separator) {
 		return Stream.of(this.getAsString(key).split(separator)).map(Boolean::valueOf).collect(Collectors.toList());
 	}
 
-	/**
-	 * Returns a value as a File object.
-	 * @param key Key for which the value shall be returned.
-	 * @return The value for the given key as a file.
-	 */
+	@Override
 	public File getAsFile(final String key) {
 		Object value = this.get(key);
 		if (value instanceof File) {
@@ -314,6 +236,15 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		} else {
 			throw new IllegalStateException("Cannot return value as a file if it is not of that type.");
 		}
+	}
+
+	/**
+	 * Takes a String, trims and returns it.
+	 * @param x The string to be trimmed.
+	 * @return The trimmed string.
+	 */
+	private String trimString(final String x) {
+		return x.trim();
 	}
 
 	/**
@@ -339,13 +270,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Checks whether particular keys have matching values according to {@code selection}.
-	 *
-	 * @param selection
-	 *            Map of keys and values to match for. Values may use * as a wildcard.
-	 * @return Returns true whether this key value star meets the keys and values in {@code selection}.
-	 */
+	@Override
 	public boolean matches(final Map<String, String> selection) {
 		boolean doesNotMatchAllSelectionCriteria = selection.entrySet().stream().anyMatch(x -> {
 			boolean isEqual = this.getAsString(x.getKey()).equals(x.getValue());
@@ -385,24 +310,14 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		return !doesNotMatchAllSelectionCriteria;
 	}
 
-	/**
-	 * Reduces the key value store such that it only contains the given keys.
-	 *
-	 * @param filterKeys
-	 *            Keys to keep in the key value store.
-	 */
+	@Override
 	public void project(final String[] filterKeys) {
 		Set<String> keysToKeep = Arrays.stream(filterKeys).collect(Collectors.toSet());
 		Collection<String> keysToRemove = SetUtil.difference(this.keySet(), keysToKeep);
 		this.removeAll(keysToRemove.toArray(new String[] {}));
 	}
 
-	/**
-	 * Removes all the keys provided by {@code removeKeys}.
-	 *
-	 * @param removeKeys
-	 *            Array of keys that shall be removed from the key value store.
-	 */
+	@Override
 	public void removeAll(final String[] removeKeys) {
 		Set<String> keysToRemove = Arrays.stream(removeKeys).collect(Collectors.toSet());
 		for (String key : keysToRemove) {
@@ -410,24 +325,12 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Enables filtering values of multiple keys.
-	 *
-	 * @param filterMap
-	 *            Map of keys and respective filters to apply.
-	 */
+	@Override
 	public void filter(final Map<String, IKVFilter> filterMap) {
 		filterMap.entrySet().stream().forEach(x -> this.filter(x.getKey(), x.getValue()));
 	}
 
-	/**
-	 * Allows to apply a {@code filter} to the value of a specific {@code key}.
-	 *
-	 * @param key
-	 *            Key to whose value the filter may be applied.
-	 * @param filter
-	 *            The filter for applying to the value of the given {@code key}.
-	 */
+	@Override
 	public void filter(final String key, final IKVFilter filter) {
 		if (!this.containsKey(key)) {
 			return;
@@ -462,16 +365,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Merges a set of keys and concatenates the values of the respective keys.
-	 *
-	 * @param fieldKeys
-	 *            Keys of values to be concatenated.
-	 * @param separator
-	 *            Seperator to separate values of different keys.
-	 * @param newKey
-	 *            Name of the new key.
-	 */
+	@Override
 	public void merge(final String[] fieldKeys, final String separator, final String newKey) {
 		StringBuilder sb = new StringBuilder();
 		boolean first = true;
@@ -487,12 +381,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		this.put(newKey, sb.toString());
 	}
 
-	/**
-	 * Updates all keys of this key value store and prepends the given prefix.
-	 *
-	 * @param prefix
-	 *            The prefix to prepend to key names.
-	 */
+	@Override
 	public void prefixAllKeys(final String prefix) {
 		Set<String> keySet = new HashSet<>(this.keySet());
 		for (String key : keySet) {
@@ -502,14 +391,7 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 		}
 	}
 
-	/**
-	 * Renames a key by the new key name.
-	 *
-	 * @param key
-	 *            The old key name.
-	 * @param newKeyName
-	 *            The new key name.
-	 */
+	@Override
 	public void renameKey(final String key, final String newKeyName) {
 		if (this.containsKey(key)) {
 			this.put(newKeyName, this.get(key));
@@ -568,4 +450,10 @@ public class KVStore extends HashMap<String, Object> implements Serializable {
 	public boolean equals(final Object obj) {
 		return super.equals(obj);
 	}
+
+	@Override
+	public boolean isNull(final String key) {
+		return (this.get(key) == null || this.getAsString(key).equals("null"));
+	}
+
 }

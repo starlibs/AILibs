@@ -50,4 +50,9 @@ public class MultiValueAttributeType implements IMultiValueAttributeType {
 		return this.buildAttributeValue(value);
 	}
 
+	@Override
+	public String getStringDescriptionOfDomain() {
+		return this.domain.toString();
+	}
+
 }

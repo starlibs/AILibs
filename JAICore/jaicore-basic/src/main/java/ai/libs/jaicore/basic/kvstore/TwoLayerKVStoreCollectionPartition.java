@@ -48,7 +48,7 @@ class TwoLayerKVStoreCollectionPartition implements Iterable<Entry<String, Map<S
 	 * Adds a signle {@link KVStore} to this {@link TwoLayerKVStoreCollectionPartition}.
 	 * @param store
 	 */
-	void add(final KVStore store) {
+	void add(final IKVStore store) {
 		/* First ensure that nested maps contain the required keys and KVStoreCollection respectively. */
 		String firstLevelValue = store.getAsString(this.firstLayerKey);
 		String secondLevelValue = store.getAsString(this.secondLayerKey);

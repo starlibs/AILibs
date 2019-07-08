@@ -6,6 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class NumericParameterDomain implements IParameterDomain {
 	private final boolean isInteger;
 	private final double min, max;
+	
+	@SuppressWarnings("unused")
+	private NumericParameterDomain() {
+		// for serialization
+		this.isInteger = true;
+		this.min = 0;
+		this.max = 0;
+	}
 
 	@JsonCreator
 	public NumericParameterDomain(@JsonProperty("integer") final boolean isInteger, @JsonProperty("min") final double min, @JsonProperty("max") final double max) {

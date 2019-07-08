@@ -13,7 +13,7 @@ import weka.core.Instances;
 public class MulticlassClassStratifiedSplitter implements IDatasetSplitter {
 
 	@Override
-	public List<Instances> split(final Instances data, final long seed, final double... portions) {
+	public List<Instances> split(final Instances data, final long seed, final double portions) throws SplitFailedException, InterruptedException {
 		return WekaUtil.getStratifiedSplit(data, seed, portions);
 	}
 

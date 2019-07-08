@@ -47,7 +47,7 @@ public class CategoricalAttributeType implements ICategoricalAttributeType {
 
 	@Override
 	public IAttributeValue<String> buildAttributeValue(final Object value) {
-		return this.buildAttributeValue((String) value);
+		return this.buildAttributeValue(value.toString());
 	}
 
 	@Override
@@ -58,6 +58,11 @@ public class CategoricalAttributeType implements ICategoricalAttributeType {
 	@Override
 	public String toString() {
 		return "CAT:" + this.domain.toString();
+	}
+
+	@Override
+	public String getStringDescriptionOfDomain() {
+		return this.domain.toString();
 	}
 
 }

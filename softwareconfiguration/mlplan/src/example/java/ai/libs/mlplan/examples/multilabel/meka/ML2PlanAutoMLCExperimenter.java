@@ -3,6 +3,7 @@ package ai.libs.mlplan.examples.multilabel.meka;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +25,15 @@ import ai.libs.jaicore.experiments.ExperimentRunner;
 import ai.libs.jaicore.experiments.IExperimentDatabaseHandle;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
-import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
+import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.WekaUtil;
@@ -40,11 +44,13 @@ import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
 import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
 import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
+import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanMekaBuilder;
+import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -56,11 +62,11 @@ import meka.core.Result;
 import weka.core.Instances;
 
 /**
-* Experimenter for ML2PLan & AutoMLC
-*
-* @author helegraf, mwever
-*
-*/
+ * Experimenter for ML2PLan & AutoMLC
+ *
+ * @author helegraf, mwever
+ *
+ */
 public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 
 	private static final ML2PlanAutoMLCExperimenterConfig CONFIG = ConfigCache.getOrCreate(ML2PlanAutoMLCExperimenterConfig.class);
@@ -146,8 +152,14 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 
 				if (CONFIG.showGUI()) {
 					new JFXPanel();
-					AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())),
-							new SearchRolloutHistogramPlugin<>(), new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
+
+					NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
+					List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer,
+							new NodeDisplayInfoAlgorithmEventPropertyComputer<>(new JaicoreNodeInfoGenerator<>(new TFDNodeInfoGenerator())), new RolloutInfoAlgorithmEventPropertyComputer(nodeInfoAlgorithmEventPropertyComputer),
+							new ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer(new WekaClassifierSolutionCandidateRepresenter()));
+
+					AlgorithmVisualizationWindow window = new AlgorithmVisualizationWindow(mlplan, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin(), new SearchRolloutHistogramPlugin(),
+							new SolutionPerformanceTimelinePlugin(), new HASCOModelStatisticsPlugin());
 					Platform.runLater(window);
 				}
 
@@ -234,10 +246,10 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 		}
 	}
 
-	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
-		IExperimentDatabaseHandle dbHandle = new ExperimenterSQLHandle(CONFIG);
+	public static void main(final String[] args) throws ExperimentDBInteractionFailedException, InterruptedException {
+		IExperimentDatabaseHandle dbHandle = new ExperimenterMySQLHandle(CONFIG);
 		ExperimentRunner runner = new ExperimentRunner(CONFIG, new ML2PlanAutoMLCExperimenter(), dbHandle);
-		runner.randomlyConductExperiments(1, false);
+		runner.randomlyConductExperiments(1);
 		System.exit(0);
 	}
 

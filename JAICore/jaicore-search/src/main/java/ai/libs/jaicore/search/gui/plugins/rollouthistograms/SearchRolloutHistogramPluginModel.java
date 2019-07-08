@@ -15,38 +15,40 @@ import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
  * @param <N>
  *            The node type class.
  */
-public class SearchRolloutHistogramPluginModel<N> extends ASimpleMVCPluginModel<SearchRolloutHistogramPluginView<N>, SearchRolloutHistogramPluginController<N>> {
+public class SearchRolloutHistogramPluginModel extends ASimpleMVCPluginModel<SearchRolloutHistogramPluginView, SearchRolloutHistogramPluginController> {
 
-	private N currentlySelectedNode;
-	private final Map<N, List<Double>> observedPerformances = new HashMap<>();
+	private String currentlySelectedNode;
+	private final Map<String, List<Double>> observedPerformances = new HashMap<>();
 
-	public final void addEntry(N node, double score) {
-		if (!observedPerformances.containsKey(node))
+	public final void addEntry(String node, double score) {
+		if (!observedPerformances.containsKey(node)) {
 			observedPerformances.put(node, Collections.synchronizedList(new LinkedList<>()));
+		}
 		observedPerformances.get(node).add(score);
 		getView().update();
 	}
 
-	public Map<N, List<Double>> getObservedPerformances() {
+	public Map<String, List<Double>> getObservedPerformances() {
 		return observedPerformances;
 	}
-	
-	public List<Double> getObservedPerformancesUnderSelectedNode (){
+
+	public List<Double> getObservedPerformancesUnderSelectedNode() {
 		return observedPerformances.get(currentlySelectedNode);
 	}
-	
+
+	@Override
 	public void clear() {
 		observedPerformances.clear();
 		getView().clear();
 	}
-	
-	public void setCurrentlySelectedNode(N currentlySelectedNode) {
+
+	public void setCurrentlySelectedNode(String currentlySelectedNode) {
 		this.currentlySelectedNode = currentlySelectedNode;
-		
+		getView().clear();
 		getView().update();
 	}
 
-	public N getCurrentlySelectedNode() {
+	public String getCurrentlySelectedNode() {
 		return currentlySelectedNode;
 	}
 }

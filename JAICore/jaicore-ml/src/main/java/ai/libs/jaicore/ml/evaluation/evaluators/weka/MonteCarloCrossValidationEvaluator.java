@@ -21,6 +21,7 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.AbstractSpl
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
+import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
@@ -100,7 +101,11 @@ public class MonteCarloCrossValidationEvaluator implements IClassifierEvaluator,
 			}
 
 			if (!this.splitCache.containsKey(this.seed + i)) {
-				this.splitCache.put(this.seed + i, this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion));
+				try {
+					this.splitCache.put(this.seed + i, this.datasetSplitter.split(this.data, this.seed + i, this.trainingPortion));
+				} catch (SplitFailedException e) {
+					throw new ObjectEvaluationFailedException("Could not evaluate classifier!", e);
+				}
 			}
 			List<Instances> split = this.splitCache.get(this.seed + i);
 

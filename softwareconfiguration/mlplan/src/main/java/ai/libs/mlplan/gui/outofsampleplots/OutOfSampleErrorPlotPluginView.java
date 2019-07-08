@@ -63,6 +63,7 @@ public class OutOfSampleErrorPlotPluginView extends ASimpleMVCPluginView<OutOfSa
 		return "Out-of-Sample Error Timeline";
 	}
 	
+	@Override
 	public void clear() {
 		nextIndexToDisplay = 0;
 		believedErrorSeries.getData().clear();

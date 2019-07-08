@@ -25,26 +25,30 @@ public class ComponentInstanceDeserializer extends StdDeserializer<ComponentInst
 
 	private transient Collection<Component> possibleComponents; // the idea is not to serialize the deserializer, so this can be transient
 
-	public ComponentInstanceDeserializer(Collection<Component> possibleComponents) {
+	public ComponentInstanceDeserializer(final Collection<Component> possibleComponents) {
 		super(ComponentInstance.class);
 		this.possibleComponents = possibleComponents;
+	}
+
+	public ComponentInstance readFromJson(final String json) throws IOException {
+		return this.readAsTree(new ObjectMapper().readTree(json));
 	}
 
 	@SuppressWarnings("unchecked")
 	public ComponentInstance readAsTree(final TreeNode p) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		// read the parameter values
-		Map<String, String> parameterValues = mapper.treeToValue(p.get("parameterValues"), HashMap.class);
+		Map<String, String> parameterValues = mapper.treeToValue(p.get("params"), HashMap.class);
 		// read the component
 
-		String componentName = p.get("component").get("name").toString().replaceAll("\"", "");
+		String componentName = p.get("component").toString().replaceAll("\"", "");
 
-		Component component = possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst()
+		Component component = this.possibleComponents.stream().filter(c -> c.getName().equals(componentName)).findFirst()
 				.orElseThrow(NoSuchElementException::new);
 
 		Map<String, ComponentInstance> satisfactionOfRequiredInterfaces = new HashMap<>();
 		// recursively resolve the requiredInterfaces
-		TreeNode n = p.get("satisfactionOfRequiredInterfaces");
+		TreeNode n = p.get("requiredInterfaces");
 		Iterator<String> fields = n.fieldNames();
 		while (fields.hasNext()) {
 			String key = fields.next();

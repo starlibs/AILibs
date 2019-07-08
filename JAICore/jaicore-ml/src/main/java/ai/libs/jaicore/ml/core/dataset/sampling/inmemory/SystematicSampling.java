@@ -13,10 +13,10 @@ import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 /**
  * Implementation of Systematic Sampling: Sort datapoints and pick every k-th
  * datapoint for the sample.
- * 
+ *
  * @author Lukas Brandt
  */
-public class SystematicSampling<I extends INumericArrayInstance, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<D> {
+public class SystematicSampling<I extends INumericArrayInstance, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {
 
 	private Random random;
 	private D sortedDataset = null;
@@ -39,26 +39,25 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 
 	/**
 	 * Simple constructor that uses the default datapoint comparator.
-	 * 
+	 *
 	 * @param random
 	 *            Random Object for determining the sampling start point.
 	 */
-	public SystematicSampling(Random random, D input) {
+	public SystematicSampling(final Random random, final D input) {
 		super(input);
 		this.random = random;
 	}
 
 	/**
 	 * Constructor for a custom datapoint comparator.
-	 * 
+	 *
 	 * @param random
 	 *            Random Object for determining the sampling start point.
 	 * @param datapointComparator
 	 *            Comparator to sort the dataset.
 	 */
-	public SystematicSampling(Random random, Comparator<I> datapointComparator, D input) {
-		super(input);
-		this.random = random;
+	public SystematicSampling(final Random random, final Comparator<I> datapointComparator, final D input) {
+		this(random, input);
 		this.datapointComparator = datapointComparator;
 	}
 
@@ -85,9 +84,9 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 			// If the sample size is not reached yet, add the next datapoint from the
 			// systematic sampling method.
 			if (this.sample.size() < this.sampleSize) {
-				int e = (startIndex + (this.index++) * k) % this.sortedDataset.size();
+				int e = (this.startIndex + (this.index++) * this.k) % this.sortedDataset.size();
 				this.sample.add(this.sortedDataset.get(e));
-				return new SampleElementAddedEvent(getId());
+				return new SampleElementAddedEvent(this.getId());
 			} else {
 				return this.terminate();
 			}
@@ -101,10 +100,10 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 	}
 
 	public D getSortedDataset() {
-		return sortedDataset;
+		return this.sortedDataset;
 	}
 
-	public void setSortedDataset(D sortedDataset) {
+	public void setSortedDataset(final D sortedDataset) {
 		this.sortedDataset = sortedDataset;
 	}
 

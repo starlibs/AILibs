@@ -7,15 +7,15 @@ import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;
 import ai.libs.jaicore.logic.fol.structure.Monom;
-import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.STNPlanningDomain;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
 
 public class CostSensitiveHTNPlanningProblem<P extends IHTNPlanningProblem, V extends Comparable<V>> implements IHTNPlanningProblem {
 	private final P corePlanningProblem;
-	private final IObjectEvaluator<Plan, V> planEvaluator;
+	private final IObjectEvaluator<IPlan, V> planEvaluator;
 
-	public CostSensitiveHTNPlanningProblem(final P corePlanningProblem, final IObjectEvaluator<Plan, V> planEvaluator) {
+	public CostSensitiveHTNPlanningProblem(final P corePlanningProblem, final IObjectEvaluator<IPlan, V> planEvaluator) {
 		super();
 		this.corePlanningProblem = corePlanningProblem;
 		this.planEvaluator = planEvaluator;
@@ -25,7 +25,7 @@ public class CostSensitiveHTNPlanningProblem<P extends IHTNPlanningProblem, V ex
 		return this.corePlanningProblem;
 	}
 
-	public IObjectEvaluator<Plan, V> getPlanEvaluator() {
+	public IObjectEvaluator<IPlan, V> getPlanEvaluator() {
 		return this.planEvaluator;
 	}
 

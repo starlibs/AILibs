@@ -35,8 +35,8 @@ import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 import ai.libs.jaicore.logic.fol.theories.EvaluablePredicate;
 import ai.libs.jaicore.planning.classical.problems.ceoc.CEOCOperation;
-import ai.libs.jaicore.planning.core.EvaluatedPlan;
-import ai.libs.jaicore.planning.core.Plan;
+import ai.libs.jaicore.planning.core.interfaces.IEvaluatedPlan;
+import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningDomain;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
@@ -51,7 +51,7 @@ import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
  *
  */
 public class HASCOReduction<V extends Comparable<V>>
-implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, EvaluatedPlan<V>> {
+implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfigurationProblem<V>, ComponentInstance, CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V>, IEvaluatedPlan<V>> {
 
 	private static final boolean CONFIGURE_PARAMS = true; // this could be determined automatically later
 
@@ -290,11 +290,11 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 		CEOCIPSTNPlanningProblem planningProblem = this.getPlanningProblem();
 
 		/* derive a plan evaluator from the configuration evaluator */
-		IObjectEvaluator<Plan, V> planEvaluator = new IObjectEvaluator<Plan, V>() {
+		IObjectEvaluator<IPlan, V> planEvaluator = new IObjectEvaluator<IPlan, V>() {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			public V evaluate(final Plan plan) throws InterruptedException, ObjectEvaluationFailedException {
+			public V evaluate(final IPlan plan) throws InterruptedException, ObjectEvaluationFailedException {
 				ComponentInstance solution = HASCOReduction.this.decodeSolution(plan);
 				if (solution == null) {
 					throw new IllegalArgumentException("The following plan yields a null solution: \n\t" + plan.getActions().stream().map(a -> a.getEncoding()).collect(Collectors.joining("\n\t")));
@@ -318,11 +318,11 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	}
 
 	@Override
-	public ComponentInstance decodeSolution(final EvaluatedPlan<V> solution) {
-		return this.decodeSolution((Plan) solution);
+	public ComponentInstance decodeSolution(final IEvaluatedPlan<V> solution) {
+		return this.decodeSolution((IPlan) solution);
 	}
 
-	public ComponentInstance decodeSolution(final Plan plan) {
+	public ComponentInstance decodeSolution(final IPlan plan) {
 		return Util.getSolutionCompositionForPlan(HASCOReduction.this.components, HASCOReduction.this.getInitState(), plan, true);
 	}
 }

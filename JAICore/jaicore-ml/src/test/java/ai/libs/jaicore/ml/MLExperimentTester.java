@@ -10,18 +10,16 @@ import java.util.Map;
 
 import org.aeonbits.owner.ConfigCache;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.ExperimentRunner;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
-import ai.libs.jaicore.experiments.IExperimentSetConfig;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
-import ai.libs.jaicore.experiments.databasehandle.ExperimenterSQLHandle;
+import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.experiments.exceptions.IllegalExperimentSetupException;
-import ai.libs.jaicore.experiments.exceptions.IllegalKeyDescriptorException;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.SingleRandomSplitClassifierEvaluator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -35,24 +33,25 @@ import weka.core.Instances;
 public class MLExperimentTester implements IExperimentSetEvaluator {
 
 	private static final ISpecificMLExperimentConfig config = ConfigCache.getOrCreate(ISpecificMLExperimentConfig.class);
+	private static final Logger logger = LoggerFactory.getLogger(MLExperimentTester.class);
 	private boolean conductedExperiment = false;
 
 	@Override
 	public void evaluate(final ExperimentDBEntry experimentEntry,
 			final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
 		try {
-			if (this.config.getDatasetFolder() == null || (!this.config.getDatasetFolder().exists())) {
+			if (config.getDatasetFolder() == null || (!config.getDatasetFolder().exists())) {
 				throw new IllegalArgumentException(
-						"config specifies invalid dataset folder " + this.config.getDatasetFolder());
+						"config specifies invalid dataset folder " + config.getDatasetFolder());
 			}
 			Map<String, String> description = experimentEntry.getExperiment().getValuesOfKeyFields();
 			Classifier c = AbstractClassifier.forName(description.get("classifier"), null);
 			Instances data = new Instances(new BufferedReader(new FileReader(
-					new File(this.config.getDatasetFolder() + File.separator + description.get("dataset") + ".arff"))));
+					new File(config.getDatasetFolder() + File.separator + description.get("dataset") + ".arff"))));
 			data.setClassIndex(data.numAttributes() - 1);
-			int seed = Integer.valueOf(description.get("seed"));
+			int seed = Integer.parseInt(description.get("seed"));
 
-			System.out.println(c.getClass().getName());
+			logger.info("Testing classifier {}", c.getClass().getName());
 			Map<String, Object> results = new HashMap<>();
 			SingleRandomSplitClassifierEvaluator eval = new SingleRandomSplitClassifierEvaluator(data);
 			eval.setSeed(seed);
@@ -67,9 +66,9 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 	}
 
 	@Test
-	public void testExperimentRunnerForMLExperiment() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException {
-		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTester(), new ExperimenterSQLHandle(config));
-		runner.randomlyConductExperiments(true);
+	public void testExperimentRunnerForMLExperiment() throws ExperimentDBInteractionFailedException, InterruptedException {
+		ExperimentRunner runner = new ExperimentRunner(config, new MLExperimentTester(), new ExperimenterMySQLHandle(config));
+		runner.randomlyConductExperiments();
 		assertTrue(this.conductedExperiment);
 	}
 }

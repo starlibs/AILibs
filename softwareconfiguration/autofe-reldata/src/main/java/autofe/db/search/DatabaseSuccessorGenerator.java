@@ -86,7 +86,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 				List<AbstractFeature> extended = this.cloneFeatureList(currentFeatures);
 				extended.add(new ForwardFeature(att));
 				DatabaseNode to = new DatabaseNode(extended, false);
-				toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Forward: " + att.getName(), NodeType.OR));
+				toReturn.add(new NodeExpansionDescription<>(to, "Forward: " + att.getName(), NodeType.OR));
 			}
 		}
 
@@ -114,12 +114,12 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			List<AbstractFeature> extended = this.cloneFeatureList(currentFeatures);
 			extended.add(new BackwardFeature(att));
 			DatabaseNode to = new DatabaseNode(extended, false);
-			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, to, "Backward: " + att.getName(), NodeType.OR));
+			toReturn.add(new NodeExpansionDescription<>(to, "Backward: " + att.getName(), NodeType.OR));
 		}
 
 		// Exit edge
 		DatabaseNode exitNode = new DatabaseNode(new ArrayList<>(currentFeatures), true);
-		toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, exitNode, "Exit", NodeType.OR));
+		toReturn.add(new NodeExpansionDescription<>(exitNode, "Exit", NodeType.OR));
 
 		return toReturn;
 	}
@@ -180,7 +180,7 @@ public class DatabaseSuccessorGenerator implements SuccessorGenerator<DatabaseNo
 			DatabaseNode extendedNode = new DatabaseNode(extendedFeatures, false);
 			AbstractRelationship ar = nextPathElement.getX();
 			String description = String.format("Intermediate: <[%s -> %s], %s>", ar.getFrom().getName(), ar.getTo().getName(), nextPathElement.getY());
-			toReturn.add(new NodeExpansionDescription<DatabaseNode, String>(node, extendedNode, description, NodeType.OR));
+			toReturn.add(new NodeExpansionDescription<>(extendedNode, description, NodeType.OR));
 		}
 
 		return toReturn;

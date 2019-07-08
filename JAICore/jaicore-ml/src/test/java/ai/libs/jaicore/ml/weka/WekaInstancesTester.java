@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.weka;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -19,9 +20,8 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
+import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeType;
@@ -83,17 +83,26 @@ public class WekaInstancesTester {
 
 			/* check for each value that the contained information is correct */
 			for (int j = 0; j <= numAttributes; j++) {
-				Object value = j < numAttributes ? inst.getAttributeValueAtPosition(j, Object.class) : inst.getTargetValue();
-				if (value instanceof NumericAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), (double)value, 0.0);
-				}
-				else if (value instanceof BooleanAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + (data.get(i).value(j) == 1.0), data.get(i).value(j) == 1.0, value);
-				}
-				else if (value instanceof CategoricalAttributeValue) {
-					assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).stringValue(j), data.get(i).stringValue(j), value);
+				if (j < numAttributes) {
+					Object value = inst.getAttributeValueAtPosition(j, Object.class);
+					if (value instanceof NumericAttributeValue) {
+						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).value(j), data.get(i).value(j), ((NumericAttributeValue) value).getValue(), 0.0);
+					}
+					else if (value instanceof BooleanAttributeValue) {
+						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + (data.get(i).value(j) == 1.0), data.get(i).value(j) == 1.0, ((BooleanAttributeValue) value).getValue());
+					}
+					else if (value instanceof CategoricalAttributeValue) {
+						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + inst.getAttributeValueAtPosition(j, Object.class) + " but should have " + data.get(i).stringValue(j), data.get(i).stringValue(j), ((CategoricalAttributeValue) value).getValue());
+					} else {
+						fail("Unsupported attribute value type " + value.getClass());
+					}
 				} else {
-					fail("Unsupported attribute value type " + value.getClass());
+					if (inst.getTargetValue() instanceof String) {
+						assertEquals(WekaUtil.getClassName(data.get(i)), inst.getTargetValue());
+					}
+					else {
+						assertEquals(data.get(i).classValue(), inst.getTargetValue());
+					}
 				}
 			}
 			assertNotNull(i + "-th instance has target value null!", inst.getTargetValue());
@@ -132,6 +141,74 @@ public class WekaInstancesTester {
 		WekaInstances<Object> wrapped = new WekaInstances<>(data);
 		for (WekaInstance<Object> wi : wrapped) {
 			assertTrue(data.contains(wi.getElement()));
+		}
+	}
+
+	@Test
+	public void testEqualnessOfTwoCopiesOfSameDataset() throws Exception {
+		Instances ds1 = new Instances(new FileReader(this.dataset));
+		ds1.setClassIndex(ds1.numAttributes() - 1);
+		WekaInstances<Object> wrapped1 = new WekaInstances<>(ds1);
+
+		Instances ds2 = new Instances(new FileReader(this.dataset));
+		ds2.setClassIndex(ds2.numAttributes() - 1);
+		WekaInstances<Object> wrapped2 = new WekaInstances<>(ds2);
+
+		/* first conduct an instance-wise comparison and a mutual containment check */
+		int n = ds1.size();
+		assertEquals("Copy of dataset has different length than the original.", n, ds2.size());
+		for (int i = 0; i < n; i++) {
+			WekaInstance<Object> i1 = wrapped1.get(i);
+			WekaInstance<Object> i2 = wrapped2.get(i);
+			assertEquals("Hash codes of single instance don't match!", i1.hashCode(), i2.hashCode());
+			assertEquals("Comparing the instances with equals yields false.", i1, i2);
+			assertTrue("The second dataset does not contain " + i1 + ", which is contained in the first.", wrapped2.contains(i1));
+			assertTrue("The first dataset does not contain " + i2 + ", which is contained in the second.", wrapped1.contains(i2));
+		}
+
+		/* now compare the entire dataset */
+		assertEquals("Hash codes of entire dataset don't match!", wrapped1.hashCode(), wrapped2.hashCode());
+		assertEquals("Comparing the datasets with equals yields false.", wrapped1, wrapped2);
+	}
+
+	@Test
+	public void testContainsPredicate() throws Exception {
+		Instances data = new Instances(new FileReader(this.dataset));
+		data.setClassIndex(data.numAttributes() - 1);
+		WekaInstances<Object> wrapped = new WekaInstances<>(data);
+
+		for (WekaInstance<Object> i : wrapped) {
+			assertTrue(wrapped.contains(i));
+		}
+	}
+
+	@Test
+	public void testSelfEqualness() throws Exception {
+		Instances data = new Instances(new FileReader(this.dataset));
+		data.setClassIndex(data.numAttributes() - 1);
+		WekaInstances<Object> wrapped = new WekaInstances<>(data);
+
+		for (WekaInstance<Object> i : wrapped) {
+			assertTrue(i.equals(i));
+		}
+		assertEquals(wrapped, wrapped);
+	}
+
+	@Test
+	public void testThatEveryInstanceOccursOnlyOnce() throws Exception {
+		Instances data = new Instances(new FileReader(this.dataset));
+		data.setClassIndex(data.numAttributes() - 1);
+		WekaInstances<Object> wrapped = new WekaInstances<>(data);
+		int n = wrapped.size();
+
+		for (int i = 0; i < n; i++) {
+			WekaInstance<Object> x = wrapped.get(i);
+			for (int j = 0; j < n; j++) {
+				if (i != j) {
+					WekaInstance<Object> y = wrapped.get(j);
+					assertFalse("Instance " + i + " and " + j + " are identical:\n\t" + Arrays.toString(x.getAsDoubleVector()) + " with label " + x.getTargetValue() + "\n\t" + Arrays.toString(y.getAsDoubleVector()) + " with label " + y.getTargetValue(), x.equals(y));
+				}
+			}
 		}
 	}
 

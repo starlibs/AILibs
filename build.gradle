@@ -190,7 +190,7 @@ dependencies{
 		exclude group: 'commons-cli'
 	}
 	compile project(":JAICore:jaicore-experiments")
-	compile project(":JAICore:jaicore-graphvisualizer")
+	compile project(":JAICore:jaicore-algorithminspector")
 	compile project(":JAICore:jaicore-logic")
 	compile project(":JAICore:jaicore-math")
 	compile project(":JAICore:jaicore-ml")

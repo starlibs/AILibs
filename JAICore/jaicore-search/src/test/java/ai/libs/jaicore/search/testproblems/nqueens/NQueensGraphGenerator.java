@@ -30,14 +30,15 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 		return n -> {
 			List<NodeExpansionDescription<QueenNode, String>> l = new ArrayList<>();
 			int currentRow = n.getPositions().size();
-			for (int i = 0; i < this.dimension; i++, countSinceLastSleep ++) {
-				if (countSinceLastSleep % 100 == 0)
+			for (int i = 0; i < this.dimension; i++, this.countSinceLastSleep ++) {
+				if (this.countSinceLastSleep % 100 == 0) {
 					Thread.sleep(5);
+				}
 				if (Thread.interrupted()) {
 					throw new InterruptedException("Successor generation has been interrupted.");
 				}
 				if (!n.attack(currentRow, i)) {
-					l.add(new NodeExpansionDescription<>(n, new QueenNode(n, i), "" + i, NodeType.OR));
+					l.add(new NodeExpansionDescription<>(new QueenNode(n, i), "" + i, NodeType.OR));
 				}
 			}
 			return l;
@@ -47,16 +48,5 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 	@Override
 	public NodeGoalTester<QueenNode> getGoalTester() {
 		return n -> n.getNumberOfQueens() == this.dimension;
-	}
-
-	@Override
-	public boolean isSelfContained() {
-		return true;
-	}
-
-	@Override
-	public void setNodeNumbering(final boolean nodenumbering) {
-
-		/* not applicable */
 	}
 }

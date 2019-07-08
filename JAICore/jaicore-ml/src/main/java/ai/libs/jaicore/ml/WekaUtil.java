@@ -33,17 +33,25 @@ import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.basic.sets.CartesianProductComputationProblem;
 import ai.libs.jaicore.basic.sets.LDSRelationComputer;
+import ai.libs.jaicore.ml.cache.InstructionFailedException;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
-import ai.libs.jaicore.ml.cache.SplitInstruction;
+import ai.libs.jaicore.ml.cache.StratifiedSplitSubsetInstruction;
 import ai.libs.jaicore.ml.core.SimpleInstanceImpl;
 import ai.libs.jaicore.ml.core.SimpleInstancesImpl;
 import ai.libs.jaicore.ml.core.SimpleLabeledInstanceImpl;
 import ai.libs.jaicore.ml.core.WekaCompatibleInstancesImpl;
+import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
+import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
+import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
+import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.interfaces.LabeledInstance;
 import ai.libs.jaicore.ml.interfaces.LabeledInstances;
+import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -646,135 +654,6 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static Collection<Integer>[] getStratifiedSplitIndices(final Instances data, final Random rand, final double... pPortions) {
-
-		/* check that portions sum up to s.th. smaller than 1 */
-		double sum = 0;
-		double[] portions = new double[pPortions.length + 1];
-		for (int i = 0; i < pPortions.length; i++) {
-			sum += pPortions[i];
-			portions[i] = pPortions[i];
-		}
-		if (sum > 1) {
-			throw new IllegalArgumentException(MSG_SUM1);
-		}
-		portions[pPortions.length] = 1 - sum;
-
-		/* determine how many instance of each class should be in each fold */
-		Map<String, Integer> numberOfInstancesPerClass = getNumberOfInstancesPerClass(data);
-		Map<String, Map<Integer, Integer>> numberOfInstancesPerClassAndFold = new HashMap<>();
-		for (Entry<String, Integer> classNameWithNumberOfInstancesPerClassAndFold : numberOfInstancesPerClass.entrySet()) {
-			String className = classNameWithNumberOfInstancesPerClassAndFold.getKey();
-			numberOfInstancesPerClassAndFold.put(className, new HashMap<>());
-			for (int foldId = 0; foldId < portions.length; foldId++) {
-				numberOfInstancesPerClassAndFold.get(className).put(foldId, ((int) Math.ceil(classNameWithNumberOfInstancesPerClassAndFold.getValue() * portions[foldId])) + 1);
-			}
-		}
-
-		/* compute basic structures for iteration over all instances */
-		Map<String, Integer> nextBinForClass = new HashMap<>();
-		numberOfInstancesPerClass.keySet().forEach(c -> nextBinForClass.put(c, 0));
-		@SuppressWarnings("unchecked")
-		Collection<Integer>[] folds = new ArrayList[portions.length];
-		LinkedList<Integer> indices = new LinkedList<>(ContiguousSet.create(Range.closed(0, data.size() - 1), DiscreteDomain.integers()).asList());
-		Collections.shuffle(indices, rand);
-
-		/* first assign one item of each class to each fold */
-		while (!indices.isEmpty()) {
-			int index = indices.poll();
-
-			/* determine fold where to place this instance */
-			String assignedClass = WekaUtil.getClassName(data.get(index));
-			int foldId = nextBinForClass.get(assignedClass);
-			if (folds[foldId] == null) {
-				folds[foldId] = new ArrayList<>();
-			}
-			Collection<Integer> fold = folds[foldId];
-			fold.add(index);
-
-			/* update point for class */
-			numberOfInstancesPerClassAndFold.get(assignedClass).put(foldId, numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) - 1);
-
-			do {
-				foldId++;
-				if (foldId >= portions.length) {
-					foldId = 0;
-				}
-			} while (numberOfInstancesPerClassAndFold.get(assignedClass).get(foldId) <= 0);
-			nextBinForClass.put(assignedClass, foldId);
-		}
-
-		if (debug && Arrays.asList(folds).stream().mapToInt(Collection::size).sum() != data.size()) {
-			throw new IllegalStateException(MSG_DEVIATING_NUMBER_OF_INSTANCES);
-		}
-		return folds;
-	}
-
-	public static List<List<Integer>> getStratifiedSplitIndicesAsList(final Instances data, final Random rand, final double... portions) {
-		/* check that portions sum up to s.th. smaller than 1 */
-		double sum = 0;
-		for (double p : portions) {
-			sum += p;
-		}
-		if (sum > 1) {
-			throw new IllegalArgumentException(MSG_SUM1);
-		}
-
-		Instances shuffledData = new Instances(data);
-		shuffledData.randomize(rand);
-		List<List<Integer>> instances = new ArrayList<>();
-		Instances emptyInstances = new Instances(shuffledData);
-		emptyInstances.clear();
-
-		/* compute instances per class */
-		Map<String, List<Integer>> classWiseSeparation = new HashMap<>();
-
-		for (int i = 0; i < data.size(); i++) {
-			String assignedClass = data.classAttribute().value((int) data.get(i).classValue());
-			if (!classWiseSeparation.containsKey(assignedClass)) {
-				classWiseSeparation.put(assignedClass, new LinkedList<>());
-			}
-			classWiseSeparation.get(assignedClass).add(i);
-		}
-
-		Map<String, Integer> classCapacities = new HashMap<>();
-		for (Entry<String, List<Integer>> classWithItsIndices : classWiseSeparation.entrySet()) {
-			classCapacities.put(classWithItsIndices.getKey(), classWithItsIndices.getValue().size());
-		}
-
-		/* first assign one item of each class to each fold */
-		for (int i = 0; i <= portions.length; i++) {
-			List<Integer> instancesForSplit = new LinkedList<>();
-			for (List<Integer> availableInstances : classWiseSeparation.values()) {
-				if (!availableInstances.isEmpty()) {
-					instancesForSplit.add(availableInstances.get(0));
-					availableInstances.remove(0);
-				}
-			}
-			instances.add(instancesForSplit);
-		}
-
-		/* now distribute remaining instances over the folds */
-		for (int i = 0; i <= portions.length; i++) {
-			double portion = i < portions.length ? portions[i] : 1 - sum;
-			List<Integer> instancesForSplit = instances.get(i);
-			for (Entry<String, List<Integer>> classWithItsIndices : classWiseSeparation.entrySet()) {
-				List<Integer> availableInstances = classWithItsIndices.getValue();
-				int items = (int) Math.min(availableInstances.size(), Math.ceil(portion * classCapacities.get(classWithItsIndices.getKey())));
-				for (int j = 0; j < items; j++) {
-					instancesForSplit.add(availableInstances.get(0));
-					availableInstances.remove(0);
-				}
-			}
-
-			Collections.shuffle(instancesForSplit, rand);
-		}
-		if (debug && instances.stream().mapToInt(List::size).sum() != data.size()) {
-			throw new IllegalStateException(MSG_DEVIATING_NUMBER_OF_INSTANCES);
-		}
-		return instances;
-	}
-
 	public static ArrayNode splitToJsonArray(final Collection<Integer>[] splitDecision) {
 		ObjectMapper om = new ObjectMapper();
 		ArrayNode an = om.createArrayNode();
@@ -782,71 +661,26 @@ public class WekaUtil {
 		return an;
 	}
 
-	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double... portions) {
-		// if data should be reproducible use other method.
-		if (data instanceof ReproducibleInstances) {
-			List<ReproducibleInstances> reproducibleInstancesResult = getStratifiedSplit((ReproducibleInstances) data, seed, portions);
-			ArrayList<Instances> result = new ArrayList<>(reproducibleInstancesResult.size());
-			for (int i = 0; i < reproducibleInstancesResult.size(); i++) {
-				result.add(reproducibleInstancesResult.get(i));
+	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException  {
+		return getStratifiedSplit(data, new Random(seed), portionOfFirstFold);
+	}
+
+	public static List<Instances> getStratifiedSplit(final Instances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException  {
+		try {
+			List<Instances> split = new ArrayList<>();
+			AttributeBasedStratiAmountSelectorAndAssigner<WekaInstance<Object>, WekaInstances<Object>> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
+			StratifiedSampling<WekaInstance<Object>, WekaInstances<Object>> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, new WekaInstances<>(data));
+			sampler.setSampleSize((int)Math.ceil(portionOfFirstFold * data.size()));
+			split.add(sampler.call().getList());
+			split.add(sampler.getComplement().getList());
+			if (split.get(0).size() + split.get(1).size() != data.size()) {
+				throw new IllegalStateException("The sum of fold sizes does not correspond to the size of the original dataset!");
 			}
-			return result;
+			return split;
 		}
-
-		/* check that portions sum up to s.th. smaller than 1 */
-		double sum = 0;
-		for (double p : portions) {
-			sum += p;
+		catch (ClassCastException | AlgorithmTimeoutedException |  AlgorithmExecutionCanceledException | AlgorithmException | ClassNotFoundException | DatasetCreationException e) {
+			throw new SplitFailedException(e);
 		}
-		if (sum > 1) {
-			throw new IllegalArgumentException(MSG_SUM1);
-		}
-
-		Instances shuffledData = new Instances(data);
-		Random rand = new Random(seed);
-		shuffledData.randomize(rand);
-		List<Instances> instances = new ArrayList<>();
-		Instances emptyInstances = new Instances(shuffledData);
-		emptyInstances.clear();
-
-		/* compute instances per class */
-		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
-
-		Map<String, Integer> classCapacities = new HashMap<>(classWiseSeparation.size());
-		for (Entry<String, Instances> classWithItsInstances : classWiseSeparation.entrySet()) {
-			classCapacities.put(classWithItsInstances.getKey(), classWithItsInstances.getValue().size());
-		}
-
-		/* first assign one item of each class to each fold */
-		for (int i = 0; i <= portions.length; i++) {
-			Instances instancesForSplit = new Instances(emptyInstances);
-			for (Instances availableInstances : classWiseSeparation.values()) {
-				if (!availableInstances.isEmpty()) {
-					instancesForSplit.add(availableInstances.get(0));
-					availableInstances.remove(0);
-				}
-			}
-			instances.add(instancesForSplit);
-		}
-
-		/* now distribute remaining instances over the folds */
-		for (int i = 0; i <= portions.length; i++) {
-			double portion = i < portions.length ? portions[i] : 1 - sum;
-			Instances instancesForSplit = instances.get(i);
-			for (Entry<String, Instances> classNamesWithItsInstances : classWiseSeparation.entrySet()) {
-				Instances availableInstances = classNamesWithItsInstances.getValue();
-				int items = (int) Math.min(availableInstances.size(), Math.ceil(portion * classCapacities.get(classNamesWithItsInstances.getKey())));
-				for (int j = 0; j < items; j++) {
-					instancesForSplit.add(availableInstances.get(0));
-					availableInstances.remove(0);
-				}
-			}
-			instancesForSplit.randomize(rand);
-		}
-		if (debug && Arrays.asList(instances).stream().mapToInt(Collection::size).sum() != data.size()) {
-			throw new IllegalStateException(MSG_DEVIATING_NUMBER_OF_INSTANCES);
-		}
-		return instances;
 	}
 
 	/**
@@ -859,8 +693,10 @@ public class WekaUtil {
 	 * @param portions
 	 *            - ratios to split
 	 * @return a list of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
+	 * @throws InterruptedException
+	 * @throws SplitFailedException
 	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double... portions) {
+	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final Random rand, final double portions) throws SplitFailedException, InterruptedException {
 		return getStratifiedSplit(data, rand.nextLong(), portions);
 	}
 
@@ -874,69 +710,25 @@ public class WekaUtil {
 	 * @param portions
 	 *            - ratios to split
 	 * @return a List of {@link ReproducibleInstances}. For each of them the history will be updated to track the split
+	 * @throws InterruptedException
+	 * @throws SplitFailedException
 	 */
-	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double... portions) {
-
-		/* check that portions sum up to s.th. smaller than 1 */
-		double sum = 0;
-		for (double p : portions) {
-			sum += p;
-		}
-		if (sum > 1) {
-			throw new IllegalArgumentException(MSG_SUM1);
-		}
-
-		Instances shuffledData = new Instances(data);
-		Random rand = new Random(seed);
-		shuffledData.randomize(rand);
-		List<ReproducibleInstances> instances = new ArrayList<>();
-		ReproducibleInstances emptyInstances = new ReproducibleInstances(data);
-		emptyInstances.clear(); // leaves History untouched
-
-		/* compute instances per class */
-		Map<String, Instances> classWiseSeparation = getInstancesPerClass(shuffledData);
-
-		Map<String, Integer> classCapacities = new HashMap<>(classWiseSeparation.size());
-		for (Entry<String, Instances> classNamesWithItsInstances : classWiseSeparation.entrySet()) {
-			classCapacities.put(classNamesWithItsInstances.getKey(), classNamesWithItsInstances.getValue().size());
-		}
-
-		/* first assign one item of each class to each fold */
-		for (int i = 0; i <= portions.length; i++) {
-			ReproducibleInstances instancesForSplit = new ReproducibleInstances(emptyInstances); // Will have the same history as data but is empty
-			for (Instances availableInstances : classWiseSeparation.values()) {
-				if (!availableInstances.isEmpty()) {
-					instancesForSplit.add(availableInstances.get(0));
-					availableInstances.remove(0);
-				}
+	public static List<ReproducibleInstances> getStratifiedSplit(final ReproducibleInstances data, final long seed, final double portions) throws SplitFailedException, InterruptedException {
+		int n = 2;
+		List<ReproducibleInstances> out = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			ReproducibleInstances fold;
+			try {
+				fold = new ReproducibleInstances(data).reduceWithInstruction("stratified split", new StratifiedSplitSubsetInstruction(seed, portions), i);
+			} catch (ClassNotFoundException | InstructionFailedException e) {
+				throw new SplitFailedException(e);
 			}
-			instances.add(instancesForSplit);
+			out.add(fold);
 		}
-
-		/* now distribute remaining instances over the folds */
-		for (int i = 0; i <= portions.length; i++) {
-			double portion = i < portions.length ? portions[i] : 1 - sum;
-			ReproducibleInstances instancesForSplit = instances.get(i);
-			for (Entry<String, Instances> classNameWithInstances : classWiseSeparation.entrySet()) {
-				Instances availableInstances = classNameWithInstances.getValue();
-				int items = (int) Math.min(availableInstances.size(), Math.ceil(portion * classCapacities.get(classNameWithInstances.getKey())));
-				for (int j = 0; j < items; j++) {
-					instancesForSplit.add(availableInstances.get(0));
-					availableInstances.remove(0);
-				}
-			}
-			instancesForSplit.randomize(rand);
+		if (out.get(0).size() != Math.ceil(portions * data.size())) {
+			throw new IllegalStateException("First fold has " + out.get(0).size() + " instead of " + Math.ceil(portions * data.size()) + " items.");
 		}
-		if (debug && Arrays.asList(instances).stream().mapToInt(Collection::size).sum() != data.size()) {
-			throw new IllegalStateException(MSG_DEVIATING_NUMBER_OF_INSTANCES);
-		}
-
-		/* update ReproducibleInstanes history */
-		String ratiosAsString = Arrays.toString(portions);
-		for (int i = 0; i < instances.size(); i++) {
-			instances.get(i).addInstruction(new SplitInstruction(ratiosAsString, seed, i));
-		}
-		return instances;
+		return out;
 	}
 
 	public static List<File> getDatasetsInFolder(final File folder) throws IOException {
@@ -1111,6 +903,19 @@ public class WekaUtil {
 
 	public static List<Double> getClassesAsList(final Instances inst) {
 		return inst.stream().map(Instance::classValue).collect(Collectors.toList());
+	}
+
+	public static boolean areInstancesEqual(final Instance a, final Instance b) {
+		int n = a.numAttributes();
+		if (b == null || b.numAttributes() != n) {
+			return false;
+		}
+		for (int i = 0; i < n; i++) {
+			if (a.value(i) != b.value(i)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public static String instancesToJsonString(final Instances data) {

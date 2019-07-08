@@ -1,0 +1,40 @@
+---
+layout: default
+---
+				<header style="width: 300px;">
+				    {% if page.logo %}
+                       <a href="{{ "/" | absolute_url }}"><img src="./img/{{ page.logo }}" alt="{{  page.title}}" style="width: 270px;" /></a>
+					{% else %}
+					   <a href="{{ "/" | absolute_url }}"><img src="{{site.logo | relative_url}}" alt="Logo" style="width: 270px;" /></a>
+					{% endif %}
+					<p>{{ page.title }} is an <a href="{{ "/" | absolute_url }}">AILibs</a> library</p>
+					<h1>{{ page.title }}</h1>
+    
+            
+                {% if page.navigation %}
+
+                    {% for item in page.navigation %}
+                        <h3 {% if page.navigation_active == item.id %}class="active"{% endif %}>
+                            {% if page.navigation_mode == 'anchor' %}
+                                <a href="#{{ item.link }}" > {{ item.title }}</a>
+                            {% else %}
+                                <a href="{{ item.link }}#content" > {{ item.title }}</a>
+                            {% endif %}
+                            </h3>
+                        {% endfor %}
+                {% endif %}
+
+				</header>
+            <section style="width: 1000px;">{{ content }}
+			
+			<!-- All projects should have Contributions being their last entry -->
+			<p>
+			We welcome contributions to {{ page.title }} given that the code quality meets our standards.
+			If you would like to add changes to {{ page.title }}, feel free to create a pull request on the `dev` branch.
+			</p>
+			<p>Please consider the following:</p>
+			<ul>
+				<li>provide a comprehensive description of your changes and why they are helpful</li>
+				<li>we cannot leave any copyright to third party authors. Creating the pull request, you accept to transfer the copyright to AILibs for being published under its current license (AGPL for now)</li>
+			</ul>
+			</section>

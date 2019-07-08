@@ -1,50 +1,31 @@
 package ai.libs.jaicore.planning.classical.algorithms.strips.forward;
 
 import java.util.Collection;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.algorithm.AOptimizer;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
+import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;
 import ai.libs.jaicore.planning.classical.problems.strips.Operation;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsOperation;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;
-import ai.libs.jaicore.planning.core.EvaluatedPlan;
-import ai.libs.jaicore.planning.core.Plan;
-import ai.libs.jaicore.planning.core.events.PlanFoundEvent;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.core.interfaces.IPathInORGraphSearch;
-import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
+import ai.libs.jaicore.planning.core.interfaces.IGraphSearchBasedPlan;
+import ai.libs.jaicore.planning.hierarchical.algorithms.GraphSearchBasedPlanningAlgorithm;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPlanningProblem, EvaluatedPlan<V>, V> {
+public class STRIPSPlanner<V extends Comparable<V>> extends GraphSearchBasedPlanningAlgorithm<StripsPlanningProblem, IGraphSearchBasedPlan<StripsForwardPlanningNode, String>, GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>, StripsForwardPlanningNode, String> {
 
-	/* logging */
-	private Logger logger = LoggerFactory.getLogger(STRIPSPlanner.class);
-	private String loggerName;
+	public STRIPSPlanner(final StripsPlanningProblem problem,
+			final AlgorithmicProblemReduction<StripsPlanningProblem, IGraphSearchBasedPlan<StripsForwardPlanningNode, String>, GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>> problemTransformer,
+			final IAlgorithmFactory<GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>> baseFactory) {
+		super(problem, problemTransformer, baseFactory);
+	}
 
-	private final IPathInORGraphSearch<GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V>, EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V>, StripsForwardPlanningNode, String> search;
-	private final INodeEvaluator<StripsForwardPlanningNode, V> nodeEvaluator;
-	private final STRIPSForwardSearchReducer reducer = new STRIPSForwardSearchReducer();
-
-	/* state of the algorithm */
-	private boolean visualize = false;
-	private final GraphGenerator<StripsForwardPlanningNode, String> graphGenerator;
-
-	public STRIPSPlanner(final StripsPlanningProblem problem, final INodeEvaluator<StripsForwardPlanningNode, V> nodeEvaluator) {
-		super(problem);
-		this.nodeEvaluator = nodeEvaluator;
+	@Override
+	public void runPreCreationHook() {
+		StripsPlanningProblem problem = this.getInput();
 
 		/* conduct some consistency checks */
 		if (!problem.getInitState().getVariableParams().isEmpty()) {
@@ -77,98 +58,12 @@ public class STRIPSPlanner<V extends Comparable<V>> extends AOptimizer<StripsPla
 		}
 
 		/* logging problem */
-		if (this.logger.isInfoEnabled()) { // have explicit check here, because we have so many computations in the argument of the info call
-			this.logger.info("Initializing planner for the following problem:\n\tOperations:{}\n\tInitial State: {}\n\tGoal State: {}",
+		if (this.getLogger().isInfoEnabled()) { // have explicit check here, because we have so many computations in the argument of the info call
+			this.getLogger().info("Initializing planner for the following problem:\n\tOperations:{}\n\tInitial State: {}\n\tGoal State: {}",
 					problem.getDomain().getOperations().stream()
 					.map(o -> "\n\t - " + o.getName() + "\n\t\tParams: " + o.getParams() + "\n\t\tPre: " + o.getPrecondition() + "\n\t\tAdd: " + ((StripsOperation) o).getAddList() + "\n\t\tDel: " + ((StripsOperation) o).getDeleteList())
 					.collect(Collectors.joining()),
 					problem.getInitState(), problem.getGoalState());
 		}
-
-		/* create search algorithm */
-		this.graphGenerator = this.reducer.encodeProblem(problem);
-		GraphSearchWithSubpathEvaluationsInput<StripsForwardPlanningNode, String, V> searchProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.graphGenerator, nodeEvaluator);
-		this.search = new BestFirst<>(searchProblem);
-	}
-
-	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmExecutionCanceledException, InterruptedException, AlgorithmTimeoutedException, AlgorithmException {
-		switch (this.getState()) {
-		case CREATED:
-			this.setLoggerOfSearch();
-			this.search.setTimeout(this.getTimeout());
-			if (this.visualize) {
-				throw new UnsupportedOperationException("Currently no visualization supported!");
-			}
-			return this.activate();
-		case ACTIVE:
-
-			/* invoke next step in search algorithm */
-			if (!this.search.hasNext()) {
-				return this.terminate();
-			}
-			try {
-				EvaluatedSearchGraphPath<StripsForwardPlanningNode, String, V> nextSolution = this.search.nextSolutionCandidate();
-				Plan plan = this.reducer.decodeSolution(nextSolution);
-				EvaluatedPlan<V> evaluatedPlan = new EvaluatedPlan<>(plan, nextSolution.getScore());
-				this.updateBestSeenSolution(evaluatedPlan);
-				return new PlanFoundEvent<>(this.getId(), evaluatedPlan);
-			} catch (NoSuchElementException e) {
-				return this.terminate();
-			}
-
-		default:
-			throw new IllegalStateException("Cannot handle algorithm state " + this.getState());
-		}
-	}
-
-	public void enableVisualization() {
-		this.visualize = true;
-	}
-
-	@Override
-	public void cancel() {
-		super.cancel();
-		if (this.search != null) {
-			this.search.cancel();
-		}
-	}
-
-	private void setLoggerOfSearch() {
-		if (this.search != null && this.loggerName != null) {
-			if (this.search instanceof ILoggingCustomizable) {
-				this.logger.info("Switching logger of search to {}.search", this.getLoggerName());
-				((ILoggingCustomizable) this.search).setLoggerName(this.getLoggerName() + ".search");
-			} else {
-				this.logger.info("The search is of class {}, which is not logging customizable.", this.search.getClass());
-			}
-		} else {
-			this.logger.info("Not yet setting logger of search, since search has not yet been configured.");
-		}
-	}
-
-	public GraphGenerator<StripsForwardPlanningNode, String> getGraphGenerator() {
-		return this.graphGenerator;
-	}
-
-	@Override
-	public void setLoggerName(final String name) {
-		if (name == null) {
-			throw new IllegalArgumentException("Logger name must not be set to null.");
-		}
-		this.logger.info("Switching logger from {} to {}", this.logger.getName(), name);
-		this.loggerName = name;
-		this.logger = LoggerFactory.getLogger(name);
-		this.logger.info("Activated logger {} with name {}", name, this.logger.getName());
-		if (this.nodeEvaluator instanceof ILoggingCustomizable) {
-			((ILoggingCustomizable) this.nodeEvaluator).setLoggerName(name + ".nodeeval");
-		}
-		this.setLoggerOfSearch();
-		super.setLoggerName(this.loggerName + "._planningalgorithm");
-	}
-
-	@Override
-	public String getLoggerName() {
-		return this.loggerName;
 	}
 }

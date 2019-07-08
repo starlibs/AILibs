@@ -1,9 +1,15 @@
 package ai.libs.jaicore.search.testproblems.cannibals;
 
+import java.util.Arrays;
+import java.util.List;
+
 import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
+import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
@@ -27,7 +33,10 @@ public class CannibalTester {
 
 		AStar<CannibalProblem, String> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(prob.getGraphGenerator(), (n1,n2) -> 1, n -> 1.0 * n.getPoint().getCannibalsOnLeft() + n.getPoint().getMissionariesOnLeft()));
 		new JFXPanel();
-		Platform.runLater(new AlgorithmVisualizationWindow(astar, new GraphViewPlugin(), new NodeInfoGUIPlugin<>(n -> n.toString())));
+		NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
+		List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer, new NodeDisplayInfoAlgorithmEventPropertyComputer<>(n -> n.toString()));
+
+		Platform.runLater(new AlgorithmVisualizationWindow(astar, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin()));
 
 		System.out.println(astar.nextSolutionCandidate().getNodes().size() - 1);
 		//		rs.cancel();
