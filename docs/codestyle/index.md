@@ -41,3 +41,11 @@ The following configuration files can be imported in eclipse:
 	<a href="{{ "/img/SaveActions-MissingCode.png" | absolute_url }}"><img src="{{ "/img/SaveActions-MissingCode.png" | absolute_url }}" alt="Save Actions - Missing Code" width="490"></a>
 	<a href="{{ "/img/SaveActions-UnnecessaryCode.png" | absolute_url }}"><img src="{{ "/img/SaveActions-UnnecessaryCode.png" | absolute_url }}" alt="Save Actions - Unnecessary Code" width="490"></a>
 </div>
+
+# Set up your IntelliJ IDEA
+
+Currently not available
+
+# Set up your NetBeans
+
+Currently not available
