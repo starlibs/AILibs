@@ -45,8 +45,8 @@ allprojects {
 	project.version = '0.1.5'
 	
 	ext {
-	    ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
-	    ossrhPassword = hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
+	    ossrhUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
+	    ossrhPassword = project.hasProperty('ossrhPassword') ? ossrhPassword : System.getenv("ossrhPassword")
 	}
 
 	
