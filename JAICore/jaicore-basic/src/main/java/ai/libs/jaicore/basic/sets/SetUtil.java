@@ -18,8 +18,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+import org.api4.java.common.attributedobjects.IGetter;
 
-import ai.libs.jaicore.basic.IGetter;
 import ai.libs.jaicore.basic.MathExt;
 
 /**

@@ -2,21 +2,21 @@ package ai.libs.jaicore.basic.algorithm.reduction;
 
 import java.util.NoSuchElementException;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithmFactory;
+import org.api4.java.algorithm.ISolutionCandidateIterator;
+import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.ASolutionCandidateIterator;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
-import ai.libs.jaicore.basic.algorithm.ISolutionCandidateIterator;
-import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 public class AReducingSolutionIterator<I1, O1, I2, O2> extends ASolutionCandidateIterator<I1, O1> {
 	private Logger logger = LoggerFactory.getLogger(AReducingSolutionIterator.class);

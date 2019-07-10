@@ -1,9 +1,8 @@
 package ai.libs.jaicore.concurrent;
 
+import org.api4.java.common.control.Cancelable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.basic.Cancelable;
 
 public class CancellationTimerTask extends NamedTimerTask {
 	private static final Logger logger = LoggerFactory.getLogger(CancellationTimerTask.class);

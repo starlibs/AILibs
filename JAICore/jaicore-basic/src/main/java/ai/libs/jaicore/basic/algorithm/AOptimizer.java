@@ -2,14 +2,16 @@ package ai.libs.jaicore.basic.algorithm;
 
 import java.util.NoSuchElementException;
 
+import org.api4.java.algorithm.IAlgorithmConfig;
+import org.api4.java.algorithm.IOptimizationAlgorithm;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.attributedobjects.ScoredItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.basic.ScoredItem;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.SolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 /**
  * The AOptimizer represents an algorithm that is meant to optimize for a single best solution.

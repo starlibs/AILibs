@@ -1,6 +1,7 @@
 package ai.libs.jaicore.testproblems.enhancedttsp;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class EnhancedTTSPSolutionEvaluator implements IObjectEvaluator<ShortList, Double> {

@@ -1,4 +1,6 @@
 dependencies {
+  compile ('org.api4:common')
+  compile ('org.api4:algorithm')
   compile ('org.apache.commons:commons-math3:3.6.1')
   compile ('org.apache.commons:commons-lang3:3.9')
   compile ('it.unimi.dsi:fastutil:8.2.1')

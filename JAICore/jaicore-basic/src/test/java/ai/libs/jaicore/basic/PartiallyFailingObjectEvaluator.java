@@ -3,8 +3,8 @@ package ai.libs.jaicore.basic;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
 /**
  * This object evaluator simulates failures. It is possible to specify the runs for which a result (null) should be returned.
