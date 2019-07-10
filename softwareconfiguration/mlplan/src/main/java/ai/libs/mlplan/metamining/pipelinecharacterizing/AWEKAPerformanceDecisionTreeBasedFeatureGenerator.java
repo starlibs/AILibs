@@ -3,7 +3,8 @@ package ai.libs.mlplan.metamining.pipelinecharacterizing;
 import java.util.ArrayList;
 import java.util.Map;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+
 import ai.libs.jaicore.math.linearalgebra.Vector;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import weka.core.Attribute;

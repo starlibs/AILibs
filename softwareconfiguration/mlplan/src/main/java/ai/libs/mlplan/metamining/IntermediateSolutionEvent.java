@@ -1,6 +1,7 @@
 package ai.libs.mlplan.metamining;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.events.AAlgorithmEvent;
+
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.classifiers.Classifier;
 

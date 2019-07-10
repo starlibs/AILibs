@@ -1,6 +1,6 @@
 package ai.libs.jaicore.graphvisualizer.events.graph;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.events.AAlgorithmEvent;
 
 public class GraphInitializedEvent<T> extends AAlgorithmEvent implements GraphEvent {
 

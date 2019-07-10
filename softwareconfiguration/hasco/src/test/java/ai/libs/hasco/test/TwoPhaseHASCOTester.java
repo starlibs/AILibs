@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +20,7 @@ import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRan
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCO;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOConfig;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 
 public class TwoPhaseHASCOTester extends SoftwareConfigurationAlgorithmTester {
 

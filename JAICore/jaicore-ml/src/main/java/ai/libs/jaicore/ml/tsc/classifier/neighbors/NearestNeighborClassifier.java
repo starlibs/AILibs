@@ -9,7 +9,7 @@ import java.util.PriorityQueue;
 
 import org.aeonbits.owner.ConfigCache;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
@@ -393,6 +393,6 @@ public class NearestNeighborClassifier extends ASimplifiedTSClassifier<Integer> 
 
 	@Override
 	public NearestNeighborLearningAlgorithm getLearningAlgorithm(final TimeSeriesDataset dataset) {
-		return new NearestNeighborLearningAlgorithm(ConfigCache.getOrCreate(IAlgorithmConfig.class), this, dataset);
+		return new NearestNeighborLearningAlgorithm(ConfigCache.getOrCreate(IOwnerBasedAlgorithmConfig.class), this, dataset);
 	}
 }

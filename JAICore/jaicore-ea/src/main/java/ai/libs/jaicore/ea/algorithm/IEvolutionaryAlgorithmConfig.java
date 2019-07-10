@@ -1,13 +1,13 @@
 package ai.libs.jaicore.ea.algorithm;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 
 /**
  * General properties of an evolutionary algorithm.
  *
  * @author wever
  */
-public interface IEvolutionaryAlgorithmConfig extends IAlgorithmConfig {
+public interface IEvolutionaryAlgorithmConfig extends IOwnerBasedAlgorithmConfig {
 
 	public static final String K_EVALUATIONS = "evaluations";
 	public static final String K_GENERATIONS = "generations";
@@ -35,7 +35,7 @@ public interface IEvolutionaryAlgorithmConfig extends IAlgorithmConfig {
 	/**
 	 * Number of generations after which early termination criterion evaluates to true.
 	 * If it is set to -1, no early termination is applied.
-	 * 
+	 *
 	 * @return Number of generations with no change after which early termination becomes true.
 	 */
 	@Key(K_EARLY_TERMINATION_GENS)

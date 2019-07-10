@@ -1,8 +1,8 @@
 package ai.libs.jaicore.ml.tsc.classifier.shapelets;
 
-import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 
-public interface ILearnShapeletsLearningAlgorithmConfig extends IRandomAlgorithmConfig {
+public interface ILearnShapeletsLearningAlgorithmConfig extends IOwnerBasedRandomizedAlgorithmConfig {
 
 	public static final String K_NUM_SHAPELETS = "numshapelets";
 	public static final String K_LEARNINGRATE = "learningrate";

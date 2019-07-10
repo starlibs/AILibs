@@ -1,10 +1,10 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst.ParentDiscarding;
 
-public interface IBestFirstConfig extends IAlgorithmConfig {
-	
+public interface IBestFirstConfig extends IOwnerBasedAlgorithmConfig {
+
 	public static final String K_PD = "bestfirst.parentdiscarding";
 
 	/**

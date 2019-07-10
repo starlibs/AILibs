@@ -5,10 +5,10 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.algorithm.TimeOut;
 import org.junit.Assert;
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.TimeOut;
 import autofe.algorithm.hasco.AutoFEMLTwoPhase;
 import autofe.algorithm.hasco.HASCOFeatureEngineeringConfig;
 import autofe.util.DataSet;

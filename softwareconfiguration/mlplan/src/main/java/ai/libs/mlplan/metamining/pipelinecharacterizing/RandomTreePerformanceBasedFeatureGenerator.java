@@ -3,7 +3,8 @@ package ai.libs.mlplan.metamining.pipelinecharacterizing;
 import java.util.HashMap;
 import java.util.Map;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
 import weka.classifiers.trees.RandomTree;

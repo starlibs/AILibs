@@ -95,7 +95,7 @@ public class EnsembleProvider {
 	 *            weights for the {@link MajorityConfidenceVote}
 	 * @return Returns the initialized (but untrained) HIVE COTE ensemble model.
 	 */
-	public static Classifier provideHIVECOTEEnsembleModel(final int seed, final int numFolds) {
+	public static Classifier provideHIVECOTEEnsembleModel(final long seed, final int numFolds) {
 		Classifier[] classifier = new Classifier[7];
 
 		Vote voter = new MajorityConfidenceVote(5, seed);
@@ -107,18 +107,18 @@ public class EnsembleProvider {
 		PolyKernel kernel = new PolyKernel();
 		kernel.setExponent(2);
 		smop.setKernel(kernel);
-		smop.setRandomSeed(seed);
+		smop.setRandomSeed((int)seed);
 		classifier[0] = smop;
 
 		// Random Forest
 		RandomForest rf = new RandomForest();
-		rf.setSeed(seed);
+		rf.setSeed((int)seed);
 		rf.setNumIterations(500);
 		classifier[1] = rf;
 
 		// Rotation forest
 		RotationForest rotF = new RotationForest();
-		rotF.setSeed(seed);
+		rotF.setSeed((int)seed);
 		rotF.setNumIterations(100);
 		classifier[2] = rotF;
 
@@ -132,7 +132,7 @@ public class EnsembleProvider {
 
 		// C45
 		J48 c45 = new J48();
-		c45.setSeed(seed);
+		c45.setSeed((int)seed);
 		classifier[5] = c45;
 
 		// SMO linear

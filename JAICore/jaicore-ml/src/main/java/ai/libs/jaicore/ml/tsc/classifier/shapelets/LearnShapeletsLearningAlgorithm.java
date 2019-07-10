@@ -11,16 +11,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
@@ -41,7 +41,7 @@ import weka.core.Instances;
  */
 public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, LearnShapeletsClassifier> {
 
-	public interface ILearnShapeletsLearningAlgorithmConfig extends IRandomAlgorithmConfig {
+	public interface ILearnShapeletsLearningAlgorithmConfig extends IOwnerBasedRandomizedAlgorithmConfig {
 
 		public static final String K_NUMSHAPELETS = "numshapelets";
 		public static final String K_LEARNINGRATE = "learningrate";
@@ -185,7 +185,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 
 		/* read config locally */
 		final int scaleR = this.getConfig().scaleR();
-		final int seed = this.getConfig().seed();
+		final long seed = this.getConfig().seed();
 		final int minShapeLength = this.getConfig().minShapeletLength();
 
 		final double[][][] result = new double[scaleR][][];
@@ -217,7 +217,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 			SimpleKMeans kMeans = new SimpleKMeans();
 			try {
 				kMeans.setNumClusters(this.getConfig().numShapelets());
-				kMeans.setSeed(seed);
+				kMeans.setSeed((int)seed);
 				kMeans.setMaxIterations(100);
 				kMeans.buildClusterer(wekaInstances);
 			} catch (Exception e) {

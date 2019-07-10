@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.api4.java.algorithm.IAlgorithm;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 
 public abstract class SoftwareConfigurationAlgorithmTester extends GeneralAlgorithmTester {
 

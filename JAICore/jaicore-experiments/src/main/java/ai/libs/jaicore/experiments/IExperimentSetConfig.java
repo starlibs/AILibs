@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.aeonbits.owner.Reloadable;
 
-import ai.libs.jaicore.basic.IConfig;
+import ai.libs.jaicore.basic.IOwnerBasedConfig;
 
-public interface IExperimentSetConfig extends IConfig, Reloadable {
+public interface IExperimentSetConfig extends IOwnerBasedConfig, Reloadable {
 
 	public static final String MEM_MAX = "mem.max";
 	public static final String MEM_OPP = "mem.opp";

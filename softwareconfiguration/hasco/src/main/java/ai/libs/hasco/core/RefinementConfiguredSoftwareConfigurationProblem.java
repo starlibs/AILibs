@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
 import ai.libs.hasco.serialization.ComponentLoader;
-import ai.libs.jaicore.basic.IObjectEvaluator;
 
 /**
  * In this problem, the core software configuration problem is extended by predefining how the the parameters may be refined

@@ -3,10 +3,11 @@ package ai.libs.hasco.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.basic.IInformedObjectEvaluatorExtension;
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements IObjectEvaluator<ComponentInstance, V>, IInformedObjectEvaluatorExtension<V> {
@@ -43,13 +44,13 @@ public class TimeRecordingEvaluationWrapper<V extends Comparable<V>> implements 
 		fields.put("consumedTimes", this.consumedTimes);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
-	public void updateBestScore(V bestScore) {
-		if(baseEvaluator instanceof IInformedObjectEvaluatorExtension) {
-			((IInformedObjectEvaluatorExtension<V>) baseEvaluator).updateBestScore(bestScore);
+	public void updateBestScore(final V bestScore) {
+		if(this.baseEvaluator instanceof IInformedObjectEvaluatorExtension) {
+			((IInformedObjectEvaluatorExtension<V>) this.baseEvaluator).updateBestScore(bestScore);
 		}
 	}
-	
+
 }

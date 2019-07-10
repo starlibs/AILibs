@@ -3,10 +3,10 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
@@ -48,7 +48,7 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 		if (this.preferredNodeEvaluator != null) {
 			problem = new GraphSearchWithSubpathEvaluationsInput<N, A, V>(problem.getGraphGenerator(), new AlternativeNodeEvaluator<>(this.preferredNodeEvaluator, problem.getNodeEvaluator()));
 		}
-		logger.debug("Created algorithm input with\n\tgraph generator: {}\n\tnode evaluator: {}", problem.getGraphGenerator(), problem.getNodeEvaluator());
+		this.logger.debug("Created algorithm input with\n\tgraph generator: {}\n\tnode evaluator: {}", problem.getGraphGenerator(), problem.getNodeEvaluator());
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V> search = new BestFirst<>(problem);
 		search.setTimeoutForComputationOfF(this.getTimeoutForFInMS(), this.getTimeoutEvaluator());
 		if (this.getLoggerName() != null && this.getLoggerName().length() > 0) {
@@ -63,15 +63,15 @@ public class StandardBestFirstFactory<N, A, V extends Comparable<V>> extends Bes
 		fields.put("preferredNodeEvaluator", this.preferredNodeEvaluator);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
 	}
-	
+
 
 	@Override
 	public String getLoggerName() {
-		return logger.getName();
+		return this.logger.getName();
 	}
 
 	@Override
-	public void setLoggerName(String name) {
-		logger = LoggerFactory.getLogger(name);
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

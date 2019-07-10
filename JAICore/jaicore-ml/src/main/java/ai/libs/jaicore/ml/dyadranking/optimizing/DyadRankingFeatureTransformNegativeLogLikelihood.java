@@ -2,7 +2,8 @@ package ai.libs.jaicore.ml.dyadranking.optimizing;
 
 import java.util.Map;
 
-import ai.libs.jaicore.basic.algorithm.IOptimizationAlgorithm;
+import org.api4.java.algorithm.IOptimizationAlgorithm;
+
 import ai.libs.jaicore.math.linearalgebra.Vector;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;

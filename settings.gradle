@@ -28,3 +28,7 @@ project(":autofe").projectDir = new File(configPrefix,"autofe")
 
 include 'autofe-reldata'
 project(":autofe-reldata").projectDir = new File(configPrefix,"autofe-reldata")
+
+
+// include api projects
+includeBuild "../api4"

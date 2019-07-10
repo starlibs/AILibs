@@ -12,13 +12,13 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.TempFileHandler;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.ml.core.dataset.ArffUtilities;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import ai.libs.jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
@@ -41,13 +41,13 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 
 	/**
 	 * Constructor for a Stratified File Sampler.
-	 * 
+	 *
 	 * @param random
 	 *            Random object for sampling inside of the strati.
 	 * @param stratiFileAssigner
 	 *            Assigner for datapoints to strati.
 	 */
-	public StratifiedFileSampling(Random random, IStratiFileAssigner stratiFileAssigner, File input) {
+	public StratifiedFileSampling(final Random random, final IStratiFileAssigner stratiFileAssigner, final File input) {
 		super(input);
 		this.random = random;
 		this.assigner = stratiFileAssigner;
@@ -70,7 +70,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 				this.sample = new LinkedList<>();
 				this.reader = new BufferedReader(new FileReader(this.getInput()));
 				this.executorService = Executors.newCachedThreadPool();
-				ArffUtilities.skipWithReaderToDatapoints(reader);
+				ArffUtilities.skipWithReaderToDatapoints(this.reader);
 				return this.activate();
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Was not able to count the datapoints.");
@@ -79,12 +79,12 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 			if (this.streamedDatapoints < this.datapointAmount) {
 				try {
 					// Assign each datapoint to a stratum.
-					String datapoint = reader.readLine();
+					String datapoint = this.reader.readLine();
 					if (datapoint != null && datapoint.trim().length() > 0 && datapoint.trim().charAt(0) != '%') {
 						this.assigner.assignDatapoint(datapoint);
 					}
 					this.streamedDatapoints++;
-					return new SampleElementAddedEvent(getId());
+					return new SampleElementAddedEvent(this.getId());
 				} catch (IOException e) {
 					throw new AlgorithmException(e, "Was not able to read datapoint line form input file");
 				}
@@ -94,11 +94,11 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 				} catch (IOException e) {
 					throw new AlgorithmException(e, "Was not able to close input file reader.");
 				}
-				if (!stratiSamplingStarted) {
+				if (!this.stratiSamplingStarted) {
 					// Start Reservoir Sampling inside the strati.
 					this.stratiSamplingStarted = true;
 					this.startReservoirSamplingForStrati(this.assigner.getAllCreatedStrati());
-					return new WaitForSamplingStepEvent(getId());
+					return new WaitForSamplingStepEvent(this.getId());
 				} else {
 					if (!this.stratiSamplingFinished) {
 						// Check if all threads for sampling inside the strati are finished. If no, wait
@@ -108,12 +108,12 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 						} else {
 							Thread.sleep(100);
 						}
-						return new WaitForSamplingStepEvent(getId());
+						return new WaitForSamplingStepEvent(this.getId());
 					} else {
 						// Write strati sampling results to the outputand terminate.
 						try {
 							for (int i = 0; i < this.sample.size(); i++) {
-								this.outputFileWriter.write(sample.get(i) + "\n");
+								this.outputFileWriter.write(this.sample.get(i) + "\n");
 							}
 							return this.terminate();
 						} catch (IOException e) {
@@ -146,7 +146,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 	 * Calculates the necessary sample sizes and start a Simple Random Sampling
 	 * Thread for each stratum.
 	 */
-	private void startReservoirSamplingForStrati(Map<String, Integer> strati) {
+	private void startReservoirSamplingForStrati(final Map<String, Integer> strati) {
 		// Calculate the amount of datapoints that will be used from each strati
 		int[] sampleSizeForStrati = new int[strati.keySet().size()];
 		// Calculate for each stratum the sample size by StratiSize / DatasetSize
@@ -162,25 +162,25 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 		for (Entry<String, Integer> entry : strati.entrySet()) {
 			int index = i;
 			this.executorService.execute(() -> {
-				String outputFile = tempFileHandler.createTempFile();
-				ReservoirSampling reservoirSampling = new ReservoirSampling(random,
-						tempFileHandler.getTempFile(entry.getKey()));
+				String outputFile = this.tempFileHandler.createTempFile();
+				ReservoirSampling reservoirSampling = new ReservoirSampling(this.random,
+						this.tempFileHandler.getTempFile(entry.getKey()));
 				reservoirSampling.setSampleSize(sampleSizeForStrati[index]);
 				try {
-					reservoirSampling.setOutputFileName(tempFileHandler.getTempFile(outputFile).getAbsolutePath());
+					reservoirSampling.setOutputFileName(this.tempFileHandler.getTempFile(outputFile).getAbsolutePath());
 					reservoirSampling.call();
-					BufferedReader bufferedReader = tempFileHandler.getFileReaderForTempFile(outputFile);
+					BufferedReader bufferedReader = this.tempFileHandler.getFileReaderForTempFile(outputFile);
 					ArffUtilities.skipWithReaderToDatapoints(bufferedReader);
 					String line;
 					while ((line = bufferedReader.readLine()) != null) {
 						if (!(line.trim().equals("") || line.trim().charAt(0) == '%')) {
-							synchronized (sample) {
-								sample.add(line);
+							synchronized (this.sample) {
+								this.sample.add(line);
 							}
 						}
 					}
 				} catch (Exception e) {
-					logger.error("Unexpected exception during reservoir sampling!", e);
+					this.logger.error("Unexpected exception during reservoir sampling!", e);
 				}
 			});
 			i++;

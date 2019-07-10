@@ -1,6 +1,7 @@
 package ai.libs.jaicore.planning.hierarchical.algorithms;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
+import org.api4.java.algorithm.IAlgorithmFactory;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AReducingSolutionIterator;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.interfaces.IGraphSearchBasedPlan;

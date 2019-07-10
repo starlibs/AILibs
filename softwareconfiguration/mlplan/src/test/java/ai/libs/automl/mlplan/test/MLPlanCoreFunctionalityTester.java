@@ -3,9 +3,10 @@ package ai.libs.automl.mlplan.test;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.TimeOut;
+
 import ai.libs.automl.AutoMLAlgorithmCoreFunctionalityTester;
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import weka.classifiers.Classifier;

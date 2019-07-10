@@ -16,6 +16,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.BusyObjectEvaluator;
-import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.basic.PartiallyFailingObjectEvaluator;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
@@ -45,11 +44,11 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 
 	/**
 	 * Tests that the random completion evaluation is really random in the sense that changing the seed changes the behavior.
-	 * 
+	 *
 	 * The test runs the following routine for different seeds: It expands a search graph with BFS up to a maximum node expansion (the number of nodes that shall be evaluated).
 	 * For every expanded node, the RCNE is called to identify a set of solution paths, which is associated with the node.
 	 * For the different seeds, these paths must differ.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 * @throws AlgorithmExecutionCanceledException
@@ -64,9 +63,9 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		final int NUM_SAMPLES = 5;
 
 		final int DIFFICULTY = 10;
-		
+
 		/* create one RCNE for each seed */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = getBF(DIFFICULTY, n -> n.externalPath().size() * 1.0);
+		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(DIFFICULTY, n -> n.externalPath().size() * 1.0);
 		Map<Integer, RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double>> completers = new HashMap<>();
 		for (int seed = 0; seed < NUM_SEEDS; seed++) {
 			completers.put(seed, this.getSeededNodeEvaluator(DIFFICULTY, seed, 1, 1)); // the number of samples is irrelevant here, because we call the respective method manually
@@ -99,7 +98,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 
 	/**
 	 * Tests that the random completer can cope with the situation that it must evaluate a node whose parent has not been evaluated.
-	 * 
+	 *
 	 * @throws InterruptedException
 	 * @throws AlgorithmTimeoutedException
 	 * @throws AlgorithmExecutionCanceledException
@@ -109,9 +108,9 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	public void testRobustnessOnMissingEvaluations() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
 		final int DIFFICULTY = 10;
-		
+
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = getBF(DIFFICULTY, n -> n.externalPath().size() * 1.0);
+		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(DIFFICULTY, n -> n.externalPath().size() * 1.0);
 		RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> completer = this.getSeededNodeEvaluator(DIFFICULTY, 0, 1, 1); // the number of samples is irrelevant here, because we call the respective method manually
 		completer.setLoggerName("testednodeevaluator");
 
@@ -144,7 +143,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		final int CITIES = 4;
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = getBF(CITIES, n -> n.externalPath().size() * 1.0);
+		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(CITIES, n -> n.externalPath().size() * 1.0);
 		RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> completer = this.getSeededNodeEvaluator(CITIES, 0, 1, 1); // the number of samples is irrelevant here, because we call the respective method manually
 		completer.setLoggerName("testednodeevaluator");
 
@@ -164,7 +163,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 						assertFalse("Solution has been found twice!", completionsFoundSoFar.contains(completion));
 						completionsFoundSoFar.add(completion);
 					} catch (RCNEPathCompletionFailedException ex) {
-						assertEquals(CombinatoricsUtils.factorial(CITIES - 1), (long) completionsFoundSoFar.size());
+						assertEquals(CombinatoricsUtils.factorial(CITIES - 1), completionsFoundSoFar.size());
 					}
 				}
 			}
@@ -173,36 +172,36 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 
 	@Test
 	public void testThatAScoreIsReturnedIfExactlyOneOutOfOneSampleSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 1);
+		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 1);
 	}
 
 	@Test
 	public void testThatAScoreIsReturnedIfExactlyOneOutOfTwoSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 2);
+		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 2);
 	}
 
 	@Test
 	public void testThatAScoreIsReturnedIfExactlyOneOutOfTenSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 10);
+		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 10);
 	}
 
 	@Test
 	public void testThatAScoreIsReturnedIfExactlyTwoOutOfTwoSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 2);
+		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 2);
 	}
 
 	@Test
 	public void testThatAScoreIsReturnedIfExactlyTwoOutOfTenSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 10);
+		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 10);
 	}
 
-	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(int cities, int k, int n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(final int cities, final int k, final int n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
 
 		final int NUM_SEEDS = 5;
 		final int NUM_SAMPLES = n;
 
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = getBF(cities, node -> node.externalPath().size() * 1.0);
+		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(cities, node -> node.externalPath().size() * 1.0);
 
 		for (int seed = 0; seed < NUM_SEEDS; seed++) {
 			for (int lastSuccessfulInvocation = k; lastSuccessfulInvocation <= NUM_SAMPLES; lastSuccessfulInvocation++) { // defines the number of the evaluation under the node that will be successful (all other will fail)
@@ -236,9 +235,9 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 
 	public RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> getNodeEvaluator(final int problemDifficulty, final IObjectEvaluator<SearchGraphPath<EnhancedTTSPNode, String>, Double> oe, final int seed, final int numSamples, final int maxSamples,
 			final int timeoutForNodeEvaluationInMs) {
-		
+
 		/* create search that is the basis for the analysis (provides the nodes to be analyzed and the graph generator) */
-		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = getBF(problemDifficulty, n -> n.externalPath().size() * 1.0);
+		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(problemDifficulty, n -> n.externalPath().size() * 1.0);
 
 		IObjectEvaluator<SearchGraphPath<EnhancedTTSPNode, String>, Double> se = new IObjectEvaluator<SearchGraphPath<EnhancedTTSPNode, String>, Double>() {
 
@@ -272,7 +271,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	}
 
 	@Override
-	public Collection<Node<EnhancedTTSPNode, Double>> getNodesToTestInDifficultProblem(int numNodes) {
+	public Collection<Node<EnhancedTTSPNode, Double>> getNodesToTestInDifficultProblem(final int numNodes) {
 		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = this.getBF(100, n -> 0.0);
 		bf.next();
 		bf.next();

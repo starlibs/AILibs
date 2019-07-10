@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset.sampling;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithm;
+
 import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 
 /**

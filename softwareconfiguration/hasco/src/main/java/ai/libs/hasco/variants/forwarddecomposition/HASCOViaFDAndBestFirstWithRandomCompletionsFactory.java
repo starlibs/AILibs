@@ -12,16 +12,16 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOVia
 
 	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
 	private Predicate<TFDNode> priorizingPredicate;
-	private int seed;
+	private long seed;
 	private int numSamples;
 	private int timeoutForSingleCompletionEvaluationInMS;
 	private int timeoutForNodeEvaluationInMS;
 
-	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(final int seed, final int numSamples) {
+	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(final long seed, final int numSamples) {
 		this(seed, numSamples, -1, -1);
 	}
 
-	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(final int seed, final int numSamples, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
+	public HASCOViaFDAndBestFirstWithRandomCompletionsFactory(final long seed, final int numSamples, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
 		super();
 		this.seed = seed;
 		this.numSamples = numSamples;

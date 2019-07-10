@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+
 import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
@@ -17,8 +20,6 @@ import ai.libs.hasco.serialization.CompositionSerializer;
 import ai.libs.hasco.serialization.UnresolvableRequiredInterfaceException;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirst;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;

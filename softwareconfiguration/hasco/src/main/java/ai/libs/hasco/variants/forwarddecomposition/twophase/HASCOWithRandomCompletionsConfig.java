@@ -1,9 +1,9 @@
 package ai.libs.hasco.variants.forwarddecomposition.twophase;
 
 import ai.libs.hasco.core.HASCOConfig;
-import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 
-public interface HASCOWithRandomCompletionsConfig extends HASCOConfig, IRandomAlgorithmConfig {
+public interface HASCOWithRandomCompletionsConfig extends HASCOConfig, IOwnerBasedRandomizedAlgorithmConfig {
 	public static final String K_RANDOM_COMPLETIONS_NUM = "hasco.random_completions.num";
 	public static final String K_RANDOM_COMPLETIONS_TIMEOUT_NODE = "hasco.random_completions.timeout_node";
 	public static final String K_RANDOM_COMPLETIONS_TIMEOUT_PATH = "hasco.random_completions.timeout_path";

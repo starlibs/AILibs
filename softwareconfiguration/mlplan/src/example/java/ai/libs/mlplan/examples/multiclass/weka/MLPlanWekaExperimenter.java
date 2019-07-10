@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,6 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;

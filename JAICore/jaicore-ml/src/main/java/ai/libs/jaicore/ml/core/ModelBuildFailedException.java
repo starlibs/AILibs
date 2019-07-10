@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
 public class ModelBuildFailedException extends ObjectEvaluationFailedException {
 

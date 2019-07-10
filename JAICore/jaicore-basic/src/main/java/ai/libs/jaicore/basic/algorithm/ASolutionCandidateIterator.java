@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
-import org.api4.java.algorithm.IAlgorithmConfig;
 import org.api4.java.algorithm.ISolutionCandidateIterator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 
 /**
  * A template for algorithms that iterate over solution candidates. By default,
@@ -28,7 +29,7 @@ public abstract class ASolutionCandidateIterator<I, O> extends AAlgorithm<I, O> 
 		super(input);
 	}
 
-	protected ASolutionCandidateIterator(final IAlgorithmConfig config,final I input) {
+	protected ASolutionCandidateIterator(final IOwnerBasedAlgorithmConfig config,final I input) {
 		super(config, input);
 	}
 

@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.core.dataset.sampling;
 
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
 import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 
 /**
@@ -11,11 +11,11 @@ import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
  */
 public abstract class ASamplingAlgorithm extends AAlgorithm<AILabeledAttributeArrayDataset, AILabeledAttributeArrayDataset> {
 
-	protected ASamplingAlgorithm(IAlgorithmConfig config, AILabeledAttributeArrayDataset input) {
+	protected ASamplingAlgorithm(final IOwnerBasedAlgorithmConfig config, final AILabeledAttributeArrayDataset input) {
 		super(config, input);
 	}
-	
-	protected ASamplingAlgorithm(AILabeledAttributeArrayDataset input) {
+
+	protected ASamplingAlgorithm(final AILabeledAttributeArrayDataset input) {
 		super(input);
 	}
 }

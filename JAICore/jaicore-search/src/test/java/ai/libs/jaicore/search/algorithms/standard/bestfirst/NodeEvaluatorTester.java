@@ -7,15 +7,14 @@ import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -44,7 +43,7 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<EnhancedTTSPN
 			if (ne instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) ne).setLoggerName("testednodeevaluator");
 			}
-			
+
 			/* start the timed job */
 			Timer t = new Timer();
 			TimerTask task = new InterruptionTimerTask("Interrupting busy evaluator");
@@ -67,10 +66,10 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<EnhancedTTSPN
 		}
 	}
 
-	public StandardBestFirst<EnhancedTTSPNode, String, Double> getBF(int problemSize, final INodeEvaluator<EnhancedTTSPNode, Double> ne) {
+	public StandardBestFirst<EnhancedTTSPNode, String, Double> getBF(final int problemSize, final INodeEvaluator<EnhancedTTSPNode, Double> ne) {
 		GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> input = new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPGraphGenerator(new EnhancedTTSPGenerator().generate(problemSize, 100)), ne); // there will
-																																																									// be 10
-																																																									// solutions
+		// be 10
+		// solutions
 		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = new StandardBestFirst<>(input);
 		bf.setNumCPUs(1);
 		return bf;

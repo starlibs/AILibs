@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 

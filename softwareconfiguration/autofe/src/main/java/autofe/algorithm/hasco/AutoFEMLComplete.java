@@ -11,6 +11,18 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithmConfig;
+import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
+import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,19 +37,8 @@ import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstWithRan
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory;
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmFinishedEvent;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmInitializedEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
@@ -380,7 +381,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 
 	@Override
 	public void setTimeout(final TimeOut timeout) {
-		this.config.setProperty(IAlgorithmConfig.K_TIMEOUT, "" + timeout.milliseconds());
+		this.config.setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, "" + timeout.milliseconds());
 	}
 
 	@Override

@@ -2,7 +2,6 @@ package ai.libs.jaicore.basic.algorithm;
 
 import java.util.NoSuchElementException;
 
-import org.api4.java.algorithm.IAlgorithmConfig;
 import org.api4.java.algorithm.IOptimizationAlgorithm;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
@@ -12,6 +11,8 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ScoredItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 
 /**
  * The AOptimizer represents an algorithm that is meant to optimize for a single best solution.
@@ -46,7 +47,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	 * @param config The parameterization of the algorithm.
 	 * @param input The input to the algorithm (the problem to solve).
 	 */
-	protected AOptimizer(final IAlgorithmConfig config, final I input) {
+	protected AOptimizer(final IOwnerBasedAlgorithmConfig config, final I input) {
 		super(config, input);
 	}
 

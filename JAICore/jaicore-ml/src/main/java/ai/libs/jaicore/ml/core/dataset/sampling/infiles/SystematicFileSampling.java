@@ -10,17 +10,18 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+
 import ai.libs.jaicore.basic.TempFileHandler;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.ml.core.dataset.ArffUtilities;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**
  * File-level implementation of Systematic Sampling: Sort datapoints and pick
  * every k-th datapoint for the sample.
- * 
+ *
  * @author Lukas Brandt
  */
 public class SystematicFileSampling extends AFileSamplingAlgorithm {
@@ -35,23 +36,23 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 
 	/**
 	 * Simple constructor that uses the default datapoint comparator.
-	 * 
+	 *
 	 * @param random
 	 *            Random Object for determining the sampling start point.
 	 */
-	public SystematicFileSampling(Random random, File input) {
+	public SystematicFileSampling(final Random random, final File input) {
 		this(random, null, input);
 	}
 
 	/**
 	 * Constructor for a custom datapoint comparator.
-	 * 
+	 *
 	 * @param random
 	 *            Random Object for determining the sampling start point.
 	 * @param datapointComparator
 	 *            Comparator to sort the dataset.
 	 */
-	public SystematicFileSampling(Random random, Comparator<String> datapointComparator, File input) {
+	public SystematicFileSampling(final Random random, final Comparator<String> datapointComparator, final File input) {
 		super(input);
 		this.random = random;
 		this.datapointComparator = datapointComparator;
@@ -113,7 +114,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 					assert datapoint != null;
 					this.outputFileWriter.write(datapoint + "\n");
 					this.addedDatapoints++;
-					return new SampleElementAddedEvent(getId());
+					return new SampleElementAddedEvent(this.getId());
 				} catch (IOException e) {
 					throw new AlgorithmException(e, "Was not able to read from sorted dataset file.");
 				}

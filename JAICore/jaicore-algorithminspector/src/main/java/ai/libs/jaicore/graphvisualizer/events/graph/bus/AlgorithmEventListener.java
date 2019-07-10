@@ -1,8 +1,8 @@
 package ai.libs.jaicore.graphvisualizer.events.graph.bus;
 
-import com.google.common.eventbus.Subscribe;
+import org.api4.java.algorithm.events.AlgorithmEvent;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import com.google.common.eventbus.Subscribe;
 
 public interface AlgorithmEventListener {
 

@@ -49,7 +49,7 @@ public class MajorityConfidenceVote extends Vote {
 	 * @param seed
 	 *            See {@link MajorityConfidenceVote#seed}
 	 */
-	public MajorityConfidenceVote(final int numFolds, final int seed) {
+	public MajorityConfidenceVote(final int numFolds, final long seed) {
 		super();
 		this.numFolds = numFolds;
 	}

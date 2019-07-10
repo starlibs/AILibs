@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.core.interfaces;
 
-import ai.libs.jaicore.basic.algorithm.IOptimizationAlgorithmFactory;
+import org.api4.java.algorithm.IOptimizationAlgorithmFactory;
+
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 

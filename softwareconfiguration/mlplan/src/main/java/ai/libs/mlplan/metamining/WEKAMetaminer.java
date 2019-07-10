@@ -5,6 +5,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
@@ -15,7 +16,6 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.WEKAPipelineCharacterizer;
 import ai.libs.mlplan.metamining.similaritymeasures.F3Optimizer;
@@ -27,14 +27,14 @@ import weka.core.Instances;
 
 /**
  * An implementation of the meta miner for pipelines consisting exclusively of WEKA components.
- * 
+ *
  * @author Helena Graf
  *
  */
 public class WEKAMetaminer implements IMetaMiner {
 
 	private Logger logger = LoggerFactory.getLogger(WEKAMetaminer.class);
-	
+
 	private boolean hasBeenBuilt = false;
 	private INDArray datasetMetafeatures;
 	private Enumeration<Attribute> dataSetMetaFeaturesAttributes;
@@ -43,35 +43,35 @@ public class WEKAMetaminer implements IMetaMiner {
 	private IRelativeRankMatrixComputer similarityComputer = new RelativeRankMatricComputer();
 	private IPipelineCharacterizer pipelineCharacterizer;
 
-	public WEKAMetaminer(Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs) {
+	public WEKAMetaminer(final Map<Component, Map<Parameter, ParameterRefinementConfiguration>> paramConfigs) {
 		this.pipelineCharacterizer = new WEKAPipelineCharacterizer(paramConfigs);
 	}
 
 	@Override
-	public double score(ComponentInstance componentInstance) {
+	public double score(final ComponentInstance componentInstance) {
 		// Check if has been trained
-		if (!hasBeenBuilt) {
+		if (!this.hasBeenBuilt) {
 			throw new WEKAMetaminerRuntimeException("Metaminer has not been built!");
 		}
-		if (dataSetMetaFeaturesAttributes == null) {
+		if (this.dataSetMetaFeaturesAttributes == null) {
 			throw new WEKAMetaminerRuntimeException("Metaminer has not been given a data set characterization!");
 		}
 
 		// Characterize pipeline and compute similarity with data set
-		double[] pipelineMetafeatures = pipelineCharacterizer.characterize(componentInstance);
-		return similarityMeasure.computeSimilarity(datasetMetafeatures, Nd4j.create(pipelineMetafeatures));
+		double[] pipelineMetafeatures = this.pipelineCharacterizer.characterize(componentInstance);
+		return this.similarityMeasure.computeSimilarity(this.datasetMetafeatures, Nd4j.create(pipelineMetafeatures));
 	}
 
-	public void build(List<ComponentInstance> distinctPipelines, Instances metaFeatureInformation,
-			double[][][] performanceValues) throws AlgorithmException, InterruptedException {
+	public void build(final List<ComponentInstance> distinctPipelines, final Instances metaFeatureInformation,
+			final double[][][] performanceValues) throws AlgorithmException, InterruptedException {
 		// Check whether has been built
-		if (hasBeenBuilt) {
-			throw new AlgorithmException("MetaMiner has already been built!");			
+		if (this.hasBeenBuilt) {
+			throw new AlgorithmException("MetaMiner has already been built!");
 		}
 
 		// ----- Data set Characterization -----
 
-		dataSetMetaFeaturesAttributes = metaFeatureInformation.enumerateAttributes();		
+		this.dataSetMetaFeaturesAttributes = metaFeatureInformation.enumerateAttributes();
 
 		// Convert to matrix (Matrix X with rows representing data sets)
 		INDArray datasetsMetafeatures = Nd4j.create(metaFeatureInformation.size(),
@@ -79,59 +79,59 @@ public class WEKAMetaminer implements IMetaMiner {
 		for (int i = 0; i < metaFeatureInformation.size(); i++) {
 			datasetsMetafeatures.putRow(i, Nd4j.create(metaFeatureInformation.get(i).toDoubleArray()));
 		}
-		logger.debug("Dataset metafeatures: {} x {}",datasetsMetafeatures.rows(),datasetsMetafeatures.columns());
+		this.logger.debug("Dataset metafeatures: {} x {}",datasetsMetafeatures.rows(),datasetsMetafeatures.columns());
 
 		// ----- Pipeline Characterization -----
 
 		// Compute relative performance ranks of pipelines on data sets
-		logger.info("Computing relative performance Matrix.");
-		INDArray rankMatrix = similarityComputer.computeRelativeRankMatrix(performanceValues);
-		logger.info("Rank matrix: {} x {}",rankMatrix.rows(),rankMatrix.columns());
-		logger.debug("Rank Matrix: {}",rankMatrix);
+		this.logger.info("Computing relative performance Matrix.");
+		INDArray rankMatrix = this.similarityComputer.computeRelativeRankMatrix(performanceValues);
+		this.logger.info("Rank matrix: {} x {}",rankMatrix.rows(),rankMatrix.columns());
+		this.logger.debug("Rank Matrix: {}",rankMatrix);
 
 		// Initialize PipelineCharacterizer with list of distinct pipelines
-		logger.info("WEKAMetaminer: Initializing pipeline characterizer.");
-		pipelineCharacterizer.build(distinctPipelines);
+		this.logger.info("WEKAMetaminer: Initializing pipeline characterizer.");
+		this.pipelineCharacterizer.build(distinctPipelines);
 
 		// Get Characterization of base pipelines from PipelineCharacterizer (Matrix W)
-		INDArray pipelinesMetafeatures = Nd4j.create(pipelineCharacterizer.getCharacterizationsOfTrainingExamples());
-		logger.debug("WEKAMetaminer: Pipeline Metafeatures: {} x {}",pipelinesMetafeatures.rows(),pipelinesMetafeatures.columns());
+		INDArray pipelinesMetafeatures = Nd4j.create(this.pipelineCharacterizer.getCharacterizationsOfTrainingExamples());
+		this.logger.debug("WEKAMetaminer: Pipeline Metafeatures: {} x {}",pipelinesMetafeatures.rows(),pipelinesMetafeatures.columns());
 
 		// Initialize HeterogenousSimilarityMeasures
-		logger.info("WEKAMetaminer: Create similarity measure.");
-		similarityMeasure.build(datasetsMetafeatures, pipelinesMetafeatures, rankMatrix);
+		this.logger.info("WEKAMetaminer: Create similarity measure.");
+		this.similarityMeasure.build(datasetsMetafeatures, pipelinesMetafeatures, rankMatrix);
 
 		// Building is finished
-		hasBeenBuilt = true;
+		this.hasBeenBuilt = true;
 	}
 
-	public void setDataSetCharacterization(Map<String, Double> datasetCharacterization) {
+	public void setDataSetCharacterization(final Map<String, Double> datasetCharacterization) {
 		// Characterize the given data set with characterizer (set x)
-		datasetMetafeatures = Nd4j.create(datasetCharacterization.size());		
-		List<Attribute> attributes = Collections.list(dataSetMetaFeaturesAttributes);
+		this.datasetMetafeatures = Nd4j.create(datasetCharacterization.size());
+		List<Attribute> attributes = Collections.list(this.dataSetMetaFeaturesAttributes);
 		for (int i = 0; i < attributes.size(); i++) {
-			datasetMetafeatures.putScalar(i, datasetCharacterization.get(attributes.get(i).name()));
+			this.datasetMetafeatures.putScalar(i, datasetCharacterization.get(attributes.get(i).name()));
 		}
 	}
 
 	/**
 	 * Get the similarity measure used to determine the similarities of s
-	 * 
+	 *
 	 * @return
 	 */
 	public IHeterogenousSimilarityMeasureComputer getSimilarityMeasure() {
-		return similarityMeasure;
+		return this.similarityMeasure;
 	}
 
-	public void setSimilarityMeasure(IHeterogenousSimilarityMeasureComputer similarityMeasure) {
+	public void setSimilarityMeasure(final IHeterogenousSimilarityMeasureComputer similarityMeasure) {
 		this.similarityMeasure = similarityMeasure;
 	}
 
 	public IPipelineCharacterizer getPipelineCharacterizer() {
-		return pipelineCharacterizer;
+		return this.pipelineCharacterizer;
 	}
 
-	public void setPipelineCharacterizer(IPipelineCharacterizer pipelineCharacterizer) {
+	public void setPipelineCharacterizer(final IPipelineCharacterizer pipelineCharacterizer) {
 		this.pipelineCharacterizer = pipelineCharacterizer;
 	}
 

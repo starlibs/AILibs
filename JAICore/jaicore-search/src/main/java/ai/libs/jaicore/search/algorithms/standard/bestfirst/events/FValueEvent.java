@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.events.AAlgorithmEvent;
 
 public class FValueEvent<V> extends AAlgorithmEvent {
 
@@ -8,17 +8,17 @@ public class FValueEvent<V> extends AAlgorithmEvent {
 
 	private double timeUnitlFound;
 
-	public FValueEvent(String algorithmId, V fValue, double timeUnitlFound) {
+	public FValueEvent(final String algorithmId, final V fValue, final double timeUnitlFound) {
 		super(algorithmId);
 		this.fValue = fValue;
 		this.timeUnitlFound = timeUnitlFound;
 	}
 
 	public V getfValue() {
-		return fValue;
+		return this.fValue;
 	}
 
 	public double getTimeUnitlFound() {
-		return timeUnitlFound;
+		return this.timeUnitlFound;
 	}
 }

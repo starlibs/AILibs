@@ -1,8 +1,9 @@
 package ai.libs.jaicore.ml.tsc.classifier.neighbors;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
@@ -16,7 +17,7 @@ import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
  */
 public class NearestNeighborLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, NearestNeighborClassifier> {
 
-	protected NearestNeighborLearningAlgorithm(final IAlgorithmConfig config, final NearestNeighborClassifier classifier, final TimeSeriesDataset input) {
+	protected NearestNeighborLearningAlgorithm(final IOwnerBasedAlgorithmConfig config, final NearestNeighborClassifier classifier, final TimeSeriesDataset input) {
 		super(config, classifier, input);
 	}
 

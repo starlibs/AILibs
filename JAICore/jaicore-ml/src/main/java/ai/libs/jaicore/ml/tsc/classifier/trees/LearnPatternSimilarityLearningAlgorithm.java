@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
@@ -26,7 +27,7 @@ import weka.core.Instances;
  */
 public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, LearnPatternSimilarityClassifier> {
 
-	public interface IPatternSimilarityConfig extends IRandomAlgorithmConfig {
+	public interface IPatternSimilarityConfig extends IOwnerBasedRandomizedAlgorithmConfig {
 		public static final String K_NUMTREES = "numtrees";
 		public static final String K_MAXDEPTH = "maxdepth";
 		public static final String K_NUMSEGMENTS = "numsegments";
@@ -214,7 +215,7 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 	 */
 	public AccessibleRandomTree initializeRegressionTree(final int numInstances) {
 		AccessibleRandomTree regTree = new AccessibleRandomTree();
-		regTree.setSeed(this.getConfig().seed());
+		regTree.setSeed((int)this.getConfig().seed());
 		regTree.setMaxDepth(this.getConfig().maxDepth());
 		regTree.setKValue(1);
 		regTree.setMinNum((int) (numInstances * 0.01));

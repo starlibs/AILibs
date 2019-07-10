@@ -6,9 +6,10 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Random;
 
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+
 import ai.libs.jaicore.ml.core.dataset.ArffUtilities;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
@@ -17,7 +18,7 @@ import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  * Random Sampling for streamed data). For a desired sample of size n, the first
  * n elements of the stream are directly selected and the remaining ones will
  * replace these with decreasing probability.
- * 
+ *
  * @author Lukas Brandt
  */
 public class ReservoirSampling extends AFileSamplingAlgorithm {
@@ -28,7 +29,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 	private int streamedDatapoints;
 	private String[] sampledDatapoints;
 
-	public ReservoirSampling(Random random, File input) {
+	public ReservoirSampling(final Random random, final File input) {
 		super(input);
 		this.random = random;
 	}
@@ -44,7 +45,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 				this.streamedDatapoints = 0;
 				this.sampledDatapoints = new String[this.sampleSize];
 				this.reader = new BufferedReader(new FileReader(this.getInput()));
-				ArffUtilities.skipWithReaderToDatapoints(reader);
+				ArffUtilities.skipWithReaderToDatapoints(this.reader);
 				return this.activate();
 			} catch (IOException e) {
 				throw new AlgorithmException(e, "Was not able to count the datapoints.");
@@ -53,11 +54,11 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 			if (this.streamedDatapoints < this.datapointAmount) {
 				try {
 					// Get current datapoint.
-					String datapoint = reader.readLine();
+					String datapoint = this.reader.readLine();
 					if (datapoint != null && datapoint.trim().length() > 0 && datapoint.trim().charAt(0) != '%') {
 						if (this.streamedDatapoints < this.sampleSize) {
 							// Take the first n elements directly for the sample.
-							this.sampledDatapoints[streamedDatapoints] = datapoint.trim();
+							this.sampledDatapoints[this.streamedDatapoints] = datapoint.trim();
 						} else {
 							// Replace elements with decreasing probability.
 							int j = this.random.nextInt(this.streamedDatapoints);
@@ -67,7 +68,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 						}
 					}
 					this.streamedDatapoints++;
-					return new SampleElementAddedEvent(getId());
+					return new SampleElementAddedEvent(this.getId());
 				} catch (IOException e) {
 					throw new AlgorithmException(e, "Was not able to read datapoint line from input file");
 				}
@@ -76,7 +77,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 					this.reader.close();
 					// Write sampled datapoints into output file and terminate.
 					for (int i = 0; i < this.sampledDatapoints.length; i++) {
-						this.outputFileWriter.write(sampledDatapoints[i] + "\n");
+						this.outputFileWriter.write(this.sampledDatapoints[i] + "\n");
 					}
 					return this.terminate();
 				} catch (IOException e) {

@@ -7,6 +7,9 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 	
+	// interface definitions
+	compile ('org.api4:algorithm')
+	
 	// basic dependencies
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'
 	// database connector	

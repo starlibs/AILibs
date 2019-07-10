@@ -5,11 +5,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.TimeAwareNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;

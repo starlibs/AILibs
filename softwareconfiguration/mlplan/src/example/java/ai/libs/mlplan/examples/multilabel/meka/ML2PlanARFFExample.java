@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.algorithm.TimeOut;
 
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
-import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;

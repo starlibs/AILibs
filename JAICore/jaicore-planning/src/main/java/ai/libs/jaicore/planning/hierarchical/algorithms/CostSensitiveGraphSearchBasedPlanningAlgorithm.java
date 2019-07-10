@@ -1,7 +1,8 @@
 package ai.libs.jaicore.planning.hierarchical.algorithms;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
-import ai.libs.jaicore.basic.algorithm.IOptimizationAlgorithm;
+import org.api4.java.algorithm.IAlgorithmFactory;
+import org.api4.java.algorithm.IOptimizationAlgorithm;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;

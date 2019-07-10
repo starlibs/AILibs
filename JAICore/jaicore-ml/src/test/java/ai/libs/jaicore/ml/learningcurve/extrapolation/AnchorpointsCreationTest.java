@@ -3,18 +3,16 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 import java.io.File;
 import java.io.IOException;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
-import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
-import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolator;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -23,8 +21,7 @@ import weka.core.converters.ConverterUtils.DataSource;
 public class AnchorpointsCreationTest {
 
 	@Test
-	public void anchorpointsAreCreatedAndHaveTheValues()
-			throws IOException, InvalidAnchorPointsException, AlgorithmException, InterruptedException, ClassNotFoundException, DatasetCreationException {
+	public void anchorpointsAreCreatedAndHaveTheValues() throws IOException, InvalidAnchorPointsException, AlgorithmException, InterruptedException, ClassNotFoundException, DatasetCreationException {
 		int[] xValues = new int[] { 2, 4, 8, 16, 32, 64 };
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();

@@ -5,7 +5,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import ai.libs.jaicore.basic.TimeOut;
+import org.api4.java.algorithm.TimeOut;
+
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;

@@ -3,8 +3,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.HashMap;
 import java.util.Random;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+
 import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
 import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
@@ -13,7 +14,7 @@ import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 /**
  * Case control sampling. Might be used as sampling algorithm or as subroutine
  * for Local Case Control Sampling
- * 
+ *
  * @author Nino Schnitker
  * @param <I>
  *
@@ -22,11 +23,11 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param rand
 	 *            RandomObject for reproducibility
 	 */
-	public CaseControlSampling(Random rand, D input) {
+	public CaseControlSampling(final Random rand, final D input) {
 		super(input);
 		this.rand = rand;
 	}
@@ -36,19 +37,19 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 		switch (this.getState()) {
 		case CREATED:
 			try {
-				this.sample = (D)getInput().createEmpty();
+				this.sample = (D)this.getInput().createEmpty();
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
 			}
 
-			HashMap<Object, Integer> classOccurrences = countClassOccurrences(this.getInput());
+			HashMap<Object, Integer> classOccurrences = this.countClassOccurrences(this.getInput());
 
 			// Count number of classes
 			int numberOfClasses = classOccurrences.keySet().size();
-			if (probabilityBoundaries == null) {
+			if (this.probabilityBoundaries == null) {
 				// Calculate Boundaries that define which Instances is choose for which random
 				// number
-				probabilityBoundaries = calculateInstanceBoundaries(classOccurrences, numberOfClasses);
+				this.probabilityBoundaries = this.calculateInstanceBoundaries(classOccurrences, numberOfClasses);
 			}
 			return this.activate();
 		case ACTIVE:
@@ -57,18 +58,18 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 				double r;
 				do {
 					r = this.rand.nextDouble();
-					for (int i = 0; i < probabilityBoundaries.size(); i++) {
-						if (probabilityBoundaries.get(i).getY().doubleValue() > r) {
-							choosenInstance = probabilityBoundaries.get(i).getX();
+					for (int i = 0; i < this.probabilityBoundaries.size(); i++) {
+						if (this.probabilityBoundaries.get(i).getY().doubleValue() > r) {
+							choosenInstance = this.probabilityBoundaries.get(i).getX();
 							break;
 						}
 					}
 					if (choosenInstance == null) {
-						choosenInstance = probabilityBoundaries.get(probabilityBoundaries.size() - 1).getX();
+						choosenInstance = this.probabilityBoundaries.get(this.probabilityBoundaries.size() - 1).getX();
 					}
 				} while (this.sample.contains(choosenInstance));
 				this.sample.add(choosenInstance);
-				return new SampleElementAddedEvent(getId());
+				return new SampleElementAddedEvent(this.getId());
 			} else {
 				return this.terminate();
 			}

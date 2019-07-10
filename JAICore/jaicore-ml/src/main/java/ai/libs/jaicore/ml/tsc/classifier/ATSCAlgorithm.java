@@ -1,13 +1,14 @@
 package ai.libs.jaicore.ml.tsc.classifier;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithm;
+
 import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
 
 /**
  * Abstract algorithm class which is able to take {@link TimeSeriesDataset}
  * objects and builds {@link TSClassifier} instances specified by the generic
  * parameter <CLASSIFIER>.
- * 
+ *
  * @author Julian Lienen
  *
  * @param <L>
@@ -37,24 +38,24 @@ public abstract class ATSCAlgorithm<L, V, D extends TimeSeriesDataset<L>, C exte
 
 	/**
 	 * Setter for the model to be maintained.
-	 * 
+	 *
 	 * @param model
 	 *            The {@link TSClassifier} model which is maintained during
 	 *            algorithm calls.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends TSClassifier<L, V, D>> void setModel(T model) {
+	public <T extends TSClassifier<L, V, D>> void setModel(final T model) {
 		this.model = (C) model;
 	}
 
 	/**
 	 * Setter for the data set input used during algorithm calls.
-	 * 
+	 *
 	 * @param input
 	 *            The {@link TimeSeriesDataset} object (or a subtype) used for the
 	 *            model maintenance
 	 */
-	public void setInput(D input) {
+	public void setInput(final D input) {
 		this.input = input;
 	}
 

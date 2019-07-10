@@ -11,15 +11,15 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.classifier.ensemble.EnsembleProvider;
@@ -44,7 +44,7 @@ import weka.classifiers.Classifier;
  *
  */
 public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, ShapeletTransformTSClassifier> {
-	public interface IShapeletTransformLearningAlgorithmConfig extends IRandomAlgorithmConfig {
+	public interface IShapeletTransformLearningAlgorithmConfig extends IOwnerBasedRandomizedAlgorithmConfig {
 
 		public static final String K_NUMSHAPELETS = "numshapelets";
 		public static final String K_NUMCLUSTERS = "numclusters";
@@ -188,7 +188,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 
 		int minShapeletLength = this.getConfig().minShapeletLength();
 		int maxShapeletLength = this.getConfig().maxShapeletLength();
-		int seed = this.getConfig().seed();
+		long seed = this.getConfig().seed();
 		ShapeletTransformTSClassifier model = this.getClassifier();
 
 		final int timeSeriesLength = dataMatrix[0].length;
@@ -235,7 +235,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		logger.debug("Initializing ensemble classifier...");
 		Classifier classifier = null;
 		try {
-			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel(seed, this.getConfig().numFolds());
+			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel((int)seed, this.getConfig().numFolds());
 		} catch (Exception e1) {
 			throw new AlgorithmException(e1, "Could not train model due to ensemble exception.");
 		}

@@ -4,7 +4,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithm;
+
 import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.KmeansSamplingFactory;
@@ -28,12 +29,12 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number> dataset) {
+	public IAlgorithm<?, ?> getAlgorithm(final IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number> dataset) {
 		KmeansSamplingFactory<INumericLabeledAttributeArrayInstance<Number>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number>> factory = new KmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			factory.setK(K);
-			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) dataset.size());
+			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 			return factory.getAlgorithm(sampleSize, dataset, new Random(SEED));
 		}
 		return null;

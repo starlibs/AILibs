@@ -10,6 +10,10 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.IHASCOPlanningReduction;
 import ai.libs.hasco.core.IsRefinementCompletedPredicate;
@@ -22,9 +26,6 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.hasco.model.ParameterRefinementConfiguration;
-import ai.libs.jaicore.basic.IInformedObjectEvaluatorExtension;
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.logic.fol.structure.CNFFormula;

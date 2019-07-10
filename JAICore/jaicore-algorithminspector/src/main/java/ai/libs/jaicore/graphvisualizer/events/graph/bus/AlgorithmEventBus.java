@@ -1,6 +1,6 @@
 package ai.libs.jaicore.graphvisualizer.events.graph.bus;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.AlgorithmEvent;
 
 public interface AlgorithmEventBus extends AlgorithmEventSource {
 

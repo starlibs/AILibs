@@ -3,10 +3,10 @@ package ai.libs.jaicore.search.util;
 import java.util.List;
 import java.util.Stack;
 
+import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;

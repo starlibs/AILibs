@@ -6,13 +6,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.api4.java.algorithm.IAlgorithm;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.jaicore.basic.sets.Pair;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;

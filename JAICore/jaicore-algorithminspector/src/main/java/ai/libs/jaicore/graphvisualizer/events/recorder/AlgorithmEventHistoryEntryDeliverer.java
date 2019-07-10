@@ -3,10 +3,10 @@ package ai.libs.jaicore.graphvisualizer.events.recorder;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.HandleAlgorithmEventException;
 import ai.libs.jaicore.graphvisualizer.events.gui.GUIEvent;
@@ -40,7 +40,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 
 	/**
 	 * Creates a new {@link AlgorithmEventHistoryEntryDeliverer} with the given {@link AlgorithmEventHistory} and the maximum sleep time between checking for new events from the history and sending them to the registered listeners.
-	 * 
+	 *
 	 * @param eventHistory The {@link AlgorithmEventHistory} from which the events are pulled.
 	 * @param maximumSleepTimeInMilliseconds The maximum sleep time between checking for new events from the history and sending them to the registered listeners
 	 */
@@ -58,7 +58,7 @@ public class AlgorithmEventHistoryEntryDeliverer extends Thread implements Prope
 
 	/**
 	 * Creates a new {@link AlgorithmEventHistoryEntryDeliverer} with the given {@link AlgorithmEventHistory}.
-	 * 
+	 *
 	 * @param eventHistory The {@link AlgorithmEventHistory} from which the events are pulled.
 	 */
 	public AlgorithmEventHistoryEntryDeliverer(final AlgorithmEventHistory eventHistory) {

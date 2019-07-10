@@ -13,12 +13,12 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 
 	private final INodeEvaluator<N, V> preferredNodeEvaluator;
 	private final Predicate<N> prioritizedNodesInRandomCompletion;
-	private final int seed;
+	private final long seed;
 	private final int numSamples;
 	private final int timeoutForSingleCompletionEvaluationInMS;
 	private final int timeoutForNodeEvaluationInMS;
 
-	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(final INodeEvaluator<N, V> preferredNodeEvaluator, final Predicate<N> preferredNodeEvaluatorForRandomCompletion, final int seed,
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS(final INodeEvaluator<N, V> preferredNodeEvaluator, final Predicate<N> preferredNodeEvaluatorForRandomCompletion, final long seed,
 			final int numSamples, final int timeoutForSingleCompletionEvaluationInMS, final int timeoutForNodeEvaluationInMS) {
 		super();
 		if (numSamples <= 0) {
@@ -40,7 +40,7 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 		return this.prioritizedNodesInRandomCompletion;
 	}
 
-	public int getSeed() {
+	public long getSeed() {
 		return this.seed;
 	}
 

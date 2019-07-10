@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.AlgorithmEvent;
+
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.ml.tsc.HistogramBuilder;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.filter.SFA;
@@ -20,7 +21,7 @@ import ai.libs.jaicore.ml.tsc.filter.ZTransformer;
  */
 public class BOSSLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, BOSSClassifier> {
 
-	public interface IBossAlgorithmConfig extends IAlgorithmConfig {
+	public interface IBossAlgorithmConfig extends IOwnerBasedAlgorithmConfig {
 
 		public static final String K_WINDOW_SIZE = "boss.windowsize";
 		public static final String K_ALPHABET_SIZE = "boss.alphabetsize";

@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.events.AAlgorithmEvent;
 
 public class NodeExpansionCompletedEvent<N> extends AAlgorithmEvent {
 	private final N expandedNode;

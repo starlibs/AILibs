@@ -1,7 +1,8 @@
 package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import weka.classifiers.Classifier;
 
@@ -32,12 +33,12 @@ public class TimeoutableEvaluator extends TimedObjectEvaluator<Classifier, Doubl
 	}
 
 	@Override
-	public long getTimeout(Classifier item) {
+	public long getTimeout(final Classifier item) {
 		return this.timeoutInMS;
 	}
 
 	@Override
-	public String getMessage(Classifier item) {
+	public String getMessage(final Classifier item) {
 		return "Evaluation of classifier " + item + " has timeouted (" + TimeoutableEvaluator.class.getName() + ")";
 	}
 

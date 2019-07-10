@@ -1,6 +1,7 @@
 package ai.libs.jaicore.planning.hierarchical.problems.htn;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.EvaluatedPlan;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedPlan;

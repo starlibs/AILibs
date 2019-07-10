@@ -17,10 +17,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.events.AlgorithmEvent;
 
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.TreeNode;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
@@ -39,7 +39,7 @@ import ai.libs.jaicore.ml.tsc.util.TimeSeriesUtil;
  */
 public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, TimeSeriesTreeClassifier> {
 
-	public interface ITimeSeriesTreeConfig extends IRandomAlgorithmConfig {
+	public interface ITimeSeriesTreeConfig extends IOwnerBasedRandomizedAlgorithmConfig {
 		public static final String K_MAXDEPTH = "maxdepth";
 		public static final String K_FEATURECACHING = "featurecaching";
 
@@ -652,7 +652,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 * @return Returns a pair of lists consisting of the start indices (X) and the
 	 *         end indices (Y)
 	 */
-	public static Pair<List<Integer>, List<Integer>> sampleIntervals(final int m, final int seed) {
+	public static Pair<List<Integer>, List<Integer>> sampleIntervals(final int m, final long seed) {
 		if (m < 1) {
 			throw new IllegalArgumentException("The series' length m must be greater than zero.");
 		}
@@ -683,7 +683,7 @@ public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 *            The seed used for the randomized sampling
 	 * @return Returns a list of elements which have been sampled
 	 */
-	public static List<Integer> randomlySampleNoReplacement(final List<Integer> list, final int sampleSize, final int seed) {
+	public static List<Integer> randomlySampleNoReplacement(final List<Integer> list, final int sampleSize, final long seed) {
 		if (list == null) {
 			throw new IllegalArgumentException("The list to be sampled from must not be null!");
 		}

@@ -6,18 +6,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
 
 /**
  * An {@link AlgorithmEventHistory} stores {@link AlgorithmEventHistoryEntry}s constructed from {@link PropertyProcessedAlgorithmEvent}s representing the recorded behavior of an {@link IAlgorithm}. Such an {@link AlgorithmEventHistory} can
  * be stored and loaded using an
  * {@link AlgorithmEventHistorySerializer}.
- * 
+ *
  * @author atornede
  *
  */
@@ -39,19 +38,19 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 
 	/**
 	 * Creates a new {@link AlgorithmEventHistory} with the given {@link List} of {@link AlgorithmEventHistoryEntry}s.
-	 * 
+	 *
 	 * @param algorithmEventHistoryEntries The list of {@link AlgorithmEventHistoryEntry}s to be stored in the history.
 	 */
-	public AlgorithmEventHistory(List<AlgorithmEventHistoryEntry> algorithmEventHistoryEntries) {
+	public AlgorithmEventHistory(final List<AlgorithmEventHistoryEntry> algorithmEventHistoryEntries) {
 		this();
 		for (AlgorithmEventHistoryEntry entry : algorithmEventHistoryEntries) {
-			entries.add(entry);
+			this.entries.add(entry);
 		}
 	}
 
 	/**
 	 * Adds the given {@link PropertyProcessedAlgorithmEvent} to this {@link AlgorithmEventHistoryEntry}.
-	 * 
+	 *
 	 * @param propertyProcessedAlgorithmEvent The {@link PropertyProcessedAlgorithmEvent} to be added to this history.
 	 */
 	public void addEvent(final PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent) {
@@ -70,7 +69,7 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 
 	/**
 	 * Returns the {@link AlgorithmEventHistoryEntry} at the given timestep.
-	 * 
+	 *
 	 * @param timestep The timestep for which the {@link AlgorithmEventHistoryEntry} has to be returned.
 	 * @return The {@link AlgorithmEventHistoryEntry} at the given timestep.
 	 */
@@ -99,27 +98,27 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((entries == null) ? 0 : entries.hashCode());
+		result = prime * result + ((this.entries == null) ? 0 : this.entries.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) {
 			return true;
 		}
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		AlgorithmEventHistory other = (AlgorithmEventHistory) obj;
-		if (entries == null) {
+		if (this.entries == null) {
 			if (other.entries != null) {
 				return false;
 			}
-		} else if (!entries.equals(other.entries)) {
+		} else if (!this.entries.equals(other.entries)) {
 			return false;
 		}
 		return true;
@@ -129,7 +128,7 @@ public class AlgorithmEventHistory implements ILoggingCustomizable, Serializable
 	public String toString() {
 		String header = "AlgorithmEventHistory \n";
 		StringJoiner joiner = new StringJoiner("\n");
-		for (AlgorithmEventHistoryEntry entry : entries) {
+		for (AlgorithmEventHistoryEntry entry : this.entries) {
 			joiner.add(entry.toString());
 		}
 		return header + joiner.toString();

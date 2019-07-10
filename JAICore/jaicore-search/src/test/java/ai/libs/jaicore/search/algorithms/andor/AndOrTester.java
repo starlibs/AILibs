@@ -2,11 +2,10 @@ package ai.libs.jaicore.search.algorithms.andor;
 
 import static org.junit.Assert.assertEquals;
 
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.graph.Graph;
-import ai.libs.jaicore.search.algorithms.andor.AndORBottomUpFilter;
 import ai.libs.jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
@@ -37,7 +36,6 @@ public class AndOrTester {
 		assertEquals(0, evaluator.evaluate(solution).doubleValue(), 0.0);
 
 		System.out.println("Found optimal out of " + (Math.pow(k, Math.pow(b, d))) + " = k^(" + Math.pow(b, d) + ") solutions within " + (System.currentTimeMillis() - start) + "ms.");
-		//		while (true);
 	}
 
 }

@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,6 @@ import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
-import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;

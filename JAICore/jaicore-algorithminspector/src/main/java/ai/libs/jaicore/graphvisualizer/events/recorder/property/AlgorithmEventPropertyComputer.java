@@ -1,6 +1,6 @@
 package ai.libs.jaicore.graphvisualizer.events.recorder.property;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.events.AlgorithmEvent;
 
 public interface AlgorithmEventPropertyComputer {
 

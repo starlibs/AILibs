@@ -16,6 +16,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.TimeOut;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -24,10 +28,6 @@ import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.ml.WekaUtil;
@@ -99,17 +99,17 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
 
 			/* create instances and set attribute */
-			logger.info("Loading dataset {} from {} for test.", problemSet.getName(), problemSet.getDatasetSource().getX());
-			File cacheFile = new File("testrsc/openml/" + problemSet.getId() + ".arff");
+			logger.info("Loading dataset {} from {} for test.", this.problemSet.getName(), this.problemSet.getDatasetSource().getX());
+			File cacheFile = new File("testrsc/openml/" + this.problemSet.getId() + ".arff");
 			if (!cacheFile.exists()) {
 				logger.info("Cache file does not exist, creating it.");
 				cacheFile.getParentFile().mkdirs();
-				Instances dataset = problemSet.getDatasetSource().getX().getDataSet();
+				Instances dataset = this.problemSet.getDatasetSource().getX().getDataSet();
 				DataSink.write(cacheFile.getAbsolutePath(), dataset);
 			}
 			logger.info("Loading ARFF file from cache.");
 			Instances dataset = new Instances(new FileReader(cacheFile));
-			Attribute targetAttribute = dataset.attribute(problemSet.getDatasetSource().getY());
+			Attribute targetAttribute = dataset.attribute(this.problemSet.getDatasetSource().getY());
 			dataset.setClassIndex(targetAttribute.index());
 			String datasetname = dataset.relationName();
 
@@ -128,7 +128,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 
 			/* get algorithm */
 			logger.info("Loading the algorithm");
-			IAlgorithm<Instances, Classifier> algorithm = getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
+			IAlgorithm<Instances, Classifier> algorithm = this.getAutoMLAlgorithm(train); // AutoML-tools should deliver a classifier
 			assert algorithm != null : "The factory method has returned NULL as the algorithm object";
 			if (algorithm instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) algorithm).setLoggerName("testedalgorithm");

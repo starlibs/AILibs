@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.core.interfaces;
 
-import ai.libs.jaicore.basic.algorithm.ISolutionCandidateIterator;
+import org.api4.java.algorithm.ISolutionCandidateIterator;
+
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 

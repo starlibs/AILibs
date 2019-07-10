@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
-import ai.libs.jaicore.basic.algorithm.events.AAlgorithmEvent;
+import org.api4.java.algorithm.events.AAlgorithmEvent;
+
 import ai.libs.jaicore.search.model.travesaltree.Node;
 
 public class RemovedGoalNodeFromOpenEvent<N, V extends Comparable<V>> extends AAlgorithmEvent {

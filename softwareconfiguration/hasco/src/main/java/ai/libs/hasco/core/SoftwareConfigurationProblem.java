@@ -6,10 +6,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.common.attributedobjects.IObjectEvaluator;
+
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
-import ai.libs.jaicore.basic.IObjectEvaluator;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class SoftwareConfigurationProblem<V extends Comparable<V>> {
@@ -54,9 +55,9 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((components == null) ? 0 : components.hashCode());
-		result = prime * result + ((compositionEvaluator == null) ? 0 : compositionEvaluator.hashCode());
-		result = prime * result + ((requiredInterface == null) ? 0 : requiredInterface.hashCode());
+		result = prime * result + ((this.components == null) ? 0 : this.components.hashCode());
+		result = prime * result + ((this.compositionEvaluator == null) ? 0 : this.compositionEvaluator.hashCode());
+		result = prime * result + ((this.requiredInterface == null) ? 0 : this.requiredInterface.hashCode());
 		return result;
 	}
 
@@ -68,29 +69,29 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		if (obj == null) {
 			return false;
 		}
-		if (getClass() != obj.getClass()) {
+		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
 		SoftwareConfigurationProblem other = (SoftwareConfigurationProblem) obj;
-		if (components == null) {
+		if (this.components == null) {
 			if (other.components != null) {
 				return false;
 			}
-		} else if (!components.equals(other.components)) {
+		} else if (!this.components.equals(other.components)) {
 			return false;
 		}
-		if (compositionEvaluator == null) {
+		if (this.compositionEvaluator == null) {
 			if (other.compositionEvaluator != null) {
 				return false;
 			}
-		} else if (!compositionEvaluator.equals(other.compositionEvaluator)) {
+		} else if (!this.compositionEvaluator.equals(other.compositionEvaluator)) {
 			return false;
 		}
-		if (requiredInterface == null) {
+		if (this.requiredInterface == null) {
 			if (other.requiredInterface != null) {
 				return false;
 			}
-		} else if (!requiredInterface.equals(other.requiredInterface)) {
+		} else if (!this.requiredInterface.equals(other.requiredInterface)) {
 			return false;
 		}
 		return true;

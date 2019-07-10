@@ -4,11 +4,11 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.IRandomAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
+import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
@@ -32,7 +32,7 @@ import weka.core.Instances;
  */
 public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, TimeSeriesBagOfFeaturesClassifier> {
 
-	public interface ITimeSeriesBagOfFeaturesConfig extends IRandomAlgorithmConfig {
+	public interface ITimeSeriesBagOfFeaturesConfig extends IOwnerBasedRandomizedAlgorithmConfig {
 		public static final String K_NUMBINS = "numbins";
 		public static final String K_NUMFOLDS = "numfolds";
 		public static final String K_ZPROP = "zprop";
@@ -120,7 +120,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		}
 
 		// Shuffle instances
-		TimeSeriesUtil.shuffleTimeSeriesDataset(dataset, this.getConfig().seed());
+		TimeSeriesUtil.shuffleTimeSeriesDataset(dataset, (int)this.getConfig().seed());
 
 		double[][] data = dataset.getValuesOrNull(0);
 		int[] targets = dataset.getTargets();

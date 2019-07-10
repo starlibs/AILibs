@@ -3,7 +3,8 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.HashMap;
 import java.util.Map;
 
-import ai.libs.jaicore.basic.ILoggingCustomizable;
+import org.api4.java.common.control.ILoggingCustomizable;
+
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
@@ -27,44 +28,51 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 
 	public AlternativeNodeEvaluator(final INodeEvaluator<T, V> ne1, final INodeEvaluator<T, V> ne2) {
 		super(ne2);
-		if (ne1 == null)
+		if (ne1 == null) {
 			throw new IllegalArgumentException("The alternativ evaluator in node evaluator must not be null!");
+		}
 		this.ne1 = ne1;
 	}
 
 	@Override
 	public boolean requiresGraphGenerator() {
-		if (super.requiresGraphGenerator())
+		if (super.requiresGraphGenerator()) {
 			return true;
-		return (ne1 instanceof IPotentiallyGraphDependentNodeEvaluator) && ((IPotentiallyGraphDependentNodeEvaluator<?, ?>)ne1).requiresGraphGenerator();
+		}
+		return (this.ne1 instanceof IPotentiallyGraphDependentNodeEvaluator) && ((IPotentiallyGraphDependentNodeEvaluator<?, ?>)this.ne1).requiresGraphGenerator();
 	}
-	
+
 	public boolean doesPrimaryNodeEvaluatorReportSolutions() {
-		return (ne1 instanceof IPotentiallySolutionReportingNodeEvaluator) && ((IPotentiallySolutionReportingNodeEvaluator<?, ?>)ne1).reportsSolutions();
+		return (this.ne1 instanceof IPotentiallySolutionReportingNodeEvaluator) && ((IPotentiallySolutionReportingNodeEvaluator<?, ?>)this.ne1).reportsSolutions();
 	}
-	
+
 	@Override
 	public boolean reportsSolutions() {
-		if (super.reportsSolutions())
+		if (super.reportsSolutions()) {
 			return true;
-		return doesDecoratedEvaluatorReportSolutions();
+		}
+		return this.doesDecoratedEvaluatorReportSolutions();
 	}
-	
+
+	@Override
 	public void setGenerator(final GraphGenerator<T, ?> generator) {
 		super.setGenerator(generator);
-		if (!(ne1 instanceof IPotentiallyGraphDependentNodeEvaluator))
+		if (!(this.ne1 instanceof IPotentiallyGraphDependentNodeEvaluator)) {
 			return;
-		IPotentiallyGraphDependentNodeEvaluator<T, V> castedNE1 = (IPotentiallyGraphDependentNodeEvaluator<T, V>)ne1;
+		}
+		IPotentiallyGraphDependentNodeEvaluator<T, V> castedNE1 = (IPotentiallyGraphDependentNodeEvaluator<T, V>)this.ne1;
 		if (castedNE1.requiresGraphGenerator()) {
 			castedNE1.setGenerator(generator);
 		}
 	}
-	
+
+	@Override
 	public void registerSolutionListener(final Object listener) {
-		if (super.doesDecoratedEvaluatorReportSolutions())
+		if (super.doesDecoratedEvaluatorReportSolutions()) {
 			super.registerSolutionListener(listener);
-		if (doesPrimaryNodeEvaluatorReportSolutions()) {
-			((IPotentiallySolutionReportingNodeEvaluator<?, ?>)ne1).registerSolutionListener(listener);
+		}
+		if (this.doesPrimaryNodeEvaluatorReportSolutions()) {
+			((IPotentiallySolutionReportingNodeEvaluator<?, ?>)this.ne1).registerSolutionListener(listener);
 		}
 	}
 
@@ -87,11 +95,11 @@ public class AlternativeNodeEvaluator<T, V extends Comparable<V>> extends Decora
 
 	@Override
 	public String getLoggerName() {
-		return loggerName;
+		return this.loggerName;
 	}
 
 	@Override
-	public void setLoggerName(String name) {
+	public void setLoggerName(final String name) {
 		this.loggerName = name;
 		super.setLoggerName(name + "._decorating");
 		if (this.ne1 instanceof ILoggingCustomizable) {

@@ -18,6 +18,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
+import org.api4.java.common.attributedobjects.GetPropertyFailedException;
 import org.api4.java.common.attributedobjects.IGetter;
 
 import ai.libs.jaicore.basic.MathExt;
@@ -963,15 +964,15 @@ public class SetUtil {
 		return list;
 	}
 
-	public static <T, U> Map<U, Collection<T>> groupCollectionByAttribute(final Collection<T> collection, final IGetter<T, U> getter) {
+	public static <T, U> Map<U, Collection<T>> groupCollectionByAttribute(final Collection<T> collection, final IGetter<T, U> getter) throws InterruptedException, GetPropertyFailedException {
 		Map<U, Collection<T>> groupedCollection = new HashMap<>();
-		collection.forEach(i -> {
+		for (T i : collection) {
 			U val = getter.getPropertyOf(i);
 			if (!groupedCollection.containsKey(val)) {
 				groupedCollection.put(val, new ArrayList<>());
 			}
 			groupedCollection.get(val).add(i);
-		});
+		}
 		return groupedCollection;
 	}
 

@@ -1,17 +1,18 @@
 package ai.libs.hasco.events;
 
+import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
+
 import ai.libs.hasco.core.HASCOSolutionCandidate;
-import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent;
 
 public class HASCOSolutionEvent<V extends Comparable<V>> extends ASolutionCandidateFoundEvent<HASCOSolutionCandidate<V>> implements ScoredSolutionCandidateFoundEvent<HASCOSolutionCandidate<V>, V> {
 
-	public HASCOSolutionEvent(String algorithmId, HASCOSolutionCandidate<V> solutionCandidate) {
+	public HASCOSolutionEvent(final String algorithmId, final HASCOSolutionCandidate<V> solutionCandidate) {
 		super(algorithmId, solutionCandidate);
 	}
 
 	@Override
 	public V getScore() {
-		return getSolutionCandidate().getScore();
+		return this.getSolutionCandidate().getScore();
 	}
 }

@@ -2,7 +2,8 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 
 import java.util.Random;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithm;
+
 import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
@@ -14,10 +15,10 @@ public class SystematicSamplingTester extends GeneralSamplingTester<Object> {
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Object>, Object> dataset) {
+	public IAlgorithm<?, ?> getAlgorithm(final IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Object>, Object> dataset) {
 		SystematicSamplingFactory<INumericLabeledAttributeArrayInstance<Object>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Object>, Object>> factory = new SystematicSamplingFactory<>();
 		if (dataset != null) {
-			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * (double) dataset.size());
+			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
 		}
 		return null;

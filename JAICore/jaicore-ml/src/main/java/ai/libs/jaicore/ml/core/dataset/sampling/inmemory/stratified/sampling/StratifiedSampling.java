@@ -2,11 +2,11 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 
 import java.util.Random;
 
+import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.events.AlgorithmEvent;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.IDataset;
 import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;

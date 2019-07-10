@@ -4,7 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithm;
+
 import ai.libs.jaicore.ml.core.dataset.ArffUtilities;
 import ai.libs.jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.infiles.stratified.sampling.ClassStratiFileAssigner;
@@ -15,7 +16,7 @@ public class ClassStratifiedFileSamplingTester extends GeneralFileSamplingTester
 	private static final long RANDOM_SEED = 1;
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(Object problem) {
+	public IAlgorithm<?, ?> getAlgorithm(final Object problem) {
 		File input = (File) problem;
 		Random r = new Random(RANDOM_SEED);
 		AFileSamplingAlgorithm algorithm = new StratifiedFileSampling(r, new ClassStratiFileAssigner(), input);

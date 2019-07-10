@@ -3,7 +3,8 @@ package ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation;
 import java.util.LinkedList;
 import java.util.List;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+
 import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import meka.core.MLUtils;

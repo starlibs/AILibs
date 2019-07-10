@@ -3,9 +3,10 @@ package ai.libs.mlplan.core.events;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
+import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
+
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.basic.algorithm.events.ASolutionCandidateFoundEvent;
-import ai.libs.jaicore.basic.algorithm.events.ScoredSolutionCandidateFoundEvent;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import weka.classifiers.Classifier;
 

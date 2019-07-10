@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.probleminputs;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.core.interfaces.GraphGenerator;

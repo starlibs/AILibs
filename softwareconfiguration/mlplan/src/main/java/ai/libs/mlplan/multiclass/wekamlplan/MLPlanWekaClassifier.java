@@ -8,13 +8,13 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
 
+import org.api4.java.algorithm.TimeOut;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.gui.statsplugin.HASCOModelStatisticsPlugin;
 import ai.libs.hasco.model.Component;
-import ai.libs.jaicore.basic.ILoggingCustomizable;
-import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.GraphViewPlugin;

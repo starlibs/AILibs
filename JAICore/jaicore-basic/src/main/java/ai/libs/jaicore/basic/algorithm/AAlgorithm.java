@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.IAlgorithm;
-import org.api4.java.algorithm.IAlgorithmConfig;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.EventBus;
 
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.timing.TimedComputation;
@@ -36,7 +36,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	private String loggerName;
 
 	/* Parameters of the algorithm. */
-	private IAlgorithmConfig config;
+	private IOwnerBasedAlgorithmConfig config;
 
 	/* Semantic input to the algorithm. */
 	private final I input;
@@ -66,7 +66,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 */
 	protected AAlgorithm(final I input) {
 		this.input = input;
-		this.config = ConfigFactory.create(IAlgorithmConfig.class);
+		this.config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 * @param config
 	 *            The configuration to take as the internal configuration object.
 	 */
-	protected AAlgorithm(final IAlgorithmConfig config, final I input) {
+	protected AAlgorithm(final IOwnerBasedAlgorithmConfig config, final I input) {
 		this.config = config;
 		this.input = input;
 		if (this.config == null) {
@@ -125,12 +125,12 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public void setNumCPUs(final int numberOfCPUs) {
-		this.getConfig().setProperty(IAlgorithmConfig.K_CPUS, numberOfCPUs + "");
+		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_CPUS, numberOfCPUs + "");
 	}
 
 	@Override
 	public void setMaxNumThreads(final int maxNumberOfThreads) {
-		this.getConfig().setProperty(IAlgorithmConfig.K_THREADS, maxNumberOfThreads + "");
+		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_THREADS, maxNumberOfThreads + "");
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	@Override
 	public void setTimeout(final TimeOut timeout) {
 		this.logger.info("Setting timeout to {}ms", timeout.milliseconds());
-		this.getConfig().setProperty(IAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
+		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
 	}
 
 	public int getTimeoutPrecautionOffset() {
@@ -419,7 +419,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	@Override
-	public IAlgorithmConfig getConfig() {
+	public IOwnerBasedAlgorithmConfig getConfig() {
 		return this.config;
 	}
 
@@ -429,7 +429,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 * @param config
 	 *            The new config object.
 	 */
-	public void setConfig(final IAlgorithmConfig config) {
+	public void setConfig(final IOwnerBasedAlgorithmConfig config) {
 		this.config = config;
 	}
 

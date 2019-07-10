@@ -6,10 +6,10 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.TimeOut;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.DyadRankedBestFirstFactory;

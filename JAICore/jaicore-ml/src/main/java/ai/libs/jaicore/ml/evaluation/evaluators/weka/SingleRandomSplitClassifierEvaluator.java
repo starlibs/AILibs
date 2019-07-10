@@ -2,10 +2,10 @@ package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
 import java.util.List;
 
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.ObjectEvaluationFailedException;
 import ai.libs.jaicore.ml.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;

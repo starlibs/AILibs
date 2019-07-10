@@ -3,9 +3,10 @@ package ai.libs.automl.mlplan.test;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.algorithm.IAlgorithm;
+import org.api4.java.algorithm.TimeOut;
+
 import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
-import ai.libs.jaicore.basic.TimeOut;
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;

@@ -6,10 +6,10 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 

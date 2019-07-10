@@ -1,14 +1,14 @@
 package ai.libs.jaicore.search.core.interfaces;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.AOptimizer;
-import ai.libs.jaicore.basic.algorithm.AlgorithmExecutionCanceledException;
-import ai.libs.jaicore.basic.algorithm.IAlgorithmConfig;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmTimeoutedException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -39,7 +39,7 @@ implements IOptimalPathInORGraphSearch<I, N, A, V> {
 		super(problem);
 	}
 
-	protected AOptimalPathInORGraphSearch(final IAlgorithmConfig config,final I problem) {
+	protected AOptimalPathInORGraphSearch(final IOwnerBasedAlgorithmConfig config,final I problem) {
 		super(config,problem);
 	}
 

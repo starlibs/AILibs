@@ -3,7 +3,8 @@ package ai.libs.jaicore.planning.classical.algorithms.strips.forward;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
+import org.api4.java.algorithm.IAlgorithmFactory;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.logic.fol.structure.VariableParam;

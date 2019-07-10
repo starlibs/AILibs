@@ -1,8 +1,8 @@
 package ai.libs.jaicore.planning.hierarchical.algorithms;
 
+import org.api4.java.algorithm.IAlgorithmFactory;
 import org.slf4j.Logger;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithmFactory;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.classical.problems.strips.Operation;
 import ai.libs.jaicore.planning.core.interfaces.IEvaluatedGraphSearchBasedPlan;

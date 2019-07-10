@@ -1,15 +1,16 @@
 package ai.libs.jaicore.search.core.interfaces;
 
-import ai.libs.jaicore.basic.algorithm.IAlgorithm;
+import org.api4.java.algorithm.IAlgorithm;
+
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  * Graph search algorithms take a graph <N, A> that is given in the form of a graph generator and search it.
  * Usually, the algorithm uses internal wrapper classes to represent edges and nodes, which is why there are
  * additional generics for that.
- * 
+ *
  * @author fmohr
- * 
+ *
  * @param <I>
  * @param <O>
  * @param <N>

@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+
 import ai.libs.jaicore.basic.TempFileHandler;
-import ai.libs.jaicore.basic.algorithm.exceptions.AlgorithmException;
 
 public class ClassStratiFileAssigner implements IStratiFileAssigner {
 
@@ -17,10 +18,10 @@ public class ClassStratiFileAssigner implements IStratiFileAssigner {
 
 	/**
 	 * Constructor with a given target attribute.
-	 * 
+	 *
 	 * @param targetAttribute Index of the target attribute.
 	 */
-	public ClassStratiFileAssigner(int targetAttribute) {
+	public ClassStratiFileAssigner(final int targetAttribute) {
 		this.targetAttribute = targetAttribute;
 		this.classToStratumMapping = new HashMap<>();
 		this.stratiSizes = new HashMap<>();
@@ -36,17 +37,17 @@ public class ClassStratiFileAssigner implements IStratiFileAssigner {
 	}
 
 	@Override
-	public void setTempFileHandler(TempFileHandler tempFileHandler) {
+	public void setTempFileHandler(final TempFileHandler tempFileHandler) {
 		this.tempFileHandler = tempFileHandler;
 	}
 
 	@Override
-	public void setArffHeader(String arffHeader) {
+	public void setArffHeader(final String arffHeader) {
 		this.arffHeader = arffHeader;
 	}
 
 	@Override
-	public void assignDatapoint(String datapoint) throws AlgorithmException {
+	public void assignDatapoint(final String datapoint) throws AlgorithmException {
 		String c;
 		String[] features = datapoint.split(",");
 		if (this.targetAttribute == -1) {
@@ -75,10 +76,10 @@ public class ClassStratiFileAssigner implements IStratiFileAssigner {
 
 	@Override
 	public Map<String, Integer> getAllCreatedStrati() {
-		return stratiSizes;
+		return this.stratiSizes;
 	}
 
-	private String createNewStratumFile(String c) throws IOException {
+	private String createNewStratumFile(final String c) throws IOException {
 		String uuid = this.tempFileHandler.createTempFile();
 		this.tempFileHandler.getFileWriterForTempFile(uuid).write(this.arffHeader);
 		this.tempFileHandler.getFileWriterForTempFile(uuid).flush();
