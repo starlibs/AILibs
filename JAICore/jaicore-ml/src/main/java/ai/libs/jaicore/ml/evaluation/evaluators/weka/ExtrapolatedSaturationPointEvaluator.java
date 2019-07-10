@@ -2,6 +2,9 @@ package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -9,9 +12,6 @@ import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;

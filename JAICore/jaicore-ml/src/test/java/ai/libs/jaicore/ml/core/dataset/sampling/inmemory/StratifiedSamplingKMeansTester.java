@@ -3,10 +3,10 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 import java.util.Random;
 
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.StratifiedSamplingFactory;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.IStratiAmountSelector;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.KMeansStratiAssigner;

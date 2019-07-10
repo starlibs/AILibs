@@ -4,15 +4,15 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
+import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.ILabeledInstance;
+import org.api4.java.ai.ml.IOrderedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.classifiers.Classifier;

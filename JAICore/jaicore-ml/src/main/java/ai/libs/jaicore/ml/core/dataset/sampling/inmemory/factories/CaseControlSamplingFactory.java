@@ -2,8 +2,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 
 import java.util.Random;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.ILabeledInstance;
+
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol.CaseControlSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 

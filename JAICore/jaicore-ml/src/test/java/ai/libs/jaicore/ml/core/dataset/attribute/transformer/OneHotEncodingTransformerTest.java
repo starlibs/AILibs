@@ -6,8 +6,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
 
 public class OneHotEncodingTransformerTest {
 

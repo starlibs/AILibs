@@ -3,8 +3,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 import java.util.Comparator;
 import java.util.Random;
 
-import ai.libs.jaicore.ml.core.dataset.INumericArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
+import org.api4.java.ai.ml.INumericArrayInstance;
+import org.api4.java.ai.ml.IOrderedDataset;
+
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.SystematicSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 

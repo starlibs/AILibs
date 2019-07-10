@@ -3,11 +3,10 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.INumericArrayInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.INumericArrayInstance;
 
 /**
  * Cluster the data set with k-means into k Clusters, where each cluster stands

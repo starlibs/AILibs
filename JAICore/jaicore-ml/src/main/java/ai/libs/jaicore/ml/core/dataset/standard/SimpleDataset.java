@@ -4,10 +4,11 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.ContainsNonNumericAttributesException;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
+
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
 
 public class SimpleDataset<L> extends LinkedList<SimpleInstance<L>> implements IOrderedLabeledAttributeArrayDataset<SimpleInstance<L>, L> {
 

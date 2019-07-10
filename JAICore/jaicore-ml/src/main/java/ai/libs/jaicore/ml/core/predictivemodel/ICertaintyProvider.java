@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core.predictivemodel;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.IDataset;
 
 /**
  * The {@link ICertaintyProvider} models an {@link IPredictiveModel} that

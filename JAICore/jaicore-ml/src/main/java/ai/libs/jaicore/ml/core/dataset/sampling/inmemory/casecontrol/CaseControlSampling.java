@@ -3,12 +3,12 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.HashMap;
 import java.util.Random;
 
+import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.ILabeledInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 /**

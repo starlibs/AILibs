@@ -3,10 +3,10 @@ package ai.libs.jaicore.ml.core.dataset.attribute.transformer.multivalue;
 import java.util.LinkedList;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.multivalue.MultiValueAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.transformer.ISingleAttributeTransformer;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.transformer.ISingleAttributeTransformer;
 
 /**
  * Transforms a multi-valued feature into a 0/1 Vector, where each dimension

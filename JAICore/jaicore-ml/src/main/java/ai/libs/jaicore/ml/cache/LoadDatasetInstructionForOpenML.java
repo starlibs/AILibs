@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.api4.java.ai.ml.IDataset;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import ai.libs.jaicore.ml.openml.OpenMLHelper;
 import weka.core.Instances;

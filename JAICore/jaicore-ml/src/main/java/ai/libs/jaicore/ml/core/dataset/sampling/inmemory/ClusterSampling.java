@@ -5,10 +5,10 @@ import java.util.List;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ASamplingAlgorithm<I, D> {

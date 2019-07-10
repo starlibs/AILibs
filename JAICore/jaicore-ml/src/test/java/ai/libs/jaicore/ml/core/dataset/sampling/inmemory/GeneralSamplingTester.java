@@ -11,6 +11,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.IAlgorithm;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
@@ -18,9 +21,6 @@ import org.junit.runners.Parameterized.Parameters;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 
 /**
  * This class provides some tests that verify basic properties of a sampling

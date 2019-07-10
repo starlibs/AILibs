@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.IOrderedDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 

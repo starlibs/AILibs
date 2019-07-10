@@ -4,10 +4,10 @@ import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.INumericArrayInstance;
 
 import ai.libs.jaicore.ml.clustering.GMeans;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.INumericArrayInstance;
 
 /**
  * Combined strati amount selector and strati assigner via g-means. IT can be

@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.IDataset;
 
 /**
  * Interface to write custom Assigner for datapoints to strati.

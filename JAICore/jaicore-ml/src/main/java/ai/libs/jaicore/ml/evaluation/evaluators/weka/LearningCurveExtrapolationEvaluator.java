@@ -1,5 +1,8 @@
 package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
+import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -9,9 +12,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.eventbus.EventBus;
 
 import ai.libs.jaicore.basic.events.IEventEmitter;
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.interfaces.LearningCurve;

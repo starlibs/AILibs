@@ -1,8 +1,9 @@
 package ai.libs.jaicore.ml.core.dataset.sampling;
 
+import org.api4.java.ai.ml.AILabeledAttributeArrayDataset;
+
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
 
 /**
  * An abstract class for sampling algorithms providing basic functionality of an algorithm.

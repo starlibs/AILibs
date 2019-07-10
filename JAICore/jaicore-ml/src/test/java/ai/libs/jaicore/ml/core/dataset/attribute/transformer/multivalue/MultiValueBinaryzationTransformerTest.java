@@ -7,10 +7,10 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
+import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.multivalue.MultiValueAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.transformer.multivalue.MultiValueBinaryzationTransformer;
 
 public class MultiValueBinaryzationTransformerTest {

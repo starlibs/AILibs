@@ -3,12 +3,11 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
-
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 
 /**
  * Implementation of a sampling method using kmeans-clustering. This algorithm

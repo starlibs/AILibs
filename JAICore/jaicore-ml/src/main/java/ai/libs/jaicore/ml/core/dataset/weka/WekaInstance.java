@@ -4,20 +4,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.api4.java.ai.ml.ContainsNonNumericAttributesException;
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.BooleanAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.BooleanAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 
 import ai.libs.jaicore.basic.sets.ElementDecorator;
 import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import weka.core.Attribute;
 import weka.core.Instance;
 

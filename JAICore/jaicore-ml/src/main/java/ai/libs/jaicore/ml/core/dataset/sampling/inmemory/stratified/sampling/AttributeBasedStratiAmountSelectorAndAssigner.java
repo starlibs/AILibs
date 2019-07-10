@@ -17,15 +17,15 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
+import org.api4.java.ai.ml.AILabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 
 /**

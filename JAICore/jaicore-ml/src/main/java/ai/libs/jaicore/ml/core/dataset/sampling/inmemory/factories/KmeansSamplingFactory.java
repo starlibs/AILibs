@@ -4,9 +4,9 @@ import java.util.Random;
 
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.KmeansSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 

@@ -6,12 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.api4.java.ai.ml.DatasetCreationException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;

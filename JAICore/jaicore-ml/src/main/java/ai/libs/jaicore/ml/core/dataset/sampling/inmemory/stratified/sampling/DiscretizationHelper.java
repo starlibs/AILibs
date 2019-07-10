@@ -10,12 +10,11 @@ import java.util.Set;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
+import org.api4.java.ai.ml.AILabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
 
 /**
  * This helper class provides methods that are required in order to discretize

@@ -3,13 +3,13 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 import java.io.File;
 import java.io.IOException;
 
+import org.api4.java.ai.ml.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;

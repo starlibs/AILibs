@@ -2,11 +2,11 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.IOrderedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
-import ai.libs.jaicore.ml.core.dataset.IOrderedDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
 public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {

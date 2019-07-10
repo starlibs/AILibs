@@ -1,7 +1,8 @@
 package ai.libs.jaicore.ml.activelearning;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.ILabeledInstance;
+
 import ai.libs.jaicore.ml.core.predictivemodel.ICertaintyProvider;
 
 /**

@@ -4,10 +4,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.KmeansSamplingFactory;
 
 public class KMeansSamplingTester extends GeneralSamplingTester<Number> {

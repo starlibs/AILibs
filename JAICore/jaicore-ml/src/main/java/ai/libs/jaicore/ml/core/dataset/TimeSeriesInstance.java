@@ -2,7 +2,8 @@ package ai.libs.jaicore.ml.core.dataset;
 
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
 
 /**
  * TimeSeriesInstance

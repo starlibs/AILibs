@@ -3,12 +3,12 @@ package ai.libs.jaicore.ml.core.dataset.standard;
 import java.util.LinkedList;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.ContainsNonNumericAttributesException;
-import ai.libs.jaicore.ml.core.dataset.INumericLabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
+import org.api4.java.ai.ml.ContainsNonNumericAttributesException;
+import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.transformer.OneHotEncodingTransformer;
 
 public class SimpleInstance<L> implements INumericLabeledAttributeArrayInstance<L> {
 	/**

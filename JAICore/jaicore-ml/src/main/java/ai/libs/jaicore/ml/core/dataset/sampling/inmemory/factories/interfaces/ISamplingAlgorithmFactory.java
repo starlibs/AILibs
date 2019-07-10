@@ -2,7 +2,8 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces;
 
 import java.util.Random;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.IDataset;
+
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
 /**

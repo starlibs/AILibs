@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.api4.java.ai.ml.IDataset;
 
 import com.clearspring.analytics.util.Lists;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -15,7 +16,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
 
 public class InstructionGraph extends ArrayList<InstructionNode> {
 

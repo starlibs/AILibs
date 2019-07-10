@@ -14,6 +14,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.BooleanAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.BooleanAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -21,13 +28,6 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.core.Instances;

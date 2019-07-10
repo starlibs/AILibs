@@ -2,9 +2,10 @@ package ai.libs.jaicore.ml.core.predictivemodel;
 
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.AILabeledAttributeArrayDataset;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.IInstance;
+import org.api4.java.ai.ml.AILabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.IInstance;
+
 import ai.libs.jaicore.ml.core.exception.ConfigurationException;
 import ai.libs.jaicore.ml.core.exception.PredictionException;
 

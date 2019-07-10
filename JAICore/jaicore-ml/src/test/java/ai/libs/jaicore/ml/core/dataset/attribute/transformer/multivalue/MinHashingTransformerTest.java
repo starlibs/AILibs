@@ -6,10 +6,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.multivalue.MultiValueAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attribute.transformer.multivalue.MinHashingTransformer;
 
 public class MinHashingTransformerTest {

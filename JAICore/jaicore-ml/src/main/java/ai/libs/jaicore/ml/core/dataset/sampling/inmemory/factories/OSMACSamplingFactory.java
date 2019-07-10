@@ -2,8 +2,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 
 import java.util.Random;
 
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol.OSMAC;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 

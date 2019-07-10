@@ -8,14 +8,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.core.dataset.TimeSeriesInstance;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
 import ai.libs.jaicore.ml.core.exception.TrainingException;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;

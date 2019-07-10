@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.ILabeledInstance;
+
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.core.dataset.IDataset;
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
 public abstract class CaseControlLikeSampling<I extends ILabeledInstance<?>, D extends IDataset<I>> extends ASamplingAlgorithm<I, D> {

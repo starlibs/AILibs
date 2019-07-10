@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.ILabeledAttributeArrayInstance;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.BooleanAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValue;
+
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.BooleanAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeType;
-import ai.libs.jaicore.ml.core.dataset.attribute.primitive.NumericAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.standard.SimpleDataset;
 import ai.libs.jaicore.ml.core.dataset.standard.SimpleInstance;
 import weka.core.Attribute;

@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.core.dataset;
 import java.io.Serializable;
 import java.util.List;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
 
 @SuppressWarnings("serial")
 public class InstanceSchema<L> implements Serializable {

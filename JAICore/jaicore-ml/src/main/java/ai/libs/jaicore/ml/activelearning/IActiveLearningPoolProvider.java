@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.activelearning;
 
 import java.util.Collection;
 
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
+import org.api4.java.ai.ml.ILabeledInstance;
 
 /**
  * Provides a sample pool for pool-based active learning.

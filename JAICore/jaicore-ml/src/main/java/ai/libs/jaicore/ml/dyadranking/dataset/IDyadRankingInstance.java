@@ -1,8 +1,8 @@
 package ai.libs.jaicore.ml.dyadranking.dataset;
 
+import org.api4.java.ai.ml.ILabeledInstance;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
-import ai.libs.jaicore.ml.core.dataset.ILabeledInstance;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 
 /**

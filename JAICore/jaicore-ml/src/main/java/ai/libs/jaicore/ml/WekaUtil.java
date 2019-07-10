@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.api4.java.ai.ml.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -44,7 +45,6 @@ import ai.libs.jaicore.ml.core.SimpleInstanceImpl;
 import ai.libs.jaicore.ml.core.SimpleInstancesImpl;
 import ai.libs.jaicore.ml.core.SimpleLabeledInstanceImpl;
 import ai.libs.jaicore.ml.core.WekaCompatibleInstancesImpl;
-import ai.libs.jaicore.ml.core.dataset.DatasetCreationException;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;

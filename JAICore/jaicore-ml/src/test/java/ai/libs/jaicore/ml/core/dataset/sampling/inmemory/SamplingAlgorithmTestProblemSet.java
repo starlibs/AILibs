@@ -3,12 +3,12 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 import java.io.File;
 import java.io.IOException;
 
+import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import ai.libs.jaicore.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.core.Attribute;
 import weka.core.Instances;

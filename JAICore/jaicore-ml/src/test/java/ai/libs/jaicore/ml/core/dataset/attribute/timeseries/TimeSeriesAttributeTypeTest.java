@@ -2,12 +2,12 @@ package ai.libs.jaicore.ml.core.dataset.attribute.timeseries;
 
 import static org.junit.Assert.assertTrue;
 
+import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.util.ArrayUtil;
-
-import ai.libs.jaicore.ml.core.dataset.attribute.IAttributeValue;
 
 /**
  * Unit test cases for the {@link TimeSeriesAttributeType} class.
