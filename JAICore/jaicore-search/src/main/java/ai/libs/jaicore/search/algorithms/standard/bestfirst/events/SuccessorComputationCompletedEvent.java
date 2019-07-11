@@ -2,33 +2,34 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
 import java.util.List;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
 
-public class SuccessorComputationCompletedEvent<T, A> extends BestFirstEvent {
-	private Node<T, ?> node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
+
+public class SuccessorComputationCompletedEvent<T, A, V extends Comparable<V>> extends BestFirstEvent {
+	private BackPointerPath<T, A, V> path;
 	private List<NodeExpansionDescription<T, A>> successorDescriptions;
 
-	public SuccessorComputationCompletedEvent(String algorithmId, Node<T, ?> node,
-			List<NodeExpansionDescription<T, A>> successorDescriptions) {
+	public SuccessorComputationCompletedEvent(final String algorithmId, final BackPointerPath<T, A, V> path,
+			final List<NodeExpansionDescription<T, A>> successorDescriptions) {
 		super(algorithmId);
-		this.node = node;
+		this.path = path;
 		this.successorDescriptions = successorDescriptions;
 	}
 
-	public Node<T, ?> getNode() {
-		return node;
+	public BackPointerPath<T, A, V> getNode() {
+		return this.path;
 	}
 
-	public void setNode(Node<T, ?> node) {
-		this.node = node;
+	public void setNode(final BackPointerPath<T, A, V> node) {
+		this.path = node;
 	}
 
 	public List<NodeExpansionDescription<T, A>> getSuccessorDescriptions() {
-		return successorDescriptions;
+		return this.successorDescriptions;
 	}
 
-	public void setSuccessorDescriptions(List<NodeExpansionDescription<T, A>> successorDescriptions) {
+	public void setSuccessorDescriptions(final List<NodeExpansionDescription<T, A>> successorDescriptions) {
 		this.successorDescriptions = successorDescriptions;
 	}
 }

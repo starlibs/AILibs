@@ -1,10 +1,11 @@
 package ai.libs.jaicore.search.testproblems.gridworld;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.jaicore.testproblems.gridworld.GridWorldNode;
 
-public class GridWorldHeuristic implements INodeEvaluator<GridWorldNode, Double> {
+public class GridWorldHeuristic implements IPathEvaluator<GridWorldNode, Object, Double> {
 
 	private final int targetX;
 	private final int targetY;
@@ -16,9 +17,9 @@ public class GridWorldHeuristic implements INodeEvaluator<GridWorldNode, Double>
 	}
 
 	@Override
-	public Double f(final Node<GridWorldNode, ?> node) {
-		int x_ = Math.abs(this.targetX - node.getPoint().getX());
-		int y_ = Math.abs(this.targetY - node.getPoint().getY());
+	public Double f(final IPath<GridWorldNode, Object> node) {
+		int x_ = Math.abs(this.targetX - node.getHead().getX());
+		int y_ = Math.abs(this.targetY - node.getHead().getY());
 		return new Double(x_ + y_);
 	}
 }

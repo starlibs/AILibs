@@ -26,7 +26,7 @@ public class AReducingSolutionIterator<I1, O1, I2, O2> extends ASolutionCandidat
 	private final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer;
 	private final ISolutionCandidateIterator<I2, O2> baseAlgorithm;
 
-	public AReducingSolutionIterator(final I1 problem, final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer, final IAlgorithmFactory<I2, O2> baseFactory) {
+	public AReducingSolutionIterator(final I1 problem, final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer, final IAlgorithmFactory<I2, O2, ?> baseFactory) {
 		super(problem);
 		this.problemTransformer = problemTransformer;
 		this.baseAlgorithm = (ISolutionCandidateIterator<I2, O2>)baseFactory.getAlgorithm(problemTransformer.encodeProblem(problem));

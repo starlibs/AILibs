@@ -3,11 +3,12 @@ package ai.libs.jaicore.search.probleminputs;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 /**
  * In AILibs, a graph search problem always aims at identifying one or more paths from
@@ -22,15 +23,16 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
  * @param <A>
  * @param <V>
  */
-public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> {
-	private final IObjectEvaluator<SearchGraphPath<N, A>, V> pathEvaluator;
+public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> implements IGraphSearchWithPathEvaluationsInput<N, A, V> {
+	private final IObjectEvaluator<IPath<N, A>, V> pathEvaluator;
 
-	public GraphSearchWithPathEvaluationsInput(final GraphGenerator<N, A> graphGenerator, final IObjectEvaluator<SearchGraphPath<N, A>, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
 		super(graphGenerator);
 		this.pathEvaluator = pathEvaluator;
 	}
 
-	public IObjectEvaluator<SearchGraphPath<N, A>, V> getPathEvaluator() {
+	@Override
+	public IObjectEvaluator<IPath<N, A>, V> getPathEvaluator() {
 		return this.pathEvaluator;
 	}
 

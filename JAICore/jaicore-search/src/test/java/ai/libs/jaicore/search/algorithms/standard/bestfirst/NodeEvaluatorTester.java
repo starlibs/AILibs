@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Test;
@@ -15,14 +16,13 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPGraphGenerator;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPGenerator;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 
-public abstract class NodeEvaluatorTester<N extends INodeEvaluator<EnhancedTTSPNode, Double>> {
+public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPNode, String, Double>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(NodeEvaluatorTester.class);
 	private static final int INTERRUPT_TRIGGER = 3000;
@@ -32,11 +32,11 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<EnhancedTTSPN
 
 	public abstract N getBusyNodeEvaluator();
 
-	public abstract Collection<Node<EnhancedTTSPNode, Double>> getNodesToTestInDifficultProblem(int numNodes);
+	public abstract Collection<BackPointerPath<EnhancedTTSPNode, String, Double>> getNodesToTestInDifficultProblem(int numNodes);
 
 	@Test
 	public void testInterruptibility() throws InterruptedException, AlgorithmException {
-		for (Node<EnhancedTTSPNode, Double> node : this.getNodesToTestInDifficultProblem(1)) {
+		for (BackPointerPath<EnhancedTTSPNode, String, Double> node : this.getNodesToTestInDifficultProblem(1)) {
 
 			/* create a new node evaluator */
 			N ne = this.getBusyNodeEvaluator();
@@ -51,8 +51,9 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<EnhancedTTSPN
 			long start = System.currentTimeMillis();
 			try {
 				logger.info("Starting evaluation of root");
-				Double score= ne.f(node);
-				fail("Obtained score " + score + " instead of interrupt. Either the node evaluation has caught and suppressed the InterruptedException, or the evaluation only took " + (System.currentTimeMillis() - start) + "ms, which was not enough to trigger the interrupt.");
+				Double score = ne.f(node);
+				fail("Obtained score " + score + " instead of interrupt. Either the node evaluation has caught and suppressed the InterruptedException, or the evaluation only took " + (System.currentTimeMillis() - start)
+						+ "ms, which was not enough to trigger the interrupt.");
 			} catch (InterruptedException e) {
 				if (Interrupter.get().hasCurrentThreadBeenInterruptedWithReason(task)) {
 					long runtime = System.currentTimeMillis() - start;
@@ -66,7 +67,7 @@ public abstract class NodeEvaluatorTester<N extends INodeEvaluator<EnhancedTTSPN
 		}
 	}
 
-	public StandardBestFirst<EnhancedTTSPNode, String, Double> getBF(final int problemSize, final INodeEvaluator<EnhancedTTSPNode, Double> ne) {
+	public StandardBestFirst<EnhancedTTSPNode, String, Double> getBF(final int problemSize, final IPathEvaluator<EnhancedTTSPNode, String, Double> ne) {
 		GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> input = new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPGraphGenerator(new EnhancedTTSPGenerator().generate(problemSize, 100)), ne); // there will
 		// be 10
 		// solutions

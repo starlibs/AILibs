@@ -1,11 +1,12 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
-import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+
 import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class MCTSPathSearchFactory<N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V> implements IOptimalPathInORGraphSearchFactory<GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V> {
+public class MCTSPathSearchFactory<N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V, MCTSPathSearch<N, A, V>> implements IOptimalPathInORGraphSearchFactory<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, N, A, V,  MCTSPathSearch<N, A, V>> {
 	private IPathUpdatablePolicy<N, A, V> treePolicy;
 	private IPolicy<N, A, V> defaultPolicy;
 	private V evaluationFailurePenalty;

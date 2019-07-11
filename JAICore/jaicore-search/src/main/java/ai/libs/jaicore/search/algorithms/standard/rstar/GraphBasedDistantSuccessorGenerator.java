@@ -4,30 +4,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.math.IMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public class GraphBasedDistantSuccessorGenerator<N, A> implements DistantSuccessorGenerator<N>, ILoggingCustomizable {
 
 	private static final int MAX_ATTEMPTS = 10;
 	private final SuccessorGenerator<N, A> succesorGenerator;
-	private final NodeGoalTester<N> goalTester;
+	private final NodeGoalTester<N, A> goalTester;
 	private final Random random;
 
 	private Logger logger = LoggerFactory.getLogger(GraphBasedDistantSuccessorGenerator.class);
 
-	public GraphBasedDistantSuccessorGenerator(final GraphGenerator<N, A> graphGenerator, final int seed) {
+	public GraphBasedDistantSuccessorGenerator(final IGraphGenerator<N, A> graphGenerator, final int seed) {
 		super();
 		this.succesorGenerator = graphGenerator.getSuccessorGenerator();
-		this.goalTester = (NodeGoalTester<N>)graphGenerator.getGoalTester();
+		this.goalTester = (NodeGoalTester<N, A>)graphGenerator.getGoalTester();
 		this.random = new Random(seed);
 	}
 

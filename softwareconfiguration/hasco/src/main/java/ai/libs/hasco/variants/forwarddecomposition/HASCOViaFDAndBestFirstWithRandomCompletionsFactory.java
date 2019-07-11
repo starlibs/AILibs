@@ -2,15 +2,16 @@ package ai.libs.hasco.variants.forwarddecomposition;
 
 import java.util.function.Predicate;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.hasco.core.RefinementConfiguredSoftwareConfigurationProblem;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 
 public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOViaFDAndBestFirstFactory<Double> {
 
-	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = n -> null;
+	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = n -> null;
 	private Predicate<TFDNode> priorizingPredicate;
 	private long seed;
 	private int numSamples;
@@ -37,11 +38,11 @@ public class HASCOViaFDAndBestFirstWithRandomCompletionsFactory extends HASCOVia
 		this.priorizingPredicate = priorizingPredicate;
 	}
 
-	public INodeEvaluator<TFDNode, Double> getPreferredNodeEvaluator() {
+	public IPathEvaluator<TFDNode, String,Double> getPreferredNodeEvaluator() {
 		return this.preferredNodeEvaluator;
 	}
 
-	public void setPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
+	public void setPreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
 		this.preferredNodeEvaluator = preferredNodeEvaluator;
 	}
 

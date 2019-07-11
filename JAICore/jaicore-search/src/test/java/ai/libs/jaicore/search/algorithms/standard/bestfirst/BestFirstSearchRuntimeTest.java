@@ -60,7 +60,7 @@ public class BestFirstSearchRuntimeTest {
 		int runtime = (int) (System.currentTimeMillis() - start);
 		double expansionsPerSecond = MathExt.round(bf.getExpandedCounter() / (runtime / 1000f), 2);
 		double creationsPerSecond = MathExt.round(bf.getCreatedCounter() / (runtime / 1000f), 2);
-		assertTrue(expansionsPerSecond > 1000);
+		assertTrue("Only achieved " + expansionsPerSecond + " but 1000 were required.", expansionsPerSecond > 1000);
 		assertTrue(creationsPerSecond > 1000);
 		System.out.println("Needed " + runtime + "ms to identify " + bf.getSolutionQueue().size() + " solutions. Expanded " + bf.getExpandedCounter() + "/" + bf.getCreatedCounter() + " created nodes. This corresponds to "
 				+ expansionsPerSecond + " expansions and " + creationsPerSecond + " creations per second.");

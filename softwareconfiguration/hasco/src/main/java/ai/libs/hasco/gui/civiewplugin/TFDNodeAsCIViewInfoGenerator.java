@@ -9,14 +9,14 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 /**
  * This info generator is meant to be used in combination with the node info plug-in.
  *
  * @author wever
  */
-public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<Node<TFDNode, Double>> {
+public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<BackPointerPath<TFDNode, String, Double>> {
 
 	private Collection<Component> components;
 
@@ -25,8 +25,8 @@ public class TFDNodeAsCIViewInfoGenerator implements NodeInfoGenerator<Node<TFDN
 	}
 
 	@Override
-	public String generateInfoForNode(final Node<TFDNode, Double> node) {
-		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getPoint().getState(), true);
+	public String generateInfoForNode(final BackPointerPath<TFDNode, String, Double> node) {
+		ComponentInstance ci = Util.getSolutionCompositionFromState(this.components, node.getHead().getState(), true);
 		if (ci == null) {
 			return "<i>No component has been chosen, yet.</i>";
 		} else {

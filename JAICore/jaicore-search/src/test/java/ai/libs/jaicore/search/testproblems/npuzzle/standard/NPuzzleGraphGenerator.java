@@ -3,12 +3,13 @@ package ai.libs.jaicore.search.testproblems.npuzzle.standard;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+
 import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
 
 /**
@@ -17,7 +18,7 @@ import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
  * @author jkoepe
  *
  */
-public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, String> {
+public class NPuzzleGraphGenerator implements IGraphGenerator<NPuzzleState, String> {
 
 	protected int dimension;
 	private NPuzzleState root;
@@ -70,7 +71,7 @@ public class NPuzzleGraphGenerator implements GraphGenerator<NPuzzleState, Strin
 	}
 
 	@Override
-	public NodeGoalTester<NPuzzleState> getGoalTester() {
+	public NodeGoalTester<NPuzzleState, String> getGoalTester() {
 		return n -> {
 			int[][] board = n.getBoard();
 			if (board[this.dimension - 1][this.dimension - 1] != 0) {

@@ -11,6 +11,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
+import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
@@ -43,9 +46,6 @@ import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlannin
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitivePlanningToSearchProblemReduction;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearch;
-import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
@@ -67,12 +67,12 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 	/* problem and algorithm setup */
 	private final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
 	private final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer;
-	private final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory;
+	private final IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory;
 
 	/* working constants of the algorithms */
 	private final CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> planningProblem;
 	private final S searchProblem;
-	private final IOptimalPathInORGraphSearch<S, N, A, V> search;
+	private final IOptimalPathInORGraphSearch<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V> search;
 	private final List<HASCOSolutionCandidate<V>> listOfAllRecognizedSolutions = new ArrayList<>();
 	private int numUnparametrizedSolutions = -1;
 	private final Set<UnparametrizedComponentInstance> returnedUnparametrizedComponentInstances = new HashSet<>();
@@ -82,14 +82,13 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 	/* runtime variables of algorithm */
 	private final TimeRecordingEvaluationWrapper<V> timeGrabbingEvaluationWrapper;
 
-	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver,
-			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory,
+	public HASCO(final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver, final IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory,
 			final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
 		this(ConfigFactory.create(HASCOConfig.class), configurationProblem, planningGraphGeneratorDeriver, searchFactory, searchProblemTransformer);
 	}
 
 	public HASCO(final HASCOConfig algorithmConfig, final RefinementConfiguredSoftwareConfigurationProblem<V> configurationProblem, final IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver,
-			final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory,
+			final IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory,
 			final AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer) {
 		super(algorithmConfig, configurationProblem);
 		if (configurationProblem == null) {
@@ -123,7 +122,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 			+ "\n\t\t\tPre Eval: " + m.getEvaluablePrecondition() + "\n\t\t\tNetwork: " + m.getNetwork().getLineBasedStringRepresentation()).collect(Collectors.joining());
 			this.logger.debug("Derived the following HTN planning problem:\n\tOperations:{}\n\tMethods:{}", operations, methods);
 		}
-		this.searchProblem = new CostSensitivePlanningToSearchProblemReduction<N, A, V, CEOCIPSTNPlanningProblem, S, EvaluatedSearchGraphPath<N,A, V>>(this.planningGraphGeneratorDeriver, searchProblemTransformer).encodeProblem(this.planningProblem);
+		this.searchProblem = new CostSensitivePlanningToSearchProblemReduction<N, A, V, CEOCIPSTNPlanningProblem, S, EvaluatedSearchGraphPath<N, A, V>>(this.planningGraphGeneratorDeriver, searchProblemTransformer).encodeProblem(this.planningProblem);
 
 		/* create search object */
 		this.logger.debug("Creating and initializing the search object");
@@ -175,8 +174,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 					IPlan plan = HASCO.this.planningGraphGeneratorDeriver.decodeSolution(searchPath);
 					ComponentInstance objectInstance;
 					if (HASCO.this.createComponentInstancesFromNodesInsteadOfPlans) {
-						objectInstance = Util.getSolutionCompositionFromState(HASCO.this.getInput().getComponents(),
-								((TFDNode) searchPath.getNodes().get(searchPath.getNodes().size() - 1)).getState(), true);
+						objectInstance = Util.getSolutionCompositionFromState(HASCO.this.getInput().getComponents(), ((TFDNode) searchPath.getNodes().get(searchPath.getNodes().size() - 1)).getState(), true);
 					} else {
 						objectInstance = Util.getSolutionCompositionForPlan(HASCO.this.getInput().getComponents(), HASCO.this.planningProblem.getCorePlanningProblem().getInit(), plan, true);
 					}
@@ -190,7 +188,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 							score = HASCO.this.timeGrabbingEvaluationWrapper.evaluate(objectInstance);
 						}
 					} catch (ObjectEvaluationFailedException e) {
-						throw new AlgorithmException(e, "Could not evaluate component instance");
+						throw new AlgorithmException("Could not evaluate component instance", e);
 					}
 					HASCO.this.logger.info("Received new solution with score {} from search, communicating this solution to the HASCO listeners. Number of returned unparametrized solutions is now {}/{}.", score,
 							HASCO.this.returnedUnparametrizedComponentInstances.size(), HASCO.this.numUnparametrizedSolutions);
@@ -241,7 +239,7 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 		}
 	}
 
-	public GraphGenerator<N, A> getGraphGenerator() {
+	public IGraphGenerator<N, A> getGraphGenerator() {
 		return this.searchProblem.getGraphGenerator();
 	}
 
@@ -296,11 +294,11 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 		return (HASCOConfig) super.getConfig();
 	}
 
-	public IOptimalPathInORGraphSearchFactory<S, N, A, V> getSearchFactory() {
+	public IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> getSearchFactory() {
 		return this.searchFactory;
 	}
 
-	public IOptimalPathInORGraphSearch<S, N, A, V> getSearch() {
+	public IOptimalPathInORGraphSearch<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V> getSearch() {
 		return this.search;
 	}
 

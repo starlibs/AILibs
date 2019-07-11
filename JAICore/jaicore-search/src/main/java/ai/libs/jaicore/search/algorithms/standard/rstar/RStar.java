@@ -13,6 +13,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.MultipleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
@@ -31,19 +38,12 @@ import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionCompletedEvent;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.MultipleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
 /**
  * Implementation of the R* algorithm.
@@ -56,13 +56,13 @@ import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
 public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A>, T, A, Double> {
 
 	/* Open list. */
-	protected PriorityQueue<GammaNode<T>> open = new PriorityQueue<>((n1, n2) -> (n1.getInternalLabel().compareTo(n2.getInternalLabel())));
+	protected PriorityQueue<GammaNode<T, A>> open = new PriorityQueue<>((n1, n2) -> (n1.getScore().compareTo(n2.getScore())));
 
 	/* Closed list of already expanded states. */
-	protected ArrayList<GammaNode<T>> closed = new ArrayList<>();
+	protected ArrayList<GammaNode<T, A>> closed = new ArrayList<>();
 
-	private final INodeEvaluator<T, Double> h;
-	private final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator<T> hPath;
+	private final IPathEvaluator<T, A, Double> h;
+	private final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.PathCostEstimator<T, A> hPath;
 
 	/* For actual search problem */
 	private final int k;
@@ -70,8 +70,8 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	private final double delta;
 	private final IMetric<T> metricOverStates;
 
-	private GammaNode<T> bestSeenGoalNode;
-	private final Map<Pair<GammaNode<T>, GammaNode<T>>, SearchGraphPath<T, A>> externalPathsBetweenGammaNodes = new HashMap<>(); // the pairs should always be in a parent-child relation
+	private GammaNode<T, A> bestSeenGoalNode;
+	private final Map<Pair<GammaNode<T, A>, GammaNode<T, A>>, SearchGraphPath<T, A>> externalPathsBetweenGammaNodes = new HashMap<>(); // the pairs should always be in a parent-child relation
 
 	private List<SolutionCandidateFoundEvent<EvaluatedSearchGraphPath<T, A, Double>>> unreturnedSolutionEvents = new LinkedList<>();
 
@@ -88,8 +88,8 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 */
 	public RStar(final GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<T, A> problem, final double w, final int k, final double delta) {
 		super(problem);
-		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T>) this.getInput().getNodeEvaluator()).getH();
-		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T>) this.getInput().getNodeEvaluator()).gethPath();
+		this.h = ((GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()).getH();
+		this.hPath = ((GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.SubPathEvaluationBasedFComputer<T, A>) this.getInput().getNodeEvaluator()).gethPath();
 		this.w = w;
 		this.k = k;
 		this.metricOverStates = this.getInput().getMetricOverStates();
@@ -102,13 +102,13 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 *
 	 * @param n
 	 * @throws InterruptedException
-	 * @throws NodeEvaluationException
+	 * @throws PathEvaluationException
 	 */
-	private void updateState(final GammaNode<T> n) throws NodeEvaluationException, InterruptedException {
+	private void updateState(final GammaNode<T, A> n) throws PathEvaluationException, InterruptedException {
 		if ((n.getG() > this.w * this.h.f(n)) || ((n.getParent() == null || !this.isPathRealizationKnownForAbstractEdgeToNode(n)) && n.getAvoid())) {
-			n.setInternalLabel(new RStarK(true, n.getG() + this.w * this.h.f(n)));
+			n.setScore(new RStarK(true, n.getG() + this.w * this.h.f(n)));
 		} else {
-			n.setInternalLabel(new RStarK(false, n.getG() + this.w * this.h.f(n)));
+			n.setScore(new RStarK(false, n.getG() + this.w * this.h.f(n)));
 		}
 		this.open.add(n);
 	}
@@ -123,18 +123,18 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @throws TimeoutException
 	 * @throws AlgorithmExecutionCanceledException
 	 */
-	private void reevaluateState(final GammaNode<T> n) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	private void reevaluateState(final GammaNode<T, A> n) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 
 		/* Line 7: Try to compute the local path from bp(n) to n. (we use AStar for this) */
 		this.logger.debug("Reevaluating node {}", n);
 		if (n.getParent() == null) {
 			throw new IllegalArgumentException("Can only re-evaluate nodes that have a parent!");
 		}
-		GraphGenerator<T, A> subProblemGraphGenerator = new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getPoint(), n.getPoint());
-		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblemGraphGenerator, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T>) this.getInput().getNodeEvaluator()));
+		IGraphGenerator<T, A> subProblemGraphGenerator = new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getHead(), n.getHead());
+		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblemGraphGenerator, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()));
 		astar.setLoggerName(this.getLoggerName() + ".astar");
 		astar.setTimeout(new TimeOut(this.getRemainingTimeToDeadline().milliseconds(), TimeUnit.MILLISECONDS));
-		this.logger.trace("Invoking AStar with root {} and only goal node {}", n.getParent().getPoint(), n.getPoint());
+		this.logger.trace("Invoking AStar with root {} and only goal node {}", n.getParent().getHead(), n.getHead());
 		this.activeAStarSubroutines.add(astar);
 		EvaluatedSearchGraphPath<T, A, Double> optimalPath = astar.call();
 		this.checkAndConductTermination();
@@ -174,14 +174,14 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				RootGenerator<T> rootGenerator = this.getInput().getGraphGenerator().getRootGenerator();
 				if (rootGenerator instanceof MultipleRootGenerator) {
 					for (T root : ((MultipleRootGenerator<T>) rootGenerator).getRoots()) {
-						GammaNode<T> internalRoot = new GammaNode<>(root);
-						internalRoot.setInternalLabel(new RStarK(false, this.w * this.h.f(internalRoot)));
+						GammaNode<T, A> internalRoot = new GammaNode<>(root);
+						internalRoot.setScore(new RStarK(false, this.w * this.h.f(internalRoot)));
 						internalRoot.setG(0);
 						this.open.add(internalRoot);
 					}
 				} else if (rootGenerator instanceof SingleRootGenerator) {
-					GammaNode<T> internalRoot = new GammaNode<>(((SingleRootGenerator<T>) rootGenerator).getRoot());
-					internalRoot.setInternalLabel(new RStarK(false, this.w * this.h.f(internalRoot)));
+					GammaNode<T, A> internalRoot = new GammaNode<>(((SingleRootGenerator<T>) rootGenerator).getRoot());
+					internalRoot.setScore(new RStarK(false, this.w * this.h.f(internalRoot)));
 					internalRoot.setG(0);
 					this.open.add(internalRoot);
 				} else {
@@ -204,9 +204,9 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				 * goal node, then we return in th next lines).
 				 */
 				// Lines 18 & 19
-				GammaNode<T> n = this.open.poll();
+				GammaNode<T, A> n = this.open.poll();
 				this.logger.debug("Selected {} for expansion.", n);
-				if (n == null || (this.bestSeenGoalNode != null && n.getInternalLabel().compareTo(this.bestSeenGoalNode.getInternalLabel()) > 0)) {
+				if (n == null || (this.bestSeenGoalNode != null && n.getScore().compareTo(this.bestSeenGoalNode.getScore()) > 0)) {
 					this.logger.info("Terminating RStar.");
 					return this.terminate();
 				}
@@ -228,9 +228,9 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 
 					/* Line 24 to 27: Compute successors */
 					this.logger.debug("Starting generation of successors of {}", n);
-					Collection<GammaNode<T>> successors = this.generateGammaSuccessors(n);
+					Collection<GammaNode<T, A>> successors = this.generateGammaSuccessors(n);
 					this.logger.debug("Generated {} successors.", successors.size());
-					for (GammaNode<T> n_ : successors) { // Line 28
+					for (GammaNode<T, A> n_ : successors) { // Line 28
 
 						/* Line 29: Initialize successors by setting the path from s to s_ to null, and by estimating the lowest cost from s to s_ with the heuristic h(s, s_). */
 						n.cLow.put(n_, this.hPath.h(n, n_));
@@ -257,7 +257,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 						}
 					}
 				}
-				return new NodeExpansionCompletedEvent<>(this.getId(), n.getPoint());
+				return new NodeExpansionCompletedEvent<>(this.getId(), n.getHead());
 
 			default:
 				throw new IllegalStateException("Cannot do anything in state " + this.getState());
@@ -268,7 +268,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 		}
 	}
 
-	private boolean isPathRealizationKnownForAbstractEdgeToNode(final GammaNode<T> node) {
+	private boolean isPathRealizationKnownForAbstractEdgeToNode(final GammaNode<T, A> node) {
 		return this.externalPathsBetweenGammaNodes.containsKey(new Pair<>(node.getParent(), node));
 	}
 
@@ -278,17 +278,17 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @param n
 	 * @return
 	 */
-	private EvaluatedSearchGraphPath<T, A, Double> getFullExternalPath(final GammaNode<T> n) {
+	private EvaluatedSearchGraphPath<T, A, Double> getFullExternalPath(final GammaNode<T, A> n) {
 		List<T> nodes = new ArrayList<>();
 		List<A> edges = new ArrayList<>();
-		GammaNode<T> current = n;
-		nodes.add(n.getPoint());
+		GammaNode<T, A> current = n;
+		nodes.add(n.getHead());
 		while (current.getParent() != null) {
-			Pair<GammaNode<T>, GammaNode<T>> pair = new Pair<>(current.getParent(), current);
+			Pair<GammaNode<T, A>, GammaNode<T, A>> pair = new Pair<>(current.getParent(), current);
 			assert this.externalPathsBetweenGammaNodes.containsKey(pair);
 			SearchGraphPath<T, A> externalPath = this.externalPathsBetweenGammaNodes.get(pair);
 			nodes.addAll(0, externalPath.getNodes());
-			List<A> concreteEdges = externalPath.getEdges();
+			List<A> concreteEdges = externalPath.getArcs();
 			if (concreteEdges == null) {
 				concreteEdges = new ArrayList<>();
 				int m = externalPath.getNodes().size();
@@ -307,9 +307,9 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @param n
 	 * @return
 	 */
-	private GammaNode<T> argminCostToStateOverPredecessors(final GammaNode<T> n) {
-		GammaNode<T> argmin = null;
-		for (GammaNode<T> p : n.getPredecessors()) {
+	private GammaNode<T, A> argminCostToStateOverPredecessors(final GammaNode<T, A> n) {
+		GammaNode<T, A> argmin = null;
+		for (GammaNode<T, A> p : n.getPredecessors()) {
 			if ((argmin == null) || (p.getG() + p.cLow.get(n) < argmin.getG() + argmin.cLow.get(n))) {
 				argmin = p;
 			}
@@ -332,29 +332,29 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @throws InterruptedException
 	 * @throws
 	 */
-	private Collection<GammaNode<T>> generateGammaSuccessors(final GammaNode<T> n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
+	private Collection<GammaNode<T, A>> generateGammaSuccessors(final GammaNode<T, A> n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmExecutionCanceledException {
 
 		/* first create a list of k nodes that are in reach of delta of the current node */
 		this.logger.trace("Invoking distant successor generator timeout-aware.");
-		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getPoint(), this.k, this.metricOverStates, this.delta), "Computing distant successors", true);
+		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getHead(), this.k, this.metricOverStates, this.delta), "Computing distant successors", true);
 		assert randomDistantSuccessors.size() == new HashSet<>(randomDistantSuccessors).size() : "Distant successor generator has created the same successor ar least twice: \n\t "
 				+ SetUtil.getMultiplyContainedItems(randomDistantSuccessors).stream().map(T::toString).collect(Collectors.joining("\n\t"));
 		this.logger.trace("Distant successor generator generated {}/{} successors.", randomDistantSuccessors.size(), this.k);
 
 		/* remove nodes for which a node is already on CLOSED (no reopening in this algorithm) */
-		randomDistantSuccessors.removeIf(childNode -> this.closed.stream().anyMatch(closedNode -> closedNode.getPoint().equals(childNode)));
+		randomDistantSuccessors.removeIf(childNode -> this.closed.stream().anyMatch(closedNode -> closedNode.getHead().equals(childNode)));
 		this.logger.trace("{} successors are still considered after having removed nodes that already are on CLOSED, which holds {} item(s).", randomDistantSuccessors.size(), this.closed.size());
 
 		/* now transform these node into (possibly existing) GammaNode objects */
-		ArrayList<GammaNode<T>> succWithoutClosed = new ArrayList<>();
+		ArrayList<GammaNode<T, A>> succWithoutClosed = new ArrayList<>();
 		for (T childNode : randomDistantSuccessors) {
-			Optional<GammaNode<T>> representantOnOpen = this.open.stream().filter(closedNode -> closedNode.getPoint().equals(childNode)).findFirst();
-			GammaNode<T> gammaNodeForThisChild;
+			Optional<GammaNode<T, A>> representantOnOpen = this.open.stream().filter(closedNode -> closedNode.getHead().equals(childNode)).findFirst();
+			GammaNode<T, A> gammaNodeForThisChild;
 			if (representantOnOpen.isPresent()) {
 				gammaNodeForThisChild = representantOnOpen.get();
 			} else {
 				gammaNodeForThisChild = new GammaNode<>(childNode);
-				gammaNodeForThisChild.setGoal(((NodeGoalTester<T>) this.getGraphGenerator().getGoalTester()).isGoal(childNode));
+				gammaNodeForThisChild.setGoal(((NodeGoalTester<T, A>) this.getGraphGenerator().getGoalTester()).isGoal(childNode));
 			}
 
 			/* if this is a solution, add it as a new solution */

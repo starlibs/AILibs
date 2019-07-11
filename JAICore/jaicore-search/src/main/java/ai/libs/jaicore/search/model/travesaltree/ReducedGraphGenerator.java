@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.GoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 
 /**
  * Graph generator that uses another graph generator as a basis by reducing the
@@ -22,9 +23,9 @@ import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
  * @param <T>
  * @param <A>
  */
-public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
+public class ReducedGraphGenerator<T, A> implements IGraphGenerator<T, A> {
 
-	private GraphGenerator<T, A> basis;
+	private IGraphGenerator<T, A> basis;
 
 	/**
 	 * Create a new ReducedGraphGenerator that uses the given graph generator as a
@@ -33,7 +34,7 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 	 * @param basis
 	 *            the graph generator to use as a basis
 	 */
-	public ReducedGraphGenerator(final GraphGenerator<T, A> basis) {
+	public ReducedGraphGenerator(final IGraphGenerator<T, A> basis) {
 		this.basis = basis;
 	}
 
@@ -90,7 +91,7 @@ public class ReducedGraphGenerator<T, A> implements GraphGenerator<T, A> {
 	}
 
 	@Override
-	public GoalTester<T> getGoalTester() {
+	public PathGoalTester<T, A> getGoalTester() {
 		return this.basis.getGoalTester();
 	}
 }

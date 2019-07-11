@@ -11,11 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.TimeAwareNodeEvaluator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 import ai.libs.jaicore.timing.TimedComputation;
 
-public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvaluator<EnhancedTTSPNode, Double>> extends NodeEvaluatorTester<T> {
+public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvaluator<EnhancedTTSPNode, String, Double>> extends NodeEvaluatorTester<T> {
 
 	private static final Logger logger = LoggerFactory.getLogger(TimeAwareNodeEvaluatorTester.class);
 
@@ -28,7 +28,7 @@ public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvalua
 	public void testTimeoutAdherence() throws InterruptedException, ExecutionException, TimeoutException {
 		T ne = this.getTimedNodeEvaluator(TIMEOUT);
 		ne.setLoggerName("testednodeevaluator");
-		for (Node<EnhancedTTSPNode, Double> node : this.getNodesToTestInDifficultProblem(1)) {
+		for (BackPointerPath<EnhancedTTSPNode, String, Double> node : this.getNodesToTestInDifficultProblem(1)) {
 			long start = System.currentTimeMillis();
 			logger.info("Starting computation of score for node with hash code {} with timeout {}", node.hashCode(), TIMEOUT);
 			try {

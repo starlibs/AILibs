@@ -2,24 +2,25 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
 import java.util.List;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 public class NodeExpansionJobSubmittedEvent<T, A, V extends Comparable<V>> extends BestFirstEvent {
-	private final Node<T, V> expandedNode;
+	private final BackPointerPath<T, A, V> expandedNode;
 	private final List<NodeExpansionDescription<T, A>> children;
 
-	public NodeExpansionJobSubmittedEvent(String algorithmId, Node<T, V> expandedNode, List<NodeExpansionDescription<T, A>> children) {
+	public NodeExpansionJobSubmittedEvent(final String algorithmId, final BackPointerPath<T, A, V> expandedNode, final List<NodeExpansionDescription<T, A>> children) {
 		super(algorithmId);
 		this.expandedNode = expandedNode;
 		this.children = children;
 	}
 
-	public Node<T, V> getExpandedNode() {
-		return expandedNode;
+	public BackPointerPath<T, A, V> getExpandedNode() {
+		return this.expandedNode;
 	}
 
 	public List<NodeExpansionDescription<T, A>> getChildren() {
-		return children;
+		return this.children;
 	}
 }

@@ -18,6 +18,8 @@ dependencies {
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
+	
+	compile ('org.api4:ai.ml')
 
 
 	// OWL API

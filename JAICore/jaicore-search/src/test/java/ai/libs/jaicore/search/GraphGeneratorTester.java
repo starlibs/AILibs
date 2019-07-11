@@ -7,18 +7,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.LabeledGraph;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 public abstract class GraphGeneratorTester<N, A> {
 
-	public abstract List<Pair<GraphGenerator<N, A>,Integer>> getGraphGenerators() throws Exception;
+	public abstract List<Pair<IGraphGenerator<N, A>,Integer>> getGraphGenerators() throws Exception;
 
 	private class Node {
 		N point;
@@ -32,8 +32,8 @@ public abstract class GraphGeneratorTester<N, A> {
 
 	@Test
 	public void testIdempotency() throws Exception {
-		for (Pair<GraphGenerator<N, A>, Integer> pair : this.getGraphGenerators()) {
-			GraphGenerator<N, A> g = pair.getX();
+		for (Pair<IGraphGenerator<N, A>, Integer> pair : this.getGraphGenerators()) {
+			IGraphGenerator<N, A> g = pair.getX();
 			int maxN = pair.getY();
 			SuccessorGenerator<N, A> s = g.getSuccessorGenerator();
 

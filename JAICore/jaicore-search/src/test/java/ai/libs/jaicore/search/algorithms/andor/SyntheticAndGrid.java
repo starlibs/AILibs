@@ -3,15 +3,16 @@ package ai.libs.jaicore.search.algorithms.andor;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 
-public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
+import ai.libs.jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
+
+public class SyntheticAndGrid implements IGraphGenerator<NodeLabel, String> {
 
 	private int k = 10;
 	private int b = 3;
@@ -60,7 +61,7 @@ public class SyntheticAndGrid implements GraphGenerator<NodeLabel, String> {
 	}
 
 	@Override
-	public NodeGoalTester<NodeLabel> getGoalTester() {
+	public NodeGoalTester<NodeLabel, String> getGoalTester() {
 		return n -> n.depth == this.depth;
 	}
 }

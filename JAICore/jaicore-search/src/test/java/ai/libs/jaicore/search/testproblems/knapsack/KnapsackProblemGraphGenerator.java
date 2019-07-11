@@ -8,17 +8,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleSuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import ai.libs.jaicore.testproblems.knapsack.KnapsackConfiguration;
 import ai.libs.jaicore.testproblems.knapsack.KnapsackProblem;
 
@@ -128,7 +128,7 @@ public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator
 	}
 
 	@Override
-	public NodeGoalTester<KnapsackConfiguration> getGoalTester() {
+	public NodeGoalTester<KnapsackConfiguration, String> getGoalTester() {
 		return n -> {
 			for (String object : n.getRemainingObjects()) {
 				if (n.getUsedCapacity() + this.problem.getWeights().get(object) <= this.problem.getKnapsackCapacity()) {

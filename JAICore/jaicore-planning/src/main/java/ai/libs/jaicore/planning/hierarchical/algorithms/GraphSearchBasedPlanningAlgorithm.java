@@ -22,7 +22,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 public class GraphSearchBasedPlanningAlgorithm<I1, O1 extends IGraphSearchBasedPlan<N, A>, I2 extends GraphSearchInput<N, A>, O2 extends SearchGraphPath<N, A>, N, A>
 extends AReducingSolutionIterator<I1, O1, I2, O2> {
 
-	public GraphSearchBasedPlanningAlgorithm(final I1 problem, final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer, final IAlgorithmFactory<I2, O2> baseFactory) {
+	public GraphSearchBasedPlanningAlgorithm(final I1 problem, final AlgorithmicProblemReduction<I1, O1, I2, O2> problemTransformer, final IAlgorithmFactory<I2, O2, ?> baseFactory) {
 		super(problem, problemTransformer, baseFactory);
 	}
 }

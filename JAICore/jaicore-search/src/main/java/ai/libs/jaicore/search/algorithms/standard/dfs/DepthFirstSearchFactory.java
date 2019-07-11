@@ -4,7 +4,7 @@ import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
-public class DepthFirstSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double> {
+public class DepthFirstSearchFactory<N, A> extends StandardORGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>,N, A, Double, DepthFirstSearch<N, A>> {
 
 	private String loggerName;
 

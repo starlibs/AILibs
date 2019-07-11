@@ -2,8 +2,8 @@ package ai.libs.jaicore.search.algorithms.standard.gbf;
 
 import java.util.Map;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
-public interface GeneralBestFirstEvaluationAggregation<T> {
-	public int aggregate(Map<Node<T,Integer>,Integer> nodes);
+public interface GeneralBestFirstEvaluationAggregation<T, A> {
+	public int aggregate(Map<BackPointerPath<T, A, Integer>, Integer> nodes);
 }

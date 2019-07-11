@@ -1,8 +1,8 @@
 package autofe.db.search;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 
-public class NoSolutionFromRandomCompletionException extends NodeEvaluationException {
+public class NoSolutionFromRandomCompletionException extends PathEvaluationException {
 
 	/**
 	 *
@@ -14,7 +14,7 @@ public class NoSolutionFromRandomCompletionException extends NodeEvaluationExcep
 	}
 
 	public NoSolutionFromRandomCompletionException(final String msg, final Throwable cause) {
-		super(cause, msg);
+		super(msg, cause);
 	}
 
 }

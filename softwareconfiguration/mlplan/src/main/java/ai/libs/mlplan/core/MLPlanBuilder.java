@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +51,6 @@ import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitte
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
@@ -138,7 +138,7 @@ public class MLPlanBuilder {
 	private String requestedHASCOInterface;
 
 	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
-	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator = null;
+	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
 
 	/* The splitter is used to create the split for separating search and selection data */
 	private IDatasetSplitter searchSelectionDatasetSplitter = new MulticlassClassStratifiedSplitter();
@@ -340,7 +340,7 @@ public class MLPlanBuilder {
 	 * @param preferredNodeEvaluator
 	 * @return
 	 */
-	public MLPlanBuilder withPreferredNodeEvaluator(final INodeEvaluator<TFDNode, Double> preferredNodeEvaluator) {
+	public MLPlanBuilder withPreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
 		if (this.factoryPreparedWithData) {
 			throw new IllegalStateException("The method prepareNodeEvaluatorInFactoryWithData has already been called. No changes to the preferred node evaluator possible anymore");
 		}
@@ -401,7 +401,7 @@ public class MLPlanBuilder {
 		}
 
 		/* now determine the real node evaluator to be used. A semantic node evaluator has highest priority */
-		INodeEvaluator<TFDNode, Double> actualNodeEvaluator;
+		IPathEvaluator<TFDNode, String, Double> actualNodeEvaluator;
 		if (this.pipelineValidityCheckingNodeEvaluator != null) {
 			this.pipelineValidityCheckingNodeEvaluator.setComponents(this.components);
 			this.pipelineValidityCheckingNodeEvaluator.setData(data);

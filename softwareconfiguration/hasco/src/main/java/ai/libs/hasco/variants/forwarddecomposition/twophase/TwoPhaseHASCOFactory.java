@@ -6,7 +6,7 @@ import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class TwoPhaseHASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double> {
+public class TwoPhaseHASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> implements SoftwareConfigurationAlgorithmFactory<TwoPhaseSoftwareConfigurationProblem, HASCOSolutionCandidate<Double>, Double, TwoPhaseHASCO<S, N, A>> {
 
 	private HASCOFactory<S, N, A, Double> hascoFactory;
 	private TwoPhaseSoftwareConfigurationProblem problem;

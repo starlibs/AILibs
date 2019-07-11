@@ -1,8 +1,8 @@
 package autofe.db.search;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 
-public class DatasetEvaluationFailedException extends NodeEvaluationException {
+public class DatasetEvaluationFailedException extends PathEvaluationException {
 
 	/**
 	 *
@@ -10,7 +10,7 @@ public class DatasetEvaluationFailedException extends NodeEvaluationException {
 	private static final long serialVersionUID = 5297889490100358566L;
 
 	public DatasetEvaluationFailedException(final String msg, final Throwable cause) {
-		super(cause, msg);
+		super(msg, cause);
 	}
 
 }

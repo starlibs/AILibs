@@ -10,6 +10,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,13 +31,8 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.rtn.RTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
+public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RTNGraphGenerator.class);
 
@@ -239,7 +239,7 @@ public class RTNGraphGenerator implements GraphGenerator<RTNNode, RTNEdge> {
 	}
 
 	@Override
-	public NodeGoalTester<RTNNode> getGoalTester() {
+	public NodeGoalTester<RTNNode, RTNEdge> getGoalTester() {
 		return p -> p.getRemainingTasks().isEmpty();
 	}
 

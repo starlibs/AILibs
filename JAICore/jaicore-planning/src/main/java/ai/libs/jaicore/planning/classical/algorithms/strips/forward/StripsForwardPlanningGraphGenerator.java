@@ -7,20 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleSuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.logic.fol.structure.Monom;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsAction;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
 
-public class StripsForwardPlanningGraphGenerator implements GraphGenerator<StripsForwardPlanningNode, String> {
+public class StripsForwardPlanningGraphGenerator implements IGraphGenerator<StripsForwardPlanningNode, String> {
 
 	private final StripsPlanningProblem problem;
 	private static final Logger logger = LoggerFactory.getLogger(StripsForwardPlanningGraphGenerator.class);
@@ -184,7 +184,7 @@ public class StripsForwardPlanningGraphGenerator implements GraphGenerator<Strip
 	}
 
 	@Override
-	public NodeGoalTester<StripsForwardPlanningNode> getGoalTester() {
+	public NodeGoalTester<StripsForwardPlanningNode, String> getGoalTester() {
 		return l -> this.problem.getGoalStateFunction().isGoalState(l.getStateRelativeToInitState(this.initState));
 	}
 }

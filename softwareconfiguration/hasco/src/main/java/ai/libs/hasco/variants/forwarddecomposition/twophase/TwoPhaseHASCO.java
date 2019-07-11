@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
@@ -44,7 +45,6 @@ import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.concurrent.NamedTimerTask;
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.timing.TimedComputation;
 
@@ -545,7 +545,7 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 		this.getConfig().setProperty(TwoPhaseHASCOConfig.K_SELECTION_NUM_CONSIDERED_SOLUTIONS, numberOfConsideredSolutions + "");
 	}
 
-	public GraphGenerator<N, A> getGraphGenerator() {
+	public IGraphGenerator<N, A> getGraphGenerator() {
 		if (this.hasco == null) {
 			throw new IllegalStateException("Cannot retrieve GraphGenerator prior to algorithm initialization.");
 		}

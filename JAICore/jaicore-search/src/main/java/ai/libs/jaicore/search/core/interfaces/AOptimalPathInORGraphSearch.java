@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.core.interfaces;
 
+import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -29,7 +31,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  * @param <Asearch>
  */
 public abstract class AOptimalPathInORGraphSearch<I extends GraphSearchInput<N, A>, N, A, V extends Comparable<V>> extends AOptimizer<I, EvaluatedSearchGraphPath<N, A, V>, V>
-implements IOptimalPathInORGraphSearch<I, N, A, V> {
+implements IOptimalPathInORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V> {
 
 	/* Logger variables */
 	private Logger logger = LoggerFactory.getLogger(AAlgorithm.class);
@@ -53,13 +55,13 @@ implements IOptimalPathInORGraphSearch<I, N, A, V> {
 		this.updateBestSeenSolution(path);
 		EvaluatedSearchSolutionCandidateFoundEvent<N, A, V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), path);
 		this.logger.info("Identified solution with score {}. Enable DEBUG to see the concrete nodes and actions.", path.getScore());
-		this.logger.debug("Nodes: {}. Actions: {}", path.getNodes(), path.getEdges());
+		this.logger.debug("Nodes: {}. Actions: {}", path.getNodes(), path.getArcs());
 		this.post(event);
 		return event;
 	}
 
 	@Override
-	public GraphGenerator<N, A> getGraphGenerator() {
+	public IGraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
 

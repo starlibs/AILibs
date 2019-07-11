@@ -1,8 +1,9 @@
 package ai.libs.jaicore.search.algorithms.standard.lds;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearch;
+
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
-import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 

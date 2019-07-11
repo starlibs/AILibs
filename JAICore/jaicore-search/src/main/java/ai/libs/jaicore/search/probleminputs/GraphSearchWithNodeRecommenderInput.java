@@ -2,12 +2,12 @@ package ai.libs.jaicore.search.probleminputs;
 
 import java.util.Comparator;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 
 public class GraphSearchWithNodeRecommenderInput<N, A> extends GraphSearchInput<N, A> {
 	private final Comparator<N> recommender;
 
-	public GraphSearchWithNodeRecommenderInput(GraphGenerator<N, A> graphGenerator, Comparator<N> recommender) {
+	public GraphSearchWithNodeRecommenderInput(IGraphGenerator<N, A> graphGenerator, Comparator<N> recommender) {
 		super(graphGenerator);
 		this.recommender = recommender;
 	}

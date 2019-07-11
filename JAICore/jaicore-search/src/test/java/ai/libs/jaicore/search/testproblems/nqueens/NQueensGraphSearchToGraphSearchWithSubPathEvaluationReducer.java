@@ -1,7 +1,8 @@
 package ai.libs.jaicore.search.testproblems.nqueens;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -10,7 +11,7 @@ public class NQueensGraphSearchToGraphSearchWithSubPathEvaluationReducer impleme
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<QueenNode, String, Double> encodeProblem(final GraphSearchInput<QueenNode, String> problem) {
-		INodeEvaluator<QueenNode, Double> nodeEvaluator = node -> (double) node.getPoint().getNumberOfAttackedCells();
+		IPathEvaluator<QueenNode, String, Double> nodeEvaluator = node -> (double) node.getHead().getNumberOfAttackedCells();
 		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), nodeEvaluator);
 
 	}

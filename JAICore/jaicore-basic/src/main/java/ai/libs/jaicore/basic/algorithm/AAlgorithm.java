@@ -470,7 +470,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			} catch (AlgorithmExecutionCanceledException e) { // these exceptions should just be forwarded
 				throw e;
 			} catch (Exception e) {
-				throw new AlgorithmException(e, "The algorithm has failed due to an exception of a Callable.");
+				throw new AlgorithmException("The algorithm has failed due to an exception of a Callable.", e);
 			}
 		}
 
@@ -501,7 +501,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 			throw new IllegalStateException("A stopping criterion must have been true (probably cancel), but checkTermination did not throw an exception!"); // this line should never be reached
 		} catch (ExecutionException e) {
-			throw new AlgorithmException(e, "The algorithm has failed due to an exception of Callable " + r + " with timeout log message " + reasonToLogOnTimeout);
+			throw new AlgorithmException("The algorithm has failed due to an exception of Callable " + r + " with timeout log message " + reasonToLogOnTimeout, e);
 		}
 	}
 }

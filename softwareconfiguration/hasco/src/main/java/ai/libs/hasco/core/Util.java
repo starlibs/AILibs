@@ -36,7 +36,7 @@ import ai.libs.jaicore.planning.classical.algorithms.strips.forward.StripsUtil;
 import ai.libs.jaicore.planning.core.Action;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 public class Util {
 
@@ -218,14 +218,14 @@ public class Util {
 		return objectMap;
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components,
-			final Monom initState, final Node<N, ?> path, final boolean resolveIntervals) {
-		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), resolveIntervals);
+	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components, final Monom initState,
+			final BackPointerPath<N, A, ?> path, final boolean resolveIntervals) {
+		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.getNodes())), resolveIntervals);
 	}
 
-	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components,
-			final Monom initState, final Node<N, ?> path, final String name, final boolean resolveIntervals) {
-		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.externalPath())), name, resolveIntervals);
+	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components, final Monom initState,
+			final BackPointerPath<N, A, ?> path, final String name, final boolean resolveIntervals) {
+		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.getNodes())), name, resolveIntervals);
 	}
 
 	public static Monom getFinalStateOfPlan(final Monom initState, final IPlan plan) {

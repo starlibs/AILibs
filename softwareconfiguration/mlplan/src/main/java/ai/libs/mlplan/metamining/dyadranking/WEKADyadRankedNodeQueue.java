@@ -2,6 +2,7 @@ package ai.libs.mlplan.metamining.dyadranking;
 
 import java.util.Collection;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,6 @@ import ai.libs.jaicore.ml.dyadranking.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.search.ADyadRankedNodeQueue;
 import ai.libs.jaicore.ml.dyadranking.util.AbstractDyadScaler;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 
 /**
@@ -51,17 +51,15 @@ public class WEKADyadRankedNodeQueue extends ADyadRankedNodeQueue<TFDNode, Doubl
 	 *            the scaler to use to scale the dataset - must have been fit to
 	 *            data already
 	 */
-	public WEKADyadRankedNodeQueue(final Vector contextCharacterization, final Collection<Component> components, final IDyadRanker ranker,
-			final AbstractDyadScaler scaler, final IPipelineCharacterizer characterizer) {
+	public WEKADyadRankedNodeQueue(final Vector contextCharacterization, final Collection<Component> components, final IDyadRanker ranker, final AbstractDyadScaler scaler, final IPipelineCharacterizer characterizer) {
 		super(contextCharacterization, ranker, scaler);
 		this.components = components;
 		this.characterizer = characterizer;
 	}
 
 	@Override
-	protected Vector characterize(final Node<TFDNode, Double> node) {
-		ComponentInstance cI = Util.getComponentInstanceFromState(this.components, node.getPoint().getState(), "solution",
-				true);
+	protected Vector characterize(final IEvaluatedPath<TFDNode, ?, Double> path) {
+		ComponentInstance cI = Util.getComponentInstanceFromState(this.components, path.getHead().getState(), "solution", true);
 		if (cI != null) {
 			this.logger.debug("Characterizing new node.");
 			return new DenseDoubleVector(this.characterizer.characterize(cI));

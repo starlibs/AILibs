@@ -6,10 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SearchGraphPath<N, A> {
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+
+public class SearchGraphPath<N, A> implements IPath<N, A> {
 	private final List<N> nodes;
 	private final List<A> edges;
 	private final Map<String, Object> annotations;
+
+	public SearchGraphPath(final IPath<N, A> path) {
+		this (path.getNodes(), path.getArcs(), (path instanceof SearchGraphPath) ? ((SearchGraphPath) path).annotations : new HashMap<>());
+	}
 
 	public SearchGraphPath(final List<N> nodes) {
 		this(nodes, new ArrayList<>(), new HashMap<>());
@@ -26,11 +32,13 @@ public class SearchGraphPath<N, A> {
 		this.annotations = annotations;
 	}
 
+	@Override
 	public List<N> getNodes() {
 		return Collections.unmodifiableList(this.nodes);
 	}
 
-	public List<A> getEdges() {
+	@Override
+	public List<A> getArcs() {
 		return this.edges != null ? Collections.unmodifiableList(this.edges) : null;
 	}
 
@@ -91,5 +99,20 @@ public class SearchGraphPath<N, A> {
 	@Override
 	public String toString() {
 		return "SearchGraphPath [nodes=" + this.nodes + ", edges=" + this.edges + ", annotations=" + this.annotations + "]";
+	}
+
+	@Override
+	public N getRoot() {
+		return this.nodes.get(0);
+	}
+
+	@Override
+	public N getHead() {
+		return this.nodes.get(this.nodes.size() - 1);
+	}
+
+	@Override
+	public IPath<N, A> getPathToParentOfHead() {
+		return new SearchGraphPath<>(this.nodes.subList(0, this.nodes.size()), this.edges.subList(0, this.edges.size()));
 	}
 }

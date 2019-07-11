@@ -3,9 +3,9 @@ package ai.libs.jaicore.search.algorithms.standard.uncertainty;
 import java.util.Comparator;
 
 import ai.libs.jaicore.search.algorithms.standard.uncertainty.paretosearch.FirstInFirstOutComparator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
-public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
+public class OversearchAvoidanceConfig<N, A, V extends Comparable<V>> {
 
 	public enum OversearchAvoidanceMode {
 		PARETO_FRONT_SELECTION, TWO_PHASE_SELECTION, NONE
@@ -20,32 +20,31 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 	private double explorationUncertaintyThreshold = 0.1d;
 	private double minimumSolutionDistanceForExploration = 0.0d;
 	private ISolutionDistanceMetric<N> solutionDistanceMetric = (s1, s2) -> 1.0d;
-	private Comparator<Node<N, V>> paretoComparator = new FirstInFirstOutComparator<>();
+	private Comparator<BackPointerPath<N, A, V>> paretoComparator = new FirstInFirstOutComparator<>();
 
-	public OversearchAvoidanceConfig(OversearchAvoidanceMode mode, long seed) {
+	public OversearchAvoidanceConfig(final OversearchAvoidanceMode mode, final long seed) {
 		this.oversearchAvoidanceMode = mode;
 		this.seed = seed;
 	}
 
 	public OversearchAvoidanceMode getOversearchAvoidanceMode() {
-		return oversearchAvoidanceMode;
+		return this.oversearchAvoidanceMode;
 	}
 
 	public ISolutionDistanceMetric<N> getSolutionDistanceMetric() {
-		return solutionDistanceMetric;
+		return this.solutionDistanceMetric;
 	}
 
-	public OversearchAvoidanceConfig<N, V> setSolutionDistanceMetric(
-			ISolutionDistanceMetric<N> solutionDistanceMetric) {
+	public OversearchAvoidanceConfig<N, A, V> setSolutionDistanceMetric(final ISolutionDistanceMetric<N> solutionDistanceMetric) {
 		this.solutionDistanceMetric = solutionDistanceMetric;
 		return this;
 	}
 
 	public boolean getAdjustPhaseLengthsDynamically() {
-		return adjustPhaseLengthsDynamically;
+		return this.adjustPhaseLengthsDynamically;
 	}
 
-	public void activateDynamicPhaseLengthsAdjustment(long timeout) {
+	public void activateDynamicPhaseLengthsAdjustment(final long timeout) {
 		this.adjustPhaseLengthsDynamically = true;
 		this.timeout = timeout;
 	}
@@ -55,34 +54,34 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 	}
 
 	public int getInterval() {
-		return interval;
+		return this.interval;
 	}
 
-	public void setInterval(int interval) {
+	public void setInterval(final int interval) {
 		this.interval = interval;
 	}
 
 	public double getExploitationScoreThreshold() {
-		return exploitationScoreThreshold;
+		return this.exploitationScoreThreshold;
 	}
 
-	public void setExploitationScoreThreshold(double exploitationScoreThreshold) {
+	public void setExploitationScoreThreshold(final double exploitationScoreThreshold) {
 		this.exploitationScoreThreshold = exploitationScoreThreshold;
 	}
 
 	public double getExplorationUncertaintyThreshold() {
-		return explorationUncertaintyThreshold;
+		return this.explorationUncertaintyThreshold;
 	}
 
-	public void setExplorationUncertaintyThreshold(double explorationUncertaintyThreshold) {
+	public void setExplorationUncertaintyThreshold(final double explorationUncertaintyThreshold) {
 		this.explorationUncertaintyThreshold = explorationUncertaintyThreshold;
 	}
 
 	public double getMinimumSolutionDistanceForExploration() {
-		return minimumSolutionDistanceForExploration;
+		return this.minimumSolutionDistanceForExploration;
 	}
 
-	public void setMinimumSolutionDistanceForExploration(double minimumSolutionDistanceForExploration) {
+	public void setMinimumSolutionDistanceForExploration(final double minimumSolutionDistanceForExploration) {
 		this.minimumSolutionDistanceForExploration = minimumSolutionDistanceForExploration;
 	}
 
@@ -90,11 +89,11 @@ public class OversearchAvoidanceConfig<N, V extends Comparable<V>> {
 		return this.seed;
 	}
 
-	public void setParetoComparator(Comparator<Node<N, V>> paretoComparator) {
+	public void setParetoComparator(final Comparator<BackPointerPath<N, A, V>> paretoComparator) {
 		this.paretoComparator = paretoComparator;
 	}
 
-	public Comparator<Node<N, V>> getParetoComperator() {
+	public Comparator<BackPointerPath<N, A, V>> getParetoComperator() {
 		return this.paretoComparator;
 	}
 

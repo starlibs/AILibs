@@ -1,5 +1,6 @@
 package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearch;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -11,7 +12,6 @@ import com.google.common.eventbus.Subscribe;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
-import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -56,13 +56,13 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 			try {
 				SearchGraphPath<N, A> path = ((GraphSearchSolutionCandidateFoundEvent<N,A,?>) parentEvent).getSolutionCandidate();
 				V score = this.getInput().getPathEvaluator().evaluate(path);
-				EvaluatedSearchGraphPath<N, A, V> evaluatedPath = new EvaluatedSearchGraphPath<>(path.getNodes(), path.getEdges(), score);
+				EvaluatedSearchGraphPath<N, A, V> evaluatedPath = new EvaluatedSearchGraphPath<>(path.getNodes(), path.getArcs(), score);
 				this.updateBestSeenSolution(evaluatedPath);
 				EvaluatedSearchSolutionCandidateFoundEvent<N,A,V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), evaluatedPath);
 				this.post(event);
 				return event;
 			} catch (ObjectEvaluationFailedException e) {
-				throw new AlgorithmException(e, "Object evaluation failed");
+				throw new AlgorithmException("Object evaluation failed", e);
 			}
 		} else {
 			return parentEvent;

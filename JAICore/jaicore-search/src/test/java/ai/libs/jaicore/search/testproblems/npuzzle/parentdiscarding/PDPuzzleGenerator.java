@@ -3,14 +3,14 @@ package ai.libs.jaicore.search.testproblems.npuzzle.parentdiscarding;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 
-public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode, String> {
+public class PDPuzzleGenerator implements IGraphGenerator<PDPuzzleNode, String> {
 
 	protected int dimension;
 	private PDPuzzleNode root;
@@ -52,7 +52,7 @@ public class PDPuzzleGenerator implements GraphGenerator<PDPuzzleNode, String> {
 	}
 
 	@Override
-	public NodeGoalTester<PDPuzzleNode> getGoalTester() {
+	public NodeGoalTester<PDPuzzleNode, String> getGoalTester() {
 		return n -> {
 			int[][] board = n.getBoard();
 			return (board[this.dimension - 1][this.dimension - 1] == 0);

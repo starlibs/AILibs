@@ -12,6 +12,11 @@ import java.util.Queue;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearch;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -28,12 +33,7 @@ import ai.libs.jaicore.basic.sets.RelationComputationProblem;
 import ai.libs.jaicore.graph.Graph;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
 
 public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorithm<GraphSearchInput<N, A>, Graph<N>> implements IGraphSearch<GraphSearchInput<N, A>, Graph<N>, N, A> {
 
@@ -71,11 +71,11 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	private Graph<N> bestSolutionBase;
 	private final int nodeLimit;
 
-	public AndORBottomUpFilter(final GraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator) {
+	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator) {
 		this(gg, pEvaluator, 1);
 	}
 
-	public AndORBottomUpFilter(final GraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator, final int andNodeLimit) {
+	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator, final int andNodeLimit) {
 		super(new GraphSearchInput<>(gg));
 		this.evaluator = pEvaluator;
 		this.nodeLimit = andNodeLimit;
@@ -112,7 +112,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 					}
 					this.logger.debug("Node expansion of {}-node {} completed. Generated {} successors.", n.type, n, generatedChildren);
 				} catch (Exception e) {
-					throw new AlgorithmException(e, "Received exception in algorithm initialization.");
+					throw new AlgorithmException("Received exception in algorithm initialization.", e);
 				}
 			}
 			this.logger.info("Size: {}", this.graph.getItems().size());
@@ -131,7 +131,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 				}
 				return this.terminate();
 			} catch (ObjectEvaluationFailedException e) {
-				throw new AlgorithmException(e, "Could not evaluate solution.");
+				throw new AlgorithmException("Could not evaluate solution.", e);
 			}
 
 		default:
@@ -312,7 +312,7 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	}
 
 	@Override
-	public GraphGenerator<N, A> getGraphGenerator() {
+	public IGraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
 }

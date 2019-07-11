@@ -45,7 +45,7 @@ public class ReductionOptimizer implements Classifier {
 	public void buildClassifier(final Instances data) throws Exception {
 		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, this.seed, .6f);
 		Instances train = dataSplit.get(0);
-		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<>(new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(this.seed), train), n -> this.getLossForClassifier(this.getTreeFromSolution(n.externalPath(), data, false), data) * 1.0), n -> n.path().size() * -1.0
+		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<>(new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(this.seed), train), n -> this.getLossForClassifier(this.getTreeFromSolution(n.getNodes(), data, false), data) * 1.0), n -> n.path().size() * -1.0
 				, 0.1, false);
 
 		/* get best 20 solutions */

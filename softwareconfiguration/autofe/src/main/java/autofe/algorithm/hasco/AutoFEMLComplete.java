@@ -11,6 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.IAlgorithmConfig;
 import org.api4.java.algorithm.TimeOut;
@@ -47,7 +48,6 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.ISplitBased
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import autofe.util.DataSet;
@@ -87,7 +87,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, AutoFEWekaPipeline, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 	private final ISplitBasedClassifierEvaluator<Double> benchmark;
 	private final AutoFEWekaPipelineFactory factory;
-	private INodeEvaluator<TFDNode, Double> preferredNodeEvaluator;
+	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator;
 
 	private double internalValidationErrorOfSelectedClassifier;
 	private final String id = this.getClass().getName() + "-" + System.currentTimeMillis();
@@ -218,7 +218,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		try {
 			dataForComplete = DataSetUtils.subsample(this.data, this.subsampleRatio, this.minInstances, this.rand, this.mlplanSubsampleRatioFactor);
 		} catch (SplitFailedException e2) {
-			throw new AlgorithmException(e2, "Could not create sample.");
+			throw new AlgorithmException("Could not create sample.", e2);
 		}
 		dataForComplete.updateInstances();
 		this.logger.debug("Finished subsampling.");
@@ -231,7 +231,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 			try {
 				selectionSplit = WekaUtil.getStratifiedSplit(dataForComplete.getInstances(), this.config.randomSeed(), selectionDataPortion);
 			} catch (SplitFailedException e) {
-				throw new AlgorithmException(e, "Search setup failed due to SplitException.");
+				throw new AlgorithmException("Search setup failed due to SplitException.", e);
 			}
 			dataShownToSearch = selectionSplit.get(1);
 		} else {
@@ -279,7 +279,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		try {
 			problem = new TwoPhaseSoftwareConfigurationProblem(this.componentFile, "AutoFEMLPipeline", wrappedSearchBenchmark, wrappedSelectionBenchmark);
 		} catch (IOException e) {
-			throw new AlgorithmException(e, "Could not construct the configuration problem.");
+			throw new AlgorithmException("Could not construct the configuration problem.", e);
 		}
 
 		/* configure and start optimizing factory */
@@ -308,7 +308,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		try {
 			this.selectedPipeline.buildClassifier(this.data);
 		} catch (Exception e) {
-			throw new AlgorithmException(e, "Coul not build the selected pipeline");
+			throw new AlgorithmException("Coul not build the selected pipeline", e);
 		}
 		long endBuildTime = System.currentTimeMillis();
 		this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
@@ -353,7 +353,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		return Collections.unmodifiableCollection(this.components);
 	}
 
-	protected INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(final Instances data) {
+	protected IPathEvaluator<TFDNode, String, Double> getSemanticNodeEvaluator(final Instances data) {
 		return new WekaPipelineValidityCheckingNodeEvaluator(this.getComponents(), data);
 	}
 

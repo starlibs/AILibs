@@ -2,21 +2,21 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.Random;
 
-import ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableNodeEvaluator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableNodeEvaluator;
 
 @SuppressWarnings("serial")
-public class RandomizedDepthFirstNodeEvaluator<T> implements SerializableNodeEvaluator<T,Double> {
+public class RandomizedDepthFirstNodeEvaluator<T, A> implements SerializableNodeEvaluator<T, A, Double> {
 
 	private final Random rand;
 
-	public RandomizedDepthFirstNodeEvaluator(Random rand) {
+	public RandomizedDepthFirstNodeEvaluator(final Random rand) {
 		super();
 		this.rand = rand;
 	}
 
 	@Override
-	public Double f(Node<T,?> node) {
-		return (double) (-1 * (node.path().size() * 1000 + rand.nextInt(100)));
+	public Double f(final IPath<T, A> node) {
+		return (double) (-1 * (node.getNodes().size() * 1000 + this.rand.nextInt(100)));
 	}
 }

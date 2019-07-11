@@ -83,7 +83,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 			sampler.call();
 			this.logger.info("Reduced dataset size to {}", size);
 		} catch (IOException e) {
-			throw new AlgorithmException(e, "Could not create a sub-sample of the given data.");
+			throw new AlgorithmException("Could not create a sub-sample of the given data.", e);
 		}
 	}
 
@@ -107,7 +107,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				data.setClassIndex(data.numAttributes() - 1);
 				this.logger.info("Loaded {}x{} dataset", data.size(), data.numAttributes());
 			} catch (IOException e) {
-				throw new AlgorithmException(e, "Could not create a sub-sample of the given data.");
+				throw new AlgorithmException("Could not create a sub-sample of the given data.", e);
 			}
 
 			/* apply ML-Plan to reduced data */
@@ -126,7 +126,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				this.logger.info("ML-Plan initialized, activation finished!");
 				return this.activate();
 			} catch (IOException e) {
-				throw new AlgorithmException(e, "Could not initialize ML-Plan!");
+				throw new AlgorithmException("Could not initialize ML-Plan!", e);
 			}
 		case ACTIVE:
 
@@ -148,7 +148,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				lr.buildClassifier(observedRuntimeData);
 				this.logger.info("Obtained the following output for the regression model: {}", lr);
 			} catch (Exception e1) {
-				throw new AlgorithmException(e1, "Could not build a regression model for the runtime.");
+				throw new AlgorithmException("Could not build a regression model for the runtime.", e1);
 			}
 
 			/* determine the number of instances that can be used for training with this classifier in the remaining time */
@@ -168,7 +168,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 						numInstances += 50;
 					}
 				} catch (Exception e) {
-					throw new AlgorithmException(e, "Could not obtain a runtime prediction for " + numInstances + " instances.");
+					throw new AlgorithmException("Could not obtain a runtime prediction for " + numInstances + " instances.", e);
 				}
 			}
 			this.logger.info("Believe that {} instances can be used for training in time!", numInstances);
@@ -185,7 +185,7 @@ public class MLPlan4BigFileInput extends AAlgorithm<File, Classifier> implements
 				this.mlplan.getSelectedClassifier().buildClassifier(completeData);
 				this.logger.info("Classifier has been fully trained within {}ms.", System.currentTimeMillis() - startFinalTraining);
 			} catch (Exception e) {
-				throw new AlgorithmException(e, "Could not train the final classifier with the full data.");
+				throw new AlgorithmException("Could not train the final classifier with the full data.", e);
 			}
 			return this.terminate();
 		default:

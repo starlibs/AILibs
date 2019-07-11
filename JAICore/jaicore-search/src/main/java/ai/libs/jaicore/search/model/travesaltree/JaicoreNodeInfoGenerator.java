@@ -4,9 +4,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
+import org.checkerframework.checker.units.qual.A;
+
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGenerator;
 
-public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements NodeInfoGenerator<Node<N, V>> {
+public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements NodeInfoGenerator<BackPointerPath<N, A, V>> {
 
 	private final NodeInfoGenerator<List<N>> nodeInfoGeneratorForPoints;
 
@@ -14,13 +16,13 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 		this(null);
 	}
 
-	public JaicoreNodeInfoGenerator(NodeInfoGenerator<List<N>> nodeInfoGeneratorForPoints) {
+	public JaicoreNodeInfoGenerator(final NodeInfoGenerator<List<N>> nodeInfoGeneratorForPoints) {
 		super();
 		this.nodeInfoGeneratorForPoints = nodeInfoGeneratorForPoints;
 	}
 
 	@Override
-	public String generateInfoForNode(Node<N, V> node) {
+	public String generateInfoForNode(final BackPointerPath<N, A, V> node) {
 		StringBuilder sb = new StringBuilder();
 
 		Map<String, Object> annotations = node.getAnnotations();
@@ -30,7 +32,7 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 		}
 		sb.append("</table>");
 		sb.append("<h2>F-Value</h2>");
-		sb.append(node.getInternalLabel());
+		sb.append(node.getScore());
 		if (annotations.containsKey("fRPSamples")) {
 			sb.append(" (based on " + annotations.get("fRPSamples") + " samples)");
 		}
@@ -66,8 +68,8 @@ public class JaicoreNodeInfoGenerator<N, V extends Comparable<V>> implements Nod
 			}
 			sb.append("</pre>");
 		}
-		if (nodeInfoGeneratorForPoints != null) {
-			sb.append(nodeInfoGeneratorForPoints.generateInfoForNode(node.externalPath()));
+		if (this.nodeInfoGeneratorForPoints != null) {
+			sb.append(this.nodeInfoGeneratorForPoints.generateInfoForNode(node.getNodes()));
 		}
 		return sb.toString();
 	}

@@ -3,13 +3,14 @@ package ai.libs.mlplan.multiclass.wekamlplan.weka;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -63,13 +64,13 @@ public class WekaPipelineValidityCheckingNodeEvaluator extends PipelineValidityC
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> n) throws ControlledNodeEvaluationException {
+	public Double f(final IPath<TFDNode, String> path) throws ControlledNodeEvaluationException {
 		if (!this.propertiesDetermined) {
 			this.extractDatasetProperties();
 		}
 
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(this.getComponents(), n.getPoint().getState(), false);
+		ComponentInstance instance = Util.getSolutionCompositionFromState(this.getComponents(), path.getHead().getState(), false);
 		if (instance != null) {
 
 			/* check invalid preprocessor combinations */

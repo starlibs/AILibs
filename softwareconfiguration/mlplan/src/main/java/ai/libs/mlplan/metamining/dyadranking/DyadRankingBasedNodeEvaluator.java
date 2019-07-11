@@ -26,6 +26,12 @@ import java.util.stream.Collectors;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
@@ -53,18 +59,12 @@ import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.FValueEvent;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomizedDepthFirstNodeEvaluator;
 import ai.libs.jaicore.search.algorithms.standard.gbf.SolutionEventBus;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
@@ -85,7 +85,7 @@ import weka.core.Instances;
  * @author Mirko Juergens
  *
  */
-public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implements IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V> {
+public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(DyadRankingBasedNodeEvaluator.class);
 
@@ -93,7 +93,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 	private BidiMap pathToPipelines = new DualHashBidiMap();
 
 	/* Used to draw random completions for nodes that are not in the final state */
-	private RandomSearch<T, String> randomPathCompleter;
+	private RandomSearch<T, A> randomPathCompleter;
 
 	/* The evaluator that can be used to get the performance of the paths */
 	private IObjectEvaluator<ComponentInstance, V> pipelineEvaluator;
@@ -169,7 +169,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 
 	private SolutionEventBus<T> eventBus;
 
-	private GraphGenerator<T, ?> graphGenerator;
+	private IGraphGenerator<T, ?> graphGenerator;
 
 	private DyadMinMaxScaler scaler = null;
 
@@ -217,12 +217,13 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public V f(final Node<T, ?> node) throws InterruptedException, NodeEvaluationException {
+	public V f(final IPath<T, A> path) throws InterruptedException, PathEvaluationException {
 		if (this.firstEvaluation == null) {
 			this.firstEvaluation = Instant.now();
 		}
+
 		/* Let the random completer handle this use-case. */
-		if (node.isGoal()) {
+		if (this.randomPathCompleter.getGraphGenerator().getGoalTester().isGoal(path)) {
 			return null;
 		}
 
@@ -231,15 +232,15 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 
 		/* Make sure that the completer knows the path until this node */
 
-		if (!this.randomPathCompleter.knowsNode(node.getPoint())) {
+		if (!this.randomPathCompleter.knowsNode(path.getHead())) {
 			synchronized (this.randomPathCompleter) {
-				this.randomPathCompleter.appendPathToNode(node.externalPath());
+				this.randomPathCompleter.appendPathToNode(path.getNodes());
 			}
 		}
 		// draw N paths at random
 		List<List<T>> randomPaths = null;
 		try {
-			randomPaths = this.getNRandomPaths(node);
+			randomPaths = this.getNRandomPaths(path);
 		} catch (InterruptedException | TimeoutException e) {
 			logger.error("Interrupted in path completion!");
 			Thread.currentThread().interrupt();
@@ -251,7 +252,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 		try {
 			allRankedPaths = this.getDyadRankedPaths(randomPaths);
 		} catch (PredictionException e1) {
-			throw new NodeEvaluationException(e1, "Could not rank nodes");
+			throw new PathEvaluationException("Could not rank nodes", e1);
 		}
 
 		// random search failed to find anything here
@@ -294,7 +295,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 	 * @throws InterruptedException
 	 * @throws TimeoutException
 	 */
-	private List<List<T>> getNRandomPaths(final Node<T, ?> node) throws InterruptedException, TimeoutException {
+	private List<List<T>> getNRandomPaths(final IPath<T, A> node) throws InterruptedException, TimeoutException {
 		List<List<T>> completedPaths = new ArrayList<>();
 		for (int currentPath = 0; currentPath < this.randomlyCompletedPaths; currentPath++) {
 			/*
@@ -309,17 +310,17 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 					logger.info("Completer has been canceled (perhaps due a cancel on the evaluator). Canceling RDFS");
 					break;
 				}
-				completedPath = new ArrayList<>(node.externalPath());
+				completedPath = new ArrayList<>(node.getNodes());
 
-				SearchGraphPath<T, String> solutionPathFromN = null;
+				SearchGraphPath<T, A> solutionPathFromN = null;
 				try {
-					solutionPathFromN = this.randomPathCompleter.nextSolutionUnderNode(node.getPoint());
+					solutionPathFromN = this.randomPathCompleter.nextSolutionUnderNode(node.getHead());
 				} catch (AlgorithmExecutionCanceledException e) {
 					logger.info("Completer has been canceled. Returning control.");
 					break;
 				}
 				if (solutionPathFromN == null) {
-					logger.info("No completion was found for path {}.", node.externalPath());
+					logger.info("No completion was found for path {}.", node.getNodes());
 					break;
 				}
 
@@ -483,7 +484,7 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 	}
 
 	@Override
-	public void setGenerator(final GraphGenerator<T, ?> generator) {
+	public void setGenerator(final IGraphGenerator<T, A> generator) {
 		this.graphGenerator = generator;
 		this.initializeRandomSearch();
 	}
@@ -495,9 +496,9 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 	 * @param generator
 	 */
 	private void initializeRandomSearch() {
-		INodeEvaluator<T, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
+		IPathEvaluator<T, A, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
 		@SuppressWarnings("unchecked")
-		GraphSearchWithSubpathEvaluationsInput<T, String, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>((GraphGenerator<T, String>) this.graphGenerator, nodeEvaluator);
+		GraphSearchWithSubpathEvaluationsInput<T, A, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>((IGraphGenerator<T, A>) this.graphGenerator, nodeEvaluator);
 		this.randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);
 		while (!(this.randomPathCompleter.next() instanceof AlgorithmInitializedEvent)) {
 
@@ -527,11 +528,9 @@ public class DyadRankingBasedNodeEvaluator<T, V extends Comparable<V>> implement
 			}
 		} catch (SplitFailedException e) {
 			throw new IllegalArgumentException(e);
-		}
-		catch (InterruptedException e) {
+		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			logger.error("Failed to characterize the dataset", e);
 		}
 	}

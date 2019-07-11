@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.algorithms;
 
-import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
+import org.api4.java.ai.graphsearch.problem.IGraphSearch;
+
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 

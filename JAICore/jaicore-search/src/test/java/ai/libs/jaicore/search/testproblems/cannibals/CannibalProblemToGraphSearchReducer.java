@@ -11,12 +11,12 @@ public class CannibalProblemToGraphSearchReducer implements AlgorithmicProblemRe
 
 	@Override
 	public GraphSearchWithPathEvaluationsInput<CannibalProblem, String, Integer> encodeProblem(final CannibalProblem problem) {
-		return new GraphSearchWithPathEvaluationsInput<>(new CannibalGraphGenerator(problem), p -> p.getEdges().size());
+		return new GraphSearchWithPathEvaluationsInput<>(new CannibalGraphGenerator(problem), p -> p.getArcs().size());
 	}
 
 	@Override
 	public List<String> decodeSolution(final SearchGraphPath<CannibalProblem, String> solution) {
-		return solution.getEdges();
+		return solution.getArcs();
 	}
 
 }

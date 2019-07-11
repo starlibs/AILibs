@@ -2,12 +2,13 @@ package ai.libs.mlplan.core;
 
 import java.util.Collection;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import weka.core.Instances;
 
-public abstract class PipelineValidityCheckingNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
+public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
 
 	private Instances data;
 	private Collection<Component> components;
@@ -21,19 +22,19 @@ public abstract class PipelineValidityCheckingNodeEvaluator implements INodeEval
 		this.components = components;
 	}
 
-	public void setData(Instances data) {
+	public void setData(final Instances data) {
 		this.data = data;
 	}
 
-	public void setComponents(Collection<Component> components) {
+	public void setComponents(final Collection<Component> components) {
 		this.components = components;
 	}
 
 	public Instances getData() {
-		return data;
+		return this.data;
 	}
 
 	public Collection<Component> getComponents() {
-		return components;
+		return this.components;
 	}
 }

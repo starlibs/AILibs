@@ -3,23 +3,23 @@ package ai.libs.jaicore.search.testproblems.enhancedttsp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleSuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 import it.unimi.dsi.fastutil.shorts.ShortArrayList;
 import it.unimi.dsi.fastutil.shorts.ShortList;
 
-public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNode, String>, ILoggingCustomizable {
+public class EnhancedTTSPGraphGenerator implements IGraphGenerator<EnhancedTTSPNode, String>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(EnhancedTTSPGraphGenerator.class);
 
@@ -104,7 +104,7 @@ public class EnhancedTTSPGraphGenerator implements GraphGenerator<EnhancedTTSPNo
 	}
 
 	@Override
-	public NodeGoalTester<EnhancedTTSPNode> getGoalTester() {
+	public NodeGoalTester<EnhancedTTSPNode, String> getGoalTester() {
 		return n -> {
 			return n.getCurTour().size() >= this.problem.getPossibleDestinations().size() && n.getCurLocation() == this.problem.getStartLocation();
 		};

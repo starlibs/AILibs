@@ -2,8 +2,9 @@ package ai.libs.jaicore.search.testproblems.nqueens;
 
 import java.util.List;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.AgnosticPathEvaluator;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -14,7 +15,7 @@ public class NQueensToGraphSearchReducer implements AlgorithmicProblemReduction<
 
 	@Override
 	public GraphSearchInput<QueenNode, String> encodeProblem(final NQueensProblem problem) {
-		GraphGenerator<QueenNode, String> graphGenerator = new NQueensGraphGenerator(problem.getN());
+		IGraphGenerator<QueenNode, String> graphGenerator = new NQueensGraphGenerator(problem.getN());
 		return new GraphSearchWithPathEvaluationsInput<>(graphGenerator, new AgnosticPathEvaluator<>());
 	}
 

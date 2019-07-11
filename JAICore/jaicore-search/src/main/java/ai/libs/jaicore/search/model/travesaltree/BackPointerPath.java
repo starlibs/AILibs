@@ -2,41 +2,49 @@ package ai.libs.jaicore.search.model.travesaltree;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
-public class Node<T, V extends Comparable<V>> {
-	private final T externalLabel;
+public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluatedPath<N, A, V> {
+	private final N nodeLabel;
+	private final A edgeLabelToParent;
 	private boolean goal;
-	protected Node<T, V> parent;
+	protected BackPointerPath<N, A, V> parent;
 	private final Map<String, Object> annotations = new HashMap<>(); // for nodes effectively examined
 
-	public Node(final Node<T, V> parent, final T point) {
+	public BackPointerPath(final BackPointerPath<N, A, V> parent, final N point, final A edgeLabelToParent) {
 		super();
 		this.parent = parent;
-		this.externalLabel = point;
+		this.nodeLabel = point;
+		this.edgeLabelToParent = edgeLabelToParent;
 	}
 
-	public Node<T, V> getParent() {
+	public BackPointerPath<N, A, V> getParent() {
 		return this.parent;
 	}
 
-	public T getPoint() {
-		return this.externalLabel;
+	@Override
+	public N getHead() {
+		return this.nodeLabel;
 	}
 
 	@SuppressWarnings("unchecked")
-	public V getInternalLabel() {
+	@Override
+	public V getScore() {
 		return (V) this.annotations.get("f");
 	}
 
-	public void setParent(final Node<T, V> newParent) {
+	public void setParent(final BackPointerPath<N, A, V> newParent) {
 		this.parent = newParent;
 	}
 
-	public void setInternalLabel(final V internalLabel) {
+	public void setScore(final V internalLabel) {
 		this.setAnnotation("f", internalLabel);
 	}
 
@@ -60,9 +68,9 @@ public class Node<T, V extends Comparable<V>> {
 		this.goal = goal;
 	}
 
-	public List<Node<T, V>> path() {
-		List<Node<T, V>> path = new ArrayList<>();
-		Node<T, V> current = this;
+	public List<BackPointerPath<N, A, V>> path() {
+		List<BackPointerPath<N, A, V>> path = new ArrayList<>();
+		BackPointerPath<N, A, V> current = this;
 		while (current != null) {
 			path.add(0, current);
 			current = current.parent;
@@ -70,11 +78,12 @@ public class Node<T, V extends Comparable<V>> {
 		return path;
 	}
 
-	public List<T> externalPath() {
-		List<T> path = new ArrayList<>();
-		Node<T, V> current = this;
+	@Override
+	public List<N> getNodes() {
+		List<N> path = new ArrayList<>();
+		BackPointerPath<N, A, V> current = this;
 		while (current != null) {
-			path.add(0, current.externalLabel);
+			path.add(0, current.nodeLabel);
 			current = current.parent;
 		}
 		return path;
@@ -84,7 +93,7 @@ public class Node<T, V extends Comparable<V>> {
 		String s = "Node [ref=";
 		s += this.toString();
 		s += ", externalLabel=";
-		s += this.externalLabel;
+		s += this.nodeLabel;
 		s += ", goal";
 		s += this.goal;
 		s += ", parentRef=";
@@ -102,9 +111,33 @@ public class Node<T, V extends Comparable<V>> {
 	@Override
 	public String toString() {
 		Map<String, Object> fields = new HashMap<>();
-		fields.put("externalLabel", this.externalLabel);
+		fields.put("externalLabel", this.nodeLabel);
 		fields.put("goal", this.goal);
 		fields.put("annotations", this.annotations);
 		return ToJSONStringUtil.toJSONString(this.getClass().getSimpleName(), fields);
+	}
+
+	@Override
+	public List<A> getArcs() {
+		if (this.parent == null) {
+			return new LinkedList<>();
+		}
+		List<A> pathToHere = this.parent.getArcs();
+		pathToHere.add(this.edgeLabelToParent);
+		return pathToHere;
+	}
+
+	public A getEdgeLabelToParent() {
+		return this.edgeLabelToParent;
+	}
+
+	@Override
+	public N getRoot() {
+		return this.parent == null ? this.nodeLabel : this.parent.getRoot();
+	}
+
+	@Override
+	public IPath<N, A> getPathToParentOfHead() {
+		return this.parent;
 	}
 }

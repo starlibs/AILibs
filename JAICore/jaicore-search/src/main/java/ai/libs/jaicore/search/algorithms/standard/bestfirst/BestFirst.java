@@ -26,6 +26,18 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.MultipleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
@@ -58,23 +70,10 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnot
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyGraphDependentNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.Node;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import ai.libs.jaicore.search.structure.graphgenerator.MultipleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.PathGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
  *
@@ -97,19 +96,17 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	}
 
 	/* problem definition */
-	protected final GraphGenerator<N, A> graphGenerator;
+	protected final IGraphGenerator<N, A> graphGenerator;
 	protected final RootGenerator<N> rootGenerator;
 	protected final SuccessorGenerator<N, A> successorGenerator;
-	protected final PathGoalTester<N> pathGoalTester;
-	protected final NodeGoalTester<N> nodeGoalTester;
-	protected final INodeEvaluator<N, V> nodeEvaluator;
+	protected final PathGoalTester<N, A> pathGoalTester;
+	protected final IPathEvaluator<N, A, V> nodeEvaluator;
 
 	/* algorithm configuration */
 	private int timeoutForComputationOfF;
-	private INodeEvaluator<N, V> timeoutNodeEvaluator;
+	private IPathEvaluator<N, A, V> timeoutNodeEvaluator;
 
 	/* automatically derived auxiliary variables */
-	protected final boolean checkGoalPropertyOnEntirePath;
 	private final boolean solutionReportingNodeEvaluator;
 	private final boolean cancelableNodeEvaluator;
 
@@ -122,11 +119,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	protected final Queue<EvaluatedSearchSolutionCandidateFoundEvent<N, A, V>> pendingSolutionFoundEvents = new LinkedBlockingQueue<>();
 
 	/* communication */
-	protected final Map<N, Node<N, V>> ext2int = new ConcurrentHashMap<>();
+	protected final Map<N, BackPointerPath<N, A, V>> ext2int = new ConcurrentHashMap<>();
 
 	/* search graph model */
-	protected Queue<Node<N, V>> open = new PriorityQueue<>((n1, n2) -> n1.getInternalLabel().compareTo(n2.getInternalLabel()));
-	private Node<N, V> nodeSelectedForExpansion; // the node that will be expanded next
+	protected Queue<BackPointerPath<N, A, V>> open = new PriorityQueue<>((n1, n2) -> n1.getScore().compareTo(n2.getScore()));
+	private BackPointerPath<N, A, V> nodeSelectedForExpansion; // the node that will be expanded next
 	private final Map<N, Thread> expanding = new HashMap<>(); // EXPANDING contains the nodes being expanded and the threads doing this job
 	private final Set<N> closed = new HashSet<>(); // CLOSED contains only node but not paths
 
@@ -149,21 +146,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
-		this.checkGoalPropertyOnEntirePath = !(this.graphGenerator.getGoalTester() instanceof NodeGoalTester);
-		if (this.checkGoalPropertyOnEntirePath) {
-			this.nodeGoalTester = null;
-			this.pathGoalTester = (PathGoalTester<N>) this.graphGenerator.getGoalTester();
-		} else {
-			this.nodeGoalTester = (NodeGoalTester<N>) this.graphGenerator.getGoalTester();
-			this.pathGoalTester = null;
-		}
+		this.pathGoalTester = this.graphGenerator.getGoalTester();
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getNodeEvaluator();
 		if (this.nodeEvaluator == null) {
 			throw new IllegalArgumentException("Cannot work with node evaulator that is null");
-		} else if (this.nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?>) {
-			DecoratingNodeEvaluator<N, V> castedEvaluator = (DecoratingNodeEvaluator<N, V>) this.nodeEvaluator;
+		} else if (this.nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?, ?>) {
+			DecoratingNodeEvaluator<N, A, V> castedEvaluator = (DecoratingNodeEvaluator<N, A, V>) this.nodeEvaluator;
 			if (castedEvaluator.requiresGraphGenerator()) {
 				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
 				castedEvaluator.setGenerator(this.graphGenerator);
@@ -176,15 +166,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				this.solutionReportingNodeEvaluator = false;
 			}
 		} else {
-			if (this.nodeEvaluator instanceof IPotentiallyGraphDependentNodeEvaluator) {
+			if (this.nodeEvaluator instanceof IPotentiallyGraphDependentPathEvaluator) {
 				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", this.nodeEvaluator);
-				((IPotentiallyGraphDependentNodeEvaluator<N, V>) this.nodeEvaluator).setGenerator(this.graphGenerator);
+				((IPotentiallyGraphDependentPathEvaluator<N, A, V>) this.nodeEvaluator).setGenerator(this.graphGenerator);
 			}
 
 			/* if the node evaluator is a solution reporter, register in his event bus */
-			if (this.nodeEvaluator instanceof IPotentiallySolutionReportingNodeEvaluator) {
+			if (this.nodeEvaluator instanceof IPotentiallySolutionReportingPathEvaluator) {
 				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", this.nodeEvaluator);
-				((IPotentiallySolutionReportingNodeEvaluator<N, V>) this.nodeEvaluator).registerSolutionListener(this);
+				((IPotentiallySolutionReportingPathEvaluator<N, A, V>) this.nodeEvaluator).registerSolutionListener(this);
 				this.solutionReportingNodeEvaluator = true;
 			} else {
 				this.solutionReportingNodeEvaluator = false;
@@ -235,10 +225,10 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	private class NodeBuilder implements Runnable {
 
 		private final Collection<N> todoList;
-		private final Node<N, V> expandedNodeInternal;
+		private final BackPointerPath<N, A, V> expandedNodeInternal;
 		private final NodeExpansionDescription<N, A> successorDescription;
 
-		public NodeBuilder(final Collection<N> todoList, final Node<N, V> expandedNodeInternal, final NodeExpansionDescription<N, A> successorDescription) {
+		public NodeBuilder(final Collection<N> todoList, final BackPointerPath<N, A, V> expandedNodeInternal, final NodeExpansionDescription<N, A> successorDescription) {
 			super();
 			this.todoList = todoList;
 			this.expandedNodeInternal = expandedNodeInternal;
@@ -265,7 +255,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				}
 				BestFirst.this.lastExpansion.add(this.successorDescription);
 
-				Node<N, V> newNode = BestFirst.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo());
+				BackPointerPath<N, A, V> newNode = BestFirst.this.newNode(this.expandedNodeInternal, this.successorDescription.getTo(), this.successorDescription.getAction());
 
 				/* update creation counter */
 				BestFirst.this.createdCounter++;
@@ -273,7 +263,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				/* compute node label */
 				try {
 					BestFirst.this.labelNode(newNode);
-					if (newNode.getInternalLabel() == null) {
+					if (newNode.getScore() == null) {
 						BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
 						return;
 					}
@@ -321,14 +311,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					try {
 
 						/* determine whether we already have the node AND it is worse than the one we want to insert */
-						Optional<Node<N, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getPoint().equals(newNode.getPoint())).findFirst();
+						Optional<BackPointerPath<N, A, V>> existingIdenticalNodeOnOpen = BestFirst.this.open.stream().filter(n -> n.getHead().equals(newNode.getHead())).findFirst();
 						if (existingIdenticalNodeOnOpen.isPresent()) {
-							Node<N, V> existingNode = existingIdenticalNodeOnOpen.get();
-							if (newNode.getInternalLabel().compareTo(existingNode.getInternalLabel()) < 0) {
+							BackPointerPath<N, A, V> existingNode = existingIdenticalNodeOnOpen.get();
+							if (newNode.getScore().compareTo(existingNode.getScore()) < 0) {
 								BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_OPEN.toString())));
 								BestFirst.this.post(new NodeRemovedEvent<>(BestFirst.this.getId(), existingNode));
 								BestFirst.this.open.remove(existingNode);
-								if (newNode.getInternalLabel() == null) {
+								if (newNode.getScore() == null) {
 									throw new IllegalArgumentException("Cannot insert nodes with value NULL into OPEN!");
 								}
 								BestFirst.this.open.add(newNode);
@@ -344,17 +334,17 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						 */
 						else if (BestFirst.this.getConfig().parentDiscarding() == ParentDiscarding.ALL) {
 							/* reopening, if the node is already on CLOSED */
-							Optional<N> existingIdenticalNodeOnClosed = BestFirst.this.closed.stream().filter(n -> n.equals(newNode.getPoint())).findFirst();
+							Optional<N> existingIdenticalNodeOnClosed = BestFirst.this.closed.stream().filter(n -> n.equals(newNode.getHead())).findFirst();
 							if (existingIdenticalNodeOnClosed.isPresent()) {
-								Node<N, V> node = BestFirst.this.ext2int.get(existingIdenticalNodeOnClosed.get());
-								if (newNode.getInternalLabel().compareTo(node.getInternalLabel()) < 0) {
+								BackPointerPath<N, A, V> node = BestFirst.this.ext2int.get(existingIdenticalNodeOnClosed.get());
+								if (newNode.getScore().compareTo(node.getScore()) < 0) {
 									node.setParent(newNode.getParent());
-									node.setInternalLabel(newNode.getInternalLabel());
-									BestFirst.this.closed.remove(node.getPoint());
+									node.setScore(newNode.getScore());
+									BestFirst.this.closed.remove(node.getHead());
 									BestFirst.this.open.add(node);
-									BestFirst.this.post(new NodeParentSwitchEvent<Node<N, V>>(BestFirst.this.getId(), node, node.getParent(), newNode.getParent()));
+									BestFirst.this.post(new NodeParentSwitchEvent<BackPointerPath<N, A, V>>(BestFirst.this.getId(), node, node.getParent(), newNode.getParent()));
 								}
-								BestFirst.this.post(new NodeRemovedEvent<Node<N, V>>(BestFirst.this.getId(), newNode));
+								BestFirst.this.post(new NodeRemovedEvent<BackPointerPath<N, A, V>>(BestFirst.this.getId(), newNode));
 								nodeProcessed = true;
 							}
 						}
@@ -372,15 +362,15 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 						BestFirst.this.openLock.lockInterruptibly();
 						synchronized (BestFirst.this.expanding) {
 							try {
-								assert !BestFirst.this.closed.contains(newNode.getPoint()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before.";
+								assert !BestFirst.this.closed.contains(newNode.getHead()) : "Currently only tree search is supported. But now we add a node to OPEN whose point has already been expanded before.";
 								BestFirst.this.expanding.keySet().forEach(node -> {
-									assert !node.equals(newNode.getPoint()) : Thread.currentThread() + " cannot add node to OPEN that is currently being expanded by " + BestFirst.this.expanding.get(node) + ".\n\tFrom: "
-											+ newNode.getParent().getPoint() + "\n\tTo: " + node;
+									assert !node.equals(newNode.getHead()) : Thread.currentThread() + " cannot add node to OPEN that is currently being expanded by " + BestFirst.this.expanding.get(node) + ".\n\tFrom: "
+											+ newNode.getParent().getHead() + "\n\tTo: " + node;
 								});
-								if (newNode.getInternalLabel() == null) {
+								if (newNode.getScore() == null) {
 									throw new IllegalArgumentException("Cannot insert nodes with value NULL into OPEN!");
 								}
-								BestFirst.this.logger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode.hashCode(), this.expandedNodeInternal, newNode.getInternalLabel());
+								BestFirst.this.logger.debug("Inserting successor {} of {} to OPEN. F-Value is {}", newNode.hashCode(), this.expandedNodeInternal, newNode.getScore());
 								BestFirst.this.open.add(newNode);
 							} finally {
 								BestFirst.this.openLock.unlock();
@@ -393,7 +383,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 				/* Recognize solution in cache together with annotation */
 				if (newNode.isGoal()) {
-					EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(newNode.externalPath(), null, newNode.getInternalLabel());
+					EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(newNode.getNodes(), null, newNode.getScore());
 
 					/*
 					 * if the node evaluator has not reported the solution already anyway, register
@@ -434,11 +424,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		}
 	}
 
-	protected Node<N, V> newNode(final Node<N, V> parent, final N t2) throws InterruptedException {
-		return this.newNode(parent, t2, null);
+	protected BackPointerPath<N, A, V> newNode(final BackPointerPath<N, A, V> parent, final N t2, final A arc) throws InterruptedException {
+		return this.newNode(parent, t2, arc, null);
 	}
 
-	protected Node<N, V> newNode(final Node<N, V> parent, final N t2, final V evaluation) throws InterruptedException {
+	protected BackPointerPath<N, A, V> newNode(final BackPointerPath<N, A, V> parent, final N t2, final A arc, final V evaluation) throws InterruptedException {
 		this.openLock.lockInterruptibly();
 		try {
 			assert !this.open.contains(parent) : "Parent node " + parent + " is still on OPEN, which must not be the case! OPEN class: " + this.open.getClass().getName() + ". OPEN size: " + this.open.size();
@@ -447,38 +437,38 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		}
 
 		/* create new node and check whether it is a goal */
-		Node<N, V> newNode = new Node<>(parent, t2);
+		BackPointerPath<N, A, V> newNode = new BackPointerPath<>(parent, t2, arc);
 		if (evaluation != null) {
-			newNode.setInternalLabel(evaluation);
+			newNode.setScore(evaluation);
 		}
 
 		/* check loop */
-		assert parent == null || !parent.externalPath().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: "
-				+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
+		assert parent == null || !parent.getNodes().contains(t2) : "There is a loop in the underlying graph. The following path contains the last node twice: "
+				+ newNode.getNodes().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* currently, we only support tree search */
-		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).externalPath().stream().map(n -> n + "").reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
-		+ newNode.externalPath().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
+		assert !this.ext2int.containsKey(t2) : "Reached node " + t2 + " for the second time.\nt\tFirst path:" + this.ext2int.get(t2).getNodes().stream().map(n -> n + "").reduce("", (s, t) -> s + SPACER + t) + "\n\tSecond Path:"
+		+ newNode.getNodes().stream().map(N::toString).reduce("", (s, t) -> s + SPACER + t);
 
 		/* register node in map and create annotation object */
 		this.ext2int.put(t2, newNode);
 
 		/* detect whether node is solution */
-		if (this.checkGoalPropertyOnEntirePath ? this.pathGoalTester.isGoal(newNode.externalPath()) : this.nodeGoalTester.isGoal(newNode.getPoint())) {
+		if (this.pathGoalTester.isGoal(newNode)) {
 			newNode.setGoal(true);
 		}
 
 		/* send events for this new node */
 		if (parent == null) {
-			this.post(new GraphInitializedEvent<Node<N, V>>(this.getId(), newNode));
+			this.post(new GraphInitializedEvent<BackPointerPath<N, A, V>>(this.getId(), newNode));
 		} else {
-			this.post(new NodeAddedEvent<Node<N, V>>(this.getId(), parent, newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_CREATED.toString())));
+			this.post(new NodeAddedEvent<BackPointerPath<N, A, V>>(this.getId(), parent, newNode, (newNode.isGoal() ? ENodeType.OR_SOLUTION.toString() : ENodeType.OR_CREATED.toString())));
 			this.logger.debug("Sent message for creation of node {} as a successor of {}", newNode.hashCode(), parent.hashCode());
 		}
 		return newNode;
 	}
 
-	protected void labelNode(final Node<N, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
+	protected void labelNode(final BackPointerPath<N, A, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 
 		/* define timeouter for label computation */
 		this.logger.debug("Computing node label for node with hash code {}", node.hashCode());
@@ -553,12 +543,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		}
 
 		/* check whether an uncertainty-value is present if the node evaluator is an uncertainty-measuring evaluator */
-		assert !(this.nodeEvaluator instanceof IPotentiallyUncertaintyAnnotatingNodeEvaluator) || !((IPotentiallyUncertaintyAnnotatingNodeEvaluator<?, ?>) this.nodeEvaluator).annotatesUncertainty()
-		|| node.getAnnotation("uncertainty") != null : "Uncertainty-based node evaluator claims to annotate uncertainty but has not assigned any uncertainty to " + node.getPoint();
+		assert !(this.nodeEvaluator instanceof IPotentiallyUncertaintyAnnotatingPathEvaluator) || !((IPotentiallyUncertaintyAnnotatingPathEvaluator<?, ?, ?>) this.nodeEvaluator).annotatesUncertainty()
+		|| node.getAnnotation("uncertainty") != null : "Uncertainty-based node evaluator claims to annotate uncertainty but has not assigned any uncertainty to " + node.getHead();
 
 		/* eventually set the label */
-		node.setInternalLabel(label);
-		assert node.getInternalLabel() != null : "Node label must not be NULL";
+		node.setScore(label);
+		assert node.getScore() != null : "Node label must not be NULL";
 	}
 
 	/**
@@ -574,7 +564,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			this.initialized = true;
 			if (this.rootGenerator instanceof MultipleRootGenerator) {
 				for (N n0 : ((MultipleRootGenerator<N>) this.rootGenerator).getRoots()) {
-					Node<N, V> root = this.newNode(null, n0);
+					BackPointerPath<N, A, V> root = this.newNode(null, n0, null);
 					this.labelNode(root);
 					this.checkAndConductTermination();
 					this.openLock.lockInterruptibly();
@@ -586,16 +576,16 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					} finally {
 						this.openLock.unlock();
 					}
-					this.logger.debug("Labeled root with {}", root.getInternalLabel());
+					this.logger.debug("Labeled root with {}", root.getScore());
 				}
 			} else {
-				Node<N, V> root = this.newNode(null, ((SingleRootGenerator<N>) this.rootGenerator).getRoot());
+				BackPointerPath<N, A, V> root = this.newNode(null, ((SingleRootGenerator<N>) this.rootGenerator).getRoot(), null);
 				if (root == null) {
 					throw new IllegalArgumentException("Root for SingleRootGenerator is null. Cannot add NULL as a node to OPEN");
 				}
 				this.labelNode(root);
 				this.checkAndConductTermination();
-				if (root.getInternalLabel() == null) {
+				if (root.getScore() == null) {
 					throw new IllegalArgumentException("The node evaluator has assigned NULL to the root node, which impedes an initialization of the search graph. Node evaluator: " + this.nodeEvaluator);
 				}
 				this.openLock.lockInterruptibly();
@@ -610,14 +600,14 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 	}
 
-	protected void selectNodeForNextExpansion(final Node<N, V> node) throws InterruptedException {
+	protected void selectNodeForNextExpansion(final BackPointerPath<N, A, V> node) throws InterruptedException {
 		assert node != null : "Cannot select node NULL for expansion!";
 		this.nodeSelectionLock.lockInterruptibly();
 		try {
 			this.openLock.lockInterruptibly();
 			try {
 				assert !this.open.contains(null) : "OPEN contains NULL";
-				assert this.open.stream().noneMatch(n -> n.getInternalLabel() == null) : "OPEN contains an element with value NULL";
+				assert this.open.stream().noneMatch(n -> n.getScore() == null) : "OPEN contains an element with value NULL";
 				int openSizeBefore = this.open.size();
 				assert this.nodeSelectedForExpansion == null : "Node selected for expansion must be NULL when setting it!";
 				this.nodeSelectedForExpansion = node;
@@ -625,7 +615,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				+ this.open.stream().map(n -> SPACER + n).collect(Collectors.joining());
 				this.open.remove(this.nodeSelectedForExpansion);
 				int openSizeAfter = this.open.size();
-				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getPoint()) : "A node chosen for expansion has no entry in the ext2int map!";
+				assert this.ext2int.containsKey(this.nodeSelectedForExpansion.getHead()) : "A node chosen for expansion has no entry in the ext2int map!";
 				assert openSizeAfter == openSizeBefore - 1 : "OPEN size must descrease by one when selecting node for expansion";
 			} finally {
 				this.openLock.unlock();
@@ -655,8 +645,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 * or it will be the first of OPEN. If necessary, we wait for potential incoming nodes
 		 */
 		long startTimeOfExpansion = System.currentTimeMillis();
-		final Node<N, V> actualNodeSelectedForExpansion;
-		Node<N, V> tmpNodeSelectedForExpansion = null; // necessary workaround as setting final variables in a try-block is not reasonably possible
+		final BackPointerPath<N, A, V> actualNodeSelectedForExpansion;
+		BackPointerPath<N, A, V> tmpNodeSelectedForExpansion = null; // necessary workaround as setting final variables in a try-block is not reasonably possible
 		this.nodeSelectionLock.lockInterruptibly();
 		try {
 			if (this.nodeSelectedForExpansion == null) {
@@ -697,8 +687,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		assert this.nodeSelectedForExpansion == null : "The object variable for the next selected node must be NULL at the end of the select step.";
 		actualNodeSelectedForExpansion = tmpNodeSelectedForExpansion;
 		synchronized (this.expanding) {
-			this.expanding.put(actualNodeSelectedForExpansion.getPoint(), Thread.currentThread());
-			assert this.expanding.keySet().contains(tmpNodeSelectedForExpansion.getPoint()) : "The node selected for expansion should be in the EXPANDING map by now.";
+			this.expanding.put(actualNodeSelectedForExpansion.getHead(), Thread.currentThread());
+			assert this.expanding.keySet().contains(tmpNodeSelectedForExpansion.getHead()) : "The node selected for expansion should be in the EXPANDING map by now.";
 		}
 		assert !this.open.contains(actualNodeSelectedForExpansion) : "Node selected for expansion is still on OPEN";
 		assert actualNodeSelectedForExpansion != null : "We have not selected any node for expansion, but this must be the case at this point.";
@@ -711,19 +701,19 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 			/* Step 2: compute the successors in the underlying graph */
 			this.beforeExpansion(actualNodeSelectedForExpansion);
-			this.post(new NodeTypeSwitchEvent<Node<N, V>>(this.getId(), actualNodeSelectedForExpansion, "or_expanding"));
-			this.logger.debug("Expanding node {} with f-value {}", actualNodeSelectedForExpansion.hashCode(), actualNodeSelectedForExpansion.getInternalLabel());
+			this.post(new NodeTypeSwitchEvent<BackPointerPath<N, A, V>>(this.getId(), actualNodeSelectedForExpansion, "or_expanding"));
+			this.logger.debug("Expanding node {} with f-value {}", actualNodeSelectedForExpansion.hashCode(), actualNodeSelectedForExpansion.getScore());
 			this.logger.debug("Start computation of successors");
 			final List<NodeExpansionDescription<N, A>> successorDescriptions;
 			List<NodeExpansionDescription<N, A>> tmpSuccessorDescriptions = null;
 			assert !actualNodeSelectedForExpansion.isGoal() : "Goal nodes must not be expanded!";
 			tmpSuccessorDescriptions = this.computeTimeoutAware(() -> {
 				this.logger.trace("Invoking getSuccessors");
-				return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getPoint());
+				return BestFirst.this.successorGenerator.generateSuccessors(actualNodeSelectedForExpansion.getHead());
 			}, "Successor generation", !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff this is not one of the worker threads
 			assert tmpSuccessorDescriptions != null : "Successor descriptions must never be null!";
 			if (this.logger.isTraceEnabled()) {
-				this.logger.trace("Received {} successor descriptions for node with hash code {}. The first 1000 of these are \n\t{}", tmpSuccessorDescriptions.size(), actualNodeSelectedForExpansion.getPoint(),
+				this.logger.trace("Received {} successor descriptions for node with hash code {}. The first 1000 of these are \n\t{}", tmpSuccessorDescriptions.size(), actualNodeSelectedForExpansion.getHead(),
 						tmpSuccessorDescriptions.stream().limit(1000).map(s -> s.getTo().toString()).collect(Collectors.joining("\n\t")));
 			}
 			successorDescriptions = tmpSuccessorDescriptions;
@@ -782,12 +772,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		 */
 		this.expandedCounter++;
 		synchronized (this.expanding) {
-			this.expanding.remove(actualNodeSelectedForExpansion.getPoint());
-			assert !this.expanding.containsKey(actualNodeSelectedForExpansion.getPoint()) : actualNodeSelectedForExpansion + " was expanded and it was not removed from EXPANDING!";
+			this.expanding.remove(actualNodeSelectedForExpansion.getHead());
+			assert !this.expanding.containsKey(actualNodeSelectedForExpansion.getHead()) : actualNodeSelectedForExpansion + " was expanded and it was not removed from EXPANDING!";
 		}
-		this.closed.add(actualNodeSelectedForExpansion.getPoint());
-		assert this.closed.contains(actualNodeSelectedForExpansion.getPoint()) : "Expanded node " + actualNodeSelectedForExpansion + " was not inserted into CLOSED!";
-		this.post(new NodeTypeSwitchEvent<Node<N, V>>(this.getId(), actualNodeSelectedForExpansion, ENodeType.OR_CLOSED.toString()));
+		this.closed.add(actualNodeSelectedForExpansion.getHead());
+		assert this.closed.contains(actualNodeSelectedForExpansion.getHead()) : "Expanded node " + actualNodeSelectedForExpansion + " was not inserted into CLOSED!";
+		this.post(new NodeTypeSwitchEvent<BackPointerPath<N, A, V>>(this.getId(), actualNodeSelectedForExpansion, ENodeType.OR_CLOSED.toString()));
 		this.afterExpansion(actualNodeSelectedForExpansion);
 		this.checkAndConductTermination();
 		this.openLock.lockInterruptibly();
@@ -810,7 +800,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		return solutionEvent;
 	}
 
-	private void lockConditionSafeleyWhileExpandingNode(final Lock l, final Node<N, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException {
+	private void lockConditionSafeleyWhileExpandingNode(final Lock l, final BackPointerPath<N, A, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException {
 		try {
 			l.lockInterruptibly();
 		} catch (InterruptedException e) { // if we are interrupted during a wait, we must still conduct a controlled shutdown
@@ -820,11 +810,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		}
 	}
 
-	private void unregisterFromExpand(final Node<N, V> node) {
-		assert this.expanding.containsKey(node.getPoint()) : "Cannot unregister a node that is not being expanded currently";
-		assert this.expanding.get(node.getPoint()) == Thread.currentThread() : "Thread " + Thread.currentThread() + " cannot unregister other thread " + this.expanding.get(node.getPoint()) + " from expansion map!";
+	private void unregisterFromExpand(final BackPointerPath<N, A, V> node) {
+		assert this.expanding.containsKey(node.getHead()) : "Cannot unregister a node that is not being expanded currently";
+		assert this.expanding.get(node.getHead()) == Thread.currentThread() : "Thread " + Thread.currentThread() + " cannot unregister other thread " + this.expanding.get(node.getHead()) + " from expansion map!";
 		this.logger.debug("Removing {} from EXPANDING.", node.hashCode());
-		this.expanding.remove(node.getPoint());
+		this.expanding.remove(node.getHead());
 	}
 
 	/**
@@ -834,10 +824,10 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws InterruptedException
 	 */
-	private void checkTerminationAndUnregisterFromExpand(final Node<N, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException {
+	private void checkTerminationAndUnregisterFromExpand(final BackPointerPath<N, A, V> node) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException {
 		if (this.isStopCriterionSatisfied()) {
 			this.unregisterFromExpand(node);
-			assert !this.expanding.containsKey(node.getPoint()) : "Expanded node " + this.nodeSelectedForExpansion + " was not removed from EXPANDING!";
+			assert !this.expanding.containsKey(node.getHead()) : "Expanded node " + this.nodeSelectedForExpansion + " was not removed from EXPANDING!";
 		}
 		super.checkAndConductTermination();
 	}
@@ -969,24 +959,24 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			if (!this.ext2int.containsKey(nodeExt)) {
 				throw new IllegalArgumentException("Received annotation for a node I don't know!");
 			}
-			Node<N, V> nodeInt = this.ext2int.get(nodeExt);
+			BackPointerPath<N, A, V> nodeInt = this.ext2int.get(nodeExt);
 			nodeInt.setAnnotation(event.getAnnotationName(), event.getAnnotationValue());
 		} catch (Exception e) {
 			this.logger.error("An unexpected exception occurred while receiving node annotation event ", e);
 		}
 	}
 
-	protected void insertNodeIntoLocalGraph(final Node<N, V> node) throws InterruptedException {
-		Node<N, V> localVersionOfParent = null;
-		List<Node<N, V>> path = node.path();
-		Node<N, V> leaf = path.get(path.size() - 1);
-		for (Node<N, V> nodeOnPath : path) {
-			if (!this.ext2int.containsKey(nodeOnPath.getPoint())) {
-				assert nodeOnPath.getParent() != null : "Want to insert a new node that has no parent. That must not be the case! Affected node is: " + nodeOnPath.getPoint();
-				assert this.ext2int.containsKey(nodeOnPath.getParent().getPoint()) : "Want to insert a node whose parent is unknown locally";
-				Node<N, V> newNode = this.newNode(localVersionOfParent, nodeOnPath.getPoint(), nodeOnPath.getInternalLabel());
-				if (!newNode.isGoal() && !newNode.getPoint().equals(leaf.getPoint())) {
-					this.post(new NodeTypeSwitchEvent<Node<N, V>>(this.getId(), newNode, "or_closed"));
+	protected void insertNodeIntoLocalGraph(final BackPointerPath<N, A, V> node) throws InterruptedException {
+		BackPointerPath<N, A, V> localVersionOfParent = null;
+		List<BackPointerPath<N, A, V>> path = node.path();
+		BackPointerPath<N, A, V> leaf = path.get(path.size() - 1);
+		for (BackPointerPath<N, A, V> nodeOnPath : path) {
+			if (!this.ext2int.containsKey(nodeOnPath.getHead())) {
+				assert nodeOnPath.getParent() != null : "Want to insert a new node that has no parent. That must not be the case! Affected node is: " + nodeOnPath.getHead();
+				assert this.ext2int.containsKey(nodeOnPath.getParent().getHead()) : "Want to insert a node whose parent is unknown locally";
+				BackPointerPath<N, A, V> newNode = this.newNode(localVersionOfParent, nodeOnPath.getHead(), nodeOnPath.getEdgeLabelToParent(), nodeOnPath.getScore());
+				if (!newNode.isGoal() && !newNode.getHead().equals(leaf.getHead())) {
+					this.post(new NodeTypeSwitchEvent<BackPointerPath<N, A, V>>(this.getId(), newNode, "or_closed"));
 				}
 				localVersionOfParent = newNode;
 			} else {
@@ -1001,8 +991,8 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	 * @param node
 	 * @return
 	 */
-	protected Node<N, V> getLocalVersionOfNode(final Node<N, V> node) {
-		return this.ext2int.get(node.getPoint());
+	protected BackPointerPath<N, A, V> getLocalVersionOfNode(final BackPointerPath<N, A, V> node) {
+		return this.ext2int.get(node.getHead());
 	}
 
 	/** BLOCK B: Controlling the algorithm from the outside **/
@@ -1012,7 +1002,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	 *
 	 * @param initialNodes
 	 */
-	public void bootstrap(final Collection<Node<N, V>> initialNodes) throws InterruptedException {
+	public void bootstrap(final Collection<BackPointerPath<N, A, V>> initialNodes) throws InterruptedException {
 
 		if (this.initialized) {
 			throw new UnsupportedOperationException("Bootstrapping is only supported if the search has already been initialized.");
@@ -1031,12 +1021,12 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			/* remove previous roots from open */
 			this.open.clear();
 			/* now insert new nodes, and the leaf ones in open */
-			for (Node<N, V> node : initialNodes) {
+			for (BackPointerPath<N, A, V> node : initialNodes) {
 				this.insertNodeIntoLocalGraph(node);
 				if (node == null) {
 					throw new IllegalArgumentException("Cannot add NULL as a node to OPEN");
 				}
-				if (node.getInternalLabel() == null) {
+				if (node.getScore() == null) {
 					throw new IllegalArgumentException("Cannot insert node with label NULL");
 				}
 				this.open.add(this.getLocalVersionOfNode(node));
@@ -1171,7 +1161,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 			this.openLock.lockInterruptibly();
 			try {
-				loopCondition = this.open.peek().getInternalLabel().compareTo(currentlyBestScore) < 0;
+				loopCondition = this.open.peek().getScore().compareTo(currentlyBestScore) < 0;
 			} finally {
 				this.openLock.unlock();
 			}
@@ -1189,25 +1179,25 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		return true;
 	}
 
-	protected void afterSelection(final Node<N, V> node) {
+	protected void afterSelection(final BackPointerPath<N, A, V> node) {
 		/* intentionally left blank */
 	}
 
-	protected void beforeExpansion(final Node<N, V> node) {
+	protected void beforeExpansion(final BackPointerPath<N, A, V> node) {
 		/* intentionally left blank */
 	}
 
-	protected void afterExpansion(final Node<N, V> node) {
+	protected void afterExpansion(final BackPointerPath<N, A, V> node) {
 		/* intentionally left blank */
 	}
 
 	/** BLOCK D: Getters and Setters **/
 
 	public List<N> getCurrentPathToNode(final N node) {
-		return this.ext2int.get(node).externalPath();
+		return this.ext2int.get(node).getNodes();
 	}
 
-	public INodeEvaluator<N, V> getNodeEvaluator() {
+	public IPathEvaluator<N, A, V> getNodeEvaluator() {
 		return this.nodeEvaluator;
 	}
 
@@ -1247,7 +1237,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		return this.timeoutForComputationOfF;
 	}
 
-	public void setTimeoutForComputationOfF(final int timeoutInMS, final INodeEvaluator<N, V> timeoutEvaluator) {
+	public void setTimeoutForComputationOfF(final int timeoutInMS, final IPathEvaluator<N, A, V> timeoutEvaluator) {
 		this.timeoutForComputationOfF = timeoutInMS;
 		this.timeoutNodeEvaluator = timeoutEvaluator;
 	}
@@ -1255,11 +1245,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	/**
 	 * @return the openCollection
 	 */
-	public List<Node<N, V>> getOpen() {
+	public List<BackPointerPath<N, A, V>> getOpen() {
 		return Collections.unmodifiableList(new ArrayList<>(this.open));
 	}
 
-	public Node<N, V> getInternalRepresentationOf(final N node) {
+	public BackPointerPath<N, A, V> getInternalRepresentationOf(final N node) {
 		return this.ext2int.get(node);
 	}
 
@@ -1267,7 +1257,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	 * @param open
 	 *            the openCollection to set
 	 */
-	public void setOpen(final Queue<Node<N, V>> collection) {
+	public void setOpen(final Queue<BackPointerPath<N, A, V>> collection) {
 		this.openLock.lock();
 		try {
 			collection.clear();
@@ -1319,17 +1309,17 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		return this.getFValue(this.ext2int.get(node));
 	}
 
-	public V getFValue(final Node<N, V> node) {
-		return node.getInternalLabel();
+	public V getFValue(final BackPointerPath<N, A, V> node) {
+		return node.getScore();
 	}
 
 	public Map<String, Object> getNodeAnnotations(final N node) {
-		Node<N, V> intNode = this.ext2int.get(node);
+		BackPointerPath<N, A, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotations();
 	}
 
 	public Object getNodeAnnotation(final N node, final String annotation) {
-		Node<N, V> intNode = this.ext2int.get(node);
+		BackPointerPath<N, A, V> intNode = this.ext2int.get(node);
 		return intNode.getAnnotation(annotation);
 	}
 

@@ -30,7 +30,7 @@ public class CostSensitiveGraphSearchBasedHTNPlanningAlgorithm<P extends IHTNPla
 extends CostSensitiveGraphSearchBasedPlanningAlgorithm<P, S, N, A, V> {
 
 	public CostSensitiveGraphSearchBasedHTNPlanningAlgorithm(final P problem, final AlgorithmicProblemReduction<P, IEvaluatedGraphSearchBasedPlan<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> problemTransformer,
-			final IAlgorithmFactory<S, EvaluatedSearchGraphPath<N, A, V>> baseFactory) {
+			final IAlgorithmFactory<S, EvaluatedSearchGraphPath<N, A, V>, ?> baseFactory) {
 		super(problem, problemTransformer, baseFactory);
 	}
 

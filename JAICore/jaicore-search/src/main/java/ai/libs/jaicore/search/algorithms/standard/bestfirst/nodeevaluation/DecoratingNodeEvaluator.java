@@ -1,20 +1,24 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.NodeEvaluationException;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
-
-public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implements INodeEvaluator<T, V>, ICancelableNodeEvaluator, ILoggingCustomizable, IPotentiallyGraphDependentNodeEvaluator<T, V>, IPotentiallySolutionReportingNodeEvaluator<T, V> {
+public abstract class DecoratingNodeEvaluator<T, A, V extends Comparable<V>>
+implements IPathEvaluator<T, A, V>, ICancelableNodeEvaluator, ILoggingCustomizable, IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V> {
 
 	private boolean canceled = false;
 	private Logger logger = LoggerFactory.getLogger(DecoratingNodeEvaluator.class);
-	private final INodeEvaluator<T, V> decoratedEvaluator;
+	private final IPathEvaluator<T, A, V> decoratedEvaluator;
 
-	public DecoratingNodeEvaluator(final INodeEvaluator<T, V> evaluator) {
+	public DecoratingNodeEvaluator(final IPathEvaluator<T, A, V> evaluator) {
 		super();
 		if (evaluator == null) {
 			throw new IllegalArgumentException("The decorated evaluator must not be null!");
@@ -22,12 +26,12 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 		this.decoratedEvaluator = evaluator;
 	}
 
-	public INodeEvaluator<T, V> getEvaluator() {
+	public IPathEvaluator<T, A, V> getEvaluator() {
 		return this.decoratedEvaluator;
 	}
 
 	@Override
-	public V f(final Node<T, ?> node) throws NodeEvaluationException, InterruptedException {
+	public V f(final IPath<T, A> node) throws PathEvaluationException, InterruptedException {
 		return this.decoratedEvaluator.f(node);
 	}
 
@@ -36,11 +40,11 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 	}
 
 	public boolean isDecoratedEvaluatorGraphDependent() {
-		return this.decoratedEvaluator instanceof IPotentiallyGraphDependentNodeEvaluator && ((IPotentiallyGraphDependentNodeEvaluator<?,?>)this.decoratedEvaluator).requiresGraphGenerator();
+		return this.decoratedEvaluator instanceof IPotentiallyGraphDependentPathEvaluator && ((IPotentiallyGraphDependentPathEvaluator<?, ?, ?>) this.decoratedEvaluator).requiresGraphGenerator();
 	}
 
 	public boolean doesDecoratedEvaluatorReportSolutions() {
-		return this.decoratedEvaluator instanceof IPotentiallySolutionReportingNodeEvaluator && ((IPotentiallySolutionReportingNodeEvaluator<?, ?>)this.decoratedEvaluator).reportsSolutions();
+		return this.decoratedEvaluator instanceof IPotentiallySolutionReportingPathEvaluator && ((IPotentiallySolutionReportingPathEvaluator<?, ?, ?>) this.decoratedEvaluator).reportsSolutions();
 	}
 
 	/**
@@ -64,7 +68,7 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 	}
 
 	@Override
-	public void setGenerator(final GraphGenerator<T, ?> generator) {
+	public void setGenerator(final IGraphGenerator<T, A> generator) {
 		this.logger.info("Setting graph generator of {} to {}", this, generator);
 		if (!this.requiresGraphGenerator()) {
 			throw new UnsupportedOperationException("This node evaluator is not graph dependent");
@@ -72,7 +76,7 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 		if (!this.isDecoratedEvaluatorGraphDependent()) {
 			return;
 		}
-		((IPotentiallyGraphDependentNodeEvaluator<T, V>) this.decoratedEvaluator).setGenerator(generator);
+		((IPotentiallyGraphDependentPathEvaluator<T, A, V>) this.decoratedEvaluator).setGenerator(generator);
 	}
 
 	@Override
@@ -80,7 +84,7 @@ public abstract class DecoratingNodeEvaluator<T, V extends Comparable<V>> implem
 		if (!this.doesDecoratedEvaluatorReportSolutions()) {
 			throw new UnsupportedOperationException(this.getClass().getName() + " is not a solution reporting node evaluator");
 		}
-		((IPotentiallySolutionReportingNodeEvaluator<T, V>) this.decoratedEvaluator).registerSolutionListener(listener);
+		((IPotentiallySolutionReportingPathEvaluator<T, A, V>) this.decoratedEvaluator).registerSolutionListener(listener);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.core.interfaces;
 
+import org.api4.java.ai.graphsearch.problem.IPathInORGraphSearch;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,7 @@ implements IPathInORGraphSearch<I, O, N, A> {
 	}
 
 	@Override
-	public GraphGenerator<N, A> getGraphGenerator() {
+	public IGraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
 

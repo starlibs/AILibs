@@ -9,6 +9,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleSuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -25,12 +30,7 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleSuccessorGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
  * This search randomly draws paths from the root. At every node, each successor is chosen with the same probability except if a priority predicate is defined. A priority predicate says whether or not a node lies on a path that has
@@ -50,7 +50,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	private final N root;
 	private final SuccessorGenerator<N, A> gen;
 	private final boolean isSingleNodeSuccessorGenerator;
-	private final NodeGoalTester<N> goalTester;
+	private final NodeGoalTester<N, A> goalTester;
 	private final Graph<N> exploredGraph = new Graph<>();
 	private final Set<N> closed = new HashSet<>();
 	private final Predicate<N> priorityPredicate;
@@ -75,7 +75,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		this.root = ((SingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
 		this.gen = problem.getGraphGenerator().getSuccessorGenerator();
 		this.isSingleNodeSuccessorGenerator = this.gen instanceof SingleSuccessorGenerator;
-		this.goalTester = (NodeGoalTester<N>) problem.getGraphGenerator().getGoalTester();
+		this.goalTester = (NodeGoalTester<N, A>) problem.getGraphGenerator().getGoalTester();
 		this.exploredGraph.addItem(this.root);
 		this.random = random;
 		this.priorityPredicate = priorityPredicate;

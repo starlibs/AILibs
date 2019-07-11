@@ -27,13 +27,13 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 	private Logger logger = LoggerFactory.getLogger(OptimizingFactory.class);
 	private String loggerName;
 
-	private final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm;
+	private final SoftwareConfigurationAlgorithmFactory<P, C, V, ?> factoryForOptimizationAlgorithm;
 	private T constructedObject;
 	private V performanceOfObject;
 	private ComponentInstance componentInstanceOfObject;
 	private final SoftwareConfigurationAlgorithm<P, C, V> optimizer;
 
-	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V> factoryForOptimizationAlgorithm) {
+	public OptimizingFactory(final OptimizingFactoryProblem<P, T, V> problem, final SoftwareConfigurationAlgorithmFactory<P, C, V, ?> factoryForOptimizationAlgorithm) {
 		super(problem);
 		this.factoryForOptimizationAlgorithm = factoryForOptimizationAlgorithm;
 		this.optimizer = this.factoryForOptimizationAlgorithm.getAlgorithm(this.getInput().getConfigurationProblem());
@@ -70,7 +70,7 @@ public class OptimizingFactory<P extends SoftwareConfigurationProblem<V>, T, C e
 				this.componentInstanceOfObject = solutionModel.getComponentInstance();
 				return this.terminate();
 			} catch (ComponentInstantiationFailedException e) {
-				throw new AlgorithmException(e, "Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.");
+				throw new AlgorithmException("Could not conduct next step in OptimizingFactory due to an exception in the component instantiation.", e);
 			}
 		default:
 			throw new IllegalStateException("Cannot do anything in state " + this.getState());

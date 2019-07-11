@@ -10,6 +10,15 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -27,17 +36,9 @@ import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.Node;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.PathGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
  * MCTS algorithm implementation.
@@ -54,18 +55,16 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	private String loggerName;
 
 	/* communication */
-	protected final Map<N, Node<N, V>> ext2int = new HashMap<>();
+	protected final Map<N, IEvaluatedPath<N, A, V>> ext2int = new HashMap<>();
 
-	protected final GraphGenerator<N, A> graphGenerator;
+	protected final IGraphGenerator<N, A> graphGenerator;
 	protected final RootGenerator<N> rootGenerator;
 	protected final SuccessorGenerator<N, A> successorGenerator;
-	protected final boolean checkGoalPropertyOnEntirePath;
-	protected final PathGoalTester<N> pathGoalTester;
-	protected final NodeGoalTester<N> nodeGoalTester;
+	protected final NodeGoalTester<N, A> nodeGoalTester;
 
 	protected final IPathUpdatablePolicy<N, A, V> treePolicy;
 	protected final IPolicy<N, A, V> defaultPolicy;
-	protected final IObjectEvaluator<SearchGraphPath<N, A>, V> playoutSimulator;
+	protected final IObjectEvaluator<IPath<N, A>, V> playoutSimulator;
 
 	private final Map<List<N>, V> scoreCache = new HashMap<>();
 
@@ -84,14 +83,11 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
-		this.checkGoalPropertyOnEntirePath = !(this.graphGenerator.getGoalTester() instanceof NodeGoalTester);
-		if (this.checkGoalPropertyOnEntirePath) {
-			this.nodeGoalTester = null;
-			this.pathGoalTester = (PathGoalTester<N>) this.graphGenerator.getGoalTester();
-		} else {
-			this.nodeGoalTester = (NodeGoalTester<N>) this.graphGenerator.getGoalTester();
-			this.pathGoalTester = null;
+		PathGoalTester<N, A> tmpGoalTester = this.graphGenerator.getGoalTester();
+		if (!(tmpGoalTester instanceof NodeGoalTester)) {
+			throw new IllegalArgumentException("MCTS must be run with a NodeGoalEvaluator!");
 		}
+		this.nodeGoalTester = (NodeGoalTester<N, A>)tmpGoalTester;
 
 		this.treePolicy = treePolicy;
 		this.defaultPolicy = defaultPolicy;
@@ -313,7 +309,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	}
 
 	private boolean isGoal(final N node) {
-		return this.nodeGoalTester.isGoal(node);
+		return this.nodeGoalTester.isGoal(node); // the back pointer path is just created as a dummy to have a path object
 	}
 
 	@Override
@@ -373,7 +369,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 							this.logger.debug("Obtained path {}. Now starting computation of the score for this playout.", path);
 							try {
 								V playoutScore = this.playoutSimulator.evaluate(this.getPathForNodeList(path));
-								boolean isSolutionPlayout = this.nodeGoalTester.isGoal(path.get(path.size() - 1));
+								boolean isSolutionPlayout = this.isGoal(path.get(path.size() - 1));
 								this.logger.debug("Determined playout score {}. Is goal: {}. Now updating the path.", playoutScore, isSolutionPlayout);
 								this.scoreCache.put(path, playoutScore);
 								this.treePolicy.updatePath(path, playoutScore);
@@ -407,7 +403,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 				this.logger.info("No more playouts exist. Terminating.");
 				return this.terminate();
 			} catch (ActionPredictionFailedException e) {
-				throw new AlgorithmException(e, "Step failed due to an exception in predicting an action when computing the playout.");
+				throw new AlgorithmException("Step failed due to an exception in predicting an action when computing the playout.", e);
 			} finally {
 				this.unregisterActiveThread();
 			}

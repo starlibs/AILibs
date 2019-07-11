@@ -6,7 +6,7 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 /**
  * A node queue for the best first search that inserts new nodes at a random
@@ -18,7 +18,7 @@ import ai.libs.jaicore.search.model.travesaltree.Node;
  * @param <V>
  */
 @SuppressWarnings("serial")
-public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedList<Node<N, V>> {
+public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedList<BackPointerPath<N, V>> {
 
 	private Random random;
 	private transient Logger logger = LoggerFactory.getLogger(RandomlyRankedNodeQueue.class);
@@ -31,7 +31,7 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedL
 	 * Adds an element at a random position within the
 	 */
 	@Override
-	public boolean add(final Node<N, V> e) {
+	public boolean add(final BackPointerPath<N, V> e) {
 		int position = this.random.nextInt(this.size() + 1);
 		this.logger.debug("Add node at random position {} to OPEN list of size {}.", position, this.size());
 		super.add(position, e);
@@ -39,7 +39,7 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedL
 	}
 
 	@Override
-	public void add(final int position, final Node<N, V> e) {
+	public void add(final int position, final BackPointerPath<N, V> e) {
 		throw new UnsupportedOperationException("Cannot place items at a specific position wihtin a randomly ranked queue!");
 	}
 

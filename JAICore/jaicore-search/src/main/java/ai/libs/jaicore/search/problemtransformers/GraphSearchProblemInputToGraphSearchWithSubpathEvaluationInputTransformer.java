@@ -1,7 +1,8 @@
 package ai.libs.jaicore.search.problemtransformers;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -9,13 +10,13 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V extends Comparable<V>>
 implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> {
 
-	private INodeEvaluator<N, V> nodeEvaluator;
+	private IPathEvaluator<N, A, V> nodeEvaluator;
 
 	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer() {
 		super();
 	}
 
-	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer(final INodeEvaluator<N, V> nodeEvaluator) {
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer(final IPathEvaluator<N, A, V> nodeEvaluator) {
 		super();
 		this.nodeEvaluator = nodeEvaluator;
 	}
@@ -28,13 +29,12 @@ implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A,
 		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), this.nodeEvaluator);
 	}
 
-	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V> setNodeEvaluator(final INodeEvaluator<N, V> nodeEvaluator) {
+	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V> setNodeEvaluator(final IPathEvaluator<N, A, V> nodeEvaluator) {
 		this.nodeEvaluator = nodeEvaluator;
 		return this;
 	}
 
-
-	public INodeEvaluator<N, V> getNodeEvaluator() {
+	public IPathEvaluator<N, A, V> getNodeEvaluator() {
 		return this.nodeEvaluator;
 	}
 

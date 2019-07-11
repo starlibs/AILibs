@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
@@ -43,7 +44,6 @@ import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlannin
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.OCIPMethod;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.CostSensitiveHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.TaskNetwork;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 
 /**
  * This is the class that conducts the actual problem reduction of software configuration to HTN Planning
@@ -275,7 +275,7 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	 * @param plannerFactory
 	 * @return
 	 */
-	public <T, A> GraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHASCOPlanningReduction<T, A> transformer) {
+	public <T, A> IGraphGenerator<T, A> getGraphGeneratorUsedByHASCOForSpecificPlanner(final IHASCOPlanningReduction<T, A> transformer) {
 		return transformer.encodeProblem(this.getPlanningProblem()).getGraphGenerator();
 	}
 

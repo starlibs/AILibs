@@ -9,6 +9,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.PathUnifyingGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,15 +29,8 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.Method;
 import ai.libs.jaicore.planning.hierarchical.problems.stn.MethodInstance;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.core.interfaces.PathUnifyingGraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
-public class TFDGraphGenerator implements GraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
+public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, PathUnifyingGraphGenerator<TFDNode, String> {
 
 	private static Logger logger = LoggerFactory.getLogger(TFDGraphGenerator.class);
 	protected TaskPlannerUtil util = new TaskPlannerUtil(null);
@@ -168,7 +168,7 @@ public class TFDGraphGenerator implements GraphGenerator<TFDNode, String>, PathU
 	}
 
 	@Override
-	public NodeGoalTester<TFDNode> getGoalTester() {
+	public NodeGoalTester<TFDNode, String> getGoalTester() {
 		return l -> l.getRemainingTasks().isEmpty();
 	}
 

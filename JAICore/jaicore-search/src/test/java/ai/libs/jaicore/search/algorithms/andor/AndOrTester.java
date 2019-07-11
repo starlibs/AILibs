@@ -2,13 +2,13 @@ package ai.libs.jaicore.search.algorithms.andor;
 
 import static org.junit.Assert.assertEquals;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.junit.Test;
 
 import ai.libs.jaicore.graph.Graph;
 import ai.libs.jaicore.search.algorithms.andor.SyntheticAndGrid.NodeLabel;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class AndOrTester {
@@ -19,7 +19,7 @@ public class AndOrTester {
 		int b = 10;
 		int d = 4;
 		int limit = 1;
-		GraphGenerator<NodeLabel, String> gg = new SyntheticAndGrid(k, b, d);
+		IGraphGenerator<NodeLabel, String> gg = new SyntheticAndGrid(k, b, d);
 		IObjectEvaluator<Graph<NodeLabel>, Double> evaluator = g -> {
 			double sum = 0;
 			for (NodeLabel leaf : g.getSinks()) {

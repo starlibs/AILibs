@@ -9,13 +9,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.junit.Test;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;

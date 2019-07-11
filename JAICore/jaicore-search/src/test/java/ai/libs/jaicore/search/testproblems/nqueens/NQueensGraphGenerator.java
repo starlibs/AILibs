@@ -3,12 +3,12 @@ package ai.libs.jaicore.search.testproblems.nqueens;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 
 @SuppressWarnings("serial")
 public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode, String> {
@@ -46,7 +46,7 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 	}
 
 	@Override
-	public NodeGoalTester<QueenNode> getGoalTester() {
+	public NodeGoalTester<QueenNode, String> getGoalTester() {
 		return n -> n.getNumberOfQueens() == this.dimension;
 	}
 }

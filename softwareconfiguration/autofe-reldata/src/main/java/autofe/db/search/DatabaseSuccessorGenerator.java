@@ -6,13 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import autofe.db.model.database.AbstractFeature;
 import autofe.db.model.database.AggregationFunction;
 import autofe.db.model.database.Attribute;

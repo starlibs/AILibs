@@ -2,6 +2,7 @@ package ai.libs.mlplan.core;
 
 import java.io.IOException;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
@@ -31,7 +32,6 @@ import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluator
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
@@ -92,7 +92,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				try {
 					dataShownToSearch = this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).get(1);
 				} catch (SplitFailedException e) {
-					throw new AlgorithmException(e, "Error in ML-Plan execution.");
+					throw new AlgorithmException("Error in ML-Plan execution.", e);
 				}
 			} else {
 				dataShownToSearch = this.getInput();
@@ -124,7 +124,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
 				classifierEvaluatorForSelection = this.builder.getClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
 			} catch (ClassifierEvaluatorConstructionFailedException e2) {
-				throw new AlgorithmException(e2, "Could not create the pipeline evaluator");
+				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
 			}
 			classifierEvaluatorForSearch.registerListener(this); // events will be forwarded
 			classifierEvaluatorForSelection.registerListener(this); // events will be forwarded
@@ -144,7 +144,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			try {
 				problem = new TwoPhaseSoftwareConfigurationProblem(this.builder.getSearchSpaceConfigFile(), this.builder.getRequestedInterface(), classifierEvaluatorForSearch, classifierEvaluatorForSelection);
 			} catch (IOException e1) {
-				throw new AlgorithmException(e1, "Could not activate ML-Plan!");
+				throw new AlgorithmException("Could not activate ML-Plan!", e1);
 			}
 
 			/* create 2-phase HASCO */
@@ -218,7 +218,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				try {
 					this.selectedClassifier.buildClassifier(this.getInput());
 				} catch (Exception e) {
-					throw new AlgorithmException(e, "Training the classifier failed!");
+					throw new AlgorithmException("Training the classifier failed!", e);
 				}
 				long endBuildTime = System.currentTimeMillis();
 				this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
@@ -285,7 +285,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	}
 
 	@SuppressWarnings("unchecked")
-	public GraphGenerator<TFDNode, String> getGraphGenerator() {
+	public IGraphGenerator<TFDNode, String> getGraphGenerator() {
 		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphGenerator();
 	}
 

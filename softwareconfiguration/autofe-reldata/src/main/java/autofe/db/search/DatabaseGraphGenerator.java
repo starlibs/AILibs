@@ -1,15 +1,15 @@
 package autofe.db.search;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import autofe.db.model.database.Database;
 
-public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, String> {
+public class DatabaseGraphGenerator implements IGraphGenerator<DatabaseNode, String> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseGraphGenerator.class);
 	private Database database;
@@ -37,7 +37,7 @@ public class DatabaseGraphGenerator implements GraphGenerator<DatabaseNode, Stri
 	}
 
 	@Override
-	public NodeGoalTester<DatabaseNode> getGoalTester() {
+	public NodeGoalTester<DatabaseNode, String> getGoalTester() {
 		return node -> {
 			try {
 				return node.isFinished();

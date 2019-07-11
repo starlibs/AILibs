@@ -68,7 +68,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 				this.algorithm.step();
 				return super.activate();
 			} catch (Exception e) {
-				throw new AlgorithmException(e, "Could not create the algorithm.");
+				throw new AlgorithmException("Could not create the algorithm.", e);
 			}
 		case ACTIVE:
 			this.logger.info("{} step3", this.getClass().getName());
@@ -98,7 +98,7 @@ public class MOEAFrameworkAlgorithm extends AEvolutionaryAlgorithm<Population> {
 		try {
 			population = this.getPopulation();
 		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new AlgorithmException(e, "Could not get the result!");
+			throw new AlgorithmException("Could not get the result!", e);
 		}
 
 		return new MOEAFrameworkAlgorithmResult(this.algorithm.getResult(), population);

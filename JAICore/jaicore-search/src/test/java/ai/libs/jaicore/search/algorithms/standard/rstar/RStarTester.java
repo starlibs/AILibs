@@ -4,11 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.TimeoutException;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearch;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
 import ai.libs.jaicore.search.algorithms.GraphSearchSolutionIteratorTester;
-import ai.libs.jaicore.search.core.interfaces.IGraphSearch;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 

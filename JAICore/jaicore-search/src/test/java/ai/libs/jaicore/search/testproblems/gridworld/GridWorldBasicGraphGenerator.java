@@ -3,14 +3,14 @@ package ai.libs.jaicore.search.testproblems.gridworld;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distributed.interfaces.SerializableGraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.GoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.RootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+
 import ai.libs.jaicore.testproblems.gridworld.GridWorldNode;
 import ai.libs.jaicore.testproblems.gridworld.GridWorldProblem;
 
@@ -44,19 +44,19 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 
 					// x direction movement
 					int dx = 1;
-					if (a==2 || a==7) {
+					if (a == 2 || a == 7) {
 						dx = 0;
 					}
-					if (a==1 || a==4 || a==6) {
+					if (a == 1 || a == 4 || a == 6) {
 						dx = -1;
 					}
 
 					// y direction movement
 					int dy = 1;
-					if (a==4 || a==5) {
+					if (a == 4 || a == 5) {
 						dy = 0;
 					}
-					if (a==1 || a==2 || a==3) {
+					if (a == 1 || a == 2 || a == 3) {
 						dy = -1;
 					}
 
@@ -72,8 +72,8 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 	}
 
 	@Override
-	public GoalTester<GridWorldNode> getGoalTester() {
-		return new NodeGoalTester<GridWorldNode>() {
+	public NodeGoalTester<GridWorldNode, String> getGoalTester() {
+		return new NodeGoalTester<GridWorldNode, String>() {
 			@Override
 			public boolean isGoal(final GridWorldNode node) {
 				return node.getX() == GridWorldBasicGraphGenerator.this.problem.getGoalX() && node.getY() == GridWorldBasicGraphGenerator.this.problem.getGoaly();

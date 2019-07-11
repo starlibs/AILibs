@@ -1,11 +1,11 @@
 package ai.libs.jaicore.search.probleminputs;
 
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallyUncertaintyAnnotatingNodeEvaluator;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
 
 public class GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, V extends Comparable<V>> extends GraphSearchWithSubpathEvaluationsInput<N, A, V> {
-	
-	public GraphSearchWithUncertaintyBasedSubpathEvaluationInput(GraphGenerator<N, A> graphGenerator, IPotentiallyUncertaintyAnnotatingNodeEvaluator<N, V> nodeEvaluator) {
+
+	public GraphSearchWithUncertaintyBasedSubpathEvaluationInput(final IGraphGenerator<N, A> graphGenerator, final IPotentiallyUncertaintyAnnotatingPathEvaluator<N, A, V> nodeEvaluator) {
 		super(graphGenerator, nodeEvaluator);
 	}
 

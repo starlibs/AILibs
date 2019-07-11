@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.ToDoubleFunction;
 
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.algorithm.TimeOut;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
@@ -24,7 +25,6 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;
@@ -532,13 +532,13 @@ public final class EvaluationUtils {
 		return new AbstractHASCOFENodeEvaluator(maxPipelineSize) {
 
 			@Override
-			public Double f(final Node<TFDNode, ?> node) {
-				if (node.getParent() == null) {
+			public Double f(final IPath<TFDNode, String> node) {
+				if (node.getNodes().size() == 1) {
 					return null;
 				}
 
 				// If pipeline is too deep, assign worst value
-				if (node.path().size() > this.maxPipelineSize) {
+				if (node.getNodes().size() > this.maxPipelineSize) {
 					return AbstractHASCOFEEvaluator.MAX_EVAL_VALUE;
 				}
 

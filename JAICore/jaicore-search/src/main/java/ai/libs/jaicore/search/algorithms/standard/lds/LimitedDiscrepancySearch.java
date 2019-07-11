@@ -7,6 +7,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -20,12 +25,8 @@ import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.PathGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
  * Implementation of the algorithm presented in
@@ -49,9 +50,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 	/* graph construction helpers */
 	protected final SingleRootGenerator<T> rootGenerator;
 	protected final SuccessorGenerator<T, A> successorGenerator;
-	protected final boolean checkGoalPropertyOnEntirePath;
-	protected final PathGoalTester<T> pathGoalTester;
-	protected final NodeGoalTester<T> nodeGoalTester;
+	protected final PathGoalTester<T, A> pathGoalTester;
 
 	/* graph traversal helpers */
 	protected final Comparator<T> heuristic;
@@ -64,14 +63,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		super(problemInput);
 		this.rootGenerator = (SingleRootGenerator<T>) this.getInput().getGraphGenerator().getRootGenerator();
 		this.successorGenerator = this.getInput().getGraphGenerator().getSuccessorGenerator();
-		this.checkGoalPropertyOnEntirePath = !(this.getInput().getGraphGenerator().getGoalTester() instanceof NodeGoalTester);
-		if (this.checkGoalPropertyOnEntirePath) {
-			this.nodeGoalTester = null;
-			this.pathGoalTester = (PathGoalTester<T>) this.getInput().getGraphGenerator().getGoalTester();
-		} else {
-			this.nodeGoalTester = (NodeGoalTester<T>) this.getInput().getGraphGenerator().getGoalTester();
-			this.pathGoalTester = null;
-		}
+		this.pathGoalTester = this.getInput().getGraphGenerator().getGoalTester();
 		this.heuristic = problemInput.getRecommender();
 	}
 
@@ -139,7 +131,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		this.logger.debug("Probing under node {} with k = {}. Exhausted: {}", node.getValue(), this.currentK, this.exhausted.contains(node));
 
 		/* return solution event if this is a solution node */
-		if (this.nodeGoalTester.isGoal(node.getValue())) {
+		if (this.pathGoalTester.isGoal(this.getPathForGoalCheck(node.getValue()))) {
 			this.updateExhaustMap(node);
 			List<T> path = node.getValuesOnPathFromRoot();
 			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, null, null);
@@ -204,10 +196,14 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 
 		/* send events for this new node */
 		if (parent != null) {
-			boolean isGoal = this.nodeGoalTester.isGoal(newNode);
+			boolean isGoal = this.pathGoalTester.isGoal(this.getPathForGoalCheck(newNode));
 			this.post(new NodeAddedEvent<TreeNode<T>>(this.getId(), parent, newTree, "or_" + (isGoal ? "solution" : "created")));
 		}
 		return newTree;
+	}
+
+	private IPath<T, A> getPathForGoalCheck(final T node) {
+		return new BackPointerPath<>(null, node, null);
 	}
 
 	@Override

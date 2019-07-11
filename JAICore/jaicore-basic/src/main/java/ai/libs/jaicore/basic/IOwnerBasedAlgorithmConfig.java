@@ -20,6 +20,8 @@ public interface IOwnerBasedAlgorithmConfig extends IOwnerBasedConfig, IAlgorith
 	 * @return Number of CPU cores available for parallelization.
 	 */
 	@Override
+	@Key(K_CPUS)
+	@DefaultValue("1")
 	public int cpus();
 
 	/**

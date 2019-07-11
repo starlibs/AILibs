@@ -10,6 +10,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,17 +23,11 @@ import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.EMCNodeType;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.splitters.ISplitter;
 import ai.libs.jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
-import ai.libs.jaicore.search.model.travesaltree.NodeType;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
 
-public class ReductionGraphGenerator implements GraphGenerator<RestProblem, Decision> {
+public class ReductionGraphGenerator implements IGraphGenerator<RestProblem, Decision> {
 
 	private final Logger logger = LoggerFactory.getLogger(ReductionGraphGenerator.class);
 	private final Random rand;

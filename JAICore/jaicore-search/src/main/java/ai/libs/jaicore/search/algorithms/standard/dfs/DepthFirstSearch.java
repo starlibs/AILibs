@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -23,11 +27,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansion
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
  *
@@ -80,7 +80,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 						}
 					}
 					N leaf = this.currentPath.get(n - 1);
-					if (((NodeGoalTester<N>) this.getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
+					if (((NodeGoalTester<N, A>) this.getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
 						this.post(new NodeTypeSwitchEvent<>(this.getId(), this.currentPath.get(n - 1), "or_solution"));
 						this.lastNodeWasTrueLeaf = true;
 					} else if (this.getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(leaf).isEmpty()) {
@@ -119,7 +119,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 				}
 				this.logger.debug("Relevant leaf node is {}.", leaf);
 
-				if (((NodeGoalTester<N>) this.getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
+				if (((NodeGoalTester<N, A>) this.getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
 					this.lastNodeWasTrueLeaf = true;
 					AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), new SearchGraphPath<>(this.currentPath));
 					this.post(event);

@@ -4,23 +4,23 @@ import java.io.File;
 
 import org.aeonbits.owner.ConfigCache;
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 
 import ai.libs.hasco.optimizingfactory.SoftwareConfigurationAlgorithmFactory;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
 import ai.libs.jaicore.planning.hierarchical.problems.ceocipstn.CEOCIPSTNPlanningProblem;
 import ai.libs.jaicore.planning.hierarchical.problems.htn.IHierarchicalPlanningToGraphSearchReduction;
-import ai.libs.jaicore.search.core.interfaces.IOptimalPathInORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
-import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V> {
+public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> implements SoftwareConfigurationAlgorithmFactory<RefinementConfiguredSoftwareConfigurationProblem<V>, HASCOSolutionCandidate<V>, V, HASCO<S, N, A, V>> {
 
 	private RefinementConfiguredSoftwareConfigurationProblem<V> problem;
 	private IHASCOPlanningReduction<N, A> planningGraphGeneratorDeriver;
-	private IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory;
+	private IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory;
 	private AlgorithmicProblemReduction<? super GraphSearchWithPathEvaluationsInput<N, A, V>, ? super EvaluatedSearchGraphPath<N, A, V>, S, EvaluatedSearchGraphPath<N, A, V>> searchProblemTransformer;
 	private HASCOConfig hascoConfig;
 
@@ -57,15 +57,15 @@ public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>
 		return this.planningGraphGeneratorDeriver;
 	}
 
-	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N,A>, ? super SearchGraphPath<N,A>> planningGraphGeneratorDeriver) {
+	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N,A>, ? super IPath<N,A>> planningGraphGeneratorDeriver) {
 		this.planningGraphGeneratorDeriver = (planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>)planningGraphGeneratorDeriver : new DefaultHASCOPlanningReduction<>(planningGraphGeneratorDeriver);
 	}
 
-	public IOptimalPathInORGraphSearchFactory<S, N, A, V> getSearchFactory() {
+	public IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> getSearchFactory() {
 		return this.searchFactory;
 	}
 
-	public void setSearchFactory(final IOptimalPathInORGraphSearchFactory<S, N, A, V> searchFactory) {
+	public void setSearchFactory(final IOptimalPathInORGraphSearchFactory<S, EvaluatedSearchGraphPath<N, A, V>, N, A, V, ?> searchFactory) {
 		this.searchFactory = searchFactory;
 	}
 

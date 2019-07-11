@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,10 +14,9 @@ import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
-public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Double> {
+public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
 
 	private final Collection<Component> components;
 	private final List<String> orderingOfComponents;
@@ -39,16 +40,16 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 	}
 
 	@Override
-	public Double f(final Node<TFDNode, ?> n) {
+	public Double f(final IPath<TFDNode, String> n) {
 		List<String> appliedMethods = new LinkedList<>();
-		for (TFDNode x : n.externalPath()) {
+		for (TFDNode x : n.getNodes()) {
 			if (x.getAppliedMethodInstance() != null) {
 				appliedMethods.add(x.getAppliedMethodInstance().getMethod().getName());
 			}
 		}
 
 		/* get partial component */
-		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getPoint().getState(), false);
+		ComponentInstance instance = Util.getSolutionCompositionFromState(this.components, n.getHead().getState(), false);
 		boolean isPipeline = appliedMethods.stream().anyMatch(x -> x.toLowerCase().contains("pipeline"));
 		boolean lastMethod = false;
 		String classifierName = null;
@@ -78,9 +79,10 @@ public class PreferenceBasedNodeEvaluator implements INodeEvaluator<TFDNode, Dou
 			} else {
 				score = null;
 				if (!this.sentLogMessageForHavingEnteredSecondSubPhase) {
-					if ((Double) n.getParent().getInternalLabel() > 1.0e-6) {
+					double scoreOfParent;
+					if ((scoreOfParent = ((BackPointerPath<TFDNode, String, Double>)n.getPathToParentOfHead()).getScore()) > 1.0e-6) {
 						this.sentLogMessageForHavingEnteredSecondSubPhase = true;
-						logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", n.getParent().getInternalLabel());
+						logger.info("Entering phase 1b! Breadth first search ends here, because the search is asking for the f-value of a node whose parent has been truely evaluated with an f-value of {}", scoreOfParent);
 					}
 				}
 			}

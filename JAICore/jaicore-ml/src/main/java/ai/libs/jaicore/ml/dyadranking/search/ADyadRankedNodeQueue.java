@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,6 @@ import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
 import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 import ai.libs.jaicore.ml.dyadranking.util.AbstractDyadScaler;
-import ai.libs.jaicore.search.model.travesaltree.Node;
 
 /**
  * A queue whose elements are nodes, sorted by a dyad ranker.
@@ -33,7 +33,7 @@ import ai.libs.jaicore.search.model.travesaltree.Node;
  * @param <V>
  *            Second node parameter
  */
-public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implements Queue<Node<N, V>> {
+public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implements Queue<IEvaluatedPath<N, ?, V>> {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -46,7 +46,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	private boolean useScaler = false;
 
 	/** the actual queue of nodes */
-	private List<Node<N, V>> queue = new ArrayList<>();
+	private List<IEvaluatedPath<N, ?, V>> queue = new ArrayList<>();
 
 	/**
 	 * characterizations of the nodes (scaled) (not ordered the same way as the
@@ -63,7 +63,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	private List<Dyad> queryDyads = new ArrayList<>();
 
 	/** connects nodes to their respective characterizations */
-	private BiMap<Node<N, V>, Vector> nodesAndCharacterizationsMap = HashBiMap.create();
+	private BiMap<IEvaluatedPath<N, ?, V>, Vector> nodesAndCharacterizationsMap = HashBiMap.create();
 
 	/**
 	 * Constructs a new DyadRankedNodeQueue that ranks the nodes in the queue
@@ -106,7 +106,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	 *            the node to be characterized
 	 * @return the characterization of the node
 	 */
-	protected abstract Vector characterize(Node<N, V> node);
+	protected abstract Vector characterize(IEvaluatedPath<N, ?, V> node);
 
 	@Override
 	public int size() {
@@ -124,7 +124,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	}
 
 	@Override
-	public Iterator<Node<N, V>> iterator() {
+	public Iterator<IEvaluatedPath<N, ?, V>> iterator() {
 		return this.queue.iterator();
 	}
 
@@ -140,7 +140,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 
 	@Override
 	public boolean remove(final Object o) {
-		if (o instanceof Node<?, ?>) {
+		if (o instanceof IEvaluatedPath<?, ?, ?>) {
 			int index = -1;
 			for (int i = 0; i < this.queue.size(); i++) {
 				if (this.queue.get(i).equals(o)) {
@@ -165,11 +165,11 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	}
 
 	@Override
-	public boolean addAll(final Collection<? extends Node<N, V>> c) {
+	public boolean addAll(final Collection<? extends IEvaluatedPath<N, ?, V>> c) {
 		this.logger.trace("Add {} nodes", c.size());
 		boolean changed = false;
 
-		for (Node<N, V> elem : c) {
+		for (IEvaluatedPath<N, ?, V> elem : c) {
 			if (this.add(elem)) {
 				changed = true;
 			}
@@ -204,12 +204,12 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	}
 
 	@Override
-	public boolean add(final Node<N, V> e) {
+	public boolean add(final IEvaluatedPath<N, ?, V> e) {
 		if (this.queue.contains(e)) {
 			return true;
 		} else if (e != null) {
 			try {
-				this.logger.debug("Add node to OPEN, is Goal: {}", e.isGoal());
+				this.logger.debug("Add node to OPEN.");
 				// characterize new node
 				Vector characterization = this.characterize(e);
 				this.nodeCharacterizations.add(characterization);
@@ -233,7 +233,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				IDyadRankingInstance prediction = this.dyadRanker.predict(new DyadRankingInstance(this.queryDyads));
 				this.queue.clear();
 				for (int i = 0; i < prediction.length(); i++) {
-					Node<N, V> toAdd = this.nodesAndCharacterizationsMap.inverse()
+					IEvaluatedPath<N, ?, V> toAdd = this.nodesAndCharacterizationsMap.inverse()
 							.get(prediction.getDyadAtPosition(i).getAlternative());
 					if (toAdd != null) {
 						this.queue.add(toAdd);
@@ -263,18 +263,18 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	}
 
 	@Override
-	public boolean offer(final Node<N, V> e) {
+	public boolean offer(final IEvaluatedPath<N, ?, V> e) {
 		return this.add(e);
 	}
 
 	@Override
-	public Node<N, V> remove() {
+	public IEvaluatedPath<N, ?, V> remove() {
 		return this.removeNodeAtPosition(0);
 	}
 
-	public Node<N, V> removeNodeAtPosition(final int i) {
-		Node<N, V> removedNode = this.queue.remove(i);
-		this.logger.trace("Retrieve node from OPEN. Is goal: {}, Index: {}", removedNode.isGoal(), i);
+	public IEvaluatedPath<N, ?, V> removeNodeAtPosition(final int i) {
+		IEvaluatedPath<N, ?, V> removedNode = this.queue.remove(i);
+		this.logger.trace("Retrieve node from OPEN. Index: {}", i);
 		this.nodeCharacterizations.remove(this.nodesAndCharacterizationsMap.get(removedNode));
 		Vector removedAlternative = this.nodesAndCharacterizationsMap.remove(removedNode);
 
@@ -294,7 +294,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	}
 
 	@Override
-	public Node<N, V> poll() {
+	public IEvaluatedPath<N, ?, V> poll() {
 		if (!this.queue.isEmpty()) {
 			return this.remove();
 		} else {
@@ -303,14 +303,14 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	}
 
 	@Override
-	public Node<N, V> element() {
+	public IEvaluatedPath<N, ?, V> element() {
 		return this.queue.get(0);
 	}
 
 	@Override
-	public Node<N, V> peek() {
+	public IEvaluatedPath<N, ?, V> peek() {
 		if (!this.queue.isEmpty()) {
-			this.logger.trace("Peek from OPEN. Is goal: {}", this.element().isGoal());
+			this.logger.trace("Peek from OPEN.");
 			return this.element();
 		} else {
 			return null;

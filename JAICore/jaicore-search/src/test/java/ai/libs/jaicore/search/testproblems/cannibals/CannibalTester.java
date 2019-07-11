@@ -29,10 +29,10 @@ public class CannibalTester {
 
 
 
-		GraphSearchWithSubpathEvaluationsInput<CannibalProblem, String, Integer> prob = new GraphSearchWithSubpathEvaluationsInput<>(new CannibalGraphGenerator(p), n -> n.externalPath().size());
+		GraphSearchWithSubpathEvaluationsInput<CannibalProblem, String, Integer> prob = new GraphSearchWithSubpathEvaluationsInput<>(new CannibalGraphGenerator(p), n -> n.getNodes().size());
 		StandardBestFirst<CannibalProblem, String, Integer> rs = new StandardBestFirst<>(prob);
 
-		AStar<CannibalProblem, String> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(prob.getGraphGenerator(), (n1,n2) -> 1, n -> 1.0 * n.getPoint().getCannibalsOnLeft() + n.getPoint().getMissionariesOnLeft()));
+		AStar<CannibalProblem, String> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(prob.getGraphGenerator(), (n1,n2) -> 1, n -> 1.0 * n.getHead().getCannibalsOnLeft() + n.getHead().getMissionariesOnLeft()));
 		new JFXPanel();
 		NodeInfoAlgorithmEventPropertyComputer nodeInfoAlgorithmEventPropertyComputer = new NodeInfoAlgorithmEventPropertyComputer();
 		List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers = Arrays.asList(nodeInfoAlgorithmEventPropertyComputer, new NodeDisplayInfoAlgorithmEventPropertyComputer<>(n -> n.toString()));

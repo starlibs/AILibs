@@ -6,6 +6,14 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -20,21 +28,11 @@ import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.ICancelableNodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.IPotentiallySolutionReportingNodeEvaluator;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
+import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.model.travesaltree.DefaultNodeComparator;
-import ai.libs.jaicore.search.model.travesaltree.Node;
-import ai.libs.jaicore.search.model.travesaltree.NodeExpansionDescription;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import ai.libs.jaicore.search.structure.graphgenerator.GoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.NodeGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.PathGoalTester;
-import ai.libs.jaicore.search.structure.graphgenerator.SingleRootGenerator;
-import ai.libs.jaicore.search.structure.graphgenerator.SuccessorGenerator;
 
 /**
  * This is a modified version of the AWA* algorithm for problems without admissible heuristic.
@@ -62,11 +60,11 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 	private final SingleRootGenerator<T> rootNodeGenerator;
 	private final SuccessorGenerator<T, A> successorGenerator;
-	private final GoalTester<T> goalTester;
-	private final INodeEvaluator<T, V> nodeEvaluator;
-	private final Queue<Node<T, V>> closedList;
-	private final Queue<Node<T, V>> suspendList;
-	private final Queue<Node<T, V>> openList;
+	private final PathGoalTester<T, A> goalTester;
+	private final IPathEvaluator<T, A, V> nodeEvaluator;
+	private final Queue<BackPointerPath<T, A, V>> closedList;
+	private final Queue<BackPointerPath<T, A, V>> suspendList;
+	private final Queue<BackPointerPath<T, A, V>> openList;
 	private int currentLevel = -1;
 	private int windowSize;
 	private final List<EvaluatedSearchGraphPath<T, A, V>> unconfirmedSolutions = new ArrayList<>(); // these are solutions emitted on the basis of the node evaluator but whose solutions have not been found in the original graph yet
@@ -84,8 +82,8 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		this.suspendList = new PriorityQueue<>(new DefaultNodeComparator<>());
 		this.openList = new PriorityQueue<>(new DefaultNodeComparator<>());
 		this.windowSize = 0;
-		if (this.nodeEvaluator instanceof IPotentiallySolutionReportingNodeEvaluator) {
-			((IPotentiallySolutionReportingNodeEvaluator) this.nodeEvaluator).registerSolutionListener(this);
+		if (this.nodeEvaluator instanceof IPotentiallySolutionReportingPathEvaluator) {
+			((IPotentiallySolutionReportingPathEvaluator) this.nodeEvaluator).registerSolutionListener(this);
 		}
 	}
 
@@ -96,7 +94,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.logger.info("Not doing anything because there are still unreturned solutions.");
 				return;
 			}
-			Node<T, V> n = this.openList.peek();
+			BackPointerPath<T, A, V> n = this.openList.peek();
 			this.openList.remove(n);
 			this.closedList.add(n);
 			if (!n.isGoal()) {
@@ -104,7 +102,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			}
 
 			/* check whether this node is outside the window and suspend it */
-			int nLevel = n.externalPath().size() - 1;
+			int nLevel = n.getNodes().size() - 1;
 			if (nLevel <= (this.currentLevel - this.windowSize)) {
 				this.closedList.remove(n);
 				this.suspendList.add(n);
@@ -121,17 +119,13 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			this.checkAndConductTermination();
 
 			/* compute successors of the expanded node */
-			this.logger.debug("Expanding {}. Starting successor generation.", n.getPoint());
-			Collection<NodeExpansionDescription<T, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getPoint()), "Successor generation timeouted" , true);
+			this.logger.debug("Expanding {}. Starting successor generation.", n.getHead());
+			Collection<NodeExpansionDescription<T, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getHead()), "Successor generation timeouted" , true);
 			this.logger.debug("Successor generation finished. Identified {} successors.", successors.size());
 			for (NodeExpansionDescription<T, A> expansionDescription : successors) {
 				this.checkAndConductTermination();
-				Node<T, V> nPrime = new Node<>(n, expansionDescription.getTo());
-				if (this.goalTester instanceof NodeGoalTester<?>) {
-					nPrime.setGoal(((NodeGoalTester<T>) this.goalTester).isGoal(nPrime.getPoint()));
-				} else if (this.goalTester instanceof PathGoalTester<?>) {
-					nPrime.setGoal(((PathGoalTester<T>) this.goalTester).isGoal(nPrime.externalPath()));
-				}
+				BackPointerPath<T, A, V> nPrime = new BackPointerPath<>(n, expansionDescription.getTo(), expansionDescription.getAction());
+				nPrime.setGoal(this.goalTester.isGoal(nPrime));
 				V nPrimeScore = this.nodeEvaluator.f(nPrime);
 
 				/* ignore nodes whose value cannot be determined */
@@ -142,29 +136,29 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 				/* determine whether this is a goal node */
 				if (nPrime.isGoal()) {
-					List<T> newSolution = nPrime.externalPath();
+					List<T> newSolution = nPrime.getNodes();
 					EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(newSolution, null, nPrimeScore);
 					this.registerNewSolutionCandidate(solution);
 				}
 
 				if (!this.openList.contains(nPrime) && !this.closedList.contains(nPrime) && !this.suspendList.contains(nPrime)) {
 					nPrime.setParent(n);
-					nPrime.setInternalLabel(nPrimeScore);
+					nPrime.setScore(nPrimeScore);
 					if (!nPrime.isGoal()) {
 						this.openList.add(nPrime);
 					}
 					this.post(new NodeAddedEvent<>(this.getId(), n, nPrime, nPrime.isGoal() ? "or_solution" : "or_open"));
 				} else if (this.openList.contains(nPrime) || this.suspendList.contains(nPrime)) {
-					V oldScore = nPrime.getInternalLabel();
+					V oldScore = nPrime.getScore();
 					if (oldScore != null && oldScore.compareTo(nPrimeScore) > 0) {
 						nPrime.setParent(n);
-						nPrime.setInternalLabel(nPrimeScore);
+						nPrime.setScore(nPrimeScore);
 					}
 				} else if (this.closedList.contains(nPrime)) {
-					V oldScore = nPrime.getInternalLabel();
+					V oldScore = nPrime.getScore();
 					if (oldScore != null && oldScore.compareTo(nPrimeScore) > 0) {
 						nPrime.setParent(n);
-						nPrime.setInternalLabel(nPrimeScore);
+						nPrime.setScore(nPrimeScore);
 					}
 					if (!nPrime.isGoal()) {
 						this.openList.add(nPrime);
@@ -195,11 +189,11 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			switch (this.getState()) {
 			case CREATED:
 				T externalRootNode = this.rootNodeGenerator.getRoot();
-				Node<T, V> rootNode = new Node<>(null, externalRootNode);
+				BackPointerPath<T, A, V> rootNode = new BackPointerPath<>(null, externalRootNode, null);
 				this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 				this.openList.add(rootNode);
 				this.post(new GraphInitializedEvent<>(this.getId(), rootNode));
-				rootNode.setInternalLabel(this.nodeEvaluator.f(rootNode));
+				rootNode.setScore(this.nodeEvaluator.f(rootNode));
 				return this.activate();
 
 			case ACTIVE:
@@ -275,7 +269,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	}
 
 	@Override
-	public GraphGenerator<T, A> getGraphGenerator() {
+	public IGraphGenerator<T, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
 	}
 

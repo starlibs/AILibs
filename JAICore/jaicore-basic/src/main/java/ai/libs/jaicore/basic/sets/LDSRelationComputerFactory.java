@@ -6,7 +6,7 @@ import org.api4.java.algorithm.IAlgorithm;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmFactory;
 
-public class LDSRelationComputerFactory<T> extends AAlgorithmFactory<RelationComputationProblem<T>, List<List<T>>> {
+public class LDSRelationComputerFactory<T> extends AAlgorithmFactory<RelationComputationProblem<T>, List<List<T>>, IAlgorithm<RelationComputationProblem<T>, List<List<T>>>> {
 
 	@Override
 	public IAlgorithm<RelationComputationProblem<T>, List<List<T>>> getAlgorithm() {

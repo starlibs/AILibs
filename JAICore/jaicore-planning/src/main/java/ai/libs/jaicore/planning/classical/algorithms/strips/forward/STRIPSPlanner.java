@@ -20,7 +20,7 @@ public class STRIPSPlanner<V extends Comparable<V>> extends GraphSearchBasedPlan
 
 	public STRIPSPlanner(final StripsPlanningProblem problem,
 			final AlgorithmicProblemReduction<StripsPlanningProblem, IGraphSearchBasedPlan<StripsForwardPlanningNode, String>, GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>> problemTransformer,
-			final IAlgorithmFactory<GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>> baseFactory) {
+			final IAlgorithmFactory<GraphSearchInput<StripsForwardPlanningNode, String>, SearchGraphPath<StripsForwardPlanningNode, String>, ?> baseFactory) {
 		super(problem, problemTransformer, baseFactory);
 	}
 

@@ -35,7 +35,7 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 		try {
 			this.randomTree.buildClassifier(data);
 		} catch(Exception e) {
-			throw new AlgorithmException(e, "Random Tree could not be trained!");
+			throw new AlgorithmException("Random Tree could not be trained!", e);
 		}
 
 		// Step 2: Count the nodes in the tree (DF Traversal Index Mapping)

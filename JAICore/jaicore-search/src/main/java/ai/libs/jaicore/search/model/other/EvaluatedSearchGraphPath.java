@@ -2,9 +2,9 @@ package ai.libs.jaicore.search.model.other;
 
 import java.util.List;
 
-import org.api4.java.common.attributedobjects.ScoredItem;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 
-public class EvaluatedSearchGraphPath<N, A, V extends Comparable<V>> extends SearchGraphPath<N, A> implements ScoredItem<V> {
+public class EvaluatedSearchGraphPath<N, A, V extends Comparable<V>> extends SearchGraphPath<N, A> implements IEvaluatedPath<N, A, V> {
 	private final V score;
 
 	public EvaluatedSearchGraphPath(final List<N> nodes, final List<A> edges, final V score) {

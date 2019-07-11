@@ -4,7 +4,7 @@ import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 
-public class LimitedDiscrepancySearchFactory<N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<GraphSearchWithNodeRecommenderInput<N, A>, EvaluatedSearchGraphPath<N, A,V>, N, A, V> {
+public class LimitedDiscrepancySearchFactory<N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<GraphSearchWithNodeRecommenderInput<N, A>, EvaluatedSearchGraphPath<N, A,V>, N, A, V, LimitedDiscrepancySearch<N, A, V>> {
 
 	@Override
 	public LimitedDiscrepancySearch<N, A, V> getAlgorithm() {

@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.IAlgorithmConfig;
 import org.api4.java.algorithm.TimeOut;
@@ -45,8 +47,6 @@ import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.INodeEvaluator;
-import ai.libs.jaicore.search.core.interfaces.GraphGenerator;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;
@@ -141,14 +141,13 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		}
 
 		/* Subsample dataset to reduce computational effort. */
-		logger.info("Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...",
-				this.config.subsamplingRatio(), this.config.minInstances(), this.data.getInstances().numInstances(),
+		logger.info("Subsampling with ratio {} and {} min instances. Num original instances and attributes: {} / {}...", this.config.subsamplingRatio(), this.config.minInstances(), this.data.getInstances().numInstances(),
 				this.data.getInstances().numAttributes());
 		DataSet dataForFE;
 		try {
 			dataForFE = DataSetUtils.subsample(this.data, this.config.subsamplingRatio(), this.config.minInstances(), new Random(this.config.randomSeed()));
 		} catch (SplitFailedException e1) {
-			throw new AlgorithmException(e1, "Could not create sample.");
+			throw new AlgorithmException("Could not create sample.", e1);
 		}
 		logger.info("Finished subsampling.");
 
@@ -168,20 +167,17 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		try {
 			problem = new RefinementConfiguredSoftwareConfigurationProblem<>(this.componentFile, "FilterPipeline", wrappedBenchmark);
 		} catch (UnresolvableRequiredInterfaceException | IOException e) {
-			throw new AlgorithmException(e, "Couldn't create the problem.");
+			throw new AlgorithmException("Couldn't create the problem.", e);
 		}
 
 		/* configure and start optimizing factory */
-		OptimizingFactoryProblem<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactoryProblem =
-				new OptimizingFactoryProblem<>(this.factory, problem);
+		OptimizingFactoryProblem<RefinementConfiguredSoftwareConfigurationProblem<Double>, FilterPipeline, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.factory, problem);
 		OnePhaseHASCOFactory hascoFactory = new OnePhaseHASCOFactory(this.config);
 		hascoFactory.withAlgorithmConfig(this.config);
 		hascoFactory.setProblemInput(problem);
 
-		hascoFactory.setSearchProblemTransformer(
-				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(nodeEvaluator,
-						null, this.config.randomSeed(), this.config.numberOfRandomCompletions(),
-						this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
+		hascoFactory.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(nodeEvaluator, null, this.config.randomSeed(), this.config.numberOfRandomCompletions(),
+				this.config.timeoutForCandidateEvaluation(), this.config.timeoutForNodeEvaluation()));
 
 		this.optimizingFactory = new OptimizingFactory<>(optimizingFactoryProblem, hascoFactory);
 		this.optimizingFactory.setLoggerName(this.loggerName + ".2phasehasco");
@@ -202,8 +198,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		this.internalValidationErrorOfSelectedClassifier = this.optimizingFactory.getPerformanceOfObject();
 		long startBuildTime = System.currentTimeMillis();
 		long endBuildTime = System.currentTimeMillis();
-		logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms",
-				endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
+		logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms", endBuildTime - startBuildTime, endBuildTime - startOptimizationTime);
 		this.state = EAlgorithmState.INACTIVE;
 		return new AlgorithmFinishedEvent(this.getId());
 	}
@@ -310,7 +305,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		throw new UnsupportedOperationException();
 	}
 
-	public GraphGenerator<TFDNode, String> getGraphGenerator() {
+	public IGraphGenerator<TFDNode, String> getGraphGenerator() {
 		if (this.state == EAlgorithmState.CREATED) {
 			this.init();
 		}
@@ -392,7 +387,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		this.config.setProperty(HASCOFeatureEngineeringConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, String.valueOf(timeoutInS * 1000));
 	}
 
-	protected INodeEvaluator<TFDNode, Double> getSemanticNodeEvaluator(final Instances data) {
+	protected IPathEvaluator<TFDNode, String, Double> getSemanticNodeEvaluator(final Instances data) {
 		return new WekaPipelineValidityCheckingNodeEvaluator(this.components, data);
 	}
 
