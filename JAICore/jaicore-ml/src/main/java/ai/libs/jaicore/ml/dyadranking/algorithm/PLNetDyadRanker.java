@@ -11,6 +11,11 @@ import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.algorithm.predictivemodel.ICertaintyProvider;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IOnlineLearner;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IPredictiveModelConfiguration;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration.ListBuilder;
@@ -29,12 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.ml.core.exception.ConfigurationException;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
-import ai.libs.jaicore.ml.core.predictivemodel.ICertaintyProvider;
-import ai.libs.jaicore.ml.core.predictivemodel.IOnlineLearner;
-import ai.libs.jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
@@ -337,7 +336,7 @@ implements IPLDyadRanker, IOnlineLearner<IDyadRankingInstance, IDyadRankingInsta
 	}
 
 	@Override
-	public void setConfiguration(final IPredictiveModelConfiguration configuration) throws ConfigurationException {
+	public void setConfiguration(final IPredictiveModelConfiguration configuration) {
 		if (!(configuration instanceof IPLNetDyadRankerConfiguration)) {
 			throw new IllegalArgumentException("The configuration is no PLNetDyadRankerConfiguration!");
 		}

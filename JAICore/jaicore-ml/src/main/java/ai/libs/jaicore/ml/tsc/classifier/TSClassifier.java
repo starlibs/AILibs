@@ -3,19 +3,19 @@ package ai.libs.jaicore.ml.tsc.classifier;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IBatchLearner;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IPredictiveModelConfiguration;
+
 import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.core.dataset.TimeSeriesInstance;
-import ai.libs.jaicore.ml.core.exception.ConfigurationException;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.core.predictivemodel.ABatchLearner;
-import ai.libs.jaicore.ml.core.predictivemodel.IBatchLearner;
-import ai.libs.jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 
 /**
  * Time series classifier which can be trained and used as a predictor. Uses
  * <code>algorithm</code> to train the model parameters (if necessary).
- * 
+ *
  * @author Julian Lienen
  *
  * @param <L>
@@ -35,11 +35,11 @@ public abstract class TSClassifier<L, V, D extends TimeSeriesDataset<L>> extends
 
 	/**
 	 * Constructor for a time series classifier.
-	 * 
+	 *
 	 * @param algorithm
 	 *            The algorithm object used for the training of the classifier
 	 */
-	public TSClassifier(ATSCAlgorithm<L, V, D, ? extends TSClassifier<L, V, D>> algorithm) {
+	public TSClassifier(final ATSCAlgorithm<L, V, D, ? extends TSClassifier<L, V, D>> algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -47,15 +47,15 @@ public abstract class TSClassifier<L, V, D extends TimeSeriesDataset<L>> extends
 	 * {@inheritDoc ABatchLearner#train(jaicore.ml.core.dataset.IDataset)}
 	 */
 	@Override
-	public void train(D dataset) throws TrainingException {
+	public void train(final D dataset) throws TrainingException {
 		// Set model which is trained
 		this.algorithm.setModel(this);
 
 		// Set input data from which the model should learn
-		algorithm.setInput(dataset);
+		this.algorithm.setInput(dataset);
 		try {
 			// Train
-			algorithm.call();
+			this.algorithm.call();
 		} catch (Exception e) {
 			throw new TrainingException("Could not train model " + this.getClass().getSimpleName(), e);
 		}
@@ -63,20 +63,20 @@ public abstract class TSClassifier<L, V, D extends TimeSeriesDataset<L>> extends
 
 	/**
 	 * Getter for the model's training algorithm object.
-	 * 
+	 *
 	 * @return The model's training algorithm
 	 */
 	public ATSCAlgorithm<L, V, D, ? extends IBatchLearner<V, TimeSeriesInstance<L>, D>> getAlgorithm() {
-		return algorithm;
+		return this.algorithm;
 	}
 
 	/**
 	 * Sets the training algorithm for the classifier.
-	 * 
+	 *
 	 * @param algorithm
 	 *            The algorithm object used to maintain the model's parameters.
 	 */
-	public void setAlgorithm(ATSCAlgorithm<L, V, D, ? extends IBatchLearner<V, TimeSeriesInstance<L>, D>> algorithm) {
+	public void setAlgorithm(final ATSCAlgorithm<L, V, D, ? extends IBatchLearner<V, TimeSeriesInstance<L>, D>> algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -84,7 +84,7 @@ public abstract class TSClassifier<L, V, D extends TimeSeriesDataset<L>> extends
 	 * {@inheritDoc ABatchLearner#predict(jaicore.ml.core.dataset.IDataset)}
 	 */
 	@Override
-	public List<V> predict(D dataset) throws PredictionException {
+	public List<V> predict(final D dataset) throws PredictionException {
 		final List<V> result = new ArrayList<>();
 		for (TimeSeriesInstance<L> inst : dataset) {
 			result.add(this.predict(inst));
@@ -104,7 +104,7 @@ public abstract class TSClassifier<L, V, D extends TimeSeriesDataset<L>> extends
 	 * {@inheritDoc ABatchLearner#setConfiguration(IPredictiveModelConfiguration)}
 	 */
 	@Override
-	public void setConfiguration(IPredictiveModelConfiguration configuration) throws ConfigurationException {
+	public void setConfiguration(final IPredictiveModelConfiguration configuration) {
 		throw new UnsupportedOperationException();
 	}
 }

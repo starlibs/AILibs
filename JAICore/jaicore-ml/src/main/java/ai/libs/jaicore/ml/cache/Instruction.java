@@ -3,11 +3,11 @@ package ai.libs.jaicore.ml.cache;
 import java.io.Serializable;
 import java.util.List;
 
+import org.api4.java.ai.ml.core.dataset.IDataset;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import ai.libs.jaicore.ml.core.dataset.IDataset;
 
 /**
  * Instruction class that can be converted into json. Used by {@link ReproducibleInstances}. The instructions are used to store information about the dataset origin and the splits done.

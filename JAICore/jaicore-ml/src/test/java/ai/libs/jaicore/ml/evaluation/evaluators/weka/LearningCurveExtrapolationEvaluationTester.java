@@ -10,7 +10,6 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;

@@ -77,7 +77,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				this.sortedDatasetFileReader = new BufferedReader(new FileReader(sortedDatasetFile));
 				ArffUtilities.skipWithReaderToDatapoints(this.sortedDatasetFileReader);
 			} catch (IOException e) {
-				throw new AlgorithmException(e, "Was not able to create a sorted dataset file.");
+				throw new AlgorithmException("Was not able to create a sorted dataset file.", e);
 			}
 			// Count datapoints in the sorted dataset and initialize variables.
 			try {
@@ -95,7 +95,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 				this.indicesForSelection.sort(Integer::compare);
 				return this.activate();
 			} catch (IOException e) {
-				throw new AlgorithmException(e, "Was not able to count the datapoints.");
+				throw new AlgorithmException("Was not able to count the datapoints.", e);
 			}
 		case ACTIVE:
 			// If the sample size is not reached yet, add the next datapoint from the
@@ -116,7 +116,7 @@ public class SystematicFileSampling extends AFileSamplingAlgorithm {
 					this.addedDatapoints++;
 					return new SampleElementAddedEvent(this.getId());
 				} catch (IOException e) {
-					throw new AlgorithmException(e, "Was not able to read from sorted dataset file.");
+					throw new AlgorithmException("Was not able to read from sorted dataset file.", e);
 				}
 			} else {
 				// Delete sorted dataset file and terminate

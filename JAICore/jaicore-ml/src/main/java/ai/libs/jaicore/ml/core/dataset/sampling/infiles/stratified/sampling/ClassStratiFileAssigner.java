@@ -60,7 +60,7 @@ public class ClassStratiFileAssigner implements IStratiFileAssigner {
 			try {
 				uuid = this.createNewStratumFile(c);
 			} catch (IOException e) {
-				throw new AlgorithmException(e, "Was not able to create a new temporary file for a stratum.");
+				throw new AlgorithmException("Was not able to create a new temporary file for a stratum.", e);
 			}
 		} else {
 			uuid = this.classToStratumMapping.get(c);
@@ -70,7 +70,7 @@ public class ClassStratiFileAssigner implements IStratiFileAssigner {
 			this.tempFileHandler.getFileWriterForTempFile(uuid).flush();
 			this.stratiSizes.put(uuid, this.stratiSizes.get(uuid) + 1);
 		} catch (IOException e) {
-			throw new AlgorithmException(e, "Was not able to write the datapoint into the corresponding stratum file.");
+			throw new AlgorithmException("Was not able to write the datapoint into the corresponding stratum file.", e);
 		}
 	}
 

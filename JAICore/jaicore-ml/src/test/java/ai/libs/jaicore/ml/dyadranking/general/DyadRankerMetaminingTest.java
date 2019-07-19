@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +21,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;

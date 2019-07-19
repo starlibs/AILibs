@@ -2,7 +2,6 @@ package ai.libs.jaicore.ml.tsc.classifier.neighbors;
 
 import java.util.ArrayList;
 
-import org.aeonbits.owner.Config.Key;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
@@ -113,7 +112,7 @@ public class ShotgunEnsembleLearnerAlgorithm extends ASimplifiedTSCLearningAlgor
 		try {
 			nearestNeighborClassifier.train(dataset);
 		} catch (Exception e) {
-			throw new AlgorithmException(e, "Cant train nearest neighbor classifier.");
+			throw new AlgorithmException("Cant train nearest neighbor classifier.", e);
 		}
 
 		ShotgunEnsembleClassifier model = this.getClassifier();

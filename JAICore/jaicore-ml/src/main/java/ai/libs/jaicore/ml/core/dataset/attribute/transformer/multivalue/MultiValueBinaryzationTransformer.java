@@ -12,13 +12,13 @@ import org.api4.java.ai.ml.core.dataset.attribute.transformer.ISingleAttributeTr
  * Transforms a multi-valued feature into a 0/1 Vector, where each dimension
  * represents one of the values, i.e. 1 in one dimension => the feature contains
  * this value, 0 in one dimension => the feature does not contain this value.
- * 
+ *
  * @author Lukas Brandt
  */
 public class MultiValueBinaryzationTransformer implements ISingleAttributeTransformer {
 
 	@Override
-	public double[] transformAttribute(IAttributeValue<?> attributeToTransform) {
+	public double[] transformAttribute(final IAttributeValue<?> attributeToTransform) {
 		if (!(attributeToTransform instanceof MultiValueAttributeValue)) {
 			throw new IllegalArgumentException("Can only perform Multi-Value Binaryzation for multi-value attributes.");
 		}

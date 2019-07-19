@@ -4,13 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.INumericArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ClusterStratiAssigner<I extends INumericArrayInstance, D extends IDataset<I>> implements IStratiAssigner<I, D> {
+public abstract class ClusterStratiAssigner<I extends INumericArrayInstance & Clusterable, D extends IDataset<I>> implements IStratiAssigner<I, D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClusterStratiAssigner.class);
 
@@ -19,7 +20,7 @@ public abstract class ClusterStratiAssigner<I extends INumericArrayInstance, D e
 	protected List<CentroidCluster<I>> clusters;
 
 	@Override
-	public int assignToStrati(I datapoint) {
+	public int assignToStrati(final I datapoint) {
 		// Search for the cluster that contains the datapoint.
 		for (int i = 0; i < this.clusters.size(); i++) {
 			List<I> clusterPoints = this.clusters.get(i).getPoints();
@@ -33,7 +34,7 @@ public abstract class ClusterStratiAssigner<I extends INumericArrayInstance, D e
 	}
 
 	@Override
-	public void setNumCPUs(int numberOfCPUs) {
+	public void setNumCPUs(final int numberOfCPUs) {
 		LOG.warn("setNumCPUs() is not supported for this class");
 	}
 

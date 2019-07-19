@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.IOrderedDataset;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;

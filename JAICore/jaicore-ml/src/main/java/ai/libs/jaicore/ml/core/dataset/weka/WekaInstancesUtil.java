@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;

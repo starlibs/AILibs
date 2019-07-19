@@ -12,8 +12,7 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
-import org.api4.java.ai.ml.IInstance;
-import org.api4.java.ai.ml.IOrderedLabeledDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledDataset;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;

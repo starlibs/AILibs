@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;

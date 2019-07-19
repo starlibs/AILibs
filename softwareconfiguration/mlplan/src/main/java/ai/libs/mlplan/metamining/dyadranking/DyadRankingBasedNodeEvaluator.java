@@ -31,6 +31,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.ai.ml.algorithm.PredictionException;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
@@ -47,7 +48,6 @@ import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
 import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;

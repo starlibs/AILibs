@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.predictivemodel;
 
-import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IPredictiveModel;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 
 /**
  * Abstract extension of {@link IPredictiveModel} to be able to construct

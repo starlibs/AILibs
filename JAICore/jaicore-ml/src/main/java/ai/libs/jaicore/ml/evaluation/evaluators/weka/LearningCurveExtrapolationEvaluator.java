@@ -1,8 +1,9 @@
 package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.LearningCurve;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -14,7 +15,6 @@ import com.google.common.eventbus.EventBus;
 import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import ai.libs.jaicore.ml.interfaces.LearningCurve;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;

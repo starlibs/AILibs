@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.ISamplingAlgorithm;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -64,7 +65,7 @@ public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgo
 			try {
 				return (D)this.getInput().createEmpty();
 			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
 		}
 		D dataset = this.getInput();

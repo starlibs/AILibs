@@ -3,9 +3,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.HashMap;
 import java.util.Random;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.ILabeledInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
@@ -39,7 +39,7 @@ public class CaseControlSampling<I extends ILabeledInstance<?>, D extends IDatas
 			try {
 				this.sample = (D)this.getInput().createEmpty();
 			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
 
 			HashMap<Object, Integer> classOccurrences = this.countClassOccurrences(this.getInput());

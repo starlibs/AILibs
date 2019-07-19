@@ -4,11 +4,11 @@ import java.io.File;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;

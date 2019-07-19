@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.core.Instances;

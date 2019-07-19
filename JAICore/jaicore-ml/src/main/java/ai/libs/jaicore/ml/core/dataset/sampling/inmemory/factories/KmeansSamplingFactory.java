@@ -2,15 +2,16 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 
 import java.util.Random;
 
+import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.KmeansSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class KmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, KmeansSampling<I, D>> {
+public class KmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number> & Clusterable, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, KmeansSampling<I, D>> {
 
 	private KmeansSampling<I, D> previousRun;
 	private int k = -1;

@@ -5,16 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IPredictiveModelConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.core.exception.ConfigurationException;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
-import ai.libs.jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
@@ -171,7 +170,7 @@ public class FeatureTransformPLDyadRanker implements IPLDyadRanker {
 	}
 
 	@Override
-	public void setConfiguration(final IPredictiveModelConfiguration configuration) throws ConfigurationException {
+	public void setConfiguration(final IPredictiveModelConfiguration configuration) {
 		/* Currently nothing to configure */
 	}
 }

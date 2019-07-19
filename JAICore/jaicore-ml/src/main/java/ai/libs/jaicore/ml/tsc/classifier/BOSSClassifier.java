@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.ai.ml.algorithm.PredictionException;
 
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.HistogramBuilder;
 import ai.libs.jaicore.ml.tsc.classifier.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;

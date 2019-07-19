@@ -3,8 +3,7 @@ package ai.libs.jaicore.ml.dyadranking.algorithm;
 import java.util.List;
 
 import org.aeonbits.owner.Config.Sources;
-
-import ai.libs.jaicore.ml.core.predictivemodel.IPredictiveModelConfiguration;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IPredictiveModelConfiguration;
 
 @Sources({ "file:conf/plNet/plnet.properties" })
 public interface IPLNetDyadRankerConfiguration extends IPredictiveModelConfiguration {

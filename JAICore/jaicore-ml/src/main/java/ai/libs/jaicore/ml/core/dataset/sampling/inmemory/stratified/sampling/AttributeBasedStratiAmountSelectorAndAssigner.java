@@ -17,9 +17,9 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
-import org.api4.java.ai.ml.AILabeledAttributeArrayDataset;
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.AILabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

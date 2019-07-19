@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Queue;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.ai.ml.algorithm.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;

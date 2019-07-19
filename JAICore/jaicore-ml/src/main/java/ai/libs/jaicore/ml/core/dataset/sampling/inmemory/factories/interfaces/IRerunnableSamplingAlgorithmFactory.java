@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces;
 
-import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 

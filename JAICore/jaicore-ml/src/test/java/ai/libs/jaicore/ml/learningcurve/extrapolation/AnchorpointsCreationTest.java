@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 import java.io.File;
 import java.io.IOException;
 
-import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.junit.Assert;
 import org.junit.Test;

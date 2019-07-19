@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.api4.java.ai.ml.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -41,16 +41,10 @@ import ai.libs.jaicore.basic.sets.LDSRelationComputer;
 import ai.libs.jaicore.ml.cache.InstructionFailedException;
 import ai.libs.jaicore.ml.cache.ReproducibleInstances;
 import ai.libs.jaicore.ml.cache.StratifiedSplitSubsetInstruction;
-import ai.libs.jaicore.ml.core.SimpleInstanceImpl;
-import ai.libs.jaicore.ml.core.SimpleInstancesImpl;
-import ai.libs.jaicore.ml.core.SimpleLabeledInstanceImpl;
-import ai.libs.jaicore.ml.core.WekaCompatibleInstancesImpl;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.StratifiedSampling;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
-import ai.libs.jaicore.ml.interfaces.LabeledInstance;
-import ai.libs.jaicore.ml.interfaces.LabeledInstances;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -214,157 +208,6 @@ public class WekaUtil {
 		return preprocessors;
 	}
 
-	public static Instances fromJAICoreInstances(final WekaCompatibleInstancesImpl instances) {
-
-		/* create basic attribute entries */
-		ArrayList<Attribute> attributes = new ArrayList<>();
-		int numAttributes = instances.getNumberOfColumns();
-		for (int i = 1; i <= numAttributes; i++) {
-			attributes.add(new Attribute("a" + i));
-		}
-
-		/*
-		 * if the instances object is labeled, create the label entry and create a list
-		 * of all the possible labels
-		 */
-		Map<Object, Double> labelMap = new HashMap<>();
-		int c = 0;
-		boolean isNominal = false;
-		for (Object o : instances.getDeclaredClasses()) {
-			labelMap.put(o, (double) (c++));
-			if (!Double.class.isInstance(o)) {
-				isNominal = true;
-			}
-		}
-
-		/* if the feature is */
-		if (isNominal) {
-			attributes.add(new Attribute(NAME_LABEL, instances.getDeclaredClasses()));
-		} else {
-			attributes.add(new Attribute(NAME_LABEL));
-		}
-
-		/* create instances object and insert the data points */
-		Instances wekaInstances = new Instances(NAME_INSTANCES, attributes, instances.size());
-		wekaInstances.setClassIndex(numAttributes);
-		for (ai.libs.jaicore.ml.interfaces.Instance instance : instances) {
-			Instance wekaInstance = new DenseInstance(numAttributes + 1);
-			wekaInstance.setDataset(wekaInstances);
-			int att = 0;
-			for (Double val : instance) {
-				wekaInstance.setValue(att++, val);
-			}
-			wekaInstance.setClassValue(labelMap.get(((LabeledInstance<?>) instance).getLabel()));
-			wekaInstances.add(wekaInstance);
-		}
-		return wekaInstances;
-	}
-
-	public static Instances fromJAICoreInstances(final ai.libs.jaicore.ml.interfaces.Instances<ai.libs.jaicore.ml.interfaces.Instance> instances) {
-
-		/* create basic attribute entries */
-		ArrayList<Attribute> attributes = new ArrayList<>();
-		int numAttributes = instances.getNumberOfColumns();
-		for (int i = 1; i <= numAttributes; i++) {
-			attributes.add(new Attribute("a" + i));
-		}
-
-		/* create instances object and insert the data points */
-		Instances wekaInstances = new Instances(NAME_INSTANCES, attributes, 0);
-		for (ai.libs.jaicore.ml.interfaces.Instance instance : instances) {
-			wekaInstances.add(fromJAICoreInstance(instance));
-		}
-		return wekaInstances;
-	}
-
-	public static Instances getEmptyDatasetForJAICoreInstance(final ai.libs.jaicore.ml.interfaces.Instance instance) {
-		ArrayList<Attribute> attributes = new ArrayList<>();
-		int numAttributes = instance.getNumberOfColumns();
-		for (int i = 1; i <= numAttributes; i++) {
-			attributes.add(new Attribute("a" + i));
-		}
-		return new Instances(NAME_INSTANCES, attributes, 0);
-	}
-
-	public static Instance fromJAICoreInstance(final ai.libs.jaicore.ml.interfaces.Instance instance) {
-		Instances emptyDataset = getEmptyDatasetForJAICoreInstance(instance);
-		Instance wekaInstance = new DenseInstance(instance.getNumberOfColumns());
-		int att = 0;
-		for (Double val : instance) {
-			wekaInstance.setValue(att++, val);
-		}
-		emptyDataset.add(wekaInstance);
-		return emptyDataset.iterator().next();
-	}
-
-	public static Instance fromJAICoreInstance(final LabeledInstance<String> instance) {
-
-		/* create basic attribute entries */
-		ArrayList<Attribute> attributes = new ArrayList<>();
-		int numAttributes = instance.getNumberOfColumns();
-		for (int i = 1; i <= numAttributes; i++) {
-			attributes.add(new Attribute("a" + i));
-		}
-		List<String> possibleValues = new ArrayList<>();
-		possibleValues.add(instance.getLabel());
-		Attribute classAttribute = new Attribute(NAME_LABEL, possibleValues);
-		attributes.add(classAttribute);
-		Instances instances = new Instances(NAME_INSTANCES, attributes, 1);
-		instances.setClassIndex(attributes.size() - 1);
-
-		double[] values = new double[numAttributes + 1];
-		for (int i = 0; i < numAttributes; i++) {
-			values[i] = instance.get(i);
-		}
-		Instance inst = new DenseInstance(1., values);
-		instances.add(inst);
-		Instance addedInstance = instances.get(0);
-		addedInstance.setClassValue(instance.getLabel());
-		return addedInstance;
-	}
-
-	public static Instances fromJAICoreInstances(final LabeledInstances<String> labeledInstances) {
-		int attributeCount = labeledInstances.getNumberOfColumns() + 1; // the amount of attributes including the class
-		// label.
-		int dataSize = labeledInstances.getNumberOfRows();
-
-		/* create basic attribute entries */
-		ArrayList<Attribute> attributeList = new ArrayList<>(attributeCount);
-		for (int i = 1; i < attributeCount; i++) {
-			attributeList.add(new Attribute("a" + i));
-		}
-		/* create class attribute */
-		List<String> classes = labeledInstances.getOccurringLabels();
-		Attribute classAttribute = new Attribute(NAME_LABEL, classes);
-
-		attributeList.add(classAttribute);
-
-		weka.core.Instances wekaInstances = new Instances(NAME_INSTANCES, attributeList, dataSize);
-		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1); // the last item is the class attribute.
-
-		for (ai.libs.jaicore.ml.interfaces.LabeledInstance<String> labeledInstance : labeledInstances) {
-			double[] values = new double[attributeCount];
-			for (int i = 0; i < attributeCount - 1; i++) {
-				values[i] = labeledInstance.get(i);
-			}
-			weka.core.Instance wekaInstance = new DenseInstance(1.0, values);
-			String label = labeledInstance.getLabel();
-
-			wekaInstance.setDataset(wekaInstances);
-			double classIndex = classAttribute.indexOfValue(label);
-			wekaInstance.setClassValue(classIndex);
-			wekaInstances.add(wekaInstance);
-		}
-		return wekaInstances;
-	}
-
-	public static WekaCompatibleInstancesImpl toJAICoreLabeledInstances(final Instances wekaInstances) {
-		WekaCompatibleInstancesImpl labeledInstances = new WekaCompatibleInstancesImpl(getClassesDeclaredInDataset(wekaInstances));
-		for (Instance inst : wekaInstances) {
-			labeledInstances.add(toJAICoreLabeledInstance(inst));
-		}
-		return labeledInstances;
-	}
 
 	/**
 	 * Returns true if there is at least one nominal attribute in the given dataset that has more than 2 values.
@@ -396,26 +239,6 @@ public class WekaUtil {
 		return false;
 	}
 
-	public static ai.libs.jaicore.ml.interfaces.LabeledInstance<String> toJAICoreLabeledInstance(final Instance wekaInst) {
-		ai.libs.jaicore.ml.interfaces.LabeledInstance<String> inst = new SimpleLabeledInstanceImpl();
-		for (int att = 0; att < wekaInst.numAttributes(); att++) {
-			if (att == wekaInst.classIndex()) {
-				continue;
-			}
-			inst.add(wekaInst.value(att));
-		}
-		inst.setLabel(wekaInst.classAttribute().value((int) wekaInst.classValue()));
-		return inst;
-	}
-
-	public static ai.libs.jaicore.ml.interfaces.Instances<SimpleInstanceImpl> toJAICoreInstances(final Instances wekaInstances) {
-		ai.libs.jaicore.ml.interfaces.Instances<SimpleInstanceImpl> instances = new SimpleInstancesImpl(wekaInstances.size());
-		for (Instance inst : wekaInstances) {
-			instances.add(new SimpleInstanceImpl(inst.toDoubleArray()));
-		}
-		return instances;
-	}
-
 	public static Collection<String> getPossibleClassValues(final Instance instance) {
 		Collection<String> labels = new ArrayList<>();
 		Attribute classAttr = instance.classAttribute();
@@ -423,14 +246,6 @@ public class WekaUtil {
 			labels.add(classAttr.value(i));
 		}
 		return labels;
-	}
-
-	public static ai.libs.jaicore.ml.interfaces.Instance toJAICoreInstance(final Instance wekaInst) {
-		ai.libs.jaicore.ml.interfaces.Instance inst = new SimpleInstanceImpl();
-		for (int att = 0; att < wekaInst.numAttributes(); att++) {
-			inst.add(wekaInst.value(att));
-		}
-		return inst;
 	}
 
 	public static String getClassifierDescriptor(final Classifier c) {

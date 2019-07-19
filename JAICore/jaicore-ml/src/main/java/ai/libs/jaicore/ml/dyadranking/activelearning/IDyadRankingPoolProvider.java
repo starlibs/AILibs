@@ -3,8 +3,9 @@ package ai.libs.jaicore.ml.dyadranking.activelearning;
 import java.util.Collection;
 import java.util.Set;
 
+import org.api4.java.ai.ml.activelearning.IActiveLearningPoolProvider;
+
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.activelearning.IActiveLearningPoolProvider;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;

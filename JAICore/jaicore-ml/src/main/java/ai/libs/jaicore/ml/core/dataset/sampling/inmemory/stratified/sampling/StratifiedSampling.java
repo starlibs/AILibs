@@ -2,9 +2,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.IOrderedDataset;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
@@ -68,7 +68,7 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 				}
 				this.simpleRandomSamplingStarted = false;
 			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
 			return this.activate();
 		case ACTIVE:

@@ -4,10 +4,10 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
+import ai.libs.jaicore.ml.core.dataset.sampling.IClusterableInstances;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.KmeansSamplingFactory;
 
 public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
@@ -29,8 +29,8 @@ public class KMeansSamplingTester extends GeneralSamplingTester<Number> {
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(final IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number> dataset) {
-		KmeansSamplingFactory<INumericLabeledAttributeArrayInstance<Number>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Number>, Number>> factory = new KmeansSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(final IOrderedLabeledAttributeArrayDataset<IClusterableInstances<Number>, Number> dataset) {
+		KmeansSamplingFactory<IClusterableInstances<Number>, IOrderedLabeledAttributeArrayDataset<IClusterableInstances<Number>, Number>> factory = new KmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			factory.setK(K);

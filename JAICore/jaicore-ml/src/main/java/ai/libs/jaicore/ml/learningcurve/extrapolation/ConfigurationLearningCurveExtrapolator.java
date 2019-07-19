@@ -1,8 +1,8 @@
 package ai.libs.jaicore.ml.learningcurve.extrapolation;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;

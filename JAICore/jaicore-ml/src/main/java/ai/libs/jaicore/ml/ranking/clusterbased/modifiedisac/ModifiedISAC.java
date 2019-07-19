@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
+
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.ranking.clusterbased.GroupBasedRanker;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.Group;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;

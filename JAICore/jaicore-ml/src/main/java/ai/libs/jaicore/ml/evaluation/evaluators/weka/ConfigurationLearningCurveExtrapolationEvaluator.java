@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
+import org.api4.java.ai.ml.LearningCurve;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,6 @@ import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
-import ai.libs.jaicore.ml.interfaces.LearningCurve;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.ConfigurationLearningCurveExtrapolator;
 import weka.classifiers.Classifier;
 

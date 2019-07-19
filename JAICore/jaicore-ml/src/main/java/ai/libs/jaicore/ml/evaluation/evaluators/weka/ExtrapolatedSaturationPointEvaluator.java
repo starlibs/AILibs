@@ -2,9 +2,10 @@ package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.AnalyticalLearningCurve;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
-import ai.libs.jaicore.ml.interfaces.AnalyticalLearningCurve;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolator;

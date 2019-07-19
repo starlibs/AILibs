@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -20,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.classifier.ensemble.EnsembleProvider;
 import ai.libs.jaicore.ml.tsc.classifier.ensemble.MajorityConfidenceVote;
@@ -237,7 +237,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		try {
 			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel((int)seed, this.getConfig().numFolds());
 		} catch (Exception e1) {
-			throw new AlgorithmException(e1, "Could not train model due to ensemble exception.");
+			throw new AlgorithmException("Could not train model due to ensemble exception.", e1);
 		}
 		logger.debug("Initialized ensemble classifier.");
 
@@ -246,7 +246,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		try {
 			WekaUtil.buildWekaClassifierFromSimplifiedTS(classifier, transfTrainingData);
 		} catch (TrainingException e) {
-			throw new AlgorithmException(e, "Could not train classifier due to a training exception.");
+			throw new AlgorithmException("Could not train classifier due to a training exception.", e);
 		}
 		logger.debug("Finished ensemble training.");
 

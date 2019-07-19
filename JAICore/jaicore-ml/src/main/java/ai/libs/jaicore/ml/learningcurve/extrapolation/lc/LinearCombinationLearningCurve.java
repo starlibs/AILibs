@@ -7,10 +7,9 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
+import org.api4.java.ai.ml.AnalyticalLearningCurve;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.ml.interfaces.AnalyticalLearningCurve;
 
 /**
  * The LinearCombinationLearningCurve consists of the actual linear combination

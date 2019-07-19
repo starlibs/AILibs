@@ -4,9 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
+
 import com.google.common.collect.Lists;
 
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;

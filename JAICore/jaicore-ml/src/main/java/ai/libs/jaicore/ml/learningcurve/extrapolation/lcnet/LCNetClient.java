@@ -17,6 +17,8 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.HashMap;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -25,8 +27,6 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import ai.libs.jaicore.logging.LoggerUtil;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 
 public class LCNetClient {
 

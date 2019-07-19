@@ -1,9 +1,10 @@
 package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 
+import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
@@ -20,7 +21,7 @@ import ai.libs.jaicore.ml.clustering.GMeans;
  * @author jnowack
  *
  */
-public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ClusterSampling<I, D> {
+public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number> & Clusterable, D extends IDataset<I>> extends ClusterSampling<I, D> {
 
 	public GmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
@@ -38,7 +39,7 @@ public class GmeansSampling<I extends INumericLabeledAttributeArrayInstance<? ex
 			try {
 				this.sample = (D)this.getInput().createEmpty();
 			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
 
 			if (this.clusterResults == null) {

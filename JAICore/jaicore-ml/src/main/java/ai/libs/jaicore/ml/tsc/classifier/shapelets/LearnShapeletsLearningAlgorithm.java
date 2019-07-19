@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Iterables;
 
 import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.util.MathUtil;
@@ -305,7 +305,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		try {
 			s = this.initializeS(dataMatrix);
 		} catch (TrainingException e) {
-			throw new AlgorithmException(e, "Can not train LearnShapelets model due to error during initialization of S.");
+			throw new AlgorithmException("Can not train LearnShapelets model due to error during initialization of S.", e);
 		}
 		double[][][] sHist = new double[scaleR][][];
 		for (int r = 0; r < scaleR; r++) {

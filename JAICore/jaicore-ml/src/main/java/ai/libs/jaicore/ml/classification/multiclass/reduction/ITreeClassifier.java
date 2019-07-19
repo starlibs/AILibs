@@ -7,9 +7,10 @@ import weka.core.Instance;
 
 public interface ITreeClassifier extends Classifier {
 
-  public int getHeight();
+	public int getHeight();
 
-  public double classifyInstance(final Instance instance) throws Exception;
+	@Override
+	public double classifyInstance(final Instance instance) throws Exception;
 
-  public int getDepthOfFirstCommonParent(List<Integer> classes);
+	public int getDepthOfFirstCommonParent(List<Integer> classes);
 }

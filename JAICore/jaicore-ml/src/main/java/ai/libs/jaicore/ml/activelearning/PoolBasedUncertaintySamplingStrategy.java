@@ -1,9 +1,10 @@
 package ai.libs.jaicore.ml.activelearning;
 
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.ILabeledInstance;
-
-import ai.libs.jaicore.ml.core.predictivemodel.ICertaintyProvider;
+import org.api4.java.ai.ml.activelearning.IActiveLearningPoolProvider;
+import org.api4.java.ai.ml.activelearning.ISelectiveSamplingStrategy;
+import org.api4.java.ai.ml.algorithm.predictivemodel.ICertaintyProvider;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.ILabeledInstance;
 
 /**
  * A simple pool-based uncertainty sampling strategy, which assesses certainty

@@ -3,9 +3,10 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 import java.util.Comparator;
 import java.util.Random;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.INumericArrayInstance;
-import org.api4.java.ai.ml.IOrderedDataset;
+import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
@@ -17,7 +18,7 @@ import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  *
  * @author Lukas Brandt
  */
-public class SystematicSampling<I extends INumericArrayInstance, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {
+public class SystematicSampling<I extends INumericArrayInstance & Clusterable, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {
 
 	private Random random;
 	private D sortedDataset = null;
@@ -75,7 +76,7 @@ public class SystematicSampling<I extends INumericArrayInstance, D extends IOrde
 					this.sortedDataset.sort(this.datapointComparator);
 				}
 			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
 			this.startIndex = this.random.nextInt(this.sortedDataset.size());
 			this.k = this.sortedDataset.size() / this.sampleSize;

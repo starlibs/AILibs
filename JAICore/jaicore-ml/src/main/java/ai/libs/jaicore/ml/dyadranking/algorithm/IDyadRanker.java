@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.dyadranking.algorithm;
 
-import ai.libs.jaicore.ml.core.predictivemodel.IBatchLearner;
+import org.api4.java.ai.ml.algorithm.predictivemodel.IBatchLearner;
+
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
 

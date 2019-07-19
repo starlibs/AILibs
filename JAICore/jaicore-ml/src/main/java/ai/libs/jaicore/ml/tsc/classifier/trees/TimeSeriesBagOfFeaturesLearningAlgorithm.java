@@ -4,13 +4,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.features.TimeSeriesFeature;
@@ -199,14 +199,14 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		try {
 			probs = measureOOBProbabilitiesUsingCV(subSeqValueMatrix, targetMatrix, (r - d) * data.length, this.getConfig().numFolds(), numClasses, subseriesClf);
 		} catch (TrainingException e1) {
-			throw new AlgorithmException(e1, "Could not measure OOB probabilities using CV.");
+			throw new AlgorithmException("Could not measure OOB probabilities using CV.", e1);
 		}
 
 		// Train final subseries classifier
 		try {
 			WekaUtil.buildWekaClassifierFromSimplifiedTS(subseriesClf, TimeSeriesUtil.createDatasetForMatrix(targetMatrix, subSeqValueMatrix));
 		} catch (TrainingException e) {
-			throw new AlgorithmException(e, "Could not train the sub series Random Forest classifier due to an internal Weka exception.");
+			throw new AlgorithmException("Could not train the sub series Random Forest classifier due to an internal Weka exception.", e);
 		}
 
 		// Discretize probability and form histogram
@@ -222,7 +222,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		try {
 			WekaUtil.buildWekaClassifierFromSimplifiedTS(finalClf, TimeSeriesUtil.createDatasetForMatrix(targets, finalInstances));
 		} catch (TrainingException e) {
-			throw new AlgorithmException(e, "Could not train the final Random Forest classifier due to an internal Weka exception.");
+			throw new AlgorithmException("Could not train the final Random Forest classifier due to an internal Weka exception.", e);
 		}
 
 		// Update model

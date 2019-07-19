@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.ai.ml.algorithm.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesForestLearningAlgorithm.ITimeSeriesForestConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;

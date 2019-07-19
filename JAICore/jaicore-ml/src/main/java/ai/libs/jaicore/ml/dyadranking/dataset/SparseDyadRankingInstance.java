@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.api4.java.ai.ml.ContainsNonNumericAttributesException;
-import org.api4.java.ai.ml.INumericArrayInstance;
+import org.api4.java.ai.ml.core.dataset.ContainsNonNumericAttributesException;
+import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValue;

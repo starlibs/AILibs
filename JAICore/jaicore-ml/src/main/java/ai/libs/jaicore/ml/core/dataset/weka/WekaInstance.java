@@ -4,8 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.api4.java.ai.ml.ContainsNonNumericAttributesException;
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.ContainsNonNumericAttributesException;
+import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;

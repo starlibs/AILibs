@@ -11,11 +11,11 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.dyadranking.Dyad;
 import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;

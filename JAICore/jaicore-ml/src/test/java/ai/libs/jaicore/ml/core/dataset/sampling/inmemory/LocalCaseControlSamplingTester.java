@@ -2,10 +2,10 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
+import ai.libs.jaicore.ml.core.dataset.sampling.IClusterableInstances;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.LocalCaseControlSamplingFactory;
 
 public class LocalCaseControlSamplingTester extends GeneralSamplingTester<Object> {
@@ -15,8 +15,8 @@ public class LocalCaseControlSamplingTester extends GeneralSamplingTester<Object
 	private static final double PRE_SAMPLING_FRACTION = 0.01;
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(final IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Object>, Object> dataset) {
-		LocalCaseControlSamplingFactory<INumericLabeledAttributeArrayInstance<Object>, IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<Object>, Object>> factory = new LocalCaseControlSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(final IOrderedLabeledAttributeArrayDataset<IClusterableInstances<Object>, Object> dataset) {
+		LocalCaseControlSamplingFactory<IClusterableInstances<Object>, IOrderedLabeledAttributeArrayDataset<IClusterableInstances<Object>, Object>> factory = new LocalCaseControlSamplingFactory<>();
 		if (dataset != null) {
 			factory.setPreSampleSize((int) (PRE_SAMPLING_FRACTION * dataset.size()));
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());

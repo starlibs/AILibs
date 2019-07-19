@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
-import org.api4.java.ai.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 import org.nd4j.linalg.api.ndarray.INDArray;
+
+import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 
 /**
  * Time Series Dataset.

@@ -71,7 +71,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 		try {
 			this.outputFileWriter.write(ArffUtilities.extractArffHeader(this.getInput()));
 		} catch (IOException e) {
-			throw new AlgorithmException(e, "Error while writing to given output path.");
+			throw new AlgorithmException("Error while writing to given output path.", e);
 		}
 		// Check if the requested sample size is zero and we can stop directly.
 		if (this.sampleSize == 0) {
@@ -100,7 +100,7 @@ public abstract class AFileSamplingAlgorithm extends AAlgorithm<File, File> {
 			this.outputFileWriter.close();
 		} catch (IOException e) {
 			this.cleanUp();
-			throw new AlgorithmException(e, "Could not close File writer for sampling output file");
+			throw new AlgorithmException("Could not close File writer for sampling output file", e);
 		}
 		this.cleanUp();
 		return new File(this.outputFilePath);

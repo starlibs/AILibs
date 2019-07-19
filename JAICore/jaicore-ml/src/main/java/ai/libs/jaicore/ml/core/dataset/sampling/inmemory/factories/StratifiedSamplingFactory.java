@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.IOrderedDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.IStratiAmountSelector;

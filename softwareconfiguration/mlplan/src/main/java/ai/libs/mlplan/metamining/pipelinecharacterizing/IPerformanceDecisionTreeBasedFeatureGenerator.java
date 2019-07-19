@@ -2,8 +2,9 @@ package ai.libs.mlplan.metamining.pipelinecharacterizing;
 
 import java.util.Map;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
+
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 
 /**
  * A feature generator that is based on a decision tree. Generates new features

@@ -3,14 +3,14 @@ package ai.libs.jaicore.ml.dyadranking.general;
 import java.util.Arrays;
 import java.util.List;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;

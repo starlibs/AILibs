@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.TreeNode;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeClassifier.TimeSeriesTreeNodeDecisionFunction;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;

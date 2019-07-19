@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import ai.libs.jaicore.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.algorithm.PredictionException;
+
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 
 /* This class is just a sketch for the BOSS ensemble classifier it assumes that the grid

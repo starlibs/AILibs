@@ -1,9 +1,9 @@
 package autofe.algorithm.hasco;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import autofe.util.DataSet;
 import weka.core.Capabilities;
 import weka.core.Instance;

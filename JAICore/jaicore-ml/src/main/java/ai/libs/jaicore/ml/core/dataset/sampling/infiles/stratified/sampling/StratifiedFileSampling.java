@@ -73,7 +73,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 				ArffUtilities.skipWithReaderToDatapoints(this.reader);
 				return this.activate();
 			} catch (IOException e) {
-				throw new AlgorithmException(e, "Was not able to count the datapoints.");
+				throw new AlgorithmException("Was not able to count the datapoints.", e);
 			}
 		case ACTIVE:
 			if (this.streamedDatapoints < this.datapointAmount) {
@@ -86,13 +86,13 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 					this.streamedDatapoints++;
 					return new SampleElementAddedEvent(this.getId());
 				} catch (IOException e) {
-					throw new AlgorithmException(e, "Was not able to read datapoint line form input file");
+					throw new AlgorithmException("Was not able to read datapoint line form input file", e);
 				}
 			} else {
 				try {
 					this.reader.close();
 				} catch (IOException e) {
-					throw new AlgorithmException(e, "Was not able to close input file reader.");
+					throw new AlgorithmException("Was not able to close input file reader.", e);
 				}
 				if (!this.stratiSamplingStarted) {
 					// Start Reservoir Sampling inside the strati.
@@ -117,7 +117,7 @@ public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 							}
 							return this.terminate();
 						} catch (IOException e) {
-							throw new AlgorithmException(e, "Was not able to write datapoint into output file.");
+							throw new AlgorithmException("Was not able to write datapoint into output file.", e);
 						}
 
 					}

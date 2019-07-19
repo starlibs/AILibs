@@ -48,7 +48,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 				ArffUtilities.skipWithReaderToDatapoints(this.reader);
 				return this.activate();
 			} catch (IOException e) {
-				throw new AlgorithmException(e, "Was not able to count the datapoints.");
+				throw new AlgorithmException("Was not able to count the datapoints.", e);
 			}
 		case ACTIVE:
 			if (this.streamedDatapoints < this.datapointAmount) {
@@ -70,7 +70,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 					this.streamedDatapoints++;
 					return new SampleElementAddedEvent(this.getId());
 				} catch (IOException e) {
-					throw new AlgorithmException(e, "Was not able to read datapoint line from input file");
+					throw new AlgorithmException("Was not able to read datapoint line from input file", e);
 				}
 			} else {
 				try {
@@ -81,7 +81,7 @@ public class ReservoirSampling extends AFileSamplingAlgorithm {
 					}
 					return this.terminate();
 				} catch (IOException e) {
-					throw new AlgorithmException(e, "Was not able to write sampled datapoints into output files.");
+					throw new AlgorithmException("Was not able to write sampled datapoints into output files.", e);
 				}
 			}
 		case INACTIVE:

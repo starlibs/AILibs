@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 
 import java.util.concurrent.ExecutionException;
 
-import ai.libs.jaicore.ml.interfaces.LearningCurve;
+import org.api4.java.ai.ml.LearningCurve;
 
 /**
  * Functional interface for extrapolating a learning curve from anchorpoints.

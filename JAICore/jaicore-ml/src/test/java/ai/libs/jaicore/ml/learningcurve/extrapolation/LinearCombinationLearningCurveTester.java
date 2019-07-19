@@ -8,11 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.api4.java.ai.ml.AnalyticalLearningCurve;
 import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import ai.libs.jaicore.ml.interfaces.AnalyticalLearningCurve;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationExtrapolationMethod;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.lc.LinearCombinationLearningCurve;

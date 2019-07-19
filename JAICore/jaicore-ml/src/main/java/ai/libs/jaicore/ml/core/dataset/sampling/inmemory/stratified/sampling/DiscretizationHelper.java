@@ -10,7 +10,7 @@ import java.util.Set;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
-import org.api4.java.ai.ml.AILabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.AILabeledAttributeArrayDataset;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
 import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import org.slf4j.Logger;

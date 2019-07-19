@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 import java.io.File;
 import java.io.IOException;
 
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 

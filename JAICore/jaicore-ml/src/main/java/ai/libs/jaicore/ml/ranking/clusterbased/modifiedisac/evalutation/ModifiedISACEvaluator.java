@@ -7,10 +7,10 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.RankingForGroup;
 import ai.libs.jaicore.ml.ranking.clusterbased.modifiedisac.ModifiedISAC;
 import weka.core.Instance;

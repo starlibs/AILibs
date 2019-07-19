@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.api4.java.ai.ml.IDataset;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 
 import com.clearspring.analytics.util.Lists;
 import com.fasterxml.jackson.annotation.JsonIgnore;

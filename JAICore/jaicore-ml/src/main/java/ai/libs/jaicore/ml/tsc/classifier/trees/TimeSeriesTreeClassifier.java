@@ -3,11 +3,11 @@ package ai.libs.jaicore.ml.tsc.classifier.trees;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graph.TreeNode;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;

@@ -3,8 +3,8 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;

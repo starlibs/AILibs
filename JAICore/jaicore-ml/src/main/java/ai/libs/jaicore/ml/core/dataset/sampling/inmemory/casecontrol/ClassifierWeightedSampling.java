@@ -4,9 +4,9 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.ILabeledInstance;
-import org.api4.java.ai.ml.IOrderedDataset;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -72,7 +72,7 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends
 				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(((WekaInstances<?>) sampleCopy).getList(), this.pilotEstimator);
 				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			} catch (DatasetCreationException e) {
-				throw new AlgorithmException(e, "Could not create a copy of the dataset.");
+				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
 			return this.activate();
 		case ACTIVE:

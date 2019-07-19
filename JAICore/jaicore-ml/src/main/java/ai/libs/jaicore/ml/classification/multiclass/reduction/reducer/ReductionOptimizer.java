@@ -7,10 +7,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +47,26 @@ public class ReductionOptimizer implements Classifier {
 	public void buildClassifier(final Instances data) throws Exception {
 		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, this.seed, .6f);
 		Instances train = dataSplit.get(0);
-		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<>(new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(this.seed), train), n -> this.getLossForClassifier(this.getTreeFromSolution(n.getNodes(), data, false), data) * 1.0), n -> n.path().size() * -1.0
-				, 0.1, false);
+		NodeGoalTester<RestProblem, Decision> tester = new NodeGoalTester<RestProblem, Decision>() {
+
+			@Override
+			public boolean isGoal(final RestProblem n) {
+				for (Set<String> open : n) {
+					if (open.size() > 1) {
+						return false;
+					}
+				}
+				return true;
+			}
+		};
+		GraphSearchWithSubpathEvaluationsInput<RestProblem, Decision, Double> input = new GraphSearchWithSubpathEvaluationsInput<>(new ReductionGraphGenerator(new Random(this.seed), train), tester,
+				n -> this.getLossForClassifier(this.getTreeFromSolution(n.getNodes(), data, false), data) * 1.0);
+		BestFirstEpsilon<RestProblem, Decision, Double> search = new BestFirstEpsilon<>(input, n -> n.getNodes().size() * -1.0, 0.1, false);
 
 		/* get best 20 solutions */
 		int i = 0;
-		Collection<EvaluatedSearchGraphPath<RestProblem,Decision,Double>> solutions = new ArrayList<>();
-		EvaluatedSearchGraphPath<RestProblem,Decision,Double> solution;
+		Collection<EvaluatedSearchGraphPath<RestProblem, Decision, Double>> solutions = new ArrayList<>();
+		EvaluatedSearchGraphPath<RestProblem, Decision, Double> solution;
 		while ((solution = search.nextSolutionCandidate()) != null) {
 			solutions.add(solution);
 			if (i++ > 100) {
@@ -60,7 +75,7 @@ public class ReductionOptimizer implements Classifier {
 		}
 
 		/* select */
-		Optional<EvaluatedSearchGraphPath<RestProblem,Decision,Double>> bestSolution = solutions.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore()));
+		Optional<EvaluatedSearchGraphPath<RestProblem, Decision, Double>> bestSolution = solutions.stream().min((s1, s2) -> s1.getScore().compareTo(s2.getScore()));
 		if (!bestSolution.isPresent()) {
 			this.logger.error("No solution found");
 			return;

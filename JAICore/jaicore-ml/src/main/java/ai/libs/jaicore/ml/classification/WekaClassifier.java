@@ -7,11 +7,12 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import ai.libs.jaicore.ml.ILearningAlgorithm;
+import org.api4.java.ai.ml.algorithm.ILearningAlgorithm;
+import org.api4.java.ai.ml.algorithm.LearningAlgorithmConfigurationFailedException;
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
+
 import ai.libs.jaicore.ml.classification.multiclass.InconsistentDataFormatException;
-import ai.libs.jaicore.ml.classification.multiclass.LearningAlgorithmConfigurationFailedException;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;

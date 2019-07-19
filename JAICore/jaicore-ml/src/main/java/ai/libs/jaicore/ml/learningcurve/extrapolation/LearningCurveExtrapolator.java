@@ -9,9 +9,10 @@ import java.util.Random;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.LearningCurve;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -22,7 +23,6 @@ import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
-import ai.libs.jaicore.ml.interfaces.LearningCurve;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -139,15 +139,15 @@ public class LearningCurveExtrapolator<I extends ILabeledAttributeArrayInstance<
 			}
 			return this.extrapolationMethod.extrapolateLearningCurveFromAnchorPoints(this.anchorPoints, this.yValues, this.dataset.size());
 		} catch (UnsupportedAttributeTypeException e) {
-			throw new AlgorithmException(e, "Error during convertion of the dataset to WEKA instances");
+			throw new AlgorithmException("Error during convertion of the dataset to WEKA instances", e);
 		} catch (AlgorithmExecutionCanceledException | TimeoutException | AlgorithmException e) {
-			throw new AlgorithmException(e, "Error during creation of the subsamples for the anchorpoints");
+			throw new AlgorithmException("Error during creation of the subsamples for the anchorpoints", e);
 		} catch (ExecutionException e) {
-			throw new AlgorithmException(e, "Error during learning curve extrapolation");
+			throw new AlgorithmException("Error during learning curve extrapolation", e);
 		} catch (InvalidAnchorPointsException | InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new AlgorithmException(e, "Error during training/testing the classifier");
+			throw new AlgorithmException("Error during training/testing the classifier", e);
 		}
 
 	}

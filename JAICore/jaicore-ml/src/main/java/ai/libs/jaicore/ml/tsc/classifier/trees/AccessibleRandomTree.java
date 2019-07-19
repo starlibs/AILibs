@@ -2,10 +2,10 @@ package ai.libs.jaicore.ml.tsc.classifier.trees;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import weka.classifiers.trees.RandomTree;
 import weka.core.Instance;
 import weka.core.Instances;

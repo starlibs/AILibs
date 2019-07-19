@@ -11,9 +11,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.algorithm.IAlgorithm;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
@@ -21,6 +21,7 @@ import org.junit.runners.Parameterized.Parameters;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.ml.core.dataset.sampling.IClusterableInstances;
 
 /**
  * This class provides some tests that verify basic properties of a sampling
@@ -62,7 +63,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 		return this.getAlgorithm(dataset);
 	}
 
-	public abstract IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<INumericLabeledAttributeArrayInstance<L>, L> dataset);
+	public abstract IAlgorithm<?, ?> getAlgorithm(IOrderedLabeledAttributeArrayDataset<IClusterableInstances<L>, L> dataset);
 
 	/**
 	 * This test verifies that the produced samples have the desired size.

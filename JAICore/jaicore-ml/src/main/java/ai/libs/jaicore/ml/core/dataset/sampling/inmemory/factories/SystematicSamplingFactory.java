@@ -3,13 +3,14 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 import java.util.Comparator;
 import java.util.Random;
 
-import org.api4.java.ai.ml.INumericArrayInstance;
-import org.api4.java.ai.ml.IOrderedDataset;
+import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.SystematicSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class SystematicSamplingFactory<I extends INumericArrayInstance, D extends IOrderedDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, SystematicSampling<I, D>> {
+public class SystematicSamplingFactory<I extends INumericArrayInstance & Clusterable, D extends IOrderedDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, SystematicSampling<I, D>> {
 
 	private Comparator<I> datapointComparator = null;
 	private SystematicSampling<I, D> previousRun = null;

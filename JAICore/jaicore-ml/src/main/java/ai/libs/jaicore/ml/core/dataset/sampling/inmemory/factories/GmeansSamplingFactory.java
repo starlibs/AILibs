@@ -2,15 +2,16 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories;
 
 import java.util.Random;
 
+import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.GmeansSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class GmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, GmeansSampling<I, D>> {
+public class GmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number> & Clusterable, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, GmeansSampling<I, D>> {
 
 	private GmeansSampling<I, D> previousRun;
 	private long clusterSeed = System.currentTimeMillis();

@@ -2,11 +2,11 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 
 import static org.junit.Assert.assertTrue;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.lcnet.LCNetExtrapolationMethod;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.lcnet.PointWiseLearningCurve;

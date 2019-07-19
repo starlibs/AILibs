@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.dataset.numeric.ArffToNumericDatasetDeserializer;
 import ai.libs.jaicore.ml.dataset.numeric.NumericDataset;
 

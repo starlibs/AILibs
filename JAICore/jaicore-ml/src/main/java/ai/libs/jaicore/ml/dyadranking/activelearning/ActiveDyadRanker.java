@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.dyadranking.activelearning;
 
-import ai.libs.jaicore.ml.core.exception.TrainingException;
+import org.api4.java.ai.ml.algorithm.TrainingException;
+
 import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 
 /**

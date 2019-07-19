@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 

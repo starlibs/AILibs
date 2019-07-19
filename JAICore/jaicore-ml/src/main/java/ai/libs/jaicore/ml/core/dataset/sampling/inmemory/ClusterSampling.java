@@ -3,15 +3,16 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 import java.util.List;
 
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
-public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number>, D extends IDataset<I>> extends ASamplingAlgorithm<I, D> {
+public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number> & Clusterable, D extends IDataset<I>> extends ASamplingAlgorithm<I, D> {
 
 	protected List<CentroidCluster<I>> clusterResults = null;
 	protected int currentCluster = 0;

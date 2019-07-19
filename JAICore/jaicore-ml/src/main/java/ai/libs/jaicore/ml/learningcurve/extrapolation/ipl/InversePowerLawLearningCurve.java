@@ -5,10 +5,9 @@ import java.math.BigDecimal;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.exception.NoBracketingException;
+import org.api4.java.ai.ml.AnalyticalLearningCurve;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.ml.interfaces.AnalyticalLearningCurve;
 
 /**
  * Representation of a learning curve with the Inverse Power Law function, which has three parameters named a, b and c. The function is f(x) = (1-a) - b * x^c. O

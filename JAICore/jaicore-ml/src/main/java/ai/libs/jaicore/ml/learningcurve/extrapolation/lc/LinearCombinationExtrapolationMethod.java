@@ -2,7 +2,8 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation.lc;
 
 import java.util.concurrent.ExecutionException;
 
-import ai.libs.jaicore.ml.interfaces.LearningCurve;
+import org.api4.java.ai.ml.LearningCurve;
+
 import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.client.ExtrapolationServiceClient;

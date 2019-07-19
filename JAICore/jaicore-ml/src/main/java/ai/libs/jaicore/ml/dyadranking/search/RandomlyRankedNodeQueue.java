@@ -18,7 +18,7 @@ import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
  * @param <V>
  */
 @SuppressWarnings("serial")
-public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedList<BackPointerPath<N, V>> {
+public class RandomlyRankedNodeQueue<N, A, V extends Comparable<V>> extends LinkedList<BackPointerPath<N, A, V>> {
 
 	private Random random;
 	private transient Logger logger = LoggerFactory.getLogger(RandomlyRankedNodeQueue.class);
@@ -31,7 +31,7 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedL
 	 * Adds an element at a random position within the
 	 */
 	@Override
-	public boolean add(final BackPointerPath<N, V> e) {
+	public boolean add(final BackPointerPath<N, A, V> e) {
 		int position = this.random.nextInt(this.size() + 1);
 		this.logger.debug("Add node at random position {} to OPEN list of size {}.", position, this.size());
 		super.add(position, e);
@@ -39,7 +39,7 @@ public class RandomlyRankedNodeQueue<N, V extends Comparable<V>> extends LinkedL
 	}
 
 	@Override
-	public void add(final int position, final BackPointerPath<N, V> e) {
+	public void add(final int position, final BackPointerPath<N, A, V> e) {
 		throw new UnsupportedOperationException("Cannot place items at a specific position wihtin a randomly ranked queue!");
 	}
 

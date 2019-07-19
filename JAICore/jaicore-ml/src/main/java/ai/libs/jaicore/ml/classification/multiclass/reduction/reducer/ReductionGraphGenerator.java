@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
@@ -113,18 +112,6 @@ public class ReductionGraphGenerator implements IGraphGenerator<RestProblem, Dec
 				this.logger.error("Encountered error: {}", e);
 			}
 			return restProblems;
-		};
-	}
-
-	@Override
-	public NodeGoalTester<RestProblem> getGoalTester() {
-		return n -> {
-			for (Set<String> open : n) {
-				if (open.size() > 1) {
-					return false;
-				}
-			}
-			return true;
 		};
 	}
 }

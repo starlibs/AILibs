@@ -2,12 +2,12 @@ package ai.libs.jaicore.ml.dyadranking.general.inputopt;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
 
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
 import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;

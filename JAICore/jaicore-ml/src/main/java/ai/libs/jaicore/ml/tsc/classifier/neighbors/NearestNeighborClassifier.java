@@ -8,10 +8,10 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.ai.ml.algorithm.PredictionException;
 
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.core.exception.PredictionException;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.distances.ITimeSeriesDistance;

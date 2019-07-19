@@ -3,9 +3,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.api4.java.ai.ml.DatasetCreationException;
-import org.api4.java.ai.ml.IDataset;
-import org.api4.java.ai.ml.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
@@ -152,11 +152,11 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 				this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 			}
 		} catch (DatasetCreationException e1) {
-			throw new AlgorithmException(e1, "Could not create a copy of the dataset.");
+			throw new AlgorithmException("Could not create a copy of the dataset.", e1);
 		} catch (InterruptedException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new AlgorithmException(e, "Unexpected error");
+			throw new AlgorithmException("Unexpected error", e);
 		}
 		return this.activate();
 	}

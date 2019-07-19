@@ -8,9 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
+
 import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;

@@ -2,12 +2,12 @@ package ai.libs.jaicore.ml.tsc.classifier.trees;
 
 import java.util.ArrayList;
 
+import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.exception.TrainingException;
 import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesForestClassifier;
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 

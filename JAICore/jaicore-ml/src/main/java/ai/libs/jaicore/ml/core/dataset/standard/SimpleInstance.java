@@ -3,8 +3,8 @@ package ai.libs.jaicore.ml.core.dataset.standard;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.api4.java.ai.ml.ContainsNonNumericAttributesException;
-import org.api4.java.ai.ml.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.core.dataset.ContainsNonNumericAttributesException;
+import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
 import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValue;
