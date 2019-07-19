@@ -26,13 +26,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.MultipleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
@@ -45,6 +39,10 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -146,7 +144,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
-		this.pathGoalTester = this.graphGenerator.getGoalTester();
+		this.pathGoalTester = problem.getGoalTester();
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
 		this.nodeEvaluator = problem.getNodeEvaluator();
@@ -156,7 +154,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 			DecoratingNodeEvaluator<N, A, V> castedEvaluator = (DecoratingNodeEvaluator<N, A, V>) this.nodeEvaluator;
 			if (castedEvaluator.requiresGraphGenerator()) {
 				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", castedEvaluator);
-				castedEvaluator.setGenerator(this.graphGenerator);
+				castedEvaluator.setGenerator(this.graphGenerator, this.pathGoalTester);
 			}
 			if (castedEvaluator.reportsSolutions()) {
 				this.logger.info("{} is a solution reporter. Register the search algo in its event bus", castedEvaluator);
@@ -168,7 +166,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		} else {
 			if (this.nodeEvaluator instanceof IPotentiallyGraphDependentPathEvaluator) {
 				this.logger.info("{} is a graph dependent node evaluator. Setting its graph generator now ...", this.nodeEvaluator);
-				((IPotentiallyGraphDependentPathEvaluator<N, A, V>) this.nodeEvaluator).setGenerator(this.graphGenerator);
+				((IPotentiallyGraphDependentPathEvaluator<N, A, V>) this.nodeEvaluator).setGenerator(this.graphGenerator, this.pathGoalTester);
 			}
 
 			/* if the node evaluator is a solution reporter, register in his event bus */
@@ -562,28 +560,13 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 	protected void initGraph() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		if (!this.initialized) {
 			this.initialized = true;
-			if (this.rootGenerator instanceof MultipleRootGenerator) {
-				for (N n0 : ((MultipleRootGenerator<N>) this.rootGenerator).getRoots()) {
-					BackPointerPath<N, A, V> root = this.newNode(null, n0, null);
-					this.labelNode(root);
-					this.checkAndConductTermination();
-					this.openLock.lockInterruptibly();
-					try {
-						if (root == null) {
-							throw new IllegalArgumentException("Root for MultipleRootGenerator is null. Cannot add NULL as a node to OPEN");
-						}
-						this.open.add(root);
-					} finally {
-						this.openLock.unlock();
-					}
-					this.logger.debug("Labeled root with {}", root.getScore());
-				}
-			} else {
-				BackPointerPath<N, A, V> root = this.newNode(null, ((SingleRootGenerator<N>) this.rootGenerator).getRoot(), null);
+			for (N n0 : this.rootGenerator.getRoots()) {
+				BackPointerPath<N, A, V> root = this.newNode(null, n0, null);
 				if (root == null) {
-					throw new IllegalArgumentException("Root for SingleRootGenerator is null. Cannot add NULL as a node to OPEN");
+					throw new IllegalArgumentException("Root cannot be null. Cannot add NULL as a node to OPEN");
 				}
 				this.labelNode(root);
+				this.logger.debug("Labeled root with {}", root.getScore());
 				this.checkAndConductTermination();
 				if (root.getScore() == null) {
 					throw new IllegalArgumentException("The node evaluator has assigned NULL to the root node, which impedes an initialization of the search graph. Node evaluator: " + this.nodeEvaluator);
@@ -595,9 +578,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					this.openLock.unlock();
 				}
 			}
-
 		}
-
 	}
 
 	protected void selectNodeForNextExpansion(final BackPointerPath<N, A, V> node) throws InterruptedException {

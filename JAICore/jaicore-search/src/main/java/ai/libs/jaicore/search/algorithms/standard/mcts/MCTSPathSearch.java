@@ -10,14 +10,8 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -26,6 +20,12 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
-		PathGoalTester<N, A> tmpGoalTester = this.graphGenerator.getGoalTester();
+		PathGoalTester<N, A> tmpGoalTester = problem.getGoalTester();
 		if (!(tmpGoalTester instanceof NodeGoalTester)) {
 			throw new IllegalArgumentException("MCTS must be run with a NodeGoalEvaluator!");
 		}

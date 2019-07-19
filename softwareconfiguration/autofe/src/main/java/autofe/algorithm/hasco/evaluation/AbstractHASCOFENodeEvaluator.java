@@ -2,9 +2,9 @@ package autofe.algorithm.hasco.evaluation;
 
 import java.util.Collection;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;

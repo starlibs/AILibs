@@ -1,24 +1,25 @@
 package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DecoratingNodeEvaluator<T, A, V extends Comparable<V>>
-implements IPathEvaluator<T, A, V>, ICancelableNodeEvaluator, ILoggingCustomizable, IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutionReportingPathEvaluator<T, A, V> {
+public abstract class DecoratingNodeEvaluator<N, A, V extends Comparable<V>>
+implements IPathEvaluator<N, A, V>, ICancelableNodeEvaluator, ILoggingCustomizable, IPotentiallyGraphDependentPathEvaluator<N, A, V>, IPotentiallySolutionReportingPathEvaluator<N, A, V> {
 
 	private boolean canceled = false;
 	private Logger logger = LoggerFactory.getLogger(DecoratingNodeEvaluator.class);
-	private final IPathEvaluator<T, A, V> decoratedEvaluator;
+	private final IPathEvaluator<N, A, V> decoratedEvaluator;
 
-	public DecoratingNodeEvaluator(final IPathEvaluator<T, A, V> evaluator) {
+	public DecoratingNodeEvaluator(final IPathEvaluator<N, A, V> evaluator) {
 		super();
 		if (evaluator == null) {
 			throw new IllegalArgumentException("The decorated evaluator must not be null!");
@@ -26,12 +27,12 @@ implements IPathEvaluator<T, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 		this.decoratedEvaluator = evaluator;
 	}
 
-	public IPathEvaluator<T, A, V> getEvaluator() {
+	public IPathEvaluator<N, A, V> getEvaluator() {
 		return this.decoratedEvaluator;
 	}
 
 	@Override
-	public V f(final IPath<T, A> node) throws PathEvaluationException, InterruptedException {
+	public V f(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
 		return this.decoratedEvaluator.f(node);
 	}
 
@@ -68,7 +69,7 @@ implements IPathEvaluator<T, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 	}
 
 	@Override
-	public void setGenerator(final IGraphGenerator<T, A> generator) {
+	public void setGenerator(final IGraphGenerator<N, A> generator, final PathGoalTester<N, A> goalTester) {
 		this.logger.info("Setting graph generator of {} to {}", this, generator);
 		if (!this.requiresGraphGenerator()) {
 			throw new UnsupportedOperationException("This node evaluator is not graph dependent");
@@ -76,7 +77,7 @@ implements IPathEvaluator<T, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 		if (!this.isDecoratedEvaluatorGraphDependent()) {
 			return;
 		}
-		((IPotentiallyGraphDependentPathEvaluator<T, A, V>) this.decoratedEvaluator).setGenerator(generator);
+		((IPotentiallyGraphDependentPathEvaluator<N, A, V>) this.decoratedEvaluator).setGenerator(generator, goalTester);
 	}
 
 	@Override
@@ -84,7 +85,7 @@ implements IPathEvaluator<T, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 		if (!this.doesDecoratedEvaluatorReportSolutions()) {
 			throw new UnsupportedOperationException(this.getClass().getName() + " is not a solution reporting node evaluator");
 		}
-		((IPotentiallySolutionReportingPathEvaluator<T, A, V>) this.decoratedEvaluator).registerSolutionListener(listener);
+		((IPotentiallySolutionReportingPathEvaluator<N, A, V>) this.decoratedEvaluator).registerSolutionListener(listener);
 	}
 
 	@Override

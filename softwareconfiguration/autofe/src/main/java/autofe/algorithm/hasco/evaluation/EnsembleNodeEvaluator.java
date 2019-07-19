@@ -1,7 +1,7 @@
 package autofe.algorithm.hasco.evaluation;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.datastructure.graph.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

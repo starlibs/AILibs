@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.algorithms.andor;
 
 import static org.junit.Assert.assertEquals;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.junit.Test;
 
@@ -19,7 +19,8 @@ public class AndOrTester {
 		int b = 10;
 		int d = 4;
 		int limit = 1;
-		IGraphGenerator<NodeLabel, String> gg = new SyntheticAndGrid(k, b, d);
+		SyntheticAndGrid gg = new SyntheticAndGrid(k, b, d);
+		NodeGoalTester<NodeLabel, String> goalTester = n -> (n.depth == gg.getDepth());
 		IObjectEvaluator<Graph<NodeLabel>, Double> evaluator = g -> {
 			double sum = 0;
 			for (NodeLabel leaf : g.getSinks()) {
@@ -27,8 +28,8 @@ public class AndOrTester {
 			}
 			return sum;
 		};
-		AndORBottomUpFilter<NodeLabel, String, Double> algo = new AndORBottomUpFilter<>(gg, evaluator, limit);
-		GraphSearchWithSubpathEvaluationsInput<NodeLabel, String, Double> prob = new GraphSearchWithSubpathEvaluationsInput<>(gg, n -> 0.0);
+		AndORBottomUpFilter<NodeLabel, String, Double> algo = new AndORBottomUpFilter<>(gg, goalTester, evaluator, limit);
+		GraphSearchWithSubpathEvaluationsInput<NodeLabel, String, Double> prob = new GraphSearchWithSubpathEvaluationsInput<>(gg, goalTester, n -> 0.0);
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<NodeLabel,String,Double>, NodeLabel, String, Double> bf = new BestFirst<>(prob);
 		//		VisualizationWindow<?,?> window = new VisualizationWindow<>(algo);
 		long start = System.currentTimeMillis();

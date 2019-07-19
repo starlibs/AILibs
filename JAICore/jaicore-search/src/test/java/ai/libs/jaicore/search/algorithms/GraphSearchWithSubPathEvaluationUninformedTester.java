@@ -14,7 +14,7 @@ public abstract class GraphSearchWithSubPathEvaluationUninformedTester extends G
 			return this.getSearchAlgorithm((GraphSearchWithSubpathEvaluationsInput<N, A, Double>)problem);
 		}
 		else {
-			return this.getSearchAlgorithm(new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), n -> 0.0));
+			return this.getSearchAlgorithm(new GraphSearchWithSubpathEvaluationsInput<>(problem, n -> 0.0));
 		}
 	}
 

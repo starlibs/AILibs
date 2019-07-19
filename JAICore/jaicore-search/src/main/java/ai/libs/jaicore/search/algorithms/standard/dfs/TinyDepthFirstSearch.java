@@ -5,10 +5,10 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -23,7 +23,7 @@ public class TinyDepthFirstSearch<N, A> {
 	public TinyDepthFirstSearch(final GraphSearchInput<N, A> problem) {
 		super();
 		this.root = ((SingleRootGenerator<N>) problem.getGraphGenerator().getRootGenerator()).getRoot();
-		this.goalTester = (NodeGoalTester<N, A>) problem.getGraphGenerator().getGoalTester();
+		this.goalTester = (NodeGoalTester<N, A>) problem.getGoalTester();
 		this.successorGenerator = problem.getGraphGenerator().getSuccessorGenerator();
 		this.path.add(this.root);
 	}

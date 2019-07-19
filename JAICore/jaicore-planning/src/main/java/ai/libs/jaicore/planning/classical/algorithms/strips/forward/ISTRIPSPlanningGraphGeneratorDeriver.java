@@ -1,6 +1,6 @@
 package ai.libs.jaicore.planning.classical.algorithms.strips.forward;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.classical.problems.strips.StripsPlanningProblem;

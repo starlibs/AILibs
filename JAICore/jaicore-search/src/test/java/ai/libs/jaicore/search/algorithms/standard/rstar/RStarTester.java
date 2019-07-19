@@ -22,7 +22,7 @@ public class RStarTester extends GraphSearchSolutionIteratorTester {
 
 	@Override
 	public <N, A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
-		GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<N, A> transformedInput = new GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<>(problem.getGraphGenerator(), (n1,n2) -> 1.0, n -> 0.0, (n1, n2) -> 1.0, (n1, n2) -> n1.equals(n2) ? 0.0 : 1.0, new GraphBasedDistantSuccessorGenerator<>(problem.getGraphGenerator(), 0));
+		GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<N, A> transformedInput = new GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic<>(problem, (n1,n2) -> 1.0, n -> 0.0, (n1, n2) -> 1.0, (n1, n2) -> n1.equals(n2) ? 0.0 : 1.0, new GraphBasedDistantSuccessorGenerator<>(problem, 0));
 
 		RStarFactory<N, A> factory = new RStarFactory<>();
 		factory.setDelta(2);

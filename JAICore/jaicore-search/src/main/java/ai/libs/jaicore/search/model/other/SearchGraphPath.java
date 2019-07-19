@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.datastructure.graph.IPath;
 
 public class SearchGraphPath<N, A> implements IPath<N, A> {
 	private final List<N> nodes;

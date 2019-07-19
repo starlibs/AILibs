@@ -19,6 +19,8 @@ import ai.libs.jaicore.interrupt.InterruptionTimerTask;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPGraphGenerator;
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPSolutionPredicate;
+import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPGenerator;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 
@@ -68,7 +70,8 @@ public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPN
 	}
 
 	public StandardBestFirst<EnhancedTTSPNode, String, Double> getBF(final int problemSize, final IPathEvaluator<EnhancedTTSPNode, String, Double> ne) {
-		GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> input = new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPGraphGenerator(new EnhancedTTSPGenerator().generate(problemSize, 100)), ne); // there will
+		EnhancedTTSP problem = new EnhancedTTSPGenerator().generate(problemSize, 100);
+		GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> input = new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPGraphGenerator(problem), new EnhancedTTSPSolutionPredicate(problem), ne); // there will
 		// be 10
 		// solutions
 		StandardBestFirst<EnhancedTTSPNode, String, Double> bf = new StandardBestFirst<>(input);

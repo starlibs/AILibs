@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.model.other;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.datastructure.graph.IPath;
 
 public class AgnosticPathEvaluator<N, A> implements IObjectEvaluator<IPath<N, A>, Double> {
 

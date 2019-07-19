@@ -3,10 +3,12 @@ package ai.libs.jaicore.search.probleminputs;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
@@ -26,8 +28,13 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
 public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> implements IGraphSearchWithPathEvaluationsInput<N, A, V> {
 	private final IObjectEvaluator<IPath<N, A>, V> pathEvaluator;
 
-	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
-		super(graphGenerator);
+	public GraphSearchWithPathEvaluationsInput(final IGraphSearchInput<N, A> graphSearchInput, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+		super(graphSearchInput);
+		this.pathEvaluator = pathEvaluator;
+	}
+
+	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+		super(graphGenerator, goalTester);
 		this.pathEvaluator = pathEvaluator;
 	}
 

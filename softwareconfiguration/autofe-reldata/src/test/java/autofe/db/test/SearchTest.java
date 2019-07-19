@@ -9,8 +9,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.junit.Test;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -28,6 +28,7 @@ import autofe.db.model.relation.BackwardRelationship;
 import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
+import autofe.db.search.DatabaseNodeGoalPredicate;
 import autofe.db.util.DBUtils;
 
 public class SearchTest {
@@ -40,7 +41,7 @@ public class SearchTest {
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(initialDatabase);
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator);
 
-		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, evaluator);
+		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, new DatabaseNodeGoalPredicate(), evaluator);
 
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(tree);
 		search.setTimeoutForComputationOfF(60000, node -> 100.0);

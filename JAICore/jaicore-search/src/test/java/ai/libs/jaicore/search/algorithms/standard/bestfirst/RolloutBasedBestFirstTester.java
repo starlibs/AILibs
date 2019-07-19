@@ -16,7 +16,7 @@ public class RolloutBasedBestFirstTester extends GraphSearchSolutionIteratorTest
 	@Override
 	public <N,A> IGraphSearch<?, ?, N, A> getSearchAlgorithm(final GraphSearchInput<N, A> problem) {
 		IPathEvaluator<N, A, Double> ne = new RandomCompletionBasedNodeEvaluator<>(new Random(0), 3, new AgnosticPathEvaluator<>());
-		GraphSearchWithSubpathEvaluationsInput<N, A, Double> transformed = new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), ne);
+		GraphSearchWithSubpathEvaluationsInput<N, A, Double> transformed = new GraphSearchWithSubpathEvaluationsInput<>(problem, ne);
 		return new StandardBestFirst<>(transformed);
 	}
 }

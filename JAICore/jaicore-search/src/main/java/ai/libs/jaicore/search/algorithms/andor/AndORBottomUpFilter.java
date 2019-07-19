@@ -13,10 +13,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearch;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -24,6 +21,10 @@ import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,12 +72,12 @@ public class AndORBottomUpFilter<N, A, V extends Comparable<V>> extends AAlgorit
 	private Graph<N> bestSolutionBase;
 	private final int nodeLimit;
 
-	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator) {
-		this(gg, pEvaluator, 1);
+	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final PathGoalTester<N, A> gt,final IObjectEvaluator<Graph<N>, V> pEvaluator) {
+		this(gg, gt, pEvaluator, 1);
 	}
 
-	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final IObjectEvaluator<Graph<N>, V> pEvaluator, final int andNodeLimit) {
-		super(new GraphSearchInput<>(gg));
+	public AndORBottomUpFilter(final IGraphGenerator<N, A> gg, final PathGoalTester<N, A> gt, final IObjectEvaluator<Graph<N>, V> pEvaluator, final int andNodeLimit) {
+		super(new GraphSearchInput<>(gg, gt));
 		this.evaluator = pEvaluator;
 		this.nodeLimit = andNodeLimit;
 	}

@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.testproblems.enhancedttsp;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
@@ -13,7 +13,7 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> encodeProblem(final EnhancedTTSP problem) {
-		return new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPGraphGenerator(problem), node -> problem.getSolutionEvaluator().evaluate(node.getHead().getCurTour()));
+		return new GraphSearchWithSubpathEvaluationsInput<>(new EnhancedTTSPGraphGenerator(problem), new EnhancedTTSPSolutionPredicate(problem), node -> problem.getSolutionEvaluator().evaluate(node.getHead().getCurTour()));
 	}
 
 	@Override

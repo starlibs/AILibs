@@ -3,12 +3,11 @@ package ai.libs.jaicore.search.testproblems.nqueens;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 @SuppressWarnings("serial")
 public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNode, String> {
@@ -43,10 +42,5 @@ public class NQueensGraphGenerator implements SerializableGraphGenerator<QueenNo
 			}
 			return l;
 		};
-	}
-
-	@Override
-	public NodeGoalTester<QueenNode, String> getGoalTester() {
-		return n -> n.getNumberOfQueens() == this.dimension;
 	}
 }

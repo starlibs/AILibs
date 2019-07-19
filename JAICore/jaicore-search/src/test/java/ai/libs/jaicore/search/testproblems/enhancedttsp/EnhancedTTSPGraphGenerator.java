@@ -3,14 +3,13 @@ package ai.libs.jaicore.search.testproblems.enhancedttsp;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleSuccessorGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,9 +66,7 @@ public class EnhancedTTSPGraphGenerator implements IGraphGenerator<EnhancedTTSPN
 			public List<NodeExpansionDescription<EnhancedTTSPNode, String>> generateSuccessors(final EnhancedTTSPNode node) throws InterruptedException {
 				List<NodeExpansionDescription<EnhancedTTSPNode, String>> l = new ArrayList<>();
 				if (node.getCurTour().size() >= EnhancedTTSPGraphGenerator.this.problem.getPossibleDestinations().size()) {
-					EnhancedTTSPGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos " + node.getCurLocation() + " and in which have already visited everything! " + (EnhancedTTSPGraphGenerator.this.getGoalTester().isGoal(node)
-							? "The goal tester detects this as a goal, but the method is invoked nevertheless. Maybe the algorithm that uses this graph generator does not properly check the goal node property. Another possibility is that a goal check DIFFERENT from this one is used"
-									: "The goal tester does not detect this as a goal node!"));
+					EnhancedTTSPGraphGenerator.this.logger.warn("Cannot generate successors of a node in which we are in pos {} and in which have already visited everything!", node.getCurLocation());
 					return l;
 				}
 				ShortList possibleUntriedDestinations = this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node);
@@ -100,13 +97,6 @@ public class EnhancedTTSPGraphGenerator implements IGraphGenerator<EnhancedTTSPN
 			public boolean allSuccessorsComputed(final EnhancedTTSPNode node) {
 				return this.getPossibleDestinationsThatHaveNotBeenGeneratedYet(node).isEmpty();
 			}
-		};
-	}
-
-	@Override
-	public NodeGoalTester<EnhancedTTSPNode, String> getGoalTester() {
-		return n -> {
-			return n.getCurTour().size() >= this.problem.getPossibleDestinations().size() && n.getCurLocation() == this.problem.getStartLocation();
 		};
 	}
 

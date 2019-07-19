@@ -10,7 +10,7 @@ public class EnhancedTTSPGraphSearchToAdditiveGraphSearchReducer implements Algo
 
 	@Override
 	public GraphSearchWithNumberBasedAdditivePathEvaluation<EnhancedTTSPNode, String> encodeProblem(final GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> problem) {
-		return new GraphSearchWithNumberBasedAdditivePathEvaluation<>(problem.getGraphGenerator(), (from, to) -> to.getHead().getTime() - from.getHead().getTime(), node -> 0.0);
+		return new GraphSearchWithNumberBasedAdditivePathEvaluation<>(problem, (from, to) -> to.getHead().getTime() - from.getHead().getTime(), node -> 0.0);
 	}
 
 	@Override

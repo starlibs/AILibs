@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +42,8 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(RandomSearch.class);
 
+	private final NodeGoalTester<N, A> goalTester;
+
 	/* state of the algorithm */
 	private final List<N> currentPath = new ArrayList<>();
 	private boolean lastNodeWasTrueLeaf = false;
@@ -49,6 +51,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 
 	public DepthFirstSearch(final GraphSearchInput<N, A> problem) {
 		super(problem);
+		this.goalTester = (NodeGoalTester<N, A>)problem.getGoalTester();
 	}
 
 	@Override
@@ -80,7 +83,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 						}
 					}
 					N leaf = this.currentPath.get(n - 1);
-					if (((NodeGoalTester<N, A>) this.getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
+					if (this.goalTester.isGoal(leaf)) {
 						this.post(new NodeTypeSwitchEvent<>(this.getId(), this.currentPath.get(n - 1), "or_solution"));
 						this.lastNodeWasTrueLeaf = true;
 					} else if (this.getInput().getGraphGenerator().getSuccessorGenerator().generateSuccessors(leaf).isEmpty()) {
@@ -119,7 +122,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 				}
 				this.logger.debug("Relevant leaf node is {}.", leaf);
 
-				if (((NodeGoalTester<N, A>) this.getInput().getGraphGenerator().getGoalTester()).isGoal(leaf)) {
+				if (this.goalTester.isGoal(leaf)) {
 					this.lastNodeWasTrueLeaf = true;
 					AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), new SearchGraphPath<>(this.currentPath));
 					this.post(event);

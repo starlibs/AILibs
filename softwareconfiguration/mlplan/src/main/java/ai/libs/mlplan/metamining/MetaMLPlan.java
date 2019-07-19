@@ -10,6 +10,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +90,8 @@ public class MetaMLPlan extends AbstractClassifier {
 
 		// Get lds
 		BestFirstLimitedDiscrepancySearchFactory<TFDNode, String, NodeOrderList> ldsFactory = new BestFirstLimitedDiscrepancySearchFactory<>();
-		GraphSearchWithNodeRecommenderInput<TFDNode, String> problemInput = new GraphSearchWithNodeRecommenderInput<>(new ReducedGraphGenerator<>(mlPlan.getGraphGenerator()),
+		IGraphSearchInput<TFDNode, String> originalInput = mlPlan.getSearchProblemInputGenerator();
+		GraphSearchWithNodeRecommenderInput<TFDNode, String> problemInput = new GraphSearchWithNodeRecommenderInput<>(new ReducedGraphGenerator<>(originalInput.getGraphGenerator()), originalInput.getGoalTester(),
 				new MetaMinerBasedSorter(this.metaMiner, builder.getComponents()));
 		ldsFactory.setProblemInput(problemInput);
 		this.lds = ldsFactory.getAlgorithm();

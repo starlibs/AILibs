@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
@@ -545,11 +545,14 @@ public class TwoPhaseHASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, D
 		this.getConfig().setProperty(TwoPhaseHASCOConfig.K_SELECTION_NUM_CONSIDERED_SOLUTIONS, numberOfConsideredSolutions + "");
 	}
 
-	public IGraphGenerator<N, A> getGraphGenerator() {
+	public IGraphSearchInput<N, A> getGraphSearchInput() {
 		if (this.hasco == null) {
 			throw new IllegalStateException("Cannot retrieve GraphGenerator prior to algorithm initialization.");
 		}
-		return this.hasco.getGraphGenerator();
+		if (this.hasco.getSearch() == null) {
+			throw new IllegalStateException("Cannot retrieve GraphGenerator prior to algorithm initialization.");
+		}
+		return this.hasco.getSearch().getInput();
 	}
 
 	public TwoPhaseHASCOReport getReort() {

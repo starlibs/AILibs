@@ -14,7 +14,7 @@ public class NPuzzleToGraphSearchReducer implements AlgorithmicProblemReduction<
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<NPuzzleState, String, Integer> encodeProblem(final NPuzzleProblem problem) {
-		return new GraphSearchWithSubpathEvaluationsInput<>(new NPuzzleGraphGenerator(problem.getBoard()), n -> new EdgeCountingSolutionEvaluator<NPuzzleState, String>().evaluate(new SearchGraphPath<>(n.getNodes())).intValue());
+		return new GraphSearchWithSubpathEvaluationsInput<>(new NPuzzleGraphGenerator(problem.getBoard()), new NPuzzleGoalPredicate(problem.getDim()), n -> new EdgeCountingSolutionEvaluator<NPuzzleState, String>().evaluate(new SearchGraphPath<>(n.getNodes())).intValue());
 	}
 
 	@Override

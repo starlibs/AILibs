@@ -27,7 +27,7 @@ public class GraphSearchWithSubpathEvaluationsInputBuilder<N, A, V extends Compa
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<N, A, V> build() {
-		return new GraphSearchWithSubpathEvaluationsInput<>(this.getGraphGenerator(), this.nodeEvaluator);
+		return new GraphSearchWithSubpathEvaluationsInput<>(this.getGraphGenerator(), this.getGoalTester(), this.nodeEvaluator);
 	}
 
 }

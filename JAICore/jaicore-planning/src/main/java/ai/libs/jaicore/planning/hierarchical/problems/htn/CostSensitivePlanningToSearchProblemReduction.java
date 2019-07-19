@@ -1,8 +1,8 @@
 package ai.libs.jaicore.planning.hierarchical.problems.htn;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.planning.core.EvaluatedPlan;
@@ -36,7 +36,7 @@ implements IHierarchicalPlanningToGraphSearchReduction<N, A, CostSensitiveHTNPla
 	@Override
 	public I2 encodeProblem(final CostSensitiveHTNPlanningProblem<I1, V> problem) {
 		IObjectEvaluator<IPath<N, A>, V> solutionEvaluator = solutionPath -> problem.getPlanEvaluator().evaluate(CostSensitivePlanningToSearchProblemReduction.this.baseReduction.decodeSolution(solutionPath));
-		return this.forwardReduction.encodeProblem(new GraphSearchWithPathEvaluationsInput<>(this.baseReduction.encodeProblem(problem.getCorePlanningProblem()).getGraphGenerator(), solutionEvaluator));
+		return this.forwardReduction.encodeProblem(new GraphSearchWithPathEvaluationsInput<>(this.baseReduction.encodeProblem(problem.getCorePlanningProblem()), solutionEvaluator));
 	}
 
 	@Override

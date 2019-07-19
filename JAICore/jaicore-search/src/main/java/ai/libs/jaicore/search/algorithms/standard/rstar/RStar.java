@@ -13,11 +13,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.MultipleRootGenerator;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.IAlgorithm;
@@ -30,6 +27,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.common.math.IMetric;
+import org.api4.java.datastructure.graph.implicit.RootGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +39,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansion
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
+import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic.DistantSuccessorGenerator;
@@ -130,8 +129,8 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 		if (n.getParent() == null) {
 			throw new IllegalArgumentException("Can only re-evaluate nodes that have a parent!");
 		}
-		IGraphGenerator<T, A> subProblemGraphGenerator = new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getHead(), n.getHead());
-		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblemGraphGenerator, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()));
+		IGraphSearchInput<T, A> subProblem = new GraphSearchInput<>(new SubPathGraphGenerator<>(this.getInput().getGraphGenerator(), n.getParent().getHead()), c -> c.equals(n.getHead()));
+		AStar<T, A> astar = new AStar<>(new GraphSearchWithNumberBasedAdditivePathEvaluation<>(subProblem, (GraphSearchWithNumberBasedAdditivePathEvaluation.FComputer<T, A>) this.getInput().getNodeEvaluator()));
 		astar.setLoggerName(this.getLoggerName() + ".astar");
 		astar.setTimeout(new TimeOut(this.getRemainingTimeToDeadline().milliseconds(), TimeUnit.MILLISECONDS));
 		this.logger.trace("Invoking AStar with root {} and only goal node {}", n.getParent().getHead(), n.getHead());
@@ -172,21 +171,13 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 
 				/* Lines 14 to 17 */
 				RootGenerator<T> rootGenerator = this.getInput().getGraphGenerator().getRootGenerator();
-				if (rootGenerator instanceof MultipleRootGenerator) {
-					for (T root : ((MultipleRootGenerator<T>) rootGenerator).getRoots()) {
-						GammaNode<T, A> internalRoot = new GammaNode<>(root);
-						internalRoot.setScore(new RStarK(false, this.w * this.h.f(internalRoot)));
-						internalRoot.setG(0);
-						this.open.add(internalRoot);
-					}
-				} else if (rootGenerator instanceof SingleRootGenerator) {
-					GammaNode<T, A> internalRoot = new GammaNode<>(((SingleRootGenerator<T>) rootGenerator).getRoot());
+				for (T root : rootGenerator.getRoots()) {
+					GammaNode<T, A> internalRoot = new GammaNode<>(root);
 					internalRoot.setScore(new RStarK(false, this.w * this.h.f(internalRoot)));
 					internalRoot.setG(0);
 					this.open.add(internalRoot);
-				} else {
-					assert false : "Only MultipleRootGenerator or SingleRootGenerators allowed.";
 				}
+
 				assert !this.open.isEmpty() : "OPEN must not be empty after initialization!";
 				return initializationEvent;
 
@@ -354,7 +345,7 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				gammaNodeForThisChild = representantOnOpen.get();
 			} else {
 				gammaNodeForThisChild = new GammaNode<>(childNode);
-				gammaNodeForThisChild.setGoal(((NodeGoalTester<T, A>) this.getGraphGenerator().getGoalTester()).isGoal(childNode));
+				gammaNodeForThisChild.setGoal(((NodeGoalTester<T, A>) this.getInput().getGoalTester()).isGoal(childNode));
 			}
 
 			/* if this is a solution, add it as a new solution */

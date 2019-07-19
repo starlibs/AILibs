@@ -3,10 +3,12 @@ package ai.libs.jaicore.search.probleminputs;
 import java.util.Iterator;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -59,8 +61,16 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluation<N, A> extends Grap
 		}
 	}
 
-	public GraphSearchWithNumberBasedAdditivePathEvaluation(final IGraphGenerator<N, A> graphGenerator, final EdgeCostComputer<N, A> g, final IPathEvaluator<N, A, Double> h) {
-		super(graphGenerator, new FComputer<>(g, h));
+	public GraphSearchWithNumberBasedAdditivePathEvaluation(final IGraphSearchInput<N, A> baseProblem, final EdgeCostComputer<N, A> g, final IPathEvaluator<N, A, Double> h) {
+		this(baseProblem.getGraphGenerator(), baseProblem.getGoalTester(), new FComputer<>(g, h));
+	}
+
+	public GraphSearchWithNumberBasedAdditivePathEvaluation(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final EdgeCostComputer<N, A> g, final IPathEvaluator<N, A, Double> h) {
+		this(graphGenerator, goalTester, new FComputer<>(g, h));
+	}
+
+	public GraphSearchWithNumberBasedAdditivePathEvaluation(final IGraphSearchInput<N, A> baseProblem, final FComputer<N, A> fComputer) {
+		this(baseProblem.getGraphGenerator(), baseProblem.getGoalTester(), fComputer);
 	}
 
 	/**
@@ -70,8 +80,8 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluation<N, A> extends Grap
 	 * @param graphGenerator
 	 * @param fComputer
 	 */
-	public GraphSearchWithNumberBasedAdditivePathEvaluation(final IGraphGenerator<N, A> graphGenerator, final FComputer<N, A> fComputer) {
-		super(graphGenerator, fComputer);
+	public GraphSearchWithNumberBasedAdditivePathEvaluation(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final FComputer<N, A> fComputer) {
+		super(graphGenerator, goalTester, fComputer);
 	}
 
 }

@@ -1,7 +1,7 @@
 package ai.libs.jaicore.planning.hierarchical.problems.htn;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.IdentityReduction;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;

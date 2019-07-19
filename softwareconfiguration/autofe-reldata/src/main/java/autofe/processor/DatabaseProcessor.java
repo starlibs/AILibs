@@ -18,6 +18,7 @@ import autofe.db.model.database.Database;
 import autofe.db.search.DatabaseGraphGenerator;
 import autofe.db.search.DatabaseNode;
 import autofe.db.search.DatabaseNodeEvaluator;
+import autofe.db.search.DatabaseNodeGoalPredicate;
 import autofe.db.sql.DatabaseConnector;
 import autofe.db.sql.RetrieveInstancesFromDatabaseFailedException;
 import autofe.db.util.DBUtils;
@@ -54,7 +55,7 @@ public class DatabaseProcessor {
 		DatabaseGraphGenerator generator = new DatabaseGraphGenerator(this.database);
 		DatabaseNodeEvaluator evaluator = new DatabaseNodeEvaluator(generator, this.configuration.getRandomCompletionPathLength(), this.configuration.getSeed(), this.configuration.getEvaluationFunction());
 
-		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, evaluator);
+		GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double> tree = new GraphSearchWithSubpathEvaluationsInput<>(generator, new DatabaseNodeGoalPredicate(), evaluator);
 		BestFirst<GraphSearchWithSubpathEvaluationsInput<DatabaseNode, String, Double>, DatabaseNode, String, Double> search = new BestFirst<>(tree);
 		search.setTimeoutForComputationOfF(TIMEOUT_F_COMPUTATION_MS, node -> 100.0);
 

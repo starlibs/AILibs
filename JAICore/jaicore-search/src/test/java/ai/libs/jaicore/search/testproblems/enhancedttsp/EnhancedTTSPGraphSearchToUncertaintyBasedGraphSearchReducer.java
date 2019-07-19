@@ -2,10 +2,10 @@ package ai.libs.jaicore.search.testproblems.enhancedttsp;
 
 import java.util.Random;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IUncertaintySource;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
@@ -27,7 +27,7 @@ public class EnhancedTTSPGraphSearchToUncertaintyBasedGraphSearchReducer impleme
 	public GraphSearchWithUncertaintyBasedSubpathEvaluationInput<EnhancedTTSPNode, String, Double> encodeProblem(final GraphSearchWithSubpathEvaluationsInput<EnhancedTTSPNode, String, Double> problem) {
 		IPotentiallyUncertaintyAnnotatingPathEvaluator<EnhancedTTSPNode, String, Double> nodeEvaluator = new RandomCompletionBasedNodeEvaluator<>(this.random, this.samples, this.solutionEvaluator);
 		nodeEvaluator.setUncertaintySource(this.uncertaintySource);
-		return new GraphSearchWithUncertaintyBasedSubpathEvaluationInput<>(problem.getGraphGenerator(), nodeEvaluator);
+		return new GraphSearchWithUncertaintyBasedSubpathEvaluationInput<>(problem, nodeEvaluator);
 
 	}
 

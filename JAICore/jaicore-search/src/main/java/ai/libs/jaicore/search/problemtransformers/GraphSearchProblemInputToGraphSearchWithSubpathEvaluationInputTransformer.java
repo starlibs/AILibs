@@ -26,7 +26,7 @@ implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A,
 		if (this.nodeEvaluator == null) {
 			throw new IllegalStateException("Cannot create problem since node evaluator has not been set, yet.");
 		}
-		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), this.nodeEvaluator);
+		return new GraphSearchWithSubpathEvaluationsInput<>(problem, this.nodeEvaluator);
 	}
 
 	public GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V> setNodeEvaluator(final IPathEvaluator<N, A, V> nodeEvaluator) {

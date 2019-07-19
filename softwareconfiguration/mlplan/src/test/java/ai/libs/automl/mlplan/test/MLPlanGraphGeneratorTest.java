@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -23,7 +23,7 @@ public class MLPlanGraphGeneratorTest extends GraphGeneratorTester<TFDNode, Stri
 		Instances data = new Instances(new FileReader("testrsc/car.arff"));
 		data.setClassIndex(data.numAttributes() - 1);
 		MLPlan mlplan = new MLPlan(AbstractMLPlanBuilder.forWeka(), data);
-		IGraphGenerator<TFDNode, String> graphGenerator = mlplan.getGraphGenerator();
+		IGraphGenerator<TFDNode, String> graphGenerator = mlplan.getSearchProblemInputGenerator().getGraphGenerator();
 
 		/* generate the actual input for the test */
 		List<Pair<IGraphGenerator<TFDNode, String>, Integer>> gg = new ArrayList<>();

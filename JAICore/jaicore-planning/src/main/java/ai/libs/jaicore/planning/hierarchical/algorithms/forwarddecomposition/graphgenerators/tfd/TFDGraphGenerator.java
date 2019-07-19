@@ -10,12 +10,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.PathUnifyingGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,11 +164,6 @@ public class TFDGraphGenerator implements IGraphGenerator<TFDNode, String>, Path
 		orderedLiterals.keySet().stream().sorted().forEach(order -> newLiteralList.addAll(orderedLiterals.get(order)));
 		newLiteralList.addAll(unorderedLiterals);
 		return new TFDNode(node.getState(), newLiteralList, node.getAppliedMethodInstance(), node.getAppliedAction());
-	}
-
-	@Override
-	public NodeGoalTester<TFDNode, String> getGoalTester() {
-		return l -> l.getRemainingTasks().isEmpty();
 	}
 
 	@Override

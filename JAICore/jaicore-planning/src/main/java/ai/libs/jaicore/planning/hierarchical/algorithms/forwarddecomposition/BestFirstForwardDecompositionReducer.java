@@ -37,7 +37,7 @@ AForwardDecompositionReducer<CostSensitiveHTNPlanningProblem<IHTNPlanningProblem
 		if (this.transformer.getNodeEvaluator() == null) {
 			throw new IllegalStateException("No node evaluator has been set in the transformer!");
 		}
-		return new GraphSearchWithSubpathEvaluationsInput<>(searchInput.getGraphGenerator(), this.transformer.getNodeEvaluator());
+		return new GraphSearchWithSubpathEvaluationsInput<>(searchInput, this.transformer.getNodeEvaluator());
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package ai.libs.mlplan.core;
 
 import java.io.IOException;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
@@ -285,8 +285,8 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	}
 
 	@SuppressWarnings("unchecked")
-	public IGraphGenerator<TFDNode, String> getGraphGenerator() {
-		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphGenerator();
+	public IGraphSearchInput<TFDNode, String> getSearchProblemInputGenerator() {
+		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphSearchInput();
 	}
 
 	public double getInternalValidationErrorOfSelectedClassifier() {

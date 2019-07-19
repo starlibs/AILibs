@@ -1,9 +1,8 @@
 package ai.libs.jaicore.search.structure.graphgenerator;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 /**
  * This is a graph generator that takes another graph generator and generates its sub-graph under a given root node
@@ -32,10 +31,5 @@ public class SubGraphGenerator<N, A> implements IGraphGenerator<N, A> {
 	@Override
 	public SuccessorGenerator<N, A> getSuccessorGenerator() {
 		return this.actualGraphGenerator.getSuccessorGenerator();
-	}
-
-	@Override
-	public PathGoalTester<N, A> getGoalTester() {
-		return this.actualGraphGenerator.getGoalTester();
 	}
 }

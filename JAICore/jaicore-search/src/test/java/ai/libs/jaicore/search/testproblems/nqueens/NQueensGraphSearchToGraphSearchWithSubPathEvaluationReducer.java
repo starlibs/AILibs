@@ -12,7 +12,7 @@ public class NQueensGraphSearchToGraphSearchWithSubPathEvaluationReducer impleme
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<QueenNode, String, Double> encodeProblem(final GraphSearchInput<QueenNode, String> problem) {
 		IPathEvaluator<QueenNode, String, Double> nodeEvaluator = node -> (double) node.getHead().getNumberOfAttackedCells();
-		return new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), nodeEvaluator);
+		return new GraphSearchWithSubpathEvaluationsInput<>(problem, nodeEvaluator);
 
 	}
 

@@ -10,11 +10,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,11 +235,6 @@ public class RTNGraphGenerator implements IGraphGenerator<RTNNode, RTNEdge> {
 			logger.info("Computed {} successors", successors.size());
 			return successors;
 		};
-	}
-
-	@Override
-	public NodeGoalTester<RTNNode, RTNEdge> getGoalTester() {
-		return p -> p.getRemainingTasks().isEmpty();
 	}
 
 	private boolean remainingTasksInitializeANDNode(final List<Literal> tasks) {

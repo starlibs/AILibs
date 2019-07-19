@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.events;
 
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 

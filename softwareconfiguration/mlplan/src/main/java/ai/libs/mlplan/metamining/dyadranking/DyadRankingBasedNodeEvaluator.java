@@ -26,8 +26,7 @@ import java.util.stream.Collectors;
 import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.collections.BidiMap;
 import org.apache.commons.collections.bidimap.DualHashBidiMap;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
@@ -35,6 +34,8 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvalua
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,7 +170,8 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 	private SolutionEventBus<T> eventBus;
 
-	private IGraphGenerator<T, ?> graphGenerator;
+	private IGraphGenerator<T, A> graphGenerator;
+	private PathGoalTester<T, A> goalTester;
 
 	private DyadMinMaxScaler scaler = null;
 
@@ -223,7 +225,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 		}
 
 		/* Let the random completer handle this use-case. */
-		if (this.randomPathCompleter.getGraphGenerator().getGoalTester().isGoal(path)) {
+		if (this.randomPathCompleter.getInput().getGoalTester().isGoal(path)) {
 			return null;
 		}
 
@@ -484,8 +486,9 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	}
 
 	@Override
-	public void setGenerator(final IGraphGenerator<T, A> generator) {
+	public void setGenerator(final IGraphGenerator<T, A> generator, final PathGoalTester<T, A> goalTester) {
 		this.graphGenerator = generator;
+		this.goalTester = goalTester;
 		this.initializeRandomSearch();
 	}
 
@@ -497,8 +500,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	 */
 	private void initializeRandomSearch() {
 		IPathEvaluator<T, A, Double> nodeEvaluator = new RandomizedDepthFirstNodeEvaluator<>(this.random);
-		@SuppressWarnings("unchecked")
-		GraphSearchWithSubpathEvaluationsInput<T, A, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>((IGraphGenerator<T, A>) this.graphGenerator, nodeEvaluator);
+		GraphSearchWithSubpathEvaluationsInput<T, A, Double> completionProblem = new GraphSearchWithSubpathEvaluationsInput<>(this.graphGenerator, this.goalTester, nodeEvaluator);
 		this.randomPathCompleter = new RandomSearch<>(completionProblem, null, this.random);
 		while (!(this.randomPathCompleter.next() instanceof AlgorithmInitializedEvent)) {
 

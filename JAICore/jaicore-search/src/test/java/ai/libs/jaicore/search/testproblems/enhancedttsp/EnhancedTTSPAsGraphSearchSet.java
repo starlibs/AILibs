@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.testproblems.enhancedttsp;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.basic.algorithm.ReductionBasedAlgorithmTestProblemSet;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;

@@ -1,7 +1,7 @@
 package ai.libs.jaicore.search.core.interfaces;
 
 import org.api4.java.ai.graphsearch.problem.IPathInORGraphSearch;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

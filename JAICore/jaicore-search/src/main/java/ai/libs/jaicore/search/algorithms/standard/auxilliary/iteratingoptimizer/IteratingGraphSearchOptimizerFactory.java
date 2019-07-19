@@ -36,7 +36,7 @@ implements IOptimalPathInORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, 
 		if (this.baseAlgorithmFactory == null) {
 			throw new IllegalStateException("Cannot produce " + IteratingGraphSearchOptimizer.class + " searches before the factory for the base search algorithm has been set.");
 		}
-		return new IteratingGraphSearchOptimizer<>(input, this.baseAlgorithmFactory.getAlgorithm(new GraphSearchInput<>(input.getGraphGenerator())));
+		return new IteratingGraphSearchOptimizer<>(input, this.baseAlgorithmFactory.getAlgorithm(input));
 	}
 
 	public IGraphSearchFactory<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> getBaseAlgorithmFactory() {

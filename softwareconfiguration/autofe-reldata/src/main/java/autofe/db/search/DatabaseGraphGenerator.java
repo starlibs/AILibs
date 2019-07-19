@@ -1,9 +1,8 @@
 package autofe.db.search;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,18 +33,6 @@ public class DatabaseGraphGenerator implements IGraphGenerator<DatabaseNode, Str
 	@Override
 	public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
 		return new DatabaseSuccessorGenerator(this.database);
-	}
-
-	@Override
-	public NodeGoalTester<DatabaseNode, String> getGoalTester() {
-		return node -> {
-			try {
-				return node.isFinished();
-			} catch (Exception e) {
-				LOGGER.error("Could not determine whether the node is finished.", e);
-				return false;
-			}
-		};
 	}
 
 	public Database getDatabase() {

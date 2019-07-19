@@ -3,10 +3,10 @@ package ai.libs.jaicore.search.util;
 import java.util.List;
 import java.util.Stack;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public class GraphSanityChecker<N, A> extends AOptimalPathInORGraphSearch<GraphS
 			int expanded = 0;
 			Stack<BackPointerPath<N, A, ?>> open = new Stack<>();
 			N root = ((SingleRootGenerator<N>) this.getGraphGenerator().getRootGenerator()).getRoot();
-			NodeGoalTester<N, A> goalTester = (NodeGoalTester<N, A>) this.getGraphGenerator().getGoalTester();
+			NodeGoalTester<N, A> goalTester = (NodeGoalTester<N, A>) this.getGoalTester();
 			open.push(new BackPointerPath<>(null, root, null));
 			this.post(new GraphInitializedEvent<N>(this.getId(), root));
 			while (!open.isEmpty() && expanded < this.maxNodesToExpand) {

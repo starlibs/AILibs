@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -28,7 +27,6 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.CompositionSerializer;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.util.CycleDetectedResult;
 import ai.libs.jaicore.search.util.DeadEndDetectedResult;
@@ -77,10 +75,9 @@ public abstract class HASCOTester<S extends GraphSearchWithPathEvaluationsInput<
 	public void sanityCheckOfSearchGraph() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, AlgorithmTestProblemSetCreationException {
 		for (Pair<HASCO<S, N, A, Double>, Integer> pairOfHASCOAndNumOfSolutions : this.getAllHASCOObjectsWithExpectedNumberOfSolutionsForTheKnownProblems()) {
 			HASCO<S, N, A, Double> hasco = pairOfHASCOAndNumOfSolutions.getX();
-			IGraphGenerator<N, A> gen = hasco.getGraphGenerator();
 
 			/* check on dead end */
-			GraphSanityChecker<N, A> deadEndDetector = new GraphSanityChecker<>(new GraphSearchInput<>(gen), 2000);
+			GraphSanityChecker<N, A> deadEndDetector = new GraphSanityChecker<>(hasco.getSearch().getInput(), 2000);
 			deadEndDetector.setLoggerName("testedalgorithm");
 			deadEndDetector.call();
 			SanityCheckResult sanity = deadEndDetector.getSanityCheck();

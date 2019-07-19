@@ -10,10 +10,10 @@ import java.util.Map.Entry;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
 import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.hasco.core.HASCOSolutionCandidate;
 import ai.libs.hasco.core.IHASCOPlanningReduction;

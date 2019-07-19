@@ -3,12 +3,11 @@ package ai.libs.jaicore.search.testproblems.npuzzle.standard;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
 
@@ -67,27 +66,6 @@ public class NPuzzleGraphGenerator implements IGraphGenerator<NPuzzleState, Stri
 			}
 
 			return successors;
-		};
-	}
-
-	@Override
-	public NodeGoalTester<NPuzzleState, String> getGoalTester() {
-		return n -> {
-			int[][] board = n.getBoard();
-			if (board[this.dimension - 1][this.dimension - 1] != 0) {
-				return false;
-			} else {
-				int sol = 1;
-				for (int i = 0; i < this.dimension; i++) {
-					for (int j = 0; j < this.dimension; j++) {
-						if (i != this.dimension - 1 && j != this.dimension - 1 && board[i][j] != sol) {
-							return false;
-						}
-						sol++;
-					}
-				}
-				return true;
-			}
 		};
 	}
 

@@ -16,13 +16,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.api4.java.datastructure.graph.IPath;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +70,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 		for (int seed = 0; seed < NUM_SEEDS; seed++) {
 			completers.put(seed, this.getSeededNodeEvaluator(DIFFICULTY, seed, 1, 1)); // the number of samples is irrelevant here, because we call the respective method manually
 			completers.get(seed).setLoggerName("testednodeevaluator"); // all completers will have the same logger
-			completers.get(seed).setGenerator(bf.getGraphGenerator());
+			completers.get(seed).setGenerator(bf.getGraphGenerator(), bf.getGoalTester());
 		}
 
 		/* gather all random completions over different seeds */
@@ -213,7 +213,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 				}
 				RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> ne = this.getNodeEvaluator(cities, new PartiallyFailingObjectEvaluator<>(successfulInvocations, 0.0), seed, k, lastSuccessfulInvocation, -1);
 				ne.setLoggerName("testednodeevaluator");
-				ne.setGenerator(bf.getGraphGenerator());
+				ne.setGenerator(bf.getGraphGenerator(), bf.getGoalTester());
 				ne.registerSolutionListener(new Object() {
 					@Subscribe
 					public void receiveSolution(final EvaluatedSearchSolutionCandidateFoundEvent<EnhancedTTSPNode, String, Double> e) {
@@ -247,7 +247,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 			}
 		};
 		RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double> rcne = new RandomCompletionBasedNodeEvaluator<>(new Random(seed), numSamples, maxSamples, se, -1, timeoutForNodeEvaluationInMs);
-		rcne.setGenerator(bf.getGraphGenerator());
+		rcne.setGenerator(bf.getGraphGenerator(), bf.getGoalTester());
 		return rcne;
 	}
 

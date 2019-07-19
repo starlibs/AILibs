@@ -2,8 +2,8 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 
 import java.util.Random;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableNodeEvaluator;
+import org.api4.java.datastructure.graph.IPath;
 
 @SuppressWarnings("serial")
 public class RandomizedDepthFirstNodeEvaluator<T, A> implements SerializableNodeEvaluator<T, A, Double> {

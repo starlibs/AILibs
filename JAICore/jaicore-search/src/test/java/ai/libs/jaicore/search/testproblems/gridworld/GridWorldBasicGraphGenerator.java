@@ -3,13 +3,12 @@ package ai.libs.jaicore.search.testproblems.gridworld;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 import ai.libs.jaicore.testproblems.gridworld.GridWorldNode;
 import ai.libs.jaicore.testproblems.gridworld.GridWorldProblem;
@@ -67,16 +66,6 @@ public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<
 					}
 				}
 				return succ;
-			}
-		};
-	}
-
-	@Override
-	public NodeGoalTester<GridWorldNode, String> getGoalTester() {
-		return new NodeGoalTester<GridWorldNode, String>() {
-			@Override
-			public boolean isGoal(final GridWorldNode node) {
-				return node.getX() == GridWorldBasicGraphGenerator.this.problem.getGoalX() && node.getY() == GridWorldBasicGraphGenerator.this.problem.getGoaly();
 			}
 		};
 	}

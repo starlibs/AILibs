@@ -3,13 +3,14 @@ package ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
@@ -21,15 +22,15 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  *
  * @author fmohr
  *
- * @param <T>
+ * @param <N>
  * @param <V>
  */
-public class AlternativeNodeEvaluator<T, A, V extends Comparable<V>> extends DecoratingNodeEvaluator<T, A, V> implements ILoggingCustomizable {
+public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends DecoratingNodeEvaluator<N, A, V> implements ILoggingCustomizable {
 
 	private String loggerName;
-	private final IPathEvaluator<T, A, V> ne1;
+	private final IPathEvaluator<N, A, V> ne1;
 
-	public AlternativeNodeEvaluator(final IPathEvaluator<T, A, V> ne1, final IPathEvaluator<T, A, V> ne2) {
+	public AlternativeNodeEvaluator(final IPathEvaluator<N, A, V> ne1, final IPathEvaluator<N, A, V> ne2) {
 		super(ne2);
 		if (ne1 == null) {
 			throw new IllegalArgumentException("The alternativ evaluator in node evaluator must not be null!");
@@ -58,14 +59,14 @@ public class AlternativeNodeEvaluator<T, A, V extends Comparable<V>> extends Dec
 	}
 
 	@Override
-	public void setGenerator(final IGraphGenerator<T, A> generator) {
-		super.setGenerator(generator);
+	public void setGenerator(final IGraphGenerator<N, A> generator, final PathGoalTester<N, A> goalTester) {
+		super.setGenerator(generator, goalTester);
 		if (!(this.ne1 instanceof IPotentiallyGraphDependentPathEvaluator)) {
 			return;
 		}
-		IPotentiallyGraphDependentPathEvaluator<T, A, V> castedNE1 = (IPotentiallyGraphDependentPathEvaluator<T, A, V>) this.ne1;
+		IPotentiallyGraphDependentPathEvaluator<N, A, V> castedNE1 = (IPotentiallyGraphDependentPathEvaluator<N, A, V>) this.ne1;
 		if (castedNE1.requiresGraphGenerator()) {
-			castedNE1.setGenerator(generator);
+			castedNE1.setGenerator(generator, goalTester);
 		}
 	}
 
@@ -80,7 +81,7 @@ public class AlternativeNodeEvaluator<T, A, V extends Comparable<V>> extends Dec
 	}
 
 	@Override
-	public V f(final IPath<T, A> node) throws PathEvaluationException, InterruptedException {
+	public V f(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
 		V f1 = this.ne1.f(node);
 		if (f1 != null) {
 			return f1;

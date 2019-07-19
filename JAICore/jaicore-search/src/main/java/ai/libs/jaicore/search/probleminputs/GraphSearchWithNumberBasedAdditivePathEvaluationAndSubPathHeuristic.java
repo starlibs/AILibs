@@ -2,9 +2,11 @@ package ai.libs.jaicore.search.probleminputs;
 
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.common.math.IMetric;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
@@ -39,9 +41,16 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic
 	private final IMetric<N> metricOverStates;
 	private final DistantSuccessorGenerator<N> distantSuccessorGenerator;
 
-	public GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic(final IGraphGenerator<N, A> graphGenerator, final EdgeCostComputer<N, A> g, final IPathEvaluator<N, A, Double> h, final PathCostEstimator<N, A> hPath,
+	public GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic(final IGraphSearchInput<N, A> graphSearchInput, final EdgeCostComputer<N, A> g, final IPathEvaluator<N, A, Double> h, final PathCostEstimator<N, A> hPath,
 			final IMetric<N> metricOverStates, final DistantSuccessorGenerator<N> distantSuccessorGenerator) {
-		super(graphGenerator, new SubPathEvaluationBasedFComputer<>(g, h, hPath));
+		super(graphSearchInput, new SubPathEvaluationBasedFComputer<>(g, h, hPath));
+		this.metricOverStates = metricOverStates;
+		this.distantSuccessorGenerator = distantSuccessorGenerator;
+	}
+
+	public GraphSearchWithNumberBasedAdditivePathEvaluationAndSubPathHeuristic(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final EdgeCostComputer<N, A> g, final IPathEvaluator<N, A, Double> h, final PathCostEstimator<N, A> hPath,
+			final IMetric<N> metricOverStates, final DistantSuccessorGenerator<N> distantSuccessorGenerator) {
+		super(graphGenerator, goalTester, new SubPathEvaluationBasedFComputer<>(g, h, hPath));
 		this.metricOverStates = metricOverStates;
 		this.distantSuccessorGenerator = distantSuccessorGenerator;
 	}

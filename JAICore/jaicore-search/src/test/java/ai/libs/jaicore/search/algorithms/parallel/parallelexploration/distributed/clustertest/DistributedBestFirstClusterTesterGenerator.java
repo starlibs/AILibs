@@ -3,13 +3,12 @@ package ai.libs.jaicore.search.algorithms.parallel.parallelexploration.distribut
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeType;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SerializableRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.NodeType;
+import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.SerializableRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 @SuppressWarnings("serial")
 public class DistributedBestFirstClusterTesterGenerator implements SerializableGraphGenerator<TestNode, String> {
@@ -36,11 +35,6 @@ public class DistributedBestFirstClusterTesterGenerator implements SerializableG
 			}
 			return l;
 		};
-	}
-
-	@Override
-	public NodeGoalTester<TestNode, String> getGoalTester() {
-		return n -> (n.min == n.max && n.min == this.target);
 	}
 
 	@Override

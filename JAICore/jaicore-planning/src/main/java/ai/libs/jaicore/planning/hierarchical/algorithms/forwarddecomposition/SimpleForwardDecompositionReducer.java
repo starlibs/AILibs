@@ -1,6 +1,6 @@
 package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;

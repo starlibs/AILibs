@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeExpansionDescription;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.RootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
+import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 /**
  * Graph generator that uses another graph generator as a basis by reducing the
@@ -88,10 +87,5 @@ public class ReducedGraphGenerator<T, A> implements IGraphGenerator<T, A> {
 				return reducedSuccessors;
 			}
 		};
-	}
-
-	@Override
-	public PathGoalTester<T, A> getGoalTester() {
-		return this.basis.getGoalTester();
 	}
 }

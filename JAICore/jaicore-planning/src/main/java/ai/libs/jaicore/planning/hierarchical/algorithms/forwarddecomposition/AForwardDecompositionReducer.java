@@ -2,8 +2,8 @@ package ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition;
 
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
 import ai.libs.jaicore.planning.core.Plan;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
@@ -31,7 +31,7 @@ public abstract class AForwardDecompositionReducer<I1 extends IHTNPlanningProble
 		} else {
 			throw new IllegalArgumentException("HTN problems of class \"" + planningProblem.getClass().getName() + "\" are currently not supported.");
 		}
-		return new GraphSearchInput<>(graphGenerator);
+		return new GraphSearchInput<>(graphGenerator, l -> l.getHead().getRemainingTasks().isEmpty());
 	}
 
 	public Plan getPlanForSolution(final IPath<TFDNode, String> solution) {

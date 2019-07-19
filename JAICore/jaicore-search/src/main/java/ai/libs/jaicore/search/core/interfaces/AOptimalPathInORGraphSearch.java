@@ -1,10 +1,11 @@
 package ai.libs.jaicore.search.core.interfaces;
 
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
+import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,10 @@ implements IOptimalPathInORGraphSearch<I, EvaluatedSearchGraphPath<N, A, V>, N, 
 	@Override
 	public IGraphGenerator<N, A> getGraphGenerator() {
 		return this.getInput().getGraphGenerator();
+	}
+
+	public PathGoalTester<N, A> getGoalTester() {
+		return this.getInput().getGoalTester();
 	}
 
 	@Override

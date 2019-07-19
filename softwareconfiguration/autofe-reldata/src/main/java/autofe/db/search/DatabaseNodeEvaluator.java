@@ -4,15 +4,15 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IGraphGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SingleRootGenerator;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.SuccessorGenerator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
+import org.api4.java.datastructure.graph.IPath;
+import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -99,24 +99,23 @@ public class DatabaseNodeEvaluator implements IPathEvaluator<DatabaseNode, Strin
 			public SuccessorGenerator<DatabaseNode, String> getSuccessorGenerator() {
 				return DatabaseNodeEvaluator.this.generator.getSuccessorGenerator();
 			}
+		}, new NodeGoalTester<DatabaseNode, String>() {
 
 			@Override
-			public NodeGoalTester<DatabaseNode, String> getGoalTester() {
-				return node -> {
-					if (node.getSelectedFeatures().size() > requiredNumberOfFeatures) {
-						throw new IllegalStateException(String.format("Too many features! Required: %s , Actual: %s", requiredNumberOfFeatures, node.getSelectedFeatures().size()));
-					} else if (node.getSelectedFeatures().size() < requiredNumberOfFeatures) {
-						return false;
-					} else {
-						// Check whether node contains intermediate features
-						for (AbstractFeature feature : node.getSelectedFeatures()) {
-							if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), DatabaseNodeEvaluator.this.db)) {
-								return false;
-							}
+			public boolean isGoal(final DatabaseNode node) {
+				if (node.getSelectedFeatures().size() > requiredNumberOfFeatures) {
+					throw new IllegalStateException(String.format("Too many features! Required: %s , Actual: %s", requiredNumberOfFeatures, node.getSelectedFeatures().size()));
+				} else if (node.getSelectedFeatures().size() < requiredNumberOfFeatures) {
+					return false;
+				} else {
+					// Check whether node contains intermediate features
+					for (AbstractFeature feature : node.getSelectedFeatures()) {
+						if (feature instanceof BackwardFeature && DBUtils.isIntermediate(((BackwardFeature) feature).getPath(), DatabaseNodeEvaluator.this.db)) {
+							return false;
 						}
-						return true;
 					}
-				};
+					return true;
+				}
 			}
 		});
 

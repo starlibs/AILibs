@@ -16,7 +16,7 @@ public class RandomizedDepthFirstSearch<T, A> extends StandardBestFirst<T, A, Do
 	private String loggerName;
 
 	public RandomizedDepthFirstSearch(final GraphSearchInput<T, A> problem, final Random random) {
-		super(new GraphSearchWithSubpathEvaluationsInput<>(problem.getGraphGenerator(), new RandomizedDepthFirstNodeEvaluator<>(random)));
+		super(new GraphSearchWithSubpathEvaluationsInput<>(problem, new RandomizedDepthFirstNodeEvaluator<>(random)));
 	}
 
 	@Override

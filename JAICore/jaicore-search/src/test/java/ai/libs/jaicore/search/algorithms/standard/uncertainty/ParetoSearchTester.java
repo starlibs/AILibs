@@ -20,7 +20,7 @@ public class ParetoSearchTester extends GraphSearchSolutionIteratorTester {
 		searchFactory.setConfig(config);
 		RandomCompletionBasedNodeEvaluator<N, A, Double> rcne = new RandomCompletionBasedNodeEvaluator<>(new Random(0), 3, new AgnosticPathEvaluator<>());
 		rcne.setUncertaintySource(new BasicUncertaintySource<>());
-		GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, Double> transformedProblem = new GraphSearchWithUncertaintyBasedSubpathEvaluationInput<>(problem.getGraphGenerator(), rcne);
+		GraphSearchWithUncertaintyBasedSubpathEvaluationInput<N, A, Double> transformedProblem = new GraphSearchWithUncertaintyBasedSubpathEvaluationInput<>(problem, rcne);
 		searchFactory.setProblemInput(transformedProblem);
 		return searchFactory.getAlgorithm();
 	}

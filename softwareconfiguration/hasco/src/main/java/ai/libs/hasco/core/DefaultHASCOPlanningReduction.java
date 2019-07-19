@@ -3,7 +3,7 @@ package ai.libs.hasco.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.IPath;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 import ai.libs.jaicore.planning.core.interfaces.IPlan;
