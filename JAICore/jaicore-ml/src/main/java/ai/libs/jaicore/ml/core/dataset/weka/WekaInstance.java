@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.ai.ml.core.dataset.ContainsNonNumericAttributesException;
-import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
@@ -18,10 +17,11 @@ import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValu
 import ai.libs.jaicore.basic.sets.ElementDecorator;
 import ai.libs.jaicore.ml.WekaUtil;
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
+import ai.libs.jaicore.ml.core.dataset.sampling.IClusterableInstances;
 import weka.core.Attribute;
 import weka.core.Instance;
 
-public class WekaInstance<L> extends ElementDecorator<Instance> implements INumericLabeledAttributeArrayInstance<L> {
+public class WekaInstance<L> extends ElementDecorator<Instance> implements IClusterableInstances<L> {
 
 	public WekaInstance(final Instance instance) {
 		super(instance);
