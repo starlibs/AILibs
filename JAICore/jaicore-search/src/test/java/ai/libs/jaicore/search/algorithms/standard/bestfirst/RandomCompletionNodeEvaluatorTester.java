@@ -83,7 +83,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 				BackPointerPath<EnhancedTTSPNode, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
 				for (Entry<Integer, RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double>> entry : completers.entrySet()) {
 					for (int i = 0; i < NUM_SAMPLES; i++) {
-						List<EnhancedTTSPNode> completion = entry.getValue().getNextRandomPathCompletionForNode(nodeToEvaluate);
+						List<EnhancedTTSPNode> completion = entry.getValue().getNextRandomPathCompletionForNode(nodeToEvaluate).getNodes();
 						int numCompletionsFoundByNow = completionsFoundSoFar.size();
 
 						/* check that the solution has not been identified by any completer (including itself) earlier. This is a very strong (perhaps unnecessarily and too strong) condition. */
@@ -157,7 +157,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 				BackPointerPath<EnhancedTTSPNode, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
 				for (int i = 0; i < NUM_SAMPLES; i++) {
 					try {
-						List<EnhancedTTSPNode> completion = completer.getNextRandomPathCompletionForNode(nodeToEvaluate);
+						List<EnhancedTTSPNode> completion = completer.getNextRandomPathCompletionForNode(nodeToEvaluate).getNodes();
 
 						/* check that the solution has not been identified by any completer (including itself) earlier. This is a very strong (perhaps unnecessarily and too strong) condition. */
 						assertFalse("Solution has been found twice!", completionsFoundSoFar.contains(completion));

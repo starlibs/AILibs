@@ -220,12 +220,12 @@ public class Util {
 
 	public static <N, A, V extends Comparable<V>> ComponentInstance getSolutionCompositionForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components, final Monom initState,
 			final BackPointerPath<N, A, ?> path, final boolean resolveIntervals) {
-		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.getNodes())), resolveIntervals);
+		return getSolutionCompositionForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path)), resolveIntervals);
 	}
 
 	public static <N, A, V extends Comparable<V>> ComponentInstance getComponentInstanceForNode(final IHASCOPlanningReduction<N, A> planningGraphDeriver, final Collection<Component> components, final Monom initState,
 			final BackPointerPath<N, A, ?> path, final String name, final boolean resolveIntervals) {
-		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path.getNodes())), name, resolveIntervals);
+		return getComponentInstanceForPlan(components, initState, planningGraphDeriver.decodeSolution(new SearchGraphPath<>(path)), name, resolveIntervals);
 	}
 
 	public static Monom getFinalStateOfPlan(final Monom initState, final IPlan plan) {

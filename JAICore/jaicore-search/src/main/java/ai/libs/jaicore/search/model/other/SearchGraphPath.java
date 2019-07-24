@@ -1,11 +1,14 @@
 package ai.libs.jaicore.search.model.other;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.datastructure.graph.IPath;
 
 public class SearchGraphPath<N, A> implements IPath<N, A> {
@@ -17,8 +20,29 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 		this (path.getNodes(), path.getArcs(), (path instanceof SearchGraphPath) ? ((SearchGraphPath) path).annotations : new HashMap<>());
 	}
 
-	public SearchGraphPath(final List<N> nodes) {
-		this(nodes, new ArrayList<>(), new HashMap<>());
+	public SearchGraphPath(final IPath<N, A> pathA, final IPath<N, A> pathB, final A link) {
+		this.nodes = new ArrayList<>();
+		this.nodes.addAll(pathA.getNodes());
+		this.nodes.addAll(pathB.getNodes());
+		this.edges = new ArrayList<>();
+		this.edges.addAll(pathA.getArcs());
+		this.edges.add(link);
+		this.edges.addAll(pathB.getArcs());
+		this.annotations = new HashMap<>();
+	}
+
+	public SearchGraphPath(final IPath<N, A> pathA, final N attachedNode, final A link) {
+		this.nodes = new ArrayList<>();
+		this.nodes.addAll(pathA.getNodes());
+		this.nodes.add(attachedNode);
+		this.edges = new ArrayList<>();
+		this.edges.addAll(pathA.getArcs());
+		this.edges.add(link);
+		this.annotations = new HashMap<>();
+	}
+
+	public SearchGraphPath(final N node) {
+		this(Arrays.asList(node), new ArrayList<>(), new HashMap<>());
 	}
 
 	public SearchGraphPath(final List<N> nodes, final List<A> edges) {
@@ -27,6 +51,12 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 
 	public SearchGraphPath(final List<N> nodes, final List<A> edges, final Map<String, Object> annotations) {
 		super();
+		if (nodes.isEmpty()) {
+			throw new IllegalArgumentException("List of nodes of a path must not be empty!");
+		}
+		if (edges == null || nodes.size() != edges.size() + 1) {
+			throw new IllegalArgumentException("Number of edges must be exactly one less than the one of nodes! Number of nodes: " + nodes.size() + ". Edges: " + (edges != null ? edges.size() : null));
+		}
 		this.nodes = nodes;
 		this.edges = edges;
 		this.annotations = annotations;
@@ -52,12 +82,7 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((this.annotations == null) ? 0 : this.annotations.hashCode());
-		result = prime * result + ((this.edges == null) ? 0 : this.edges.hashCode());
-		result = prime * result + ((this.nodes == null) ? 0 : this.nodes.hashCode());
-		return result;
+		return new HashCodeBuilder().append(this.nodes).append(this.edges).append(this.annotations).toHashCode();
 	}
 
 	@Override
@@ -72,28 +97,8 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 			return false;
 		}
 		SearchGraphPath other = (SearchGraphPath) obj;
-		if (this.annotations == null) {
-			if (other.annotations != null) {
-				return false;
-			}
-		} else if (!this.annotations.equals(other.annotations)) {
-			return false;
-		}
-		if (this.edges == null) {
-			if (other.edges != null) {
-				return false;
-			}
-		} else if (!this.edges.equals(other.edges)) {
-			return false;
-		}
-		if (this.nodes == null) {
-			if (other.nodes != null) {
-				return false;
-			}
-		} else if (!this.nodes.equals(other.nodes)) {
-			return false;
-		}
-		return true;
+		boolean equals = new EqualsBuilder().append(this.nodes, other.nodes).append(this.edges, other.edges).isEquals();
+		return equals;
 	}
 
 	@Override
@@ -112,7 +117,43 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 	}
 
 	@Override
-	public IPath<N, A> getPathToParentOfHead() {
-		return new SearchGraphPath<>(this.nodes.subList(0, this.nodes.size()), this.edges.subList(0, this.edges.size()));
+	public SearchGraphPath<N, A> getPathToParentOfHead() {
+		if (this.nodes.isEmpty()) {
+			throw new UnsupportedOperationException("This is an empty path!");
+		}
+		if (this.isPoint()) {
+			throw new UnsupportedOperationException("Root has no head!");
+		}
+		return new SearchGraphPath<>(this.nodes.subList(0, this.nodes.size() - 1), this.edges.subList(0, this.edges.size() - 1));
+	}
+
+	@Override
+	public boolean isPoint() {
+		return this.nodes.size() == 1;
+	}
+
+	@Override
+	public int getNumberOfNodes() {
+		return this.nodes.size();
+	}
+
+	@Override
+	public IPath<N, A> getPathFromChildOfRoot() {
+		return new SearchGraphPath<>(this.nodes.subList(1, this.nodes.size()), this.edges != null ? this.edges.subList(1, this.edges.size()) : null);
+	}
+
+	@Override
+	public A getInArc(final N node) {
+		return this.edges.get(this.nodes.indexOf(node) - 1);
+	}
+
+	@Override
+	public A getOutArc(final N node) {
+		return this.edges.get(this.nodes.indexOf(node));
+	}
+
+	@Override
+	public boolean containsNode(final N node) {
+		return this.nodes.contains(node);
 	}
 }

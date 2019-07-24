@@ -45,6 +45,16 @@ public class SetUtil {
 		return union;
 	}
 
+	public static <T> List<T> union(final List<T>... lists) {
+		List<T> union = new ArrayList<>();
+		for (int i = 0; i < lists.length; i++) {
+			if (lists[i] != null) {
+				union.addAll(lists[i]);
+			}
+		}
+		return union;
+	}
+
 	public static <T> Collection<T> symmetricDifference(final Collection<T> a, final Collection<T> b) {
 		return SetUtil.union(SetUtil.difference(a, b), SetUtil.difference(b, a));
 	}

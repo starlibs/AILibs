@@ -236,7 +236,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 		if (!this.randomPathCompleter.knowsNode(path.getHead())) {
 			synchronized (this.randomPathCompleter) {
-				this.randomPathCompleter.appendPathToNode(path.getNodes());
+				this.randomPathCompleter.appendPathToNode(path);
 			}
 		}
 		// draw N paths at random
@@ -316,7 +316,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 				SearchGraphPath<T, A> solutionPathFromN = null;
 				try {
-					solutionPathFromN = this.randomPathCompleter.nextSolutionUnderNode(node.getHead());
+					solutionPathFromN = this.randomPathCompleter.nextSolutionUnderSubPath(node);
 				} catch (AlgorithmExecutionCanceledException e) {
 					logger.info("Completer has been canceled. Returning control.");
 					break;

@@ -33,7 +33,7 @@ public class PartiallyFailingObjectEvaluator<T, V extends Comparable<V>> impleme
 		if (this.successfullInvocations.contains(this.numCalls.incrementAndGet())) {
 			return this.valueToReturn;
 		}
-		throw new ObjectEvaluationFailedException("Intentional Exception for test purposes.", null);
+		throw new ObjectEvaluationFailedException("Intentional Exception. Call number " + this.numCalls.get() + " is not among set of successful invocations " + this.successfullInvocations, null);
 	}
 
 }

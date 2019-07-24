@@ -381,7 +381,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 
 				/* Recognize solution in cache together with annotation */
 				if (newNode.isGoal()) {
-					EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(newNode.getNodes(), null, newNode.getScore());
+					EvaluatedSearchGraphPath<N, A, V> solution = new EvaluatedSearchGraphPath<>(newNode, newNode.getScore());
 
 					/*
 					 * if the node evaluator has not reported the solution already anyway, register

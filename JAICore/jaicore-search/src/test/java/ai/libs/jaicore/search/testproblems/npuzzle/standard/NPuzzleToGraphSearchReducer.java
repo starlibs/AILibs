@@ -1,7 +1,11 @@
 package ai.libs.jaicore.search.testproblems.npuzzle.standard;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+
+import ai.libs.jaicore.basic.StringUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.search.core.interfaces.EdgeCountingSolutionEvaluator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -14,7 +18,9 @@ public class NPuzzleToGraphSearchReducer implements AlgorithmicProblemReduction<
 
 	@Override
 	public GraphSearchWithSubpathEvaluationsInput<NPuzzleState, String, Integer> encodeProblem(final NPuzzleProblem problem) {
-		return new GraphSearchWithSubpathEvaluationsInput<>(new NPuzzleGraphGenerator(problem.getBoard()), new NPuzzleGoalPredicate(problem.getDim()), n -> new EdgeCountingSolutionEvaluator<NPuzzleState, String>().evaluate(new SearchGraphPath<>(n.getNodes())).intValue());
+		IPathEvaluator<NPuzzleState, String, Integer> pathEvaluator = p -> new EdgeCountingSolutionEvaluator<NPuzzleState, String>()
+				.evaluate(new SearchGraphPath<>(p.getNodes(), Arrays.asList(StringUtil.getArrayWithValues(p.getNodes().size() - 1, "")))).intValue();
+		return new GraphSearchWithSubpathEvaluationsInput<>(new NPuzzleGraphGenerator(problem.getBoard()), new NPuzzleGoalPredicate(problem.getDim()), pathEvaluator);
 	}
 
 	@Override

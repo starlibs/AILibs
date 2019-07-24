@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
-import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
@@ -17,6 +17,10 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	private boolean goal;
 	protected BackPointerPath<N, A, V> parent;
 	private final Map<String, Object> annotations = new HashMap<>(); // for nodes effectively examined
+
+	public BackPointerPath(final N point) {
+		this (null, point, null);
+	}
 
 	public BackPointerPath(final BackPointerPath<N, A, V> parent, final N point, final A edgeLabelToParent) {
 		super();
@@ -137,7 +141,49 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	}
 
 	@Override
-	public IPath<N, A> getPathToParentOfHead() {
+	public BackPointerPath<N, A, V> getPathToParentOfHead() {
 		return this.parent;
+	}
+
+	@Override
+	public int getNumberOfNodes() {
+		return this.parent == null ? 1 : this.parent.getNumberOfNodes() + 1;
+	}
+
+	@Override
+	public boolean isPoint() {
+		return this.parent == null;
+	}
+
+	@Override
+	public BackPointerPath<N, A, V> getPathFromChildOfRoot() {
+		if (this.parent.getParent() == null) {
+			return new BackPointerPath<>(this.nodeLabel);
+		}
+		return new BackPointerPath<>(this.parent.getPathFromChildOfRoot(), this.nodeLabel, this.edgeLabelToParent);
+	}
+
+	@Override
+	public A getInArc(final N node) {
+		if (this.nodeLabel.equals(node)) {
+			return this.edgeLabelToParent;
+		}
+		return this.parent.getInArc(node);
+	}
+
+	@Override
+	public A getOutArc(final N node) {
+		if (this.parent == null) {
+			throw new NoSuchElementException("No such node found.");
+		}
+		if (this.parent.nodeLabel.equals(node)) {
+			return this.edgeLabelToParent;
+		}
+		return this.parent.getOutArc(node);
+	}
+
+	@Override
+	public boolean containsNode(final N node) {
+		return this.nodeLabel.equals(node) || (this.parent != null && this.parent.containsNode(node));
 	}
 }
