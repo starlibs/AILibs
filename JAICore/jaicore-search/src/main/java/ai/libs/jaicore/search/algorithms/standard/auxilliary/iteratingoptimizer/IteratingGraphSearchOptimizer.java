@@ -31,6 +31,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
 	private final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
+	private int numberOfSeenSolutions = 0;
 
 	public IteratingGraphSearchOptimizer(final I problem, final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
 		super(problem);
@@ -51,21 +52,32 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		AlgorithmEvent parentEvent = this.baseAlgorithm.nextWithException();
-		if (parentEvent instanceof GraphSearchSolutionCandidateFoundEvent) {
-			try {
-				SearchGraphPath<N, A> path = ((GraphSearchSolutionCandidateFoundEvent<N,A,?>) parentEvent).getSolutionCandidate();
-				V score = this.getInput().getPathEvaluator().evaluate(path);
-				EvaluatedSearchGraphPath<N, A, V> evaluatedPath = new EvaluatedSearchGraphPath<>(path.getNodes(), path.getArcs(), score);
-				this.updateBestSeenSolution(evaluatedPath);
-				EvaluatedSearchSolutionCandidateFoundEvent<N,A,V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), evaluatedPath);
-				this.post(event);
-				return event;
-			} catch (ObjectEvaluationFailedException e) {
-				throw new AlgorithmException("Object evaluation failed", e);
+
+		this.checkTermination(true);
+
+		switch (this.getState()) {
+		case CREATED:
+			return this.activate();
+		case ACTIVE:
+			AlgorithmEvent parentEvent = this.baseAlgorithm.nextWithException();
+			if (parentEvent instanceof GraphSearchSolutionCandidateFoundEvent) {
+				try {
+					SearchGraphPath<N, A> path = ((GraphSearchSolutionCandidateFoundEvent<N,A,?>) parentEvent).getSolutionCandidate();
+					V score = this.getInput().getPathEvaluator().evaluate(path);
+					EvaluatedSearchGraphPath<N, A, V> evaluatedPath = new EvaluatedSearchGraphPath<>(path.getNodes(), path.getArcs(), score);
+					this.updateBestSeenSolution(evaluatedPath);
+					this.numberOfSeenSolutions ++;
+					EvaluatedSearchSolutionCandidateFoundEvent<N,A,V> event = new EvaluatedSearchSolutionCandidateFoundEvent<>(this.getId(), evaluatedPath);
+					this.post(event);
+					return event;
+				} catch (ObjectEvaluationFailedException e) {
+					throw new AlgorithmException("Object evaluation failed", e);
+				}
+			} else {
+				return parentEvent;
 			}
-		} else {
-			return parentEvent;
+		default:
+			throw new IllegalStateException("Illegal state " + this.getState());
 		}
 	}
 
@@ -73,5 +85,7 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 		return this.baseAlgorithm;
 	}
 
-
+	public int getNumberOfSeenSolutions() {
+		return this.numberOfSeenSolutions;
+	}
 }

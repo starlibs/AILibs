@@ -68,7 +68,7 @@ public class DatabaseNodeEvaluator implements IPathEvaluator<DatabaseNode, Strin
 	}
 
 	@Override
-	public Double f(final IPath<DatabaseNode, String> node) throws InterruptedException, NoSolutionFromRandomCompletionException, DatasetEvaluationFailedException {
+	public Double evaluate(final IPath<DatabaseNode, String> node) throws InterruptedException, NoSolutionFromRandomCompletionException, DatasetEvaluationFailedException {
 		if (node.getHead().getSelectedFeatures().isEmpty()) {
 			LOGGER.warn("Return default value (0) for empty node");
 			return 0.0;

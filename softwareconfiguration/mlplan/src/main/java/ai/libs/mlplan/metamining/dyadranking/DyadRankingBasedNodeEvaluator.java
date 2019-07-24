@@ -219,7 +219,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public V f(final IPath<T, A> path) throws InterruptedException, PathEvaluationException {
+	public V evaluate(final IPath<T, A> path) throws InterruptedException, PathEvaluationException {
 		if (this.firstEvaluation == null) {
 			this.firstEvaluation = Instant.now();
 		}

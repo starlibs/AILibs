@@ -21,6 +21,6 @@ public class NQueensToGraphSearchReducer implements AlgorithmicProblemReduction<
 
 	@Override
 	public List<Integer> decodeSolution(final SearchGraphPath<QueenNode, String> solution) {
-		return solution.getNodes().get(solution.getNodes().size() - 1).getPositions();
+		return solution.getHead().getPositions();
 	}
 }

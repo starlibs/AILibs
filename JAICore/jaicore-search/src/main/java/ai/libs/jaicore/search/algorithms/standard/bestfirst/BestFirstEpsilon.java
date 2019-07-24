@@ -47,7 +47,7 @@ public class BestFirstEpsilon<T, A, W extends Comparable<W>> extends StandardBes
 			Collection<BackPointerPath<T, A, Double>> focal = super.stream().filter(n -> n.getScore() <= threshold).collect(Collectors.toList());
 			focal.stream().filter(n -> !BestFirstEpsilon.this.secondaryCache.containsKey(n)).forEach(n -> {
 				try {
-					BestFirstEpsilon.this.secondaryCache.put(n, BestFirstEpsilon.this.secondaryNodeEvaluator.f(n));
+					BestFirstEpsilon.this.secondaryCache.put(n, BestFirstEpsilon.this.secondaryNodeEvaluator.evaluate(n));
 				} catch (Exception e) {
 					BestFirstEpsilon.this.logger.error("Observed exception during computation of f: {}", e);
 				}

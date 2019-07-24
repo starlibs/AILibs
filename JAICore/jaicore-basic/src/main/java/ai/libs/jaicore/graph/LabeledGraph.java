@@ -89,9 +89,6 @@ public class LabeledGraph<T, L> extends Graph<T> {
 
 	public void addEdge(final T from, final T to, final L label) {
 		super.addEdge(from, to);
-		if (label == null) {
-			throw new IllegalArgumentException("No null-labels allowed!");
-		}
 		this.labels.put(new Edge<>(from, to), label);
 	}
 

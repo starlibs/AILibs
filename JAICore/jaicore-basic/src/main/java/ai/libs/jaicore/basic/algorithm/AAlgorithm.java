@@ -14,7 +14,6 @@ import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
-import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.algorithm.exceptions.ExceptionInAlgorithmIterationException;
@@ -248,6 +247,8 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			}
 			this.logger.debug("Throwing TimeoutException");
 			throw new AlgorithmTimeoutedException(this.timeOfTimeoutDetection - this.deadline);
+		} else {
+			this.logger.trace("No timeout detected. Remaining time: {}", System.currentTimeMillis() - this.deadline);
 		}
 
 		if (this.isCanceled()) { // for a cancel, we assume that the shutdown has already been triggered by the canceler
@@ -451,7 +452,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	}
 
 	protected <T> T computeTimeoutAware(final Callable<T> r, final String reasonToLogOnTimeout, final boolean shutdownOnStoppingCriterionSatisfied)
-			throws InterruptedException, AlgorithmException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+			throws InterruptedException, ExecutionException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		this.logger.debug("Received request to execute {} with awareness of timeout {}. Currently active threads: {}. Currently active tasks in global timer: {}", r, this.getTimeout(), this.activeThreads,
 				GlobalTimer.getInstance().getActiveTasks());
 
@@ -470,7 +471,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			} catch (AlgorithmExecutionCanceledException e) { // these exceptions should just be forwarded
 				throw e;
 			} catch (Exception e) {
-				throw new AlgorithmException("The algorithm has failed due to an exception of a Callable.", e);
+				throw new ExecutionException("The algorithm has failed due to an exception of a Callable.", e);
 			}
 		}
 
@@ -500,8 +501,6 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 			this.resolveShutdownInterruptOnCurrentThread();
 			this.checkTermination(shutdownOnStoppingCriterionSatisfied);
 			throw new IllegalStateException("A stopping criterion must have been true (probably cancel), but checkTermination did not throw an exception!"); // this line should never be reached
-		} catch (ExecutionException e) {
-			throw new AlgorithmException("The algorithm has failed due to an exception of Callable " + r + " with timeout log message " + reasonToLogOnTimeout, e);
 		}
 	}
 }

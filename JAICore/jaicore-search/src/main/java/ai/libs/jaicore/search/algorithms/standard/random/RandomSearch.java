@@ -262,7 +262,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		assert this.exploredGraph.isGraphSane();
 
 		/* if the root is exhausted, cancel */
-		if (this.exhausted.contains(path)) {
+		if (this.exhausted.contains(path.getHead())) {
 			return null;
 		}
 

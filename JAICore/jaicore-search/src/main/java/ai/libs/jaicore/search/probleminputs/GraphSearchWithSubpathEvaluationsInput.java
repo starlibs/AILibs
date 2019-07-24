@@ -34,7 +34,7 @@ public class GraphSearchWithSubpathEvaluationsInput<N, A, V extends Comparable<V
 	public GraphSearchWithSubpathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IPathEvaluator<N, A, V> nodeEvaluator) {
 		super(graphGenerator, goalTester, p -> {
 			try {
-				return nodeEvaluator.f(new BackPointerPath<>(null, p.getHead(), null));
+				return nodeEvaluator.evaluate(new BackPointerPath<>(null, p.getHead(), null));
 			} catch (PathEvaluationException e) {
 				throw new ObjectEvaluationFailedException("Could not evaluate path", e);
 			}

@@ -40,7 +40,7 @@ public class PreferenceBasedNodeEvaluator implements IPathEvaluator<TFDNode, Str
 	}
 
 	@Override
-	public Double f(final IPath<TFDNode, String> n) {
+	public Double evaluate(final IPath<TFDNode, String> n) {
 		List<String> appliedMethods = new LinkedList<>();
 		for (TFDNode x : n.getNodes()) {
 			if (x.getAppliedMethodInstance() != null) {

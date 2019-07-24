@@ -108,6 +108,7 @@ public abstract class AOptimizer<I, O extends ScoredItem<V>, V extends Comparabl
 	@Override
 	public O call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		while (this.hasNext()) {
+			this.checkTermination(true);
 			this.nextWithException();
 		}
 		return this.bestSeenSolution;

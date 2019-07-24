@@ -81,7 +81,7 @@ public class EnhancedTTSPExample {
 	private class AStarNodeEvaluator implements IPathEvaluator<EnhancedTTSPNode, String, Double> {
 
 		@Override
-		public Double f(final IPath<EnhancedTTSPNode, String> node) {
+		public Double evaluate(final IPath<EnhancedTTSPNode, String> node) {
 
 			double g = node.getHead().getTime();
 			double h = 0;

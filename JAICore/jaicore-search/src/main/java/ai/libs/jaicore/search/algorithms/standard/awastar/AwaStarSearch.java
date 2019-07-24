@@ -5,11 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.ExecutionException;
 
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -87,7 +89,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		}
 	}
 
-	private void windowAStar() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
+	private void windowAStar() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException, PathEvaluationException {
 		while (!this.openList.isEmpty()) {
 			this.checkAndConductTermination();
 			if (!this.unreturnedSolutionEvents.isEmpty()) {
@@ -120,13 +122,18 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 			/* compute successors of the expanded node */
 			this.logger.debug("Expanding {}. Starting successor generation.", n.getHead());
-			Collection<NodeExpansionDescription<T, A>> successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getHead()), "Successor generation timeouted" , true);
+			Collection<NodeExpansionDescription<T, A>> successors;
+			try {
+				successors = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(n.getHead()), "Successor generation timeouted" , true);
+			} catch (ExecutionException e) {
+				throw new AlgorithmException("Could not compute successors.", e.getCause());
+			}
 			this.logger.debug("Successor generation finished. Identified {} successors.", successors.size());
 			for (NodeExpansionDescription<T, A> expansionDescription : successors) {
 				this.checkAndConductTermination();
 				BackPointerPath<T, A, V> nPrime = new BackPointerPath<>(n, expansionDescription.getTo(), expansionDescription.getAction());
 				nPrime.setGoal(this.goalTester.isGoal(nPrime));
-				V nPrimeScore = this.nodeEvaluator.f(nPrime);
+				V nPrimeScore = this.nodeEvaluator.evaluate(nPrime);
 
 				/* ignore nodes whose value cannot be determined */
 				if (nPrimeScore == null) {
@@ -193,7 +200,11 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 				this.openList.add(rootNode);
 				this.post(new GraphInitializedEvent<>(this.getId(), rootNode));
-				rootNode.setScore(this.nodeEvaluator.f(rootNode));
+				try {
+					rootNode.setScore(this.nodeEvaluator.evaluate(rootNode));
+				} catch (PathEvaluationException e) {
+					throw new AlgorithmException("Could not compute score.", e);
+				}
 				return this.activate();
 
 			case ACTIVE:
@@ -218,7 +229,11 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 						}
 					}
 					this.logger.info("Running core algorithm with window size {} and current level {}. {} items are in OPEN", this.windowSize, this.currentLevel, this.openList.size());
-					this.windowAStar();
+					try {
+						this.windowAStar();
+					} catch (PathEvaluationException e) {
+						throw new AlgorithmException("Could not compute score.", e);
+					}
 				}
 
 				/* if we reached this point, there is at least one item in the result list. We return it */

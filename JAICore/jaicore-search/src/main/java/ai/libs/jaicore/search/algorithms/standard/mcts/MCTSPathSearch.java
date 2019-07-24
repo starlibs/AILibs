@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
@@ -77,6 +78,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	private final V penaltyForFailedEvaluation;
 
 	private final boolean forbidDoublePaths;
+	private int numberOfPlayouts = 0;
 
 	public MCTSPathSearch(final GraphSearchWithPathEvaluationsInput<N, A, V> problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy, final V penaltyForFailedEvaluation, final boolean forbidDoublePaths) {
 		super(problem);
@@ -122,6 +124,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	 */
 	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, ActionPredictionFailedException {
 		this.logger.debug("Computing a new playout ...");
+		this.numberOfPlayouts++;
 		N current = this.root;
 		N next;
 		Collection<N> childrenOfCurrent = this.unexpandedNodes.contains(current) ? null : this.exploredGraph.getSuccessors(current);
@@ -292,7 +295,12 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		}
 		this.logger.trace("Situation {} has never been analyzed before, expanding the graph at the respective point.", node);
 		this.unexpandedNodes.remove(node);
-		Collection<NodeExpansionDescription<N, A>> availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
+		Collection<NodeExpansionDescription<N, A>> availableActions;
+		try {
+			availableActions = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node), "Successor generation", true);
+		} catch (ExecutionException e) {
+			throw new AlgorithmException("Could not compute available actions.", e.getCause());
+		}
 		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toSet())
 				.size() : "The actions under this node don't have unique names";
 				Map<A, N> successorStates = new HashMap<>();
@@ -462,5 +470,9 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		} else {
 			this.logger.info("Not setting logger of tree policy");
 		}
+	}
+
+	public int getNumberOfPlayouts() {
+		return this.numberOfPlayouts;
 	}
 }

@@ -38,7 +38,7 @@ public class HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory extends HASCOV
 						throw new IllegalArgumentException("This variant of HASCO currently only works with back-pointer based nodes.");
 					}
 					if (((BackPointerPath<?, ?, ?>)n).isGoal()) {
-						return nodeEvaluator.f(n);
+						return nodeEvaluator.evaluate(n);
 					} else {
 						return 1.0;
 					}

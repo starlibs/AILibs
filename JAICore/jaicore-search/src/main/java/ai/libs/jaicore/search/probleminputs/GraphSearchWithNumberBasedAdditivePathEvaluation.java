@@ -30,14 +30,14 @@ public class GraphSearchWithNumberBasedAdditivePathEvaluation<N, A> extends Grap
 		}
 
 		@Override
-		public Double f(final IPath<N, A> path) throws PathEvaluationException, InterruptedException {
+		public Double evaluate(final IPath<N, A> path) throws PathEvaluationException, InterruptedException {
 			if (!(path instanceof BackPointerPath)) {
 				throw new IllegalArgumentException("Can compute f-value only for back pointer paths.");
 			}
 			List<?> cPath = ((BackPointerPath<N, A, Double>)path).path();
 			int depth = cPath.size() - 1;
 			double pathCost = 0;
-			double heuristic = this.h.f(path);
+			double heuristic = this.h.evaluate(path);
 			if (depth > 0) {
 				@SuppressWarnings("unchecked")
 				Iterator<BackPointerPath<N, A, ?>> it = (Iterator<BackPointerPath<N, A, ?>>) cPath.iterator();

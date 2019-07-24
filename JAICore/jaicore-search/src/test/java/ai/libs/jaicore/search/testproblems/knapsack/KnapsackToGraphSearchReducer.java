@@ -32,7 +32,7 @@ public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction
 		}, new IPathEvaluator<KnapsackConfiguration, String, Double>() {
 
 			@Override
-			public Double f(final IPath<KnapsackConfiguration, String> path) throws PathEvaluationException, InterruptedException {
+			public Double evaluate(final IPath<KnapsackConfiguration, String> path) throws PathEvaluationException, InterruptedException {
 				try {
 					return problem.getSolutionEvaluator().evaluate(path.getHead());
 				}

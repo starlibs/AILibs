@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -104,10 +105,10 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @throws PathEvaluationException
 	 */
 	private void updateState(final GammaNode<T, A> n) throws PathEvaluationException, InterruptedException {
-		if ((n.getG() > this.w * this.h.f(n)) || ((n.getParent() == null || !this.isPathRealizationKnownForAbstractEdgeToNode(n)) && n.getAvoid())) {
-			n.setScore(new RStarK(true, n.getG() + this.w * this.h.f(n)));
+		if ((n.getG() > this.w * this.h.evaluate(n)) || ((n.getParent() == null || !this.isPathRealizationKnownForAbstractEdgeToNode(n)) && n.getAvoid())) {
+			n.setScore(new RStarK(true, n.getG() + this.w * this.h.evaluate(n)));
 		} else {
-			n.setScore(new RStarK(false, n.getG() + this.w * this.h.f(n)));
+			n.setScore(new RStarK(false, n.getG() + this.w * this.h.evaluate(n)));
 		}
 		this.open.add(n);
 	}
@@ -121,8 +122,9 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 	 * @throws AlgorithmException
 	 * @throws TimeoutException
 	 * @throws AlgorithmExecutionCanceledException
+	 * @throws PathEvaluationException
 	 */
-	private void reevaluateState(final GammaNode<T, A> n) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	private void reevaluateState(final GammaNode<T, A> n) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, PathEvaluationException {
 
 		/* Line 7: Try to compute the local path from bp(n) to n. (we use AStar for this) */
 		this.logger.debug("Reevaluating node {}", n);
@@ -173,7 +175,11 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				RootGenerator<T> rootGenerator = this.getInput().getGraphGenerator().getRootGenerator();
 				for (T root : rootGenerator.getRoots()) {
 					GammaNode<T, A> internalRoot = new GammaNode<>(root);
-					internalRoot.setScore(new RStarK(false, this.w * this.h.f(internalRoot)));
+					try {
+						internalRoot.setScore(new RStarK(false, this.w * this.h.evaluate(internalRoot)));
+					} catch (PathEvaluationException e) {
+						throw new AlgorithmException("Could not compute score", e);
+					}
 					internalRoot.setG(0);
 					this.open.add(internalRoot);
 				}
@@ -206,7 +212,11 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 				if (n.getParent() != null && !this.isPathRealizationKnownForAbstractEdgeToNode(n)) {
 
 					/* The path that corresponds to the edge bp(s)->s has not been computed yet. Try to compute it using reevaluateState. */
-					this.reevaluateState(n);
+					try {
+						this.reevaluateState(n);
+					} catch (PathEvaluationException e) {
+						throw new AlgorithmException("Could not evaluate state.", e);
+					}
 
 					/* put the node on OPEN again */
 					this.logger.debug("Putting node {} on OPEN again", n);
@@ -240,7 +250,11 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 						if (isNewNode || (n.getG() + n.cLow.get(n_) < n_.getG())) {
 							n_.setG(n.getG() + n.cLow.get(n_));
 							n_.setParent(n);
-							this.updateState(n_); // updates priority of n_ in open list.
+							try {
+								this.updateState(n_);
+							} catch (PathEvaluationException e) {
+								throw new AlgorithmException("Could not update state.", e);
+							} // updates priority of n_ in open list.
 							if (isNewNode) {
 								this.logger.debug("Adding new node {} to OPEN.", n_);
 								this.open.add(n_);
@@ -327,7 +341,12 @@ public class RStar<T, A> extends AOptimalPathInORGraphSearch<GraphSearchWithNumb
 
 		/* first create a list of k nodes that are in reach of delta of the current node */
 		this.logger.trace("Invoking distant successor generator timeout-aware.");
-		List<T> randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getHead(), this.k, this.metricOverStates, this.delta), "Computing distant successors", true);
+		List<T> randomDistantSuccessors;
+		try {
+			randomDistantSuccessors = this.computeTimeoutAware(() -> this.getInput().getDistantSuccessorGenerator().getDistantSuccessors(n.getHead(), this.k, this.metricOverStates, this.delta), "Computing distant successors", true);
+		} catch (ExecutionException e) {
+			throw new AlgorithmException("Could not compute successors", e.getCause());
+		}
 		assert randomDistantSuccessors.size() == new HashSet<>(randomDistantSuccessors).size() : "Distant successor generator has created the same successor ar least twice: \n\t "
 				+ SetUtil.getMultiplyContainedItems(randomDistantSuccessors).stream().map(T::toString).collect(Collectors.joining("\n\t"));
 		this.logger.trace("Distant successor generator generated {}/{} successors.", randomDistantSuccessors.size(), this.k);

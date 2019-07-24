@@ -64,7 +64,7 @@ public class AutoFEMLPreferredNodeEvaluator implements IPathEvaluator<TFDNode, S
 	}
 
 	@Override
-	public Double f(final IPath<TFDNode, String> path) throws PathEvaluationException {
+	public Double evaluate(final IPath<TFDNode, String> path) throws PathEvaluationException {
 		if (path.getNodes().size() == 1) {
 			return 0.0;
 		}

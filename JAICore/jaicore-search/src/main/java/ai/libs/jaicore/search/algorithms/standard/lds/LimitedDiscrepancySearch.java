@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
@@ -145,7 +146,12 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 			this.expanded.add(node);
 			this.logger.debug("Starting successor generation of {}", node.getValue());
 			long start = System.currentTimeMillis();
-			Collection<NodeExpansionDescription<T, A>> succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()), "Successor generation" , true);
+			Collection<NodeExpansionDescription<T, A>> succ;
+			try {
+				succ = this.computeTimeoutAware(() -> this.successorGenerator.generateSuccessors(node.getValue()), "Successor generation" , true);
+			} catch (ExecutionException e) {
+				throw new AlgorithmException("Could not compute successors", e.getCause());
+			}
 			if (succ == null || succ.isEmpty()) {
 				this.logger.debug("No successors were generated.");
 				return new NoMoreNodesOnLevelEvent(this.getId());
