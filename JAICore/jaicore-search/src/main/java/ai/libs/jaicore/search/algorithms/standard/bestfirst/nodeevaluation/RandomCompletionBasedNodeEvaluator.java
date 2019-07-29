@@ -69,11 +69,13 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	protected Set<IPath<T, A>> postedSolutions = new HashSet<>();
 	protected Map<List<T>, Integer> timesToComputeEvaluations = new HashMap<>();
 
+	/* caches and statistics */
 	protected Map<List<T>, V> scoresOfSolutionPaths = new ConcurrentHashMap<>();
 	protected Map<IPath<T, A>, V> fValues = new ConcurrentHashMap<>();
 	protected Map<String, Integer> ppFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
+	private List<Integer> completionTimes = new ArrayList<>();
 
 	protected IGraphGenerator<T, A> generator;
 	protected PathGoalTester<T, A> goalTester;
@@ -228,7 +230,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 					/* complete the current path by the dfs-solution; we assume that this goes quickly */
 					IPath<T, A> tmpCompletedPath = null;
 					try {
+						long timeOfCompletionStart = System.currentTimeMillis();
 						tmpCompletedPath = this.getNextRandomPathCompletionForNode(n);
+						this.completionTimes.add((int)(System.currentTimeMillis() - timeOfCompletionStart));
 					} catch (RCNEPathCompletionFailedException e1) {
 						if (e1.getCause() instanceof InterruptedException) {
 							throw (InterruptedException) e1.getCause();

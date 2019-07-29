@@ -1,13 +1,17 @@
 package ai.libs.jaicore.search.syntheticgraphs;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.NodeExpansionDescription;
 import org.api4.java.datastructure.graph.implicit.NodeType;
 import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
-import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
+import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
 
 public class BalancedGraphGeneratorGenerator {
 
@@ -16,14 +20,14 @@ public class BalancedGraphGeneratorGenerator {
 
 	class N {
 		int depth;
-		int idOfNodeOnLayer;
+		long idOfNodeOnLayer;
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
 			result = prime * result + this.depth;
-			result = prime * result + this.idOfNodeOnLayer;
+			result = prime * result + (int)this.idOfNodeOnLayer;
 			return result;
 		}
 
@@ -47,6 +51,11 @@ public class BalancedGraphGeneratorGenerator {
 			}
 			return true;
 		}
+
+		@Override
+		public String toString() {
+			return "N [depth=" + this.depth + ", idOfNodeOnLayer=" + this.idOfNodeOnLayer + "]";
+		}
 	}
 
 	public BalancedGraphGeneratorGenerator(final int branchingFactor, final int depth) {
@@ -64,24 +73,39 @@ public class BalancedGraphGeneratorGenerator {
 			}
 
 			@Override
-			public SuccessorGenerator<N, Integer> getSuccessorGenerator() {
-				return new SuccessorGenerator<N, Integer>() {
+			public SingleSuccessorGenerator<N, Integer> getSuccessorGenerator() {
+				return new SingleSuccessorGenerator<N, Integer>() {
+
+					private Map<N, Set<Integer>> successors = new HashMap<>();
 
 					@Override
 					public List<NodeExpansionDescription<N, Integer>> generateSuccessors(final N node) throws InterruptedException {
-						List<NodeExpansionDescription<N, Integer>> successors = new ArrayList<>();
+						List<NodeExpansionDescription<N, Integer>> successorsOfThisNode = new ArrayList<>();
 						int d = node.depth + 1;
-						int offsetForIdOnLayer = BalancedGraphGeneratorGenerator.this.branchingFactor * node.idOfNodeOnLayer;
 						if (d > BalancedGraphGeneratorGenerator.this.depth) {
-							return successors;
+							return successorsOfThisNode;
 						}
 						for (int i = 0; i < BalancedGraphGeneratorGenerator.this.branchingFactor; i++) {
-							N successor = new N();
-							successor.depth = d;
-							successor.idOfNodeOnLayer = offsetForIdOnLayer + i;
-							successors.add(new NodeExpansionDescription<>(successor, i, NodeType.OR));
+							successorsOfThisNode.add(this.generateSuccessor(node, i));
 						}
-						return successors;
+						return successorsOfThisNode;
+					}
+
+					@Override
+					public NodeExpansionDescription<N, Integer> generateSuccessor(final N node, final int i) throws InterruptedException {
+						int j = i % BalancedGraphGeneratorGenerator.this.branchingFactor;
+						int d = node.depth + 1;
+						long offsetForIdOnLayer = BalancedGraphGeneratorGenerator.this.branchingFactor * node.idOfNodeOnLayer;
+						N successor = new N();
+						successor.depth = d;
+						successor.idOfNodeOnLayer = offsetForIdOnLayer + j;
+						this.successors.computeIfAbsent(node, n -> new HashSet<>()).add(i);
+						return new NodeExpansionDescription<>(successor, j, NodeType.OR);
+					}
+
+					@Override
+					public boolean allSuccessorsComputed(final N node) {
+						return this.successors.get(node) != null && this.successors.get(node).size() == BalancedGraphGeneratorGenerator.this.branchingFactor;
 					}
 				};
 			}

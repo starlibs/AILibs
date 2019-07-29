@@ -56,6 +56,10 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 
 	public ExperimentDatabasePreparer(final IExperimentSetConfig config, final IExperimentDatabaseHandle databaseHandle) throws ExperimentDBInteractionFailedException {
 
+		if (config.getKeyFields() == null) {
+			throw new IllegalArgumentException("Configuration has not defined any key fields. Make sure to specify the " + IExperimentSetConfig.KEYFIELDS + " entry in the config file.");
+		}
+
 		/* check data base configuration */
 		this.config = config;
 		this.keyFields = config.getKeyFields().toArray(new String[config.getKeyFields().size()]);

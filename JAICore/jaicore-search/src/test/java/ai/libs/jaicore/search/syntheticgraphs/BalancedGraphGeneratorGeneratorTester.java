@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
+import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.syntheticgraphs.BalancedGraphGeneratorGenerator.N;
@@ -54,7 +54,7 @@ public class BalancedGraphGeneratorGeneratorTester {
 	@Test
 	public void testNumberOfSolutionPaths() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
 		GraphSearchInput<N, Integer> input = new BalanceGraphSearchProblem(this.branchingFactor, this.depth);
-		RandomSearch<N, Integer> rs = new RandomSearch<>(input);
+		DepthFirstSearch<N, Integer> rs = new DepthFirstSearch<>(input);
 		int solutions = 0;
 		while (rs.hasNext()) {
 			try {

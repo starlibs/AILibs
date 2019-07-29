@@ -2,7 +2,9 @@ package ai.libs.jaicore.search.algorithms.standard.random;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -59,6 +61,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	private final Set<N> exhausted = new HashSet<>(); // the set of nodes of which all solution paths have been computed
 	private final Random random;
 
+	private final Queue<SearchGraphPath<N, A>> foundSolutions = new LinkedList<>();
+
 	public RandomSearch(final GraphSearchInput<N, A> problem) {
 		this(problem, 0);
 	}
@@ -79,6 +83,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		this.goalTester = problem.getGoalTester();
 		this.exploredGraph.addItem(rootNode);
 		this.root = new SearchGraphPath<>(rootNode);
+		this.logger.debug("Added root node {} with the path {} to the model.", rootNode, this.root);
 		this.random = random;
 		this.priorityPredicate = priorityPredicate;
 	}
@@ -93,7 +98,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws AlgorithmTimeoutedException
 	 */
-	private void expandPath(final IPath<N,A> path) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+	private void expandPath(final IPath<N, A> path) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
+		this.logger.debug("Starting expansion of path {}", path);
 		synchronized (this.exploredGraph) {
 			assert this.exploredGraph.isGraphSane();
 			assert !this.goalTester.isGoal(path) : "Goal nodes cannot be expanded!";
@@ -143,10 +149,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 					}
 					if (knownSuccessors.contains(successor.getTo())) {
 						this.logger.debug("Skipping successor {}, which is already part of the model.", successor.getTo());
-					}
-					else {
+					} else {
 						this.addNodeToLocalModel(path, successor.getTo(), successor.getAction());
-						addedSuccessors ++;
+						addedSuccessors++;
 					}
 				}
 				this.logger.debug("{} nodes have been added to the local model. Now checking prioritization.", addedSuccessors);
@@ -177,7 +182,8 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		assert from != null;
 		assert to != null;
 		assert !this.exploredGraph.hasItem(to);
-		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t" + path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
+		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t"
+		+ path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
 		this.exploredGraph.addItem(to);
 		this.logger.debug("Added node {} to graph.", to);
 		assert this.exploredGraph.hasItem(to);
@@ -189,8 +195,14 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		this.exploredGraph.addEdge(from, to, label);
 		SearchGraphPath<N, A> extendedPath = new SearchGraphPath<>(path, to, label);
 		boolean isGoalNode = this.goalTester.isGoal(extendedPath);
+		NodeAddedEvent<N> event = new NodeAddedEvent<>(this.getId(), from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open"));
 		this.logger.debug("Added node {} as a successor of {} with edge label {} to the model.", to, from, label);
-		this.post(new NodeAddedEvent<>(this.getId(), from, to, isGoalNode ? "or_solution" : (isPrioritized ? "or_prioritized" : "or_open")));
+		this.post(event);
+		this.logger.trace("Sent {} for algorithm {} and node {}", event.getClass().getSimpleName(), event.getAlgorithmId(), event.getNode());
+		if (isGoalNode) {
+			this.logger.info("Found solution");
+			this.foundSolutions.add(extendedPath);
+		}
 		return extendedPath;
 	}
 
@@ -202,12 +214,22 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 			assert this.exploredGraph.isGraphSane();
 			switch (this.getState()) {
 			case CREATED:
-				this.post(new GraphInitializedEvent<>(this.getId(), this.root));
+				GraphInitializedEvent<N> initEvent = new GraphInitializedEvent<>(this.getId(), this.root.getRoot());
+				this.post(initEvent);
+				this.logger.trace("Sent {} for id {} with root {}", initEvent.getClass().getSimpleName(), initEvent.getAlgorithmId(), initEvent.getRoot());
 				this.logger.info("Starting random search ...");
 				assert this.exploredGraph.isGraphSane();
 				return this.activate();
 
 			case ACTIVE:
+
+				/* if there are still known paths, just return them */
+				if (!this.foundSolutions.isEmpty()) {
+					AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), this.foundSolutions.poll());
+					this.logger.info("Identified new solution. Event is {}", event);
+					this.post(event);
+					return event;
+				}
 
 				/* if the root is exhausted, cancel */
 				SearchGraphPath<N, A> drawnPath = null;
@@ -220,6 +242,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				this.logger.info("Drew path of length {}. Posting this event. For more details on the path, enable TRACE", drawnPath.getNodes().size());
 				this.logger.trace("The drawn path is {}", drawnPath);
 				AlgorithmEvent event = new GraphSearchSolutionCandidateFoundEvent<>(this.getId(), drawnPath);
+				this.foundSolutions.remove(drawnPath);
 				this.logger.info("Identified new solution. Event is {}", event);
 				this.post(event);
 				assert this.exploredGraph.isGraphSane();

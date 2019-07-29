@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.IdAlreadyInUseException;
@@ -20,16 +22,16 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.graphvisualizer.plugin.IGUIPluginModel;
 
-public class GraphViewPluginModel implements IGUIPluginModel {
+public class GraphViewPluginModel implements IGUIPluginModel, ILoggingCustomizable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphViewPluginModel.class);
+	private Logger logger= LoggerFactory.getLogger(GraphViewPluginModel.class);
 
 	private static final String DEF_RES_STYLESHEET_PATH = "searchgraph.css";
 	private static final String STYLESHEET_PATH = "conf/searchgraph.css";
 
 	private static final File DEF_STYLESHEET = FileUtil.getExistingFileWithHighestPriority(DEF_RES_STYLESHEET_PATH, STYLESHEET_PATH);
 
-	private int nodeIdCounter;
+	private final AtomicInteger nodeIdCounter = new AtomicInteger(0);
 
 	private GraphViewPluginView view;
 
@@ -48,7 +50,6 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		this.searchGraphNodesToViewGraphNodesMap = new ConcurrentHashMap<>();
 		this.viewGraphNodesToSearchGraphNodesMap = new ConcurrentHashMap<>();
 		this.nodeToConnectedEdgesMap = new ConcurrentHashMap<>();
-		this.nodeIdCounter = 0;
 
 		this.initializeGraph(searchGraphCSSPath);
 	}
@@ -59,28 +60,28 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 		try {
 			this.graph.setAttribute("ui.stylesheet", ResourceUtil.readResourceFileToString(searchGraphCSSPath.getPath()));
 		} catch (IOException e) {
-			LOGGER.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);
+			this.logger.warn("Could not load css stylesheet for graph view plugin. Continue without stylesheet", e);
 		}
 	}
 
-	public void addNode(final String node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {
-		try {
-			Node viewNode = this.graph.addNode(String.valueOf(this.nodeIdCounter));
+	public synchronized void addNode(final String node, final List<Object> predecessorNodes, final String typeOfNode) throws ViewGraphManipulationException {
+		try  {
+			this.logger.debug("Adding node with external id {}", node);
+			Node viewNode = this.graph.addNode(String.valueOf(this.nodeIdCounter.getAndIncrement()));
 			this.registerNodeMapping(node, viewNode);
 
 			for (Object predecessorNode : predecessorNodes) {
 				this.createEdge(node, predecessorNode);
 			}
-
 			this.switchNodeType(viewNode, typeOfNode);
 			this.view.update();
-			this.nodeIdCounter++;
+			this.logger.debug("Added node with external id {}. Internal id is {}", node, viewNode.getId());
 		} catch (IdAlreadyInUseException exception) {
 			throw new ViewGraphManipulationException("Cannot add node " + node + " as the id " + this.nodeIdCounter + " is already in use.");
 		}
 	}
 
-	private void createEdge(final Object node, final Object predecessorNode) throws ViewGraphManipulationException {
+	private synchronized void createEdge(final Object node, final Object predecessorNode) throws ViewGraphManipulationException {
 		Node viewNode = this.searchGraphNodesToViewGraphNodesMap.get(node);
 		Node viewPredecessorNode = this.searchGraphNodesToViewGraphNodesMap.get(predecessorNode);
 		if (viewPredecessorNode == null) {
@@ -165,5 +166,15 @@ public class GraphViewPluginModel implements IGUIPluginModel {
 
 	public String getSearchGraphNodeMappedToViewGraphNode(final Object viewGraphNode) {
 		return this.viewGraphNodesToSearchGraphNodesMap.get(viewGraphNode);
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

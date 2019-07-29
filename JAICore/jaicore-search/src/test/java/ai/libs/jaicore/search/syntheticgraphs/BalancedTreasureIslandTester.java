@@ -16,9 +16,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
+import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.syntheticgraphs.BalancedGraphGeneratorGenerator.N;
 
 @RunWith(Parameterized.class)
@@ -61,19 +60,20 @@ public class BalancedTreasureIslandTester {
 
 	@Test
 	public void testNumberOfTreasurePaths() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
-		BalanceGraphSearchProblem plainInput = new BalanceGraphSearchProblem(this.branchingFactor, this.depth);
-		TreasureIslandPathCostGenerator evaluator = new TreasureIslandPathCostGenerator(this.numberOfIslandsWithTreasure, this.distanceToIslands, (int)Math.pow(this.branchingFactor, this.distanceToIslands));
-		GraphSearchWithPathEvaluationsInput<N, Integer, Double> input = new GraphSearchWithPathEvaluationsInput<>(plainInput, evaluator);
-		RandomSearch<N, Integer> rs = new RandomSearch<>(input);
+		ChaoticTreasureIslandPathCostGenerator gen = new ChaoticTreasureIslandPathCostGenerator(this.numberOfIslandsWithTreasure, this.distanceToIslands, (int)Math.pow(this.branchingFactor, this.distanceToIslands), 0);
+		BalancedGraphSearchWithPathEvaluationsProblem input = new BalancedGraphSearchWithPathEvaluationsProblem(this.branchingFactor, this.depth, gen);
+		TreasureIslandPathCostGenerator evaluator = (TreasureIslandPathCostGenerator)input.getPathEvaluator();
+		DepthFirstSearch<N, Integer> rs = new DepthFirstSearch<>(input);
 		int numberOfTreasureSolutions = 0;
 		while (rs.hasNext()) {
 			try {
 				SearchGraphPath<N, Integer> path = rs.nextSolutionCandidate();
 				assertEquals(this.depth, path.getArcs().size());
 				double score = evaluator.evaluate(path);
+				assertEquals(score, evaluator.evaluate(path), 0.000001);
 				N islandNode = path.getNodes().get(this.distanceToIslands);
-				boolean shouldBeATreasure = evaluator.isTreasurePath(path);
-				assertTrue("Path " + path.getArcs() + " with score " + score + " and id " + islandNode.idOfNodeOnLayer + " on layer " + islandNode.depth + " is false positive or false negative", shouldBeATreasure == (score < 1));
+				boolean shouldBeATreasure = gen.isPathToTreasureIsland(path);
+				assertTrue("Path " + path.getArcs() + " with score " + score + " and id " + islandNode.idOfNodeOnLayer + " on layer " + islandNode.depth + " is false positive or false negative. Should be a treasure is set to " + shouldBeATreasure, shouldBeATreasure == (score < 10));
 				if (shouldBeATreasure) {
 					numberOfTreasureSolutions++;
 				}

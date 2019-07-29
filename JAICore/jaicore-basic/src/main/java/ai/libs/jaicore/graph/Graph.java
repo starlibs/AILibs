@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -25,6 +24,7 @@ public class Graph<T> implements Serializable {
 		private Set<Node> predecessors = new HashSet<>();
 	}
 
+	private T root;
 	private final Map<T, Node> nodes = new HashMap<>();
 	private final Set<Pair<T, T>> edges = new HashSet<>();
 
@@ -59,6 +59,9 @@ public class Graph<T> implements Serializable {
 		Node n = new Node();
 		n.t = item;
 		this.nodes.put(item, n);
+		if (this.root == null) {
+			this.root = item;
+		}
 		if (!this.hasItem(n.t)) {
 			throw new IllegalStateException("Just added node " + item + " does not respond positively on a call to hasItem");
 		}
@@ -90,6 +93,14 @@ public class Graph<T> implements Serializable {
 		nodeFrom.successors.add(nodeTo);
 		nodeTo.predecessors.add(nodeFrom);
 		this.edges.add(new Pair<>(from, to));
+
+		/* update root if necessary */
+		if (to == this.root) {
+			this.root = null;
+			if (this.getPredecessors(from).isEmpty()) {
+				this.root = from;
+			}
+		}
 	}
 
 	public void removeEdge(final T from, final T to) {
@@ -100,6 +111,14 @@ public class Graph<T> implements Serializable {
 		nodeFrom.successors.remove(nodeTo);
 		nodeTo.predecessors.remove(nodeFrom);
 		this.edges.remove(new Pair<>(from, to));
+
+		/* update root if necessary */
+		if (from == this.root) {
+			this.root = null;
+			if (this.getPredecessors(to).isEmpty()) {
+				this.root = to;
+			}
+		}
 	}
 
 	public Set<T> getSuccessors(final T item) {
@@ -131,13 +150,7 @@ public class Graph<T> implements Serializable {
 	}
 
 	public final T getRoot() {
-		Collection<T> sources = this.getSources();
-		if (sources.isEmpty()) {
-			throw new NoSuchElementException("The graph is empty, so it has no root");
-		} else if (sources.size() > 1) {
-			throw new NoSuchElementException("The graph has several sources, so no unique root can be returned");
-		}
-		return sources.iterator().next();
+		return this.root;
 	}
 
 	public final Collection<T> getSinks() {

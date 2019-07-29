@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import ai.libs.jaicore.graphvisualizer.events.recorder.AlgorithmEventHistory;
@@ -33,7 +36,7 @@ import javafx.stage.Stage;
  * @author atornede
  *
  */
-public class AlgorithmVisualizationWindow implements Runnable {
+public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomizable {
 
 	private PropertyProcessedAlgorithmEventSource algorithmEventSource;
 	private AlgorithmEventHistoryEntryDeliverer algorithmEventHistoryPuller;
@@ -55,6 +58,8 @@ public class AlgorithmVisualizationWindow implements Runnable {
 	private BorderPane topLayout;
 
 	private TabPane pluginTabPane;
+
+	private Logger logger = LoggerFactory.getLogger(AlgorithmVisualizationWindow.class);
 
 	/**
 	 * Creates a new {@link AlgorithmVisualizationWindow} based on the given {@link AlgorithmEventHistory} (i.e. offline version), the main {@link IGUIPlugin} and optionally additional plugins.
@@ -197,5 +202,21 @@ public class AlgorithmVisualizationWindow implements Runnable {
 	 */
 	public AlgorithmEventHistory getAlgorithmEventHistory() {
 		return this.algorithmEventHistory;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		this.algorithmEventHistory.setLoggerName(name + ".history");
+		for (IGUIPlugin plugin : this.visualizationPlugins) {
+			if (plugin instanceof ILoggingCustomizable) {
+				((ILoggingCustomizable) plugin).setLoggerName(name + "." + plugin.getClass().getSimpleName().toLowerCase());
+			}
+		}
 	}
 }

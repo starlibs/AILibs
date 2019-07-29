@@ -363,13 +363,17 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 				this.registerActiveThread();
 				while (this.getState() == EAlgorithmState.ACTIVE) {
 					this.checkAndConductTermination();
-					if (this.unexpandedNodes.isEmpty()) {
+
+					/* if the whole graph has been expanded and paths must not be visited more than once, terminate */
+					if (this.unexpandedNodes.isEmpty() && this.forbidDoublePaths) {
 						AlgorithmEvent finishEvent = this.terminate();
 						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
 						return finishEvent;
-					} else {
+					}
 
-						/* compute a playout and, if the path is a solution, compute its score and update the path */
+
+					/* otherwise, compute a playout and, if the path is a solution, compute its score and update the path */
+					else {
 						this.logger.debug("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
 						List<N> path = this.getPlayout();
 						assert path != null : "The playout must never be null!";
@@ -474,5 +478,13 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 
 	public int getNumberOfPlayouts() {
 		return this.numberOfPlayouts;
+	}
+
+	public IPathUpdatablePolicy<N, A, V> getTreePolicy() {
+		return this.treePolicy;
+	}
+
+	public IPolicy<N, A, V> getDefaultPolicy() {
+		return this.defaultPolicy;
 	}
 }

@@ -36,6 +36,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	/* Parameters of the algorithm. */
 	private IOwnerBasedAlgorithmConfig config;
+	private TimeOut timeout;
 
 	/* Semantic input to the algorithm. */
 	private final I input;
@@ -64,8 +65,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 *            The input for the algorithm.
 	 */
 	protected AAlgorithm(final I input) {
-		this.input = input;
-		this.config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
+		this (ConfigFactory.create(IOwnerBasedAlgorithmConfig.class), input);
 	}
 
 	/**
@@ -82,6 +82,11 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 		if (this.config == null) {
 			throw new IllegalArgumentException("Algorithm configuration must not be null!");
 		}
+		this.synchronizeConfig();
+	}
+
+	private void synchronizeConfig() {
+		this.timeout = new TimeOut(this.config.timeout(), TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -141,6 +146,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	public void setTimeout(final TimeOut timeout) {
 		this.logger.info("Setting timeout to {}ms", timeout.milliseconds());
 		this.getConfig().setProperty(IOwnerBasedAlgorithmConfig.K_TIMEOUT, timeout.milliseconds() + "");
+		this.timeout = timeout;
 	}
 
 	public int getTimeoutPrecautionOffset() {
@@ -153,7 +159,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 
 	@Override
 	public TimeOut getTimeout() {
-		return new TimeOut(this.getConfig().timeout(), TimeUnit.MILLISECONDS);
+		return this.timeout;
 	}
 
 	public boolean isTimeouted() {
@@ -432,6 +438,7 @@ public abstract class AAlgorithm<I, O> implements IAlgorithm<I, O>, ILoggingCust
 	 */
 	public void setConfig(final IOwnerBasedAlgorithmConfig config) {
 		this.config = config;
+		this.synchronizeConfig(); // for the local copies of the distinct values
 	}
 
 	@Override

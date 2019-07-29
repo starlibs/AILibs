@@ -6,6 +6,9 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.api4.java.common.control.ILoggingCustomizable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
@@ -32,6 +35,7 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 
 	private final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
 	private int numberOfSeenSolutions = 0;
+	private Logger logger = LoggerFactory.getLogger(IteratingGraphSearchOptimizer.class);
 
 	public IteratingGraphSearchOptimizer(final I problem, final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
 		super(problem);
@@ -87,5 +91,21 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 
 	public int getNumberOfSeenSolutions() {
 		return this.numberOfSeenSolutions;
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
+		if (this.baseAlgorithm instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.baseAlgorithm).setLoggerName(name + ".base");
+		}
+		else {
+			this.logger.info("Cannot configure logger of base algorithm, because it does not implement the {} interface.", ILoggingCustomizable.class);
+		}
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
 	}
 }
