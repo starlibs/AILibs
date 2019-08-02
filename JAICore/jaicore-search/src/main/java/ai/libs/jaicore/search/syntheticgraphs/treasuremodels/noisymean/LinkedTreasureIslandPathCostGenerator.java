@@ -1,15 +1,17 @@
-package ai.libs.jaicore.search.syntheticgraphs;
+package ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class LinkedTreasureIslandPathCostGenerator extends TreasureIslandPathCostGenerator {
+import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
+
+public class LinkedTreasureIslandPathCostGenerator extends NoisyMeanTreasureModel {
 	private final Function<Long, Double> meanFunction;
 	private final Map<Long, Double> explicitlyEvaluatedMeans = new HashMap<>();
 
-	public LinkedTreasureIslandPathCostGenerator(final int numberOfIslandsWithTreasure, final int distanceToIslands, final int numberOfIslands, final Function<Long, Double> meanFunction) {
-		super(numberOfIslandsWithTreasure, distanceToIslands, numberOfIslands);
+	public LinkedTreasureIslandPathCostGenerator(final IIslandModel islandModel, final Function<Long, Double> meanFunction) {
+		super(islandModel);
 		this.meanFunction = meanFunction;
 	}
 

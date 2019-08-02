@@ -23,7 +23,13 @@ import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness;
-import ai.libs.jaicore.search.syntheticgraphs.BalancedGraphGeneratorGenerator.N;
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.balanced.BalancedGraphSearchWithPathEvaluationsProblem;
+import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
+import ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized.EqualSizedIslandsModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.LinkedTreasureIslandPathCostGenerator;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.NoisyMeanTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.ShiftedSineTreasureGenerator;
 
 public class SearchBenchmarker implements IExperimentSetEvaluator {
 
@@ -43,11 +49,11 @@ public class SearchBenchmarker implements IExperimentSetEvaluator {
 		int maxiter = Math.min(treasureNodes < 1000 ? treasureNodes : (int)(treasureNodes * 0.5), Integer.parseInt(experiment.get("maxiter")));
 
 		/* create graph search input */
-		TreasureIslandPathCostGenerator treasureGenerator = this.getTreasureGenerator(experiment.get("function"), numberOfIslands, numberOfIslandsWithTreasure, absoluteDistanceToIslands);
+		NoisyMeanTreasureModel treasureGenerator = this.getTreasureGenerator(experiment.get("function"), numberOfIslands, numberOfIslandsWithTreasure);
 		BalancedGraphSearchWithPathEvaluationsProblem input = new BalancedGraphSearchWithPathEvaluationsProblem(branchingFactor, depth, treasureGenerator);
 
 		/* get algorithm */
-		AOptimalPathInORGraphSearch<?, N, Integer, Double> optimizer = this.getSearchAlgorithm(experiment.get("search"), input);
+		AOptimalPathInORGraphSearch<?, ITransparentTreeNode, Integer, Double> optimizer = this.getSearchAlgorithm(experiment.get("search"), input);
 		optimizer.setTimeout(new TimeOut(30, TimeUnit.SECONDS));
 
 		System.out.println("Starting " + experiment.get("search") + " with " + maxiter + " iterations for " + branchingFactor + "/" + depth + "/" + absoluteDistanceToIslands + "/" + numberOfIslandsWithTreasure);
@@ -69,34 +75,35 @@ public class SearchBenchmarker implements IExperimentSetEvaluator {
 		}
 
 		/* store result of best seen solution */
-		EvaluatedSearchGraphPath<N, Integer, Double> path = optimizer.getBestSeenSolution();
+		EvaluatedSearchGraphPath<ITransparentTreeNode, Integer, Double> path = optimizer.getBestSeenSolution();
 		Map<String, Object> result = new HashMap<>();
 		result.put("score", path.getScore());
 		processor.processResults(result);
 	}
 
-	public TreasureIslandPathCostGenerator getTreasureGenerator(final String function, final int numberOfIslands, final int numberOfTreasures, final int distanceToIslands) {
+	public NoisyMeanTreasureModel getTreasureGenerator(final String function, final int numberOfIslands, final int numberOfTreasures) {
 		switch (function.toLowerCase()) {
 		case "sine":
 			ShiftedSineTreasureGenerator linkFuction = new ShiftedSineTreasureGenerator(numberOfIslands, numberOfTreasures, 0.1, 0.5);
-			LinkedTreasureIslandPathCostGenerator treasureGenerator = new LinkedTreasureIslandPathCostGenerator(numberOfTreasures, distanceToIslands, numberOfIslands, linkFuction);
+			IIslandModel islandModel = new EqualSizedIslandsModel(10);
+			LinkedTreasureIslandPathCostGenerator treasureGenerator = new LinkedTreasureIslandPathCostGenerator(islandModel, linkFuction);
 			return treasureGenerator;
 		}
 		throw new UnsupportedOperationException();
 	}
 
-	public AOptimalPathInORGraphSearch<?, N, Integer, Double> getSearchAlgorithm(final String algorithm, final GraphSearchWithPathEvaluationsInput<N, Integer, Double> input) {
+	public AOptimalPathInORGraphSearch<?, ITransparentTreeNode, Integer, Double> getSearchAlgorithm(final String algorithm, final GraphSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double> input) {
 		switch (algorithm) {
 		case "random":
-			IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<N, Integer, Double>, N, Integer, Double> factory = new IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<N, Integer, Double>, N, Integer, Double>();
+			IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double>, ITransparentTreeNode, Integer, Double> factory = new IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double>, ITransparentTreeNode, Integer, Double>();
 			factory.setBaseAlgorithmFactory(new RandomSearchFactory<>());
-			IteratingGraphSearchOptimizer<GraphSearchWithPathEvaluationsInput<N, Integer, Double>, N, Integer, Double> optimizer = factory.getAlgorithm(input);
+			IteratingGraphSearchOptimizer<GraphSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double>, ITransparentTreeNode, Integer, Double> optimizer = factory.getAlgorithm(input);
 			return optimizer;
 		case "bf-uninformed":
-			GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<N, Integer> reducer = new GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<>();
+			GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<ITransparentTreeNode, Integer> reducer = new GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<>();
 			return new StandardBestFirst<>(reducer.encodeProblem(input));
 		case "bf-informed":
-			GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<N, Integer, Double> reducer2 = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(n -> null, n -> false, 0, 3,
+			GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<ITransparentTreeNode, Integer, Double> reducer2 = new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS<>(n -> null, n -> false, 0, 3,
 					10000, 10000);
 			return new StandardBestFirst<>(reducer2.encodeProblem(input));
 		case "uct":
@@ -104,7 +111,7 @@ public class SearchBenchmarker implements IExperimentSetEvaluator {
 		case "uct-sp":
 			return new SPUCTPathSearch<>(input, 0, 0.0, Math.sqrt(2), 100, false);
 		case "dfs":
-			IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<N, Integer, Double>, N, Integer, Double> dfsFactory = new IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<N, Integer, Double>, N, Integer, Double>();
+			IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double>, ITransparentTreeNode, Integer, Double> dfsFactory = new IteratingGraphSearchOptimizerFactory<GraphSearchWithPathEvaluationsInput<ITransparentTreeNode, Integer, Double>, ITransparentTreeNode, Integer, Double>();
 			dfsFactory.setBaseAlgorithmFactory(new DepthFirstSearchFactory<>());
 			return dfsFactory.getAlgorithm(input);
 		default:

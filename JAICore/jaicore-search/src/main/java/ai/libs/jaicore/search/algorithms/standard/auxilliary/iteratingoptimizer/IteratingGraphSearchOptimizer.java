@@ -1,6 +1,7 @@
 package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer;
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearch;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -17,7 +18,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSo
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 /**
@@ -33,11 +33,11 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
  */
 public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
-	private final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
+	private final IGraphSearch<IGraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
 	private int numberOfSeenSolutions = 0;
 	private Logger logger = LoggerFactory.getLogger(IteratingGraphSearchOptimizer.class);
 
-	public IteratingGraphSearchOptimizer(final I problem, final IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
+	public IteratingGraphSearchOptimizer(final I problem, final IGraphSearch<IGraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm) {
 		super(problem);
 		this.baseAlgorithm = baseAlgorithm;
 		baseAlgorithm.registerListener(new Object() {
@@ -85,7 +85,7 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 		}
 	}
 
-	public IGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> getBaseAlgorithm() {
+	public IGraphSearch<IGraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> getBaseAlgorithm() {
 		return this.baseAlgorithm;
 	}
 

@@ -1,4 +1,4 @@
-package ai.libs.jaicore.search.syntheticgraphs;
+package ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean;
 
 public class ShiftedSineTreasureGenerator extends ATreasureMeanFunction {
 

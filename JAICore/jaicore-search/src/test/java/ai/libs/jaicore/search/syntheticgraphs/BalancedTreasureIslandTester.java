@@ -18,7 +18,12 @@ import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.syntheticgraphs.BalancedGraphGeneratorGenerator.N;
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.balanced.BalancedGraphSearchWithPathEvaluationsProblem;
+import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
+import ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized.EqualSizedIslandsModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.ChaoticMeansTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.NoisyMeanTreasureModel;
 
 @RunWith(Parameterized.class)
 public class BalancedTreasureIslandTester {
@@ -60,21 +65,22 @@ public class BalancedTreasureIslandTester {
 
 	@Test
 	public void testNumberOfTreasurePaths() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
-		ChaoticTreasureIslandPathCostGenerator gen = new ChaoticTreasureIslandPathCostGenerator(this.numberOfIslandsWithTreasure, this.distanceToIslands, (int)Math.pow(this.branchingFactor, this.distanceToIslands), 0);
+		IIslandModel model = new EqualSizedIslandsModel((long)Math.pow(this.branchingFactor, this.depth - this.distanceToIslands));
+		ChaoticMeansTreasureModel gen = new ChaoticMeansTreasureModel(this.numberOfIslandsWithTreasure, model, 0);
 		BalancedGraphSearchWithPathEvaluationsProblem input = new BalancedGraphSearchWithPathEvaluationsProblem(this.branchingFactor, this.depth, gen);
-		TreasureIslandPathCostGenerator evaluator = (TreasureIslandPathCostGenerator)input.getPathEvaluator();
-		DepthFirstSearch<N, Integer> rs = new DepthFirstSearch<>(input);
+		NoisyMeanTreasureModel evaluator = (NoisyMeanTreasureModel)input.getPathEvaluator();
+		DepthFirstSearch<ITransparentTreeNode, Integer> rs = new DepthFirstSearch<>(input);
 		int numberOfTreasureSolutions = 0;
 		while (rs.hasNext()) {
 			try {
-				SearchGraphPath<N, Integer> path = rs.nextSolutionCandidate();
+				SearchGraphPath<ITransparentTreeNode, Integer> path = rs.nextSolutionCandidate();
 				assertEquals(this.depth, path.getArcs().size());
 				double score = evaluator.evaluate(path);
 				assertEquals(score, evaluator.evaluate(path), 0.000001);
-				N islandNode = path.getNodes().get(this.distanceToIslands);
+				ITransparentTreeNode islandNode = path.getNodes().get(this.distanceToIslands);
 				boolean shouldBeATreasure = gen.isPathToTreasureIsland(path);
-				assertTrue("Path " + path.getArcs() + " with score " + score + " and id " + islandNode.idOfNodeOnLayer + " on layer " + islandNode.depth + " is false positive or false negative. Should be a treasure is set to " + shouldBeATreasure, shouldBeATreasure == (score < 10));
-				if (shouldBeATreasure) {
+				assertTrue("Path " + path.getArcs() + " with score " + score + " and id " + islandNode.getNumberOfLeftRelativesInSameGeneration() + " on layer " + islandNode.getDepth() + " is false positive or false negative. Should be a treasure is set to " + shouldBeATreasure, shouldBeATreasure == (score < 10));
+				if (score < 10) {
 					numberOfTreasureSolutions++;
 				}
 			} catch (NoSuchElementException e) {

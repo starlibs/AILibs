@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -29,7 +30,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansion
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearch;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  *
@@ -38,7 +38,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  * @param <N>
  * @param <A>
  */
-public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
+public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<IGraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> implements ILoggingCustomizable {
 
 	/* logging */
 	private String loggerName;
@@ -52,7 +52,7 @@ public class DepthFirstSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchI
 	private boolean lastNodeWasTrueLeaf = false;
 	private Map<N, List<NodeExpansionDescription<N, A>>> successors = new HashMap<>();
 
-	public DepthFirstSearch(final GraphSearchInput<N, A> problem) {
+	public DepthFirstSearch(final IGraphSearchInput<N, A> problem) {
 		super(problem);
 		this.goalTester = problem.getGoalTester();
 	}

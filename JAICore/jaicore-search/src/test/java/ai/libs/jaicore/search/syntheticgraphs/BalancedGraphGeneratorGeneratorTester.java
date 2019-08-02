@@ -17,7 +17,8 @@ import org.junit.runners.Parameterized.Parameters;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.syntheticgraphs.BalancedGraphGeneratorGenerator.N;
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
+import ai.libs.jaicore.search.syntheticgraphs.graphmodels.balanced.BalanceGraphSearchProblem;
 
 @RunWith(Parameterized.class)
 public class BalancedGraphGeneratorGeneratorTester {
@@ -53,12 +54,12 @@ public class BalancedGraphGeneratorGeneratorTester {
 
 	@Test
 	public void testNumberOfSolutionPaths() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException {
-		GraphSearchInput<N, Integer> input = new BalanceGraphSearchProblem(this.branchingFactor, this.depth);
-		DepthFirstSearch<N, Integer> rs = new DepthFirstSearch<>(input);
+		GraphSearchInput<ITransparentTreeNode, Integer> input = new BalanceGraphSearchProblem(this.branchingFactor, this.depth);
+		DepthFirstSearch<ITransparentTreeNode, Integer> rs = new DepthFirstSearch<>(input);
 		int solutions = 0;
 		while (rs.hasNext()) {
 			try {
-				SearchGraphPath<N, Integer> path = rs.nextSolutionCandidate();
+				SearchGraphPath<ITransparentTreeNode, Integer> path = rs.nextSolutionCandidate();
 				assertEquals(this.depth, path.getArcs().size());
 				solutions++;
 			} catch (NoSuchElementException e) {

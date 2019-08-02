@@ -1,5 +1,6 @@
 package ai.libs.jaicore.search.core.interfaces;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.ai.graphsearch.problem.IPathInORGraphSearch;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.ASolutionCandidateIterator;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 
 /**
  * This is a template for algorithms that aim at finding paths from a root to
@@ -27,7 +27,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
  * @param <NSearch>
  * @param <Asearch>
  */
-public abstract class AAnyPathInORGraphSearch<I extends GraphSearchInput<N, A>, O extends SearchGraphPath<N, A>, N, A> extends ASolutionCandidateIterator<I, O>
+public abstract class AAnyPathInORGraphSearch<I extends IGraphSearchInput<N, A>, O extends SearchGraphPath<N, A>, N, A> extends ASolutionCandidateIterator<I, O>
 implements IPathInORGraphSearch<I, O, N, A> {
 
 	/* Logger variables */
