@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetLoss;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.PLNetLoss;
 
 public class PLNetLossTest {
 	

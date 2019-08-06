@@ -6,13 +6,14 @@ import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
-public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayInstance<? extends Number> & Clusterable, D extends IDataset<I>> extends ASamplingAlgorithm<I, D> {
+public abstract class ClusterSampling<Y, I extends INumericFeatureInstance & ILabeledInstance<Y> & Clusterable, D extends ISupervisedDataset<Double, Y, I>> extends ASamplingAlgorithm<Double, Y, I, D> {
 
 	protected List<CentroidCluster<I>> clusterResults = null;
 	protected int currentCluster = 0;
@@ -47,7 +48,7 @@ public abstract class ClusterSampling<I extends INumericLabeledAttributeArrayIns
 			CentroidCluster<I> cluster = this.clusterResults.get(this.currentCluster++);
 			boolean same = true;
 			for (int i = 1; i < cluster.getPoints().size(); i++) {
-				if (!cluster.getPoints().get(i - 1).getTargetValue().equals(cluster.getPoints().get(i).getTargetValue())) {
+				if (!cluster.getPoints().get(i - 1).getLabel().equals(cluster.getPoints().get(i).getLabel())) {
 					same = false;
 					break;
 				}

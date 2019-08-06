@@ -6,12 +6,12 @@ import java.util.List;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
-import ai.libs.jaicore.ml.dyadranking.loss.KendallsTauOfTopK;
+import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.IDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.loss.DyadRankingLossUtil;
+import ai.libs.jaicore.ml.ranking.dyadranking.loss.KendallsTauOfTopK;
 import junit.framework.Assert;
 
 public class KendallsTauOfTopKTest {

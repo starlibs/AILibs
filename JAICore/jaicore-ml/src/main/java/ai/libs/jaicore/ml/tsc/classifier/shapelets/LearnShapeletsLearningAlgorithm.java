@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
@@ -97,14 +97,12 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 		@Key(K_MAXITER)
 		public int maxIterations();
 
-
 		/**
 		 * Gamma value used for momentum during gradient descent. Defaults to 0.5.
 		 */
 		@Key(K_GAMMA)
 		@DefaultValue("0.5")
 		public double gamma();
-
 
 		/**
 		 * Parameter indicator whether estimation of K (number of learned shapelets)
@@ -153,13 +151,11 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	private TimeOut timeout = new TimeOut(Integer.MAX_VALUE, TimeUnit.SECONDS);
 
-
 	/**
 	 * Indicator whether instances used for training should be reordered s.t. the
 	 * classes are used in an alternating manner.
 	 */
 	private boolean useInstanceReordering = true;
-
 
 	/**
 	 * Constructor of the algorithm to train a {@link LearnShapeletsClassifier}.
@@ -217,7 +213,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 			SimpleKMeans kMeans = new SimpleKMeans();
 			try {
 				kMeans.setNumClusters(this.getConfig().numShapelets());
-				kMeans.setSeed((int)seed);
+				kMeans.setSeed((int) seed);
 				kMeans.setMaxIterations(100);
 				kMeans.buildClusterer(wekaInstances);
 			} catch (Exception e) {
@@ -294,11 +290,12 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 				totalSegments += numberOfSegments * this.numInstances;
 			}
 
-			int k = (int)(Math.log(totalSegments) * (this.numClasses - 1));
-			this.getConfig().setProperty(ILearnShapeletsLearningAlgorithmConfig.K_NUMSHAPELETS, "" +  (k >= 0 ? k : 1));
+			int k = (int) (Math.log(totalSegments) * (this.numClasses - 1));
+			this.getConfig().setProperty(ILearnShapeletsLearningAlgorithmConfig.K_NUMSHAPELETS, "" + (k >= 0 ? k : 1));
 		}
 		final int k = this.getConfig().numShapelets();
-		LOGGER.info("Parameters: k={}, learningRate={}, reg={}, r={}, minShapeLength={}, maxIter={}, Q={}, C={}", k, this.getConfig().learningRate(), this.getConfig().regularization(), scaleR, this.getConfig().minShapeletLength(), this.getConfig().maxIterations(), this.q, this.numClasses);
+		LOGGER.info("Parameters: k={}, learningRate={}, reg={}, r={}, minShapeLength={}, maxIter={}, Q={}, C={}", k, this.getConfig().learningRate(), this.getConfig().regularization(), scaleR, this.getConfig().minShapeletLength(),
+				this.getConfig().maxIterations(), this.q, this.numClasses);
 
 		// Initialization
 		double[][][] s;
@@ -692,7 +689,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 	 */
 	@Override
 	public ILearnShapeletsLearningAlgorithmConfig getConfig() {
-		return (ILearnShapeletsLearningAlgorithmConfig)super.getConfig();
+		return (ILearnShapeletsLearningAlgorithmConfig) super.getConfig();
 	}
 
 	/**

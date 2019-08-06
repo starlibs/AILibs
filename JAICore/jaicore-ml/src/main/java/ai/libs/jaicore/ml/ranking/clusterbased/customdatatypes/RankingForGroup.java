@@ -8,17 +8,22 @@ import java.util.List;
  * @author Helen Beierling
  *
  * @param <C> The identifier of the group
- * @param <S> The solutions that are ranked best for a group of probleminstances
+ * @param <O> The solutions that are ranked best for a group of probleminstances
  */
-public class RankingForGroup<C,S> extends Ranking<S>{
+public class RankingForGroup<C, O> extends Ranking<O> {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -8923800257075362730L;
+
 	private transient GroupIdentifier<C> identifierOfGroup;
 
-	public RankingForGroup(final GroupIdentifier<C> identifier, final List<S> solutionsForGroup){
+	public RankingForGroup(final GroupIdentifier<C> identifier, final List<O> solutionsForGroup) {
 		super(solutionsForGroup);
-		this.identifierOfGroup=identifier;
+		this.identifierOfGroup = identifier;
 	}
 
-	public GroupIdentifier<C> getIdentifierForGroup(){
+	public GroupIdentifier<C> getIdentifierForGroup() {
 		return this.identifierOfGroup;
 	}
 
@@ -41,7 +46,7 @@ public class RankingForGroup<C,S> extends Ranking<S>{
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		RankingForGroup other = (RankingForGroup) obj;
+		RankingForGroup<?, ?> other = (RankingForGroup<?, ?>) obj;
 		if (this.identifierOfGroup == null) {
 			if (other.identifierOfGroup != null) {
 				return false;

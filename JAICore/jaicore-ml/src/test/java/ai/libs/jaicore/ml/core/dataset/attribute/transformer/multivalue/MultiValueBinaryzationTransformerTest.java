@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttribute
 import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.transformer.multivalue.MultiValueBinaryzationTransformer;
+import ai.libs.jaicore.ml.core.transformer.attribute.multivalue.MultiValueBinarizationTransformer;
 
 public class MultiValueBinaryzationTransformerTest {
 	private static final double DELTA = 0.00001;
@@ -23,7 +23,7 @@ public class MultiValueBinaryzationTransformerTest {
 		domain.add("b");
 		domain.add("c");
 		MultiValueAttributeType type = new MultiValueAttributeType(domain);
-		MultiValueBinaryzationTransformer transformer = new MultiValueBinaryzationTransformer();
+		MultiValueBinarizationTransformer transformer = new MultiValueBinarizationTransformer();
 
 		assertArrayEquals(new double[] { 0.0d, 0.0d, 0.0d },
 				transformer.transformAttribute(new MultiValueAttributeValue(type, new LinkedList<>())), DELTA);

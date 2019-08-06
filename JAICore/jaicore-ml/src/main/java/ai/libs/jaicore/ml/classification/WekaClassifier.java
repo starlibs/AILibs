@@ -5,21 +5,30 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.algorithm.ILearningAlgorithm;
-import org.api4.java.ai.ml.algorithm.LearningAlgorithmConfigurationFailedException;
-import org.api4.java.ai.ml.algorithm.PredictionException;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.dataset.attribute.nominal.INominalAttributeType;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
+import org.api4.java.ai.ml.learner.LearnerConfigurationFailedException;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
+import org.api4.java.ai.ml.learner.predict.IPrediction;
+import org.api4.java.ai.ml.learner.predict.IPredictionBatch;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.multiclass.InconsistentDataFormatException;
+import ai.libs.jaicore.ml.dataset.Prediction;
 import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaClassifier implements ILearningAlgorithm<double[], Double, String[]> {
+public class WekaClassifier extends ASupervisedLearner<IWekaClassifierConfig, Double, Double, INumericFeatureSupervisedInstance<Double>, ISupervisedDataset<Double, Double, INumericFeatureSupervisedInstance<Double>>> {
+	private static final Logger LOGGER = LoggerFactory.getLogger(WekaClassifier.class);
 
 	private final String name;
 	private String[] options;
@@ -45,24 +54,30 @@ public class WekaClassifier implements ILearningAlgorithm<double[], Double, Stri
 		return this.options;
 	}
 
-	@Override
-	public void setConfig(final String[] config) throws LearningAlgorithmConfigurationFailedException {
-		this.options = config;
-		try {
-			this.wrappedClassifier.setOptions(config);
-		} catch (Exception e) {
-			throw new LearningAlgorithmConfigurationFailedException("Could not set config for " + WekaClassifier.class.getSimpleName());
-		}
-	}
-
-	private Instances extractMetaData(final double[][] xBatch, final Double[] yBatch) {
+	private Instances extractMetaData(final ISupervisedDataset<Double, Double, INumericFeatureSupervisedInstance<Double>> dTrain) {
 		ArrayList<Attribute> attInfo = new ArrayList<>();
-		for (int i = 0; i < xBatch[0].length; i++) {
-			attInfo.add(new Attribute("a" + i));
+		for (int i = 0; i < dTrain.getFeatureTypes().size(); i++) {
+			IAttributeType type = dTrain.getFeatureTypes().get(i);
+			if (type instanceof INominalAttributeType) {
+				attInfo.add(new Attribute("a" + i, ((INominalAttributeType) type).getValues()));
+			}
 		}
-		this.targetValueToClass.clear();
-		Arrays.stream(yBatch).forEach(yI -> this.targetValueToClass.computeIfAbsent(yI, t -> "c" + t));
-		attInfo.add(new Attribute("class", new LinkedList<>(this.targetValueToClass.values())));
+
+		if (dTrain.getLabelTypes().isEmpty() || dTrain.getLabelTypes().size() > 1) {
+			throw new UnsupportedOperationException("No target resp. multiple targets are not supported.");
+		}
+
+		IAttributeType labelType = dTrain.getLabelTypes().get(0);
+		if (labelType instanceof INominalAttributeType) {
+			INominalAttributeType nomLabel = (INominalAttributeType) labelType;
+			attInfo.add(new Attribute("class", new LinkedList<>(nomLabel.getValues())));
+			this.targetValueToClass.clear();
+			for (String value : ((INominalAttributeType) labelType).getValues()) {
+				this.targetValueToClass.put(nomLabel.encodeToDouble(value), value);
+			}
+		} else {
+			attInfo.add(new Attribute("class"));
+		}
 
 		Instances extractedMetaData = new Instances("Wrapped WEKA Instances", attInfo, 0);
 		extractedMetaData.setClassIndex(extractedMetaData.numAttributes() - 1);
@@ -70,22 +85,23 @@ public class WekaClassifier implements ILearningAlgorithm<double[], Double, Stri
 	}
 
 	@Override
-	public void fit(final double[][] xBatchTrain, final Double[] yBatchTrain) throws TrainingException {
-		if (xBatchTrain.length != yBatchTrain.length) { // check whether data has consistent format
-			throw new InconsistentDataFormatException("The number of instances and labels is inconsistent as there are " + xBatchTrain.length + " instances and " + yBatchTrain.length + " labels");
-		}
-
+	public void fit(final ISupervisedDataset<Double, Double, INumericFeatureSupervisedInstance<Double>> dTrain) throws TrainingException, InterruptedException {
 		// extract the dataset's meta data and prepare the instances.
-		this.metaData = this.extractMetaData(xBatchTrain, yBatchTrain);
+		this.metaData = this.extractMetaData(dTrain);
 
 		Instances trainData = new Instances(this.metaData, 0);
-		for (int i = 0; i < xBatchTrain.length; i++) {
+		for (int i = 0; i < dTrain.size(); i++) {
 			Instance newI = new DenseInstance(trainData.numAttributes());
 			newI.setDataset(trainData);
-			for (int j = 0; j < xBatchTrain[0].length; j++) {
-				newI.setValue(j, xBatchTrain[i][j]);
+			for (int j = 0; j < dTrain.get(i).getNumFeatures(); j++) {
+				if (dTrain.getFeatureTypes().get(j) instanceof INominalAttributeType) {
+					newI.setValue(j, ((INominalAttributeType) dTrain.getFeatureTypes().get(j)).decodeToString(dTrain.get(i).get(j)));
+				} else {
+					newI.setValue(j, dTrain.get(i).get(j));
+				}
 			}
-			newI.setValue(xBatchTrain[0].length, this.targetValueToClass.get(yBatchTrain[i]));
+
+			newI.setValue(newI.numAttributes() - 1, this.targetValueToClass.get(dTrain.get(i).getLabel()));
 			trainData.add(newI);
 		}
 		try {
@@ -93,39 +109,51 @@ public class WekaClassifier implements ILearningAlgorithm<double[], Double, Stri
 		} catch (Exception e) {
 			throw new TrainingException("Could not build " + this.getClass().getSimpleName() + " due to exception", e);
 		}
+
 	}
 
 	@Override
-	public Double predict(final double[] xTest) throws PredictionException {
+	public IPrediction<Double> predict(final INumericFeatureSupervisedInstance<Double> xTest) throws PredictionException, InterruptedException {
 		Instance testInstance = new DenseInstance(this.metaData.numAttributes());
 		testInstance.setDataset(this.metaData);
-		IntStream.range(0, xTest.length).forEach(ix -> testInstance.setValue(ix, xTest[ix]));
+		IntStream.range(0, xTest.getNumFeatures()).forEach(ix -> testInstance.setValue(ix, xTest.get(ix)));
 		try {
-			return this.wrappedClassifier.classifyInstance(testInstance);
+			return new Prediction<>(this.wrappedClassifier.classifyInstance(testInstance));
 		} catch (Exception e) {
 			throw new PredictionException("Could not make a prediction since an exception occurred in the wrapped weka classifier.", e);
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Double[] predict(final double[][] xBatchTest) throws PredictionException {
-		Double[] resultVector = new Double[xBatchTest.length];
-		for (int i = 0; i < xBatchTest.length; i++) {
-			resultVector[i] = this.predict(xBatchTest[i]);
+	public IPredictionBatch<Double> predict(final ISupervisedDataset<Double, Double, INumericFeatureSupervisedInstance<Double>> dTest) throws PredictionException, InterruptedException {
+		return this.predict((INumericFeatureSupervisedInstance<Double>[]) dTest.stream().toArray());
+	}
+
+	@Override
+	public IPredictionBatch<Double> predict(final INumericFeatureSupervisedInstance<Double>[] dTest) throws PredictionException, InterruptedException {
+		return new PredictionBatch<>(Arrays.stream(dTest).map(x -> {
+			try {
+				return this.predict(x);
+			} catch (PredictionException e) {
+				LOGGER.error("There was an issue while making a prediction", e);
+				return new Prediction<>(Double.NaN);
+			} catch (InterruptedException e) {
+				LOGGER.error("Got interrupted while predicting. ", e);
+				Thread.currentThread().interrupt();
+				return new Prediction<>(Double.NaN);
+			}
+		}).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void setConfig(final IWekaClassifierConfig config) throws LearnerConfigurationFailedException, InterruptedException {
+		this.options = config.getOptions();
+		try {
+			this.wrappedClassifier.setOptions(this.options);
+		} catch (Exception e) {
+			throw new LearnerConfigurationFailedException("Could not set config for " + WekaClassifier.class.getSimpleName());
 		}
-		return resultVector;
-	}
-
-	@Override
-	public Double fitAndPredict(final double[][] xBatchTrain, final Double[] yBatchTrain, final double[] xTest) throws TrainingException, PredictionException {
-		this.fit(xBatchTrain, yBatchTrain);
-		return this.predict(xTest);
-	}
-
-	@Override
-	public Double[] fitAndPredict(final double[][] xBatchTrain, final Double[] yBatchTrain, final double[][] xBatchTest) throws TrainingException, PredictionException {
-		this.fit(xBatchTrain, yBatchTrain);
-		return this.predict(xBatchTest);
 	}
 
 }

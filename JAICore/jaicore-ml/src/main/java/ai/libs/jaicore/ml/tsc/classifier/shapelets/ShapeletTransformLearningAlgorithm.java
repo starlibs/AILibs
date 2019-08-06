@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -215,7 +215,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		logger.debug("Starting cached shapelet selection with min={}, max={} and k={}...", minShapeletLength, maxShapeletLength, this.getConfig().numShapelets());
 		List<Shapelet> shapelets = null;
 
-		shapelets = this.shapeletCachedSelection(dataMatrix,minShapeletLength, maxShapeletLength, this.getConfig().numShapelets(), targetMatrix, beginTime);
+		shapelets = this.shapeletCachedSelection(dataMatrix, minShapeletLength, maxShapeletLength, this.getConfig().numShapelets(), targetMatrix, beginTime);
 		logger.debug("Finished cached shapelet selection. Extracted {} shapelets.", shapelets.size());
 
 		// Cluster shapelets
@@ -235,7 +235,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		logger.debug("Initializing ensemble classifier...");
 		Classifier classifier = null;
 		try {
-			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel((int)seed, this.getConfig().numFolds());
+			classifier = this.getConfig().useHIVECOTEEnsemble() ? EnsembleProvider.provideHIVECOTEEnsembleModel(seed, this.getConfig().numFolds()) : EnsembleProvider.provideCAWPEEnsembleModel((int) seed, this.getConfig().numFolds());
 		} catch (Exception e1) {
 			throw new AlgorithmException("Could not train model due to ensemble exception.", e1);
 		}
@@ -674,11 +674,12 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 	public AlgorithmEvent nextWithException() {
 		throw new UnsupportedOperationException("The operation to be performed is not supported.");
 	}
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public IShapeletTransformLearningAlgorithmConfig getConfig() {
-		return (IShapeletTransformLearningAlgorithmConfig)super.getConfig();
+		return (IShapeletTransformLearningAlgorithmConfig) super.getConfig();
 	}
 }

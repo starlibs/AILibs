@@ -4,9 +4,10 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
-import org.api4.java.ai.ml.core.dataset.ILabeledInstance;
-import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -35,7 +36,7 @@ import weka.core.Instances;
  * @param <I>
  */
 
-public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends IOrderedDataset<I>> extends CaseControlLikeSampling<I, D> {
+public class ClassifierWeightedSampling<X, Y, I extends IFeatureInstance<X> & ILabeledInstance<Y>, D extends ISupervisedDataset<X, Y, I>> extends CaseControlLikeSampling<X, Y, I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
 
@@ -64,12 +65,12 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance<?>, D extends
 		switch (this.getState()) {
 		case CREATED:
 			try {
-				this.sample = (D) this.getInput().createEmpty();
-				D sampleCopy = (D) this.getInput().createEmpty();
+				this.sample = (D) this.getInput().createEmptyCopy();
+				D sampleCopy = (D) this.getInput().createEmptyCopy();
 				for (I instance : this.getInput()) {
 					sampleCopy.add(instance);
 				}
-				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(((WekaInstances<?>) sampleCopy).getList(), this.pilotEstimator);
+				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(((WekaInstances) sampleCopy).getList(), this.pilotEstimator);
 				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException("Could not create a copy of the dataset.", e);

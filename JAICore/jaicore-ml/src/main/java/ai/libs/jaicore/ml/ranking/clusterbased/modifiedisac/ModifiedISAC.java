@@ -7,10 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.IRanking;
+import org.api4.java.ai.ml.dataset.supervised.ranking.INumericFeatureRankingDataset;
+import org.api4.java.ai.ml.dataset.supervised.ranking.INumericFeatureRankingInstance;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
+import org.api4.java.ai.ml.learner.predict.IPrediction;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
+import org.api4.java.ai.ml.learner.ranker.IRankerConfig;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.ranking.clusterbased.GroupBasedRanker;
+import ai.libs.jaicore.ml.classification.ASupervisedLearner;
+import ai.libs.jaicore.ml.dataset.Prediction;
+import ai.libs.jaicore.ml.ranking.clusterbased.IGroupBasedRanker;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.Group;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.ProblemInstance;
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.RankingForGroup;
@@ -21,7 +29,8 @@ import weka.core.Instance;
  *         ModifiedISAC handles the preparation of the data and the clustering of it as well as the
  *         the search for a cluster for a new instance.
  */
-public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String> {
+public class ModifiedISAC<C extends IRankerConfig> extends ASupervisedLearner<C, Double, IRanking<String>, INumericFeatureRankingInstance<String>, INumericFeatureRankingDataset<String>>
+		implements IGroupBasedRanker<C, Double, String, INumericFeatureRankingInstance<String>, INumericFeatureRankingDataset<String>, double[]> {
 	// Saves the position of the points in the original list to save their relation to the corresponding
 	// instance.
 	private Map<double[], Integer> positionOfInstance = new HashMap<>();
@@ -36,7 +45,7 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String> {
 	 * @see jaicore.Ranker.Ranker#bulidRanker()
 	 */
 	@Override
-	public void buildRanker() throws TrainingException {
+	public void fit(final INumericFeatureRankingDataset<String> dTrain) throws TrainingException {
 		ModifiedISACInstanceCollector collector;
 		try {
 			collector = new ModifiedISACInstanceCollector();
@@ -135,9 +144,9 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String> {
 	 * @see jaicore.GroupBasedRanker.GroupBasedRanker#getRanking(java.lang.Object)
 	 */
 	@Override
-	public RankingForGroup<double[], String> getRanking(final Instance prob) {
+	public RankingForGroup<double[], String> getRanking(final INumericFeatureRankingInstance<String> prob) {
 		RankingForGroup<double[], String> myRanking = null;
-		double[] point = this.norm.normalize(prob.toDoubleArray());
+		double[] point = this.norm.normalize(prob.toDoubleVector());
 		L1DistanceMetric dist = new L1DistanceMetric();
 		double minDist = Double.MAX_VALUE;
 		for (RankingForGroup<double[], String> rank : this.rankings) {
@@ -156,5 +165,10 @@ public class ModifiedISAC extends GroupBasedRanker<double[], Instance, String> {
 	 */
 	public List<ClassifierRankingForGroup> getRankings() {
 		return this.rankings;
+	}
+
+	@Override
+	public IPrediction<IRanking<String>> predict(final INumericFeatureRankingInstance<String> xTest) throws PredictionException, InterruptedException {
+		return new Prediction<>(this.getRanking(xTest));
 	}
 }

@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.tsc.classifier.ASimplifiedTSClassifier;
@@ -143,7 +143,7 @@ public class ShotgunEnsembleClassifier extends ASimplifiedTSClassifier<Integer> 
 		// Return most frequent label.
 		int topFrequency = -1;
 		int mostFrequentLabel = 0;
-		for (Entry<Integer,Integer> entry : labelFrequencyMap.entrySet()) {
+		for (Entry<Integer, Integer> entry : labelFrequencyMap.entrySet()) {
 			int label = entry.getKey();
 			int labelFrequency = entry.getValue();
 			if (labelFrequency > topFrequency) {

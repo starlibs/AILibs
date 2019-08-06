@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,6 @@ public class TimeSeriesForestClassifier extends ASimplifiedTSClassifier<Integer>
 	public void setSeed(final int seed) {
 		this.config.setProperty(ITimeSeriesForestConfig.K_SEED, "" + seed);
 	}
-
 
 	/**
 	 * Predicts the class of the given instance by taking the majority vote of all

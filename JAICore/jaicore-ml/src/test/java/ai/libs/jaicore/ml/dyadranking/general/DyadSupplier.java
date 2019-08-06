@@ -4,7 +4,7 @@ import java.util.Random;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
+import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
 
 /**
  * Simple helper class that can be used in (integration)-tests of the

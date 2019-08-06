@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.tsc.classifier.trees;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -207,7 +207,7 @@ public class AccessibleRandomTree extends RandomTree {
 			}
 			if (totalWeight < 2 * AccessibleRandomTree.this.m_MinNum ||
 
-					// Nominal case
+			// Nominal case
 					(data.classAttribute().isNominal() && Utils.eq(classProbs[Utils.maxIndex(classProbs)], Utils.sum(classProbs)))
 
 					||

@@ -3,15 +3,16 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 
-public class LocalCaseControlSampling<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> extends PilotEstimateSampling<I, D> {
+public class LocalCaseControlSampling<Y, I extends INumericFeatureInstance & ILabeledInstance<Y>, D extends ISupervisedDataset<Double, Y, I>> extends PilotEstimateSampling<Y, I, D> {
 
 	public LocalCaseControlSampling(final Random rand, final int preSampleSize, final D input) {
 		super(input);
@@ -26,7 +27,7 @@ public class LocalCaseControlSampling<I extends ILabeledAttributeArrayInstance<?
 		double sumOfDistributionLosses = 0;
 		double loss;
 		for (I instance : instances) {
-			Instance wekaInstance = ((WekaInstance<?>)instance).getElement();
+			Instance wekaInstance = ((WekaInstance) instance).getElement();
 			try {
 				loss = 1 - pilotEstimator.distributionForInstance(wekaInstance)[(int) wekaInstance.classValue()];
 			} catch (Exception e) {
@@ -35,7 +36,7 @@ public class LocalCaseControlSampling<I extends ILabeledAttributeArrayInstance<?
 			sumOfDistributionLosses += loss;
 		}
 		for (I instance : instances) {
-			Instance wekaInstance = ((WekaInstance<?>)instance).getElement();
+			Instance wekaInstance = ((WekaInstance) instance).getElement();
 			try {
 				loss = 1 - pilotEstimator.distributionForInstance(wekaInstance)[(int) wekaInstance.classValue()];
 			} catch (Exception e) {

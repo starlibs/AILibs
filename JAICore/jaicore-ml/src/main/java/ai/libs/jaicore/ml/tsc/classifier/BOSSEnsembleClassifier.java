@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 

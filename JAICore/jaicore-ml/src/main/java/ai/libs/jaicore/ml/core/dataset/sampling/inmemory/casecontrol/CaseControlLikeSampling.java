@@ -5,13 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
-public abstract class CaseControlLikeSampling<I extends ILabeledInstance<?>, D extends IDataset<I>> extends ASamplingAlgorithm<I, D> {
+public abstract class CaseControlLikeSampling<X, Y, I extends IFeatureInstance<X> & ILabeledInstance<Y>, D extends ISupervisedDataset<X, Y, I>> extends ASamplingAlgorithm<X, Y, I, D> {
 
 	protected Random rand;
 	protected List<Pair<I, Double>> probabilityBoundaries = null;
@@ -42,28 +43,24 @@ public abstract class CaseControlLikeSampling<I extends ILabeledInstance<?>, D e
 		for (I instance : dataset) {
 			boolean classExists = false;
 			for (Object clazz : classOccurrences.keySet()) {
-				if (clazz.equals(instance.getTargetValue())) {
+				if (clazz.equals(instance.getLabel())) {
 					classExists = true;
 				}
 			}
 			if (classExists) {
-				classOccurrences.put(instance.getTargetValue(),
-						classOccurrences.get(instance.getTargetValue()).intValue() + 1);
+				classOccurrences.put(instance.getLabel(), classOccurrences.get(instance.getLabel()).intValue() + 1);
 			} else {
-				classOccurrences.put(instance.getTargetValue(), 0);
+				classOccurrences.put(instance.getLabel(), 0);
 			}
 		}
 		return classOccurrences;
 	}
 
-	protected List<Pair<I, Double>> calculateInstanceBoundaries(final HashMap<Object, Integer> classOccurrences,
-			final int numberOfClasses) {
+	protected List<Pair<I, Double>> calculateInstanceBoundaries(final HashMap<Object, Integer> classOccurrences, final int numberOfClasses) {
 		double boundaryOfCurrentInstance = 0.0;
 		List<Pair<I, Double>> boundaries = new ArrayList<>();
 		for (I instance : this.getInput()) {
-			boundaryOfCurrentInstance += ((double) 1
-					/ classOccurrences.get(instance.getTargetValue()).intValue())
-					/ numberOfClasses;
+			boundaryOfCurrentInstance += ((double) 1 / classOccurrences.get(instance.getLabel()).intValue()) / numberOfClasses;
 			boundaries.add(new Pair<I, Double>(instance, boundaryOfCurrentInstance));
 		}
 		return boundaries;

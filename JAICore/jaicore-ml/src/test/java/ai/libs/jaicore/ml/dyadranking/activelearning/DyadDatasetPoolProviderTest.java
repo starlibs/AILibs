@@ -12,11 +12,11 @@ import java.util.List;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.activelearning.DyadDatasetPoolProvider;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
+import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.DyadDatasetPoolProvider;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.IDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.SparseDyadRankingInstance;
 
 /**
  * Simple test to check whether the queried rankings the pool provider returns

@@ -2,8 +2,8 @@ package ai.libs.jaicore.ml.tsc.classifier;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 
 import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.tsc.util.ClassMapper;

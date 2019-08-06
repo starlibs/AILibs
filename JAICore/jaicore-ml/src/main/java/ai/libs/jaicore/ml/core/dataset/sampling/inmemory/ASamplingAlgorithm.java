@@ -7,8 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.api4.java.ai.ml.ISamplingAlgorithm;
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
-import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -28,7 +30,7 @@ import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
  * @author Felix Weiland
  * @author jnowack
  */
-public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
+public abstract class ASamplingAlgorithm<X, Y, I extends IFeatureInstance<X> & ILabeledInstance<Y>, D extends ISupervisedDataset<X, Y, I>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<X, Y, I, D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
@@ -63,7 +65,7 @@ public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgo
 		if (this.sampleSize == 0) {
 			LOG.warn("Sample size is 0, so an empty data set is returned!");
 			try {
-				return (D)this.getInput().createEmpty();
+				return (D) this.getInput().createEmptyCopy();
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
@@ -113,8 +115,9 @@ public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgo
 	 * Gets the data point contained in the original data that are not part of the
 	 * @return
 	 * @throws DatasetCreationException
+	 * @throws InterruptedException
 	 */
-	public D getComplement() throws DatasetCreationException {
+	public D getComplement() throws DatasetCreationException, InterruptedException {
 
 		if (this.sample == null) {
 			throw new IllegalStateException("Sample computation has not started yet.");
@@ -135,7 +138,7 @@ public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgo
 		}
 
 		/* now compute complement */
-		D complement = (D)input.createEmpty();
+		D complement = (D) input.createEmptyCopy();
 		for (I instance : input) {
 			int frequencyInComplement = frequenciesInComplement.get(instance);
 			if (frequenciesInSubSample.get(instance) + frequencyInComplement < frequenciesInInput.get(instance)) {
@@ -147,8 +150,7 @@ public abstract class ASamplingAlgorithm<I, D extends IDataset<I>> extends AAlgo
 		/* check plausibility (sizes should sum up) */
 		if (this.sample.size() + complement.size() != input.size()) {
 			throw new IllegalStateException("The input set of size " + input.size() + " has been reduced to " + this.sample.size() + " + " + complement.size() + ". This is not plausible.");
-		}
-		else {
+		} else {
 			for (Entry<Object, Integer> instanceWithFrequency : frequenciesInInput.entrySet()) {
 				Object inst = instanceWithFrequency.getKey();
 				int frequencyNow = frequenciesInSubSample.get(inst) + frequenciesInComplement.get(inst);

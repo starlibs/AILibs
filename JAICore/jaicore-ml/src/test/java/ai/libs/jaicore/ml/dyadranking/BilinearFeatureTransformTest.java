@@ -7,9 +7,9 @@ import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.algorithm.featuretransform.BiliniearFeatureTransform;
 import ai.libs.jaicore.ml.dyadranking.general.DyadSupplier;
+import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.featuretransform.BiliniearFeatureTransform;
 
 /**
  * Class for testing the functionality of

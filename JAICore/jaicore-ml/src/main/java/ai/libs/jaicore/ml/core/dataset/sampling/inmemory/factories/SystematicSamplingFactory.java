@@ -4,16 +4,18 @@ import java.util.Comparator;
 import java.util.Random;
 
 import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
-import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.SystematicSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class SystematicSamplingFactory<I extends INumericArrayInstance & Clusterable, D extends IOrderedDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, SystematicSampling<I, D>> {
+public class SystematicSamplingFactory<Y, I extends INumericFeatureInstance & ILabeledInstance<Y> & Clusterable, D extends ISupervisedDataset<Double, Y, I>>
+		implements IRerunnableSamplingAlgorithmFactory<Double, Y, I, D, SystematicSampling<Y, I, D>> {
 
 	private Comparator<I> datapointComparator = null;
-	private SystematicSampling<I, D> previousRun = null;
+	private SystematicSampling<Y, I, D> previousRun = null;
 
 	/**
 	 * Set a custom comparator that will be used to sort the datapoints before
@@ -27,13 +29,13 @@ public class SystematicSamplingFactory<I extends INumericArrayInstance & Cluster
 	}
 
 	@Override
-	public void setPreviousRun(final SystematicSampling<I, D> previousRun) {
+	public void setPreviousRun(final SystematicSampling<Y, I, D> previousRun) {
 		this.previousRun = previousRun;
 	}
 
 	@Override
-	public SystematicSampling<I, D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
-		SystematicSampling<I, D> systematicSampling;
+	public SystematicSampling<Y, I, D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
+		SystematicSampling<Y, I, D> systematicSampling;
 		if (this.datapointComparator != null) {
 			systematicSampling = new SystematicSampling<>(random, this.datapointComparator, inputDataset);
 		} else {

@@ -29,16 +29,17 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> samplingAlgorithmFactory;
-	private WekaInstances<Object> dataset;
+	private ISamplingAlgorithmFactory<Double, Double, WekaInstance, WekaInstances, ASamplingAlgorithm<Double, Double, WekaInstance, WekaInstances>> samplingAlgorithmFactory;
+	private WekaInstances dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
 	private String identifier;
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> samplingAlgorithmFactory,
-			final WekaInstances<Object> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
+			final ISamplingAlgorithmFactory<Double, Double, WekaInstance, WekaInstances, ASamplingAlgorithm<Double, Double, WekaInstance, WekaInstances>> samplingAlgorithmFactory, final WekaInstances dataset,
+			final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -57,7 +58,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements IClassi
 	public Double evaluate(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		try {
-			ConfigurationLearningCurveExtrapolator<WekaInstance<Object>, WekaInstances<Object>> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement,
+			ConfigurationLearningCurveExtrapolator<Double, Double, WekaInstance, WekaInstances> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement,
 					this.anchorpoints, this.samplingAlgorithmFactory, this.seed, this.identifier, this.configurations);
 
 			// Create the extrapolator and calculate the accuracy the classifier would have

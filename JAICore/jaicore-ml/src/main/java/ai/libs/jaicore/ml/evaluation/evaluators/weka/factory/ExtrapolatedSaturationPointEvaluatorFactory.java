@@ -16,13 +16,13 @@ import weka.core.Instances;
 public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierEvaluatorFactory {
 
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ? extends ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> subsamplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<Double, Double, WekaInstance, WekaInstances, ? extends ASamplingAlgorithm<Double, Double, WekaInstance, WekaInstances>> subsamplingAlgorithmFactory;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 
 	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<WekaInstance<Object>, WekaInstances<Object>, ? extends ASamplingAlgorithm<WekaInstance<Object>, WekaInstances<Object>>> subsamplingAlgorithmFactory,
-					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+			final ISamplingAlgorithmFactory<Double, Double, WekaInstance, WekaInstances, ? extends ASamplingAlgorithm<Double, Double, WekaInstance, WekaInstances>> subsamplingAlgorithmFactory,
+			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.subsamplingAlgorithmFactory = subsamplingAlgorithmFactory;
@@ -34,15 +34,13 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierE
 	public IClassifierEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) throws ClassifierEvaluatorConstructionFailedException {
 		try {
 			List<Instances> split = WekaUtil.getStratifiedSplit(dataset, seed, 0.7);
-			WekaInstances<Object> train = new WekaInstances<>(split.get(0));
-			WekaInstances<Object> test = new WekaInstances<>(split.get(1));
-			return new ExtrapolatedSaturationPointEvaluator<>(this.anchorpoints, this.subsamplingAlgorithmFactory, train,
-					this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed, test);
+			WekaInstances train = new WekaInstances(split.get(0));
+			WekaInstances test = new WekaInstances(split.get(1));
+			return new ExtrapolatedSaturationPointEvaluator<>(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed, test);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new ClassifierEvaluatorConstructionFailedException(e);
-		}
-		catch (ClassNotFoundException | SplitFailedException e) {
+		} catch (ClassNotFoundException | SplitFailedException e) {
 			throw new ClassifierEvaluatorConstructionFailedException(e);
 		}
 	}

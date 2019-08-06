@@ -6,12 +6,13 @@ import java.util.List;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class ClusterStratiAssigner<I extends INumericArrayInstance & Clusterable, D extends IDataset<I>> implements IStratiAssigner<I, D> {
+public abstract class ClusterStratiAssigner<Y, I extends INumericFeatureInstance & ILabeledInstance<Y> & Clusterable, D extends ISupervisedDataset<Double, Y, I>> implements IStratiAssigner<Double, Y, I, D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ClusterStratiAssigner.class);
 

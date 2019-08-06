@@ -17,8 +17,8 @@ import java.net.ProtocolException;
 import java.net.URL;
 import java.util.HashMap;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;

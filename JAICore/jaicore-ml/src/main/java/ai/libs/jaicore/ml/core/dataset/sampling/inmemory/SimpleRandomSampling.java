@@ -2,14 +2,16 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
-import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
 
-public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {
+public class SimpleRandomSampling<X, Y, I extends IFeatureInstance<X> & ILabeledInstance<Y>, D extends ISupervisedDataset<X, Y, I>> extends ASamplingAlgorithm<X, Y, I, D> {
 
 	private Random random;
 
@@ -21,12 +23,12 @@ public class SimpleRandomSampling<I, D extends IOrderedDataset<I>> extends ASamp
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
 		switch (this.getState()) {
 		case CREATED:
 			try {
-				this.sample = (D) this.getInput().createEmpty();
-				this.copyDataset = (D) this.getInput().createEmpty();
+				this.sample = (D) this.getInput().createEmptyCopy();
+				this.copyDataset = (D) this.getInput().createEmptyCopy();
 				this.copyDataset.addAll(this.getInput());
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException("Could not create a copy of the dataset.", e);

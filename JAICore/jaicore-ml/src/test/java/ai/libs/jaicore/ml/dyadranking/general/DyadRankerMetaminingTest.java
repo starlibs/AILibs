@@ -21,15 +21,15 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
-import ai.libs.jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import ai.libs.jaicore.ml.dyadranking.util.AbstractDyadScaler;
-import ai.libs.jaicore.ml.dyadranking.util.DyadUnitIntervalScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.PLNetDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.IDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.SparseDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.loss.DyadRankingLossUtil;
+import ai.libs.jaicore.ml.ranking.dyadranking.loss.KendallsTauDyadRankingLoss;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.AbstractDyadScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.DyadUnitIntervalScaler;
 
 /**
  * This is a test based on a dataset containing 400 dyad rankings of dataset and

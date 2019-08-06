@@ -1,17 +1,21 @@
 package ai.libs.jaicore.ml.core.dataset;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+
+import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.INDArrayTimeseries;
 
 /**
  * TimeSeriesInstance
  */
-public class TimeSeriesInstance<L> implements ILabeledAttributeArrayInstance<L> {
+public class TimeSeriesInstance<L> implements IFeatureInstance<INDArrayTimeseries>, ILabeledInstance<L> {
 
 	/** Attribute values of the instance. */
-	private IAttributeValue<?>[] attributeValues;
+	private INDArrayTimeseries[] attributeValues;
 
 	/** Target value of the instance. */
 	private L targetValue;
@@ -23,15 +27,15 @@ public class TimeSeriesInstance<L> implements ILabeledAttributeArrayInstance<L> 
 	 * @param attributeValues
 	 * @param targetValue
 	 */
-	public TimeSeriesInstance(final IAttributeValue<?>[] attributeValues, final L targetValue) {
+	public TimeSeriesInstance(final INDArrayTimeseries[] attributeValues, final L targetValue) {
 		// Set attributes.
 		this.attributeValues = attributeValues;
 		this.targetValue = targetValue;
 	}
 
-	public TimeSeriesInstance(final List<IAttributeValue<?>> attributeValues, final L targetValue) {
+	public TimeSeriesInstance(final List<INDArrayTimeseries> attributeValues, final L targetValue) {
 		int n = attributeValues.size();
-		this.attributeValues = new IAttributeValue<?>[n];
+		this.attributeValues = new INDArrayTimeseries[n];
 		for (int i = 0; i < n; i++) {
 			this.attributeValues[i] = attributeValues.get(i);
 		}
@@ -39,22 +43,26 @@ public class TimeSeriesInstance<L> implements ILabeledAttributeArrayInstance<L> 
 	}
 
 	@Override
-	public <T> IAttributeValue<T> getAttributeValueAtPosition(final int position, final Class<T> type) {
-		return (IAttributeValue<T>) this.attributeValues[position];
+	public INDArrayTimeseries get(final int pos) {
+		return this.attributeValues[pos];
 	}
 
 	@Override
-	public L getTargetValue() {
+	public L getLabel() {
 		return this.targetValue;
 	}
 
 	@Override
-	public int getNumberOfAttributes() {
-		return this.attributeValues.length;
+	public Iterator<INDArrayTimeseries> iterator() {
+		return Arrays.stream(this.attributeValues).iterator();
 	}
 
 	@Override
-	public IAttributeValue<?>[] getAllAttributeValues() {
+	public int getNumFeatures() {
+		return this.attributeValues.length;
+	}
+
+	public INDArrayTimeseries[] getAllFeatures() {
 		return this.attributeValues;
 	}
 }

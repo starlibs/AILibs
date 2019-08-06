@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,15 +132,14 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 			Instances seqInstances = new Instances("SeqFeatures", new ArrayList<>(this.attributes), this.lengthPerTree[i]);
 
 			for (int len = 0; len < this.lengthPerTree[i]; len++) {
-				Instance instance = LearnPatternSimilarityLearningAlgorithm.generateSubseriesFeatureInstance(univInstance,
-						this.segments[i], this.segmentsDifference[i], len);
+				Instance instance = LearnPatternSimilarityLearningAlgorithm.generateSubseriesFeatureInstance(univInstance, this.segments[i], this.segmentsDifference[i], len);
 				seqInstances.add(instance);
 			}
 
 			seqInstances.setClassIndex(this.classAttIndexPerTree[i]);
 			leafNodeCounts[i] = new int[this.trees[i].getNosLeafNodes()];
 
-			for(int inst = 0; inst< seqInstances.numInstances(); inst++) {
+			for (int inst = 0; inst < seqInstances.numInstances(); inst++) {
 				LearnPatternSimilarityLearningAlgorithm.collectLeafCounts(leafNodeCounts[i], seqInstances.get(inst), this.trees[i]);
 			}
 		}
@@ -178,8 +177,7 @@ public class LearnPatternSimilarityClassifier extends ASimplifiedTSClassifier<In
 	 */
 	@Override
 	public Integer predict(final List<double[]> multivInstance) throws PredictionException {
-		LOGGER.warn(
-				"Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
+		LOGGER.warn("Dataset to be predicted is multivariate but only first time series (univariate) will be considered.");
 
 		return this.predict(multivInstance.get(0));
 	}

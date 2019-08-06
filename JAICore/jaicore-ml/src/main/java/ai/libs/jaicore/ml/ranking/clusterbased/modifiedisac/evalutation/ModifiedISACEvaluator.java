@@ -7,14 +7,15 @@ import java.util.Map.Entry;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.dataset.supervised.ranking.INumericFeatureRankingDataset;
+import org.api4.java.ai.ml.dataset.supervised.ranking.INumericFeatureRankingInstance;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.ranking.clusterbased.customdatatypes.RankingForGroup;
 import ai.libs.jaicore.ml.ranking.clusterbased.modifiedisac.ModifiedISAC;
 import weka.core.Instance;
-import weka.core.Instances;
 
 public class ModifiedISACEvaluator {
 
@@ -111,38 +112,42 @@ public class ModifiedISACEvaluator {
 		return top3overall;
 	}
 
-	public static double[] evaluateModifiedISACLeaveOneOut(final Instances data) throws TrainingException {
-		double[] results = new double[data.numInstances()];
-		platz1my = new double[data.numInstances()];
-		platz1overall = new double[data.numInstances()];
-		top3mymethod = new double[data.numInstances()];
-		top3overall = new double[data.numInstances()];
-		untochedmy = new double[data.numInstances()];
-		untocedoverall = new double[data.numInstances()];
-		top3ml = new double[data.numInstances()];
-		untouchedml = new double[data.numInstances()];
-		platz1ml = new double[data.numInstances()];
-		stepdifference = new double[data.numInstances()];
-		stepdifferenceML = new double[data.numInstances()];
-		kendallforML = new double[data.numInstances()];
-		times = new double[data.numInstances()];
-		randomForest = new double[data.numInstances()];
+	public static double[] evaluateModifiedISACLeaveOneOut(final INumericFeatureRankingDataset<String> data) throws TrainingException {
+		double[] results = new double[data.size()];
+		platz1my = new double[data.size()];
+		platz1overall = new double[data.size()];
+		top3mymethod = new double[data.size()];
+		top3overall = new double[data.size()];
+		untochedmy = new double[data.size()];
+		untocedoverall = new double[data.size()];
+		top3ml = new double[data.size()];
+		untouchedml = new double[data.size()];
+		platz1ml = new double[data.size()];
+		stepdifference = new double[data.size()];
+		stepdifferenceML = new double[data.size()];
+		kendallforML = new double[data.size()];
+		times = new double[data.size()];
+		randomForest = new double[data.size()];
 		naivebaismulti = 0;
 		naivebais = 0;
 
-		for (int i = 0; i < data.numInstances(); i++) {
+		for (int i = 0; i < data.size(); i++) {
 			HashMap<String, Integer> positionInRanking = new HashMap<>();
-			Instances trainingData = new Instances(data);
-			Instances testprep = new Instances(data);
-			Instances tester = new Instances(data);
-			Instance reminder = tester.get(i);
+			INumericFeatureRankingDataset<String> trainingData = (INumericFeatureRankingDataset<String>) data.createEmptyCopy();
+			trainingData.addAll(data);
 
-			trainingData.delete(i);
+			INumericFeatureRankingDataset<String> testprep = (INumericFeatureRankingDataset<String>) data.createEmptyCopy();
+			testprep.addAll(data);
+
+			INumericFeatureRankingDataset<String> tester = (INumericFeatureRankingDataset<String>) data.createEmptyCopy();
+
+			INumericFeatureRankingInstance<String> reminder = tester.get(i);
+			trainingData.remove(i);
 
 			double[] overallranking = new double[22];
 			int[] totalvalue = new int[22];
 
-			for (Instance inst : trainingData) {
+			for (INumericFeatureRankingInstance<String> inst : trainingData) {
 				int tmp = 0;
 				for (int l = inst.numAttributes() - 1; l >= 104; l--) {
 					if (!Double.isNaN(inst.value(l))) {
@@ -165,12 +170,12 @@ public class ModifiedISACEvaluator {
 			}
 
 			for (int p = 0; p < overallranking.length; p++) {
-				overall.put(data.get(exampel).attribute((data.numAttributes() - 1) - p).name(), overallranking[p]);
+				overall.put(data.getFeatureTypes().get((data.size() - 1) - p)get(exampel).attribute().name(), overallranking[p]);
 			}
 			StopWatch watch = new StopWatch();
 			watch.start();
 			ModifiedISAC isac = new ModifiedISAC();
-			isac.buildRanker();
+			isac.fit(null);
 			watch.stop();
 			logger.info("Time: {}ms", watch.getTime());
 			times[i] = watch.getTime();

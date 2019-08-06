@@ -4,7 +4,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +107,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 	 * @throws AlgorithmException
 	 */
 	@Override
-	public TimeSeriesBagOfFeaturesClassifier call() throws AlgorithmException  {
+	public TimeSeriesBagOfFeaturesClassifier call() throws AlgorithmException {
 
 		// Training procedure
 		TimeSeriesDataset dataset = this.getInput();
@@ -120,7 +120,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		}
 
 		// Shuffle instances
-		TimeSeriesUtil.shuffleTimeSeriesDataset(dataset, (int)this.getConfig().seed());
+		TimeSeriesUtil.shuffleTimeSeriesDataset(dataset, (int) this.getConfig().seed());
 
 		double[][] data = dataset.getValuesOrNull(0);
 		int[] targets = dataset.getTargets();
@@ -545,6 +545,6 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 	 */
 	@Override
 	public ITimeSeriesBagOfFeaturesConfig getConfig() {
-		return (ITimeSeriesBagOfFeaturesConfig)super.getConfig();
+		return (ITimeSeriesBagOfFeaturesConfig) super.getConfig();
 	}
 }

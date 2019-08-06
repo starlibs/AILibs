@@ -11,13 +11,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.ml.dyadranking.algorithm.IDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
-import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.IDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.IPLDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.PLNetDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.IDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.loss.KendallsTauDyadRankingLoss;
 import junit.framework.Assert;
 
 /**

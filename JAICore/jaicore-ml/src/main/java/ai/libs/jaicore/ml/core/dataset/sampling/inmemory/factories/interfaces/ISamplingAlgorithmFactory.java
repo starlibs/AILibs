@@ -2,7 +2,9 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
 
@@ -13,7 +15,7 @@ import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.ASamplingAlgorithm;
  * @param <I> Type of the dataset instances.
  * @param <A> Type of the sampling algorithm that will be created.
  */
-public interface ISamplingAlgorithmFactory<I, D extends IDataset<I>, A extends ASamplingAlgorithm<I, D>> {
+public interface ISamplingAlgorithmFactory<X, Y, I extends IFeatureInstance<X> & ILabeledInstance<Y>, D extends ISupervisedDataset<X, Y, I>, A extends ASamplingAlgorithm<X, Y, I, D>> {
 
 	/**
 	 * After the necessary config is done, this method returns a fully configured

@@ -62,7 +62,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		// Stratify the data by class
 		Map<Object, WekaInstances<Object>> classStrati = new HashMap<>();
 		for (WekaInstance<Object> d : dataset) {
-			Object c = d.getTargetValue();
+			Object c = d.getLabel();
 			if (!classStrati.containsKey(c)) {
 				classStrati.put(c, dataset.createEmpty());
 			}

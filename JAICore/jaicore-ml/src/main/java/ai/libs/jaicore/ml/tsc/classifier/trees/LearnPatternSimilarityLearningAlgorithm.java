@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
@@ -215,7 +215,7 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 	 */
 	public AccessibleRandomTree initializeRegressionTree(final int numInstances) {
 		AccessibleRandomTree regTree = new AccessibleRandomTree();
-		regTree.setSeed((int)this.getConfig().seed());
+		regTree.setSeed((int) this.getConfig().seed());
 		regTree.setMaxDepth(this.getConfig().maxDepth());
 		regTree.setKValue(1);
 		regTree.setMinNum((int) (numInstances * 0.01));
@@ -316,6 +316,6 @@ public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearn
 
 	@Override
 	public IPatternSimilarityConfig getConfig() {
-		return (IPatternSimilarityConfig)super.getConfig();
+		return (IPatternSimilarityConfig) super.getConfig();
 	}
 }

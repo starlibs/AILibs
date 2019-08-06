@@ -1,9 +1,10 @@
 package ai.libs.jaicore.ml.evaluation.evaluators.weka;
 
 import org.api4.java.ai.ml.LearningCurve;
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
-import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
-import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -31,13 +32,13 @@ import weka.classifiers.Classifier;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArrayInstance<?>, D extends IOrderedLabeledAttributeArrayDataset<I, ?>> implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
+public class LearningCurveExtrapolationEvaluator<X, Y, I extends IFeatureInstance<X> & ILabeledInstance<Y>, D extends ISupervisedDataset<X, Y, I>> implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<X, Y, I, D, ? extends ASamplingAlgorithm<X, Y, I, D>> samplingAlgorithmFactory;
 	private D dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
@@ -61,7 +62,7 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArra
 	 *            measurements at the anchorpoints.
 	 * @param seed Random seed.
 	 */
-	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory, final D dataset,
+	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<X, Y, I, D, ? extends ASamplingAlgorithm<X, Y, I, D>> samplingAlgorithmFactory, final D dataset,
 			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -85,7 +86,8 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledAttributeArra
 		// Create the learning curve extrapolator with the given configuration.
 		this.logger.info("Receive request to evaluate classifier {}", classifier);
 		try {
-			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
+			LearningCurveExtrapolator<X, Y, I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints,
+					this.samplingAlgorithmFactory, this.seed);
 			extrapolator.setLoggerName(this.getLoggerName() + ".extrapolator");
 
 			/* Create the extrapolator and calculate the accuracy the classifier would have if it was trained on the complete dataset. */

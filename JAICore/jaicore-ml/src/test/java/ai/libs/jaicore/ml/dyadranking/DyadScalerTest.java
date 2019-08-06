@@ -9,14 +9,14 @@ import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.util.AbstractDyadScaler;
-import ai.libs.jaicore.ml.dyadranking.util.DyadMinMaxScaler;
-import ai.libs.jaicore.ml.dyadranking.util.DyadStandardScaler;
-import ai.libs.jaicore.ml.dyadranking.util.DyadUnitIntervalScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.IDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.AbstractDyadScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.DyadMinMaxScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.DyadStandardScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.DyadUnitIntervalScaler;
 
 /**
  * Tests our basic scalers.

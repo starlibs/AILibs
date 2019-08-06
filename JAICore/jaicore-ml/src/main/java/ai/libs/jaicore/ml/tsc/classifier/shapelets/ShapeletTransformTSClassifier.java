@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,7 +153,8 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 	 * @param numFolds
 	 *            See {@link ShapeletTransformLearningAlgorithm#numFolds}
 	 */
-	public ShapeletTransformTSClassifier(final int k, final int numClusters, final IQualityMeasure qm, final int seed, final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength, final boolean useHIVECOTEEnsemble, final int numFolds) {
+	public ShapeletTransformTSClassifier(final int k, final int numClusters, final IQualityMeasure qm, final int seed, final boolean clusterShapelets, final int minShapeletLength, final int maxShapeletLength,
+			final boolean useHIVECOTEEnsemble, final int numFolds) {
 		super();
 		this.config = ConfigCache.getOrCreate(IShapeletTransformLearningAlgorithmConfig.class);
 		this.config.setProperty(IShapeletTransformLearningAlgorithmConfig.K_NUMSHAPELETS, "" + k);

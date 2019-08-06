@@ -9,7 +9,7 @@ import java.io.FileOutputStream;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
 
 /**
  * A simple test to check whether serialization and deserialization works for {@link DyadRankingDataset}s.

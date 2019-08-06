@@ -8,15 +8,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.api4.java.ai.ml.algorithm.TrainingException;
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
-import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
 import ai.libs.jaicore.ml.core.dataset.TimeSeriesInstance;
-import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.INDArrayTimeseries;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -77,19 +75,16 @@ public class WekaUtil {
 	 *         class information.
 	 */
 	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance<?> instance) {
-		IAttributeValue<?>[] attValues = instance.getAllAttributeValues();
 		List<INDArray> indArrays = new ArrayList<>();
 
-		for (final IAttributeValue<?> attValue : attValues) {
-			if (attValue instanceof TimeSeriesAttributeValue) {
-				indArrays.add(((TimeSeriesAttributeValue) attValue).getValue());
-			}
+		for (INDArrayTimeseries timeseries : instance) {
+			indArrays.add(timeseries.getValue());
 		}
 
 		INDArray combinedMatrix = hstackINDArrays(indArrays);
 
 		final Instance finalInstance = new DenseInstance(1, Nd4j.toFlattened(combinedMatrix).toDoubleVector());
-		finalInstance.setClassValue(ai.libs.jaicore.ml.WekaUtil.getIntValOfClassName(finalInstance, (String) instance.getTargetValue()));
+		finalInstance.setClassValue(ai.libs.jaicore.ml.WekaUtil.getIntValOfClassName(finalInstance, (String) instance.getLabel()));
 		return finalInstance;
 	}
 
@@ -209,7 +204,7 @@ public class WekaUtil {
 		}
 
 		// Add class attribute
-		final INDArray targets = dataSet.getTargets();
+		final INDArray targets = dataSet.getTargetsAsINDArray();
 		attributes.add(new Attribute("class", IntStream.rangeClosed((int) targets.minNumber().longValue(), (int) targets.maxNumber().longValue()).boxed().map(String::valueOf).collect(Collectors.toList())));
 		final Instances result = new Instances(I_NAME, attributes, (int) dataSet.getNumberOfInstances());
 		result.setClassIndex(result.numAttributes() - 1);

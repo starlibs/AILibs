@@ -2,9 +2,10 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.IFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
@@ -21,13 +22,13 @@ import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.WaitForSamplingStepEven
  *
  * @author Lukas Brandt
  */
-public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {
+public class StratifiedSampling<X, Y, I extends IFeatureInstance<X> & ILabeledInstance<Y>, D extends ISupervisedDataset<X, Y, I>> extends ASamplingAlgorithm<X, Y, I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(StratifiedSampling.class);
-	private IStratiAmountSelector<D> stratiAmountSelector;
-	private IStratiAssigner<I, D> stratiAssigner;
+	private IStratiAmountSelector<X, Y, I, D> stratiAmountSelector;
+	private IStratiAssigner<X, Y, I, D> stratiAssigner;
 	private Random random;
-	private IDataset[] strati = null;
+	private ISupervisedDataset<X, Y, I>[] strati = null;
 	private D datasetCopy;
 	private boolean allDatapointsAssigned = false;
 	private boolean simpleRandomSamplingStarted;
@@ -42,27 +43,28 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 	 * @param random
 	 *            Random object for sampling inside of the strati.
 	 */
-	public StratifiedSampling(final IStratiAmountSelector<D> stratiAmountSelector, final IStratiAssigner<I, D> stratiAssigner, final Random random, final D input) {
+	public StratifiedSampling(final IStratiAmountSelector<X, Y, I, D> stratiAmountSelector, final IStratiAssigner<X, Y, I, D> stratiAssigner, final Random random, final D input) {
 		super(input);
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 		this.random = random;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmException {
 		switch (this.getState()) {
 		case CREATED:
 			try {
-				this.sample = (D) this.getInput().createEmpty();
+				this.sample = (D) this.getInput().createEmptyCopy();
 				if (!this.allDatapointsAssigned) {
-					this.datasetCopy = (D) this.getInput().createEmpty();
+					this.datasetCopy = (D) this.getInput().createEmptyCopy();
 					this.datasetCopy.addAll(this.getInput());
 					this.stratiAmountSelector.setNumCPUs(this.getNumCPUs());
 					this.stratiAssigner.setNumCPUs(this.getNumCPUs());
-					this.strati = new IDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
+					this.strati = new ISupervisedDataset[this.stratiAmountSelector.selectStratiAmount(this.datasetCopy)];
 					for (int i = 0; i < this.strati.length; i++) {
-						this.strati[i] = this.getInput().createEmpty();
+						this.strati[i] = (ISupervisedDataset<X, Y, I>) this.getInput().createEmptyCopy();
 					}
 					this.stratiAssigner.init(this.datasetCopy, this.strati.length);
 				}
@@ -122,13 +124,14 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 		int[] sampleSizeForStrati = new int[this.strati.length];
 		// Calculate for each stratum the sample size by StratiSize / DatasetSize
 		for (int i = 0; i < this.strati.length; i++) {
-			sampleSizeForStrati[i] = Math.round((float) (this.sampleSize * ((double) this.strati[i].size() / (double) this.getInput().size())));
+			sampleSizeForStrati[i] = Math.round((float) (this.sampleSize * (this.strati[i].size() / (double) this.getInput().size())));
 		}
 
 		// Start a Simple Random Sampling thread for each stratum
 		for (int i = 0; i < this.strati.length; i++) {
 
-			SimpleRandomSampling<I, D> simpleRandomSampling = new SimpleRandomSampling<>(this.random, (D) this.strati[i]);
+			@SuppressWarnings("unchecked")
+			SimpleRandomSampling<X, Y, I, D> simpleRandomSampling = new SimpleRandomSampling<>(this.random, (D) this.strati[i]);
 			simpleRandomSampling.setSampleSize(sampleSizeForStrati[i]);
 			try {
 				synchronized (this.sample) {
@@ -140,11 +143,11 @@ public class StratifiedSampling<I, D extends IOrderedDataset<I>> extends ASampli
 		}
 	}
 
-	public IDataset[] getStrati() {
+	public ISupervisedDataset<X, Y, I>[] getStrati() {
 		return this.strati;
 	}
 
-	public void setStrati(final IDataset[] strati) {
+	public void setStrati(final ISupervisedDataset<X, Y, I>[] strati) {
 		this.strati = strati;
 	}
 }

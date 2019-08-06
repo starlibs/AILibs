@@ -8,9 +8,9 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingInstance;
 
 /**
  * Creates simple rankings for testing purposes.
@@ -25,7 +25,7 @@ public class DyadRankingInstanceSupplier {
 	}
 
 	/**
-	 * Creates a random {@link ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance}
+	 * Creates a random {@link ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
 	 *
 	 * @param maxLength The amount of dyads
@@ -49,7 +49,7 @@ public class DyadRankingInstanceSupplier {
 	}
 
 	/**
-	 * Creates a comparator for {@link ai.libs.jaicore.ml.dyadranking.Dyad} (with 2
+	 * Creates a comparator for {@link ai.libs.jaicore.ml.ranking.dyadranking.Dyad} (with 2
 	 * instances x_1, x_2 and 2 alternatives y_1,y_2). A pair of dyads (d_i, d_j) is
 	 * then ranked by the rule d_i >= d_j iff x_i1^2 + x_i2^2 - y_i1^2 - y_i2^2 >
 	 * x_j1^2 + x_j2^2 - y_j1^2 - y_j2^2

@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.factory.Nd4j;
 
+import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.INDArrayTimeseries;
+import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.NDArrayTimeseries;
 import ai.libs.jaicore.ml.core.dataset.attribute.timeseries.TimeSeriesAttributeType;
 
 /**
  * Time Series Dataset.
  */
-public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDataset<TimeSeriesInstance<L>, L> {
+public class TimeSeriesDataset<Y> implements ISupervisedDataset<INDArrayTimeseries, Y, TimeSeriesInstance<Y>> {
 
 	/** Number of instances contained in the dataset. */
 	private long numberOfInstances;
@@ -30,9 +31,9 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	private List<INDArray> timestampMatrices;
 
 	/** Target values for the instances. */
-	private INDArray targets;
+	private List<Y> targets;
 
-	private final IAttributeType<L> targetType;
+	private final List<IAttributeType> targetTypes;
 
 	/**
 	 * Attribute types for the time series variables contained in this dataset.
@@ -40,7 +41,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	 * INDArray-matrix) is added to/removed from the dataset. Used to be able to
 	 * reconstruct {@link}TimeSeriesInstances from the stored matrices.
 	 */
-	private List<IAttributeType<?>> attributeTypes;
+	private List<IAttributeType> attributeTypes;
 
 	/**
 	 * Creates a TimeSeries dataset. Let `n` be the number of instances.
@@ -55,7 +56,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	 *            `valueMatrices`.
 	 * @param targets Target values for the instances.
 	 */
-	public TimeSeriesDataset(final List<INDArray> valueMatrices, final List<INDArray> timestampMatrices, final INDArray targets, final IAttributeType<L> targetType) {
+	public TimeSeriesDataset(final List<INDArray> valueMatrices, final List<INDArray> timestampMatrices, final List<Y> targets, final List<IAttributeType> targetType) {
 		// Parameter checks.
 		// ..
 		this.numberOfInstances = valueMatrices.get(0).shape()[0];
@@ -68,7 +69,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 			this.addAttributeType(valueMatrix);
 		}
 		// Create target attribute type.
-		this.targetType = targetType;
+		this.targetTypes = targetType;
 	}
 
 	/**
@@ -98,8 +99,8 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	 * @throws IndexOutOfBoundsException
 	 */
 	@Override
-	public TimeSeriesInstance<L> remove(final int index) {
-		TimeSeriesInstance<L> instance = this.get(index);
+	public TimeSeriesInstance<Y> remove(final int index) {
+		TimeSeriesInstance<Y> instance = this.get(index);
 		this.valueMatrices.remove(index);
 		this.timestampMatrices.remove(index);
 		this.attributeTypes.remove(index);
@@ -128,8 +129,15 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 		this.attributeTypes.set(index, type);
 	}
 
-	public INDArray getTargets() {
+	public List<Y> getTargets() {
 		return this.targets;
+	}
+
+	public INDArray getTargetsAsINDArray() {
+		if (this.targets.get(0) instanceof Number) {
+			return Nd4j.create(this.targets.stream().mapToDouble(x -> (Double) x).toArray());
+		}
+		return null;
 	}
 
 	public int getNumberOfVariables() {
@@ -191,7 +199,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	 * Iterator for the @{@link}TimeSeriesDataset. Iterates and implicitly creates
 	 * the @{link}TimeSeriesInstance.
 	 */
-	class TimeSeriesDatasetIterator implements Iterator<TimeSeriesInstance<L>> {
+	class TimeSeriesDatasetIterator implements Iterator<TimeSeriesInstance<Y>> {
 
 		private int current = 0;
 
@@ -201,7 +209,7 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 		}
 
 		@Override
-		public TimeSeriesInstance<L> next() {
+		public TimeSeriesInstance<Y> next() {
 			if (!this.hasNext()) {
 				throw new NoSuchElementException();
 			}
@@ -211,53 +219,40 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	}
 
 	@Override
-	public TimeSeriesInstance<L> get(final int index) {
+	public TimeSeriesInstance<Y> get(final int index) {
 
 		// Build attribute value as view on the row of the attribute matrix.
-		List<IAttributeValue<?>> attributeValues = new ArrayList<>();
+		List<INDArrayTimeseries> attributeValues = new ArrayList<>();
 		for (int i = 0; i < TimeSeriesDataset.this.valueMatrices.size(); i++) {
-			INDArray viewOnCurrent = TimeSeriesDataset.this.valueMatrices.get(i).getRow(index);
-			IAttributeType<?> type = TimeSeriesDataset.this.attributeTypes.get(i);
-			IAttributeValue<?> value = type.buildAttributeValue(viewOnCurrent);
-			attributeValues.add(value);
+			attributeValues.add(new NDArrayTimeseries(TimeSeriesDataset.this.valueMatrices.get(i).getRow(index)));
 		}
 		// Build target value.
-		double target = TimeSeriesDataset.this.targets.getDouble(index);
-		return new TimeSeriesInstance<>(attributeValues, this.targetType.buildAttributeValue(target).getValue());
+		Y target = TimeSeriesDataset.this.targets.get(index);
+		return new TimeSeriesInstance<>(attributeValues, target);
 	}
 
 	@Override
-	public Iterator<TimeSeriesInstance<L>> iterator() {
+	public Iterator<TimeSeriesInstance<Y>> iterator() {
 		return new TimeSeriesDatasetIterator();
 	}
 
 	@Override
-	public int getNumberOfAttributes() {
+	public int getNumFeatures() {
 		return this.attributeTypes.size();
 	}
 
 	@Override
-	public List<IAttributeType<?>> getAttributeTypes() {
-		return this.attributeTypes;
-	}
-
-	@Override
-	public IAttributeType<L> getTargetType() {
-		return this.targetType;
-	}
-
-	@Override
-	public IDataset<TimeSeriesInstance<L>> createEmpty() {
+	public ISupervisedDataset<INDArrayTimeseries, Y, TimeSeriesInstance<Y>> createEmptyCopy() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean add(final TimeSeriesInstance<L> e) {
+	public boolean add(final TimeSeriesInstance<Y> e) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean addAll(final Collection<? extends TimeSeriesInstance<L>> c) {
+	public boolean addAll(final Collection<? extends TimeSeriesInstance<Y>> c) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -307,12 +302,12 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	}
 
 	@Override
-	public void add(final int arg0, final TimeSeriesInstance<L> arg1) {
+	public void add(final int arg0, final TimeSeriesInstance<Y> arg1) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public boolean addAll(final int arg0, final Collection<? extends TimeSeriesInstance<L>> arg1) {
+	public boolean addAll(final int arg0, final Collection<? extends TimeSeriesInstance<Y>> arg1) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -327,27 +322,42 @@ public class TimeSeriesDataset<L> implements IOrderedLabeledAttributeArrayDatase
 	}
 
 	@Override
-	public ListIterator<TimeSeriesInstance<L>> listIterator() {
+	public ListIterator<TimeSeriesInstance<Y>> listIterator() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public ListIterator<TimeSeriesInstance<L>> listIterator(final int arg0) {
+	public ListIterator<TimeSeriesInstance<Y>> listIterator(final int arg0) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public TimeSeriesInstance<L> set(final int arg0, final TimeSeriesInstance<L> arg1) {
+	public TimeSeriesInstance<Y> set(final int arg0, final TimeSeriesInstance<Y> arg1) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public List<TimeSeriesInstance<L>> subList(final int arg0, final int arg1) {
+	public List<TimeSeriesInstance<Y>> subList(final int arg0, final int arg1) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public int getFrequency(final TimeSeriesInstance<L> instance) {
-		return (int)this.stream().filter(instance::equals).count();
+	public int getFrequency(final TimeSeriesInstance<Y> instance) {
+		return (int) this.stream().filter(instance::equals).count();
 	}
+
+	@Override
+	public List<IAttributeType> getLabelTypes() {
+		return this.targetTypes;
+	}
+
+	@Override
+	public int getNumLabels() {
+		return this.targetTypes.size();
+	}
+
+	@Override
+	public List<IAttributeType> getFeatureTypes() {
+		return this.attributeTypes;
+	}
+
 }

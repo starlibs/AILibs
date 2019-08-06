@@ -4,9 +4,10 @@ import java.util.Comparator;
 import java.util.Random;
 
 import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
-import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
-import org.api4.java.ai.ml.core.dataset.IOrderedDataset;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
@@ -18,7 +19,7 @@ import ai.libs.jaicore.ml.core.dataset.sampling.SampleElementAddedEvent;
  *
  * @author Lukas Brandt
  */
-public class SystematicSampling<I extends INumericArrayInstance & Clusterable, D extends IOrderedDataset<I>> extends ASamplingAlgorithm<I, D> {
+public class SystematicSampling<Y, I extends INumericFeatureInstance & ILabeledInstance<Y> & Clusterable, D extends ISupervisedDataset<Double, Y, I>> extends ASamplingAlgorithm<Double, Y, I, D> {
 
 	private Random random;
 	private D sortedDataset = null;
@@ -64,14 +65,14 @@ public class SystematicSampling<I extends INumericArrayInstance & Clusterable, D
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables and sort dataset.
 			try {
-				this.sample = (D) this.getInput().createEmpty();
+				this.sample = (D) this.getInput().createEmptyCopy();
 				if (this.sortedDataset == null) {
-					this.sortedDataset = (D) this.getInput().createEmpty();
+					this.sortedDataset = (D) this.getInput().createEmptyCopy();
 					this.sortedDataset.addAll(this.getInput());
 					this.sortedDataset.sort(this.datapointComparator);
 				}

@@ -2,16 +2,18 @@ package ai.libs.jaicore.ml.core.dataset.attribute.timeseries;
 
 import java.util.stream.Stream;
 
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
 /**
  * Describes a time series type as an 1-NDArray with a fixed length.
  */
-public class TimeSeriesAttributeType implements IAttributeType<INDArray> {
+public class TimeSeriesAttributeType implements INDArrayTimeseriesAttributeType {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 5594176564150923471L;
 	private int length;
 
 	public TimeSeriesAttributeType(final int length) {
@@ -27,21 +29,24 @@ public class TimeSeriesAttributeType implements IAttributeType<INDArray> {
 	 * @return Returns true if the given value conforms
 	 */
 	@Override
-	public boolean isValidValue(final INDArray value) {
+	public boolean isValidValue(final Object o) {
+		if (!(o instanceof INDArray)) {
+			return false;
+		}
+		INDArray value = (INDArray) o;
 		return value.rank() == 1 && value.length() == this.length;
 	}
 
 	@Override
-	public IAttributeValue<INDArray> buildAttributeValue(final Object value) {
+	public INDArrayTimeseriesAttributeValue buildAttributeValue(final Object value) {
 		if (value instanceof INDArray) {
-			return new TimeSeriesAttributeValue(this, (INDArray) value);
+			return new TimeSeriesAttributeValue(new NDArrayTimeseries((INDArray) value));
 		} else {
 			throw new IllegalArgumentException("Value has to be an INDArray");
 		}
 	}
 
-	@Override
-	public IAttributeValue<INDArray> buildAttributeValue(final String stringDescription) {
+	public INDArrayTimeseriesAttributeValue buildAttributeValue(final String stringDescription) {
 		double[] data = Stream.of(stringDescription.split(",")).mapToDouble(Double::parseDouble).toArray();
 		int[] shape = { data.length };
 		INDArray value = Nd4j.create(data, shape);

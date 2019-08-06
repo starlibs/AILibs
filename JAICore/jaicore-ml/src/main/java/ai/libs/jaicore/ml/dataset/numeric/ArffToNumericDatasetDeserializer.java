@@ -9,15 +9,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.dataset.attribute.nominal.INominalAttributeType;
+import org.api4.java.ai.ml.dataset.attribute.numeric.INumericAttributeType;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
+import org.api4.java.ai.ml.dataset.supervised.classification.INumericFeatureSingleLabelClassificationInstance;
+
 import ai.libs.jaicore.basic.OptionsParser;
 import ai.libs.jaicore.basic.kvstore.KVStore;
-import ai.libs.jaicore.ml.dataset.IAttribute;
+import ai.libs.jaicore.ml.core.dataset.attribute.nominal.NominalAttributeType;
+import ai.libs.jaicore.ml.core.dataset.attribute.numeric.NumericAttributeType;
 import ai.libs.jaicore.ml.dataset.IDatasetDeserializer;
-import ai.libs.jaicore.ml.dataset.NominalAttribute;
-import ai.libs.jaicore.ml.dataset.NumericAttribute;
 import weka.core.UnsupportedAttributeTypeException;
 
-public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<double[], NumericDataset> {
+public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<double[], INumericFeatureSupervisedDataset<String, INumericFeatureSingleLabelClassificationInstance>> {
 
 	private static final String M_RELATION = "@relation";
 	private static final String M_ATTRIBUTE = "@attribute";
@@ -37,7 +42,7 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<do
 	private static final String SEPARATOR_ATTRIBUTE_DESCRIPTION = " ";
 	private static final String SEPARATOR_DENSE_INSTANCE_VALUES = ",";
 
-	private List<IAttribute> chooseTheList(final List<IAttribute> instanceAttribute, final List<IAttribute> targetAttribute, final int numAttributes, final int currentIndex, final int classIndex, final boolean multiTarget) {
+	private List<IAttributeType> chooseTheList(final List<IAttributeType> instanceAttribute, final List<IAttributeType> targetAttribute, final int numAttributes, final int currentIndex, final int classIndex, final boolean multiTarget) {
 		if (!multiTarget) {
 			return (currentIndex == classIndex) ? targetAttribute : instanceAttribute;
 		} else {
@@ -50,13 +55,13 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<do
 	}
 
 	@Override
-	public NumericDataset deserializeDataset(final File datasetFile) {
+	public INumericFeatureSupervisedDataset<String, INumericFeatureSingleLabelClassificationInstance> deserializeDataset(final File datasetFile) {
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			KVStore relationMetaData = new KVStore();
-			NumericDataset dataset = null;
-			List<IAttribute> attributeList = new LinkedList<>();
-			List<IAttribute> instanceAttribute = new LinkedList<>();
-			List<IAttribute> targetAttribute = new LinkedList<>();
+			NumericDataset<String> dataset = null;
+			List<IAttributeType> attributeList = new LinkedList<>();
+			List<IAttributeType> instanceAttribute = new LinkedList<>();
+			List<IAttributeType> targetAttribute = new LinkedList<>();
 
 			boolean instanceReadMode = false;
 			String line;
@@ -82,11 +87,11 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<do
 					}
 
 					for (int i = 0; i < attributeList.size(); i++) {
-						List<IAttribute> listToAddAttributeTo = this.chooseTheList(instanceAttribute, targetAttribute, attributeList.size(), i, classIndex, relationMetaData.getAsBoolean(F_MULTI_TARGET));
+						List<IAttributeType> listToAddAttributeTo = this.chooseTheList(instanceAttribute, targetAttribute, attributeList.size(), i, classIndex, relationMetaData.getAsBoolean(F_MULTI_TARGET));
 						listToAddAttributeTo.add(attributeList.get(i));
 					}
 
-					dataset = new NumericDataset((relationMetaData != null) ? relationMetaData.getAsString(K_RELATION_NAME) : "unnamed", instanceAttribute, targetAttribute);
+					dataset = new NumericDataset<>((relationMetaData != null) ? relationMetaData.getAsString(K_RELATION_NAME) : "unnamed", instanceAttribute, targetAttribute);
 
 				} else if (instanceReadMode && !line.trim().isEmpty() && !instanceAttribute.isEmpty() && !targetAttribute.isEmpty()) {
 					double[] instance = this.parseInstance(line, attributeList);
@@ -102,7 +107,7 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<do
 							y[targetAttribute.indexOf(attributeList.get(i))] = instance[i];
 						}
 					}
-					dataset.addInstance(x, y);
+					dataset.add(x, y);
 				}
 				lineCounter++;
 			}
@@ -136,7 +141,7 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<do
 		return metaData;
 	}
 
-	private IAttribute parseAttributeMetaData(final String line) throws UnsupportedAttributeTypeException {
+	private IAttributeType parseAttributeMetaData(final String line) throws UnsupportedAttributeTypeException {
 		String[] attributeDefinitionSplit = line.substring(M_ATTRIBUTE.length() + 1).split(SEPARATOR_ATTRIBUTE_DESCRIPTION);
 		String name = attributeDefinitionSplit[0].trim();
 		if (name.startsWith("'") && name.endsWith("'")) {
@@ -152,10 +157,10 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<do
 
 		switch (type) {
 		case M_NUMERIC_ATT:
-			return new NumericAttribute(name);
+			return new NumericAttributeType(name);
 		case M_NOMINAL_ATT:
 			if (values != null) {
-				return new NominalAttribute(name, Arrays.stream(values).map(String::trim).collect(Collectors.toList()));
+				return new NominalAttributeType(name, Arrays.stream(values).map(String::trim).collect(Collectors.toList()));
 			} else {
 				throw new IllegalStateException("Identified a nominal attribute but it seems to have no values.");
 			}
@@ -172,15 +177,15 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<do
 	 * @return
 	 * @throws UnsupportedAttributeTypeException
 	 */
-	private double[] parseInstance(final String line, final List<IAttribute> attributes) throws UnsupportedAttributeTypeException {
+	private double[] parseInstance(final String line, final List<IAttributeType> attributes) throws UnsupportedAttributeTypeException {
 		String[] instanceValueSplit = line.split(SEPARATOR_DENSE_INSTANCE_VALUES);
 		double[] instanceDescription = new double[instanceValueSplit.length];
 
 		for (int i = 0; i < instanceValueSplit.length; i++) {
-			if (attributes.get(i) instanceof NumericAttribute) {
+			if (attributes.get(i) instanceof INumericAttributeType) {
 				instanceDescription[i] = Double.valueOf(instanceValueSplit[i]);
-			} else if (attributes.get(i) instanceof NominalAttribute) {
-				instanceDescription[i] = ((NominalAttribute) attributes.get(i)).getValueID(instanceValueSplit[i]);
+			} else if (attributes.get(i) instanceof INominalAttributeType) {
+				instanceDescription[i] = ((INominalAttributeType) attributes.get(i)).encodeToDouble(instanceValueSplit[i]);
 			} else {
 				throw new UnsupportedAttributeTypeException("Cannot parse the value of the attribute type " + attributes.get(i).getClass().getName());
 			}

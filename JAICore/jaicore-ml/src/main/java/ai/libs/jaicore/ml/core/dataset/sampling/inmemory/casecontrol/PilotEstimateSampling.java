@@ -3,9 +3,10 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory.casecontrol;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.ILabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 
-public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInstance<?>, D extends IDataset<I>> extends CaseControlLikeSampling<I, D> {
+public abstract class PilotEstimateSampling<Y, I extends INumericFeatureInstance & ILabeledInstance<Y>, D extends ISupervisedDataset<Double, Y, I>> extends CaseControlLikeSampling<Double, Y, I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(PilotEstimateSampling.class);
 
@@ -81,7 +82,7 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 
 	private AlgorithmEvent doInitStep() throws AlgorithmException, InterruptedException {
 		try {
-			this.sample = (D) this.getInput().createEmpty();
+			this.sample = (D) this.getInput().createEmptyCopy();
 			if (this.probabilityBoundaries == null || this.chosenInstance == null) {
 				Classifier pilotEstimator = new Logistic();
 				// set preSampleSize to |Dataset|/2 as default value, if preSampleSize would be
@@ -89,8 +90,8 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 				if (this.preSampleSize < 1) {
 					this.preSampleSize = this.getInput().size() / 2;
 				}
-				D pilotEstimateSample = (D) this.getInput().createEmpty();
-				D sampleCopy = (D) this.getInput().createEmpty();
+				D pilotEstimateSample = (D) this.getInput().createEmptyCopy();
+				D sampleCopy = (D) this.getInput().createEmptyCopy();
 
 				for (I instance : this.getInput()) {
 					sampleCopy.add(instance);
@@ -123,7 +124,7 @@ public abstract class PilotEstimateSampling<I extends ILabeledAttributeArrayInst
 					} while (pilotEstimateSample.contains(choosenInstance));
 					pilotEstimateSample.add(choosenInstance);
 				}
-				Instances pilotEstimateInstances = ((WekaInstances<?>) pilotEstimateSample).getList();
+				Instances pilotEstimateInstances = ((WekaInstances) pilotEstimateSample).getList();
 
 				NumericToNominal numericToNominal = new NumericToNominal();
 				String[] options = new String[2];

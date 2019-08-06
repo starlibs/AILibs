@@ -8,12 +8,12 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
 
-import ai.libs.jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
-import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.dyadranking.general.DyadRankingInstanceSupplier;
-import ai.libs.jaicore.ml.dyadranking.zeroshot.inputoptimization.NegIdentityInpOptLoss;
-import ai.libs.jaicore.ml.dyadranking.zeroshot.inputoptimization.PLNetInputOptimizer;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.PLNetDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.zeroshot.inputoptimization.NegIdentityInpOptLoss;
+import ai.libs.jaicore.ml.ranking.dyadranking.zeroshot.inputoptimization.PLNetInputOptimizer;
 import junit.framework.Assert;
 
 /**

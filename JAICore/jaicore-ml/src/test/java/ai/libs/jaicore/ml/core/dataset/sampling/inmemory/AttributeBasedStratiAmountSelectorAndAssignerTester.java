@@ -11,16 +11,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeValue;
-import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeType;
 import org.api4.java.ai.ml.core.dataset.attribute.categorical.CategoricalAttributeValue;
-import org.api4.java.ai.ml.core.dataset.attribute.categorical.ICategoricalAttributeType;
-import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
-import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeValue;
+import org.api4.java.ai.ml.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.dataset.attribute.IAttributeValue;
+import org.api4.java.ai.ml.dataset.attribute.nominal.INominalAttributeType;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedInstance;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
+import ai.libs.jaicore.ml.core.dataset.attribute.nominal.NominalAttributeType;
+import ai.libs.jaicore.ml.core.dataset.attribute.numeric.INumericAttributeType;
+import ai.libs.jaicore.ml.core.dataset.attribute.numeric.NumericAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 import ai.libs.jaicore.ml.core.dataset.standard.SimpleDataset;
@@ -30,9 +32,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_allAttributes_categorical_serial() {
-		SimpleDataset<String> dataset = createToyDatasetOnlyCategorical();
+		SimpleDataset<String> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<String>, SimpleDataset<String>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<String, INumericFeatureSupervisedInstance<String>, INumericFeatureSupervisedDataset<String, INumericFeatureSupervisedInstance<String>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(6, computedNumber);
@@ -40,9 +43,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_allAttributes_categorical_parallel() {
-		SimpleDataset<String> dataset = createToyDatasetOnlyCategorical();
+		SimpleDataset<String> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<String>, SimpleDataset<String>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<String, INumericFeatureSupervisedInstance<String>, INumericFeatureSupervisedDataset<String, INumericFeatureSupervisedInstance<String>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(6, computedNumber);
@@ -50,9 +54,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_onlyTargetAttribute_categorical_serial() {
-		SimpleDataset<String> dataset = createToyDatasetOnlyCategorical();
+		SimpleDataset<String> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<String>, SimpleDataset<String>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<String, INumericFeatureSupervisedInstance<String>, INumericFeatureSupervisedDataset<String, INumericFeatureSupervisedInstance<String>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(3, computedNumber);
@@ -60,9 +65,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_onlyTargetAttribute_categorical_parallel() {
-		SimpleDataset<String> dataset = createToyDatasetOnlyCategorical();
+		SimpleDataset<String> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<String>, SimpleDataset<String>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<String, INumericFeatureSupervisedInstance<String>, INumericFeatureSupervisedDataset<String, INumericFeatureSupervisedInstance<String>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(3, computedNumber);
@@ -70,9 +76,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_assignment_onlyTargetAttribute_categorical_serial() {
-		SimpleDataset<String> dataset = createToyDatasetOnlyCategorical();
+		SimpleDataset<String> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<String>, SimpleDataset<String>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<String, INumericFeatureSupervisedInstance<String>, INumericFeatureSupervisedDataset<String, INumericFeatureSupervisedInstance<String>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
 		selectorAndAssigner.init(dataset);
 		Map<SimpleInstance<String>, Integer> stratiAssignment = new HashMap<>();
@@ -97,9 +104,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_assignment_onlyTargetAttribute_categorical_parallel() {
-		SimpleDataset<String> dataset = createToyDatasetOnlyCategorical();
+		SimpleDataset<String> dataset = this.createToyDatasetOnlyCategorical();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<String>, SimpleDataset<String>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
+		AttributeBasedStratiAmountSelectorAndAssigner<String, INumericFeatureSupervisedInstance<String>, INumericFeatureSupervisedDataset<String, INumericFeatureSupervisedInstance<String>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
 		selectorAndAssigner.init(dataset);
 		Map<SimpleInstance<String>, Integer> stratiAssignment = new HashMap<>();
@@ -124,9 +132,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_allAttributes_mixed_equalLength_serial() {
-		SimpleDataset<Double> dataset = createToyDatasetMixed();
+		SimpleDataset<Double> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<Double>, SimpleDataset<Double>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<String, INumericFeatureSupervisedInstance<String>, INumericFeatureSupervisedDataset<String, INumericFeatureSupervisedInstance<String>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -134,9 +143,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_allAttributes_mixed_equalLength_parallel() {
-		SimpleDataset<Double> dataset = createToyDatasetMixed();
+		SimpleDataset<Double> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<Double>, SimpleDataset<Double>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<Double, INumericFeatureSupervisedInstance<Double>, INumericFeatureSupervisedDataset<Double, INumericFeatureSupervisedInstance<Double>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_LENGTH, 2);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -144,9 +154,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_allAttributes_mixed_equalSize_serial() {
-		SimpleDataset<Double> dataset = createToyDatasetMixed();
+		SimpleDataset<Double> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<Double>, SimpleDataset<Double>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<Double, INumericFeatureSupervisedInstance<Double>, INumericFeatureSupervisedDataset<Double, INumericFeatureSupervisedInstance<Double>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(1);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -154,9 +165,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_number_allAttributes_mixed_equalSize_parallel() {
-		SimpleDataset<Double> dataset = createToyDatasetMixed();
+		SimpleDataset<Double> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 0, 1, 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<Double>, SimpleDataset<Double>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<Double, INumericFeatureSupervisedInstance<Double>, INumericFeatureSupervisedDataset<Double, INumericFeatureSupervisedInstance<Double>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(4);
 		int computedNumber = selectorAndAssigner.selectStratiAmount(dataset);
 		assertEquals(8, computedNumber);
@@ -164,9 +176,10 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_assignment_onlyTargetAttribute_mixed_serial() {
-		SimpleDataset<Double> dataset = createToyDatasetMixed();
+		SimpleDataset<Double> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<Double>, SimpleDataset<Double>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<Double, INumericFeatureSupervisedInstance<Double>, INumericFeatureSupervisedDataset<Double, INumericFeatureSupervisedInstance<Double>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(1);
 		selectorAndAssigner.init(dataset);
 		Map<SimpleInstance<Double>, Integer> stratiAssignment = new HashMap<>();
@@ -189,13 +202,14 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 	@Test
 	public void test_assignment_onlyTargetAttribute_mixed_parallel() {
-		SimpleDataset<Double> dataset = createToyDatasetMixed();
+		SimpleDataset<Double> dataset = this.createToyDatasetMixed();
 		Integer[] attributeIndices = { 2 };
-		AttributeBasedStratiAmountSelectorAndAssigner<SimpleInstance<Double>, SimpleDataset<Double>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
+		AttributeBasedStratiAmountSelectorAndAssigner<Double, INumericFeatureSupervisedInstance<Double>, INumericFeatureSupervisedDataset<Double, INumericFeatureSupervisedInstance<Double>>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(
+				Arrays.asList(attributeIndices), DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(4);
 		selectorAndAssigner.init(dataset);
-		Map<SimpleInstance<Double>, Integer> stratiAssignment = new HashMap<>();
-		for (SimpleInstance<Double> i : dataset) {
+		Map<INumericFeatureSupervisedInstance<Double>, Integer> stratiAssignment = new HashMap<>();
+		for (INumericFeatureSupervisedInstance<Double> i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
 		}
 		// Number of strati must be 2
@@ -215,17 +229,17 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public SimpleDataset<String> createToyDatasetOnlyCategorical() {
 		// Attribute 1
 		String[] domain1 = { "A", "B" };
-		IAttributeType<?> type1 = new CategoricalAttributeType(Arrays.asList(domain1));
+		IAttributeType type1 = new NominalAttributeType("a1", Arrays.asList(domain1));
 
 		// Attribute 2
 		String[] domain2 = { "C" };
-		IAttributeType<?> type2 = new CategoricalAttributeType(Arrays.asList(domain2));
+		IAttributeType type2 = new NominalAttributeType("a2", Arrays.asList(domain2));
 
 		// Attribute 3
 		String[] domain3 = { "X", "Y", "Z" };
-		IAttributeType<String> type3 = new CategoricalAttributeType(Arrays.asList(domain3));
+		IAttributeType type3 = new NominalAttributeType("a3", Arrays.asList(domain3));
 
-		List<IAttributeType<?>> attributeTypeList = new ArrayList<>();
+		List<IAttributeType> attributeTypeList = new ArrayList<>();
 		attributeTypeList.add(type1);
 		attributeTypeList.add(type2);
 
@@ -234,8 +248,8 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		SimpleDataset<String> simpleDataset = new SimpleDataset<>(schema);
 
 		// Instance 1
-		IAttributeValue<?> value11 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "A");
-		IAttributeValue<?> value12 = new CategoricalAttributeValue((ICategoricalAttributeType) type2, "C");
+		IAttributeValue<?> value11 = new CategoricalAttributeValue((INominalAttributeType) type1, "A");
+		IAttributeValue<?> value12 = new CategoricalAttributeValue((INominalAttributeType) type2, "C");
 		String value13 = "X";
 
 		List<IAttributeValue<?>> values1 = new ArrayList<>();
@@ -244,8 +258,8 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		SimpleInstance<String> i1 = new SimpleInstance<>(values1, value13);
 
 		// Instance 2
-		IAttributeValue<?> value21 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "A");
-		IAttributeValue<?> value22 = new CategoricalAttributeValue((ICategoricalAttributeType) type2, "C");
+		IAttributeValue<?> value21 = new CategoricalAttributeValue((INominalAttributeType) type1, "A");
+		IAttributeValue<?> value22 = new CategoricalAttributeValue((INominalAttributeType) type2, "C");
 		String value23 = "Y";
 
 		ArrayList<IAttributeValue<?>> values2 = new ArrayList<>();
@@ -254,8 +268,8 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		SimpleInstance<String> i2 = new SimpleInstance<>(values2, value23);
 
 		// Instance 3
-		IAttributeValue<?> value31 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "B");
-		IAttributeValue<?> value32 = new CategoricalAttributeValue((ICategoricalAttributeType) type2, "C");
+		IAttributeValue<?> value31 = new CategoricalAttributeValue((INominalAttributeType) type1, "B");
+		IAttributeValue<?> value32 = new CategoricalAttributeValue((INominalAttributeType) type2, "C");
 		String value33 = "X";
 
 		ArrayList<IAttributeValue<?>> values3 = new ArrayList<>();
@@ -264,8 +278,8 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		SimpleInstance<String> i3 = new SimpleInstance<>(values3, value33);
 
 		// Instance 4
-		IAttributeValue<?> value41 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "A");
-		IAttributeValue<?> value42 = new CategoricalAttributeValue((ICategoricalAttributeType) type2, "C");
+		IAttributeValue<?> value41 = new CategoricalAttributeValue((INominalAttributeType) type1, "A");
+		IAttributeValue<?> value42 = new CategoricalAttributeValue((INominalAttributeType) type2, "C");
 		String value43 = "Z";
 
 		ArrayList<IAttributeValue<?>> values4 = new ArrayList<>();
@@ -284,15 +298,15 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	public SimpleDataset<Double> createToyDatasetMixed() {
 		// Attribute 1 (categorical)
 		String[] domain1 = { "A", "B" };
-		IAttributeType<?> type1 = new CategoricalAttributeType(Arrays.asList(domain1));
+		IAttributeType type1 = new INominalAttributeType(Arrays.asList(domain1));
 
 		// Attribute 2 (numeric)
-		IAttributeType<?> type2 = new NumericAttributeType();
+		IAttributeType type2 = new INumericAttributeType();
 
 		// Attribute 3 (numeric)
-		IAttributeType<Double> type3 = new NumericAttributeType();
+		IAttributeType<Double> type3 = new INumericAttributeType();
 
-		List<IAttributeType<?>> attributeTypeList = new ArrayList<>();
+		List<IAttributeType> attributeTypeList = new ArrayList<>();
 		attributeTypeList.add(type1);
 		attributeTypeList.add(type2);
 
@@ -301,33 +315,33 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		SimpleDataset<Double> simpleDataset = new SimpleDataset<>(schema);
 
 		// Instance 1
-		IAttributeValue<?> value11 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "A");
-		IAttributeValue<?> value12 = new NumericAttributeValue((NumericAttributeType) type2, 0.0);
+		IAttributeValue<?> value11 = new CategoricalAttributeValue((INominalAttributeType) type1, "A");
+		IAttributeValue<?> value12 = new NumericAttributeValue((INumericAttributeType) type2, 0.0);
 		double value13 = 1.0;
 
 		// Instance 2
-		IAttributeValue<?> value21 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "B");
-		IAttributeValue<?> value22 = new NumericAttributeValue((NumericAttributeType) type2, 3.0);
+		IAttributeValue<?> value21 = new CategoricalAttributeValue((INominalAttributeType) type1, "B");
+		IAttributeValue<?> value22 = new NumericAttributeValue((INumericAttributeType) type2, 3.0);
 		double value23 = 20.0;
 
 		// Instance 3
-		IAttributeValue<?> value31 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "A");
-		IAttributeValue<?> value32 = new NumericAttributeValue((NumericAttributeType) type2, 3.0);
+		IAttributeValue<?> value31 = new CategoricalAttributeValue((INominalAttributeType) type1, "A");
+		IAttributeValue<?> value32 = new NumericAttributeValue((INumericAttributeType) type2, 3.0);
 		double value33 = -2.0;
 
 		// Instance 4
-		IAttributeValue<?> value41 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "B");
-		IAttributeValue<?> value42 = new NumericAttributeValue((NumericAttributeType) type2, 2.0);
+		IAttributeValue<?> value41 = new CategoricalAttributeValue((INominalAttributeType) type1, "B");
+		IAttributeValue<?> value42 = new NumericAttributeValue((INumericAttributeType) type2, 2.0);
 		double value43 = 1.5;
 
 		// Instance 5
-		IAttributeValue<?> value51 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "B");
-		IAttributeValue<?> value52 = new NumericAttributeValue((NumericAttributeType) type2, 6.0);
+		IAttributeValue<?> value51 = new CategoricalAttributeValue((INominalAttributeType) type1, "B");
+		IAttributeValue<?> value52 = new NumericAttributeValue((INumericAttributeType) type2, 6.0);
 		double value53 = 3.0;
 
 		// Instance 6
-		IAttributeValue<?> value61 = new CategoricalAttributeValue((ICategoricalAttributeType) type1, "A");
-		IAttributeValue<?> value62 = new NumericAttributeValue((NumericAttributeType) type2, 10.0);
+		IAttributeValue<?> value61 = new CategoricalAttributeValue((INominalAttributeType) type1, "A");
+		IAttributeValue<?> value62 = new NumericAttributeValue((INumericAttributeType) type2, 10.0);
 		double value63 = 5.0;
 
 		ArrayList<IAttributeValue<?>> values1 = new ArrayList<>();

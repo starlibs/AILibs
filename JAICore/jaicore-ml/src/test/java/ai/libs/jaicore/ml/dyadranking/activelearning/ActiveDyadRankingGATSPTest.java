@@ -16,18 +16,18 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.ml.dyadranking.activelearning.ActiveDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.activelearning.ConfidenceIntervalClusteringBasedActiveDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.activelearning.DyadDatasetPoolProvider;
-import ai.libs.jaicore.ml.dyadranking.activelearning.PrototypicalPoolBasedActiveDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.activelearning.RandomPoolBasedActiveDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.activelearning.UCBPoolBasedActiveDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
-import ai.libs.jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import ai.libs.jaicore.ml.dyadranking.util.DyadStandardScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.ActiveDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.ConfidenceIntervalClusteringBasedActiveDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.DyadDatasetPoolProvider;
+import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.PrototypicalPoolBasedActiveDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.RandomPoolBasedActiveDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.UCBPoolBasedActiveDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.IPLDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.PLNetDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyadranking.loss.DyadRankingLossUtil;
+import ai.libs.jaicore.ml.ranking.dyadranking.loss.KendallsTauDyadRankingLoss;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.DyadStandardScaler;
 import weka.clusterers.SimpleKMeans;
 
 /**

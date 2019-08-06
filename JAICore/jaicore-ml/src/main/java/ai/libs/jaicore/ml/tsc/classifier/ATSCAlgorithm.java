@@ -6,12 +6,12 @@ import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
 
 /**
  * Abstract algorithm class which is able to take {@link TimeSeriesDataset}
- * objects and builds {@link TSClassifier} instances specified by the generic
+ * objects and builds {@link ATimeSeriesClassificationModel} instances specified by the generic
  * parameter <CLASSIFIER>.
  *
  * @author Julian Lienen
  *
- * @param <L>
+ * @param <Y>
  *            The type of the target that the <CLASSIFIER> to be trained
  * @param <V>
  *            The value type of the target that the <CLASSIFIER> to be trained
@@ -23,7 +23,7 @@ import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
  *            The time series classifier which is modified and returned as
  *            algorithm result.
  */
-public abstract class ATSCAlgorithm<L, V, D extends TimeSeriesDataset<L>, C extends TSClassifier<L, V, D>> implements IAlgorithm<TimeSeriesDataset<L>, C> {
+public abstract class ATSCAlgorithm<Y, D extends TimeSeriesDataset<Y>, C extends ATimeSeriesClassificationModel<Y, D>> implements IAlgorithm<TimeSeriesDataset<Y>, C> {
 
 	/**
 	 * The model which is maintained during algorithm calls
@@ -40,11 +40,11 @@ public abstract class ATSCAlgorithm<L, V, D extends TimeSeriesDataset<L>, C exte
 	 * Setter for the model to be maintained.
 	 *
 	 * @param model
-	 *            The {@link TSClassifier} model which is maintained during
+	 *            The {@link ATimeSeriesClassificationModel} model which is maintained during
 	 *            algorithm calls.
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends TSClassifier<L, V, D>> void setModel(final T model) {
+	public <T extends ATimeSeriesClassificationModel<Y, D>> void setModel(final T model) {
 		this.model = (C) model;
 	}
 

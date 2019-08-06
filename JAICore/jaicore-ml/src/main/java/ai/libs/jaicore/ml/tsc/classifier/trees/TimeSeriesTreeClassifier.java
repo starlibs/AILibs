@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.tsc.classifier.trees;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

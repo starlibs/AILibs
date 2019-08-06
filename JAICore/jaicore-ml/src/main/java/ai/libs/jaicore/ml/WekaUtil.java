@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -207,7 +207,6 @@ public class WekaUtil {
 		}
 		return preprocessors;
 	}
-
 
 	/**
 	 * Returns true if there is at least one nominal attribute in the given dataset that has more than 2 values.
@@ -476,24 +475,23 @@ public class WekaUtil {
 		return an;
 	}
 
-	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException  {
+	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		return getStratifiedSplit(data, new Random(seed), portionOfFirstFold);
 	}
 
-	public static List<Instances> getStratifiedSplit(final Instances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException  {
+	public static List<Instances> getStratifiedSplit(final Instances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		try {
 			List<Instances> split = new ArrayList<>();
-			AttributeBasedStratiAmountSelectorAndAssigner<WekaInstance<Object>, WekaInstances<Object>> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
-			StratifiedSampling<WekaInstance<Object>, WekaInstances<Object>> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, new WekaInstances<>(data));
-			sampler.setSampleSize((int)Math.ceil(portionOfFirstFold * data.size()));
+			AttributeBasedStratiAmountSelectorAndAssigner<Double, WekaInstance, WekaInstances> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
+			StratifiedSampling<Double, Double, WekaInstance, WekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, new WekaInstances(data));
+			sampler.setSampleSize((int) Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
 			split.add(sampler.getComplement().getList());
 			if (split.get(0).size() + split.get(1).size() != data.size()) {
 				throw new IllegalStateException("The sum of fold sizes does not correspond to the size of the original dataset!");
 			}
 			return split;
-		}
-		catch (ClassCastException | AlgorithmTimeoutedException |  AlgorithmExecutionCanceledException | AlgorithmException | ClassNotFoundException | DatasetCreationException e) {
+		} catch (ClassCastException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | ClassNotFoundException | DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}
 	}

@@ -5,8 +5,9 @@ import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
 
 import ai.libs.jaicore.ml.clustering.GMeans;
 
@@ -28,7 +29,8 @@ import ai.libs.jaicore.ml.clustering.GMeans;
  *
  * @author Lukas Brandt
  */
-public class GMeansStratiAmountSelectorAndAssigner<I extends INumericArrayInstance & Clusterable, D extends IDataset<I>> extends ClusterStratiAssigner<I, D> implements IStratiAmountSelector<D> {
+public class GMeansStratiAmountSelectorAndAssigner<Y, I extends INumericFeatureInstance & ILabeledInstance<Y> & Clusterable, D extends INumericFeatureSupervisedDataset<Y, I>> extends ClusterStratiAssigner<Y, I, D>
+		implements IStratiAmountSelector<Double, Y, I, D> {
 
 	private GMeans<I> clusterer;
 

@@ -11,9 +11,9 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.algorithm.IDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.search.ADyadRankedNodeQueue;
-import ai.libs.jaicore.ml.dyadranking.util.AbstractDyadScaler;
+import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.IDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyadranking.search.ADyadRankedNodeQueue;
+import ai.libs.jaicore.ml.ranking.dyadranking.util.AbstractDyadScaler;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
 

@@ -10,9 +10,11 @@ import java.util.Set;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
-import org.api4.java.ai.ml.core.dataset.AILabeledAttributeArrayDataset;
-import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
-import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.dataset.attribute.numeric.INumericAttributeType;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * @param <I>
  *            The instance type
  */
-public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>> {
+public class DiscretizationHelper<Y, I extends INumericFeatureInstance & ILabeledInstance<Y>, D extends INumericFeatureSupervisedDataset<Y, I>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
 
@@ -56,9 +58,8 @@ public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>
 	 *            assigned
 	 * @return
 	 */
-	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(final D dataset,
-			final List<Integer> indices, final Map<Integer, Set<Object>> attributeValues,
-			final DiscretizationStrategy discretizationStrategy, final int numberOfCategories) {
+	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(final D dataset, final List<Integer> indices, final Map<Integer, Set<Object>> attributeValues, final DiscretizationStrategy discretizationStrategy,
+			final int numberOfCategories) {
 		Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies = new HashMap<>();
 
 		// Only consider numeric attributes
@@ -176,11 +177,11 @@ public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>
 	 */
 	private Set<Integer> getNumericIndicesFromDataset(final D dataset) {
 		Set<Integer> numericAttributes = new HashSet<>();
-		List<IAttributeType<?>> attributeTypes = new ArrayList<>(dataset.getAttributeTypes());
-		attributeTypes.add(dataset.getTargetType());
+		List<IAttributeType> attributeTypes = new ArrayList<>(dataset.getFeatureTypes());
+		attributeTypes.addAll(dataset.getLabelTypes());
 		for (int i = 0; i < attributeTypes.size(); i++) {
-			IAttributeType<?> attributeType = attributeTypes.get(i);
-			if (attributeType instanceof NumericAttributeType) {
+			IAttributeType attributeType = attributeTypes.get(i);
+			if (attributeType instanceof INumericAttributeType) {
 				numericAttributes.add(i);
 			}
 		}
@@ -193,8 +194,7 @@ public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>
 	 * @param discretizationPolicies
 	 * @param attributeValues
 	 */
-	protected void discretizeAttributeValues(final Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies,
-			final Map<Integer, Set<Object>> attributeValues) {
+	protected void discretizeAttributeValues(final Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies, final Map<Integer, Set<Object>> attributeValues) {
 		Set<Integer> numericIndices = discretizationPolicies.keySet();
 		for (int index : numericIndices) {
 			Set<Object> originalValues = attributeValues.get(index);
@@ -203,8 +203,7 @@ public class DiscretizationHelper<D extends AILabeledAttributeArrayDataset<?, ?>
 				double d = (double) value;
 				discretizedValues.add(this.discretize(d, discretizationPolicies.get(index)));
 			}
-			LOG.info("Attribute index {}: Reduced values from {} to {}", index, originalValues.size(),
-					discretizedValues.size());
+			LOG.info("Attribute index {}: Reduced values from {} to {}", index, originalValues.size(), discretizedValues.size());
 			attributeValues.put(index, discretizedValues);
 		}
 	}

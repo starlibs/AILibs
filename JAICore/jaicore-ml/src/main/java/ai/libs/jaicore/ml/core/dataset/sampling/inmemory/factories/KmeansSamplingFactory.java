@@ -5,21 +5,23 @@ import java.util.Random;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.INumericLabeledAttributeArrayInstance;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.ISupervisedDataset;
 
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.KmeansSampling;
 import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class KmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstance<? extends Number> & Clusterable, D extends IDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, KmeansSampling<I, D>> {
+public class KmeansSamplingFactory<Y, I extends INumericFeatureInstance & ILabeledInstance<Y> & Clusterable, D extends ISupervisedDataset<Double, Y, I>>
+		implements IRerunnableSamplingAlgorithmFactory<Double, Y, I, D, KmeansSampling<Y, I, D>> {
 
-	private KmeansSampling<I, D> previousRun;
+	private KmeansSampling<Y, I, D> previousRun;
 	private int k = -1;
 	private long clusterSeed = System.currentTimeMillis();
 	private DistanceMeasure distanceMeassure = new ManhattanDistance();
 
 	@Override
-	public void setPreviousRun(final KmeansSampling<I, D> previousRun) {
+	public void setPreviousRun(final KmeansSampling<Y, I, D> previousRun) {
 		this.previousRun = previousRun;
 	}
 
@@ -54,12 +56,12 @@ public class KmeansSamplingFactory<I extends INumericLabeledAttributeArrayInstan
 	}
 
 	@Override
-	public KmeansSampling<I, D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
+	public KmeansSampling<Y, I, D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
 		int kValue = sampleSize;
 		if (this.k > 0) {
 			kValue = this.k;
 		}
-		KmeansSampling<I, D> kmeansSampling = new KmeansSampling<>(this.clusterSeed, kValue, inputDataset);
+		KmeansSampling<Y, I, D> kmeansSampling = new KmeansSampling<>(this.clusterSeed, kValue, inputDataset);
 		kmeansSampling.setSampleSize(sampleSize);
 		kmeansSampling.setDistanceMeassure(this.distanceMeassure);
 		if (this.previousRun != null && this.previousRun.getClusterResults() != null) {

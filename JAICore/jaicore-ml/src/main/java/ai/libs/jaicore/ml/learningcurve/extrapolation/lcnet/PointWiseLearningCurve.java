@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.learningcurve.extrapolation.lcnet;
 
 import org.api4.java.ai.ml.LearningCurve;
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 
 /**
  * This class represents a learning curve that gets returned by the

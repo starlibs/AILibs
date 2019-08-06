@@ -4,8 +4,9 @@ import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.math3.random.JDKRandomGenerator;
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.INumericArrayInstance;
+import org.api4.java.ai.ml.dataset.INumericFeatureInstance;
+import org.api4.java.ai.ml.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +17,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Lukas Brandt
  */
-public class KMeansStratiAssigner<I extends INumericArrayInstance & Clusterable, D extends IDataset<I>> extends ClusterStratiAssigner<I, D> {
+public class KMeansStratiAssigner<Y, I extends INumericFeatureInstance & ILabeledInstance<Y> & Clusterable, D extends INumericFeatureSupervisedDataset<Y, I>> extends ClusterStratiAssigner<Y, I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(KMeansStratiAssigner.class);
+
 	/**
 	 * Constructor for KMeansStratiAssigner.
 	 *

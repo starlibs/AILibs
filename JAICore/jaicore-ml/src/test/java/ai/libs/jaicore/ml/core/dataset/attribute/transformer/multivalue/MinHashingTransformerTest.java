@@ -10,7 +10,7 @@ import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttribute
 import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.transformer.multivalue.MinHashingTransformer;
+import ai.libs.jaicore.ml.core.transformer.attribute.multivalue.MinHashingTransformer;
 
 public class MinHashingTransformerTest {
 	

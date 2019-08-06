@@ -1,6 +1,8 @@
 package ai.libs.jaicore.basic.sets;
 
-public class ElementDecorator<E> {
+import org.api4.java.common.attributedobjects.IElementDecorator;
+
+public class ElementDecorator<E> implements IElementDecorator<E> {
 	private final E element;
 
 	public ElementDecorator(final E element) {

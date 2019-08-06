@@ -4,15 +4,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
+import org.api4.java.ai.ml.dataset.supervised.classification.INumericFeatureSingleLabelClassificationInstance;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
 import ai.libs.jaicore.ml.dataset.numeric.ArffToNumericDatasetDeserializer;
-import ai.libs.jaicore.ml.dataset.numeric.NumericDataset;
 
 public class WekaClassifierTest {
 
@@ -21,15 +21,10 @@ public class WekaClassifierTest {
 		WekaClassifier classifier = new WekaClassifier("weka.classifiers.trees.RandomForest", new String[] {});
 		KVStore s = new KVStore();
 		long timestampStart = System.currentTimeMillis();
-		NumericDataset dataset = new ArffToNumericDatasetDeserializer().deserializeDataset(new File("testrsc/dataset/arff/numeric_only_with_classindex.arff"));
+		INumericFeatureSupervisedDataset<String, INumericFeatureSingleLabelClassificationInstance> dataset = new ArffToNumericDatasetDeserializer().deserializeDataset(new File("testrsc/dataset/arff/numeric_only_with_classindex.arff"));
 		System.out.println((System.currentTimeMillis() - timestampStart));
 
-		Double[] targets = new Double[dataset.getY().length];
-		IntStream.range(0, dataset.getY().length).forEach(x -> {
-			targets[x] = dataset.getY()[x][0];
-		});
-
-		classifier.fit(dataset.getX(), targets);
+		classifier.fit(dataset);
 		Double[] yHat = classifier.predict(dataset.getX());
 
 		System.out.println(Arrays.toString(yHat));

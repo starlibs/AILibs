@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.ai.ml.algorithm.PredictionException;
+import org.api4.java.ai.ml.learner.predict.PredictionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,6 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 	 */
 	private RandomForest finalClf;
 
-
 	/**
 	 * Number of total classes used within training.
 	 */
@@ -77,7 +76,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 	 *            Seed used for randomized operations
 	 */
 	public TimeSeriesBagOfFeaturesClassifier(final int seed) {
-		this (seed, 10, 10, 0.1d, 5, false);
+		this(seed, 10, 10, 0.1d, 5, false);
 	}
 
 	/**
@@ -97,7 +96,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 	 *            The minimal interval length used for the interval generation
 	 */
 	public TimeSeriesBagOfFeaturesClassifier(final int seed, final int numBins, final int numFolds, final double zProp, final int minIntervalLength) {
-		this (seed, numBins, numFolds, zProp, minIntervalLength, false);
+		this(seed, numBins, numFolds, zProp, minIntervalLength, false);
 	}
 
 	/**

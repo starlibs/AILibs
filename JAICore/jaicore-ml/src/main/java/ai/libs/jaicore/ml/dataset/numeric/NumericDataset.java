@@ -1,158 +1,373 @@
 package ai.libs.jaicore.ml.dataset.numeric;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
-import java.util.PriorityQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.dataset.IAttribute;
+import org.api4.java.ai.ml.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.dataset.IDataSource;
+import org.api4.java.ai.ml.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
+import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedInstance;
 
-public class NumericDataset implements Iterable<Pair<double[], double[]>> {
+public class NumericDataset<Y> implements INumericFeatureSupervisedDataset<Y, INumericFeatureSupervisedInstance<Y>> {
+
+	class NumericDatasetInstance implements INumericFeatureSupervisedInstance<Y> {
+
+		private int rowIndex;
+
+		private NumericDatasetInstance(final int rowIndex) {
+			this.rowIndex = rowIndex;
+		}
+
+		@Override
+		public Double get(final int pos) {
+			return NumericDataset.this.xMatrix.get(this.rowIndex)[pos];
+		}
+
+		@Override
+		public int getNumFeatures() {
+			return NumericDataset.this.xMatrix.get(this.rowIndex).length;
+		}
+
+		@Override
+		public Iterator<Double> iterator() {
+			return Arrays.stream(NumericDataset.this.xMatrix.get(this.rowIndex)).iterator();
+		}
+
+		@Override
+		public Y getLabel() {
+			return NumericDataset.this.yMatrix.get(this.rowIndex);
+		}
+
+		@Override
+		public double[] toDoubleVector() {
+			return NumericDataset.this.xMatrix.get(this.rowIndex);
+		}
+
+	}
+
+	class InstanceIterator implements Iterator<INumericFeatureSupervisedInstance<Y>>, ListIterator<INumericFeatureSupervisedInstance<Y>> {
+
+		private int nextIndex = 0;
+		private int lastReturnedIndex = -1;
+
+		private InstanceIterator() {
+			// intentionally left blank
+		}
+
+		private InstanceIterator(final int startIndex) {
+			this.nextIndex = startIndex;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return this.nextIndex < NumericDataset.this.xMatrix.size();
+		}
+
+		@Override
+		public INumericFeatureSupervisedInstance<Y> next() {
+			return new NumericDatasetInstance(this.nextIndex++);
+		}
+
+		@Override
+		public INumericFeatureSupervisedInstance<Y> previous() {
+			return new NumericDatasetInstance((this.nextIndex--) - 2);
+		}
+
+		@Override
+		public void add(final INumericFeatureSupervisedInstance<Y> arg0) {
+			NumericDataset.this.add(arg0);
+		}
+
+		@Override
+		public boolean hasPrevious() {
+			return this.nextIndex > 0;
+		}
+
+		@Override
+		public int nextIndex() {
+			return this.nextIndex;
+		}
+
+		@Override
+		public int previousIndex() {
+			return this.nextIndex - 2;
+		}
+
+		@Override
+		public void set(final INumericFeatureSupervisedInstance<Y> arg0) {
+			NumericDataset.this.set(this.nextIndex - 1, arg0);
+		}
+
+		@Override
+		public void remove() {
+			if (this.lastReturnedIndex < 0) {
+				throw new NoSuchElementException("No element to remove.");
+			}
+		}
+	}
 
 	private static final int DEFAULT_CAPACITY = 1;
-	private static final int ROW_EXTENSION = 1;
 
 	private final String relationName;
-	private final List<IAttribute> instanceAttributes;
-	private final List<IAttribute> targetAttributes;
+	private final List<IAttributeType> instanceAttributes;
+	private final List<IAttributeType> targetAttributes;
 
-	private double[][] xMatrix;
-	private double[][] yMatrix;
-	private int size;
+	private ArrayList<double[]> xMatrix;
+	private ArrayList<Y> yMatrix;
 
-	private PriorityQueue<Integer> queue = new PriorityQueue<>();
-
-	public NumericDataset(final String relationName, final List<IAttribute> instanceAttributes, final List<IAttribute> targetAttributes) {
+	public NumericDataset(final String relationName, final List<IAttributeType> instanceAttributes, final List<IAttributeType> targetAttributes) {
 		this(relationName, instanceAttributes, targetAttributes, DEFAULT_CAPACITY);
 	}
 
-	public NumericDataset(final String relationName, final List<IAttribute> instanceAttributes, final List<IAttribute> targetAttributes, final int capacity) {
+	public NumericDataset(final String relationName, final List<IAttributeType> instanceAttributes, final List<IAttributeType> targetAttributes, final int capacity) {
 		this.relationName = relationName;
 		this.instanceAttributes = new LinkedList<>(instanceAttributes);
 		this.targetAttributes = new LinkedList<>(targetAttributes);
-		this.xMatrix = new double[capacity][];
-		this.yMatrix = new double[capacity][];
-		this.queue.offer(0);
-		this.size = 0;
+		this.xMatrix = new ArrayList<>(capacity);
+		this.yMatrix = new ArrayList<>(capacity);
 	}
 
-	public NumericDataset(final NumericDataset other) {
+	public NumericDataset(final NumericDataset<Y> other) {
 		this.relationName = other.relationName;
 		this.instanceAttributes = new LinkedList<>(other.instanceAttributes);
 		this.targetAttributes = new LinkedList<>(other.targetAttributes);
-		this.xMatrix = Arrays.copyOf(other.xMatrix, other.xMatrix.length);
-		this.yMatrix = Arrays.copyOf(other.yMatrix, other.yMatrix.length);
-		this.size = other.size;
-		other.queue.stream().forEach(this.queue::offer);
-	}
-
-	public double[][] getX() {
-		return this.xMatrix;
-	}
-
-	public double[][] getY() {
-		return this.yMatrix;
-	}
-
-	public void addInstance(final double[] x, final double[] y) {
-		Integer indexToInsert = this.queue.poll();
-		if (indexToInsert == null) {
-			throw new IllegalStateException("There was no next index for an instance to be inserted?!");
-		}
-		if (this.queue.isEmpty()) {
-			this.queue.offer(indexToInsert + 1);
-		}
-
-		System.out.println(indexToInsert + " " + x.length);
-		if (indexToInsert >= this.xMatrix.length) {
-			this.xMatrix = Arrays.copyOf(this.xMatrix, this.xMatrix.length + ROW_EXTENSION);
-			this.yMatrix = Arrays.copyOf(this.yMatrix, this.yMatrix.length + ROW_EXTENSION);
-		}
-
-		this.xMatrix[indexToInsert] = x;
-		this.yMatrix[indexToInsert] = y;
-		this.size++;
-	}
-
-	public Pair<double[], double[]> getInstance(final int index) {
-		return new Pair<>(this.xMatrix[index], this.yMatrix[index]);
+		this.xMatrix = new ArrayList<>(other.xMatrix.size());
+		other.xMatrix.stream().forEach(x -> this.xMatrix.add(Arrays.copyOf(x, x.length)));
+		this.yMatrix = new ArrayList<>(other.yMatrix);
 	}
 
 	@Override
-	public Iterator<Pair<double[], double[]>> iterator() {
-		return new NumericDatasetIterator();
+	public boolean add(final INumericFeatureSupervisedInstance<Y> instance) {
+		this.xMatrix.add(instance.toDoubleVector());
+		this.yMatrix.add(instance.getLabel());
+		return true;
+	}
+
+	public void add(final double[] x, final Y y) {
+		this.xMatrix.add(x);
+		this.yMatrix.add(y);
+	}
+
+	public NumericDatasetInstance getInstance(final int index) {
+		return new NumericDatasetInstance(index);
 	}
 
 	public boolean removeInstance(final int index) {
-		if (index < 0 || index >= this.xMatrix.length) {
+		if (index < 0 || index >= this.xMatrix.size()) {
 			throw new NoSuchElementException("There is no such element to be removed. Invalid index (" + index + ") given.");
 		}
 
-		if (this.xMatrix[index] != null || this.yMatrix[index] != null) {
-			this.xMatrix[index] = null;
-			this.yMatrix[index] = null;
-			this.queue.offer(index);
-			this.size--;
-			return true;
-		} else {
-			return false;
-		}
+		this.xMatrix.remove(index);
+		this.yMatrix.remove(index);
+		return true;
 	}
 
 	public String getRelationName() {
 		return this.relationName;
 	}
 
-	public List<IAttribute> getInstanceAttributes() {
+	@Override
+	public int size() {
+		return this.xMatrix.size();
+	}
+
+	@Override
+	public List<IAttributeType> getFeatureTypes() {
 		return new LinkedList<>(this.instanceAttributes);
 	}
 
-	public List<IAttribute> getTargetAttributes() {
+	@Override
+	public int getNumFeatures() {
+		return this.instanceAttributes.size();
+	}
+
+	@Override
+	public List<IAttributeType> getLabelTypes() {
 		return new LinkedList<>(this.targetAttributes);
 	}
 
-	public int size() {
-		return this.size;
+	@Override
+	public int getNumLabels() {
+		return this.targetAttributes.size();
 	}
 
-	public class NumericDatasetIterator implements Iterator<Pair<double[], double[]>> {
-		private int currentIndex;
-		private List<Integer> emptySlotIndices;
+	@Override
+	public IDataSource<Double, INumericFeatureSupervisedInstance<Y>> createEmptyCopy() throws DatasetCreationException, InterruptedException {
+		return new NumericDataset<>(this);
+	}
 
-		private NumericDatasetIterator() {
-			this.currentIndex = 0;
-			this.emptySlotIndices = new LinkedList<>(NumericDataset.this.queue);
+	@Override
+	public Iterator<INumericFeatureSupervisedInstance<Y>> iterator() {
+		return new InstanceIterator();
+	}
+
+	@Override
+	public void add(final int index, final INumericFeatureSupervisedInstance<Y> element) {
+		this.xMatrix.add(index, element.toDoubleVector());
+		this.yMatrix.add(index, element.getLabel());
+	}
+
+	@Override
+	public boolean addAll(final Collection<? extends INumericFeatureSupervisedInstance<Y>> c) {
+		c.stream().forEach(this::add);
+		return true;
+	}
+
+	@Override
+	public boolean addAll(final int index, final Collection<? extends INumericFeatureSupervisedInstance<Y>> c) {
+		AtomicInteger indexCursor = new AtomicInteger(index);
+		c.stream().forEach(x -> this.add(indexCursor.getAndIncrement(), x));
+		return true;
+	}
+
+	@Override
+	public void clear() {
+		this.xMatrix.clear();
+		this.yMatrix.clear();
+	}
+
+	@Override
+	public boolean contains(final Object o) {
+		if (!(o instanceof INumericFeatureSupervisedInstance)) {
+			return false;
 		}
 
-		@Override
-		public boolean hasNext() {
-			while (true) {
-				// the last element of the queue marks the first position in the instance matrix which is still empty
-				// thus, if the current index has reached / exceeded this point, there is no element anymore to iterate over.
-				if (this.currentIndex >= this.emptySlotIndices.get(this.emptySlotIndices.size() - 1)) {
-					return false;
-				}
+		INumericFeatureSupervisedInstance<?> instance = (INumericFeatureSupervisedInstance<?>) o;
+		if (!instance.getLabel().getClass().isInstance(this.get(0).getLabel().getClass())) {
+			return false;
+		}
 
-				// if the empty slot indicies list contains the current index the instance has been removed, thus increment
-				// the counter and try anew.
-				if (this.emptySlotIndices.contains(this.currentIndex)) {
-					this.currentIndex++;
-				} else {
-					return true;
-				}
+		for (INumericFeatureSupervisedInstance<Y> i : this) {
+			if (Arrays.equals(i.toDoubleVector(), instance.toDoubleVector()) && instance.getLabel().equals(i.getLabel())) {
+				return true;
 			}
 		}
 
-		@Override
-		public Pair<double[], double[]> next() {
-			if (!this.hasNext()) {
-				throw new NoSuchElementException("No next element.");
+		return false;
+	}
+
+	@Override
+	public boolean containsAll(final Collection<?> c) {
+		for (Object o : c) {
+			if (!this.contains(o)) {
+				return false;
 			}
-			return new Pair<>(NumericDataset.this.xMatrix[this.currentIndex], NumericDataset.this.yMatrix[this.currentIndex]);
+		}
+		return true;
+	}
+
+	@Override
+	public INumericFeatureSupervisedInstance<Y> get(final int index) {
+		return new NumericDatasetInstance(index);
+	}
+
+	@Override
+	public int indexOf(final Object o) {
+		if (!(o instanceof INumericFeatureSupervisedInstance)) {
+			return -1;
 		}
 
+		INumericFeatureSupervisedInstance<?> instance = (INumericFeatureSupervisedInstance<?>) o;
+		if (!instance.getLabel().getClass().isInstance(this.get(0).getLabel().getClass())) {
+			return -1;
+		}
+
+		for (int i = 0; i < this.size(); i++) {
+			if (Arrays.equals(this.get(i).toDoubleVector(), instance.toDoubleVector()) && instance.getLabel().equals(this.get(i).getLabel())) {
+				return i;
+			}
+		}
+		return -1;
 	}
+
+	@Override
+	public boolean isEmpty() {
+		return this.xMatrix.isEmpty();
+	}
+
+	@Override
+	public int lastIndexOf(final Object o) {
+		if (!(o instanceof INumericFeatureSupervisedInstance)) {
+			return -1;
+		}
+
+		INumericFeatureSupervisedInstance<?> instance = (INumericFeatureSupervisedInstance<?>) o;
+		if (!instance.getLabel().getClass().isInstance(this.get(0).getLabel().getClass())) {
+			return -1;
+		}
+
+		for (int i = this.size() - 1; i > 0; i--) {
+			if (Arrays.equals(this.get(i).toDoubleVector(), instance.toDoubleVector()) && instance.getLabel().equals(this.get(i).getLabel())) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	@Override
+	public ListIterator<INumericFeatureSupervisedInstance<Y>> listIterator() {
+		return null;
+	}
+
+	@Override
+	public ListIterator<INumericFeatureSupervisedInstance<Y>> listIterator(final int index) {
+		return null;
+	}
+
+	@Override
+	public boolean remove(final Object o) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public INumericFeatureSupervisedInstance<Y> remove(final int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean removeAll(final Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean retainAll(final Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public INumericFeatureSupervisedInstance<Y> set(final int index, final INumericFeatureSupervisedInstance<Y> element) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<INumericFeatureSupervisedInstance<Y>> subList(final int fromIndex, final int toIndex) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object[] toArray() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T[] toArray(final T[] a) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

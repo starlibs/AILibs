@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation.lcnet;
 import java.io.IOException;
 
 import org.api4.java.ai.ml.LearningCurve;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.learner.fit.TrainingException;
 
 import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolationMethod;
@@ -34,21 +34,20 @@ public class LCNetExtrapolationMethod implements LearningCurveExtrapolationMetho
 	}
 
 	@Override
-	public LearningCurve extrapolateLearningCurveFromAnchorPoints(final int[] xValues, final double[] yValues, final int dataSetSize)
-			throws InvalidAnchorPointsException {
-		if(this.configurations == null) {
+	public LearningCurve extrapolateLearningCurveFromAnchorPoints(final int[] xValues, final double[] yValues, final int dataSetSize) throws InvalidAnchorPointsException {
+		if (this.configurations == null) {
 			throw new UnsupportedOperationException("Configurations is not allowed to be null");
 		} else {
 			return new PointWiseLearningCurve(dataSetSize, this.configurations, this.identifier);
 		}
 	}
 
-	//It is not clarified yet if this method should be called from this class
+	// It is not clarified yet if this method should be called from this class
 	public void deleteNet() throws IOException {
 		this.lcNet.deleteNet(this.identifier);
 	}
 
-	//It is not clarified yet if this method should be called from this class
+	// It is not clarified yet if this method should be called from this class
 	public void trainNet(final int[] xValues, final double[] yValues, final int dataSetSize, final double[][] configurations) throws TrainingException {
 		this.lcNet.train(xValues, yValues, dataSetSize, configurations, this.identifier);
 	}
