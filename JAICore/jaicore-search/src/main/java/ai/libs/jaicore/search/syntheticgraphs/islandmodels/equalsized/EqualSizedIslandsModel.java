@@ -18,19 +18,14 @@ public class EqualSizedIslandsModel implements IIslandModel {
 
 	@Override
 	public long getIsland(final IPath<ITransparentTreeNode, Integer> path) {
-		long numberOfLeafsOnTheLeft = path.getHead().getNumberOfLeafsStemmingFromLeftRelativesInSameGeneration();
-		if (numberOfLeafsOnTheLeft == 0) {
-			return 0;
-		}
-		return (long)Math.floor(numberOfLeafsOnTheLeft * 1.0 / this.size);
+		long island = path.getHead().getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(this.size);
+		//		System.out.println(path + ": " + island);
+		return island;
 	}
 
 	@Override
 	public long getNumberOfIslands() {
-		if (this.numberOfIslands < 0) {
-			this.numberOfIslands = (long)Math.ceil(this.rootNode.getNumberOfLeafsUnderNode() * 1.0 / this.size);
-		}
-		return this.numberOfIslands;
+		return this.rootNode.getNumberOfSubtreesWithMaxNumberOfNodes(this.size);
 	}
 
 	@Override

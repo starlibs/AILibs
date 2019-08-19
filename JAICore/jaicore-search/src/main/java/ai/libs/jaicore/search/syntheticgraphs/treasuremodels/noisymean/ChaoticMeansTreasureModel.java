@@ -36,8 +36,11 @@ public class ChaoticMeansTreasureModel extends NoisyMeanTreasureModel {
 
 	private void distributeTreasures() {
 		while (this.indicesOfIslands.size() < this.numberOfIslandsWithTreasure) {
-			this.indicesOfIslands.add((long) this.random.nextInt(Math.abs((int)this.getIslandModel().getNumberOfIslands())));
+			long newTreasureIsland = this.random.nextInt(Math.abs((int)this.getIslandModel().getNumberOfIslands()));
+			assert newTreasureIsland >= 0 && newTreasureIsland < this.getIslandModel().getNumberOfIslands();
+			this.indicesOfIslands.add(newTreasureIsland);
 		}
+		System.out.println(this.indicesOfIslands);
 	}
 
 	@Override
@@ -46,7 +49,7 @@ public class ChaoticMeansTreasureModel extends NoisyMeanTreasureModel {
 			this.distributeTreasures();
 		}
 		final Random r1 = new Random(this.random.nextInt() + island); // this randomness includes the random source of the generator
-		return this.means.computeIfAbsent(island, p -> this.indicesOfIslands.contains(p) ? 1 + r1.nextDouble() * 5 : 20 + r1.nextDouble() * 85);
+		return this.means.computeIfAbsent(island, p -> this.isTreasureIsland(p) ? 1 + r1.nextDouble() * 5 : 20 + r1.nextDouble() * 85);
 	}
 
 	public boolean isTreasureIsland(final long island) {

@@ -32,7 +32,8 @@ public abstract class NoisyMeanTreasureModel implements ITreasureModel {
 	@Override
 	public Double evaluate(final IPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
 		this.islandModel.setRootNode(path.getRoot());
-		double mean = this.getMeanOfIsland(this.islandModel.getIsland(path));
+		long island = this.islandModel.getIsland(path);
+		double mean = this.getMeanOfIsland(island);
 		double maxDeviationFactor = mean < 10 ? mean : Math.sqrt(mean);
 		final Random r2 = new Random(path.hashCode());
 		boolean add = r2.nextBoolean();

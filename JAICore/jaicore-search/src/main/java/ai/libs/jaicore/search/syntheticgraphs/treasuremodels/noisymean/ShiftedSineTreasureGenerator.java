@@ -1,5 +1,7 @@
 package ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean;
 
+import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
+
 public class ShiftedSineTreasureGenerator extends ATreasureMeanFunction {
 
 	private final double c; //
@@ -7,8 +9,8 @@ public class ShiftedSineTreasureGenerator extends ATreasureMeanFunction {
 
 	private final double s;
 
-	public ShiftedSineTreasureGenerator(final long totalNumberOfIslands, final long numberOfTreasures, final double c, final double d) {
-		super(totalNumberOfIslands, numberOfTreasures);
+	public ShiftedSineTreasureGenerator(final IIslandModel islandModel, final long numberOfTreasures, final double c, final double d) {
+		super(islandModel, numberOfTreasures);
 		this.c = c;
 		this.d = d;
 

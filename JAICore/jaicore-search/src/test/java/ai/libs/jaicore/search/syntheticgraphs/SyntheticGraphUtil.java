@@ -18,6 +18,8 @@ public class SyntheticGraphUtil {
 
 	public static List<Pair<Integer, Double>> getScoresWithDepths(final ISyntheticTreasureIslandProblem problem) {
 		DepthFirstSearch<ITransparentTreeNode, Integer> dfs = new DepthFirstSearch<>(problem);
+
+
 		List<Pair<Integer,Double>> scores = new LinkedList<>();
 		while (dfs.hasNext()) {
 			try {

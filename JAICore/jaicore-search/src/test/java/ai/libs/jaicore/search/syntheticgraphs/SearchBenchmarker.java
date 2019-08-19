@@ -49,7 +49,8 @@ public class SearchBenchmarker implements IExperimentSetEvaluator {
 		int maxiter = Math.min(treasureNodes < 1000 ? treasureNodes : (int)(treasureNodes * 0.5), Integer.parseInt(experiment.get("maxiter")));
 
 		/* create graph search input */
-		NoisyMeanTreasureModel treasureGenerator = this.getTreasureGenerator(experiment.get("function"), numberOfIslands, numberOfIslandsWithTreasure);
+		IIslandModel islandModel = new EqualSizedIslandsModel(numberOfIslands);
+		NoisyMeanTreasureModel treasureGenerator = this.getTreasureGenerator(experiment.get("function"), islandModel, numberOfIslandsWithTreasure);
 		BalancedGraphSearchWithPathEvaluationsProblem input = new BalancedGraphSearchWithPathEvaluationsProblem(branchingFactor, depth, treasureGenerator);
 
 		/* get algorithm */
@@ -81,11 +82,10 @@ public class SearchBenchmarker implements IExperimentSetEvaluator {
 		processor.processResults(result);
 	}
 
-	public NoisyMeanTreasureModel getTreasureGenerator(final String function, final int numberOfIslands, final int numberOfTreasures) {
+	public NoisyMeanTreasureModel getTreasureGenerator(final String function, final IIslandModel islandModel, final int numberOfTreasures) {
 		switch (function.toLowerCase()) {
 		case "sine":
-			ShiftedSineTreasureGenerator linkFuction = new ShiftedSineTreasureGenerator(numberOfIslands, numberOfTreasures, 0.1, 0.5);
-			IIslandModel islandModel = new EqualSizedIslandsModel(10);
+			ShiftedSineTreasureGenerator linkFuction = new ShiftedSineTreasureGenerator(islandModel, numberOfTreasures, 0.1, 0.5);
 			LinkedTreasureIslandPathCostGenerator treasureGenerator = new LinkedTreasureIslandPathCostGenerator(islandModel, linkFuction);
 			return treasureGenerator;
 		}

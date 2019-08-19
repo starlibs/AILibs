@@ -8,6 +8,11 @@ public interface ITransparentTreeNode {
 
 	public long getNumberOfRightRelativesInSameGeneration();
 
+	public long getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(long maxNumberOfNodes);
+	public long getNumberOfSubtreesWithMaxNumberOfNodes(long maxNumberOfNodes);
+
+	public long getNumberOfLeafsPriorToNodeViaDFS();
+
 	public long getNumberOfLeafsStemmingFromLeftRelativesInSameGeneration(); // siblings that are leafs should count as 1
 
 	public long getNumberOfLeafsUnderNode();
