@@ -123,8 +123,8 @@ allprojects {
 			properties["sonar.sourceEncoding"] = project.compileJava.options.encoding
 			properties["sonar.java.source"] = project.sourceCompatibility
 			properties["sonar.java.target"] = project.targetCompatibility
-			properties["sonar.java.binaries"] = sourceSets.main.output.classesDir
-			properties["sonar.java.test.binaries"] = sourceSets.test.output.classesDir
+			properties["sonar.java.binaries"] = sourceSets.main.output.getClassesDirs
+			properties["sonar.java.test.binaries"] = sourceSets.test.output.getClassesDirs
 		}
 	}
 
