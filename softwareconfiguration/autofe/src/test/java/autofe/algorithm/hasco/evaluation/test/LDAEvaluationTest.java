@@ -31,7 +31,7 @@ public class LDAEvaluationTest {
         /* load dataset and create a train-test-split */
         OpenmlConnector connector = new OpenmlConnector();
         DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
-        File file = ds.getDataset(DataSetUtils.API_KEY);
+		File file = connector.datasetGet(ds);
         Instances data = new Instances(new BufferedReader(new FileReader(file)));
         data.setClassIndex(data.numAttributes() - 1);
         List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, 42, .05f);
@@ -65,7 +65,7 @@ public class LDAEvaluationTest {
         /* load dataset and create a train-test-split */
         OpenmlConnector connector = new OpenmlConnector();
         DataSetDescription ds = connector.dataGet(DataSetUtils.SEGMENT_ID);
-        File file = ds.getDataset(DataSetUtils.API_KEY);
+		File file = connector.datasetGet(ds);
         Instances data = new Instances(new BufferedReader(new FileReader(file)));
         data.setClassIndex(data.numAttributes() - 1);
         List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, 42, .05f);

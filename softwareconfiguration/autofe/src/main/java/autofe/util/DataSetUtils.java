@@ -414,7 +414,7 @@ public final class DataSetUtils {
 	public static DataSet getDataSetByID(final int datasetID) throws Exception {
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(datasetID);
-		File file = ds.getDataset(API_KEY);
+		File file = connector.datasetGet(ds);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 

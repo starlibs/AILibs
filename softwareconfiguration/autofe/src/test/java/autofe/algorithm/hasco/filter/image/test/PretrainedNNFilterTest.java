@@ -36,7 +36,7 @@ public class PretrainedNNFilterTest {
         /* load dataset and create a train-test-split */
         OpenmlConnector connector = new OpenmlConnector();
         DataSetDescription ds = connector.dataGet(DataSetUtils.MNIST_ID);
-        File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		File file = connector.datasetGet(ds);
         Instances data = new Instances(new BufferedReader(new FileReader(file)));
         data.setClassIndex(data.numAttributes() - 1);
         List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .02f);
@@ -73,7 +73,7 @@ public class PretrainedNNFilterTest {
         /* load dataset and create a train-test-split */
         OpenmlConnector connector = new OpenmlConnector();
         DataSetDescription ds = connector.dataGet(DataSetUtils.MNIST_ID);
-        File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		File file = connector.datasetGet(ds);
         Instances data = new Instances(new BufferedReader(new FileReader(file)));
         data.setClassIndex(data.numAttributes() - 1);
         List<Instances> split = WekaUtil.getStratifiedSplit(data, 42, .25f);

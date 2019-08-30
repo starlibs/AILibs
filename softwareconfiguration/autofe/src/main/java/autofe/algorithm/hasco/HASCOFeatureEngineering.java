@@ -338,7 +338,7 @@ public class HASCOFeatureEngineering implements CapabilitiesHandler, OptionHandl
 		/* load image dataset and create a train-test-split */
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(dataset);
-		File file = ds.getDataset(DataSetUtils.API_KEY);
+		File file = connector.datasetGet(ds);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 
