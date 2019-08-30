@@ -19,17 +19,20 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 
-
 	// OWL API
 	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
+	
 	// TreeMiner
 	compile 'com.github.helegraf:TreeMiner:ed1071c4ef'
     compile 'com.github.helegraf:data-handling:bd4f875ad5'
 	
+	// https://mvnrepository.com/artifact/commons-cli/commons-cli
+	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+
 	// linear algebra
 	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta2'
 	compile group: 'org.nd4j', name: 'nd4j-api', version: '1.0.0-beta2'
-	
+
 	// gradient descent (but forbid that the guy uses his log4j-stuff, which we will bride to slf4j)
 	compile ('de.jungblut.common:thomasjungblut-common:1.1') {
 	  exclude group: 'log4j'
@@ -38,9 +41,7 @@ dependencies {
 	  exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
 	  exclude group: 'commons-cli'
 	}
-	
-	// https://mvnrepository.com/artifact/commons-cli/commons-cli
-	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
+
 
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
