@@ -31,7 +31,7 @@ public class MetaMinerExample {
 		logger.info("Load data.");
 		OpenmlConnector connector = new OpenmlConnector();
 		DataSetDescription ds = connector.dataGet(40984);
-		File file = ds.getDataset("4350e421cdc16404033ef1812ea38c01");
+		File file = connector.datasetGet(ds);
 		Instances data = new Instances(new BufferedReader(new FileReader(file)));
 		data.setClassIndex(data.numAttributes() - 1);
 		List<Instances> split = WekaUtil.getStratifiedSplit(data,0, .7f);

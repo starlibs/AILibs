@@ -58,7 +58,11 @@ public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>
 	}
 
 	public void setPlanningGraphGeneratorDeriver(final IHierarchicalPlanningToGraphSearchReduction<N, A, ? super CEOCIPSTNPlanningProblem, ? extends IPlan, ? extends GraphSearchInput<N,A>, ? super SearchGraphPath<N,A>> planningGraphGeneratorDeriver) {
-		this.planningGraphGeneratorDeriver = (planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) ? (IHASCOPlanningReduction<N, A>)planningGraphGeneratorDeriver : new DefaultHASCOPlanningReduction<>(planningGraphGeneratorDeriver);
+		if(planningGraphGeneratorDeriver instanceof IHASCOPlanningReduction) {
+			this.planningGraphGeneratorDeriver = (IHASCOPlanningReduction<N, A>) planningGraphGeneratorDeriver;
+		} else {
+			this.planningGraphGeneratorDeriver = new DefaultHASCOPlanningReduction<N,A>(planningGraphGeneratorDeriver);
+		}
 	}
 
 	public IOptimalPathInORGraphSearchFactory<S, N, A, V> getSearchFactory() {

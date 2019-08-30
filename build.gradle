@@ -42,7 +42,7 @@ allprojects {
 
 	//Project properties
 	project.group = 'ai.libs'
-	project.version = '0.1.5'
+	project.version = '0.1.6'
 	
 	ext {
 	    ossrhUsername = project.hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
@@ -75,7 +75,6 @@ allprojects {
 		maven { url "https://jitpack.io" }
 		maven { url "http://clojars.org/repo/" }
 		maven { url "https://plugins.gradle.org/m2/" }
-		maven { url "https://nexus.cs.upb.de/repository/maven-releases/" }
 		flatDir {
 			dirs 'lib'
 		}

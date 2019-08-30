@@ -84,10 +84,11 @@ public class WEKADyadRankedNodeQueueConfig extends ADyadRankedNodeQueueConfig<TF
 	 *
 	 * @param data
 	 *            the data to use
+	 * @throws Exception 
 	 */
-	public void setData(final Instances data) {
+	public void setData(final Instances data) throws Exception {
 		this.logger.trace("Setting data to instances of size {}", data.size());
-		this.contextCharacterization = this.datasetCharacterizer.characterize(data).entrySet().stream()
+		this.contextCharacterization = this.datasetCharacterizer.characterizeAll(data).entrySet().stream()
 				.mapToDouble(Map.Entry::getValue).toArray();
 	}
 

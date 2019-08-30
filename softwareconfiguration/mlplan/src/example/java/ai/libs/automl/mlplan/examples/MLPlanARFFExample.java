@@ -56,7 +56,7 @@ public class MLPlanARFFExample {
 		builder.withNumCpus(2);
 
 		MLPlan mlplan = new MLPlan(builder, split.get(0));
-		mlplan.setPortionOfDataForPhase2(0f);
+		mlplan.setPortionOfDataForPhase2(.3f);
 		mlplan.setLoggerName("mlplan");
 
 		if (ACTIVATE_VISUALIZATION) {

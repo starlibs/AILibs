@@ -47,7 +47,7 @@ public class SamplingAlgorithmTestProblemSet<L> extends AAlgorithmTestProblemSet
 		OpenmlConnector client = new OpenmlConnector();
 		try {
 			DataSetDescription description = client.dataGet(id);
-			File file = description.getDataset(OPENML_API_KEY);
+			File file = client.datasetGet(description);
 			DataSource source = new DataSource(file.getCanonicalPath());
 			dataset = source.getDataSet();
 			dataset.setClassIndex(dataset.numAttributes() - 1);

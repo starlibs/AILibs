@@ -45,7 +45,7 @@ public class LatexDatasetTableGenerator {
 		OpenmlConnector client = new OpenmlConnector();
 		for (int id : datasetIds) {
 			DataSetDescription description = client.dataGet(id);
-			File file = description.getDataset("key");
+			File file = client.datasetGet(description);
 			this.datasets.add(new DataSource(file.getCanonicalPath()));
 		}
 	}

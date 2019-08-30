@@ -32,7 +32,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
 		DataSetDescription description = client.dataGet(42);
-		File file = description.getDataset("4350e421cdc16404033ef1812ea38c01");
+		File file = client.datasetGet(description);
 		DataSource source = new DataSource(file.getCanonicalPath());
 		dataset = source.getDataSet();
 		dataset.setClassIndex(dataset.numAttributes() - 1);

@@ -68,7 +68,7 @@ public class OpenMLHelper {
 		OpenmlConnector client = new OpenmlConnector();
 		try {
 			DataSetDescription description = client.dataGet(dataId);
-			File file = description.getDataset(OpenMLHelper.apiKey);
+			File file = client.datasetGet(description);
 			// Instances convert
 			return new DataSource(file.getCanonicalPath());
 		} catch (Exception e) {

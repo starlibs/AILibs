@@ -14,7 +14,6 @@ import org.openml.webapplication.fantail.dc.statistical.Cardinality;
 import org.openml.webapplication.fantail.dc.statistical.NominalAttDistinctValues;
 import org.openml.webapplication.fantail.dc.statistical.SimpleMetaFeatures;
 import org.openml.webapplication.fantail.dc.statistical.Statistical;
-import org.openml.webapplication.features.GlobalMetafeatures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,7 +90,7 @@ public class GlobalCharacterizer extends Characterizer {
 			try {
 				watch.reset();
 				watch.start();
-				metaFeatures.putAll(characterizer.characterize(instances));
+				metaFeatures.putAll(characterizer.characterizeAll(instances));
 				watch.stop();
 				computationTimes.put(characterizer.toString(), (double) watch.getTime());
 			} catch (Exception e) {

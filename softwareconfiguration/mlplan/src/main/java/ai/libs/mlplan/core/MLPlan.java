@@ -222,7 +222,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 				}
 				long endBuildTime = System.currentTimeMillis();
 				this.logger.info("Selected model has been built on entire dataset. Build time of chosen model was {}ms. Total construction time was {}ms. The chosen classifier is: {}", endBuildTime - startBuildTime,
-						endBuildTime - startOptimizationTime, this.selectedClassifier);
+						endBuildTime - startOptimizationTime, this.getComponentInstanceOfSelectedClassifier());
 			} else {
 				this.logger.info("Selected model has not been built, since model building has been disabled. Total construction time was {}ms.", System.currentTimeMillis() - startOptimizationTime);
 			}

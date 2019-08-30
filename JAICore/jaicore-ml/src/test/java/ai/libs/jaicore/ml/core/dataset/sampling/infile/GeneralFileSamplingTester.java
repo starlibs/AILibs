@@ -144,14 +144,14 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	public File getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		OpenmlConnector client = new OpenmlConnector();
 		DataSetDescription description = client.dataGet(188);
-		File file = description.getDataset(OPENML_API_KEY);
+		File file = client.datasetGet(description);
 		return file;
 	}
 
 	public File getDifficultProblemInputForGeneralTestPurposes() throws Exception {
 		OpenmlConnector client = new OpenmlConnector();
 		DataSetDescription description = client.dataGet(182);
-		File file = description.getDataset(OPENML_API_KEY);
+		File file = client.datasetGet(description);
 		return file;
 	}
 
