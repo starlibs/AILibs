@@ -24,7 +24,7 @@ public class SparseDoubleVectorTest {
 		double[] value1 = { 1, 2 };
 		double[] value2 = { 2, 3 };
 		double[] sum = { 3, 5 };
-		Vector vector = new SparseDoubleVector(value1);
+		IVector vector = new SparseDoubleVector(value1);
 		vector.addVector(value2);
 		assertEquals(vector, new SparseDoubleVector(sum));
 
@@ -38,8 +38,8 @@ public class SparseDoubleVectorTest {
 		double[] value1 = { 1, 2 };
 		double[] value2 = { 2, 3 };
 		double[] sum = { 3, 5 };
-		Vector toAdd = new SparseDoubleVector(value1);
-		Vector vector = new SparseDoubleVector(value2);
+		IVector toAdd = new SparseDoubleVector(value1);
+		IVector vector = new SparseDoubleVector(value2);
 		vector.addVector(toAdd);
 		assertEquals(vector, new SparseDoubleVector(sum));
 	}
@@ -52,8 +52,8 @@ public class SparseDoubleVectorTest {
 		double[] value1 = { 1, 2 };
 		double[] value2 = { 2, 3 };
 		double[] sum = { 3, 5 };
-		Vector vector = new SparseDoubleVector(value1);
-		Vector resultVector = vector.addVectorToCopy(value2);
+		IVector vector = new SparseDoubleVector(value1);
+		IVector resultVector = vector.addVectorToCopy(value2);
 		assertEquals(resultVector, new SparseDoubleVector(sum));
 	}
 
@@ -65,9 +65,9 @@ public class SparseDoubleVectorTest {
 		double[] value1 = { 1, 2 };
 		double[] value2 = { 2, 3 };
 		double[] sum = { 3, 5 };
-		Vector toAdd = new SparseDoubleVector(value1);
-		Vector vector = new SparseDoubleVector(value2);
-		Vector resultVector = vector.addVectorToCopy(toAdd);
+		IVector toAdd = new SparseDoubleVector(value1);
+		IVector vector = new SparseDoubleVector(value2);
+		IVector resultVector = vector.addVectorToCopy(toAdd);
 		assertEquals(resultVector, new SparseDoubleVector(sum));
 	}
 
@@ -79,8 +79,8 @@ public class SparseDoubleVectorTest {
 		double[] value1 = { 1, 2 };
 		double[] value2 = { 2, 3 };
 		double constantToAdd = 1;
-		Vector vector = new SparseDoubleVector(value1);
-		Vector resultVector = vector.addConstantToCopy(constantToAdd);
+		IVector vector = new SparseDoubleVector(value1);
+		IVector resultVector = vector.addConstantToCopy(constantToAdd);
 		assertEquals(resultVector, new SparseDoubleVector(value2));
 	}
 
@@ -92,7 +92,7 @@ public class SparseDoubleVectorTest {
 		double[] value1 = { 1, 2 };
 		double[] value2 = { 2, 3 };
 		double constantToAdd = 1;
-		Vector vector = new SparseDoubleVector(value1);
+		IVector vector = new SparseDoubleVector(value1);
 		vector.addConstant(constantToAdd);
 		assertEquals(vector, new SparseDoubleVector(value2));
 	}
@@ -105,8 +105,8 @@ public class SparseDoubleVectorTest {
 		double[] value1 = { 1, 2 };
 		double[] value2 = { 2, 3 };
 		double[] sum = { 3, 5 };
-		Vector toSubtract = new SparseDoubleVector(value1);
-		Vector vector = new SparseDoubleVector(sum);
+		IVector toSubtract = new SparseDoubleVector(value1);
+		IVector vector = new SparseDoubleVector(sum);
 		vector.subtractVector(toSubtract);
 		assertEquals(vector, new SparseDoubleVector(value2));
 	}
@@ -118,9 +118,9 @@ public class SparseDoubleVectorTest {
 	public void testSubtractVectorWithCopy() {
 		double[] data = { 8, 8 };
 		double[] toSubtractData = { 4, 4 };
-		Vector toSubtract = new SparseDoubleVector(toSubtractData);
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.subtractVectorFromCopy(toSubtract);
+		IVector toSubtract = new SparseDoubleVector(toSubtractData);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.subtractVectorFromCopy(toSubtract);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -132,7 +132,7 @@ public class SparseDoubleVectorTest {
 	public void testSubtractArrayFromVectorWithoutCopy() {
 		double[] data = { 8, 8 };
 		double[] toSubtractData = { 4, 4 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.subtractVector(toSubtractData);
 
 		assertResultVectorIs4(vector);
@@ -145,8 +145,8 @@ public class SparseDoubleVectorTest {
 	public void testSubtractArrayFromVectorWithCopy() {
 		double[] data = { 8, 8 };
 		double[] toSubtractData = { 4, 4 };
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.subtractVectorFromCopy(toSubtractData);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.subtractVectorFromCopy(toSubtractData);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -158,7 +158,7 @@ public class SparseDoubleVectorTest {
 	public void testSubtractConstantWithoutCopy() {
 		double[] data = { 8, 8 };
 		double toSubtract = 4;
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.subtractConstant(toSubtract);
 
 		assertResultVectorIs4(vector);
@@ -171,8 +171,8 @@ public class SparseDoubleVectorTest {
 	public void testSubtractConstantWithCopy() {
 		double[] data = { 8, 8 };
 		double toSubtract = 4;
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.subtractConstantFromCopy(toSubtract);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.subtractConstantFromCopy(toSubtract);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -183,8 +183,8 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseWithoutCopy() {
 		double[] data = { 2, 2 };
-		Vector toMultiply = new SparseDoubleVector(data);
-		Vector vector = new SparseDoubleVector(data);
+		IVector toMultiply = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.multiplyByVectorPairwise(toMultiply);
 
 		assertResultVectorIs4(vector);
@@ -196,9 +196,9 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseWithCopy() {
 		double[] data = { 2, 2 };
-		Vector toMultiply = new SparseDoubleVector(data);
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.multiplyByVectorPairwiseToCopy(toMultiply);
+		IVector toMultiply = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.multiplyByVectorPairwiseToCopy(toMultiply);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -209,7 +209,7 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseFromArrayWithoutCopy() {
 		double[] data = { 2, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.multiplyByVectorPairwise(data);
 
 		assertResultVectorIs4(vector);
@@ -221,8 +221,8 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testMultiplyByVectorPairwiseFromArrayWithCopy() {
 		double[] data = { 2, 2 };
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.multiplyByVectorPairwiseToCopy(data);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.multiplyByVectorPairwiseToCopy(data);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -234,7 +234,7 @@ public class SparseDoubleVectorTest {
 	public void testMultiplyByConstantWithoutCopy() {
 		double[] data = { 2, 2 };
 		double toMultiply = 2;
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.multiplyByConstant(toMultiply);
 
 		assertResultVectorIs4(vector);
@@ -247,8 +247,8 @@ public class SparseDoubleVectorTest {
 	public void testMultiplyByConstantWithCopy() {
 		double[] data = { 2, 2 };
 		double toMultiply = 2;
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.multiplyByConstantToCopy(toMultiply);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.multiplyByConstantToCopy(toMultiply);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -259,10 +259,10 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testDivideByVectorPairwiseWithoutCopy() {
 		double[] toDivideData = { 2, 2 };
-		Vector toDivide = new SparseDoubleVector(toDivideData);
+		IVector toDivide = new SparseDoubleVector(toDivideData);
 
 		double[] data = { 8, 8 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.divideByVectorPairwise(toDivide);
 
 		assertResultVectorIs4(vector);
@@ -274,11 +274,11 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testDivideByVectorPairwiseWithCopy() {
 		double[] toDivideData = { 2, 2 };
-		Vector toDivide = new SparseDoubleVector(toDivideData);
+		IVector toDivide = new SparseDoubleVector(toDivideData);
 
 		double[] data = { 8, 8 };
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.divideByVectorPairwiseToCopy(toDivide);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.divideByVectorPairwiseToCopy(toDivide);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -291,7 +291,7 @@ public class SparseDoubleVectorTest {
 		double[] toDivideData = { 2, 2 };
 
 		double[] data = { 8, 8 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.divideByVectorPairwise(toDivideData);
 
 		assertResultVectorIs4(vector);
@@ -305,8 +305,8 @@ public class SparseDoubleVectorTest {
 		double[] toDivideData = { 2, 2 };
 
 		double[] data = { 8, 8 };
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.divideByVectorPairwiseToCopy(toDivideData);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.divideByVectorPairwiseToCopy(toDivideData);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -318,7 +318,7 @@ public class SparseDoubleVectorTest {
 	public void testDivideByConstantWithoutCopy() {
 		double[] data = { 8, 8 };
 		double toDivide = 2;
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.divideByConstant(toDivide);
 
 		assertResultVectorIs4(vector);
@@ -331,8 +331,8 @@ public class SparseDoubleVectorTest {
 	public void testDivideByConstantWithCopy() {
 		double[] data = { 8, 8 };
 		double toDivide = 2;
-		Vector vector = new SparseDoubleVector(data);
-		Vector resultVector = vector.divideByConstantToCopy(toDivide);
+		IVector vector = new SparseDoubleVector(data);
+		IVector resultVector = vector.divideByConstantToCopy(toDivide);
 
 		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
@@ -344,7 +344,7 @@ public class SparseDoubleVectorTest {
 	public void testGetValue() {
 		double expectedValue = 2;
 		double[] data = { 2, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		assertEquals(expectedValue, vector.getValue(0), DOUBLE_COMPARISON_DELTA);
 	}
 
@@ -354,9 +354,9 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testSetValue() {
 		double[] expectedVectorData = { 4, 2 };
-		Vector expectedVector = new SparseDoubleVector(expectedVectorData);
+		IVector expectedVector = new SparseDoubleVector(expectedVectorData);
 		double[] data = { 2, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.setValue(0, 4);
 		assertEquals(expectedVector, vector);
 	}
@@ -367,10 +367,10 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testDotProduct() {
 		double[] vectorData1 = { 4, 1 };
-		Vector vector1 = new SparseDoubleVector(vectorData1);
+		IVector vector1 = new SparseDoubleVector(vectorData1);
 
 		double[] vectorData2 = { 2, 2 };
-		Vector vector2 = new SparseDoubleVector(vectorData2);
+		IVector vector2 = new SparseDoubleVector(vectorData2);
 
 		assertEquals(10, vector1.dotProduct(vector2), DOUBLE_COMPARISON_DELTA);
 	}
@@ -381,7 +381,7 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testSum() {
 		double[] data = { 4, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 
 		assertEquals(6, vector.sum(), DOUBLE_COMPARISON_DELTA);
 	}
@@ -392,7 +392,7 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testMean() {
 		double[] data = { 4, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 
 		assertEquals(3, vector.mean(), DOUBLE_COMPARISON_DELTA);
 	}
@@ -403,7 +403,7 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testStandardDeviation() {
 		double[] data = { 4, 2, 1, 3 };
-		Vector vector = new DenseDoubleVector(data);
+		IVector vector = new DenseDoubleVector(data);
 		assertEquals(1.118, vector.standardDeviation(), DOUBLE_COMPARISON_DELTA);
 	}
 
@@ -413,9 +413,9 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testDuplicate() {
 		double[] data = { 4, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 
-		Vector vectorCopy = vector.duplicate();
+		IVector vectorCopy = vector.duplicate();
 		vectorCopy.addConstant(2);
 
 		assertNotEquals(vector, vectorCopy);
@@ -427,10 +427,10 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testZeroAllDimensions() {
 		double[] data = { 4, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 		vector.zeroAllDimensions();
 
-		Vector expectedVector = new SparseDoubleVector(2);
+		IVector expectedVector = new SparseDoubleVector(2);
 
 		assertEquals(expectedVector, vector);
 	}
@@ -441,7 +441,7 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testEuclideanNorm() {
 		double[] data = { 4, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 
 		double expectedEuclideanNorm = Math.sqrt(4 * 4 + 2 * 2);
 
@@ -454,7 +454,7 @@ public class SparseDoubleVectorTest {
 	@Test
 	public void testAsArray() {
 		double[] data = { 4, 2 };
-		Vector vector = new SparseDoubleVector(data);
+		IVector vector = new SparseDoubleVector(data);
 
 		assertArrayEquals(data, vector.asArray(), DOUBLE_COMPARISON_DELTA);
 	}
@@ -465,9 +465,9 @@ public class SparseDoubleVectorTest {
 	 * @param resultVector
 	 *            The vector to be tested.
 	 */
-	private void assertResultVectorIs4(Vector resultVector) {
+	private void assertResultVectorIs4(IVector resultVector) {
 		double[] expectedVectorValues = { 4, 4 };
-		Vector expectedVector = new SparseDoubleVector(expectedVectorValues);
+		IVector expectedVector = new SparseDoubleVector(expectedVectorValues);
 		// assert that the operation yields the correct result
 		assertEquals(expectedVector, resultVector);
 	}
@@ -482,7 +482,7 @@ public class SparseDoubleVectorTest {
 	 * @param resultVector
 	 *            The vector to be checked to be (4,4).
 	 */
-	private void assertResultVectorIs4AndCalleeIsUnchanged(double[] expectedCalleeData, Vector callee, Vector resultVector) {
+	private void assertResultVectorIs4AndCalleeIsUnchanged(double[] expectedCalleeData, IVector callee, IVector resultVector) {
 		assertResultVectorIs4(resultVector);
 		// assert that the original vector did not change
 		assertArrayEquals(expectedCalleeData, callee.asArray(), DOUBLE_COMPARISON_DELTA);

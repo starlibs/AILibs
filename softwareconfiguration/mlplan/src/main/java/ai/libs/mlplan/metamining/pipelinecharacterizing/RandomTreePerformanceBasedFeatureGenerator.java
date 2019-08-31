@@ -6,7 +6,7 @@ import java.util.Map;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.Vector;
+import ai.libs.jaicore.math.linearalgebra.IVector;
 import weka.classifiers.trees.RandomTree;
 import weka.classifiers.trees.RandomTree.Tree;
 import weka.core.Instances;
@@ -58,8 +58,8 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 	}
 
 	@Override
-	public Vector predict(final Vector intermediatePipelineRepresentation) {
-		Vector pipelineRepresentation = new DenseDoubleVector(this.nodesIndices.size(), this.nonOccurenceValue);
+	public IVector predict(final IVector intermediatePipelineRepresentation) {
+		IVector pipelineRepresentation = new DenseDoubleVector(this.nodesIndices.size(), this.nonOccurenceValue);
 
 		// Query the RandomTree
 		Tree subTree = this.tree;
@@ -103,7 +103,7 @@ public class RandomTreePerformanceBasedFeatureGenerator extends AWEKAPerformance
 		}
 	}
 
-	private void setSubTreeToValue(final Tree subTree, final double value, final Vector featureRepresentation) {
+	private void setSubTreeToValue(final Tree subTree, final double value, final IVector featureRepresentation) {
 		featureRepresentation.setValue(this.nodesIndices.get(subTree), value);
 
 		if (subTree.getM_Successors() != null) {

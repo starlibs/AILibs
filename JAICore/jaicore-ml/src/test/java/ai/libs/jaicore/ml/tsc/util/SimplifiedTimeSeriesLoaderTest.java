@@ -9,8 +9,10 @@ import java.util.List;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLoadingException;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.core.timeseries.exceptions.TimeSeriesLoadingException;
+import ai.libs.jaicore.ml.core.timeseries.util.ClassMapper;
+import ai.libs.jaicore.ml.core.timeseries.util.SimplifiedTimeSeriesLoader;
 
 /**
  * Unit tests for loading simplified, native Java array using time series
@@ -30,8 +32,8 @@ public class SimplifiedTimeSeriesLoaderTest {
 		final File datasetFile = new File(
 				TSC_DATASET_PATH_PREFIX + "univariate" + File.separator + "Car" + File.separator + "Car_TRAIN.arff");
 
-		final Pair<TimeSeriesDataset, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArff(datasetFile);
-		TimeSeriesDataset result = pairResult.getX();
+		final Pair<TimeSeriesDataset2, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArff(datasetFile);
+		TimeSeriesDataset2 result = pairResult.getX();
 
 		final int expectedNumInstances = 60;
 		final int expectedNumSteps = 577;
@@ -51,9 +53,9 @@ public class SimplifiedTimeSeriesLoaderTest {
 		File datasetFile1 = new File(TSC_DATASET_PATH_PREFIX + "multivariate" + File.separator + "Libras"
 				+ File.separator + "LibrasDimension2_TRAIN.arff");
 
-		final Pair<TimeSeriesDataset, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
+		final Pair<TimeSeriesDataset2, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
 				datasetFile1);
-		TimeSeriesDataset result = pairResult.getX();
+		TimeSeriesDataset2 result = pairResult.getX();
 
 		final int expectedNumInstances = 180;
 		final int expectedNumSteps = 45;
@@ -76,9 +78,9 @@ public class SimplifiedTimeSeriesLoaderTest {
 				+ "multivariate" + File.separator + "FingerMovements" + File.separator
 				+ "FingerMovementsDimension2_TRAIN.arff");
 
-		final Pair<TimeSeriesDataset, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
+		final Pair<TimeSeriesDataset2, ClassMapper> pairResult = SimplifiedTimeSeriesLoader.loadArffs(datasetFile0,
 				datasetFile1);
-		TimeSeriesDataset result = pairResult.getX();
+		TimeSeriesDataset2 result = pairResult.getX();
 
 		final int expectedNumInstances = 316;
 		final int expectedNumSteps = 50;

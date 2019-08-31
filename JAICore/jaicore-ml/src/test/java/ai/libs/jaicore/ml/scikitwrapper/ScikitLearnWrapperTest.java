@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper.ProblemType;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;
@@ -48,7 +48,7 @@ public class ScikitLearnWrapperTest {
 	}
 
 	@Test
-	public void buildAndPredict() throws Exception {
+	public void fitAndPredict() throws Exception {
 		List<String> imports = Arrays.asList("sklearn", "sklearn.ensemble");
 		String constructInstruction = "sklearn.ensemble.RandomForestClassifier(n_estimators=100)";
 		ScikitLearnWrapper slw = new ScikitLearnWrapper(constructInstruction, ScikitLearnWrapper.getImportString(imports), false);
@@ -60,7 +60,7 @@ public class ScikitLearnWrapperTest {
 		System.out.println("Build took: " + (System.currentTimeMillis() - startTrain));
 
 		long startVal = System.currentTimeMillis();
-		assertNotNull(slw.classifyInstances(stratifiedSplit.get(1)));
+		assertNotNull(slw.predict(stratifiedSplit.get(1)));
 		System.out.println("Validation took: " + (System.currentTimeMillis() - startVal));
 	}
 

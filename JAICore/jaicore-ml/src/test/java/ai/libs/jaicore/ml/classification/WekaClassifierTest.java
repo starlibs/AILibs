@@ -3,31 +3,32 @@ package ai.libs.jaicore.ml.classification;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 
-import org.api4.java.ai.ml.dataset.supervised.INumericFeatureSupervisedDataset;
-import org.api4.java.ai.ml.dataset.supervised.classification.INumericFeatureSingleLabelClassificationInstance;
-import org.api4.java.ai.ml.learner.fit.TrainingException;
-import org.api4.java.ai.ml.learner.predict.PredictionException;
+import org.api4.java.ai.ml.core.dataset.supervised.INumericFeatureSupervisedDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.INumericFeatureSupervisedInstance;
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.api4.java.ai.ml.core.learner.algorithm.IPredictionBatch;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
-import ai.libs.jaicore.ml.dataset.numeric.ArffToNumericDatasetDeserializer;
+import ai.libs.jaicore.ml.core.tabular.dataset.ArffToNumericDatasetDeserializer;
+import ai.libs.jaicore.ml.weka.learner.WekaClassifier;
 
 public class WekaClassifierTest {
 
 	@Test
-	public void testFit() throws TrainingException, PredictionException, FileNotFoundException, IOException {
+	public void testFit() throws TrainingException, PredictionException, FileNotFoundException, IOException, InterruptedException {
 		WekaClassifier classifier = new WekaClassifier("weka.classifiers.trees.RandomForest", new String[] {});
 		KVStore s = new KVStore();
 		long timestampStart = System.currentTimeMillis();
-		INumericFeatureSupervisedDataset<String, INumericFeatureSingleLabelClassificationInstance> dataset = new ArffToNumericDatasetDeserializer().deserializeDataset(new File("testrsc/dataset/arff/numeric_only_with_classindex.arff"));
+		INumericFeatureSupervisedDataset<Double, INumericFeatureSupervisedInstance<Double>> dataset = new ArffToNumericDatasetDeserializer().deserializeDataset(new File("testrsc/dataset/arff/numeric_only_with_classindex.arff"));
 		System.out.println((System.currentTimeMillis() - timestampStart));
 
 		classifier.fit(dataset);
-		Double[] yHat = classifier.predict(dataset.getX());
+		IPredictionBatch<Double> yHat = classifier.predict(dataset);
 
-		System.out.println(Arrays.toString(yHat));
+		System.out.println(yHat);
 	}
 
 }

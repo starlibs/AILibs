@@ -8,6 +8,8 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ai.libs.jaicore.ml.core.tabular.dataset.attribute.CategoricalAttribute;
+
 public class NominalAttributeTest {
 
 	private static final String ATTRIBUTE_NAME = "myNominalAttribute";
@@ -16,11 +18,11 @@ public class NominalAttributeTest {
 	private static final String ELEMENT = "c";
 	private static final double ELEMENT_VALUE = 2.0;
 
-	private static NominalAttribute attributeToTest;
+	private static CategoricalAttribute attributeToTest;
 
 	@BeforeClass
 	public static void setup() {
-		attributeToTest = new NominalAttribute(ATTRIBUTE_NAME, VALUES);
+		attributeToTest = new CategoricalAttribute(ATTRIBUTE_NAME, VALUES);
 	}
 
 	@Test

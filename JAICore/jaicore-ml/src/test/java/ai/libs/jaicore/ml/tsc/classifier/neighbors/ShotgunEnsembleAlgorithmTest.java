@@ -11,11 +11,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.neighbors.ShotgunEnsembleClassifier;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.neighbors.ShotgunEnsembleLearnerAlgorithm;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 
 /**
  * Test suite for the
- * {@link ai.libs.jaicore.ml.tsc.classifier.neighbors.ShotgunEnsembleLearnerAlgorithm}
+ * {@link ai.libs.jaicore.ml.core.timeseries.classification.learner.neighbors.ShotgunEnsembleLearnerAlgorithm}
  * implementation.
  *
  * @author fischor
@@ -32,7 +34,7 @@ public class ShotgunEnsembleAlgorithmTest {
 	 * }
 	 * </code> after set up.
 	 */
-	TimeSeriesDataset dataset;
+	TimeSeriesDataset2 dataset;
 
 	ShotgunEnsembleClassifier model;
 
@@ -49,7 +51,7 @@ public class ShotgunEnsembleAlgorithmTest {
 		int[] targets = { 1, 2, 1, 2 };
 		ArrayList<double[][]> values = new ArrayList<>(1);
 		values.add(data);
-		this.dataset = new TimeSeriesDataset(values, targets);
+		this.dataset = new TimeSeriesDataset2(values, targets);
 
 		// Create algorithm
 		this.model = new ShotgunEnsembleClassifier(this.minWindowLength, this.maxWindowLength, this.meanNormalization, 0.5);

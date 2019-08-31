@@ -9,14 +9,14 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.AttributeDiscretizationPolicy;
-import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.stratified.sampling.DiscretizationHelper;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeDiscretizationPolicy;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper;
 
 public class DiscretizationHelperTester {
 
 	private static final int NUMBER_OF_CATEGORIES = 2;
 
-	private DiscretizationHelper<?> discretizationHelper = new DiscretizationHelper<>();
+	private DiscretizationHelper discretizationHelper = new DiscretizationHelper();
 
 	@Test
 	public void testEqualSizePolicyEven() {

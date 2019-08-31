@@ -1,9 +1,10 @@
 package ai.libs.jaicore.ml.tsc.complexity;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.complexity.StretchingComplexity;
+import ai.libs.jaicore.basic.complexity.StretchingComplexity;
 
 /**
  * Test suite for the {@link StretchingComplexity} implementation.

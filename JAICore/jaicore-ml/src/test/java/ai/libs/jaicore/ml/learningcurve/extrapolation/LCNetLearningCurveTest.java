@@ -2,14 +2,14 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 
 import static org.junit.Assert.assertTrue;
 
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import ai.libs.jaicore.ml.learningcurve.extrapolation.InvalidAnchorPointsException;
-import ai.libs.jaicore.ml.learningcurve.extrapolation.lcnet.LCNetExtrapolationMethod;
-import ai.libs.jaicore.ml.learningcurve.extrapolation.lcnet.PointWiseLearningCurve;
+import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.InvalidAnchorPointsException;
+import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lcnet.LCNetExtrapolationMethod;
+import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lcnet.PointWiseLearningCurve;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LCNetLearningCurveTest {
@@ -22,8 +22,7 @@ public class LCNetLearningCurveTest {
 		double[] configurations = { 3, 0 };
 		LCNetExtrapolationMethod lcNetExtrapolationMethod = new LCNetExtrapolationMethod(identifier);
 		lcNetExtrapolationMethod.setConfigurations(configurations);
-		PointWiseLearningCurve learningCurve = (PointWiseLearningCurve) lcNetExtrapolationMethod
-				.extrapolateLearningCurveFromAnchorPoints(null, null, dataSetSize);
+		PointWiseLearningCurve learningCurve = (PointWiseLearningCurve) lcNetExtrapolationMethod.extrapolateLearningCurveFromAnchorPoints(null, null, dataSetSize);
 		double yValue = learningCurve.getCurveValue(xValue);
 		assertTrue(yValue > 0);
 		assertTrue(yValue < 2);

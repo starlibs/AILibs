@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 
 public class WekaMLPlanWekaClassifierTest {

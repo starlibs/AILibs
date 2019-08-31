@@ -1,15 +1,16 @@
 package ai.libs.jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
+
+import org.api4.java.common.metric.IScalarDistance;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.distances.IScalarDistance;
-import ai.libs.jaicore.ml.tsc.distances.WeightedDynamicTimeWarping;
-import ai.libs.jaicore.ml.tsc.util.ScalarDistanceUtil;
+import ai.libs.jaicore.basic.metric.ScalarDistanceUtil;
+import ai.libs.jaicore.basic.metric.WeightedDynamicTimeWarping;
 
 /**
  * Test suite for the
- * {@link ai.libs.jaicore.ml.tsc.distances.WeightedDynamicTimeWarping} implementation.
+ * {@link ai.libs.jaicore.basic.metric.WeightedDynamicTimeWarping} implementation.
  * 
  * @author fischor
  */

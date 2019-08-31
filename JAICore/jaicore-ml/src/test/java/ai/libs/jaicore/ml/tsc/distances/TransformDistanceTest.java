@@ -3,13 +3,17 @@ package ai.libs.jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.api4.java.common.metric.IDistanceMetric;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.filter.transform.ATransformFilter;
-import ai.libs.jaicore.ml.tsc.filter.transform.HilbertTransform;
+import ai.libs.jaicore.basic.metric.DynamicTimeWarping;
+import ai.libs.jaicore.basic.metric.EuclideanDistance;
+import ai.libs.jaicore.basic.metric.TransformDistance;
+import ai.libs.jaicore.basic.transform.vector.ATransformFilter;
+import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
 
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.TransformDistance}
+ * Test suite for the {@link ai.libs.jaicore.basic.metric.TransformDistance}
  * implementation.
  *
  * @author fischor
@@ -45,7 +49,7 @@ public class TransformDistanceTest {
 		double[] timeSeries2 = { 2, 2, 2, 2, 2 }; // transform will give [ -4.166667, -1.666667, 0, 1.666667, 4.166667 ]
 		double alpha = 0.5;
 		ATransformFilter transform = new HilbertTransform();
-		ITimeSeriesDistance euclideanDistance = new EuclideanDistance();
+		IDistanceMetric euclideanDistance = new EuclideanDistance();
 
 		// Expectation.
 		double expectation = Math.cos(alpha) * Math.sqrt(15) + Math.sin(alpha) * 6.79562;

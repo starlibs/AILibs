@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,10 +23,9 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.serialization.HASCOJacksonModule;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.cache.InstructionFailedException;
-import ai.libs.jaicore.ml.cache.InstructionGraph;
-import ai.libs.jaicore.ml.cache.ReproducibleInstances;
-import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
+import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
+import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.Classifier;
@@ -59,7 +59,7 @@ public class ReproducabilityTest {
 	}
 
 	@Test
-	public void testResultReproducibility() throws URISyntaxException, IOException, InstructionFailedException, InterruptedException, ComponentInstantiationFailedException, ObjectEvaluationFailedException {
+	public void testResultReproducibility() throws URISyntaxException, IOException, DatasetTraceInstructionFailedException, InterruptedException, ComponentInstantiationFailedException, ObjectEvaluationFailedException {
 
 		/* define serializations of data and the algorithm */
 		String dataset = "[{\"name\":\"load\",\"instruction\":{\"command\":\"LoadDatasetInstructionForOpenML\",\"apiKey\":\"\",\"id\":\"40983\"},\"inputs\":[]},{\"name\":\"split\",\"instruction\":{\"command\":\"StratifiedSplitSubsetInstruction\",\"seed\": "

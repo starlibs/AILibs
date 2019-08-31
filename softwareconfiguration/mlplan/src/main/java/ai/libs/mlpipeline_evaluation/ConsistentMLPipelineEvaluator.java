@@ -6,11 +6,11 @@ import java.util.Random;
 
 import org.apache.commons.lang.NotImplementedException;
 
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.MonteCarloCrossValidationEvaluator;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Instances;

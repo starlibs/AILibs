@@ -44,7 +44,7 @@ import ai.libs.hasco.optimizingfactory.OptimizingFactoryProblem;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.serialization.UnresolvableRequiredInterfaceException;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;

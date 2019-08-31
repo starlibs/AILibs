@@ -3,28 +3,28 @@ package ai.libs.jaicore.ml.core.dataset;
 import java.io.Serializable;
 import java.util.List;
 
-import org.api4.java.ai.ml.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 
 @SuppressWarnings("serial")
 public class InstanceSchema implements Serializable {
 
-	private final List<IAttributeType> attributeTypeList;
-	private final IAttributeType targetType;
+	private final List<IAttribute> attributeTypeList;
+	private final IAttribute targetType;
 
-	public InstanceSchema(final List<IAttributeType> attributeTypeList, final IAttributeType targetType) {
+	public InstanceSchema(final List<IAttribute> attributeTypeList, final IAttribute targetType) {
 		this.attributeTypeList = attributeTypeList;
 		this.targetType = targetType;
 	}
 
-	public List<IAttributeType> getAttributeTypeList() {
+	public List<IAttribute> getAttributeTypeList() {
 		return this.attributeTypeList;
 	}
 
-	public IAttributeType get(final int index) {
+	public IAttribute get(final int index) {
 		return this.attributeTypeList.get(index);
 	}
 
-	public IAttributeType getTargetType() {
+	public IAttribute getTargetType() {
 		return this.targetType;
 	}
 
@@ -34,7 +34,7 @@ public class InstanceSchema implements Serializable {
 
 		sb.append("%attributes\n");
 
-		for (IAttributeType t : this.attributeTypeList) {
+		for (IAttribute t : this.attributeTypeList) {
 			sb.append(t.toString() + "\n");
 		}
 		sb.append("%target\n");

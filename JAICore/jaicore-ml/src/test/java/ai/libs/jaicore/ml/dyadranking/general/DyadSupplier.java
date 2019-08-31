@@ -3,8 +3,8 @@ package ai.libs.jaicore.ml.dyadranking.general;
 import java.util.Random;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
+import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 
 /**
  * Simple helper class that can be used in (integration)-tests of the
@@ -55,11 +55,11 @@ public class DyadSupplier {
 	 */
 	public static Dyad getRandomDyad(final int seed, final int instanceSize, final int alternativeSize) {
 		Random rnd = new Random(seed);
-		Vector instance = new DenseDoubleVector(instanceSize);
+		IVector instance = new DenseDoubleVector(instanceSize);
 		for (int i = 0; i < instanceSize; i++) {
 			instance.setValue(i, rnd.nextGaussian());
 		}
-		Vector alternatives = new DenseDoubleVector(alternativeSize);
+		IVector alternatives = new DenseDoubleVector(alternativeSize);
 		for (int i = 0; i < alternativeSize; i++) {
 			alternatives.setValue(i, rnd.nextGaussian());
 		}

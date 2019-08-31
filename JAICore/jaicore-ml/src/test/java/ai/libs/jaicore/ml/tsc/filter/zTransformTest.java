@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.tsc.filter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,11 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
-import ai.libs.jaicore.ml.tsc.filter.ZTransformer;
-
-import static org.junit.Assert.assertEquals;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.core.timeseries.exceptions.NoneFittedFilterExeception;
+import ai.libs.jaicore.ml.core.timeseries.filter.ZTransformer;
 
 
 @RunWith(JUnit4.class)
@@ -23,7 +21,7 @@ public class zTransformTest {
 	
 	double[] timeseries1, timeseries2 ;
 	//double[] timeseries2;
-	TimeSeriesDataset dataset;
+	TimeSeriesDataset2 dataset;
 	
 	@Before
 	public void setUp() throws Exception {
@@ -40,7 +38,7 @@ public class zTransformTest {
 		ArrayList<double[][]> futureDataSet = new ArrayList<double[][]>();
 		futureDataSet.add(matrix);
 		futureDataSet.add(matrix2);
-		dataset = new TimeSeriesDataset(futureDataSet,null, null);
+		dataset = new TimeSeriesDataset2(futureDataSet,null, null);
 	}
 
 	@Test
@@ -54,7 +52,7 @@ public class zTransformTest {
 				}
 				System.out.println("--------------------------------------------------");
 			}
-			TimeSeriesDataset tmp = test.fitTransform(dataset);
+			TimeSeriesDataset2 tmp = test.fitTransform(dataset);
 			for(double[][] matrix: tmp.getValueMatrices()) {
 				for(double[] istance: matrix) {
 					System.out.println(Arrays.toString(istance));

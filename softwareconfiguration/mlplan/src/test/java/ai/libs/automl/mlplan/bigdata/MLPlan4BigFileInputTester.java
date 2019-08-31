@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.api4.java.algorithm.TimeOut;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.bigdata.MLPlan4BigFileInput;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;

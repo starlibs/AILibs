@@ -18,7 +18,7 @@ import ai.libs.jaicore.graphvisualizer.events.recorder.property.AlgorithmEventPr
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;

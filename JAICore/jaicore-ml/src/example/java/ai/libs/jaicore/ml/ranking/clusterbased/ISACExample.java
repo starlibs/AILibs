@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.inference.TTest;
-import org.api4.java.ai.ml.dataset.supervised.ranking.INumericFeatureRankingDataset;
+import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingDataset;
 
-import ai.libs.jaicore.ml.ranking.clusterbased.modifiedisac.ClassifierRankingForGroup;
-import ai.libs.jaicore.ml.ranking.clusterbased.modifiedisac.ModifiedISAC;
-import ai.libs.jaicore.ml.ranking.clusterbased.modifiedisac.evalutation.ModifiedISACEvaluator;
+import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.modifiedisac.ClassifierRankingForGroup;
+import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.modifiedisac.ModifiedISAC;
+import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.modifiedisac.evalutation.ModifiedISACEvaluator;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -25,7 +25,7 @@ public class ISACExample {
 	public static void normalRun() {
 		try {
 			ModifiedISAC isac = new ModifiedISAC();
-			INumericFeatureRankingDataset dataset;
+			ILabelRankingDataset dataset;
 			isac.fit(dataset);
 
 			List<ClassifierRankingForGroup> rankings = isac.getRankings();

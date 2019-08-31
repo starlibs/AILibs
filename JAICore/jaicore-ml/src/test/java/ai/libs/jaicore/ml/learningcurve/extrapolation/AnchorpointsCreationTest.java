@@ -3,16 +3,19 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 import java.io.File;
 import java.io.IOException;
 
-import org.api4.java.ai.ml.core.dataset.DatasetCreationException;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SystematicSamplingFactory;
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SystematicSamplingFactory;
+import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.InvalidAnchorPointsException;
+import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolator;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -27,7 +30,7 @@ public class AnchorpointsCreationTest {
 		OpenmlConnector client = new OpenmlConnector();
 		try {
 			DataSetDescription description = client.dataGet(42);
-			File file = description.getDataset("4350e421cdc16404033ef1812ea38c01");
+			File file = client.datasetGet(description);
 			DataSource source = new DataSource(file.getCanonicalPath());
 			dataset = source.getDataSet();
 			dataset.setClassIndex(dataset.numAttributes() - 1);
@@ -37,8 +40,8 @@ public class AnchorpointsCreationTest {
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
 
-		WekaInstances<Object> simpleDataset = new WekaInstances<>(dataset);
-		LearningCurveExtrapolator<WekaInstance<Object>, WekaInstances<Object>> extrapolator = new LearningCurveExtrapolator<>((x, y, ds) -> {
+		WekaInstances simpleDataset = new WekaInstances(dataset);
+		LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> extrapolator = new LearningCurveExtrapolator<>((x, y, ds) -> {
 			Assert.assertArrayEquals(x, xValues);
 			for (int i = 0; i < y.length; i++) {
 				Assert.assertTrue(y[i] > 0.0d);

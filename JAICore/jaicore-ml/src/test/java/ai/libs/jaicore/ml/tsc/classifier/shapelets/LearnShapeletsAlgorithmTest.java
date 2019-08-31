@@ -11,9 +11,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ai.libs.jaicore.ml.tsc.classifier.shapelets.LearnShapeletsClassifier;
-import ai.libs.jaicore.ml.tsc.classifier.shapelets.LearnShapeletsLearningAlgorithm;
-import ai.libs.jaicore.ml.tsc.util.MathUtil;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.shapelets.LearnShapeletsClassifier;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.shapelets.LearnShapeletsLearningAlgorithm;
+import ai.libs.jaicore.ml.core.timeseries.util.MathUtil;
 import junit.framework.Assert;
 
 /**

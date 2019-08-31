@@ -25,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.kvstore.IKVStore;
-import ai.libs.jaicore.ml.cache.ReproducibleInstances;
+import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 
 /**
  * Database adapter for performance data. Functionality to store and save performance values in a database. json to reproduce the {@link ReproducibleInstances} is saved as well as the solution that produced the performance value.

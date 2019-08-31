@@ -4,10 +4,10 @@ import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.filter.derivate.GulloDerivate;
+import ai.libs.jaicore.basic.transform.vector.derivate.GulloDerivate;
 
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.filter.derivate.GulloDerivate}
+ * Test suite for the {@link ai.libs.jaicore.basic.transform.vector.derivate.GulloDerivate}
  * implementation.
  * 
  * @author fischor

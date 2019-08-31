@@ -2,14 +2,14 @@ package ai.libs.jaicore.ml.tsc.classifier.trees;
 
 import java.util.ArrayList;
 
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesForestClassifier;
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesForestClassifier;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 
 /**
  * Unit tests of the time series forest classifier.
@@ -47,13 +47,12 @@ public class TimeSeriesForestTest {
 		classifier.setMaxDepth(maxDepth);
 		classifier.setSeed(seed);
 
-		final double[][] data = new double[][] {{1,2,3,4,5}, {2,3,4,5,6}};
+		final double[][] data = new double[][] { { 1, 2, 3, 4, 5 }, { 2, 3, 4, 5, 6 } };
 		ArrayList<double[][]> valueMatrix = new ArrayList<>();
 		valueMatrix.add(data);
-		final int[] targets = new int[] {0,1};
+		final int[] targets = new int[] { 0, 1 };
 
-		classifier.train(new TimeSeriesDataset(valueMatrix, targets));
-		Assert.assertEquals("The number of trained trees does not match the expected number.", numTrees,
-				classifier.getTrees().length);
+		classifier.train(new TimeSeriesDataset2(valueMatrix, targets));
+		Assert.assertEquals("The number of trained trees does not match the expected number.", numTrees, classifier.getTrees().length);
 	}
 }

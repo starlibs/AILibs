@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import Catalano.Imaging.FastBitmap;
 import Catalano.Imaging.FastBitmap.ColorSpace;
 import Catalano.Imaging.Filters.Crop;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import weka.core.Attribute;
 import weka.core.DenseInstance;

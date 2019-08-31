@@ -31,17 +31,17 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.ExactMatchLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageLLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.HammingLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.JaccardLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.RankLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.MeanSquaredErrorLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.PrecisionAsLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.RootMeanSquaredErrorLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMEKAGGPFitnessMeasureLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.ExactMatchLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.F1MacroAverageLLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.HammingLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1AsLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.JaccardLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.RankLoss;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.MeanSquaredErrorLoss;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.PrecisionAsLoss;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
+import ai.libs.jaicore.ml.regression.loss.RootMeanSquaredError;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
@@ -268,7 +268,7 @@ public class MLPlanCLI {
 				slcBuilder.withPerformanceMeasure(new PrecisionAsLoss(classIndex));
 				break;
 			case "ROOT_MEAN_SQUARED_ERROR":
-				slcBuilder.withPerformanceMeasure(new RootMeanSquaredErrorLoss());
+				slcBuilder.withPerformanceMeasure(new RootMeanSquaredError());
 				break;
 			default:
 				throw new IllegalArgumentException("Invalid singlelabel measure " + commandLine.getOptionValue(evaluationMeasureOption));

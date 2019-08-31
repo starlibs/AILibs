@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.complexity.SquaredBackwardDifferenceComplexity;
+import ai.libs.jaicore.basic.complexity.SquaredBackwardDifferenceComplexity;
 
 /**
  * Test suite for the {@link SquaredBackwardDifferenceComplexity}

@@ -19,7 +19,7 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.ComponentUtil;
 import ai.libs.hasco.serialization.ComponentLoader;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
 import weka.core.Instances;

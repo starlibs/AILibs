@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
+import ai.libs.jaicore.ml.weka.ClassifierMetricGetter;
 
 /**
 * This is a helper class to setup the metric table.

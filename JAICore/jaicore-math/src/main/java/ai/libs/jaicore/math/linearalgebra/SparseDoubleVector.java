@@ -131,19 +131,19 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void addVector(final Vector vector) {
+	public void addVector(final IVector vector) {
 		this.setIsChanged();
 		this.internalVector = (SparseVector) this.internalVector.add(vector.toSparseVector().internalVector);
 	}
 
 	@Override
-	public void subtractVector(final Vector vector) {
+	public void subtractVector(final IVector vector) {
 		this.setIsChanged();
 		this.internalVector = (SparseVector) this.internalVector.add(-1, vector.toSparseVector().internalVector);
 	}
 
 	@Override
-	public void multiplyByVectorPairwise(final Vector secondVector) {
+	public void multiplyByVectorPairwise(final IVector secondVector) {
 		this.setIsChanged();
 		SparseVector sparseVector = this.internalVector;
 		int[] indexes = sparseVector.getIndex();
@@ -159,7 +159,7 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void divideByVectorPairwise(final Vector secondVector) {
+	public void divideByVectorPairwise(final IVector secondVector) {
 		this.setIsChanged();
 		SparseVector sparseVector = this.internalVector;
 		int[] indexes = sparseVector.getIndex();
@@ -175,7 +175,7 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public double dotProduct(final Vector vector) {
+	public double dotProduct(final IVector vector) {
 		return this.internalVector.dot(vector.toSparseVector().internalVector);
 	}
 
@@ -204,7 +204,7 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector duplicate() {
+	public IVector duplicate() {
 		return new SparseDoubleVector(this.asArray());
 	}
 
@@ -288,7 +288,7 @@ public class SparseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector kroneckerProduct(final double[] vectorAsArray) {
+	public IVector kroneckerProduct(final double[] vectorAsArray) {
 		return new SparseDoubleVector(this.kroneckerProductInternal(vectorAsArray));
 	}
 

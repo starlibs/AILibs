@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.core.Attribute;

@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.dyadranking.general;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,24 +13,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
-import ai.libs.jaicore.ml.ranking.dyadranking.algorithm.PLNetDyadRanker;
-import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.ranking.dyadranking.dataset.SparseDyadRankingInstance;
-import ai.libs.jaicore.ml.ranking.dyadranking.loss.DyadRankingLossUtil;
-import ai.libs.jaicore.ml.ranking.dyadranking.loss.KendallsTauDyadRankingLoss;
-import ai.libs.jaicore.ml.ranking.dyadranking.util.AbstractDyadScaler;
-import ai.libs.jaicore.ml.ranking.dyadranking.util.DyadUnitIntervalScaler;
+import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.dyadranking.DyadRankingLossUtil;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
+import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;
+import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadUnitIntervalScaler;
+import ai.libs.jaicore.ml.ranking.loss.KendallsTauDyadRankingLoss;
 
 /**
  * This is a test based on a dataset containing 400 dyad rankings of dataset and
@@ -73,7 +74,7 @@ public class DyadRankerMetaminingTest {
 	}
 
 	@Test
-	public void test() {
+	public void test() throws InterruptedException {
 
 		AbstractDyadScaler scaler = new DyadUnitIntervalScaler();
 		Collections.shuffle(this.dataset, new Random(seed));
@@ -92,7 +93,7 @@ public class DyadRankerMetaminingTest {
 		try {
 
 			// train the ranker
-			this.ranker.train(trainData);
+			this.ranker.fit(trainData);
 			double avgKendallTau = 0.0d;
 			avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, this.ranker);
 			System.out.println("Average Kendall's tau for " + this.ranker.getClass().getSimpleName() + ": " + avgKendallTau);
@@ -104,6 +105,7 @@ public class DyadRankerMetaminingTest {
 			// }
 		} catch (TrainingException | PredictionException e) {
 			e.printStackTrace();
+			fail("An exception occurred while training resp. predicting");
 		}
 
 	}
@@ -135,24 +137,24 @@ public class DyadRankerMetaminingTest {
 	private static DyadRankingDataset randomlyTrimSparseDyadRankingInstances(final DyadRankingDataset dataset, final int dyadRankingLength) {
 		DyadRankingDataset trimmedDataset = new DyadRankingDataset();
 		for (IDyadRankingInstance instance : dataset) {
-			if (instance.length() < dyadRankingLength) {
+			if (instance.getNumAttributes() < dyadRankingLength) {
 				continue;
 			}
-			ArrayList<Boolean> flagVector = new ArrayList<>(instance.length());
+			ArrayList<Boolean> flagVector = new ArrayList<>(instance.getNumAttributes());
 			for (int i = 0; i < dyadRankingLength; i++) {
 				flagVector.add(Boolean.TRUE);
 			}
-			for (int i = dyadRankingLength; i < instance.length(); i++) {
+			for (int i = dyadRankingLength; i < instance.getNumAttributes(); i++) {
 				flagVector.add(Boolean.FALSE);
 			}
 			Collections.shuffle(flagVector);
-			List<Vector> trimmedAlternatives = new ArrayList<Vector>(dyadRankingLength);
-			for (int i = 0; i < instance.length(); i++) {
+			List<IVector> trimmedAlternatives = new ArrayList<IVector>(dyadRankingLength);
+			for (int i = 0; i < instance.getNumAttributes(); i++) {
 				if (flagVector.get(i)) {
-					trimmedAlternatives.add(instance.getDyadAtPosition(i).getAlternative());
+					trimmedAlternatives.add((IVector) instance.getLabel().get(i).getAlternative());
 				}
 			}
-			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(instance.getDyadAtPosition(0).getInstance(), trimmedAlternatives);
+			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) instance.getLabel().get(0).getInstance(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;

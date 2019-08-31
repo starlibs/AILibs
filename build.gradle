@@ -37,12 +37,12 @@ allprojects {
 	apply plugin: 'nebula.maven-base-publish'
 
 	//Java version
-	sourceCompatibility = 1.8
-	targetCompatibility = 1.8
+	sourceCompatibility = 12
+	targetCompatibility = 12
 
 	//Project properties
 	project.group = 'ai.libs'
-	project.version = '0.1.5'
+	project.version = '0.2.0'
 	
 	ext {
 	    ossrhUsername = hasProperty('ossrhUsername') ? ossrhUsername : System.getenv("ossrhUsername")
@@ -122,8 +122,6 @@ allprojects {
 			properties["sonar.sourceEncoding"] = project.compileJava.options.encoding
 			properties["sonar.java.source"] = project.sourceCompatibility
 			properties["sonar.java.target"] = project.targetCompatibility
-			properties["sonar.java.binaries"] = sourceSets.main.output.classesDir
-			properties["sonar.java.test.binaries"] = sourceSets.test.output.classesDir
 		}
 	}
 
@@ -182,8 +180,8 @@ allprojects {
 
 dependencies{
 	compile project(":hasco")
-	compile project(":autofe")
-	compile project(":autofe-reldata")
+	//compile project(":autofe")
+	//compile project(":autofe-reldata")
 	compile project(":mlplan")
 	compile project(":JAICore:jaicore-basic")
 	compile (project(":JAICore:jaicore-ea")) {
@@ -194,6 +192,7 @@ dependencies{
 	compile project(":JAICore:jaicore-logic")
 	compile project(":JAICore:jaicore-math")
 	compile project(":JAICore:jaicore-ml")
+	compile project(":JAICore:jaicore-ml-weka")
 	compile project(":JAICore:jaicore-planning")
 	compile project(":JAICore:jaicore-processes")
 	compile project(":JAICore:jaicore-search")

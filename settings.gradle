@@ -10,6 +10,7 @@ include ":JAICore:jaicore-experiments"
 include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-math"
 include ":JAICore:jaicore-ml"
+include ":JAICore:jaicore-ml-weka"
 
 include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"
@@ -23,11 +24,11 @@ project(":hasco").projectDir = new File(configPrefix,"hasco")
 include 'mlplan'
 project(":mlplan").projectDir = new File(configPrefix,"mlplan")
 
-include 'autofe'
-project(":autofe").projectDir = new File(configPrefix,"autofe")
+//include 'autofe'
+//project(":autofe").projectDir = new File(configPrefix,"autofe")
 
-include 'autofe-reldata'
-project(":autofe-reldata").projectDir = new File(configPrefix,"autofe-reldata")
+//include 'autofe-reldata'
+//project(":autofe-reldata").projectDir = new File(configPrefix,"autofe-reldata")
 
 
 // include api projects

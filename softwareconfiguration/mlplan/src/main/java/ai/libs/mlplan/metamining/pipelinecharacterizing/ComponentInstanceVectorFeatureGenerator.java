@@ -13,7 +13,7 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.Vector;
+import ai.libs.jaicore.math.linearalgebra.IVector;
 
 /**
  * Characterizes a pipelines by the components that occur in it and the
@@ -80,7 +80,7 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 	 *            the patterns found so far
 	 * @return the characterization
 	 */
-	public double[] characterize(final ComponentInstance cI, final Vector patterns) {
+	public double[] characterize(final ComponentInstance cI, final IVector patterns) {
 		// first: get the encapsulated component
 		Component c = cI.getComponent();
 		String componentName = c.getName();
@@ -111,7 +111,7 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 		return patterns.asArray();
 	}
 
-	private void handleNumericalParameter(final ComponentInstance cI, final Vector patterns, final Parameter param, final int parameterIndex) {
+	private void handleNumericalParameter(final ComponentInstance cI, final IVector patterns, final Parameter param, final int parameterIndex) {
 		if (cI.getParameterValue(param) != null) {
 			double value = Double.parseDouble(cI.getParameterValue(param));
 			patterns.setValue(parameterIndex, value);
@@ -121,7 +121,7 @@ public class ComponentInstanceVectorFeatureGenerator implements IPipelineCharact
 		}
 	}
 
-	private void handleCatergoricalParameter(final ComponentInstance cI, final Vector patterns, final Parameter param,
+	private void handleCatergoricalParameter(final ComponentInstance cI, final IVector patterns, final Parameter param,
 			final int parameterIndex) {
 		// the parameters are one-hot-encoded, where the parameterIndex specifies the
 		// one hot index for the first categorical parameter, parameterIndex+1 is the

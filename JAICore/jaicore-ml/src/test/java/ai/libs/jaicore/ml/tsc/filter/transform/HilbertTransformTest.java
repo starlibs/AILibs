@@ -4,7 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.filter.transform.HilbertTransform;
+import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
 
 /**
  * Test suite for the {@link HilbertTransform} implementation.

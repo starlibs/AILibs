@@ -11,8 +11,8 @@ import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.cache.ReproducibleInstances;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import weka.core.Instances;
 
 /**
@@ -34,16 +34,16 @@ public class CacheTest {
 			data.setClassIndex(data.numAttributes() - 1);
 
 			// perform a split with normal instances
-			Instances i = WekaUtil.getStratifiedSplit(data, 45, 0.7).get(0);
+			Instances i = WekaUtil.getStratifiedSplit(data, 45, 0.7).getAttributeValue(0);
 
 			//
 			ReproducibleInstances rData = ReproducibleInstances.fromOpenML(40983, "4350e421cdc16404033ef1812ea38c01");
 
 			// perform a split
-			ReproducibleInstances ri0 = WekaUtil.getStratifiedSplit(rData, new Random(45), 0.1).get(0);
+			ReproducibleInstances ri0 = WekaUtil.getStratifiedSplit(rData, new Random(45), 0.1).getAttributeValue(0);
 
 			// perform a split
-			Instances ri1 = WekaUtil.getStratifiedSplit((Instances) rData, 45, 0.1).get(0);
+			Instances ri1 = WekaUtil.getStratifiedSplit((Instances) rData, 45, 0.1).getAttributeValue(0);
 
 			if (ri0.getInstructions().size() != 2) {
 				fail("wrong number of instructions");
@@ -60,7 +60,7 @@ public class CacheTest {
 			}
 
 			for (int j = 0; j < r.size(); j++) {
-				if (!ri0.get(j).toString().equals(r.get(j).toString())) { // Instances in Weka do not implement equals!
+				if (!ri0.getAttributeValue(j).toString().equals(r.getAttributeValue(j).toString())) { // Instances in Weka do not implement equals!
 					fail("Reproduction failed");
 				}
 			}

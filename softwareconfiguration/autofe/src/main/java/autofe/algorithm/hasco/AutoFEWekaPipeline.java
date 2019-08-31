@@ -10,7 +10,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import autofe.algorithm.hasco.filter.meta.FilterPipeline;
 import autofe.util.DataSet;

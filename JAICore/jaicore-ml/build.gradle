@@ -9,9 +9,10 @@ dependencies {
 	
 	compile ('org.api4:ai.ml')
 	
-	compile group: 'org.openml', name: 'apiconnector', version: '1.0.16'
-	compile group: 'de.upb.isys', name: 'omlwebapp', version: '0.0.1'
-	compile ('de.upb.isys:meka:0.0.4') 
+	compile 'org.openml:apiconnector:1.0.23'
+	compile 'org.openml:EvaluationEngine:0.1.0'
+	
+	compile ('ai.libs.thirdparty:interruptible-meka:0.1.0') 
     compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '1.3.0'
 
 	
@@ -77,7 +78,7 @@ uploadArchives {
       		}
 
       		pom.project {
-        		name 'JAICore-Basic'
+        		name 'JAICore-ML'
         		packaging 'jar'
         		// optionally artifactId can be defined here 
         		description 'This project provides utils to deal with machine learning tasks. Especially it gives support to work with standard ML libraries in Java.'

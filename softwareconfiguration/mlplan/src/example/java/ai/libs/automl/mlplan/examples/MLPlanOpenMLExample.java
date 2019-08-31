@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.api4.java.algorithm.TimeOut;
 
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.cache.ReproducibleInstances;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import weka.classifiers.Classifier;

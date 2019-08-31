@@ -27,9 +27,9 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationEvent;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
-import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
+import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
@@ -90,7 +90,7 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 			Instances dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
 				try {
-					dataShownToSearch = this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).get(1);
+					dataShownToSearch = this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).getAttributeValue(1);
 				} catch (SplitFailedException e) {
 					throw new AlgorithmException("Error in ML-Plan execution.", e);
 				}

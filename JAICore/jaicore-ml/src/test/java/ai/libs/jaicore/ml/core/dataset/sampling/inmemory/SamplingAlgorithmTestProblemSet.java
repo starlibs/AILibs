@@ -3,18 +3,17 @@ package ai.libs.jaicore.ml.core.dataset.sampling.inmemory;
 import java.io.File;
 import java.io.IOException;
 
-import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.openml.apiconnector.xml.DataSetDescription;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
 import weka.core.Attribute;
-import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSource;
 
-public class SamplingAlgorithmTestProblemSet<L> extends AAlgorithmTestProblemSet<IOrderedLabeledAttributeArrayDataset<?, L>> {
+public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<ILabeledDataset<ILabeledInstance>> {
 
 	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 
@@ -23,31 +22,31 @@ public class SamplingAlgorithmTestProblemSet<L> extends AAlgorithmTestProblemSet
 	}
 
 	@Override
-	public IOrderedLabeledAttributeArrayDataset<?, L> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
+	public ILabeledDataset<ILabeledInstance> getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		// Load whine quality data set
 		try {
-			return loadDatasetFromOpenML(287);
+			return this.loadDatasetFromOpenML(287);
 		} catch (IOException | ClassNotFoundException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
 	}
 
 	@Override
-	public IOrderedLabeledAttributeArrayDataset<?, L> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
+	public ILabeledDataset<ILabeledInstance> getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
 		// Load higgs data set
 		try {
-			return loadDatasetFromOpenML(23512);
+			return this.loadDatasetFromOpenML(23512);
 		} catch (IOException | ClassNotFoundException e) {
 			throw new AlgorithmTestProblemSetCreationException(e);
 		}
 	}
 
-	private IOrderedLabeledAttributeArrayDataset<?, L> loadDatasetFromOpenML(int id) throws IOException, ClassNotFoundException {
-		Instances dataset = null;
+	private ILabeledDataset<ILabeledInstance> loadDatasetFromOpenML(final int id) throws IOException, ClassNotFoundException {
+		Dataset dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
 		try {
 			DataSetDescription description = client.dataGet(id);
-			File file = description.getDataset(OPENML_API_KEY);
+			File file = client.datasetGet(description);
 			DataSource source = new DataSource(file.getCanonicalPath());
 			dataset = source.getDataSet();
 			dataset.setClassIndex(dataset.numAttributes() - 1);
@@ -57,7 +56,7 @@ public class SamplingAlgorithmTestProblemSet<L> extends AAlgorithmTestProblemSet
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
 
-		return new WekaInstances<>(dataset);
+		return new Dataset<>(dataset);
 	}
 
 }

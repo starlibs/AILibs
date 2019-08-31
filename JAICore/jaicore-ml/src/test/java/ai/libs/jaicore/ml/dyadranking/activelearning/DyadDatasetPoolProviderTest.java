@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.junit.Test;
 
-import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.ranking.dyadranking.Dyad;
-import ai.libs.jaicore.ml.ranking.dyadranking.activelearning.DyadDatasetPoolProvider;
-import ai.libs.jaicore.ml.ranking.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.ranking.dyadranking.dataset.SparseDyadRankingInstance;
+import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.learner.activelearning.DyadDatasetPoolProvider;
 
 /**
  * Simple test to check whether the queried rankings the pool provider returns
@@ -45,26 +45,23 @@ public class DyadDatasetPoolProviderTest {
 		IDyadRankingInstance trueRanking3 = dataset.get(13);
 
 		// build sparse dyad ranking instances from them
-		List<Vector> alternatives1 = new ArrayList<>(trueRanking1.length());
-		List<Vector> alternatives2 = new ArrayList<>(trueRanking2.length());
-		List<Vector> alternatives3 = new ArrayList<>(trueRanking3.length());
+		List<IVector> alternatives1 = new ArrayList<>(trueRanking1.getNumAttributes());
+		List<IVector> alternatives2 = new ArrayList<>(trueRanking2.getNumAttributes());
+		List<IVector> alternatives3 = new ArrayList<>(trueRanking3.getNumAttributes());
 
-		for (Dyad dyad : trueRanking1) {
-			alternatives1.add(dyad.getAlternative());
+		for (IDyad dyad : trueRanking1.getLabel()) {
+			alternatives1.add((IVector) dyad.getAlternative());
 		}
-		for (Dyad dyad : trueRanking2) {
-			alternatives2.add(dyad.getAlternative());
+		for (IDyad dyad : trueRanking2.getLabel()) {
+			alternatives2.add((IVector) dyad.getAlternative());
 		}
-		for (Dyad dyad : trueRanking3) {
-			alternatives3.add(dyad.getAlternative());
+		for (IDyad dyad : trueRanking3.getLabel()) {
+			alternatives3.add((IVector) dyad.getAlternative());
 		}
 
-		SparseDyadRankingInstance si1 = new SparseDyadRankingInstance(trueRanking1.getDyadAtPosition(0).getInstance(),
-				alternatives1);
-		SparseDyadRankingInstance si2 = new SparseDyadRankingInstance(trueRanking2.getDyadAtPosition(0).getInstance(),
-				alternatives1);
-		SparseDyadRankingInstance si3 = new SparseDyadRankingInstance(trueRanking3.getDyadAtPosition(0).getInstance(),
-				alternatives1);
+		SparseDyadRankingInstance si1 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking1.getLabel().get(0).getInstance(), alternatives1);
+		SparseDyadRankingInstance si2 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking2.getLabel().get(0).getInstance(), alternatives1);
+		SparseDyadRankingInstance si3 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking3.getLabel().get(0).getInstance(), alternatives1);
 
 		// shuffle the sparse instances
 		Collections.shuffle(alternatives1);

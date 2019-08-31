@@ -2,7 +2,6 @@ package ai.libs.jaicore.ml.clustering;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.awt.Canvas;
 import java.awt.Color;
@@ -17,7 +16,7 @@ import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.clustering.GMeans;
+import ai.libs.jaicore.ml.clustering.learner.GMeans;
 
 /**
  * Test class to test Gmeans clusters.
