@@ -7,6 +7,7 @@ import java.util.Map;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.serializable.DefaultPropertyProcessedAlgorithmEvent;
 import org.api4.java.algorithm.events.serializable.PropertyProcessedAlgorithmEvent;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +24,9 @@ import ai.libs.jaicore.graphvisualizer.events.recorder.property.PropertyComputat
  * @author atornede
  *
  */
-public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
+public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener, ILoggingCustomizable {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(AlgorithmEventHistoryRecorder.class);
+	private Logger logger = LoggerFactory.getLogger(AlgorithmEventHistoryRecorder.class);
 
 	private AlgorithmEventHistory algorithmEventHistory;
 
@@ -44,7 +45,9 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 	@Subscribe
 	@Override
 	public void handleAlgorithmEvent(final AlgorithmEvent algorithmEvent) {
+		this.logger.info("Receiving AlgorithmEvent {}", algorithmEvent);
 		synchronized (this) {
+			this.logger.debug("Converting AlgorithmEvent {}", algorithmEvent);
 			PropertyProcessedAlgorithmEvent propertyProcessedAlgorithmEvent = this.convertAlgorithmEventToPropertyProcessedAlgorithmEvent(algorithmEvent);
 			this.algorithmEventHistory.addEvent(propertyProcessedAlgorithmEvent);
 		}
@@ -52,15 +55,15 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 
 	private PropertyProcessedAlgorithmEvent convertAlgorithmEventToPropertyProcessedAlgorithmEvent(final AlgorithmEvent algorithmEvent) {
 		Map<String, Object> properties = new HashMap<>();
-
 		for (AlgorithmEventPropertyComputer algorithmEventPropertyComputer : this.eventPropertyComputers) {
 			try {
 				Object computedProperty = algorithmEventPropertyComputer.computeAlgorithmEventProperty(algorithmEvent);
+				this.logger.trace("Computer {} converted event to {}", algorithmEventPropertyComputer, computedProperty);
 				if (computedProperty != null) {
 					properties.put(algorithmEventPropertyComputer.getPropertyName(), computedProperty);
 				}
 			} catch (PropertyComputationFailedException e) {
-				LOGGER.error("Could not compute property \"{}\".", algorithmEventPropertyComputer.getPropertyName(), e);
+				this.logger.error("Could not compute property \"{}\".", algorithmEventPropertyComputer.getPropertyName(), e);
 			}
 		}
 
@@ -74,6 +77,16 @@ public class AlgorithmEventHistoryRecorder implements AlgorithmEventListener {
 	 */
 	public AlgorithmEventHistory getHistory() {
 		return this.algorithmEventHistory;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 
 }

@@ -5,5 +5,5 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
 public interface ITreasureModel extends IPathEvaluator<ITransparentTreeNode, Integer, Double> {
-
+	public double getMinimumAchievable();
 }

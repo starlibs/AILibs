@@ -3,6 +3,7 @@ package ai.libs.jaicore.graph;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,23 +11,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 
 public class Graph<T> implements Serializable {
 
 	private static final long serialVersionUID = 3912962578399588845L;
 
-	private class Node implements Serializable {
-		private static final long serialVersionUID = 1083239915581499630L;
-		private T t = null;
-		private Set<Node> successors = new HashSet<>();
-		private Set<Node> predecessors = new HashSet<>();
-	}
-
 	private T root;
-	private final Map<T, Node> nodes = new HashMap<>();
-	private final Set<Pair<T, T>> edges = new HashSet<>();
+	private final Set<T> nodes = new HashSet<>();
+	private final Map<T, Set<T>> successors = new HashMap<>();
+	private final Map<T, Set<T>> predecessors = new HashMap<>();
 
 	public Graph() {
 	}
@@ -45,10 +39,10 @@ public class Graph<T> implements Serializable {
 
 	public Graph(final Graph<T> toClone) {
 		this();
-		for (T i : toClone.nodes.keySet()) {
+		for (T i : toClone.nodes) {
 			this.addItem(i);
 		}
-		for (T i : this.nodes.keySet()) {
+		for (T i : this.nodes) {
 			for (T i2 : toClone.getSuccessors(i)) {
 				this.addEdge(i, i2);
 			}
@@ -56,23 +50,38 @@ public class Graph<T> implements Serializable {
 	}
 
 	public void addItem(final T item) {
-		Node n = new Node();
-		n.t = item;
-		this.nodes.put(item, n);
+		this.nodes.add(item);
 		if (this.root == null) {
 			this.root = item;
 		}
-		if (!this.hasItem(n.t)) {
+		if (!this.hasItem(item)) {
 			throw new IllegalStateException("Just added node " + item + " does not respond positively on a call to hasItem");
 		}
 	}
 
+	public void addPath(final List<T> path) {
+		T parent = null;
+		for (T node : path) {
+			if (!this.hasItem(node)) {
+				this.addItem(node);
+			}
+			if (parent != null && !this.getPredecessors(node).contains(parent)) {
+				this.addEdge(parent, node);
+			}
+			parent = node;
+		}
+	}
+
 	public Set<T> getItems() {
-		return this.nodes.keySet();
+		return Collections.unmodifiableSet(this.nodes);
 	}
 
 	public boolean hasItem(final T item) {
-		return this.nodes.containsKey(item);
+		return this.nodes.contains(item);
+	}
+
+	public boolean hasEdge(final T from, final T to) {
+		return this.successors.containsKey(from) && this.successors.get(from).contains(to);
 	}
 
 	public void removeItem(final T item) {
@@ -88,11 +97,8 @@ public class Graph<T> implements Serializable {
 	public void addEdge(final T from, final T to) {
 		this.checkNodeExistence(from);
 		this.checkNodeExistence(to);
-		Node nodeFrom = this.nodes.get(from);
-		Node nodeTo = this.nodes.get(to);
-		nodeFrom.successors.add(nodeTo);
-		nodeTo.predecessors.add(nodeFrom);
-		this.edges.add(new Pair<>(from, to));
+		this.successors.computeIfAbsent(from, n -> new HashSet<>()).add(to);
+		this.predecessors.computeIfAbsent(to, n -> new HashSet<>()).add(from);
 
 		/* update root if necessary */
 		if (to == this.root) {
@@ -106,11 +112,8 @@ public class Graph<T> implements Serializable {
 	public void removeEdge(final T from, final T to) {
 		this.checkNodeExistence(from);
 		this.checkNodeExistence(to);
-		Node nodeFrom = this.nodes.get(from);
-		Node nodeTo = this.nodes.get(to);
-		nodeFrom.successors.remove(nodeTo);
-		nodeTo.predecessors.remove(nodeFrom);
-		this.edges.remove(new Pair<>(from, to));
+		this.successors.get(from).remove(to);
+		this.predecessors.get(to).remove(from);
 
 		/* update root if necessary */
 		if (from == this.root) {
@@ -123,30 +126,22 @@ public class Graph<T> implements Serializable {
 
 	public Set<T> getSuccessors(final T item) {
 		this.checkNodeExistence(item);
-		Set<T> successors = new HashSet<>();
-		for (Node n : this.nodes.get(item).successors) {
-			successors.add(n.t);
-		}
-		return successors;
+		return Collections.unmodifiableSet(this.successors.containsKey(item) ? this.successors.get(item) : new HashSet<>());
 	}
 
 	public Set<T> getPredecessors(final T item) {
 		this.checkNodeExistence(item);
-		Set<T> predecessors = new HashSet<>();
-		for (Node n : this.nodes.get(item).predecessors) {
-			predecessors.add(n.t);
-		}
-		return predecessors;
+		return Collections.unmodifiableSet(this.predecessors.containsKey(item) ? this.predecessors.get(item) : new HashSet<>());
 	}
 
 	private void checkNodeExistence(final T item) {
-		if (!this.nodes.keySet().contains(item)) {
+		if (!this.nodes.contains(item)) {
 			throw new IllegalArgumentException("Cannot perform operation on node " + item + ", which does not exist!");
 		}
 	}
 
 	public final Collection<T> getSources() {
-		return this.nodes.keySet().stream().filter(n -> this.nodes.get(n).predecessors.isEmpty()).collect(Collectors.toList());
+		return this.nodes.stream().filter(n -> !this.predecessors.containsKey(n) || this.predecessors.get(n).isEmpty()).collect(Collectors.toList());
 	}
 
 	public final T getRoot() {
@@ -154,7 +149,7 @@ public class Graph<T> implements Serializable {
 	}
 
 	public final Collection<T> getSinks() {
-		return this.nodes.keySet().stream().filter(n -> this.nodes.get(n).successors.isEmpty()).collect(Collectors.toList());
+		return this.nodes.stream().filter(n -> !this.successors.containsKey(n) || this.successors.get(n).isEmpty()).collect(Collectors.toList());
 	}
 
 	public final void addGraph(final Graph<T> g) {
@@ -172,19 +167,15 @@ public class Graph<T> implements Serializable {
 		return this.nodes.isEmpty();
 	}
 
-	public Set<Pair<T, T>> getEdges() {
-		return this.edges;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.nodes.keySet() == null) ? 0 : this.nodes.keySet().hashCode());
+		result = prime * result + ((this.nodes == null) ? 0 : this.nodes.hashCode());
+		result = prime * result + ((this.successors == null) ? 0 : this.successors.hashCode());
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(final Object obj) {
 		if (this == obj) {
@@ -196,21 +187,20 @@ public class Graph<T> implements Serializable {
 		if (this.getClass() != obj.getClass()) {
 			return false;
 		}
-		Graph<T> other = (Graph<T>) obj;
-		for (T t : this.nodes.keySet()) {
-			if (!other.nodes.containsKey(t)) {
+		Graph other = (Graph) obj;
+		if (this.nodes == null) {
+			if (other.nodes != null) {
 				return false;
 			}
-			Set<T> predecessors = this.getPredecessors(t);
-			Set<T> predecessorsOther = other.getPredecessors(t);
-			if (!predecessors.equals(predecessorsOther)) {
+		} else if (!this.nodes.equals(other.nodes)) {
+			return false;
+		}
+		if (this.successors == null) {
+			if (other.successors != null) {
 				return false;
 			}
-			Set<T> successors = this.getSuccessors(t);
-			Set<T> successorsOther = other.getSuccessors(t);
-			if (!successors.equals(successorsOther)) {
-				return false;
-			}
+		} else if (!this.successors.equals(other.successors)) {
+			return false;
 		}
 		return true;
 	}
@@ -259,14 +249,14 @@ public class Graph<T> implements Serializable {
 	public boolean isGraphSane() {
 
 		/* check that all nodes are contained */
-		boolean allNodesContained = this.nodes.keySet().stream().allMatch(this::hasItem);
+		boolean allNodesContained = this.nodes.stream().allMatch(this::hasItem);
 		if (!allNodesContained) {
 			assert allNodesContained : "Not every node n in the node map have positive responses for a call of hasItem(n)";
 		return false;
 		}
 
 		/* check that all successors are contained */
-		boolean allSuccessorsContained = this.nodes.keySet().stream().allMatch(n -> this.getSuccessors(n).stream().allMatch(this::hasItem));
+		boolean allSuccessorsContained = this.nodes.stream().allMatch(n -> this.getSuccessors(n).stream().allMatch(this::hasItem));
 		if (!allSuccessorsContained) {
 			assert allSuccessorsContained : "There is a node in the graph such that not every successor n of it has a positive response for a call of hasItem(n)";
 		return false;

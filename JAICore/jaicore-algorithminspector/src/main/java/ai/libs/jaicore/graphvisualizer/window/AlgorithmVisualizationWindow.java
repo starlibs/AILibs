@@ -42,6 +42,7 @@ public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomiza
 	private AlgorithmEventHistoryEntryDeliverer algorithmEventHistoryPuller;
 
 	private AlgorithmEventHistory algorithmEventHistory;
+	private AlgorithmEventHistoryRecorder historyRecorder;
 
 	private List<IGUIPlugin> visualizationPlugins;
 
@@ -90,10 +91,10 @@ public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomiza
 	 */
 	public AlgorithmVisualizationWindow(final IAlgorithm<?, ?> algorithm, final List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers, final IGUIPlugin mainPlugin, final IGUIPlugin... visualizationPlugins) {
 		this.mainPlugin = mainPlugin;
-		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);
-		algorithm.registerListener(historyRecorder);
-		this.algorithmEventHistory = historyRecorder.getHistory();
-		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(historyRecorder.getHistory());
+		this.historyRecorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);
+		algorithm.registerListener(this.historyRecorder);
+		this.algorithmEventHistory = this.historyRecorder.getHistory();
+		this.algorithmEventHistoryPuller = new AlgorithmEventHistoryEntryDeliverer(this.historyRecorder.getHistory());
 		this.algorithmEventSource = this.algorithmEventHistoryPuller;
 		this.initializePlugins(visualizationPlugins);
 		// it is important to register the history puller as a last listener!
@@ -217,6 +218,12 @@ public class AlgorithmVisualizationWindow implements Runnable, ILoggingCustomiza
 			if (plugin instanceof ILoggingCustomizable) {
 				((ILoggingCustomizable) plugin).setLoggerName(name + "." + plugin.getClass().getSimpleName().toLowerCase());
 			}
+			else {
+				this.logger.debug("Plugin {} is not logging customizable.", plugin);
+			}
+		}
+		if (this.historyRecorder != null) {
+			this.historyRecorder.setLoggerName(name + ".recorder");
 		}
 	}
 }

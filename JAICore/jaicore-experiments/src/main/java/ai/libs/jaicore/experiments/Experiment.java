@@ -1,5 +1,6 @@
 package ai.libs.jaicore.experiments;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,6 +14,10 @@ public class Experiment {
 	private final int numCPUs;
 	private Map<String, String> valuesOfKeyFields;
 	private Map<String, Object> valuesOfResultFields;
+
+	public Experiment(final Experiment experiment) {
+		this(experiment.getMemoryInMB(), experiment.getNumCPUs(), new HashMap<>(experiment.getValuesOfKeyFields()), experiment.getValuesOfResultFields() != null ? new HashMap<>(experiment.getValuesOfResultFields()) : null);
+	}
 
 	public Experiment(final int memoryInMB, final int numCPUs, final Map<String, String> valuesOfKeyFields) {
 		this(memoryInMB, numCPUs, valuesOfKeyFields, null);

@@ -22,8 +22,8 @@ import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.balanced.BalancedGraphSearchWithPathEvaluationsProblem;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized.EqualSizedIslandsModel;
-import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.ChaoticMeansTreasureModel;
-import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.NoisyMeanTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.ChaoticMeansTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.NoisyMeanTreasureModel;
 
 @RunWith(Parameterized.class)
 public class BalancedTreasureIslandTester {

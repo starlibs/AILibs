@@ -5,7 +5,7 @@ import org.junit.Test;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized.EqualSizedIslandsModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.ITreasureModel;
-import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.ChaoticMeansTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.ChaoticMeansTreasureModel;
 
 public class ChaoticTreasureGeneratorTester {
 

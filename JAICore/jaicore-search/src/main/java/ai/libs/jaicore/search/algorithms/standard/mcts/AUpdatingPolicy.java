@@ -26,7 +26,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		this.maximize = maximize;
 	}
 
-	class NodeLabel {
+	public class NodeLabel {
 		final DescriptiveStatistics scores = new DescriptiveStatistics();
 		int visits;
 
@@ -40,18 +40,27 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 
 	public abstract double getScore(NodeLabel labelOfNode, NodeLabel labelOfChild);
 
+	public abstract A getActionBasedOnScores(Map<A, Double> scores);
+
 	@Override
 	public void updatePath(final List<N> path, final Double score) {
 		this.logger.debug("Updating path {} with score {}", path, score);
+		int lastVisits = Integer.MAX_VALUE;
+		double lastMin = -1 * Double.MAX_VALUE;
+		double lastMax = Double.MAX_VALUE;
 		for (N node : path) {
-			if (!this.labels.containsKey(node)) {
-				this.labels.put(node, new NodeLabel());
-			}
-			NodeLabel label = this.labels.get(node);
+			NodeLabel label = this.labels.computeIfAbsent(node, n -> new NodeLabel());
 			label.visits++;
 			label.scores.addValue(score);
-			this.logger.trace("Updated label of node {}. Visits now {}, stats contains {} entries with mean {}", node, label.visits, label.scores.getN(), label.scores.getMean());
+			this.logger.trace("Updated label of node {}. Visits now {}, stats contains {} entries with min/mean/max {}/{}/{}", node, label.visits, label.scores.getN(), label.scores.getMin(), label.scores.getMean(), label.scores.getMax());
+			if (label.visits > lastVisits || label.scores.getMin() < lastMin || label.scores.getMax() > lastMax) {
+				throw new IllegalStateException("Illegal visits/min/max stats of child " + label.visits + "/" + label.scores.getMin() +"/" + label.scores.getMax()  + " compared to parent " + lastVisits + "/" + lastMin + "/" + lastMax + ".");
+			}
+			lastMin = label.scores.getMin();
+			lastMax = label.scores.getMax();
+			lastVisits = label.visits;
 		}
+		this.logger.debug("Path update completed.");
 	}
 
 	@Override
@@ -70,10 +79,9 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		}
 
 		/* otherwise, play best action */
-		double best = this.maximize ? Double.MIN_VALUE : Double.MAX_VALUE;
 		this.logger.debug("All actions have been tried. Label is: {}", this.labels.get(node));
 		NodeLabel labelOfNode = this.labels.get(node);
-		A choice = null;
+		Map<A, Double> scores = new HashMap<>();
 		for (A action : possibleActions) {
 			N child = actionsWithTheirSuccessors.get(action);
 			NodeLabel labelOfChild = this.labels.get(child);
@@ -81,15 +89,10 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 			assert labelOfChild.scores.getN() != 0 : "Number of observations cannot be 0 if we already visited this node before";
 			this.logger.trace("Considering action {} whose successor state has stats {} and {} visits", action, labelOfChild.scores.getMean(), labelOfChild.visits);
 			double score = this.getScore(labelOfNode, labelOfChild);
-			assert !(new Double(score).equals(Double.NaN)) : "The UCB score is NaN, which cannot be the case. Score mean is " + labelOfChild.scores.getMean() + ", number of visits is " + labelOfChild.visits;
-			if (this.maximize && (score > best) || !this.maximize && (score < best)) {
-				this.logger.trace("Updating best choice {} with {} since it is better than the current solution with performance {}", choice, action, best);
-				best = score;
-				choice = action;
-			} else {
-				this.logger.trace("Skipping current solution {} since its score {} is not better than the currently best {}.", action, score, best);
-			}
+			scores.put(action, score);
+			assert !(new Double(score).equals(Double.NaN)) : "The score of action " + action + " is NaN, which cannot be the case. Score mean is " + labelOfChild.scores.getMean() + ", number of visits is " + labelOfChild.visits;
 		}
+		A choice = this.getActionBasedOnScores(scores);
 
 		/* quick sanity check */
 		assert choice != null : "Would return null, but this must not be the case!";
@@ -110,6 +113,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	public void setLoggerName(final String name) {
 		this.loggerName = name;
 		this.logger = LoggerFactory.getLogger(name);
+		this.logger.info("Set logger of {} to {}", this, name);
 	}
 
 }

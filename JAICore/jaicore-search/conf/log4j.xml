@@ -63,8 +63,18 @@
 		<level value="info" />
 	</logger>
 	
+	  <logger name="gui">
+    <level value="trace" />
+    
+    <appender-ref ref="console" />
+    <appender-ref ref="infoFileAppender" />
+    <appender-ref ref="warnFileAppender" />
+    <appender-ref ref="errFileAppender" />
+    <appender-ref ref="traceFileAppender" />
+  </logger>
+	
   <logger name="testedalgorithm">
-    <level value="debug" />
+    <level value="trace" />
     
     <appender-ref ref="console" />
     <appender-ref ref="infoFileAppender" />
@@ -73,7 +83,7 @@
     <appender-ref ref="traceFileAppender" />
   </logger>
   
-  <logger name="testedalgorithm._algorithm._algorithm">
+  <logger name="testedalgorithm._orgraphsearch">
     <level value="info" />
   </logger>
   

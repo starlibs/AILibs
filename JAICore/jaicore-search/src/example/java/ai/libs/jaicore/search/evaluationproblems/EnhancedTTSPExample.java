@@ -26,12 +26,12 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPGraphGenerator;
-import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPSolutionPredicate;
-import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPToGraphSearchReducer;
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPSimpleGraphGenerator;
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPSimpleSolutionPredicate;
+import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPToSimpleGraphSearchReducer;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
 import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPGenerator;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
+import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPState;
 
 public class EnhancedTTSPExample {
 
@@ -43,16 +43,16 @@ public class EnhancedTTSPExample {
 	private static final boolean VISUALIZE = true;
 
 	private static EnhancedTTSP ttsp;
-	private static EnhancedTTSPGraphGenerator graphGenerator;
-	private static EnhancedTTSPSolutionPredicate goalTester;
-	private static GraphSearchInput<EnhancedTTSPNode, String> input;
-	private static EnhancedTTSPToGraphSearchReducer reducer;
+	private static EnhancedTTSPSimpleGraphGenerator graphGenerator;
+	private static EnhancedTTSPSimpleSolutionPredicate goalTester;
+	private static GraphSearchInput<EnhancedTTSPState, String> input;
+	private static EnhancedTTSPToSimpleGraphSearchReducer reducer;
 
 	public static void main(final String... args) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		EnhancedTTSPExample example = new EnhancedTTSPExample();
 		ttsp = new EnhancedTTSPGenerator().generate(N, MAX_DISTANCE);
-		graphGenerator = new EnhancedTTSPGraphGenerator(ttsp);
-		goalTester = new EnhancedTTSPSolutionPredicate(ttsp);
+		graphGenerator = new EnhancedTTSPSimpleGraphGenerator(ttsp);
+		goalTester = new EnhancedTTSPSimpleSolutionPredicate(ttsp);
 		input = new GraphSearchInput<>(graphGenerator, goalTester);
 		example.testRandomHillClimbing();
 		example.testRandomSearch();
@@ -72,16 +72,16 @@ public class EnhancedTTSPExample {
 	}
 
 	public void testDijkstra() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
-		this.runAlgorithm("Dijkstra", new StandardBestFirst<EnhancedTTSPNode, String, Double>(new GraphSearchWithSubpathEvaluationsInput<>(input, n -> n.getHead().getTime())), true);
+		this.runAlgorithm("Dijkstra", new StandardBestFirst<EnhancedTTSPState, String, Double>(new GraphSearchWithSubpathEvaluationsInput<>(input, n -> n.getHead().getTime())), true);
 	}
 
 	/**
 	 * Small class for heuristic based node evaluation as can be used by AStar
 	 */
-	private class AStarNodeEvaluator implements IPathEvaluator<EnhancedTTSPNode, String, Double> {
+	private class AStarNodeEvaluator implements IPathEvaluator<EnhancedTTSPState, String, Double> {
 
 		@Override
-		public Double evaluate(final IPath<EnhancedTTSPNode, String> node) {
+		public Double evaluate(final IPath<EnhancedTTSPState, String> node) {
 
 			double g = node.getHead().getTime();
 			double h = 0;
@@ -95,28 +95,28 @@ public class EnhancedTTSPExample {
 	}
 
 	public void testAStarEpsilon() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
-		this.runAlgorithm("AStarEpsilon", new BestFirstEpsilon<EnhancedTTSPNode, String, Integer>(new GraphSearchWithSubpathEvaluationsInput<>(input, new AStarNodeEvaluator()), n -> ttsp.getLocations().size() - n.getHead().getCurTour().size(), 1.3, false), true);
+		this.runAlgorithm("AStarEpsilon", new BestFirstEpsilon<EnhancedTTSPState, String, Integer>(new GraphSearchWithSubpathEvaluationsInput<>(input, new AStarNodeEvaluator()), n -> ttsp.getLocations().size() - n.getHead().getCurTour().size(), 1.3, false), true);
 	}
 
 	public void testMCTS() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
-		this.runAlgorithm("MCTS", new UCTPathSearch<EnhancedTTSPNode, String>(new GraphSearchWithPathEvaluationsInput<>(input, n -> ttsp.getSolutionEvaluator().evaluate(reducer.decodeSolution(n))), 0, 0, false), false);
+		this.runAlgorithm("MCTS", new UCTPathSearch<EnhancedTTSPState, String>(new GraphSearchWithPathEvaluationsInput<>(input, n -> ttsp.getSolutionEvaluator().evaluate(reducer.decodeSolution(n))), 0, 0, false), false);
 	}
 
 	public void testRandomSearch() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		this.runAlgorithm("RandomSearch", new RandomSearch<>(input), false);
 	}
 
-	private void runAlgorithm(final String name, final IPathInORGraphSearch<?, ? extends SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String> search, final boolean stopOnFirst) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
+	private void runAlgorithm(final String name, final IPathInORGraphSearch<?, ? extends SearchGraphPath<EnhancedTTSPState, String>, EnhancedTTSPState, String> search, final boolean stopOnFirst) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 		logger.info("Running {}", name);
 		long start = System.currentTimeMillis();
-		Pair<SearchGraphPath<EnhancedTTSPNode, String>, Double> answer = this.runSearch(search, stopOnFirst, VISUALIZE);
+		Pair<SearchGraphPath<EnhancedTTSPState, String>, Double> answer = this.runSearch(search, stopOnFirst, VISUALIZE);
 		long runtime = System.currentTimeMillis() - start;
 		logger.info("Runtime was: {}", runtime);
-		logger.info("Best tour is: {}", answer.getX().getNodes().stream().map(EnhancedTTSPNode::getCurLocation).collect(Collectors.toList()));
+		logger.info("Best tour is: {}", answer.getX().getNodes().stream().map(EnhancedTTSPState::getCurLocation).collect(Collectors.toList()));
 		logger.info("Time of best tour is: {}", answer.getY());
 	}
 
-	private Pair<SearchGraphPath<EnhancedTTSPNode, String>, Double> runSearch(final IPathInORGraphSearch<?, ? extends SearchGraphPath<EnhancedTTSPNode, String>, EnhancedTTSPNode, String> search, final boolean stopOnFirst, final boolean visualize) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
+	private Pair<SearchGraphPath<EnhancedTTSPState, String>, Double> runSearch(final IPathInORGraphSearch<?, ? extends SearchGraphPath<EnhancedTTSPState, String>, EnhancedTTSPState, String> search, final boolean stopOnFirst, final boolean visualize) throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
 
 		if (visualize) {
 			logger.warn("Currently no visualization supported.");
@@ -133,9 +133,9 @@ public class EnhancedTTSPExample {
 		}, TIMEOUT_IN_MS);
 
 		/* run search */
-		SearchGraphPath<EnhancedTTSPNode, String> bestSolution = null;
+		SearchGraphPath<EnhancedTTSPState, String> bestSolution = null;
 		double bestValue = Double.MAX_VALUE;
-		SolutionCandidateFoundEvent<? extends SearchGraphPath<EnhancedTTSPNode, String>> solution;
+		SolutionCandidateFoundEvent<? extends SearchGraphPath<EnhancedTTSPState, String>> solution;
 		while (!Thread.currentThread().isInterrupted() && (solution = search.nextSolutionCandidateEvent()) != null) {
 			double value = solution.getTimestamp();
 			if (value < bestValue) {

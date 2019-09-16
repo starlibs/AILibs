@@ -1,9 +1,12 @@
 package ai.libs.jaicore.basic.kvstore;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Generic interface of KVStores allowing convenient access to the data contained.
@@ -163,6 +166,14 @@ public interface IKVStore extends Map<String, Object> {
 	 * @return The value for the given key as a file.
 	 */
 	public File getAsFile(final String key);
+
+	/**
+	 * Returns a value as a JSON object
+	 * @param key Key for which the value shall be returned
+	 * @return The value for the given key as a JSON object
+	 * @throws IOException
+	 */
+	public JsonNode getAsJson(final String key) throws IOException;
 
 	/**
 	 * Checks whether particular keys have matching values according to {@code selection}.

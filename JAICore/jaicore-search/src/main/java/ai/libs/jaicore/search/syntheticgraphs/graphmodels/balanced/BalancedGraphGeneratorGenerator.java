@@ -20,6 +20,24 @@ class BalancedGraphGeneratorGenerator {
 	private final int branchingFactor;
 	private final int maxDepth;
 
+	public int getNumberOfLeafsUnderANonTerminalNodeInDepth(final int depthOfRequestedNode, final int assumedDepthOfTree) {
+		return (int)Math.pow(this.branchingFactor, assumedDepthOfTree - depthOfRequestedNode);
+	}
+
+	public int getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final long maxNumberOfNodes) {
+
+		/* determine possible height */
+		int height = 0;
+		long numberOfNodesForHeight = 1;
+		while (numberOfNodesForHeight < maxNumberOfNodes) {
+			height ++;
+			numberOfNodesForHeight = (long)Math.pow(BalancedGraphGeneratorGenerator.this.branchingFactor, height);
+		}
+		height --;
+		int missingLayers = BalancedGraphGeneratorGenerator.this.maxDepth - depth;
+		return (int)Math.pow(BalancedGraphGeneratorGenerator.this.branchingFactor, missingLayers - height);
+	}
+
 	public class BalancedTreeNode implements ITransparentTreeNode {
 		int depth;
 		long idOfNodeOnLayer;
@@ -97,6 +115,26 @@ class BalancedGraphGeneratorGenerator {
 		@Override
 		public int getDistanceToDeepestLeafUnderNode() {
 			return this.getDistanceToShallowestLeafUnderNode();
+		}
+
+		@Override
+		public long getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(final long maxNumberOfNodes) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public long getNumberOfSubtreesWithMaxNumberOfNodes(final long maxNumberOfNodes) {
+			return BalancedGraphGeneratorGenerator.this.getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(this.depth, maxNumberOfNodes);
+		}
+
+		@Override
+		public long getNumberOfLeafsPriorToNodeViaDFS() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public long getNumberOfLeafsInSubtreesWithMaxNumberOfNodesPriorToThisNode(final long maxNumberOfNodes) {
+			throw new UnsupportedOperationException();
 		}
 	}
 

@@ -20,6 +20,9 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ai.libs.jaicore.basic.sets.SetUtil;
 
 /**
@@ -246,6 +249,11 @@ public class KVStore extends HashMap<String, Object> implements IKVStore, Serial
 		} else {
 			throw new IllegalStateException("Cannot return value as a file if it is not of that type.");
 		}
+	}
+
+	@Override
+	public JsonNode getAsJson(final String key) throws IOException {
+		return new ObjectMapper().readTree(this.getAsString(key));
 	}
 
 	/**

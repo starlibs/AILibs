@@ -32,6 +32,7 @@ import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.core.interfaces.AAnyPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
@@ -181,7 +182,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IGraphSearchInpu
 		N from = path.getHead();
 		assert from != null;
 		assert to != null;
-		assert !this.exploredGraph.hasItem(to);
+		assert !this.exploredGraph.hasItem(to) : "Cannot attach node " + to + " to path " + path.getNodes() + " of local model, because it is already contained in the explored graph! Known nodes: " + this.exploredGraph.getItems().stream().map(s -> "\n\t" + s).collect(Collectors.joining());
 		assert this.exploredGraph.hasItem(from) : "The head " + from + " of the path with " + path.getNumberOfNodes() + " nodes is not part of the explored graph! Here is the path: \n\t"
 		+ path.getNodes().stream().map(Object::toString).collect(Collectors.joining("\n\t"));
 		this.exploredGraph.addItem(to);
@@ -350,6 +351,9 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<IGraphSearchInpu
 		this.exhausted.add(head);
 		this.prioritizedNodes.remove(head);
 		this.updateExhaustedAndPrioritizedState(head);
+		if (head != this.root) {
+			this.post(new RolloutEvent<N, Double>(this.getId(), cPath.getNodes(), null));
+		}
 		return head == this.root ? null : cPath;
 	}
 

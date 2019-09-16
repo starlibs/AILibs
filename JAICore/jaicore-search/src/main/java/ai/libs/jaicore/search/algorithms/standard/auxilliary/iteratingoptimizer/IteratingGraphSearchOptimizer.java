@@ -94,6 +94,12 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 	}
 
 	@Override
+	public void registerListener(final Object listener) {
+		super.registerListener(listener);
+		this.baseAlgorithm.registerListener(listener);
+	}
+
+	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
 		if (this.baseAlgorithm instanceof ILoggingCustomizable) {

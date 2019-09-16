@@ -31,4 +31,4 @@ project(":autofe-reldata").projectDir = new File(configPrefix,"autofe-reldata")
 
 
 // include api projects
-includeBuild "../api4"
+//includeBuild "../api4"

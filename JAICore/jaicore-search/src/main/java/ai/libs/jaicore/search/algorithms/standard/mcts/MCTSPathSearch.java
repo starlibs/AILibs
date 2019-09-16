@@ -30,12 +30,17 @@ import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.Subscribe;
+
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
+import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.graphvisualizer.events.graph.GraphInitializedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeAddedEvent;
 import ai.libs.jaicore.graphvisualizer.events.graph.NodeTypeSwitchEvent;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
+import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.BradleyTerryLikelihoodPolicy;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
@@ -80,7 +85,8 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	private final boolean forbidDoublePaths;
 	private int numberOfPlayouts = 0;
 
-	public MCTSPathSearch(final GraphSearchWithPathEvaluationsInput<N, A, V> problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy, final V penaltyForFailedEvaluation, final boolean forbidDoublePaths) {
+	public MCTSPathSearch(final GraphSearchWithPathEvaluationsInput<N, A, V> problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy, final V penaltyForFailedEvaluation,
+			final boolean forbidDoublePaths) {
 		super(problem);
 		this.graphGenerator = problem.getGraphGenerator();
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
@@ -89,7 +95,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		if (!(tmpGoalTester instanceof NodeGoalTester)) {
 			throw new IllegalArgumentException("MCTS must be run with a NodeGoalEvaluator!");
 		}
-		this.nodeGoalTester = (NodeGoalTester<N, A>)tmpGoalTester;
+		this.nodeGoalTester = (NodeGoalTester<N, A>) tmpGoalTester;
 
 		this.treePolicy = treePolicy;
 		this.defaultPolicy = defaultPolicy;
@@ -100,17 +106,30 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		this.exploredGraph.addItem(this.root);
 		this.penaltyForFailedEvaluation = penaltyForFailedEvaluation;
 		this.forbidDoublePaths = forbidDoublePaths;
+
+		/* configure the policies */
+		if (treePolicy instanceof BradleyTerryLikelihoodPolicy) {
+			((BradleyTerryLikelihoodPolicy<N, A>) treePolicy).setExplorationGraph(this.exploredGraph);
+		}
+
+		if (treePolicy instanceof IEventEmitter) {
+			((IEventEmitter) treePolicy).registerListener(new Object() {
+
+				@Subscribe
+				public void receiveEvent(final AlgorithmEvent e) {
+					MCTSPathSearch.this.post(e); // forward the event
+				}
+			});
+		}
 	}
 
 	/**
 	 * This method produces a playout path in three phases. Starting with root, it always chooses one of the children of the currently considered node as the next current node.
 	 *
-	 * 1. selection: if all successors of the current node have been visited, use the tree policy to choose the next node
-	 * 2. expansion: one (new) child node is added to expand the tree (here, this means to mark one of the successors as visited)
-	 * 3. simulation: draw a path completion from the node added in step 2
+	 * 1. selection: if all successors of the current node have been visited, use the tree policy to choose the next node 2. expansion: one (new) child node is added to expand the tree (here, this means to mark one of the successors as
+	 * visited) 3. simulation: draw a path completion from the node added in step 2
 	 *
-	 * Note that we have two stages of node expansion in this algorithm.
-	 * In a first step, node successors are always computed in a block, i.e. we compute all successors at once and attach them to the <code>exploredGraph</code> variable.
+	 * Note that we have two stages of node expansion in this algorithm. In a first step, node successors are always computed in a block, i.e. we compute all successors at once and attach them to the <code>exploredGraph</code> variable.
 	 * However, the algorithm ignores such generated nodes until they become explicitly "generated" in step 2, which means that they are added to the <code>nodesExplicitlyAdded</code> variable.
 	 *
 	 * If this method hits a dead-end, it will draw a new playout automatically.
@@ -123,6 +142,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	 * @throws ActionPredictionFailedException
 	 */
 	private List<N> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, ActionPredictionFailedException {
+		long startPlayout = System.currentTimeMillis();
 		this.logger.debug("Computing a new playout ...");
 		this.numberOfPlayouts++;
 		N current = this.root;
@@ -175,14 +195,14 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 			assert chosenAction != null : "Chosen action must not be null!";
 			next = successorStates.get(chosenAction);
 			assert next != null : "Next action must not be null!";
-			this.logger.trace("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
+			this.logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 			current = next;
 			childrenOfCurrent = this.unexpandedNodes.contains(current) ? null : this.exploredGraph.getSuccessors(current);
 			path.add(current);
 
 			/* if the current path is a goal path, return it */
 			if (this.isGoal(current)) {
-				this.logger.debug("Constructed complete solution with tree policy.");
+				this.logger.debug("Constructed complete solution with tree policy within {}ms.", System.currentTimeMillis() - startPlayout);
 				return path;
 			}
 			this.post(new NodeTypeSwitchEvent<N>(this.getId(), next, NODESTATE_ROLLOUT));
@@ -258,7 +278,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 			path.add(current);
 		}
 		this.checkThatPathIsSolution(path);
-		this.logger.debug("Drawn playout path is: {}.", path);
+		this.logger.debug("Drawn playout path after {}ms is: {}.", System.currentTimeMillis() - startPlayout, path);
 		this.propagateFullyKnownNodes(current);
 		return path;
 	}
@@ -288,7 +308,8 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 	}
 
 	private Map<A, N> expandNode(final N node) throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
-		this.logger.debug("Starting expansion of node {}", node);
+		long startExpansion = System.currentTimeMillis();
+		this.logger.trace("Starting expansion of node {}", node);
 		this.checkAndConductTermination();
 		if (!this.unexpandedNodes.contains(node)) {
 			throw new IllegalArgumentException();
@@ -301,17 +322,27 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 		} catch (ExecutionException e) {
 			throw new AlgorithmException("Could not compute available actions.", e.getCause());
 		}
+		long successorGenerationRuntime = System.currentTimeMillis() - startExpansion;
+		if (successorGenerationRuntime > 10) {
+			this.logger.warn("The successor generation runtime was {}ms", successorGenerationRuntime);
+		}
 		assert availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toList()).size() == availableActions.stream().map(NodeExpansionDescription::getAction).collect(Collectors.toSet())
-				.size() : "The actions under this node don't have unique names";
+				.size() : "The actions under this node don't have unique names. Action names: \n\t" + availableActions.stream().map(d -> d.getAction().toString()).collect(Collectors.joining("\n\t"));
 				Map<A, N> successorStates = new HashMap<>();
 				for (NodeExpansionDescription<N, A> d : availableActions) {
+					N to = d.getTo();
+					A action = d.getAction();
 					this.checkAndConductTermination();
-					successorStates.put(d.getAction(), d.getTo());
-					this.logger.trace("Adding edge {} -> {} with label {}", node, d.getTo(), d.getAction());
-					this.exploredGraph.addItem(d.getTo());
-					this.unexpandedNodes.add(d.getTo());
-					this.exploredGraph.addEdge(node, d.getTo(), d.getAction());
-					this.post(new NodeAddedEvent<>(this.getId(), node, d.getTo(), this.isGoal(d.getTo()) ? "or_solution" : "or_open"));
+					successorStates.put(action, to);
+					this.logger.trace("Adding edge {} -> {} with label {}", node, to, action);
+					this.exploredGraph.addItem(to);
+					this.unexpandedNodes.add(to);
+					this.exploredGraph.addEdge(node, to, action);
+					this.post(new NodeAddedEvent<>(this.getId(), node, to, this.isGoal(to) ? "or_solution" : "or_open"));
+				}
+				long expansionRuntime = System.currentTimeMillis() - startExpansion;
+				if (expansionRuntime > 10) {
+					this.logger.warn("The expansion runtime was {}ms", expansionRuntime);
 				}
 				return successorStates;
 	}
@@ -371,7 +402,6 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 						return finishEvent;
 					}
 
-
 					/* otherwise, compute a playout and, if the path is a solution, compute its score and update the path */
 					else {
 						this.logger.debug("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
@@ -382,8 +412,9 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 							try {
 								V playoutScore = this.playoutSimulator.evaluate(this.getPathForNodeList(path));
 								boolean isSolutionPlayout = this.isGoal(path.get(path.size() - 1));
-								this.logger.debug("Determined playout score {}. Is goal: {}. Now updating the path.", playoutScore, isSolutionPlayout);
+								this.logger.info("Determined playout score {}. Is goal: {}. Now updating the path of tree policy {}.", playoutScore, isSolutionPlayout, this.treePolicy);
 								this.scoreCache.put(path, playoutScore);
+								this.post(new RolloutEvent<>(this.getId(), path, this.scoreCache.get(path)));
 								this.treePolicy.updatePath(path, playoutScore);
 								if (isSolutionPlayout) {
 									return this.registerSolution(new EvaluatedSearchGraphPath<>(path, this.getActionListForPath(path), playoutScore));
@@ -394,6 +425,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 								throw e; // if we get here (no exception for timeout or cancel has been thrown in check), we really have been interrupted
 							} catch (ObjectEvaluationFailedException e) {
 								this.scoreCache.put(path, this.penaltyForFailedEvaluation);
+								this.post(new RolloutEvent<>(this.getId(), path, this.scoreCache.get(path)));
 								this.post(new NodeTypeSwitchEvent<>(this.getId(), path.get(path.size() - 1), "or_ffail"));
 								this.treePolicy.updatePath(path, this.penaltyForFailedEvaluation);
 								this.logger.warn("Could not evaluate playout {}", e);
@@ -402,11 +434,11 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 							}
 						} else {
 							assert !this.forbidDoublePaths : "Second time path " + this.getActionListForPath(path) + " has been generated even though double paths are forbidden!";
-						this.logger.warn("Path {} has already been observed in the past.", this.getActionListForPath(path));
 						V playoutScore = this.scoreCache.get(path);
 						this.logger.debug("Looking up score {} for the already evaluated path {}", playoutScore, path);
 						this.treePolicy.updatePath(path, playoutScore);
 						this.closePath(path); // visualize that path rollout has been completed
+						this.post(new RolloutEvent<>(this.getId(), path, this.scoreCache.get(path)));
 						}
 					}
 
@@ -472,7 +504,15 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 			this.logger.info("Setting logger of tree policy to {}.treepolicy", name);
 			((ILoggingCustomizable) this.treePolicy).setLoggerName(name + ".treepolicy");
 		} else {
-			this.logger.info("Not setting logger of tree policy");
+			this.logger.info("Not setting logger of tree policy, because {} is not customizable.", this.treePolicy.getClass().getName());
+		}
+
+		/* set logger of default policy */
+		if (this.defaultPolicy instanceof ILoggingCustomizable) {
+			this.logger.info("Setting logger of default policy to {}.defaultpolicy", name);
+			((ILoggingCustomizable) this.defaultPolicy).setLoggerName(name + ".defaultpolicy");
+		} else {
+			this.logger.info("Not setting logger of default policy, because {} is not customizable.", this.defaultPolicy.getClass().getName());
 		}
 	}
 

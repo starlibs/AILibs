@@ -1,23 +1,37 @@
 package ai.libs.jaicore.search.syntheticgraphs.graphmodels;
 
+import java.math.BigInteger;
+
 public interface ITransparentTreeNode {
 
 	public int getDepth();
 
-	public long getNumberOfLeftRelativesInSameGeneration();
+	public BigInteger getNumberOfLeftRelativesInSameGeneration();
 
-	public long getNumberOfRightRelativesInSameGeneration();
+	public BigInteger getNumberOfRightRelativesInSameGeneration();
 
-	public long getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(long maxNumberOfNodes);
-	public long getNumberOfSubtreesWithMaxNumberOfNodes(long maxNumberOfNodes);
+	public BigInteger getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(BigInteger maxNumberOfNodes);
 
-	public long getNumberOfLeafsPriorToNodeViaDFS();
+	/**
+	 *  Gets the number of leaf nodes of all sub-trees of maximum given size prior to the node on which it is invoked.
+	 *
+	 *  Note that the leafs in the same sub-tree are not counted.
+	 *  These can be obtained by computing the number of all leaf nodes prior to this one minus the result of this method.
+	 *
+	 * @param maxNumberOfNodes
+	 * @return
+	 */
+	public BigInteger getNumberOfLeafsInSubtreesWithMaxNumberOfNodesPriorToThisNode(BigInteger maxNumberOfNodes);
 
-	public long getNumberOfLeafsStemmingFromLeftRelativesInSameGeneration(); // siblings that are leafs should count as 1
+	public BigInteger getNumberOfSubtreesWithMaxNumberOfNodes(BigInteger maxNumberOfNodes);
 
-	public long getNumberOfLeafsUnderNode();
+	public BigInteger getNumberOfLeafsPriorToNodeViaDFS();
 
-	public long getNumberOfLeafsStemmingFromRightRelativesInSameGeneration(); // siblings that are leafs should count as 1
+	public BigInteger getNumberOfLeafsStemmingFromLeftRelativesInSameGeneration(); // siblings that are leafs should count as 1
+
+	public BigInteger getNumberOfLeafsUnderNode();
+
+	public BigInteger getNumberOfLeafsStemmingFromRightRelativesInSameGeneration(); // siblings that are leafs should count as 1
 
 	public int getDistanceToShallowestLeafUnderNode();
 

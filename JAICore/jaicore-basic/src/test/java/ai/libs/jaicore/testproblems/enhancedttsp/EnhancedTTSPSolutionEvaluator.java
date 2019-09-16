@@ -15,9 +15,14 @@ public class EnhancedTTSPSolutionEvaluator implements IObjectEvaluator<ShortList
 
 	@Override
 	public Double evaluate(final ShortList solutionTour) {
-		EnhancedTTSPNode state = this.problem.getInitalState();
+		EnhancedTTSPState state = this.problem.getInitalState();
 		for (short next : solutionTour) {
-			state = this.problem.computeSuccessorState(state, next);
+			try {
+				state = this.problem.computeSuccessorState(state, next);
+			}
+			catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Cannot evaluate tour " + solutionTour + " due to an error in successor computation of " + state + " with next step " + next + ". Message: " + e.getMessage());
+			}
 		}
 		return state.getTime() - this.problem.getHourOfDeparture();
 	}

@@ -41,6 +41,6 @@ public class SPUCBPolicy<N, A> extends UCBPolicy<N, A> implements ILoggingCustom
 		/* get single player term added */
 		double squaredResults = Arrays.stream(labelOfNode.scores.getValues()).reduce(0, (a, b) -> a + Math.pow(b, 2));
 		double expectedResults = labelOfChild.visits * Math.pow(labelOfNode.scores.getMean(), 2);
-		return ucb + Math.sqrt((squaredResults - expectedResults + this.bigD) / labelOfChild.visits);
+		return ucb + (this.isMaximize() ? 1 : -1) * Math.sqrt((squaredResults - expectedResults + this.bigD) / labelOfChild.visits);
 	}
 }

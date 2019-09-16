@@ -1,5 +1,6 @@
 package ai.libs.jaicore.testproblems.enhancedttsp;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,9 @@ public class EnhancedTTSP {
 		this.numberOfConsideredHours = blockedHours.size();
 		this.locations = locations;
 		for (Location l : locations) {
+			if (this.xCoords.containsKey(l.getId())) {
+				throw new IllegalArgumentException("Illegal list of locations. There are at least two locations with id " + l.getId());
+			}
 			this.xCoords.put(l.getId(), l.getX());
 			this.yCoords.put(l.getId(), l.getY());
 		}
@@ -63,7 +67,7 @@ public class EnhancedTTSP {
 		this.durationOfLongBreak = durationOfLongBreak;
 		this.maxConsecutiveDrivingTime = maxConsecutiveDrivingTime;
 		this.maxDrivingTimeBetweenLongBreaks = 24 - durationOfLongBreak;
-		this.possibleDestinations = new ShortArrayList(locations.stream().map(Location::getId).sorted().collect(Collectors.toList()));
+		this.possibleDestinations = new ShortArrayList(locations.stream().map(Location::getId).collect(Collectors.toList()));
 		this.solutionEvaluator = new EnhancedTTSPSolutionEvaluator(this);
 	}
 
@@ -107,16 +111,16 @@ public class EnhancedTTSP {
 		return this.possibleDestinations;
 	}
 
-	public EnhancedTTSPNode getInitalState() {
-		return new EnhancedTTSPNode(this.startLocation, new ShortArrayList(), this.hourOfDeparture, 0, 0);
+	public EnhancedTTSPState getInitalState() {
+		return new EnhancedTTSPState(null, this.startLocation, this.hourOfDeparture, 0, 0);
 	}
 
-	public EnhancedTTSPNode computeSuccessorState(final EnhancedTTSPNode n, final short destination) {
+	public EnhancedTTSPState computeSuccessorState(final EnhancedTTSPState n, final short destination) {
 
 		this.logger.info("Generating successor for node {} to go to destination {}", n, destination);
 
 		if (n.getCurLocation() == destination) {
-			throw new IllegalArgumentException("It is forbidden to ask for the successor to the current position as a destination!");
+			throw new IllegalArgumentException("It is forbidden to ask for the successor to the current position as a destination! Here, both current position and destination are " + destination + ".\nComplete tour: " + n.getCurTour());
 		}
 
 		/*
@@ -129,7 +133,7 @@ public class EnhancedTTSP {
 		double timeSinceLastShortBreak = n.getTimeTraveledSinceLastShortBreak();
 		double timeSinceLastLongBreak = n.getTimeTraveledSinceLastLongBreak();
 
-		double minTravelTime = Math.sqrt(Math.pow(this.xCoords.get(curLocation) - this.xCoords.get(destination), 2) + Math.pow(this.yCoords.get(curLocation)- this.yCoords.get(destination), 2)); // use Euclidean distance as min travel time
+		double minTravelTime = this.getMinTravelTimeBetweenLocations(destination, curLocation);
 		this.logger.info("Simulating the ride from {} to " + destination + ", which minimally takes " + minTravelTime + ". We are departing at {}", curLocation, curTime);
 
 		double timeToNextShortBreak = this.getTimeToNextShortBreak(curTime, Math.min(timeSinceLastShortBreak, timeSinceLastLongBreak));
@@ -192,9 +196,29 @@ public class EnhancedTTSP {
 
 		ShortList tourToHere = new ShortArrayList(n.getCurTour());
 		tourToHere.add(destination);
-		return new EnhancedTTSPNode(destination, tourToHere, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
+		return new EnhancedTTSPState(n, destination, timeOfArrival, timeSinceLastShortBreak, timeSinceLastLongBreak);
 	}
 
+	public double getMinTravelTimeBetweenLocations(final short a, final short b) {
+		return Math.sqrt(Math.pow(this.xCoords.get(a) - this.xCoords.get(b), 2) + Math.pow(this.yCoords.get(a)- this.yCoords.get(b), 2)); // use Euclidean distance as min travel time
+	}
+
+	public double getLongestMinTravelTimeBetweenTwoLocations() {
+		double max = 0;
+		for (short a = 0; a < this.locations.size(); a++) {
+			for (short b = 0; b < a; b ++) {
+				max = Math.max(max, this.getMinTravelTimeBetweenLocations(a, b));
+			}
+		}
+		return max;
+	}
+
+	public double getUpperBoundForAnyTour() {
+		double maxTime = this.getLongestMinTravelTimeBetweenTwoLocations();
+		double totalTimeBoundForTraveling = maxTime * this.locations.size();
+		int longBreaks = (int)Math.floor(totalTimeBoundForTraveling / this.maxDrivingTimeBetweenLongBreaks);
+		return totalTimeBoundForTraveling + longBreaks * this.durationOfLongBreak;
+	}
 
 
 	private double getTimeToNextShortBreak(final double time, final double timeSinceLastBreak) {
@@ -247,6 +271,21 @@ public class EnhancedTTSP {
 		double additionalShare = (doableMinTravelTimeForRest / minTravelTimeForRest) * (1 - shareOfTripDone);
 		this.logger.info("\t\tAdditional share:" + additionalShare);
 		return shareOfTripDone + additionalShare;
+	}
+
+	public ShortList getPossibleRemainingDestinationsInState(final EnhancedTTSPState state) {
+		ShortList list = new ShortArrayList();
+		ShortList curTour = state.getCurTour();
+		if (curTour.size() == this.getPossibleDestinations().size() -1) { // allow to go to start location iff this is the last place to go
+			return new ShortArrayList(Arrays.asList(this.startLocation));
+		}
+
+		for (short l : this.getPossibleDestinations()) {
+			if (l != this.startLocation && !curTour.contains(l)) {
+				list.add(l);
+			}
+		}
+		return list;
 	}
 
 	public EnhancedTTSPSolutionEvaluator getSolutionEvaluator() {

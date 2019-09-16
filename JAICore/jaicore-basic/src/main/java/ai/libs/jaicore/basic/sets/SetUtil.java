@@ -1044,4 +1044,77 @@ public class SetUtil {
 		}
 		return true;
 	}
+
+	public List<Boolean> checkEqualsPerElement(final List<?> l1, final List<?> l2) {
+		if (l1.size() != l2.size()) {
+			throw new IllegalArgumentException();
+		}
+		int n = l1.size();
+		List<Boolean> matches = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			matches.add(l1.get(i).equals(l2.get(i)));
+		}
+		return matches;
+	}
+
+	public static class ListComparisonResult {
+		private int sizeA, sizeB;
+		private List<Integer> hashCodesA, hashCodesB;
+		private List<Boolean> equals;
+
+		public ListComparisonResult(final int sizeA, final int sizeB, final List<Integer> hashCodesA, final List<Integer> hashCodesB, final List<Boolean> equals) {
+			super();
+			this.sizeA = sizeA;
+			this.sizeB = sizeB;
+			this.hashCodesA = hashCodesA;
+			this.hashCodesB = hashCodesB;
+			this.equals = equals;
+		}
+
+		public String getQuickSummary() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("Sizes: " + this.sizeA + "/" + this.sizeB + "\n");
+			sb.append("Hash codes: \n");
+			int n = Math.max(this.sizeA, this.sizeB);
+			for (int i = 0; i < n; i++) {
+				sb.append("\t");
+				sb.append(this.sizeA >= i ? this.hashCodesA.get(i) : "             ");
+				sb.append("/");
+				sb.append(this.sizeB >= i ? this.hashCodesB.get(i) : "             ");
+				sb.append("\n");
+			}
+			sb.append("Equals: ");
+			sb.append(implode(this.equals, ", "));
+			return sb.toString();
+		}
+
+		public boolean allHashCodesMatch() {
+			return this.hashCodesA.equals(this.hashCodesB);
+		}
+
+		public boolean allEqual() {
+			return !this.equals.contains(false);
+		}
+
+		public int getFirstIndexOfUnequalness() {
+			return this.equals.indexOf(false);
+		}
+	}
+
+	public static ListComparisonResult compareLists(final List<?> l1, final List<?> l2) {
+		int sizeA = l1.size();
+		int sizeB = l2.size();
+		List<Integer> hashCodesA = new ArrayList<>(sizeA);
+		List<Integer> hashCodesB = new ArrayList<>(sizeB);
+		l1.forEach(e -> hashCodesA.add(e.hashCode()));
+		l2.forEach(e -> hashCodesB.add(e.hashCode()));
+
+		int n = Math.min(sizeA, sizeB);
+		List<Boolean> matches = new ArrayList<>(n);
+		for (int i = 0; i < n; i++) {
+			matches.add(l1.get(i).equals(l2.get(i)));
+		}
+		return new ListComparisonResult(sizeA, sizeB, hashCodesA, hashCodesB, matches);
+	}
+
 }

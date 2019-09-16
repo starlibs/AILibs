@@ -25,8 +25,8 @@ import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.degenerated.DegeneratedGraphSearchWithPathEvaluationsProblem;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized.EqualSizedIslandsModel;
-import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.ChaoticMeansTreasureModel;
-import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.noisymean.NoisyMeanTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.ChaoticMeansTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.NoisyMeanTreasureModel;
 
 @RunWith(Parameterized.class)
 public class DegeneratedGraphTreasureIslandTester {
@@ -71,7 +71,6 @@ public class DegeneratedGraphTreasureIslandTester {
 
 	@Test
 	public void testIslandSizes() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
-		System.out.println("Island size: " + this.islandSize);
 		IIslandModel model = new EqualSizedIslandsModel(this.islandSize);
 		ChaoticMeansTreasureModel gen = new ChaoticMeansTreasureModel(this.numberOfIslandsWithTreasure, model, 0);
 		DegeneratedGraphSearchWithPathEvaluationsProblem input = new DegeneratedGraphSearchWithPathEvaluationsProblem(new Random(0), this.branchingFactor / 2,this.branchingFactor, this.depth, gen);
