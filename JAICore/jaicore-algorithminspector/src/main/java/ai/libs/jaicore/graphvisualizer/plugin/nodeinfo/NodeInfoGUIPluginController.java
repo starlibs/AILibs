@@ -12,7 +12,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 
 public class NodeInfoGUIPluginController implements IGUIPluginController, ILoggingCustomizable {
 
-	private Logger logger;
+	private Logger logger = LoggerFactory.getLogger(NodeInfoGUIPluginController.class);
 	private NodeInfoGUIPluginModel model;
 
 	public NodeInfoGUIPluginController(final NodeInfoGUIPluginModel model) {

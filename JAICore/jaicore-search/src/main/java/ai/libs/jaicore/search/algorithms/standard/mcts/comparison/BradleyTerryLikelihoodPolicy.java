@@ -19,7 +19,7 @@ import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.observationfilter.EmptyObservationFilter;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.MeanImprovementWinComputer;
+import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.BestAndLatestVsBestAndLatestWinComputer;
 
 /**
  * This is a slightly simplified implementation of the algorithm presented in
@@ -72,16 +72,16 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 			BradleyTerryLikelihoodPolicy.this.winComputer.updateWinsOfChildrenBasedOnNewScore(this, score, isForRightChild);
 
 			/* now update probabilities */
-			BradleyTerryLikelihoodPolicy.this.logger.debug("Updated number of wins from {}/{} to {}/{}", winsLeftBefore, winsRightBefore, this.winsLeft, this.winsRight);
+			BradleyTerryLikelihoodPolicy.this.logger.trace("Updated number of wins from {}/{} to {}/{}", winsLeftBefore, winsRightBefore, this.winsLeft, this.winsRight);
 			double pLeftBefore = this.pLeft;
 			double pRightBefore = this.pRight;
 			if (this.winsLeft > 0 || this.winsRight > 0) {
 				this.updateProbabilities();
-				BradleyTerryLikelihoodPolicy.this.logger.debug("Observation of {} on {} causes probabilities to update from {}/{} to {}/{}", score, isForRightChild ? "right" : "left", pLeftBefore, pRightBefore, this.pLeft, this.pRight);
+				BradleyTerryLikelihoodPolicy.this.logger.trace("Observation of {} on {} causes probabilities to update from {}/{} to {}/{}", score, isForRightChild ? "right" : "left", pLeftBefore, pRightBefore, this.pLeft, this.pRight);
 				pLeftBefore = this.pLeft;
 				pRightBefore = this.pRight;
 				this.scaleProbabilities();
-				BradleyTerryLikelihoodPolicy.this.logger.debug("Scaling according to {} visits on {} causes probabilities to update from {}/{} to {}/{}", this.visits, this.node, pLeftBefore, pRightBefore, this.pLeft, this.pRight);
+				BradleyTerryLikelihoodPolicy.this.logger.trace("Scaling according to {} visits on {} causes probabilities to update from {}/{} to {}/{}", this.visits, this.node, pLeftBefore, pRightBefore, this.pLeft, this.pRight);
 			}
 			else {
 				if (!this.observedScoresLeft.isEmpty() && !this.observedScoresRight.isEmpty() && this.observedScoresLeft.equals(this.observedScoresRight)) {
@@ -162,6 +162,10 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 			}
 			return parentProbabilty * (parentModel.left == this ? parentModel.pLeft : parentModel.pRight);
 		}
+
+		public int getVisits() {
+			return this.visits;
+		}
 	}
 
 	private final Map<N, BTModel> nodeModels = new HashMap<>();
@@ -172,7 +176,7 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 	private final int maxIter;
 	private int numberOfEvaluations = 0;
 	private final Random random;
-	private final IWinComputer winComputer = new MeanImprovementWinComputer();
+	private final IWinComputer winComputer = new BestAndLatestVsBestAndLatestWinComputer();
 	private final IObservationUpdate updater = new EmptyObservationFilter();
 	private final IGammaFunction gamma = new GammaFunction();
 
@@ -242,6 +246,7 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 		}
 		else {
 			action = this.random.nextDouble() <= nodeModel.pLeft ? leftAction : rightAction;
+			//			System.out.println(nodeModel.depth + " (" + nodeModel.visits + " visits): " + nodeModel.pLeft + ", " + nodeModel.pRight + " -> " + action);
 			this.logger.info("Stochastically recommending action {} where probability of action {} was {} and probability of action {} was {}", action, leftAction, nodeModel.pLeft, rightAction, nodeModel.pRight);
 		}
 		//		}
@@ -314,4 +319,6 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 	public void registerListener(final Object listener) {
 		this.eventBus.register(listener);
 	}
+
+
 }

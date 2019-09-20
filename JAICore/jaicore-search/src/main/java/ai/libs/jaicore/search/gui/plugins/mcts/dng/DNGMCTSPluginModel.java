@@ -1,8 +1,11 @@
 package ai.libs.jaicore.search.gui.plugins.mcts.dng;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginModel;
 
@@ -18,7 +21,9 @@ public class DNGMCTSPluginModel extends ASimpleMVCPluginModel<DNGMCTSPluginView,
 	private String currentlySelectedNode = "0";
 	private final Map<String, String> parents = new HashMap<>();
 	private final Map<String, List<String>> listsOfKnownSuccessors = new HashMap<>();
-	private final Map<String, BradleyTerryUpdate> btUpdates = new HashMap<>();
+	private final Map<String, List<Double>> listOfObersvationsPerNode = new HashMap<>();
+	private final Map<String, Map<String, List<Double>>> observedQValues = new HashMap<>();
+	private final Map<String, List<DNGBeliefUpdate>> observedUpdates = new HashMap<>();
 
 	@Override
 	public void clear() {
@@ -35,7 +40,11 @@ public class DNGMCTSPluginModel extends ASimpleMVCPluginModel<DNGMCTSPluginView,
 		return this.currentlySelectedNode;
 	}
 
-	public void setNodeStats(final BradleyTerryUpdate update) {
+	public void addObservation(final String node, final double score) {
+		this.listOfObersvationsPerNode.computeIfAbsent(node, n -> new ArrayList<>()).add(score);
+	}
+
+	public void setNodeStats(final DNGQSample update) {
 		if (update == null) {
 			throw new IllegalArgumentException("Cannot process NULL update");
 		}
@@ -43,18 +52,29 @@ public class DNGMCTSPluginModel extends ASimpleMVCPluginModel<DNGMCTSPluginView,
 		if (!this.listsOfKnownSuccessors.containsKey(node)) {
 			throw new IllegalArgumentException("Cannot receive update for an unknown node. Make sure that Rollout events are processed!");
 		}
-		this.btUpdates.put(node, update);
+		this.observedQValues.computeIfAbsent(node, n -> new HashMap<>()).computeIfAbsent(update.getSuccessor(), n2 -> new ArrayList<>()).add(update.getScore());
 		if (node.equals(this.getCurrentlySelectedNode())) {
 			this.getView().update();
 		}
 	}
 
-	public Map<String, BradleyTerryUpdate> getBtUpdates() {
-		return this.btUpdates;
+	public void setNodeStats(final DNGBeliefUpdate update) {
+		if (update == null) {
+			throw new IllegalArgumentException("Cannot process NULL update");
+		}
+		String node = update.getNode();
+		this.observedUpdates.computeIfAbsent(node, n -> new ArrayList<>()).add(update);
+		if (node.equals(this.getCurrentlySelectedNode())) {
+			this.getView().update();
+		}
 	}
 
-	public BradleyTerryUpdate getUpdateOfSelectedNode() {
-		return this.btUpdates.get(this.getCurrentlySelectedNode());
+	public Map<String, List<Double>> getQValuesOfNode(final String node) {
+		return this.observedQValues.get(node);
+	}
+
+	public Map<String, List<Double>> getQValuesOfSelectedNode() {
+		return this.observedQValues.get(this.getCurrentlySelectedNode());
 	}
 
 	public Map<String, List<String>> getListsOfKnownSuccessors() {
@@ -71,5 +91,25 @@ public class DNGMCTSPluginModel extends ASimpleMVCPluginModel<DNGMCTSPluginView,
 
 	public String getParentOfCurrentNode() {
 		return this.parents.get(this.getCurrentlySelectedNode());
+	}
+
+	public Map<String, List<DNGBeliefUpdate>> getObservedMuValues() {
+		return this.observedUpdates;
+	}
+
+	public List<DNGBeliefUpdate> getObservedMuValuesOfCurrentlySelectedNode() {
+		return this.observedUpdates.get(this.getCurrentlySelectedNode());
+	}
+
+	public Map<String, List<Double>> getListOfObersvationsPerNode() {
+		return this.listOfObersvationsPerNode;
+	}
+
+	public DescriptiveStatistics getObservationStatisticsOfNode(final String node) {
+		DescriptiveStatistics stats = new DescriptiveStatistics();
+		for (double val : this.listOfObersvationsPerNode.get(node)) {
+			stats.addValue(val);
+		}
+		return stats;
 	}
 }

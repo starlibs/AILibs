@@ -27,7 +27,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	}
 
 	public class NodeLabel {
-		final DescriptiveStatistics scores = new DescriptiveStatistics();
+		public final DescriptiveStatistics scores = new DescriptiveStatistics();
 		int visits;
 
 		@Override
@@ -88,7 +88,10 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 			assert labelOfChild.visits != 0 : "Visits of node " + child + " cannot be 0 if we already used this action before!";
 			assert labelOfChild.scores.getN() != 0 : "Number of observations cannot be 0 if we already visited this node before";
 			this.logger.trace("Considering action {} whose successor state has stats {} and {} visits", action, labelOfChild.scores.getMean(), labelOfChild.visits);
-			double score = this.getScore(labelOfNode, labelOfChild);
+			Double score = this.getScore(labelOfNode, labelOfChild);
+			if (score.isNaN()) {
+				throw new IllegalStateException("Score of action " + action + " is NaN, which it must not be!");
+			}
 			scores.put(action, score);
 			assert !(new Double(score).equals(Double.NaN)) : "The score of action " + action + " is NaN, which cannot be the case. Score mean is " + labelOfChild.scores.getMean() + ", number of visits is " + labelOfChild.visits;
 		}

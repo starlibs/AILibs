@@ -4,9 +4,9 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.api4.java.ai.ml.core.dataset.ContainsNonNumericAttributesException;
 import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
 import org.api4.java.ai.ml.core.dataset.attribute.IAttributeType;
+import org.api4.java.ai.ml.core.exception.ContainsNonNumericAttributesException;
 
 import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
 

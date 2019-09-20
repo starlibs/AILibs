@@ -11,7 +11,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.controlbar.ResetEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 import ai.libs.jaicore.graphvisualizer.plugin.timeslider.GoToTimeStepEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.ObservationsUpdatedEvent;
+import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGBeliefUpdateEvent;
+import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGQSampleEvent;
 import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfo;
 import ai.libs.jaicore.search.gui.plugins.mcts.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 
@@ -46,11 +47,16 @@ public class DNGMCTSPluginController extends ASimpleMVCPluginController<DNGMCTSP
 					}
 					this.getModel().getParents().put(n, lastNode);
 				}
+				this.getModel().addObservation(n, (double)rolloutInfo.getScore());
 				lastNode = n;
 			}
 		}
-		else if (algorithmEvent.correspondsToEventOfClass(ObservationsUpdatedEvent.class)) {
-			BradleyTerryUpdate updateInfo = (BradleyTerryUpdate) algorithmEvent.getProperty(DNGEventPropertyComputer.UPDATE_PROPERTY_NAME);
+		else if (algorithmEvent.correspondsToEventOfClass(DNGQSampleEvent.class)) {
+			DNGQSample updateInfo = (DNGQSample) algorithmEvent.getProperty(DNGEventPropertyComputer.UPDATE_PROPERTY_NAME);
+			this.getModel().setNodeStats(updateInfo);
+		}
+		else if (algorithmEvent.correspondsToEventOfClass(DNGBeliefUpdateEvent.class)) {
+			DNGBeliefUpdate updateInfo = (DNGBeliefUpdate) algorithmEvent.getProperty(DNGEventPropertyComputer.UPDATE_PROPERTY_NAME);
 			this.getModel().setNodeStats(updateInfo);
 		}
 	}

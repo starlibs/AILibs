@@ -14,6 +14,9 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.eventbus.EventBus;
+
+import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
@@ -30,9 +33,10 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
  * @param <N>
  * @param <A>
  */
-public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable {
+public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(DNGPolicy.class);
+	private EventBus eventBus = new EventBus();
 
 	/* initialization according to section 6.2 in the paper */
 	private final double initLambda = 1.0;
@@ -83,6 +87,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 			this.beta.put(node, this.beta.computeIfAbsent(node, n -> this.initBeta) + (lambdaOfN * Math.pow(playoutScore - muOfN, 2) / (lambdaOfN + 1)) / 2);
 			this.mu.put(node, (muOfN * lambdaOfN + playoutScore) / (lambdaOfN + 1));
 			this.lambda.put(node, lambdaOfN + 1);
+			this.eventBus.post(new DNGBeliefUpdateEvent<N>("", node, this.mu.get(node), this.alpha.get(node), this.beta.get(node), this.lambda.get(node)));
 		}
 	}
 
@@ -100,6 +105,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 		double bestScore = Double.MAX_VALUE;
 		for (Entry<A, N> actionStatePair : actions.entrySet()) {
 			double score = this.getQValue(state, actionStatePair.getValue());
+			this.eventBus.post(new DNGQSampleEvent<N, A>("", state, actionStatePair.getValue(), actionStatePair.getKey(), score));
 			if (score < bestScore) {
 				bestAction = actionStatePair.getKey();
 				bestScore = score;
@@ -153,5 +159,10 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	@Override
+	public void registerListener(final Object listener) {
+		this.eventBus.register(listener);
 	}
 }

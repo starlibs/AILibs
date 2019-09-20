@@ -19,7 +19,7 @@ public class MeanImprovementWinComputer implements IWinComputer {
 	public void updateWinsOfChildrenBasedOnNewScore(final BTModel nodeModel, final double newScore, final boolean forRightChild) {
 		DescriptiveStatistics statsOfNode = this.statsPerNode.computeIfAbsent(nodeModel, nm -> new DescriptiveStatistics());
 		statsOfNode.addValue(newScore);
-		final double quantile = statsOfNode.getPercentile(33);
+		final double quantile = statsOfNode.getPercentile(10);
 		DescriptiveStatistics trimmedMeanStats = new DescriptiveStatistics();
 		for (double d : statsOfNode.getSortedValues()) {
 			if (d > quantile) {

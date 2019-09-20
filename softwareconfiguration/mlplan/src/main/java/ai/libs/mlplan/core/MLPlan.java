@@ -2,7 +2,8 @@ package ai.libs.mlplan.core;
 
 import java.io.IOException;
 
-import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
@@ -17,6 +18,7 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.hasco.core.HASCOSolutionCandidate;
+import ai.libs.hasco.core.Util;
 import ai.libs.hasco.events.HASCOSolutionEvent;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
@@ -27,6 +29,7 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseHASCOFactory
 import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConfigurationProblem;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
+import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ClassifierEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.learningcurve.extrapolation.LearningCurveExtrapolatedEvent;
@@ -285,8 +288,33 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 	}
 
 	@SuppressWarnings("unchecked")
-	public IGraphSearchInput<TFDNode, String> getSearchProblemInputGenerator() {
+	public IGraphSearchWithPathEvaluationsInput<TFDNode, String, Double> getSearchProblemInputGenerator() {
 		return ((TwoPhaseHASCO<? extends GraphSearchInput<TFDNode, String>, TFDNode, String>) this.optimizingFactory.getOptimizer()).getGraphSearchInput();
+	}
+
+	public AlgorithmicProblemReduction<Instances, Classifier, IGraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, IEvaluatedPath<TFDNode, String, Double>> getReduction() {
+		return new AlgorithmicProblemReduction<Instances, Classifier, IGraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, IEvaluatedPath<TFDNode, String, Double>>() {
+
+			@Override
+			public IGraphSearchWithPathEvaluationsInput<TFDNode, String, Double> encodeProblem(final Instances problem) {
+				return MLPlan.this.getSearchProblemInputGenerator();
+			}
+
+			@Override
+			public Classifier decodeSolution(final IEvaluatedPath<TFDNode, String, Double> solution) {
+				TwoPhaseHASCO<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> twoPhaseHasco = (TwoPhaseHASCO<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String>) MLPlan.this.optimizingFactory
+						.getOptimizer();
+				ComponentInstance ci = Util.getSolutionCompositionFromState(twoPhaseHasco.getInput().getComponents(), solution.getNodes().get(solution.getNodes().size() - 1).getState(), true);
+				try {
+					Classifier c = MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(ci);
+					return c;
+				} catch (ComponentInstantiationFailedException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
+
+		};
 	}
 
 	public double getInternalValidationErrorOfSelectedClassifier() {
@@ -305,6 +333,10 @@ public class MLPlan extends AAlgorithm<Instances, Classifier> implements ILoggin
 
 	public OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, Classifier, HASCOSolutionCandidate<Double>, Double> getOptimizingFactory() {
 		return this.optimizingFactory;
+	}
+
+	public GraphSearchWithPathEvaluationsInput<TFDNode, String, Double> getSearchProblem() {
+		return null;
 	}
 
 	@Subscribe

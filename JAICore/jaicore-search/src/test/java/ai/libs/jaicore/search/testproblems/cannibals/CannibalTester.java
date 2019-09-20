@@ -14,6 +14,7 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPro
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.testproblems.cannibals.CannibalProblem;
@@ -37,12 +38,8 @@ public class CannibalTester {
 
 		Platform.runLater(new AlgorithmVisualizationWindow(astar, algorithmEventPropertyComputers, new GraphViewPlugin(), new NodeInfoGUIPlugin()));
 
-		System.out.println(astar.nextSolutionCandidate().getNodes().size() - 1);
-		//		rs.cancel();
-		//		for (int i = 0; i < 20 && rs.hasNext(); i++) {
-		//			System.out.println(rs.next());
-		//		}
-
-		System.out.println("ready");
+		SearchGraphPath<CannibalProblem, String> solution = astar.nextSolutionCandidate();
+		System.out.println("Solution states (total number of moves is " + solution.getArcs().size() + "):");
+		solution.getNodes().forEach(s -> System.out.println("\t" + s));
 	}
 }

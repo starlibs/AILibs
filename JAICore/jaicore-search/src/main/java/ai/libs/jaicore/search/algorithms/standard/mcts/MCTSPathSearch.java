@@ -171,6 +171,7 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 					continue;
 				}
 				A action = this.exploredGraph.getEdgeLabel(current, child);
+				assert this.exploredGraph.getItems().contains(child);
 				assert !successorStates.containsKey(action) : "A successor state has already been defined for action \"" + action + "\" with hashCode " + action.hashCode();
 				availableActions.add(action);
 				successorStates.put(action, child);
@@ -194,7 +195,9 @@ public class MCTSPathSearch<N, A, V extends Comparable<V>> extends AOptimalPathI
 			A chosenAction = this.treePolicy.getAction(current, successorStates);
 			assert chosenAction != null : "Chosen action must not be null!";
 			next = successorStates.get(chosenAction);
-			assert next != null : "Next action must not be null!";
+			if (next == null) {
+				throw new IllegalStateException("Next action must not be null!");
+			}
 			this.logger.debug("Tree policy decides to expand {} taking action {} to {}", current, chosenAction, next);
 			current = next;
 			childrenOfCurrent = this.unexpandedNodes.contains(current) ? null : this.exploredGraph.getSuccessors(current);

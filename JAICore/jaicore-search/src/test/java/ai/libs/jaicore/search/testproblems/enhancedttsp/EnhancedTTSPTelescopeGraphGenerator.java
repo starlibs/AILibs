@@ -135,7 +135,7 @@ public class EnhancedTTSPTelescopeGraphGenerator implements IGraphGenerator<Enha
 				l.add(new NodeExpansionDescription<>(leftChild, "l", NodeType.OR));
 				l.add(new NodeExpansionDescription<>(rightChild, "r", NodeType.OR));
 				long walltime = System.currentTimeMillis() - start;
-				if (walltime > 1) {
+				if (walltime > 10) {
 					EnhancedTTSPTelescopeGraphGenerator.this.logger.warn("Successor generation took {}ms", walltime);
 				}
 				return l;

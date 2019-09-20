@@ -1,7 +1,8 @@
 package ai.libs.jaicore.search.gui.plugins.mcts.dng;
 
-import java.awt.Button;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.jfree.chart.ChartFactory;
@@ -9,10 +10,12 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.data.statistics.BoxAndWhiskerXYDataset;
 import org.jfree.data.statistics.DefaultBoxAndWhiskerXYDataset;
 
+import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.graphvisualizer.events.gui.DefaultGUIEventBus;
 import ai.libs.jaicore.graphvisualizer.plugin.ASimpleMVCPluginView;
 import ai.libs.jaicore.graphvisualizer.plugin.graphview.NodeClickedEvent;
 import javafx.application.Platform;
+import javafx.scene.control.Button;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -31,8 +34,7 @@ public class DNGMCTSPluginView extends ASimpleMVCPluginView<DNGMCTSPluginModel, 
 	private final Button parent = new Button("parent");
 	private WebEngine engine;
 	private final BoxAndWhiskerXYDataset dataset = new DefaultBoxAndWhiskerXYDataset("plot");
-	private final JFreeChart chart = ChartFactory.createBoxAndWhiskerChart(
-			"Box and Whisker Chart", "Time", "Value", this.dataset, true);
+	private final JFreeChart chart = ChartFactory.createBoxAndWhiskerChart("Box and Whisker Chart", "Time", "Value", this.dataset, true);
 
 	public DNGMCTSPluginView(final DNGMCTSPluginModel model) {
 		super(model, new FlowPane());
@@ -83,72 +85,56 @@ public class DNGMCTSPluginView extends ASimpleMVCPluginView<DNGMCTSPluginModel, 
 		int depth = 0;
 		while (parents.containsKey(currentNode)) {
 			currentNode = parents.get(currentNode);
-			depth ++;
+			depth++;
 		}
 		sb.append(depth);
 		sb.append(")</h2>");
-		BradleyTerryUpdate update = this.getModel().getUpdateOfSelectedNode();
-		if (update != null) {
-			sb.append("<p>Number of visits: ");
-			sb.append(update.getVisits());
-			sb.append("</p>");
-			sb.append("<h2>Stats of children</h2><table><tr>");
-
-			/* first row contains number of visits */
-			BradleyTerryUpdate modelOfLeftChild = this.getModel().getBtUpdates().get(this.getLeftChild(update.getNode()));
-			BradleyTerryUpdate modelOfRightChild = this.getModel().getBtUpdates().get(this.getRightChild(update.getNode()));
-			sb.append("<td>");
-			sb.append(modelOfLeftChild != null ? modelOfLeftChild.getVisits() : 0);
-			sb.append("</td>");
-			sb.append("<td>");
-			sb.append(modelOfRightChild != null ? modelOfRightChild.getVisits() : 0);
-			sb.append("</td>");
-
-			/* second row contains wins */
-			sb.append("</tr><tr>");
-			sb.append("<td>");
-			sb.append(update.getWinsLeft());
-			sb.append("</td>");
-			sb.append("<td>");
-			sb.append(update.getWinsRight());
-			sb.append("</td>");
-
-			/* third row contains probabilities */
-			sb.append("</tr><tr>");
-			sb.append("<td>");
-			sb.append(update.getpLeftScaled());
-			sb.append(" (");
-			sb.append(update.getpLeft());
-			sb.append(")</td>");
-			sb.append("<td>");
-			sb.append(update.getpRightScaled());
-			sb.append(" (");
-			sb.append(update.getpRight());
-			sb.append(")</td>");
-
-			/* fourth row contains stats summary */
-			sb.append("</tr><tr>");
-			DescriptiveStatistics leftStats = new DescriptiveStatistics();
-			update.getScoresLeft().forEach(d -> leftStats.addValue(d));
-			DescriptiveStatistics rightStats = new DescriptiveStatistics();
-			update.getScoresRight().forEach(d -> rightStats.addValue(d));
-			sb.append("<td>");
-			sb.append(leftStats.toString().replace("\n", "<br />"));
-			sb.append("</td>");
-			sb.append("<td>");
-			sb.append(rightStats.toString().replace("\n", "<br />"));
-			sb.append("</td>");
-
-			/* third row contains lists of considers observations */
-			sb.append("</tr><tr>");
-			sb.append("<td style=\"vertical-align: top;\"><ul>");
-			update.getScoresLeft().forEach(d -> sb.append("<li>" + d + "</li>"));
-			sb.append("</ul></td>");
-			sb.append("<td style=\"vertical-align: top;\"><ul>");
-			update.getScoresRight().forEach(d -> sb.append("<li>" + d + "</li>"));
-			sb.append("</ul></td>");
-			sb.append("</tr></table>");
+		sb.append("<h3>Mu-Estimates of Children</h3>");
+		String currentlySelectedNode = this.getModel().getCurrentlySelectedNode();
+		String leftChild = this.getLeftChild(currentlySelectedNode);
+		String rightChild = this.getRightChild(currentlySelectedNode);
+		List<DNGBeliefUpdate> muValuesOfLeft = this.getModel().getObservedMuValues().get(leftChild);
+		sb.append("<h4>" + leftChild + " (" + (muValuesOfLeft != null ? muValuesOfLeft.size() : "-1") + ")</h4>");
+		if (muValuesOfLeft != null) {
+			DNGBeliefUpdate latestUpdate = muValuesOfLeft.get(muValuesOfLeft.size() - 1);
+			DescriptiveStatistics statsOfLeft = this.getModel().getObservationStatisticsOfNode(leftChild);
+			sb.append("Mu: " + latestUpdate.getMu() + "<br />");
+			sb.append("Mu - sampleMean: " + (latestUpdate.getMu() - statsOfLeft.getMean()) + "<br />");
+			sb.append("Alpha: " + latestUpdate.getAlpha() + "<br />");
+			sb.append("Beta: " + latestUpdate.getBeta() + "<br />");
+			sb.append("Lambda: " + latestUpdate.getLambda());
 		}
+		if (rightChild != null) {
+			List<DNGBeliefUpdate> muValuesOfRight = this.getModel().getObservedMuValues().get(rightChild);
+			DescriptiveStatistics statsOfRight = this.getModel().getObservationStatisticsOfNode(rightChild);
+			sb.append("<h4>" + rightChild + " (" + (muValuesOfRight != null ? muValuesOfRight.size() : "-1") + ")</h4>");
+			if (muValuesOfRight != null) {
+				DNGBeliefUpdate latestUpdate = muValuesOfRight.get(muValuesOfRight.size() - 1);
+				sb.append("Mu: " + latestUpdate.getMu() + "<br />");
+				sb.append("Mu - sampleMean: " + (latestUpdate.getMu() - statsOfRight.getMean()) + "<br />");
+				sb.append("Alpha: " + latestUpdate.getAlpha() + "<br />");
+				sb.append("Beta: " + latestUpdate.getBeta() + "<br />");
+				sb.append("Lambda: " + latestUpdate.getLambda());
+			}
+		}
+		sb.append("<h3>Q-Values of Children</h3>");
+		Map<String, List<Double>> qValues = this.getModel().getQValuesOfSelectedNode();
+		if (qValues != null) {
+			{
+				List<Double> scoresOfLeft = qValues.get(leftChild);
+				sb.append("<h4>" + leftChild + " (" + scoresOfLeft.size()  + ")</h4>");
+				sb.append(scoresOfLeft.subList(Math.max(0, scoresOfLeft.size() - 5), scoresOfLeft.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
+			}
+
+			{
+				List<Double> scoresOfRight = qValues.get(rightChild);
+				if (scoresOfRight != null) {
+					sb.append("<h4>" + rightChild + " (" + scoresOfRight.size()  + ")</h4>");
+					sb.append(scoresOfRight.subList(Math.max(0, scoresOfRight.size() - 5), scoresOfRight.size()).stream().map(v -> MathExt.round(v, 4)).collect(Collectors.toList()));
+				}
+			}
+		}
+
 		Platform.runLater(() -> {
 			this.engine.loadContent(sb.toString());
 		});

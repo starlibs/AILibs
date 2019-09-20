@@ -14,16 +14,16 @@ public class GammaFunction implements IGammaFunction {
 
 	/* short term exploration definintion */
 	private final int shortMinObservationsEnforcedForAnyDecision = 2;
-	private final int shortAbsoluteMaxStepsToReachGammaOne = 5;
-	private final int shortAbsoluteMaxStepsToReachMaxGamma = 20;
-	private final int shortMaxGamma = 10;
+	private final int shortAbsoluteMaxStepsToReachGammaOne = 4;
+	private final int shortAbsoluteMaxStepsToReachMaxGamma = 10;
+	private final double shortMaxGamma = 5;
 
 	/* long term exploration definintion */
-	private final int minObservationsEnforcedForAnyDecision = 50;
-	private final int absoluteMinStepsToReachMaxGamma = this.minObservationsEnforcedForAnyDecision * 2 + 100;
-	private final int absoluteMaxStepsToReachGammaOne = this.absoluteMinStepsToReachMaxGamma + 100;
-	private final int absoluteMaxStepsToReachMaxGamma = this.absoluteMaxStepsToReachGammaOne + 500;
-	private final int maxGamma = 10;
+	private final int minObservationsEnforcedForAnyDecision = 5;
+	private final int absoluteMaxStepsToReachGammaOne = 100;
+	private final int absoluteMinStepsToReachMaxGamma = this.absoluteMaxStepsToReachGammaOne  + 50;
+	private final int absoluteMaxStepsToReachMaxGamma = this.absoluteMinStepsToReachMaxGamma + 250;
+	private final double maxGamma = 1;
 	private final AffineFunction verticalScale = new AffineFunction(0, 0, 1, this.maxGamma);
 
 	/* this function describe in general the exploration behavior (in the unit interval) */
@@ -48,7 +48,7 @@ public class GammaFunction implements IGammaFunction {
 		if (Double.valueOf(relativeDepth).equals(Double.NaN)) {
 			throw new IllegalStateException("Could not compute relative depth for node " + n + " with absolute depth " + absoluteDepth + " and max observed depth " + n.maxObservedDepthUnderNode + " under it.");
 		}
-		int val = Math.max(this.absoluteMinStepsToReachMaxGamma, (int)Math.round(new AffineFunction(0, this.absoluteMaxStepsToReachMaxGamma, 1.0, this.absoluteMinStepsToReachMaxGamma).apply(relativeDepth)));
+		int val = Math.max(this.absoluteMinStepsToReachMaxGamma, (int)Math.round(new AffineFunction(0, this.absoluteMaxStepsToReachMaxGamma, 1.0, this.absoluteMinStepsToReachMaxGamma).apply(1 - relativeDepth)));
 		//		int val = (int)Math.round((this.absoluteMaxStepsToReachMaxGamma - this.absoluteMinStepsToReachMaxGamma) * 1.0 / (1 + absoluteDepth)) + this.absoluteMinStepsToReachMaxGamma;
 		//		this.logger.debug("Determined numbers of observations to reach max for node in depth {} with value {} = round(({} - {})/(2^{})) + {}", absoluteDepth, val, this.absoluteMaxStepsToReachMaxGamma, this.absoluteMinStepsToReachMaxGamma, absoluteDepth + 1, this.absoluteMinStepsToReachMaxGamma);
 		//		return this.absoluteMaxStepsToReachMaxGamma;
@@ -79,7 +79,7 @@ public class GammaFunction implements IGammaFunction {
 		//		if (n.depth > 50) {
 		//			System.out.println(g + " for " + n.visits + " visits, requiring " + iterationsToReachGammaOneForThisNode + "/" + iterationsToReachMaxGammaForThisNode);
 		//		}
-		if (g < 0 || g > this.maxGamma) {
+		if (g < 0 || g > max) {
 			throw new IllegalStateException();
 		}
 		return g;
