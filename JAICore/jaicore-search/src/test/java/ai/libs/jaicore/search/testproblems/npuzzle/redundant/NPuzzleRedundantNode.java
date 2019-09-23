@@ -1,6 +1,6 @@
 package ai.libs.jaicore.search.testproblems.npuzzle.redundant;
 
-import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
 public class NPuzzleRedundantNode extends NPuzzleState {
 

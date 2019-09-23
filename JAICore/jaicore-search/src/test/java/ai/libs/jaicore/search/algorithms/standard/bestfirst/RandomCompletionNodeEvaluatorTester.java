@@ -32,12 +32,12 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.basic.BusyObjectEvaluator;
 import ai.libs.jaicore.basic.PartiallyFailingObjectEvaluator;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.NodeExpansionJobSubmittedEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.RCNEPathCompletionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.RandomCompletionBasedNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 
 public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorTester<RandomCompletionBasedNodeEvaluator<EnhancedTTSPNode, String, Double>> {
 

@@ -17,12 +17,12 @@ import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.MathExt;
+import ai.libs.jaicore.problems.nqueens.NQueensProblem;
 import ai.libs.jaicore.search.algorithms.standard.dfs.TinyDepthFirstSearch;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationViaUninformedness;
 import ai.libs.jaicore.search.testproblems.nqueens.NQueensToGraphSearchReducer;
-import ai.libs.jaicore.testproblems.nqueens.NQueensProblem;
 
 @RunWith(Parameterized.class)
 public class BestFirstSearchRuntimeTest {

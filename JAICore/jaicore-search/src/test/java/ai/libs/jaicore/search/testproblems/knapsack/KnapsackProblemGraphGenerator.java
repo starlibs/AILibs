@@ -18,8 +18,8 @@ import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.testproblems.knapsack.KnapsackConfiguration;
-import ai.libs.jaicore.testproblems.knapsack.KnapsackProblem;
+import ai.libs.jaicore.problems.knapsack.KnapsackConfiguration;
+import ai.libs.jaicore.problems.knapsack.KnapsackProblem;
 
 public class KnapsackProblemGraphGenerator implements SerializableGraphGenerator<KnapsackConfiguration, String>, ILoggingCustomizable {
 

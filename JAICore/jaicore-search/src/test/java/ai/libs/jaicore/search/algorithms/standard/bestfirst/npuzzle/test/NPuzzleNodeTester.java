@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
 public class NPuzzleNodeTester {
 

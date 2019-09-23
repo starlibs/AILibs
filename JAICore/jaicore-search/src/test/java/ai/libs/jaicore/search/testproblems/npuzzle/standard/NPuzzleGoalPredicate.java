@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.testproblems.npuzzle.standard;
 
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
 
-import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
 public class NPuzzleGoalPredicate implements NodeGoalTester<NPuzzleState, String> {
 

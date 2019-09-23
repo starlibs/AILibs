@@ -10,7 +10,7 @@ import org.api4.java.datastructure.graph.implicit.RootGenerator;
 import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
-import ai.libs.jaicore.testproblems.cannibals.CannibalProblem;
+import ai.libs.jaicore.problems.cannibals.CannibalProblem;
 
 public class CannibalGraphGenerator implements IGraphGenerator<CannibalProblem, String> {
 

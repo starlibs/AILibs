@@ -10,9 +10,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.TimeAwareNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 import ai.libs.jaicore.timing.TimedComputation;
 
 public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvaluator<EnhancedTTSPNode, String, Double>> extends NodeEvaluatorTester<T> {
