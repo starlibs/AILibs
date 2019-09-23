@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.search.testproblems.npuzzle.parentdiscarding.PDPuzzleNode;
+import ai.libs.jaicore.search.exampleproblems.npuzzle.parentdiscarding.PDPuzzleNode;
 
 public class PDPuzzleNodeTester {
 	PDPuzzleNode n;

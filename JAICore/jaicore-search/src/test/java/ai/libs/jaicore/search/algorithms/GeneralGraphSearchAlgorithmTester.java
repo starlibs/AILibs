@@ -10,10 +10,10 @@ import org.api4.java.algorithm.IAlgorithm;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.search.exampleproblemtesters.EnhancedTTSPAsGraphSearchSet;
+import ai.libs.jaicore.search.exampleproblemtesters.KnapsackProblemAsGraphSearchSet;
+import ai.libs.jaicore.search.exampleproblemtesters.NQueensProblemAsGraphSearchSet;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
-import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPAsGraphSearchSet;
-import ai.libs.jaicore.search.testproblems.knapsack.KnapsackProblemAsGraphSearchSet;
-import ai.libs.jaicore.search.testproblems.nqueens.NQueensProblemAsGraphSearchSet;
 
 public abstract class GeneralGraphSearchAlgorithmTester extends GeneralAlgorithmTester {
 
