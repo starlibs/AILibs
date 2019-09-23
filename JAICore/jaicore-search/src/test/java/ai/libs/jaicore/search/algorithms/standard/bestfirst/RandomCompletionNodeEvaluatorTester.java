@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.util.CombinatoricsUtils;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -103,9 +104,10 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	 * @throws AlgorithmTimeoutedException
 	 * @throws AlgorithmExecutionCanceledException
 	 * @throws AlgorithmException
+	 * @throws PathEvaluationException 
 	 */
 	@Test
-	public void testRobustnessOnMissingEvaluations() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testRobustnessOnMissingEvaluations() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 
 		final int DIFFICULTY = 10;
 
@@ -121,7 +123,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 
 				/* get the expanded node and run all completers on it */
 				BackPointerPath<EnhancedTTSPNode, String, ?> nodeToEvaluate = ((NodeExpansionJobSubmittedEvent) e).getExpandedNode();
-				assertTrue(completer.f(nodeToEvaluate) >= 0);
+				assertTrue(completer.evaluate(nodeToEvaluate) >= 0);
 			}
 		}
 	}
@@ -171,31 +173,31 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 	}
 
 	@Test
-	public void testThatAScoreIsReturnedIfExactlyOneOutOfOneSampleSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatAScoreIsReturnedIfExactlyOneOutOfOneSampleSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 1);
 	}
 
 	@Test
-	public void testThatAScoreIsReturnedIfExactlyOneOutOfTwoSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatAScoreIsReturnedIfExactlyOneOutOfTwoSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 2);
 	}
 
 	@Test
-	public void testThatAScoreIsReturnedIfExactlyOneOutOfTenSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatAScoreIsReturnedIfExactlyOneOutOfTenSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 1, 10);
 	}
 
 	@Test
-	public void testThatAScoreIsReturnedIfExactlyTwoOutOfTwoSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatAScoreIsReturnedIfExactlyTwoOutOfTwoSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 2);
 	}
 
 	@Test
-	public void testThatAScoreIsReturnedIfExactlyTwoOutOfTenSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatAScoreIsReturnedIfExactlyTwoOutOfTenSamplesSucceeds() throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 		this.testThatAScoreIsReturnedIfExactlyKSampleSucceed(5, 2, 10);
 	}
 
-	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(final int cities, final int k, final int n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException {
+	public void testThatAScoreIsReturnedIfExactlyKSampleSucceed(final int cities, final int k, final int n) throws InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, AlgorithmException, PathEvaluationException {
 
 		final int NUM_SEEDS = 5;
 		final int NUM_SAMPLES = n;
@@ -226,7 +228,7 @@ public class RandomCompletionNodeEvaluatorTester extends TimeAwareNodeEvaluatorT
 				/* now evaluate the root node */
 				bf.initGraph();
 				BackPointerPath<EnhancedTTSPNode, String, ?> root = bf.getOpen().get(0);
-				ne.f(root);
+				ne.evaluate(root);
 				assertEquals("There should be exactly " + k + " solutions.", k, seenSolutions.size());
 				assertEquals("There should be exactly " + k + " scores.", k, seenScores.size());
 			}

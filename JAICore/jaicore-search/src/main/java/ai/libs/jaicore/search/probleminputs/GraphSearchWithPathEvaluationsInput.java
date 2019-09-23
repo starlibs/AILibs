@@ -6,7 +6,10 @@ import java.util.Map;
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
+import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.datastructure.graph.IPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
@@ -26,20 +29,33 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  * @param <V>
  */
 public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> extends GraphSearchInput<N, A> implements IGraphSearchWithPathEvaluationsInput<N, A, V> {
-	private final IObjectEvaluator<IPath<N, A>, V> pathEvaluator;
+	private final IPathEvaluator<N, A, V> pathEvaluator;
 
-	public GraphSearchWithPathEvaluationsInput(final IGraphSearchInput<N, A> graphSearchInput, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final IGraphSearchInput<N, A> graphSearchInput, final IPathEvaluator<N, A, V> pathEvaluator) {
 		super(graphSearchInput);
 		this.pathEvaluator = pathEvaluator;
 	}
+	
+	public GraphSearchWithPathEvaluationsInput(final IGraphSearchInput<N, A> graphSearchInput, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+		this (graphSearchInput, new IPathEvaluator<N, A, V>() {
+
+			@Override
+			public V evaluate(IPath<N, A> path) throws PathEvaluationException, InterruptedException {
+				try {
+					return pathEvaluator.evaluate(path);
+				} catch (ObjectEvaluationFailedException e) {
+					throw new PathEvaluationException(e.getMessage(), e.getCause());
+				}
+			}
+		});
+	}
 
 	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
-		super(graphGenerator, goalTester);
-		this.pathEvaluator = pathEvaluator;
+		this(new GraphSearchInput<>(graphGenerator, goalTester), pathEvaluator);
 	}
 
 	@Override
-	public IObjectEvaluator<IPath<N, A>, V> getPathEvaluator() {
+	public IPathEvaluator<N, A, V> getPathEvaluator() {
 		return this.pathEvaluator;
 	}
 

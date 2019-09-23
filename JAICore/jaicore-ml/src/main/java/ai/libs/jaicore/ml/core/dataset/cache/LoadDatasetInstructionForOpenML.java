@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,7 +26,7 @@ public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
 	}
 
 	@Override
-	public List<IDataset<?>> getOutputInstances(final List<IDataset<?>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException {
+	public List<IDataset<IInstance>> getOutputDatasets(final List<IDataset<IInstance>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException {
 
 		// load openml or local dataset
 		OpenMLHelper.setApiKey(this.apiKey);

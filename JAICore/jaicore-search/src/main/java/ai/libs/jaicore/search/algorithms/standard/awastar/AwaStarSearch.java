@@ -10,6 +10,7 @@ import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTest
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
@@ -87,7 +88,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 		}
 	}
 
-	private void windowAStar() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException {
+	private void windowAStar() throws AlgorithmTimeoutedException, AlgorithmExecutionCanceledException, InterruptedException, AlgorithmException, PathEvaluationException {
 		while (!this.openList.isEmpty()) {
 			this.checkAndConductTermination();
 			if (!this.unreturnedSolutionEvents.isEmpty()) {
@@ -126,7 +127,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.checkAndConductTermination();
 				BackPointerPath<T, A, V> nPrime = new BackPointerPath<>(n, expansionDescription.getTo(), expansionDescription.getAction());
 				nPrime.setGoal(this.goalTester.isGoal(nPrime));
-				V nPrimeScore = this.nodeEvaluator.f(nPrime);
+				V nPrimeScore = this.nodeEvaluator.evaluate(nPrime);
 
 				/* ignore nodes whose value cannot be determined */
 				if (nPrimeScore == null) {
@@ -181,7 +182,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 	}
 
 	@Override
-	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
+	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException{
 		try {
 			this.registerActiveThread();
 			this.logger.debug("Next step in {}. State is {}", this.getId(), this.getState());
@@ -193,7 +194,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 				this.logger.info("Initializing graph and OPEN with {}.", rootNode);
 				this.openList.add(rootNode);
 				this.post(new GraphInitializedEvent<>(this.getId(), rootNode));
-				rootNode.setScore(this.nodeEvaluator.f(rootNode));
+				rootNode.setScore(this.nodeEvaluator.evaluate(rootNode));
 				return this.activate();
 
 			case ACTIVE:
@@ -232,6 +233,9 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			default:
 				throw new IllegalStateException("Cannot do anything in state " + this.getState());
 			}
+		}
+		catch (PathEvaluationException e) {
+			throw new AlgorithmException("Algorithm failed due to path evaluation exception.", e); 
 		}
 		finally {
 			this.unregisterActiveThread();

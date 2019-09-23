@@ -23,9 +23,9 @@ public class TimeLoggingNodeEvaluator<T, A, V extends Comparable<V>> extends Dec
 	}
 
 	@Override
-	public V f(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
+	public V evaluate(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
 		long start = System.currentTimeMillis();
-		V f = super.f(path);
+		V f = super.evaluate(path);
 		this.times.put(path, (int) (System.currentTimeMillis() - start));
 		return f;
 	}

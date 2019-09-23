@@ -16,7 +16,7 @@ public class RandomizedDepthFirstNodeEvaluator<T, A> implements SerializableNode
 	}
 
 	@Override
-	public Double f(final IPath<T, A> node) {
+	public Double evaluate(final IPath<T, A> node) {
 		return (double) (-1 * (node.getNodes().size() * 1000 + this.rand.nextInt(100)));
 	}
 }

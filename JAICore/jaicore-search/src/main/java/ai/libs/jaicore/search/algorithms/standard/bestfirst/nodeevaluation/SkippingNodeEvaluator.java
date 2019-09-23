@@ -23,16 +23,16 @@ public class SkippingNodeEvaluator<T, A, V extends Comparable<V>> implements IPa
 	}
 
 	@Override
-	public V f(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
+	public V evaluate(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
 		int depth = path.getNodes().size() - 1;
 		if (!this.fCache.containsKey(path)) {
 			if (depth == 0) {
-				this.fCache.put(path, this.actualEvaluator.f(path));
+				this.fCache.put(path, this.actualEvaluator.evaluate(path));
 			} else {
 				if (this.rand.nextFloat() >= this.coin) {
-					this.fCache.put(path, this.actualEvaluator.f(path));
+					this.fCache.put(path, this.actualEvaluator.evaluate(path));
 				} else {
-					this.fCache.put(path, this.f(path.getPathToParentOfHead()));
+					this.fCache.put(path, this.evaluate(path.getPathToParentOfHead()));
 				}
 			}
 		}

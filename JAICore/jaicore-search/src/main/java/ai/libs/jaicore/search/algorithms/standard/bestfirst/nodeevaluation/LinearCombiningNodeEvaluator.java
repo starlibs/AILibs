@@ -16,12 +16,12 @@ public class LinearCombiningNodeEvaluator<T, A> implements IPathEvaluator<T, A, 
 	}
 
 	@Override
-	public Double f(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
+	public Double evaluate(final IPath<T, A> path) throws PathEvaluationException, InterruptedException {
 		double score = 0;
 		double incr;
 		for (IPathEvaluator<T, A, Double> evaluator : this.evaluators.keySet()) {
 			if (this.evaluators.get(evaluator) != 0) {
-				incr = evaluator.f(path);
+				incr = evaluator.evaluate(path);
 				if (incr == Integer.MAX_VALUE) {
 					score = Integer.MAX_VALUE;
 					break;

@@ -32,7 +32,7 @@ public abstract class TimeAwareNodeEvaluatorTester<T extends TimeAwareNodeEvalua
 			long start = System.currentTimeMillis();
 			logger.info("Starting computation of score for node with hash code {} with timeout {}", node.hashCode(), TIMEOUT);
 			try {
-				TimedComputation.compute(() -> ne.f(node), (long) TIMEOUT + TOLERANCE, "Timeout Test");
+				TimedComputation.compute(() -> ne.evaluate(node), (long) TIMEOUT + TOLERANCE, "Timeout Test");
 				logger.info("Finished computation regularly. Runtime was {}ms", System.currentTimeMillis() - start);
 			}
 			catch (AlgorithmTimeoutedException e) {

@@ -32,8 +32,8 @@ implements IPathEvaluator<N, A, V>, ICancelableNodeEvaluator, ILoggingCustomizab
 	}
 
 	@Override
-	public V f(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
-		return this.decoratedEvaluator.f(node);
+	public V evaluate(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
+		return this.decoratedEvaluator.evaluate(node);
 	}
 
 	public boolean isDecoratedEvaluatorCancelable() {

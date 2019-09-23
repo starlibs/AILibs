@@ -81,12 +81,12 @@ public class AlternativeNodeEvaluator<N, A, V extends Comparable<V>> extends Dec
 	}
 
 	@Override
-	public V f(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
-		V f1 = this.ne1.f(node);
+	public V evaluate(final IPath<N, A> node) throws PathEvaluationException, InterruptedException {
+		V f1 = this.ne1.evaluate(node);
 		if (f1 != null) {
 			return f1;
 		}
-		return super.f(node);
+		return super.evaluate(node);
 	}
 
 	@Override

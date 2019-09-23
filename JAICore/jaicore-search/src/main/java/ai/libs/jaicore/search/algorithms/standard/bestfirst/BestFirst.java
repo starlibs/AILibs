@@ -32,6 +32,7 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
@@ -284,14 +285,6 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
 					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_TIMEDOUT.toString()));
 					return;
-				} catch (ControlledNodeEvaluationException e) {
-					BestFirst.this.logger.debug("Node evaluation failed with a controlled exception.");
-					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
-					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_ERROR.toString(), e));
-					BestFirst.this.post(new NodeAnnotationEvent<>(BestFirst.this.getId(), newNode, ENodeAnnotation.F_MESSAGE.toString(), "hello, yes it is pruned!"));
-					BestFirst.this.post(new NodeTypeSwitchEvent<>(BestFirst.this.getId(), newNode, ENodeType.OR_PRUNED.toString()));
-
-					return;
 				} catch (Exception e) {
 					BestFirst.this.logger.debug("Observed an exception during computation of f:\n{}", LoggerUtil.getExceptionInfo(e));
 					newNode.setAnnotation(ENodeAnnotation.F_ERROR.toString(), e);
@@ -488,7 +481,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		long startComputation = System.currentTimeMillis();
 		try {
 			this.logger.trace("Calling f-function of node evaluator for {}", node.hashCode());
-			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.f(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff
+			label = this.computeTimeoutAware(() -> BestFirst.this.nodeEvaluator.evaluate(node), "Node Labeling with " + BestFirst.this.nodeEvaluator, !this.threadsOfPool.contains(Thread.currentThread())); // shutdown algorithm on exception iff
 			// this is not a worker thread
 			this.logger.trace("Determined f-value of {}", label);
 			if (this.isStopCriterionSatisfied()) {
@@ -509,7 +502,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				computationTimedout = true;
 				Thread.interrupted(); // set interrupt state of thread to FALSE, because interrupt
 				try {
-					label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.f(node) : null;
+					label = BestFirst.this.timeoutNodeEvaluator != null ? BestFirst.this.timeoutNodeEvaluator.evaluate(node) : null;
 				} catch (Exception e2) {
 					this.logger.error("An unexpected exception occurred while labeling node {}", node, e2);
 				}
