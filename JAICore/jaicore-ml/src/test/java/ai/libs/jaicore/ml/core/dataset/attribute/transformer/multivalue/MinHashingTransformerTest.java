@@ -6,14 +6,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeType;
-import org.api4.java.ai.ml.core.dataset.attribute.multivalue.MultiValueAttributeValue;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.transformer.multivalue.MinHashingTransformer;
+import ai.libs.jaicore.ml.core.dataset.attributetransformer.multivalue.MinHashingTransformer;
+import ai.libs.jaicore.ml.core.tabular.dataset.attribute.MultiValueAttributeType;
+import ai.libs.jaicore.ml.core.tabular.dataset.attribute.MultiValueAttributeValue;
 
 public class MinHashingTransformerTest {
-	
+
 	private static final double DELTA = 0.00001;
 
 	@Test
@@ -24,7 +24,7 @@ public class MinHashingTransformerTest {
 		domain.add("c");
 		domain.add("d");
 		domain.add("e");
-		MultiValueAttributeType type = new MultiValueAttributeType(domain);
+		MultiValueAttributeType type = new MultiValueAttributeType("a0", domain);
 
 		MultiValueAttributeValue v1 = new MultiValueAttributeValue(type, Arrays.asList("a", "b", "c", "d", "e"));
 		MultiValueAttributeValue v2 = new MultiValueAttributeValue(type, Arrays.asList("a", "c", "d", "e"));

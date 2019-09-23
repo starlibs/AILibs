@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.sampling.infiles.DatasetFileSorter;
+import ai.libs.jaicore.ml.core.filter.sampling.infiles.DatasetFileSorter;
 
 public class DataFileSorterTest {
 

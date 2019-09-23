@@ -1,16 +1,16 @@
 package ai.libs.jaicore.ml.dataset.numeric;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.junit.Test;
 
-import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.dataset.IAttribute;
+import ai.libs.jaicore.ml.core.tabular.dataset.ArffToNumericDatasetDeserializer;
+import ai.libs.jaicore.ml.core.tabular.dataset.Dataset;
 
 public class ArffToNumericDatasetDeserializerTest {
 
@@ -39,33 +39,28 @@ public class ArffToNumericDatasetDeserializerTest {
 
 	@Test
 	public void testDeserializationOfD1() {
-		NumericDataset dataset = this.deserializer.deserializeDataset(D1_NUMERIC_ONLY_WO_CI_ARFF);
+		Dataset dataset = (Dataset) this.deserializer.deserializeDataset(D1_NUMERIC_ONLY_WO_CI_ARFF);
 		assertEquals("The relation name is not as expected", D1_RELATION_NAME, dataset.getRelationName());
 		this.checkCorrectInstances(dataset, D1_EXPECTED_X, D1_EXPECTED_Y, D1_TRAIN_ATTRIBUTE_NAMES, D1_TEST_ATTRIBUTE_NAMES);
 	}
 
 	@Test
 	public void testDeserializationOfD2() {
-		NumericDataset dataset = this.deserializer.deserializeDataset(D2_NUMERIC_ONLY_W_CI_ARFF);
+		Dataset dataset = (Dataset) this.deserializer.deserializeDataset(D2_NUMERIC_ONLY_W_CI_ARFF);
 		assertEquals("The relation name is not as expected", D2_RELATION_NAME, dataset.getRelationName());
 		this.checkCorrectInstances(dataset, D2_EXPECTED_X, D2_EXPECTED_Y, D2_TRAIN_ATTRIBUTE_NAMES, D2_TEST_ATTRIBUTE_NAMES);
 	}
 
 	@Test
 	public void testDeserializationOfD3() {
-		NumericDataset dataset = this.deserializer.deserializeDataset(D3_NUMERIC_ONLY_W_CI_ARFF);
+		Dataset dataset = (Dataset) this.deserializer.deserializeDataset(D3_NUMERIC_ONLY_W_CI_ARFF);
 		assertEquals("The relation name is not as expected", D3_RELATION_NAME, dataset.getRelationName());
 		this.checkCorrectInstances(dataset, D3_EXPECTED_X, D3_EXPECTED_Y, D3_TRAIN_ATTRIBUTE_NAMES, D3_TEST_ATTRIBUTE_NAMES);
 	}
 
-	private void checkCorrectInstances(final NumericDataset dataset, final double[][] expectedX, final double[][] expectedY, final String[] featureNames, final String[] targetNames) {
-		this.checkAttributeNames("Instance attribute names do not match!", featureNames, dataset.getInstanceAttributes());
-		this.checkAttributeNames("Target attribute names do not match!", targetNames, dataset.getTargetAttributes());
-		for (int i = 0; i < dataset.size(); i++) {
-			Pair<double[], double[]> instance = dataset.getInstance(i);
-			assertTrue("Instance description at position " + i + " is not as expected. It was " + Arrays.toString(instance.getX()) + " but expected was " + Arrays.toString(expectedX[i]), Arrays.equals(instance.getX(), expectedX[i]));
-			assertTrue("Target description at position " + i + " is not as expected. It was " + Arrays.toString(instance.getY()) + " but expected was " + Arrays.toString(expectedY[i]), Arrays.equals(instance.getY(), expectedY[i]));
-		}
+	private void checkCorrectInstances(final Dataset dataset, final double[][] expectedX, final double[][] expectedY, final String[] featureNames, final String[] targetNames) {
+		this.checkAttributeNames("Instance attribute names do not match!", featureNames, dataset.getListOfAttributes());
+		this.checkAttributeNames("Target attribute names do not match!", targetNames, Arrays.asList(dataset.getLabelAttribute()));
 	}
 
 	private void checkAttributeNames(final String msg, final String[] expectedNames, final List<IAttribute> attributes) {

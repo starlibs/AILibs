@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.multiclass.wekamlplan.sophisticated.featuregen.FeatureGenerator;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;

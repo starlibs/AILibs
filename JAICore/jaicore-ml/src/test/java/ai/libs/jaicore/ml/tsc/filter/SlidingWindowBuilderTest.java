@@ -10,12 +10,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.core.timeseries.filter.SlidingWindowBuilder;
 
 @RunWith(JUnit4.class)
 public class SlidingWindowBuilderTest {
 
-	private TimeSeriesDataset dataset;
+	private TimeSeriesDataset2 dataset;
 
 	@Before
 	public void setUp() {
@@ -32,7 +33,7 @@ public class SlidingWindowBuilderTest {
 		List<double[][]> futureDataSet = new ArrayList<>();
 		futureDataSet.add(matrix);
 		futureDataSet.add(matrix2);
-		this.dataset = new TimeSeriesDataset(futureDataSet, null, null);
+		this.dataset = new TimeSeriesDataset2(futureDataSet, null, null);
 	}
 
 	@Test
@@ -41,7 +42,7 @@ public class SlidingWindowBuilderTest {
 		builder.setDefaultWindowSize(2);
 		for (double[][] matrix : this.dataset.getValueMatrices()) {
 			for (double[] instance : matrix) {
-				TimeSeriesDataset tmp = builder.specialFitTransform(instance);
+				TimeSeriesDataset2 tmp = builder.specialFitTransform(instance);
 				for (double[][] newMatrix : tmp.getValueMatrices()) {
 					for (double[] entry : newMatrix) {
 						fail("This fail is just here to announce that this test does not really test anything at all. Insert a meaningful check.");

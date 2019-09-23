@@ -10,14 +10,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.core.timeseries.filter.SFA;
+import ai.libs.jaicore.ml.core.timeseries.filter.SlidingWindowBuilder;
 
 @RunWith(JUnit4.class)
 public class SFATest {
 
 	double[] timeseries1;
 	double[] timeseries2;
-	TimeSeriesDataset dataset;
+	TimeSeriesDataset2 dataset;
 
 	@Before
 	public void setup() {
@@ -27,7 +29,7 @@ public class SFATest {
 
 		ArrayList<double[][]> futureDataSet = new ArrayList<>();
 		futureDataSet.add(matrix);
-		this.dataset = new TimeSeriesDataset(futureDataSet, null, null);
+		this.dataset = new TimeSeriesDataset2(futureDataSet, null, null);
 	}
 
 	@Test
@@ -37,7 +39,7 @@ public class SFATest {
 		builder.setDefaultWindowSize(3);
 		for (double[][] matrix : this.dataset.getValueMatrices()) {
 			for (double[] instance : matrix) {
-				TimeSeriesDataset tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
+				TimeSeriesDataset2 tmp = testSFA.fitTransform((builder.specialFitTransform(instance)));
 				for (double[][] m : tmp.getValueMatrices()) {
 					for (double[] i : m) {
 						fail("This fail is just here to announce that this test does not really test anything at all. Insert a meaningful check. Output to prevent SQ to fire: " + i);
@@ -46,7 +48,7 @@ public class SFATest {
 			}
 		}
 
-		TimeSeriesDataset output = testSFA.fitTransform(this.dataset);
+		TimeSeriesDataset2 output = testSFA.fitTransform(this.dataset);
 		assertEquals(2, output.getValues(0)[0][0], 1.0E-5);
 	}
 

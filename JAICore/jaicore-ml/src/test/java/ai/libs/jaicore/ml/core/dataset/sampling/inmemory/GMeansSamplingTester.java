@@ -4,11 +4,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.IOrderedLabeledAttributeArrayDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
-import ai.libs.jaicore.ml.core.dataset.sampling.IClusterableInstances;
-import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.GmeansSamplingFactory;
+import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.GmeansSamplingFactory;
 
 public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 
@@ -28,8 +28,8 @@ public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(final IOrderedLabeledAttributeArrayDataset<IClusterableInstances<Number>, Number> dataset) {
-		GmeansSamplingFactory<IClusterableInstances<Number>, IOrderedLabeledAttributeArrayDataset<IClusterableInstances<Number>, Number>> factory = new GmeansSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
+		GmeansSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new GmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());

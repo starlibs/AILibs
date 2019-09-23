@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.Dyad;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance;
+import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 
 /**
  * Creates simple rankings for testing purposes.
@@ -25,7 +25,7 @@ public class DyadRankingInstanceSupplier {
 	}
 
 	/**
-	 * Creates a random {@link ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingInstance}
+	 * Creates a random {@link ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance}
 	 * consisting of (with 2 alternatives and 2 instances)
 	 *
 	 * @param maxLength The amount of dyads
@@ -49,7 +49,7 @@ public class DyadRankingInstanceSupplier {
 	}
 
 	/**
-	 * Creates a comparator for {@link ai.libs.jaicore.ml.dyadranking.Dyad} (with 2
+	 * Creates a comparator for {@link ai.libs.jaicore.ml.ranking.dyad.learner.Dyad} (with 2
 	 * instances x_1, x_2 and 2 alternatives y_1,y_2). A pair of dyads (d_i, d_j) is
 	 * then ranked by the rule d_i >= d_j iff x_i1^2 + x_i2^2 - y_i1^2 - y_i2^2 >
 	 * x_j1^2 + x_j2^2 - y_j1^2 - y_j2^2
@@ -59,10 +59,10 @@ public class DyadRankingInstanceSupplier {
 	public static Comparator<Dyad> complexDyadRanker() {
 		return (final Dyad d1, final Dyad d2) ->
 		{
-			Vector scoreVecI = d1.getInstance();
-			Vector scoreVecA = d1.getAlternative();
-			Vector scoreVecI2 = d2.getInstance();
-			Vector scoreVecA2 = d2.getAlternative();
+			IVector scoreVecI = d1.getInstance();
+			IVector scoreVecA = d1.getAlternative();
+			IVector scoreVecI2 = d2.getInstance();
+			IVector scoreVecA2 = d2.getAlternative();
 			double score1 = bilinFunc(scoreVecI, scoreVecA);
 			double score2 = bilinFunc(scoreVecI2, scoreVecA2);
 			double scoreDiff = score1 - score2;
@@ -80,7 +80,7 @@ public class DyadRankingInstanceSupplier {
 	 * @param scoreVec2 (x_2, y_2)
 	 * @return
 	 */
-	private static final double bilinFunc(final Vector scoreVec1, final Vector scoreVec2) {
+	private static final double bilinFunc(final IVector scoreVec1, final IVector scoreVec2) {
 		double score = scoreVec1.getValue(0) * scoreVec2.getValue(0) + scoreVec1.getValue(1) * scoreVec2.getValue(1)
 				+ scoreVec1.getValue(0) * scoreVec2.getValue(1) + scoreVec1.getValue(1) * scoreVec2.getValue(0);
 		return Math.exp(score);
@@ -106,8 +106,8 @@ public class DyadRankingInstanceSupplier {
 	}
 
 	public static double inputOptimizerTestScore(final Dyad dyad) {
-		Vector inst = dyad.getInstance();
-		Vector alt = dyad.getAlternative();
+		IVector inst = dyad.getInstance();
+		IVector alt = dyad.getAlternative();
 		return Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1));
 	}
 

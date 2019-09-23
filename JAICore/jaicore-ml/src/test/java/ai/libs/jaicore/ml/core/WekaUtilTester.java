@@ -16,13 +16,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.cache.InstructionGraph;
-import ai.libs.jaicore.ml.cache.LoadDatasetInstructionForOpenML;
-import ai.libs.jaicore.ml.cache.ReproducibleInstances;
-import ai.libs.jaicore.ml.cache.StratifiedSplitSubsetInstruction;
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstance;
-import ai.libs.jaicore.ml.core.dataset.weka.WekaInstances;
+import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
+import ai.libs.jaicore.ml.core.dataset.cache.LoadDatasetInstructionForOpenML;
+import ai.libs.jaicore.ml.core.dataset.cache.StratifiedSplitSubsetInstruction;
+import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.trees.RandomForest;
@@ -96,21 +96,21 @@ public class WekaUtilTester {
 		List<Instances> split1 = WekaUtil.getStratifiedSplit(data, seed, .7f);
 		List<Instances> split2 = WekaUtil.getStratifiedSplit(data, seed, .7f);
 
-		WekaInstances<Object> split1a = new WekaInstances<>(split1.get(0));
-		WekaInstances<Object> split2a = new WekaInstances<>(split2.get(0));
-		WekaInstances<Object> split1b = new WekaInstances<>(split1.get(1));
-		WekaInstances<Object> split2b = new WekaInstances<>(split2.get(1));
-		for (WekaInstance<Object> inst : split1a) {
-			assertTrue("Instance " + Arrays.toString(inst.getAsDoubleVector()) + " is only contained in first split but not in the second. " + split2a, split2a.contains(inst));
+		WekaInstances split1a = new WekaInstances(split1.get(0));
+		WekaInstances split2a = new WekaInstances(split2.get(0));
+		WekaInstances split1b = new WekaInstances(split1.get(1));
+		WekaInstances split2b = new WekaInstances(split2.get(1));
+		for (WekaInstance inst : split1a) {
+			assertTrue("Instance " + Arrays.toString(inst.toDoubleVector()) + " is only contained in first split but not in the second. " + split2a, split2a.contains(inst));
 		}
-		for (WekaInstance<Object> inst : split2a) {
-			assertTrue("Instance " + Arrays.toString(inst.getAsDoubleVector()) + " is only contained in second split but not in the first. " + split1a, split1a.contains(inst));
+		for (WekaInstance inst : split2a) {
+			assertTrue("Instance " + Arrays.toString(inst.toDoubleVector()) + " is only contained in second split but not in the first. " + split1a, split1a.contains(inst));
 		}
-		for (WekaInstance<Object> inst : split1b) {
-			assertTrue("Instance " + Arrays.toString(inst.getAsDoubleVector()) + " is only contained in first split but not in the second. " + split2b, split2b.contains(inst));
+		for (WekaInstance inst : split1b) {
+			assertTrue("Instance " + Arrays.toString(inst.toDoubleVector()) + " is only contained in first split but not in the second. " + split2b, split2b.contains(inst));
 		}
-		for (WekaInstance<Object> inst : split2b) {
-			assertTrue("Instance " + Arrays.toString(inst.getAsDoubleVector()) + " is only contained in second split but not in the first. " + split1b, split1b.contains(inst));
+		for (WekaInstance inst : split2b) {
+			assertTrue("Instance " + Arrays.toString(inst.toDoubleVector()) + " is only contained in second split but not in the first. " + split1b, split1b.contains(inst));
 		}
 	}
 
@@ -127,30 +127,30 @@ public class WekaUtilTester {
 		InstructionGraph graph = new InstructionGraph();
 		graph.addNode("load", new LoadDatasetInstructionForOpenML("", OPENML_KRVSKP));
 		graph.addNode("split", new StratifiedSplitSubsetInstruction(seed, .7f), Arrays.asList(new Pair<>("load", 0)));
-		List<WekaInstances<Object>> split2 = new ArrayList<>();
-		split2.add(((WekaInstances<Object>)graph.getDataForUnit(new Pair<>("split", 0))));
-		split2.add(((WekaInstances<Object>)graph.getDataForUnit(new Pair<>("split", 1))));
+		List<WekaInstances> split2 = new ArrayList<>();
+		split2.add(((WekaInstances) graph.getDataForUnit(new Pair<>("split", 0))));
+		split2.add(((WekaInstances) graph.getDataForUnit(new Pair<>("split", 1))));
 
 		/* check equalness of the two splits */
-		assertEquals(new WekaInstances<>(split1.get(0)).size(), split2.get(0).size());
-		WekaInstances<Object> split1a = new WekaInstances<>(split1.get(0));
-		WekaInstances<Object> split2a = split2.get(0);
-		WekaInstances<Object> split1b = new WekaInstances<>(split1.get(1));
-		WekaInstances<Object> split2b = split2.get(1);
+		assertEquals(new WekaInstances(split1.getAttributeValue(0)).size(), split2.getAttributeValue(0).size());
+		WekaInstances split1a = new WekaInstances(split1.getAttributeValue(0));
+		WekaInstances split2a = split2.getAttributeValue(0);
+		WekaInstances split1b = new WekaInstances(split1.getAttributeValue(1));
+		WekaInstances split2b = split2.getAttributeValue(1);
 		System.out.println("now checking containment");
-		for (WekaInstance<Object> inst : split1a) {
+		for (WekaInstance inst : split1a) {
 			assertTrue("Instance " + inst + " is only contained in first split but not in the second. " + split2a, split2a.contains(inst));
 		}
 		System.out.println("A");
-		for (WekaInstance<Object> inst : split2a) {
+		for (WekaInstance inst : split2a) {
 			assertTrue("Instance " + inst + " is only contained in second split but not in the first. " + split1a, split1a.contains(inst));
 		}
 		System.out.println("B");
-		for (WekaInstance<Object> inst : split1b) {
+		for (WekaInstance inst : split1b) {
 			assertTrue("Instance " + inst + " is only contained in first split but not in the second. " + split2b, split2b.contains(inst));
 		}
 		System.out.println("c");
-		for (WekaInstance<Object> inst : split2b) {
+		for (WekaInstance inst : split2b) {
 			assertTrue("Instance " + inst + " is only contained in second split but not in the first. " + split1b, split1b.contains(inst));
 		}
 	}

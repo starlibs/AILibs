@@ -4,7 +4,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.filter.transform.SineTransform;
+import ai.libs.jaicore.basic.transform.vector.SineTransform;
 
 /**
  * Test suite for the {@link SineTransform} implementation.

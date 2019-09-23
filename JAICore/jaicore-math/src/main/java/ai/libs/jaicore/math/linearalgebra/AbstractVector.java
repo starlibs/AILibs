@@ -5,7 +5,7 @@ package ai.libs.jaicore.math.linearalgebra;
  * 
  * @author Alexander Hetzer
  */
-public abstract class AbstractVector implements Vector {
+public abstract class AbstractVector implements IVector {
 
 	@Override
 	public void squareRoot() {
@@ -16,8 +16,8 @@ public abstract class AbstractVector implements Vector {
 	}
 
 	@Override
-	public Vector squareRootToCopy() {
-		Vector copy = this.duplicate();
+	public IVector squareRootToCopy() {
+		IVector copy = this.duplicate();
 		for (int i = 0; i < length(); i++) {
 			copy.setValue(i, Math.sqrt(getValue(i)));
 		}
@@ -90,85 +90,85 @@ public abstract class AbstractVector implements Vector {
 	}
 
 	@Override
-	public Vector addVectorToCopy(double[] vectorAsArray) {
-		Vector vector = duplicate();
+	public IVector addVectorToCopy(double[] vectorAsArray) {
+		IVector vector = duplicate();
 		vector.addVector(vectorAsArray);
 		return vector;
 	}
 
 	@Override
-	public Vector subtractVectorFromCopy(double[] vectorAsArray) {
-		Vector vector = duplicate();
+	public IVector subtractVectorFromCopy(double[] vectorAsArray) {
+		IVector vector = duplicate();
 		vector.subtractVector(vectorAsArray);
 		return vector;
 	}
 
 	@Override
-	public Vector multiplyByVectorPairwiseToCopy(double[] vectorAsArray) {
-		Vector vector = duplicate();
+	public IVector multiplyByVectorPairwiseToCopy(double[] vectorAsArray) {
+		IVector vector = duplicate();
 		vector.multiplyByVectorPairwise(vectorAsArray);
 		return vector;
 	}
 
 	@Override
-	public Vector divideByVectorPairwiseToCopy(double[] vectorAsArray) {
-		Vector vector = duplicate();
+	public IVector divideByVectorPairwiseToCopy(double[] vectorAsArray) {
+		IVector vector = duplicate();
 		vector.divideByVectorPairwise(vectorAsArray);
 		return vector;
 	}
 
 	@Override
-	public Vector addConstantToCopy(double constant) {
-		Vector vector = duplicate();
+	public IVector addConstantToCopy(double constant) {
+		IVector vector = duplicate();
 		vector.addConstant(constant);
 		return vector;
 	}
 
 	@Override
-	public Vector addVectorToCopy(Vector vector) {
-		Vector vectorCopy = duplicate();
+	public IVector addVectorToCopy(IVector vector) {
+		IVector vectorCopy = duplicate();
 		vectorCopy.addVector(vector);
 		return vectorCopy;
 	}
 
 	@Override
-	public Vector subtractConstantFromCopy(double constant) {
-		Vector vectorCopy = duplicate();
+	public IVector subtractConstantFromCopy(double constant) {
+		IVector vectorCopy = duplicate();
 		vectorCopy.subtractConstant(constant);
 		return vectorCopy;
 	}
 
 	@Override
-	public Vector subtractVectorFromCopy(Vector vector) {
-		Vector vectorCopy = duplicate();
+	public IVector subtractVectorFromCopy(IVector vector) {
+		IVector vectorCopy = duplicate();
 		vectorCopy.subtractVector(vector);
 		return vectorCopy;
 	}
 
 	@Override
-	public Vector multiplyByVectorPairwiseToCopy(Vector vector) {
-		Vector vectorCopy = duplicate();
+	public IVector multiplyByVectorPairwiseToCopy(IVector vector) {
+		IVector vectorCopy = duplicate();
 		vectorCopy.multiplyByVectorPairwise(vector);
 		return vectorCopy;
 	}
 
 	@Override
-	public Vector multiplyByConstantToCopy(double constant) {
-		Vector vectorCopy = duplicate();
+	public IVector multiplyByConstantToCopy(double constant) {
+		IVector vectorCopy = duplicate();
 		vectorCopy.multiplyByConstant(constant);
 		return vectorCopy;
 	}
 
 	@Override
-	public Vector divideByVectorPairwiseToCopy(Vector vector) {
-		Vector vectorCopy = duplicate();
+	public IVector divideByVectorPairwiseToCopy(IVector vector) {
+		IVector vectorCopy = duplicate();
 		vectorCopy.divideByVectorPairwise(vector);
 		return vectorCopy;
 	}
 
 	@Override
-	public Vector divideByConstantToCopy(double constant) {
-		Vector vectorCopy = duplicate();
+	public IVector divideByConstantToCopy(double constant) {
+		IVector vectorCopy = duplicate();
 		vectorCopy.divideByConstant(constant);
 		return vectorCopy;
 	}

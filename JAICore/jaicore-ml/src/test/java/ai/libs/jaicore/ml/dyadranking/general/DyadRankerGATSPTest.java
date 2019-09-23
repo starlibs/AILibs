@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,17 +20,16 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.Vector;
-import ai.libs.jaicore.ml.dyadranking.algorithm.IPLDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.algorithm.IPLNetDyadRankerConfiguration;
-import ai.libs.jaicore.ml.dyadranking.algorithm.PLNetDyadRanker;
-import ai.libs.jaicore.ml.dyadranking.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.dyadranking.dataset.IDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.dataset.SparseDyadRankingInstance;
-import ai.libs.jaicore.ml.dyadranking.loss.DyadRankingLossUtil;
-import ai.libs.jaicore.ml.dyadranking.loss.KendallsTauDyadRankingLoss;
-import ai.libs.jaicore.ml.dyadranking.util.AbstractDyadScaler;
-import ai.libs.jaicore.ml.dyadranking.util.DyadStandardScaler;
+import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.dyadranking.DyadRankingLossUtil;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLNetDyadRankerConfiguration;
+import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
+import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;
+import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadStandardScaler;
+import ai.libs.jaicore.ml.ranking.loss.KendallsTauDyadRankingLoss;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on
@@ -94,7 +94,7 @@ public class DyadRankerGATSPTest {
 		try {
 
 			// train the ranker
-			this.ranker.train(trainData);
+			this.ranker.fit(trainData);
 			double avgKendallTau = DyadRankingLossUtil.computeAverageLoss(new KendallsTauDyadRankingLoss(), testData, this.ranker);
 			assertTrue(avgKendallTau > 0.5d);
 		} catch (Exception e) {
@@ -134,11 +134,11 @@ public class DyadRankerGATSPTest {
 			e1.printStackTrace();
 		}
 
-		List<Vector> alternativeFeatures = new ArrayList<>(100);
+		List<IVector> alternativeFeatures = new ArrayList<>(100);
 
 		// parse the file containing the features of the alternatives
 		File alternativeFile = new File(ALTERNATIVES_FEATURE_FILE);
-		try(BufferedReader reader = new BufferedReader(new FileReader(alternativeFile))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(alternativeFile))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String[] tokens = line.split(",");
@@ -158,7 +158,7 @@ public class DyadRankerGATSPTest {
 		File xxlFile = new File(XXL_FILE);
 		int numAttributes = 0;
 		int numLabels = 0;
-		try(BufferedReader reader = new BufferedReader(new FileReader(xxlFile))) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(xxlFile))) {
 			// read the first line and setup counters accordingly
 			String line = reader.readLine();
 			String[] tokens = line.split("\t");
@@ -179,13 +179,13 @@ public class DyadRankerGATSPTest {
 			reader.readLine();
 			reader.readLine();
 
-			List<Vector> instanceFeatures = new ArrayList<>(246);
-			List<ArrayList<Vector>> alternativesList = new ArrayList<>(246);
+			List<IVector> instanceFeatures = new ArrayList<>(246);
+			List<ArrayList<IVector>> alternativesList = new ArrayList<>(246);
 			int lineIndex = 0;
 			while ((line = reader.readLine()) != null) {
 				tokens = line.split("\t");
-				Vector instance = new DenseDoubleVector(numAttributes);
-				ArrayList<Vector> alternatives = new ArrayList<>(numLabels);
+				IVector instance = new DenseDoubleVector(numAttributes);
+				ArrayList<IVector> alternatives = new ArrayList<>(numLabels);
 
 				// add the instances to the dyad ranking instance
 				for (int i = 0; i < numAttributes; i++) {
@@ -203,7 +203,7 @@ public class DyadRankerGATSPTest {
 			}
 
 			for (int i = 0; i < instanceFeatures.size(); i++) {
-				dataset.add(new SparseDyadRankingInstance(instanceFeatures.get(i), alternativesList.get(i)));
+				dataset.add(new SparseDyadRankingInstance(dataset.getInstanceSchema(), instanceFeatures.get(i), alternativesList.get(i)));
 			}
 
 			reader.close();
@@ -222,29 +222,27 @@ public class DyadRankerGATSPTest {
 	 * @param seed
 	 * @return
 	 */
-	private static DyadRankingDataset randomlyTrimSparseDyadRankingInstances(final DyadRankingDataset dataset,
-			final int dyadRankingLength) {
+	private static DyadRankingDataset randomlyTrimSparseDyadRankingInstances(final DyadRankingDataset dataset, final int dyadRankingLength) {
 		DyadRankingDataset trimmedDataset = new DyadRankingDataset();
 		for (IDyadRankingInstance instance : dataset) {
-			if (instance.length() < dyadRankingLength) {
+			if (instance.getNumAttributes() < dyadRankingLength) {
 				continue;
 			}
-			ArrayList<Boolean> flagVector = new ArrayList<>(instance.length());
+			ArrayList<Boolean> flagVector = new ArrayList<>(instance.getNumAttributes());
 			for (int i = 0; i < dyadRankingLength; i++) {
 				flagVector.add(Boolean.TRUE);
 			}
-			for (int i = dyadRankingLength; i < instance.length(); i++) {
+			for (int i = dyadRankingLength; i < instance.getNumAttributes(); i++) {
 				flagVector.add(Boolean.FALSE);
 			}
 			Collections.shuffle(flagVector);
-			List<Vector> trimmedAlternatives = new ArrayList<>(dyadRankingLength);
-			for (int i = 0; i < instance.length(); i++) {
+			List<IVector> trimmedAlternatives = new ArrayList<>(dyadRankingLength);
+			for (int i = 0; i < instance.getNumAttributes(); i++) {
 				if (flagVector.get(i)) {
-					trimmedAlternatives.add(instance.getDyadAtPosition(i).getAlternative());
+					trimmedAlternatives.add((IVector) instance.getLabel().get(i).getAlternative());
 				}
 			}
-			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(
-					instance.getDyadAtPosition(0).getInstance(), trimmedAlternatives);
+			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) instance.getLabel().get(0).getInstance(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;
@@ -254,16 +252,16 @@ public class DyadRankerGATSPTest {
 	public static List<IPLDyadRanker> supplyDyadRankers() {
 		PLNetDyadRanker plNetRanker = new PLNetDyadRanker();
 		// Use a simple config such that the test finishes quickly
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "100");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_PLNET_SEED, Long.toString(SEED));
-		plNetRanker.getConfiguration().setProperty(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "0.8");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_ACTIVATION_FUNCTION, "SIGMOID");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_HIDDEN_NODES, "5");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_MAX_EPOCHS, "100");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_INTERVAL, "1");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_PATIENCE, "5");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_RETRAIN, "false");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_LEARNINGRATE, "0.1");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_MINI_BATCH_SIZE, "1");
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_PLNET_SEED, Long.toString(SEED));
+		plNetRanker.getConfig().put(IPLNetDyadRankerConfiguration.K_EARLY_STOPPING_TRAIN_RATIO, "0.8");
 		return Arrays.asList(plNetRanker);
 	}
 }

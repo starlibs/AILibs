@@ -12,9 +12,9 @@ import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
-import ai.libs.jaicore.ml.classification.multiclass.reduction.splitters.RPNDSplitter;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.learner.reduction.MCTreeNodeReD;
+import ai.libs.jaicore.ml.weka.learner.reduction.splitter.RPNDSplitter;
 import ai.libs.reduction.ensemble.simple.EnsembleOfSimpleOneStepReductionsExperiment;
 import ai.libs.reduction.single.ReductionExperiment;
 import weka.classifiers.AbstractClassifier;

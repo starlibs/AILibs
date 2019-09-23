@@ -8,7 +8,7 @@ import org.api4.java.datastructure.graph.IPath;
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
 import ai.libs.mlplan.core.PipelineValidityCheckingNodeEvaluator;

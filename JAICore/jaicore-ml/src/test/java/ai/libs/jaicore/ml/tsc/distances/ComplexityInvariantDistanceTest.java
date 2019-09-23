@@ -5,13 +5,13 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.complexity.StretchingComplexity;
-import ai.libs.jaicore.ml.tsc.distances.ComplexityInvariantDistance;
-import ai.libs.jaicore.ml.tsc.distances.EuclideanDistance;
+import ai.libs.jaicore.basic.complexity.StretchingComplexity;
+import ai.libs.jaicore.basic.metric.ComplexityInvariantDistance;
+import ai.libs.jaicore.basic.metric.EuclideanDistance;
 
 /**
  * Test suite for the
- * {@link ai.libs.jaicore.ml.tsc.distances.ComplexityInvariantDistance} implementation.
+ * {@link ai.libs.jaicore.basic.metric.ComplexityInvariantDistance} implementation.
  * 
  * @author fischor
  */

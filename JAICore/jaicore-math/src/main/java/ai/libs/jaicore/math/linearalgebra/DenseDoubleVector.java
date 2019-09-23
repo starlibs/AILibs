@@ -85,7 +85,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void addVector(final Vector vector) {
+	public void addVector(final IVector vector) {
 		this.internalVector = this.internalVector.add(vector.toDenseVector().internalVector);
 	}
 
@@ -95,12 +95,12 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void subtractVector(final Vector vector) {
+	public void subtractVector(final IVector vector) {
 		this.internalVector = this.internalVector.add(-1, vector.toDenseVector().internalVector);
 	}
 
 	@Override
-	public void multiplyByVectorPairwise(final Vector secondVector) {
+	public void multiplyByVectorPairwise(final IVector secondVector) {
 		for (int i = 0; i < this.internalVector.size(); i++) {
 			this.internalVector.set(i, this.internalVector.get(i) * secondVector.getValue(i));
 		}
@@ -112,7 +112,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public void divideByVectorPairwise(final Vector secondVector) {
+	public void divideByVectorPairwise(final IVector secondVector) {
 		for (int i = 0; i < this.internalVector.size(); i++) {
 			this.internalVector.set(i, this.internalVector.get(i) / secondVector.getValue(i));
 		}
@@ -124,7 +124,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public double dotProduct(final Vector vector) {
+	public double dotProduct(final IVector vector) {
 		return this.internalVector.dot(vector.toDenseVector().internalVector);
 	}
 
@@ -168,7 +168,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector duplicate() {
+	public IVector duplicate() {
 		return new DenseDoubleVector(this.asArray());
 	}
 
@@ -196,7 +196,7 @@ public class DenseDoubleVector extends AbstractVector {
 	}
 
 	@Override
-	public Vector kroneckerProduct(final double[] vectorAsArray) {
+	public IVector kroneckerProduct(final double[] vectorAsArray) {
 		return new DenseDoubleVector(this.kroneckerProductInternal(vectorAsArray));
 	}
 }

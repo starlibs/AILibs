@@ -3,7 +3,7 @@ package ai.libs.mlplan.examples.multiclass.weka;
 import org.aeonbits.owner.Config.Sources;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
-import ai.libs.jaicore.ml.experiments.IMultiClassClassificationExperimentConfig;
+import ai.libs.jaicore.ml.core.evaluation.experiment.IMultiClassClassificationExperimentConfig;
 
 @Sources({ "file:conf/mlplan-weka-eval.properties" })
 public interface MLPlanWekaExperimenterConfig extends IMultiClassClassificationExperimentConfig, IDatabaseConfig {

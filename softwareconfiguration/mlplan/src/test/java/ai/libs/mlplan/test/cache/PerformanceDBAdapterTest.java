@@ -12,10 +12,10 @@ import org.junit.Test;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.jaicore.basic.SQLAdapter;
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.cache.ReproducibleInstances;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.F1MacroAverageL;
-import ai.libs.jaicore.ml.core.evaluation.measure.singlelabel.ZeroOneLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.F1MacroAverageL;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
@@ -46,7 +46,7 @@ public class PerformanceDBAdapterTest {
 			double score = Math.PI / 5.0;
 
 			// Store the first sample
-			pAdapter.store(composition1, instances1.get(0), instances1.get(1), score, className1, 6517L);
+			pAdapter.store(composition1, instances1.getAttributeValue(0), instances1.getAttributeValue(1), score, className1, 6517L);
 
 			// These should have no entry in the db, assuming it was empty when the test was
 			// started
@@ -57,15 +57,15 @@ public class PerformanceDBAdapterTest {
 			String className2 = F1MacroAverageL.class.getName();
 
 			// This is a different dataset
-			Optional<Double> shouldntExist1 = pAdapter.exists(composition1, instances2.get(0), instances2.get(1), className1);
+			Optional<Double> shouldntExist1 = pAdapter.exists(composition1, instances2.getAttributeValue(0), instances2.getAttributeValue(1), className1);
 			// This is a different is a different seed for splitting
-			Optional<Double> shouldntExist2 = pAdapter.exists(composition1, instances3.get(0), instances3.get(1), className1);
+			Optional<Double> shouldntExist2 = pAdapter.exists(composition1, instances3.getAttributeValue(0), instances3.getAttributeValue(1), className1);
 			// This is a different composition
-			Optional<Double> shouldntExist3 = pAdapter.exists(composition2, instances1.get(0), instances1.get(1), className1);
+			Optional<Double> shouldntExist3 = pAdapter.exists(composition2, instances1.getAttributeValue(0), instances1.getAttributeValue(1), className1);
 			// This is a different loss function (or measure resp.)
-			Optional<Double> shouldntExist4 = pAdapter.exists(composition1, instances1.get(0), instances1.get(1), className2);
+			Optional<Double> shouldntExist4 = pAdapter.exists(composition1, instances1.getAttributeValue(0), instances1.getAttributeValue(1), className2);
 			// This is the entry we inserted above
-			Optional<Double> shouldExist1 = pAdapter.exists(composition1, instances1.get(0), instances1.get(1), className1);
+			Optional<Double> shouldExist1 = pAdapter.exists(composition1, instances1.getAttributeValue(0), instances1.getAttributeValue(1), className1);
 
 			assertFalse(shouldntExist1.isPresent());
 			assertFalse(shouldntExist2.isPresent());

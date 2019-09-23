@@ -5,14 +5,15 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Before;
 import org.junit.Test;
 
+import ai.libs.jaicore.basic.metric.EuclideanDistance;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.distances.EuclideanDistance;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.neighbors.NearestNeighborClassifier;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 
 /**
  * Test suite for the
@@ -34,7 +35,7 @@ public class NearestNeighborTest {
 	 * }
 	 * </code> after set up.
 	 */
-	TimeSeriesDataset dataset;
+	TimeSeriesDataset2 dataset;
 
 	/**
 	 * Priority queue containing the (targetClass, distance)-pairs <code>
@@ -56,7 +57,7 @@ public class NearestNeighborTest {
 		int[] targets = { 1, 2, 2, 1, 1 };
 		ArrayList<double[][]> values = new ArrayList<>(1);
 		values.add(data);
-		this.dataset = new TimeSeriesDataset(values, targets);
+		this.dataset = new TimeSeriesDataset2(values, targets);
 
 		// Set up priority queue.
 		this.nearestNeighbors = new PriorityQueue<>(NearestNeighborClassifier.nearestNeighborComparator);
@@ -248,7 +249,7 @@ public class NearestNeighborTest {
 		// For prediction on dataset
 		NearestNeighborClassifier classifier = new NearestNeighborClassifier(6, new EuclideanDistance());
 		classifier.train(this.dataset);
-		classifier.predict((TimeSeriesDataset) null);
+		classifier.predict((TimeSeriesDataset2) null);
 
 	}
 

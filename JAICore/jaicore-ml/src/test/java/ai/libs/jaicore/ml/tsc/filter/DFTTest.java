@@ -1,25 +1,21 @@
 package ai.libs.jaicore.ml.tsc.filter;
 
-import static org.junit.Assert.*;
-
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.exceptions.NoneFittedFilterExeception;
-import ai.libs.jaicore.ml.tsc.filter.DFT;
-import ai.libs.jaicore.ml.tsc.filter.SlidingWindowBuilder;
-
 import static org.junit.Assert.assertEquals;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.core.timeseries.exceptions.NoneFittedFilterExeception;
+import ai.libs.jaicore.ml.core.timeseries.filter.DFT;
+import ai.libs.jaicore.ml.core.timeseries.filter.SlidingWindowBuilder;
 
 /**
  * @author Helen
@@ -31,7 +27,7 @@ public class DFTTest {
 	double[] timeseries1;
 	double[] timeseries2;
 	
-	TimeSeriesDataset dataset;
+	TimeSeriesDataset2 dataset;
 	
 	@Before
 	public void setup() {
@@ -43,7 +39,7 @@ public class DFTTest {
 		
 		ArrayList<double[][]> futureDataSet = new ArrayList<double[][]>();
 		futureDataSet.add(matrix);
-		dataset = new TimeSeriesDataset(futureDataSet,null, null);
+		dataset = new TimeSeriesDataset2(futureDataSet,null, null);
 	}
 	
 	@Rule
@@ -56,14 +52,14 @@ public class DFTTest {
 //		testDFT.setNumberOfDisieredCoefficients(7);
 		testDFT.setNumberOfDisieredCoefficients(2);
 		testDFT.fit(dataset);
-		TimeSeriesDataset output = null;
+		TimeSeriesDataset2 output = null;
 //		thrown.expect(IllegalArgumentException.class);
 		try {
 			SlidingWindowBuilder slide = new SlidingWindowBuilder();
 			slide.setDefaultWindowSize(3);
 			for(double[][] matrix : dataset.getValueMatrices()) {
 				for(double[] instance : matrix) {
-					TimeSeriesDataset tmp2= testDFT.rekursivDFT(slide.specialFitTransform(instance));
+					TimeSeriesDataset2 tmp2= testDFT.rekursivDFT(slide.specialFitTransform(instance));
 					for(double[][] m : tmp2.getValueMatrices()) {
 						for(double[] i : m) {
 							System.out.println(Arrays.toString(i));
@@ -74,7 +70,7 @@ public class DFTTest {
 					System.out.println("------------------------------------------------");
 				}
 			}
-			output = (TimeSeriesDataset)testDFT.transform(dataset);
+			output = (TimeSeriesDataset2)testDFT.transform(dataset);
 			System.out.println("iterativ");
 			System.out.println("------------------------------------------------");
 			
@@ -88,7 +84,7 @@ public class DFTTest {
 			System.out.println("------------------------------------------------");
 			for(double[][] matrix : dataset.getValueMatrices()) {
 				for(double[] instance : matrix) {
-					TimeSeriesDataset tmp2= testDFT.fitTransform((slide.specialFitTransform(instance)));
+					TimeSeriesDataset2 tmp2= testDFT.fitTransform((slide.specialFitTransform(instance)));
 					System.out.println(tmp2.getNumberOfVariables());
 					for(double[][] m : tmp2.getValueMatrices()) {
 						for(double[] i : m) {

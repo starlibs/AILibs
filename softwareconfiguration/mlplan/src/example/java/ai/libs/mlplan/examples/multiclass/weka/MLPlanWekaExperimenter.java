@@ -26,7 +26,7 @@ import ai.libs.jaicore.experiments.ExperimentDBEntry;
 import ai.libs.jaicore.experiments.IExperimentIntermediateResultProcessor;
 import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.ml.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;

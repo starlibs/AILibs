@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ai.libs.jaicore.ml.tsc.classifier.BOSSLearningAlgorithm.IBossAlgorithmConfig;
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.BOSSClassifier;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.BOSSLearningAlgorithm.IBossAlgorithmConfig;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 
 /**
  * @author Helen DFT JUnit test
@@ -21,7 +22,7 @@ import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
  */
 public class BOSSAlgorithmTest {
 
-	private TimeSeriesDataset dataset;
+	private TimeSeriesDataset2 dataset;
 
 	@Before
 	public void setup() {
@@ -33,7 +34,7 @@ public class BOSSAlgorithmTest {
 
 		List<double[][]> futureDataSet = new ArrayList<>();
 		futureDataSet.add(matrix);
-		this.dataset = new TimeSeriesDataset(futureDataSet, null, null);
+		this.dataset = new TimeSeriesDataset2(futureDataSet, null, null);
 	}
 
 	@Rule

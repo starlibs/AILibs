@@ -6,7 +6,7 @@ import java.util.Map;
 import org.api4.java.ai.ml.algorithm.TrainingException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
-import ai.libs.jaicore.math.linearalgebra.Vector;
+import ai.libs.jaicore.math.linearalgebra.IVector;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -22,10 +22,10 @@ public abstract class AWEKAPerformanceDecisionTreeBasedFeatureGenerator
 implements IPerformanceDecisionTreeBasedFeatureGenerator {
 
 	@Override
-	public void train(final Map<Vector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws TrainingException {
+	public void train(final Map<IVector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws TrainingException {
 		// Step 1: Transform to Instances Object
 		ArrayList<Attribute> attInfo = new ArrayList<>();
-		for (int i = 0; i < intermediatePipelineRepresentationsWithPerformanceValues.keySet().toArray(new Vector[0])[0]
+		for (int i = 0; i < intermediatePipelineRepresentationsWithPerformanceValues.keySet().toArray(new IVector[0])[0]
 				.length(); i++) {
 			attInfo.add(new Attribute("Attribute-" + i));
 		}
@@ -52,7 +52,7 @@ implements IPerformanceDecisionTreeBasedFeatureGenerator {
 	/**
 	 * Constructs an internal decision tree based on the Instances object so that
 	 * the feature generator can be used in the future to predict features for some
-	 * new vector ({@link #predict(Vector)}).
+	 * new vector ({@link #predict(IVector)}).
 	 *
 	 * @param data
 	 * @throws Exception

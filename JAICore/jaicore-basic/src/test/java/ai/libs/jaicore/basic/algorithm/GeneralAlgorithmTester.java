@@ -168,8 +168,7 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 	public void testTimeout() throws AlgorithmTestProblemSetCreationException, InterruptedException, ExecutionException, AlgorithmCreationException {
 		try {
 			this.runTimeoutTest(false);
-		}
-		finally {
+		} finally {
 
 		}
 	}
@@ -443,7 +442,6 @@ public abstract class GeneralAlgorithmTester implements ILoggingCustomizable {
 			}
 			fail(msg);
 		}
-
 
 		assert allTasksResolved;
 	}

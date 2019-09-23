@@ -7,8 +7,8 @@ import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.TimeOut;
 
 import ai.libs.automl.AutoMLAlgorithmResultProductionTester;
-import ai.libs.jaicore.ml.core.dataset.sampling.inmemory.factories.SimpleRandomSamplingFactory;
-import ai.libs.jaicore.ml.learningcurve.extrapolation.ipl.InversePowerLawExtrapolationMethod;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
+import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanWekaBuilder;

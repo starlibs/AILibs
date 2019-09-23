@@ -2,20 +2,20 @@ package ai.libs.jaicore.ml.tsc.distances;
 
 import static org.junit.Assert.assertEquals;
 
+import org.api4.java.common.metric.IDistanceMetric;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.distances.DerivateTransformDistance;
-import ai.libs.jaicore.ml.tsc.distances.DynamicTimeWarping;
-import ai.libs.jaicore.ml.tsc.distances.EuclideanDistance;
-import ai.libs.jaicore.ml.tsc.distances.ITimeSeriesDistance;
-import ai.libs.jaicore.ml.tsc.distances.TransformDistance;
-import ai.libs.jaicore.ml.tsc.filter.derivate.ADerivateFilter;
-import ai.libs.jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
-import ai.libs.jaicore.ml.tsc.filter.transform.ATransformFilter;
-import ai.libs.jaicore.ml.tsc.filter.transform.HilbertTransform;
+import ai.libs.jaicore.basic.metric.DerivateTransformDistance;
+import ai.libs.jaicore.basic.metric.DynamicTimeWarping;
+import ai.libs.jaicore.basic.metric.EuclideanDistance;
+import ai.libs.jaicore.basic.metric.TransformDistance;
+import ai.libs.jaicore.basic.transform.vector.ATransformFilter;
+import ai.libs.jaicore.basic.transform.vector.HilbertTransform;
+import ai.libs.jaicore.basic.transform.vector.derivate.ADerivateFilter;
+import ai.libs.jaicore.basic.transform.vector.derivate.BackwardDifferenceDerivate;
 
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.DerivateTransformDistance}
+ * Test suite for the {@link ai.libs.jaicore.basic.metric.DerivateTransformDistance}
  * implementation.
  * 
  * @author fischor
@@ -56,7 +56,7 @@ public class DerivateTransformDistanceTest {
 		double c = 0.25;
 		ADerivateFilter derivate = new BackwardDifferenceDerivate();
 		ATransformFilter transform = new HilbertTransform();
-		ITimeSeriesDistance euclideanDistance = new EuclideanDistance();
+		IDistanceMetric euclideanDistance = new EuclideanDistance();
 
 		// Expectation.
 		double expectation = a * Math.sqrt(15) + b * Math.sqrt(4) + c * 6.79562;

@@ -20,7 +20,7 @@ import ai.libs.jaicore.experiments.IExperimentSetEvaluator;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.SingleRandomSplitClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.SingleRandomSplitClassifierEvaluator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;

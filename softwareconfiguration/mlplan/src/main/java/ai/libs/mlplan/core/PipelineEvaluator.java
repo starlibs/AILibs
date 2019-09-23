@@ -13,7 +13,7 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.events.IEvent;
 import ai.libs.jaicore.basic.events.IEventEmitter;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.IClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;

@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.distances.MoveSplitMerge;
+import ai.libs.jaicore.basic.metric.MoveSplitMerge;
 
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.MoveSplitMerge}
+ * Test suite for the {@link ai.libs.jaicore.basic.metric.MoveSplitMerge}
  * implementation.
  * 
  * @author fischor

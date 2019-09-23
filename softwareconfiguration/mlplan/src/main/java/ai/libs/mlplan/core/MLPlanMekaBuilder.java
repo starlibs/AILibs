@@ -4,12 +4,12 @@ import java.io.File;
 import java.io.IOException;
 
 import ai.libs.jaicore.basic.FileUtil;
+import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMEKAGGPFitnessMeasureLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1AsLoss;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ProbabilisticMonteCarloCrossValidationEvaluatorFactory;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.AutoMEKAGGPFitnessMeasureLoss;
-import ai.libs.jaicore.ml.core.evaluation.measure.multilabel.InstanceWiseF1AsLoss;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.factory.ProbabilisticMonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.evaluation.evaluators.weka.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;

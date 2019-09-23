@@ -1,14 +1,16 @@
 plugins {
 	id 'java'
 	id 'eclipse'
-	//id 'org.openjfx.javafxplugin' version '0.0.5'
+	id 'org.openjfx.javafxplugin' version '0.0.5'
 }
+
 eclipse {
     classpath {
         downloadJavadoc = true
         downloadSources = true
     }
 }
+
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	
@@ -19,9 +21,11 @@ dependencies {
 	implementation 'com.github.graphstream:gs-algo:2.0-alpha'
 
 }
-//javafx {
-//    modules = [ 'javafx.controls', 'javafx.swing', 'javafx.web' ]
-//}
+
+javafx {
+    modules = [ 'javafx.controls', 'javafx.swing', 'javafx.web' ]
+}
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

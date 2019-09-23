@@ -4,12 +4,11 @@ dependencies {
 	compile project(":JAICore:jaicore-algorithminspector")
 	compile project(":JAICore:jaicore-experiments")
 	
-	//compile ("org.api4:datastructure")
-	//compile ("org.api4:ai.graphsearch")
+	compile ("org.api4:ai.graphsearch:0.0.1")
 	
 	compile group: 'tech.tablesaw', name: 'tablesaw-jsplot', version: '0.35.0'
 	compile group: 'org.knowm.xchart', name: 'xchart', version: '3.5.2' // currently only used for the ParetoFronVisualization
-  testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
+  	//testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 }
 
 uploadArchives {

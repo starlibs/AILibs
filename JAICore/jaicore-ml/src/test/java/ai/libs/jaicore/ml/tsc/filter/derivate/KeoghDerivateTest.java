@@ -4,10 +4,10 @@ import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.filter.derivate.KeoghDerivate;
+import ai.libs.jaicore.basic.transform.vector.derivate.KeoghDerivate;
 
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.filter.derivate.KeoghDerivate}
+ * Test suite for the {@link ai.libs.jaicore.basic.transform.vector.derivate.KeoghDerivate}
  * implementation.
  * 
  * @author fischor

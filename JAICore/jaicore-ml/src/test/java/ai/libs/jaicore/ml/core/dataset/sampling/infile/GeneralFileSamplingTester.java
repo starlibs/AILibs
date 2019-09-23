@@ -19,7 +19,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.ml.core.dataset.ArffUtilities;
-import ai.libs.jaicore.ml.core.dataset.sampling.infiles.AFileSamplingAlgorithm;
+import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
 
 /**
  * This class provides tests for assuring some basic sampling algorithm

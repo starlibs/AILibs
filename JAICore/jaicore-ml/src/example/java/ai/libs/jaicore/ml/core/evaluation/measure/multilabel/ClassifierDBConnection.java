@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.basic.kvstore.IKVStore;
-import ai.libs.jaicore.ml.core.evaluation.measure.ClassifierMetricGetter;
+import ai.libs.jaicore.ml.weka.ClassifierMetricGetter;
 import meka.core.Result;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

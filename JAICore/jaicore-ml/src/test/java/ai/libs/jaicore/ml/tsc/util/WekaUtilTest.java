@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.ai.ml.core.dataset.attribute.primitive.NumericAttributeType;
 import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import ai.libs.jaicore.ml.core.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.util.WekaUtil;
+import ai.libs.jaicore.ml.core.tabular.dataset.attribute.NumericAttribute;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
 import junit.framework.Assert;
 import weka.core.Instances;
 
 /**
  * Weka util unit tests.
- * 
+ *
  * @author Julian Lienen
  *
  */
@@ -27,7 +27,8 @@ public class WekaUtilTest {
 	@Test
 	public void timeSeriesDatasetToWekaInstancesTest() {
 		final List<INDArray> valueMatrix = Arrays.asList(Nd4j.create(new double[][] { { 1, 2, 3, 4 }, { 1, 2, 2, 2 } }));
-		TimeSeriesDataset<Double> dataset = new TimeSeriesDataset<>(valueMatrix, new ArrayList<>(), Nd4j.create(new double[] { 1, 2 }), new NumericAttributeType());
+
+		TimeSeriesDataset<Double> dataset = new TimeSeriesDataset<>(valueMatrix, new ArrayList<>(), Arrays.asList(1.0, 2.0), Arrays.asList(new NumericAttribute("class")));
 
 		Instances actResult = WekaUtil.timeSeriesDatasetToWekaInstances(dataset);
 

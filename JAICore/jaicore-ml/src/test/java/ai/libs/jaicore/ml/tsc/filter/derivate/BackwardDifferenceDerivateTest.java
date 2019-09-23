@@ -4,11 +4,11 @@ import static org.junit.Assert.assertArrayEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate;
+import ai.libs.jaicore.basic.transform.vector.derivate.BackwardDifferenceDerivate;
 
 /**
  * Test suite for the
- * {@link ai.libs.jaicore.ml.tsc.filter.derivate.BackwardDifferenceDerivate}
+ * {@link ai.libs.jaicore.basic.transform.vector.derivate.BackwardDifferenceDerivate}
  * implementation.
  * 
  * @author fischor

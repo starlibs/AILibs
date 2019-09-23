@@ -10,6 +10,7 @@ include ":JAICore:jaicore-experiments"
 include ":JAICore:jaicore-logic"
 include ":JAICore:jaicore-math"
 include ":JAICore:jaicore-ml"
+include ":JAICore:jaicore-ml-weka"
 
 include ":JAICore:jaicore-planning"
 include ":JAICore:jaicore-processes"
@@ -28,7 +29,3 @@ project(":autofe").projectDir = new File(configPrefix,"autofe")
 
 include 'autofe-reldata'
 project(":autofe-reldata").projectDir = new File(configPrefix,"autofe-reldata")
-
-
-// include api projects
-//includeBuild "../api4"

@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.aeonbits.owner.ConfigCache;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -15,11 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.TreeNode;
-import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeClassifier.TimeSeriesTreeNodeDecisionFunction;
-import ai.libs.jaicore.ml.tsc.classifier.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
-import ai.libs.jaicore.ml.tsc.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.tsc.features.TimeSeriesFeature;
-import ai.libs.jaicore.ml.tsc.features.TimeSeriesFeature.FeatureType;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeClassifier;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeLearningAlgorithm;
+import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesFeature;
+import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesFeature.FeatureType;
 import junit.framework.Assert;
 
 /**
@@ -51,7 +52,6 @@ public class TimeSeriesTreeTest {
 	 */
 	public static final int SEED = 42;
 	public static final int MAX_DEPTH = 10;
-
 
 	private final ITimeSeriesTreeConfig config = ConfigCache.getOrCreate(ITimeSeriesTreeConfig.class);
 
@@ -278,7 +278,7 @@ public class TimeSeriesTreeTest {
 		int[] targets = new int[] { 0, 1 };
 		List<double[][]> dataList = new ArrayList<>();
 		dataList.add(data);
-		TimeSeriesDataset dataset = new TimeSeriesDataset(dataList, targets);
+		TimeSeriesDataset2 dataset = new TimeSeriesDataset2(dataList, targets);
 
 		tst.train(dataset);
 

@@ -3,10 +3,15 @@ package ai.libs.jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.api4.java.common.metric.IDistanceMetric;
 import org.junit.Test;
 
+import ai.libs.jaicore.basic.metric.DerivateDistance;
+import ai.libs.jaicore.basic.metric.DynamicTimeWarping;
+import ai.libs.jaicore.basic.metric.EuclideanDistance;
+
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.DerivateDistance}
+ * Test suite for the {@link ai.libs.jaicore.basic.metric.DerivateDistance}
  * implementation.
  *
  * @author fischor
@@ -41,8 +46,8 @@ public class DerivateDistanceTest {
 		double[] timeSeries1 = { 1, 1, 2, 2, 3, 5 };
 		double[] timeSeries2 = { 1, 2, 3, 5, 5, 6 };
 		double alpha = 0.5;
-		ITimeSeriesDistance timeSeriesDistance = new DynamicTimeWarping();
-		ITimeSeriesDistance derivateDistance = new EuclideanDistance();
+		IDistanceMetric timeSeriesDistance = new DynamicTimeWarping();
+		IDistanceMetric derivateDistance = new EuclideanDistance();
 
 		// Expectation.
 		double expectation = Math.cos(alpha) * 1 + Math.sin(alpha) * Math.sqrt(7);

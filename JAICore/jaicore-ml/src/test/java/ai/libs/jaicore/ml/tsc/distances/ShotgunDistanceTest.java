@@ -5,6 +5,9 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import ai.libs.jaicore.basic.metric.ShotgunDistance;
+import ai.libs.jaicore.basic.metric.aicore;
+
 
 /**
  * Test suite for the {@link aicore.ml.tsc.distances.ShotgunDistance}

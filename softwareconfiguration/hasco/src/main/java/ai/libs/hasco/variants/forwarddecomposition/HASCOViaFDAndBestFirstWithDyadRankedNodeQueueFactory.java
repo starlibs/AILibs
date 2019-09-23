@@ -23,8 +23,7 @@ public class HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory extends HASCOV
 	 *
 	 * @param openConfig
 	 */
-	public HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(
-			final IBestFirstQueueConfiguration<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> openConfig) {
+	public HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory(final IBestFirstQueueConfiguration<GraphSearchWithSubpathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> openConfig) {
 		super();
 		this.setNodeEvaluator(n -> 1.0);
 		this.setSearchFactory(new DyadRankedBestFirstFactory<>(openConfig));
@@ -32,17 +31,16 @@ public class HASCOViaFDAndBestFirstWithDyadRankedNodeQueueFactory extends HASCOV
 
 	@Override
 	public void setNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> nodeEvaluator) {
-		this.setSearchProblemTransformer(
-				new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> {
-					if (!(n instanceof BackPointerPath)) {
-						throw new IllegalArgumentException("This variant of HASCO currently only works with back-pointer based nodes.");
-					}
-					if (((BackPointerPath<?, ?, ?>)n).isGoal()) {
-						return nodeEvaluator.evaluate(n);
-					} else {
-						return 1.0;
-					}
-				}));
+		this.setSearchProblemTransformer(new GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<>(n -> {
+			if (!(n instanceof BackPointerPath)) {
+				throw new IllegalArgumentException("This variant of HASCO currently only works with back-pointer based nodes.");
+			}
+			if (((BackPointerPath<?, ?, ?>) n).isGoal()) {
+				return nodeEvaluator.evaluate(n);
+			} else {
+				return 1.0;
+			}
+		}));
 	}
 
 	@Override

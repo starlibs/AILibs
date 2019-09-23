@@ -5,7 +5,7 @@ import org.aeonbits.owner.Config.LoadType;
 import org.aeonbits.owner.Config.Sources;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
-import ai.libs.jaicore.ml.experiments.IMultiClassClassificationExperimentConfig;
+import ai.libs.jaicore.ml.core.evaluation.experiment.IMultiClassClassificationExperimentConfig;
 
 @LoadPolicy(LoadType.MERGE)
 @Sources({ "file:conf/ml2planAutoExperimenter.properties", "file:conf/ml2planAutodatabase.properties" })

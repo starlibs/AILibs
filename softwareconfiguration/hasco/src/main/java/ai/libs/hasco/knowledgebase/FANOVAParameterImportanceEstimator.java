@@ -13,9 +13,9 @@ import com.google.common.collect.Sets;
 import ai.libs.hasco.core.Util;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.ml.core.FeatureDomain;
-import ai.libs.jaicore.ml.core.FeatureSpace;
-import ai.libs.jaicore.ml.intervaltree.ExtendedRandomForest;
+import ai.libs.jaicore.ml.core.tabular.rqp.learner.intervaltree.ExtendedRandomForest;
+import ai.libs.jaicore.ml.core.tabular.rqp.learner.intervaltree.featurespace.FeatureDomain;
+import ai.libs.jaicore.ml.core.tabular.rqp.learner.intervaltree.featurespace.FeatureSpace;
 import weka.core.Instances;
 
 /**

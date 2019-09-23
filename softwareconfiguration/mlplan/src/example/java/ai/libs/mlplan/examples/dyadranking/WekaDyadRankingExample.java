@@ -10,8 +10,8 @@ import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.cache.ReproducibleInstances;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.DyadRankedBestFirstFactory;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;

@@ -12,8 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.jaicore.ml.WekaUtil;
-import ai.libs.jaicore.ml.classification.multiclass.reduction.MCTreeNodeReD;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.learner.reduction.MCTreeNodeReD;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;

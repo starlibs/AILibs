@@ -8,7 +8,7 @@ import java.util.HashMap;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.Vector;
+import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.RandomTreePerformanceBasedFeatureGenerator;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -33,7 +33,7 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 	 */
 	@Test
 	public void testTrainWithVectorNoUnsetValues() throws Exception {
-		HashMap<Vector, Double> map = new HashMap<>();
+		HashMap<IVector, Double> map = new HashMap<>();
 		map.put(new DenseDoubleVector(new double[] { 1, -1, -1 }), 5.0);
 		map.put(new DenseDoubleVector(new double[] { 1, -1, -1 }), 7.0);
 		map.put(new DenseDoubleVector(new double[] { -1, 1, -1 }), 3.0);
@@ -68,7 +68,7 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 	 */
 	@Test
 	public void testTrainWithVectorUnsetValues() throws Exception {
-		HashMap<Vector, Double> map = new HashMap<>();
+		HashMap<IVector, Double> map = new HashMap<>();
 		map.put(new DenseDoubleVector(new double[] { 1, -1, -1 }), 5.0);
 		map.put(new DenseDoubleVector(new double[] { 1, -1, -1 }), 7.0);
 		map.put(new DenseDoubleVector(new double[] { -1, 0, -1 }), 3.0);
@@ -191,7 +191,7 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 	@Test
 	public void testPredictOnTrainingDataNoUnsetValues() throws Exception {
 		// Train Model
-		HashMap<Vector, Double> map = new HashMap<>();
+		HashMap<IVector, Double> map = new HashMap<>();
 		map.put(new DenseDoubleVector(new double[] { 1, -1, -1 }), 5.0);
 		map.put(new DenseDoubleVector(new double[] { 1, -1, -1 }), 7.0);
 		map.put(new DenseDoubleVector(new double[] { -1, 1, -1 }), 3.0);
@@ -212,8 +212,8 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 			System.out.println(treeFeatureGen);
 
 			// Predictions for the training data
-			Vector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
-			Vector prediction = treeFeatureGen.predict(features);
+			IVector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
+			IVector prediction = treeFeatureGen.predict(features);
 			System.out.println(features + " --> " + prediction);
 
 			features = new DenseDoubleVector(new double[] { -1, 1, -1 });
@@ -244,7 +244,7 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 	@Test
 	public void testPredictOnTrainingDataUnsetValues() throws Exception {
 		// Train Model
-		HashMap<Vector, Double> map = new HashMap<>();
+		HashMap<IVector, Double> map = new HashMap<>();
 		map.put(new DenseDoubleVector(new double[] { 1, -1, -1 }), 5.0);
 		map.put(new DenseDoubleVector(new double[] { -1, 1, -1 }), 7.0);
 		map.put(new DenseDoubleVector(new double[] { 0, 0, -1 }), 3.0);
@@ -266,8 +266,8 @@ public class RandomTreePerformanceBasedFeatureGeneratorTest {
 			System.out.println(treeFeatureGen);
 
 			// Predictions for the training data
-			Vector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
-			Vector prediction = treeFeatureGen.predict(features);
+			IVector features = new DenseDoubleVector(new double[] { 1, -1, -1 });
+			IVector prediction = treeFeatureGen.predict(features);
 			System.out.println(features + " --> " + prediction);
 
 			features = new DenseDoubleVector(new double[] { -1, 1, -1 });

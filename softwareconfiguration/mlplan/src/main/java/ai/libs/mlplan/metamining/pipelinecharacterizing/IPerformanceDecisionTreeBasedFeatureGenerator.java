@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.api4.java.ai.ml.algorithm.TrainingException;
 
-import ai.libs.jaicore.math.linearalgebra.Vector;
+import ai.libs.jaicore.math.linearalgebra.IVector;
 
 /**
  * A feature generator that is based on a decision tree. Generates new features
@@ -19,7 +19,7 @@ public interface IPerformanceDecisionTreeBasedFeatureGenerator {
 	/**
 	 * Constructs an internal decision tree so that the feature generator can be
 	 * used in the future to predict features for some new vector
-	 * ({@link #predict(Vector)}).
+	 * ({@link #predict(IVector)}).
 	 *
 	 * @param intermediatePipelineRepresentationsWithPerformanceValues
 	 *            maps a features to performance value. Should only contain
@@ -27,7 +27,7 @@ public interface IPerformanceDecisionTreeBasedFeatureGenerator {
 	 * @throws Exception
 	 *             if something goes wrong while constructing the tree
 	 */
-	void train(Map<Vector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws TrainingException;
+	void train(Map<IVector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws TrainingException;
 
 	/**
 	 * Predicts a feature vector based on a path in the constructed decision tree:
@@ -39,5 +39,5 @@ public interface IPerformanceDecisionTreeBasedFeatureGenerator {
 	 *            the feature vector for which to generate a new representation
 	 * @return the new representation of the given feature vector
 	 */
-	Vector predict(Vector intermediatePipelineRepresentation);
+	IVector predict(IVector intermediatePipelineRepresentation);
 }

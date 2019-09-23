@@ -4,12 +4,12 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.distances.EuclideanDistance;
-import ai.libs.jaicore.ml.tsc.distances.ManhattanDistance;
-import ai.libs.jaicore.ml.tsc.exceptions.TimeSeriesLengthException;
+import ai.libs.jaicore.basic.metric.EuclideanDistance;
+import ai.libs.jaicore.basic.metric.ManhattanDistance;
+import ai.libs.jaicore.ml.core.timeseries.exceptions.TimeSeriesLengthException;
 
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.ManhattanDistance}
+ * Test suite for the {@link ai.libs.jaicore.basic.metric.ManhattanDistance}
  * implementation.
  * 
  * @author fischor

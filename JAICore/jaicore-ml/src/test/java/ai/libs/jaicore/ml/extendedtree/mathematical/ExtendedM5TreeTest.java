@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.ml.intervaltree.ExtendedM5Tree;
+import ai.libs.jaicore.ml.core.tabular.rqp.learner.intervaltree.ExtendedM5Tree;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;

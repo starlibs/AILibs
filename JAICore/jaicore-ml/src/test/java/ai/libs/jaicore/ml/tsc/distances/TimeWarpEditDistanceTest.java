@@ -3,12 +3,14 @@ package ai.libs.jaicore.ml.tsc.distances;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.api4.java.common.metric.IScalarDistance;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.tsc.util.ScalarDistanceUtil;
+import ai.libs.jaicore.basic.metric.ScalarDistanceUtil;
+import ai.libs.jaicore.basic.metric.TimeWarpEditDistance;
 
 /**
- * Test suite for the {@link ai.libs.jaicore.ml.tsc.distances.TimeWarpEditDistance}
+ * Test suite for the {@link ai.libs.jaicore.basic.metric.TimeWarpEditDistance}
  * implementation.
  *
  * @author fischor
