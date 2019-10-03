@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.ICancelableNodeEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
@@ -71,7 +72,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.Decor
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 /**
  *
@@ -82,7 +82,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
  * @param <A>
  * @param <V>
  */
-public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
+public class BestFirst<I extends IGraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
 	private Logger logger = LoggerFactory.getLogger(BestFirst.class);
 	private String loggerName;
@@ -147,7 +147,7 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 		this.pathGoalTester = problem.getGoalTester();
 
 		/* if the node evaluator is graph dependent, communicate the generator to it */
-		this.nodeEvaluator = problem.getNodeEvaluator();
+		this.nodeEvaluator = problem.getPathEvaluator();
 		if (this.nodeEvaluator == null) {
 			throw new IllegalArgumentException("Cannot work with node evaulator that is null");
 		} else if (this.nodeEvaluator instanceof DecoratingNodeEvaluator<?, ?, ?>) {

@@ -18,21 +18,27 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.IWinComputer;
 public class BestAndLatestVsBestAndLatestWinComputer implements IWinComputer {
 
 	private Logger logger = LoggerFactory.getLogger(LatestVsLatestWinComputer.class);
-	private final int kBest = 1;
-	private final int fBest = 9;
-	private final int kLatest = 50;
+	private final int kBest;
+	private final int fBest = 0;
+	private final int kLatest;
 
 	private Map<BTModel, MinMaxPriorityQueue<Double>> bestValues = new HashMap<>();
 	private Map<BTModel, Queue<Double>> latestValues = new HashMap<>();
 
+	public BestAndLatestVsBestAndLatestWinComputer(final int kBest, final int kLatest) {
+		super();
+		this.kBest = kBest;
+		this.kLatest = kLatest;
+	}
+
 	@Override
 	public void updateWinsOfChildrenBasedOnNewScore(final BTModel nodeModel, final double newScore, final boolean forRightChild) {
-		this.logger.debug("Recomputing wins for children of {}.",  nodeModel);
-		//		System.out.println("Observing " + newScore + " for " + (forRightChild ? "right" : "left") + " child in depth " + nodeModel.depth+ ". Observed scores: " + nodeModel.observedScoresLeft + "; " + nodeModel.observedScoresRight);
+		this.logger.debug("Recomputing wins for children of {}.", nodeModel);
+		// System.out.println("Observing " + newScore + " for " + (forRightChild ? "right" : "left") + " child in depth " + nodeModel.depth+ ". Observed scores: " + nodeModel.observedScoresLeft + "; " + nodeModel.observedScoresRight);
 
 		/* updating latest */
-		Queue<Double> leftQueue = this.latestValues.computeIfAbsent(nodeModel.left, nm -> new LinkedList<>());
-		Queue<Double> rightQueue = this.latestValues.computeIfAbsent(nodeModel.right, nm -> new LinkedList<>());
+		Queue<Double> leftQueue = this.latestValues.computeIfAbsent(nodeModel.getLeft(), nm -> new LinkedList<>());
+		Queue<Double> rightQueue = this.latestValues.computeIfAbsent(nodeModel.getRight(), nm -> new LinkedList<>());
 		Queue<Double> updatedQueue = forRightChild ? rightQueue : leftQueue;
 		updatedQueue.add(newScore);
 		if (updatedQueue.size() > this.kLatest) {
@@ -40,16 +46,16 @@ public class BestAndLatestVsBestAndLatestWinComputer implements IWinComputer {
 		}
 
 		/* updating best */
-		MinMaxPriorityQueue<Double> leftBestQueue = this.bestValues.computeIfAbsent(nodeModel.left, nm -> MinMaxPriorityQueue.create());
-		MinMaxPriorityQueue<Double> rightBestQueue = this.bestValues.computeIfAbsent(nodeModel.right, nm -> MinMaxPriorityQueue.create());
-		//		System.out.println("PREV: " + leftBestQueue + "/" + rightBestQueue);
+		MinMaxPriorityQueue<Double> leftBestQueue = this.bestValues.computeIfAbsent(nodeModel.getLeft(), nm -> MinMaxPriorityQueue.create());
+		MinMaxPriorityQueue<Double> rightBestQueue = this.bestValues.computeIfAbsent(nodeModel.getRight(), nm -> MinMaxPriorityQueue.create());
+		// System.out.println("PREV: " + leftBestQueue + "/" + rightBestQueue);
 		MinMaxPriorityQueue<Double> updatedBestQueue = forRightChild ? rightBestQueue : leftBestQueue;
 		updatedBestQueue.add(newScore);
 		if (updatedBestQueue.size() > this.kBest) {
 			updatedBestQueue.removeLast();
 		}
-		//		System.out.println("NEXT: " + leftBestQueue + "/" + rightBestQueue);
-		if (!leftBestQueue.isEmpty() && !leftBestQueue.peek().equals( nodeModel.observedScoresLeft.peek())) {
+		// System.out.println("NEXT: " + leftBestQueue + "/" + rightBestQueue);
+		if (!leftBestQueue.isEmpty() && !leftBestQueue.peek().equals(nodeModel.observedScoresLeft.peek())) {
 			throw new IllegalStateException("\nBest believed score left is " + leftBestQueue.peek() + ", which differs from true observed left optimum " + nodeModel.observedScoresLeft.peek());
 		}
 		if (!rightBestQueue.isEmpty() && !rightBestQueue.peek().equals(nodeModel.observedScoresRight.peek())) {
@@ -66,8 +72,7 @@ public class BestAndLatestVsBestAndLatestWinComputer implements IWinComputer {
 						leftClones.add(best);
 					}
 				}
-			}
-			else if (rightBestQueue.peek() < leftBestQueue.peek()) {
+			} else if (rightBestQueue.peek() < leftBestQueue.peek()) {
 				for (double best : rightBestQueue) {
 					for (int i = 0; i < this.fBest; i++) {
 						rightClones.add(best);
@@ -93,10 +98,10 @@ public class BestAndLatestVsBestAndLatestWinComputer implements IWinComputer {
 				boolean winOfRight = rightScore <= leftScore;
 				this.logger.trace("Comparing scores {} and {} implies win for left: {}; win for right: {}", leftScore, rightScore, winOfLeft, winOfRight);
 				if (winOfLeft) {
-					winsLeft ++;
+					winsLeft++;
 				}
 				if (winOfRight) {
-					winsRight ++;
+					winsRight++;
 				}
 			}
 		}
@@ -112,9 +117,9 @@ public class BestAndLatestVsBestAndLatestWinComputer implements IWinComputer {
 			if (substantialGap && leftBestQueue.peek() < rightBestQueue.peek() && winsLeft < winsRight) {
 				System.err.println("inconsistency in depth " + nodeModel.depth + ": right has more wins than left! " + winsLeft + ", " + winsRight + "; " + leftScores + " vs " + rightScores);
 			}
-			//			if (nodeModel.depth <= 5) {
-			//				System.out.println(nodeModel.depth + ": " + leftBestQueue.peek() + "/" + rightBestQueue.peek());
-			//		}
+			// if (nodeModel.depth <= 5) {
+			// System.out.println(nodeModel.depth + ": " + leftBestQueue.peek() + "/" + rightBestQueue.peek());
+			// }
 		}
 	}
 

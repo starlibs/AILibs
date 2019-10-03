@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +44,12 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	public abstract A getActionBasedOnScores(Map<A, Double> scores);
 
 	@Override
-	public void updatePath(final List<N> path, final Double score) {
+	public void updatePath(final IPath<N, A> path, final Double score) {
 		this.logger.debug("Updating path {} with score {}", path, score);
 		int lastVisits = Integer.MAX_VALUE;
 		double lastMin = -1 * Double.MAX_VALUE;
 		double lastMax = Double.MAX_VALUE;
-		for (N node : path) {
+		for (N node : path.getNodes()) {
 			NodeLabel label = this.labels.computeIfAbsent(node, n -> new NodeLabel());
 			label.visits++;
 			label.scores.addValue(score);

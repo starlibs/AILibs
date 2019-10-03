@@ -1,5 +1,6 @@
 package ai.libs.jaicore.search.problemtransformers;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.datastructure.graph.IPath;
@@ -8,13 +9,12 @@ import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
-public class GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<N, A> implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, Double>, SearchGraphPath<N, A>, GraphSearchWithSubpathEvaluationsInput<N, A, Double>, EvaluatedSearchGraphPath<N, A, Double>> {
+public class GraphSearchWithPathEvaluationsInputToGraphSearchWithSubpathEvaluationViaUninformedness<N, A> implements AlgorithmicProblemReduction<IGraphSearchWithPathEvaluationsInput<N, A, Double>, SearchGraphPath<N, A>, GraphSearchWithSubpathEvaluationsInput<N, A, Double>, EvaluatedSearchGraphPath<N, A, Double>> {
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<N, A, Double> encodeProblem(final GraphSearchWithPathEvaluationsInput<N, A, Double> problem) {
+	public GraphSearchWithSubpathEvaluationsInput<N, A, Double> encodeProblem(final IGraphSearchWithPathEvaluationsInput<N, A, Double> problem) {
 		IPathEvaluator<N, A, Double> evaluator = new AlternativeNodeEvaluator<>(new IPathEvaluator<N, A, Double>() {
 
 			@Override

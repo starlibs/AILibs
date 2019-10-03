@@ -2,7 +2,7 @@ package ai.libs.jaicore.search.algorithms.standard.mcts;
 
 import java.util.Random;
 
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 
 /**
  * This is the single player UCT variant proposed in
@@ -20,14 +20,14 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
  * @author fmohr
  *
  */
-public class SPUCTPathSearch<N, A> extends MCTSPathSearch<N, A, Double> {
+public class SPUCTPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends MCTSPathSearch<I, N, A, Double> {
 
-	public SPUCTPathSearch(final GraphSearchWithPathEvaluationsInput<N, A, Double> problem, final boolean maximization, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD, final boolean forbidDoublePaths) {
+	public SPUCTPathSearch(final I problem, final boolean maximization, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD, final boolean forbidDoublePaths) {
 		super(problem, new SPUCBPolicy<>(maximization, bigD), new UniformRandomPolicy<>(new Random(seed)), evaluationFailurePenalty, forbidDoublePaths);
 		((SPUCBPolicy<N, A>)this.getTreePolicy()).setExplorationConstant(explorationC);
 	}
 
-	public SPUCTPathSearch(final GraphSearchWithPathEvaluationsInput<N, A, Double> problem, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD, final boolean forbidDoublePaths) {
+	public SPUCTPathSearch(final I problem, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD, final boolean forbidDoublePaths) {
 		this(problem, false, seed, evaluationFailurePenalty, explorationC, bigD, forbidDoublePaths);
 	}
 }

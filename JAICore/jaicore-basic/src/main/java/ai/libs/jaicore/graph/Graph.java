@@ -84,6 +84,19 @@ public class Graph<T> implements Serializable {
 		return this.successors.containsKey(from) && this.successors.get(from).contains(to);
 	}
 
+	public boolean hasPath(final List<T> nodes) {
+		T last = null;
+		for (T current : nodes) {
+			if (last != null) {
+				if (!this.hasEdge(last, current)) {
+					return false;
+				}
+			}
+			last = current;
+		}
+		return true;
+	}
+
 	public void removeItem(final T item) {
 		for (T successor : this.getSuccessors(item)) {
 			this.removeEdge(item, successor);

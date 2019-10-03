@@ -34,7 +34,6 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 
 	@Override
 	public ShortList decodeSolution(final IPath<EnhancedTTSPBinaryTelescopeNode, String> solution) {
-		ShortList tour = solution.getHead().getCurTour();
-		return tour.subList(0, tour.size() - 1); // remove trailing 0
+		return solution.getHead().getCurTour();
 	}
 }

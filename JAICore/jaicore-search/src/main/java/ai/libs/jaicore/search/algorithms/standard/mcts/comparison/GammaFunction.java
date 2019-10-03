@@ -88,13 +88,13 @@ public class GammaFunction implements IGammaFunction {
 	private double getLongTermGamma(final BTModel n) {
 		int iterationsToReachMaxGammaForThisNode = this.observationsToReachMaxGamma.apply(n);
 		int iterationsToReachGammaOneForThisNode = (int)Math.round(this.absoluteMaxStepsToReachGammaOne * 1.0 / this.absoluteMaxStepsToReachMaxGamma * iterationsToReachMaxGammaForThisNode);
-		return this.getExploitationBasedOnlyOnVisits(n.left.visits, n.right.visits, this.minObservationsEnforcedForAnyDecision, iterationsToReachGammaOneForThisNode, iterationsToReachMaxGammaForThisNode, this.maxGamma);
+		return this.getExploitationBasedOnlyOnVisits(n.getLeft().visits, n.getRight().visits, this.minObservationsEnforcedForAnyDecision, iterationsToReachGammaOneForThisNode, iterationsToReachMaxGammaForThisNode, this.maxGamma);
 	}
 
 	private double getShortTermGamma(final BTModel n) {
 		int iterationsToReachGammaOneForThisNode = this.shortAbsoluteMaxStepsToReachGammaOne;
 		int iterationsToReachMaxGammaForThisNode = this.shortAbsoluteMaxStepsToReachMaxGamma;
-		return this.getExploitationBasedOnlyOnVisits(n.left.visits, n.right.visits, this.shortMinObservationsEnforcedForAnyDecision, iterationsToReachGammaOneForThisNode, iterationsToReachMaxGammaForThisNode, this.shortMaxGamma);
+		return this.getExploitationBasedOnlyOnVisits(n.getLeft().visits, n.getRight().visits, this.shortMinObservationsEnforcedForAnyDecision, iterationsToReachGammaOneForThisNode, iterationsToReachMaxGammaForThisNode, this.shortMaxGamma);
 	}
 
 	@Override

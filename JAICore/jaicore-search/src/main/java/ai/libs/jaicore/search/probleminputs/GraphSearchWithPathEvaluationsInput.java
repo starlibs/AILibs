@@ -12,6 +12,8 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.datastructure.graph.IPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.api4.java.datastructure.graph.implicit.RootGenerator;
+import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
@@ -35,12 +37,12 @@ public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> 
 		super(graphSearchInput);
 		this.pathEvaluator = pathEvaluator;
 	}
-	
+
 	public GraphSearchWithPathEvaluationsInput(final IGraphSearchInput<N, A> graphSearchInput, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
 		this (graphSearchInput, new IPathEvaluator<N, A, V>() {
 
 			@Override
-			public V evaluate(IPath<N, A> path) throws PathEvaluationException, InterruptedException {
+			public V evaluate(final IPath<N, A> path) throws PathEvaluationException, InterruptedException {
 				try {
 					return pathEvaluator.evaluate(path);
 				} catch (ObjectEvaluationFailedException e) {
@@ -52,6 +54,27 @@ public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> 
 
 	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
 		this(new GraphSearchInput<>(graphGenerator, goalTester), pathEvaluator);
+	}
+
+	/**
+	 * Clones a problem but uses a different start node instead.
+	 *
+	 * @param originalProblem
+	 * @param alternativeRootGenerator
+	 */
+	public GraphSearchWithPathEvaluationsInput(final GraphSearchWithPathEvaluationsInput<N, A, V> originalProblem, final RootGenerator<N> alternativeRootGenerator) {
+		this (new IGraphGenerator<N, A>() {
+
+			@Override
+			public RootGenerator<N> getRootGenerator() {
+				return alternativeRootGenerator;
+			}
+
+			@Override
+			public SuccessorGenerator<N, A> getSuccessorGenerator() {
+				return originalProblem.getGraphGenerator().getSuccessorGenerator();
+			}
+		}, originalProblem.getGoalTester(), originalProblem.getPathEvaluator());
 	}
 
 	@Override

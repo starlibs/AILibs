@@ -4,6 +4,7 @@ dependencies {
   compile ('it.unimi.dsi:fastutil:8.2.1')
   compile ('com.fasterxml.jackson.core:jackson-databind:2.9.7')
   compile ('org.api4:common:0.0.1')
+  compile ('org.api4:datastructure:0.0.1')
   compile ('org.api4:algorithm:0.0.1')
   testCompile 'org.awaitility:awaitility:3.1.6'
 }

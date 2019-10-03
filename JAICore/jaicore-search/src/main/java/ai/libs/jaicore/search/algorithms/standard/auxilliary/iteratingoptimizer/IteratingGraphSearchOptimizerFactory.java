@@ -2,14 +2,14 @@ package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 
 import ai.libs.jaicore.search.core.interfaces.StandardORGraphSearchFactory;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class IteratingGraphSearchOptimizerFactory<I extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, IteratingGraphSearchOptimizer<I, N, A, V>>
+public class IteratingGraphSearchOptimizerFactory<I extends IGraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends StandardORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, IteratingGraphSearchOptimizer<I, N, A, V>>
 implements IOptimalPathInORGraphSearchFactory<I, EvaluatedSearchGraphPath<N, A, V>, N, A, V, IteratingGraphSearchOptimizer<I, N, A, V>> {
 
 	private IGraphSearchFactory<IGraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A, ?> baseAlgorithmFactory;

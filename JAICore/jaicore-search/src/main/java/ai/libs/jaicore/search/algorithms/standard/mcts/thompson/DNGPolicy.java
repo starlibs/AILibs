@@ -1,7 +1,6 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.thompson;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -11,6 +10,7 @@ import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTest
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +41,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	/* initialization according to section 6.2 in the paper */
 	private final double initLambda = 1.0;
 	private final double initAlpha = 1.0;
-	private final double initBeta = 1.0;
+	private final double initBeta = 1 / this.initLambda;
 	private final double initMu = 0.0;
 
 	private final Map<N, Double> alpha = new HashMap<>();
@@ -79,8 +79,8 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	 * In fact, without inner rewards and without discounting, this just amounts to use the playout score
 	 * for all nodes on the path, which can be done in a simple loop.
 	 */
-	public void updatePath(final List<N> path, final Double playoutScore) {
-		for (N node : path) {
+	public void updatePath(final IPath<N, A> path, final Double playoutScore) {
+		for (N node : path.getNodes()) {
 			double lambdaOfN = this.lambda.computeIfAbsent(node, n -> this.initLambda);
 			double muOfN = this.mu.computeIfAbsent(node, n -> this.initMu);
 			this.alpha.put(node, this.alpha.computeIfAbsent(node, n -> this.initAlpha) + 0.5);

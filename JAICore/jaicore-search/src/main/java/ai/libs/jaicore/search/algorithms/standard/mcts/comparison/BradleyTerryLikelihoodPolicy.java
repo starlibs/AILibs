@@ -1,12 +1,16 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.comparison;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +21,12 @@ import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.graph.Graph;
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
+import ai.libs.jaicore.search.algorithms.standard.mcts.IPathLikelihoodProvidingPolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.observationfilter.EmptyObservationFilter;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.BestAndLatestVsBestAndLatestWinComputer;
+import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.EstimatorDistanceBasedWinComputer;
+import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.ThresholdedRunsWinComputer;
+import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 /**
  * This is a slightly simplified implementation of the algorithm presented in
@@ -30,17 +37,23 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.Be
  * @param <N>
  * @param <A>
  */
-public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILoggingCustomizable, IEventEmitter {
+public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, IPathLikelihoodProvidingPolicy<N, A>, ILoggingCustomizable, IEventEmitter {
 
 	private EventBus eventBus = new EventBus();
 	private Logger logger = LoggerFactory.getLogger(BradleyTerryLikelihoodPolicy.class);
+	private Map<IPath<N,A>, Double> scores = new HashMap<>();
 
 	public class BTModel<T> {
+		private final IPath<T, A> path;
 		private final T node;
+		private final A action;
 
-		public BTModel(final T node, final BTModel parent, final int depth) {
+		public BTModel(final IPath<T, A> path, final BTModel parent, final int depth) {
 			super();
-			this.node = node;
+			this.node = path.getHead();
+			// System.out.println("Path: " + path.getNodes().stream().map(n -> "\n\t" + n).collect(Collectors.joining()));
+			this.action = path.getArcs().size() > 1 ? path.getArcs().get(path.getArcs().size() - 1) : null;
+			this.path = path;
 			this.depth = depth;
 		}
 
@@ -48,8 +61,20 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 		public int maxObservedDepthUnderNode = -1;
 		int visits = 0;
 		public BTModel parent;
-		public BTModel left;
-		public BTModel right;
+		private BTModel left;
+		private BTModel right;
+
+		public boolean isGoalNode() {
+			return this.left == null && this.right == null;
+		}
+
+		public IPath<T, A> getPath() {
+			return this.path;
+		}
+
+		public T getNode() {
+			return this.node;
+		}
 
 		public final MinMaxPriorityQueue<Double> observedScoresLeft = MinMaxPriorityQueue.create();
 		public final MinMaxPriorityQueue<Double> observedScoresRight = MinMaxPriorityQueue.create();
@@ -59,6 +84,11 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 
 		private double pLeft = .5;
 		private double pRight = .5;
+
+		private void checkChildModels() {
+			assert this.left == null || this.left.path.getPathToParentOfHead().equals(this.path);
+			assert this.right == null || this.right.path.getPathToParentOfHead().equals(this.path);
+		}
 
 		public void addScore(final double score, final boolean isForRightChild) {
 			boolean observationsRemoved = false;
@@ -82,18 +112,35 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 				pRightBefore = this.pRight;
 				this.scaleProbabilities();
 				BradleyTerryLikelihoodPolicy.this.logger.trace("Scaling according to {} visits on {} causes probabilities to update from {}/{} to {}/{}", this.visits, this.node, pLeftBefore, pRightBefore, this.pLeft, this.pRight);
-			}
-			else {
+			} else {
 				if (!this.observedScoresLeft.isEmpty() && !this.observedScoresRight.isEmpty() && this.observedScoresLeft.equals(this.observedScoresRight)) {
-					throw new IllegalStateException("With at least one observation on each side for node " + this.node + ", there should be a decision unless both have the same score. Scores are: \n\tleft: " + this.observedScoresLeft + "\n\tright: " + this.observedScoresRight);
+					throw new IllegalStateException("With at least one observation on each side for node " + this.node + ", there should be a decision unless both have the same score. Scores are: \n\tleft: " + this.observedScoresLeft
+							+ "\n\tright: " + this.observedScoresRight);
 				}
-				BradleyTerryLikelihoodPolicy.this.logger.debug("Did not update the probability model of node {} yet, because for one of the nodes, no observation has been made yet. Current number of observations: {}/{}", this.node, this.observedScoresLeft.size(), this.observedScoresRight.size());
+				BradleyTerryLikelihoodPolicy.this.logger.debug("Did not update the probability model of node {} yet, because for one of the nodes, no observation has been made yet. Current number of observations: {}/{}", this.node,
+						this.observedScoresLeft.size(), this.observedScoresRight.size());
 			}
-			BradleyTerryLikelihoodPolicy.this.eventBus.post(new ObservationsUpdatedEvent<T>(this.getClass().getName(), this.node, this.visits, this.observedScoresLeft, this.observedScoresRight, this.winsLeft, this.winsRight, pLeftBefore, pRightBefore, this.pLeft, this.pRight));
-			//			if (this.depth == 30) {
-			//				System.out.println(this.observedScoresLeft + " vs " + this.observedScoresRight + " -> (" + this.winsLeft + ", " + this.winsRight + ")");
-			//			}
+			BradleyTerryLikelihoodPolicy.this.eventBus.post(
+					new ObservationsUpdatedEvent<T>(this.getClass().getName(), this.node, this.visits, this.observedScoresLeft, this.observedScoresRight, this.winsLeft, this.winsRight, pLeftBefore, pRightBefore, this.pLeft, this.pRight));
+			// if (this.depth == 30) {
+			// System.out.println(this.observedScoresLeft + " vs " + this.observedScoresRight + " -> (" + this.winsLeft + ", " + this.winsRight + ")");
+			// }
+		}
 
+		public BTModel getLeft() {
+			return this.left;
+		}
+
+		public BTModel getRight() {
+			return this.right;
+		}
+
+		public double getpLeft() {
+			return this.pLeft;
+		}
+
+		public double getpRight() {
+			return this.pRight;
 		}
 
 		private void updateProbabilities() {
@@ -106,8 +153,9 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 
 		private void scaleProbabilities() {
 			final double MAX_EXPONENT = 1000;
-			//			double exp = Math.min(MAX_EXPONENT, new AffineFunction(0, 0, Math.pow(BradleyTerryLikelihoodPolicy.this.maxIter, 2), MAX_EXPONENT).apply(Math.pow(BradleyTerryLikelihoodPolicy.this.numberOfEvaluations, 2))); // squared increase
-			//			double exp = new AffineFunction(0, 0, BradleyTerryLikelihoodPolicy.this.maxIter, MAX_EXPONENT).apply(BradleyTerryLikelihoodPolicy.this.numberOfEvaluations); // linear increase
+			// double exp = Math.min(MAX_EXPONENT, new AffineFunction(0, 0, Math.pow(BradleyTerryLikelihoodPolicy.this.maxIter, 2), MAX_EXPONENT).apply(Math.pow(BradleyTerryLikelihoodPolicy.this.numberOfEvaluations, 2))); // squared
+			// increase
+			// double exp = new AffineFunction(0, 0, BradleyTerryLikelihoodPolicy.this.maxIter, MAX_EXPONENT).apply(BradleyTerryLikelihoodPolicy.this.numberOfEvaluations); // linear increase
 			Double gammaScore = Double.valueOf(BradleyTerryLikelihoodPolicy.this.gamma.apply(this));
 			if (gammaScore.equals(Double.NaN)) {
 				throw new IllegalStateException("Computing gamma failed.");
@@ -125,7 +173,8 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 				double gapBetweenLeftAndRight = Math.abs(this.observedScoresLeft.peek() - this.observedScoresRight.peek());
 				double gapBetweenLeftAndRightProbability = Math.abs(this.pLeft - this.pRight);
 				if (gapBetweenLeftAndRight > 0.05 && gapBetweenLeftAndRightProbability > 0.2 && (bestScoreIsLeft && this.pRight > this.pLeft || !bestScoreIsLeft && this.pRight < this.pLeft)) {
-					BradleyTerryLikelihoodPolicy.this.logger.warn("Best choice is in the branch with less probability! Best values: {}/{}. Probabilities: {}/{}. Depth: {}, Number of visits: {}", this.observedScoresLeft.peek(),this.observedScoresRight.peek(), this.pLeft, this.pRight, this.depth, this.visits);
+					BradleyTerryLikelihoodPolicy.this.logger.warn("Best choice is in the branch with less probability! Best values: {}/{}. Probabilities: {}/{}. Depth: {}, Number of visits: {}", this.observedScoresLeft.peek(),
+							this.observedScoresRight.peek(), this.pLeft, this.pRight, this.depth, this.visits);
 				}
 			}
 		}
@@ -173,16 +222,14 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 	private Map<N, Integer> depthMap = new HashMap<>();
 	private Map<N, Integer> maxObservedDepthUnderNode = new HashMap<>();
 
-	private final int maxIter;
 	private int numberOfEvaluations = 0;
 	private final Random random;
-	private final IWinComputer winComputer = new BestAndLatestVsBestAndLatestWinComputer();
+	private final IWinComputer winComputer = new EstimatorDistanceBasedWinComputer();
 	private final IObservationUpdate updater = new EmptyObservationFilter();
 	private final IGammaFunction gamma = new GammaFunction();
 
-	public BradleyTerryLikelihoodPolicy(final int maxIter, final Random random) {
+	public BradleyTerryLikelihoodPolicy(final Random random) {
 		super();
-		this.maxIter = maxIter;
 		this.random = random;
 	}
 
@@ -195,6 +242,7 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 		if (actionsWithSuccessors == null || actionsWithSuccessors.isEmpty()) {
 			throw new IllegalArgumentException("No actions and successors are provided.");
 		}
+
 		A leftAction = null;
 		A rightAction = null;
 		if (actionsWithSuccessors.size() == 1) {
@@ -203,9 +251,9 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 			return action;
 		}
 
-		//		if (nodeModel.getPathProbability() < .01) {
-		//			System.out.println(nodeModel.visits + ": " + nodeModel.pLeft + ", " +nodeModel.pRight + ": " + nodeModel.observedScoresLeft + ", " + nodeModel.observedScoresRight);
-		//		}
+		// if (nodeModel.getPathProbability() < .01) {
+		// System.out.println(nodeModel.visits + ": " + nodeModel.pLeft + ", " +nodeModel.pRight + ": " + nodeModel.observedScoresLeft + ", " + nodeModel.observedScoresRight);
+		// }
 
 		/* determine which is the left and which is the right action */
 		this.logger.debug("Selecting action among {} candidates: {}", actionsWithSuccessors.size(), actionsWithSuccessors.keySet());
@@ -219,11 +267,9 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 			}
 			if (nodeModel.left.node.equals(successor)) {
 				leftAction = entry.getKey();
-			}
-			else if (nodeModel.right.node.equals(successor)) {
+			} else if (nodeModel.right.node.equals(successor)) {
 				rightAction = entry.getKey();
-			}
-			else {
+			} else {
 				throw new IllegalStateException();
 			}
 		}
@@ -232,37 +278,40 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 		}
 
 		/* if the numbers of actions is not enough, choose the one with less examples */
-		//		int numOfRequiredObservations = this.requiredNumberOfObservationsForEach.apply(node);
+		// int numOfRequiredObservations = this.requiredNumberOfObservationsForEach.apply(node);
 		A action;
-		//		if (Math.min(nodeModel.observedScoresLeft.size(), nodeModel.observedScoresRight.size()) < numOfRequiredObservations) {
-		//			action = nodeModel.observedScoresLeft.size() <= nodeModel.observedScoresRight.size() ? leftAction : rightAction;
-		//			this.logger.info("Refusing opinion, because number of min samples does not exceed {}. Choosing action {} to balance number of observations", numOfRequiredObservations, action);
-		//		}
-		//		else {
+		// if (Math.min(nodeModel.observedScoresLeft.size(), nodeModel.observedScoresRight.size()) < numOfRequiredObservations) {
+		// action = nodeModel.observedScoresLeft.size() <= nodeModel.observedScoresRight.size() ? leftAction : rightAction;
+		// this.logger.info("Refusing opinion, because number of min samples does not exceed {}. Choosing action {} to balance number of observations", numOfRequiredObservations, action);
+		// }
+		// else {
 		assert Math.abs(1 - (nodeModel.pLeft + nodeModel.pRight)) < 0.000001 : "Sum of probabilities is " + nodeModel.pLeft + " + " + nodeModel.pRight + " = " + (nodeModel.pLeft + nodeModel.pRight);
 		if (this.random == null) {
 			action = nodeModel.pLeft > nodeModel.pRight ? leftAction : rightAction;
 			this.logger.info("Deterministically recommending action {} based on probabilities {}/{}", action, nodeModel.pLeft, nodeModel.pRight);
-		}
-		else {
+		} else {
 			action = this.random.nextDouble() <= nodeModel.pLeft ? leftAction : rightAction;
-			//			System.out.println(nodeModel.depth + " (" + nodeModel.visits + " visits): " + nodeModel.pLeft + ", " + nodeModel.pRight + " -> " + action);
+			// System.out.println(nodeModel.depth + " (" + nodeModel.visits + " visits): " + nodeModel.pLeft + ", " + nodeModel.pRight + " -> " + action);
 			this.logger.info("Stochastically recommending action {} where probability of action {} was {} and probability of action {} was {}", action, leftAction, nodeModel.pLeft, rightAction, nodeModel.pRight);
 		}
-		//		}
+		// }
 		return action;
 	}
 
 	@Override
-	public void updatePath(final List<N> path, final Double playoutScore) {
+	public void updatePath(final IPath<N, A> path, final Double playoutScore) {
 		this.logger.info("Updating path {} with score {}", path, playoutScore);
-		this.numberOfEvaluations ++;
+		this.numberOfEvaluations++;
+		this.scores.put(path, playoutScore);
+
+		/* first create all node models on the path if they don't exist yet and update depths etc. */
 		BTModel last = null;
-		int n = path.size();
+		int n = path.getNumberOfNodes();
 		for (int i = 0; i < n; i++) {
 			int depth = n - 1 - i;
-			N node = path.get(depth);
-			BTModel modelOfCurrent = this.nodeModels.computeIfAbsent(node, k -> new BTModel(k, null, depth));
+			N node = path.getNodes().get(depth);
+			final int j = i;
+			BTModel modelOfCurrent = this.nodeModels.computeIfAbsent(node, k -> new BTModel(new SearchGraphPath<>(new ArrayList<>(path.getNodes().subList(0, depth + 1)), new ArrayList<>(path.getArcs().subList(0, depth))), null, depth));
 			if (last != null) {
 				last.parent = modelOfCurrent;
 			}
@@ -274,26 +323,36 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 			}
 			assert this.depthMap.get(node) == depth : "Depth should be " + this.depthMap.get(node) + " but is " + i;
 			if (last != null) {
-				modelOfCurrent.visits ++;
+				modelOfCurrent.visits++;
 				if (modelOfCurrent.left == null || modelOfCurrent.left.equals(last)) {
 					if (modelOfCurrent.left == null) {
 						modelOfCurrent.left = last;
 					}
-					modelOfCurrent.addScore(playoutScore, false);
 					this.logger.debug("Updated left score of node {} with {}", node, playoutScore);
-				}
-				else if (modelOfCurrent.right == null || modelOfCurrent.right.equals(last)) {
+				} else if (modelOfCurrent.right == null || modelOfCurrent.right.equals(last)) {
 					if (modelOfCurrent.right == null) {
 						modelOfCurrent.right = last;
 					}
-					modelOfCurrent.addScore(playoutScore, true);
 					this.logger.debug("Updated right score of node {} with {}", node, playoutScore);
-				}
-				else {
+				} else {
 					throw new IllegalStateException();
 				}
 			}
+			assert modelOfCurrent.path.getHead().equals(node);
 			last = modelOfCurrent;
+		}
+
+		/* now update scores along the path (bottom up) */
+		last = null;
+		for (int i = 0; i < n; i++) {
+			int depth = n - 1 - i;
+			N node = path.getNodes().get(depth);
+			BTModel current = this.nodeModels.get(node);
+			if (last != null) {
+				assert current.left != null && current.left.equals(last) || current.right != null && current.right.equals(last);
+				current.addScore(playoutScore, current.right != null && current.right.equals(last));
+			}
+			last = current;
 		}
 	}
 
@@ -320,5 +379,56 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 		this.eventBus.register(listener);
 	}
 
+	public Collection<IPath<N, A>> getAllKnownPathsUnderNode(final N node) {
+		Collection<IPath<N, A>> paths = new ArrayList<>();
+		assert this.nodeModels.get(node).path.getHead().equals(node);
+		BTModel model = this.nodeModels.get(node);
+		model.checkChildModels();
+		if (model.left == null && model.right == null) {
+			paths.add(model.path);
+			return paths;
+		}
+		if (model.left != null) {
+			paths.addAll(this.getAllKnownPathsUnderNode((N) model.left.node));
+		}
+		if (model.right != null) {
+			paths.addAll(this.getAllKnownPathsUnderNode((N) model.right.node));
+		}
+		return paths;
+	}
 
+	@Override
+	public double getLikelihood(final IPath<N, A> path) {
+		double likelihood = 1;
+		N last = null;
+		List<Double> likelihoodPath = new ArrayList<>();
+		for (N node : path.getNodes()) {
+			if (last != null) {
+				BTModel model = this.nodeModels.get(last);
+				if (model == null) {
+					throw new IllegalStateException("No model for node " + last);
+				}
+				if (model.left != null && model.right != null) {
+					if (model.left.node.equals(node)) {
+						likelihood *= model.pLeft;
+					} else if (model.right.node.equals(node)) {
+						likelihood *= model.pRight;
+					} else {
+						throw new IllegalStateException();
+					}
+				}
+				else {
+					/* do nothing. If one child has not been expanded, its intended likelihood is implicitly 1 */
+				}
+			}
+			last = node;
+			likelihoodPath.add(likelihood);
+		}
+		System.out.println( path.getHead() + ": " + this.scores.get(path) + " -> " + likelihood);
+		return likelihood;
+	}
+
+	public List<IPath<N, A>> getMostLikelyPathsUnderNode(final N node, final int k) {
+		return this.getAllKnownPathsUnderNode(node).stream().sorted((p1,p2) -> Double.compare(this.getLikelihood(p2), this.getLikelihood(p1))).limit(k).collect(Collectors.toList());
+	}
 }

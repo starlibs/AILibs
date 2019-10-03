@@ -31,14 +31,8 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 		this.annotations = new HashMap<>();
 	}
 
-	public SearchGraphPath(final IPath<N, A> pathA, final N attachedNode, final A link) {
-		this.nodes = new ArrayList<>();
-		this.nodes.addAll(pathA.getNodes());
-		this.nodes.add(attachedNode);
-		this.edges = new ArrayList<>();
-		this.edges.addAll(pathA.getArcs());
-		this.edges.add(link);
-		this.annotations = new HashMap<>();
+	public SearchGraphPath(final IPath<N, A> path, final N attachedNode, final A link) {
+		this (path, new SearchGraphPath<>(attachedNode), link);
 	}
 
 	public SearchGraphPath(final N node) {

@@ -11,7 +11,7 @@ import ai.libs.jaicore.search.syntheticgraphs.graphmodels.degenerated.Degenerate
 public class DegeneratedGraphSearchProblem extends GraphSearchInput<ITransparentTreeNode, Integer> {
 
 	public DegeneratedGraphSearchProblem(final Random r, final int deadEndsPerGeneration, final int branchingFactor, final int depth) {
-		super(new DegeneratedGraphGeneratorGenerator(r, deadEndsPerGeneration, branchingFactor, depth).create(), new NodeGoalTester<ITransparentTreeNode, Integer>() {
+		super(new DegeneratedGraphGeneratorGenerator(r, deadEndsPerGeneration, branchingFactor, depth).build(), new NodeGoalTester<ITransparentTreeNode, Integer>() {
 
 			@Override
 			public boolean isGoal(final ITransparentTreeNode node) {

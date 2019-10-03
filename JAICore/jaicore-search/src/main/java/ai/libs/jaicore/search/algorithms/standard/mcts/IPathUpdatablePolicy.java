@@ -1,8 +1,8 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts;
 
-import java.util.List;
+import org.api4.java.datastructure.graph.IPath;
 
 public interface IPathUpdatablePolicy<N, A, V extends Comparable<V>> extends IPolicy<N, A, V> {
 
-	public void updatePath(List<N> path, V playout);
+	public void updatePath(IPath<N, A> path, V playout);
 }

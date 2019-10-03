@@ -2,12 +2,15 @@ package ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearch;
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,10 +18,10 @@ import com.google.common.eventbus.Subscribe;
 
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.EvaluatedSearchSolutionCandidateFoundEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.GraphSearchSolutionCandidateFoundEvent;
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
 /**
  * This is a wrapper class to turn non-optimization algorithms into (uninformed working) optimizers.
@@ -31,7 +34,7 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
  * @param <A>
  * @param <V>
  */
-public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
+public class IteratingGraphSearchOptimizer<I extends IGraphSearchWithPathEvaluationsInput<N, A, V>, N, A, V extends Comparable<V>> extends AOptimalPathInORGraphSearch<I, N, A, V> {
 
 	private final IGraphSearch<IGraphSearchInput<N, A>, SearchGraphPath<N, A>, N, A> baseAlgorithm;
 	private int numberOfSeenSolutions = 0;
@@ -43,10 +46,20 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 		baseAlgorithm.registerListener(new Object() {
 
 			@Subscribe
-			public void receiveEvent(final AlgorithmEvent e) {
-				IteratingGraphSearchOptimizer.this.post(e);
+			public void receiveEvent(final AlgorithmEvent e) throws PathEvaluationException, InterruptedException {
+				if (e instanceof RolloutEvent) {
+					IteratingGraphSearchOptimizer.this.post(IteratingGraphSearchOptimizer.this.recomputeRolloutEventWithScore((RolloutEvent<N, V>)e));
+				}
+				else {
+					IteratingGraphSearchOptimizer.this.post(e);
+				}
 			}
 		});
+	}
+
+	private RolloutEvent<N, V> recomputeRolloutEventWithScore(final RolloutEvent<N, V> e) throws PathEvaluationException, InterruptedException {
+		V score = this.getInput().getPathEvaluator().evaluate((IPath<N,A>)e.getPath());
+		return new RolloutEvent<>(e.getAlgorithmId(), e.getPath(), score);
 	}
 
 	@Override
@@ -96,7 +109,6 @@ public class IteratingGraphSearchOptimizer<I extends GraphSearchWithPathEvaluati
 	@Override
 	public void registerListener(final Object listener) {
 		super.registerListener(listener);
-		this.baseAlgorithm.registerListener(listener);
 	}
 
 	@Override

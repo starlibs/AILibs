@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.api4.java.datastructure.graph.IPath;
+
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.basic.sets.SetUtil;
 
@@ -100,6 +102,23 @@ public class LabeledGraph<T, L> extends Graph<T> {
 			for (T t2 : g.getSuccessors(t1)) {
 				this.addEdge(t1, t2, g.getEdgeLabel(t1, t2));
 			}
+		}
+	}
+
+	public void addPath(final IPath<T, L> path) {
+		List<T> nodes = path.getNodes();
+		List<L> labels = path.getArcs();
+		int n = nodes.size();
+		T last = null;
+		for (int i = 0; i < n; i++) {
+			T current = nodes.get(i);
+			this.addItem(current);
+			if (last != null) {
+				L label = labels.get(i - 1);
+				System.out.println("Adding label " + label + " for edge " + last + " -> " + current);
+				this.addEdge(last, current, label);
+			}
+			last = current;
 		}
 	}
 

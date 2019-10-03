@@ -36,4 +36,6 @@ public interface ITransparentTreeNode {
 	public int getDistanceToShallowestLeafUnderNode();
 
 	public int getDistanceToDeepestLeafUnderNode();
+
+	public boolean hasChildren();
 }

@@ -1,14 +1,14 @@
 package ai.libs.jaicore.search.problemtransformers;
 
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 
 public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformer<N, A, V extends Comparable<V>>
-implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> {
+implements AlgorithmicProblemReduction<IGraphSearchWithPathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>, GraphSearchWithSubpathEvaluationsInput<N, A, V>, EvaluatedSearchGraphPath<N, A, V>> {
 
 	private IPathEvaluator<N, A, V> nodeEvaluator;
 
@@ -22,7 +22,7 @@ implements AlgorithmicProblemReduction<GraphSearchWithPathEvaluationsInput<N, A,
 	}
 
 	@Override
-	public GraphSearchWithSubpathEvaluationsInput<N, A, V> encodeProblem(final GraphSearchWithPathEvaluationsInput<N, A, V> problem) {
+	public GraphSearchWithSubpathEvaluationsInput<N, A, V> encodeProblem(final IGraphSearchWithPathEvaluationsInput<N, A, V> problem) {
 		if (this.nodeEvaluator == null) {
 			throw new IllegalStateException("Cannot create problem since node evaluator has not been set, yet.");
 		}

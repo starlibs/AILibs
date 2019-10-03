@@ -15,9 +15,10 @@ import org.api4.java.datastructure.graph.implicit.NodeType;
 import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.SingleSuccessorGenerator;
 
+import ai.libs.jaicore.search.syntheticgraphs.ISyntheticGraphGeneratorBuilder;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
-class DegeneratedGraphGeneratorGenerator {
+public class DegeneratedGraphGeneratorGenerator implements ISyntheticGraphGeneratorBuilder {
 
 	private final Random random;
 	private final int deadEndsPerGeneration;
@@ -216,6 +217,11 @@ class DegeneratedGraphGeneratorGenerator {
 		public BigInteger getNumberOfSubtreesWithMaxNumberOfNodes(final BigInteger maxNumberOfNodes) {
 			return DegeneratedGraphGeneratorGenerator.this.getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(this.depth, maxNumberOfNodes);
 		}
+
+		@Override
+		public boolean hasChildren() {
+			return this.hasChildren;
+		}
 	}
 
 	public DegeneratedGraphGeneratorGenerator(final Random random, final int deadEndsPerGeneration, final int branchingFactor, final int maxDepth) {
@@ -226,7 +232,8 @@ class DegeneratedGraphGeneratorGenerator {
 		this.maxDepth = maxDepth;
 	}
 
-	public IGraphGenerator<ITransparentTreeNode, Integer> create() {
+	@Override
+	public IGraphGenerator<ITransparentTreeNode, Integer> build() {
 		return new IGraphGenerator<ITransparentTreeNode, Integer>() {
 
 			@Override
