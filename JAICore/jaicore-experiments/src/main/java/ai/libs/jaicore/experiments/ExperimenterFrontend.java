@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.GetPropertyFailedException;
@@ -22,6 +23,7 @@ public class ExperimenterFrontend {
 	private IExperimentSetConfig config;
 	private IExperimentDatabaseHandle databaseHandle;
 	private IExperimentSetEvaluator evaluator;
+	private ExperimentDomain<?, ?, ?, ?> domain;
 
 	public ExperimenterFrontend withDatabaseConfig(final String databaseConfigFileName) {
 		return this.withDatabaseConfig(new File(databaseConfigFileName));
@@ -55,6 +57,13 @@ public class ExperimenterFrontend {
 		return this;
 	}
 
+	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I,?>, Z> ExperimenterFrontend withAlgorithmExperimentDomain(final ExperimentDomain<B, I, A, Z> domain) {
+		this.withEvaluator(new AlgorithmBenchmarker(domain.getDecoder()));
+		this.withExperimentsConfig(domain.getConfig());
+		this.domain = domain;
+		return this;
+	}
+
 	public ExperimenterFrontend synchronizeDatabase()
 			throws ExperimentDBInteractionFailedException, AlgorithmTimeoutedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, InterruptedException, AlgorithmExecutionCanceledException {
 		ExperimentDatabasePreparer preparer = new ExperimentDatabasePreparer(this.config, this.databaseHandle);
@@ -74,6 +83,9 @@ public class ExperimenterFrontend {
 	public Map<String, Object> simulateExperiment(final Experiment experiment) throws ExperimentEvaluationFailedException, InterruptedException {
 		ExperimentDBEntry experimentEntry = new ExperimentDBEntry(-1, experiment);
 		Map<String, Object> results = new HashMap<>();
+		if (this.domain != null) {
+			this.evaluator = new AlgorithmBenchmarker(this.domain.getDecoder(), this.domain.getResultUpdaterComputer().apply(experiment), this.domain.getTerminationCriterionComputer().apply(experiment));
+		}
 		this.evaluator.evaluate(experimentEntry, r -> results.putAll(r));
 		return results;
 	}

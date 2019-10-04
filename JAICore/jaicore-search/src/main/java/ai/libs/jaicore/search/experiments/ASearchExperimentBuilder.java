@@ -13,4 +13,9 @@ public abstract class ASearchExperimentBuilder<B extends ASearchExperimentBuilde
 		this.set("search", search);
 		return this.getMe();
 	}
+
+	public B withMaxiter(final int maxIter) {
+		this.set("maxiter", maxIter);
+		return this.getMe();
+	}
 }
