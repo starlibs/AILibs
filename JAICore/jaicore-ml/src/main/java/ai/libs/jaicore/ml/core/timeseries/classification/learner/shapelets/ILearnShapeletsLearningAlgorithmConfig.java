@@ -1,8 +1,8 @@
 package ai.libs.jaicore.ml.core.timeseries.classification.learner.shapelets;
 
-import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 
-public interface ILearnShapeletsLearningAlgorithmConfig extends IOwnerBasedRandomizedAlgorithmConfig {
+public interface ILearnShapeletsLearningAlgorithmConfig extends IOwnerBasedRandomConfig {
 
 	public static final String K_NUM_SHAPELETS = "numshapelets";
 	public static final String K_LEARNINGRATE = "learningrate";

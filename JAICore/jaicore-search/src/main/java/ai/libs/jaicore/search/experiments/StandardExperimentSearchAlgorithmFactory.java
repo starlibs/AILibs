@@ -4,7 +4,9 @@ import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.experiments.Experiment;
+import ai.libs.jaicore.experiments.configurations.IAlgorithmNameConfig;
 import ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer.IteratingGraphSearchOptimizer;
 import ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer.IteratingGraphSearchOptimizerFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
@@ -21,8 +23,8 @@ import ai.libs.jaicore.search.problemtransformers.GraphSearchWithPathEvaluations
 public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>> {
 
 	public IOptimalPathInORGraphSearch<I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double> getAlgorithm(final Experiment experiment, final IGraphSearchWithPathEvaluationsInput<N, A, Double> input) {
-		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get("seed"));
-		final String algorithm = experiment.getValuesOfKeyFields().get("search");
+		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get(IOwnerBasedRandomConfig.K_SEED));
+		final String algorithm = experiment.getValuesOfKeyFields().get(IAlgorithmNameConfig.K_ALGORITHM_NAME);
 		switch (algorithm) {
 		case "random":
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> factory = new IteratingGraphSearchOptimizerFactory<I, N, A, Double>();

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import org.aeonbits.owner.ConfigCache;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
-import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.ml.core.timeseries.classification.learner.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
@@ -26,7 +26,7 @@ import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
  */
 public class TimeSeriesForestLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, TimeSeriesForestClassifier> {
 
-	public interface ITimeSeriesForestConfig extends IOwnerBasedRandomizedAlgorithmConfig {
+	public interface ITimeSeriesForestConfig extends IOwnerBasedRandomConfig {
 		public static final String K_NUMTREES = "numtrees";
 		public static final String K_MAXDEPTH = "maxdepth";
 		public static final String K_FEATURECACHING = "featurecaching";

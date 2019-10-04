@@ -8,8 +8,6 @@ import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
-import org.api4.java.common.attributedobjects.GetPropertyFailedException;
-import org.api4.java.common.attributedobjects.IGetter;
 
 import ai.libs.jaicore.basic.IDatabaseConfig;
 import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
@@ -23,7 +21,8 @@ public class ExperimenterFrontend {
 	private IExperimentSetConfig config;
 	private IExperimentDatabaseHandle databaseHandle;
 	private IExperimentSetEvaluator evaluator;
-	private ExperimentDomain<?, ?, ?, ?> domain;
+	private ExperimentDomain<?, ?, ?> domain;
+	private IExperimentRunController<?> controller;
 
 	public ExperimenterFrontend withDatabaseConfig(final String databaseConfigFileName) {
 		return this.withDatabaseConfig(new File(databaseConfigFileName));
@@ -57,10 +56,15 @@ public class ExperimenterFrontend {
 		return this;
 	}
 
-	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I,?>, Z> ExperimenterFrontend withAlgorithmExperimentDomain(final ExperimentDomain<B, I, A, Z> domain) {
-		this.withEvaluator(new AlgorithmBenchmarker(domain.getDecoder()));
+	public <B extends IExperimentBuilder, I, A extends IAlgorithm<? extends I,?>> ExperimenterFrontend withAlgorithmExperimentDomain(final ExperimentDomain<B, I, A> domain) {
+		this.evaluator = null;
 		this.withExperimentsConfig(domain.getConfig());
 		this.domain = domain;
+		return this;
+	}
+
+	public ExperimenterFrontend withController(final IExperimentRunController<?> controller) {
+		this.controller = controller;
 		return this;
 	}
 
@@ -71,26 +75,32 @@ public class ExperimenterFrontend {
 		return this;
 	}
 
+	private void prepareEvaluator() {
+		if (this.controller == null) {
+			throw new IllegalStateException("Cannot prepare evaluator, because no experiment controller has been set!");
+		}
+		if (this.domain != null) {
+			this.evaluator = new AlgorithmBenchmarker(this.domain.getDecoder(), this.controller);
+		}
+	}
+
 	public void randomlyConductExperiments() throws ExperimentDBInteractionFailedException, InterruptedException {
+		this.prepareEvaluator();
 		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle).randomlyConductExperiments();
 	}
 
 	public ExperimenterFrontend randomlyConductExperiments(final int limit) throws ExperimentDBInteractionFailedException, InterruptedException {
+		this.prepareEvaluator();
 		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle).randomlyConductExperiments(limit);
 		return this;
 	}
 
-	public Map<String, Object> simulateExperiment(final Experiment experiment) throws ExperimentEvaluationFailedException, InterruptedException {
+	public <O> O simulateExperiment(final Experiment experiment, final IExperimentRunController<O> controller) throws ExperimentEvaluationFailedException, InterruptedException {
+		this.withController(controller);
+		this.prepareEvaluator();
 		ExperimentDBEntry experimentEntry = new ExperimentDBEntry(-1, experiment);
 		Map<String, Object> results = new HashMap<>();
-		if (this.domain != null) {
-			this.evaluator = new AlgorithmBenchmarker(this.domain.getDecoder(), this.domain.getResultUpdaterComputer().apply(experiment), this.domain.getTerminationCriterionComputer().apply(experiment));
-		}
 		this.evaluator.evaluate(experimentEntry, r -> results.putAll(r));
-		return results;
-	}
-
-	public <O> O simulateExperiment(final Experiment experiment, final IGetter<Map<String, Object>, O> resultInterpreter) throws ExperimentEvaluationFailedException, InterruptedException, GetPropertyFailedException {
-		return resultInterpreter.getPropertyOf(this.simulateExperiment(experiment));
+		return controller.parseResultMap(results);
 	}
 }

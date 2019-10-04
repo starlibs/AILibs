@@ -20,7 +20,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 
-import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.TreeNode;
 import ai.libs.jaicore.ml.core.timeseries.classification.learner.ASimplifiedTSCLearningAlgorithm;
@@ -39,7 +39,7 @@ import ai.libs.jaicore.ml.core.timeseries.util.TimeSeriesUtil;
  */
 public class TimeSeriesTreeLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, TimeSeriesTreeClassifier> {
 
-	public interface ITimeSeriesTreeConfig extends IOwnerBasedRandomizedAlgorithmConfig {
+	public interface ITimeSeriesTreeConfig extends IOwnerBasedRandomConfig {
 		public static final String K_MAXDEPTH = "maxdepth";
 		public static final String K_FEATURECACHING = "featurecaching";
 

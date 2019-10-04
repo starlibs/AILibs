@@ -9,7 +9,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.timeseries.classification.learner.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
@@ -32,7 +32,7 @@ import weka.core.Instances;
  */
 public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, TimeSeriesBagOfFeaturesClassifier> {
 
-	public interface ITimeSeriesBagOfFeaturesConfig extends IOwnerBasedRandomizedAlgorithmConfig {
+	public interface ITimeSeriesBagOfFeaturesConfig extends IOwnerBasedRandomConfig {
 		public static final String K_NUMBINS = "numbins";
 		public static final String K_NUMFOLDS = "numfolds";
 		public static final String K_ZPROP = "zprop";

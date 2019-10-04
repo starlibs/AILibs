@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 
-import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.ml.core.timeseries.classification.learner.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.core.timeseries.util.MathUtil;
@@ -41,7 +41,7 @@ import weka.core.Instances;
  */
 public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, LearnShapeletsClassifier> {
 
-	public interface ILearnShapeletsLearningAlgorithmConfig extends IOwnerBasedRandomizedAlgorithmConfig {
+	public interface ILearnShapeletsLearningAlgorithmConfig extends IOwnerBasedRandomConfig {
 
 		public static final String K_NUMSHAPELETS = "numshapelets";
 		public static final String K_LEARNINGRATE = "learningrate";

@@ -1,6 +1,5 @@
 package ai.libs.jaicore.experiments;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,29 +27,14 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 		}
 	}
 
-	private final List<IExperimentTerminationCriterion> terminationCriteria;
-	private final List<IEventBasedResultUpdater> resultUpdaters = new ArrayList<>();
+	private final IExperimentRunController<?> controller;
 	private final Caps<?, ?> caps;
 
 	private Logger logger = LoggerFactory.getLogger(AlgorithmBenchmarker.class);
 
-	public <I, A extends IAlgorithm<? extends I, ?>> AlgorithmBenchmarker(final IExperimentDecoder<I, A> decoder) {
-		this(decoder, new ArrayList<>(0));
-	}
-
-	public <I, A extends IAlgorithm<? extends I, ?>> AlgorithmBenchmarker(final IExperimentDecoder<I, A> decoder, final List<IExperimentTerminationCriterion> terminationCriteria) {
+	public <I, A extends IAlgorithm<? extends I, ?>> AlgorithmBenchmarker(final IExperimentDecoder<I, A> decoder, final IExperimentRunController<?> controller) {
 		this.caps = new Caps<>(decoder);
-		this.terminationCriteria = terminationCriteria;
-	}
-
-	public <I, A extends IAlgorithm<? extends I, ?>> AlgorithmBenchmarker(final IExperimentDecoder<I, A> decoder, final List<IEventBasedResultUpdater> updaters, final List<IExperimentTerminationCriterion> terminationCriteria) {
-		this.caps = new Caps<>(decoder);
-		this.resultUpdaters.addAll(updaters);
-		this.terminationCriteria = terminationCriteria;
-	}
-
-	public void addResultUpdater(final IEventBasedResultUpdater updater) {
-		this.resultUpdaters.add(updater);
+		this.controller = controller;
 	}
 
 	@Override
@@ -65,6 +49,9 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			((ILoggingCustomizable) algorithm).setLoggerName(this.getLoggerName() + ".optimizer");
 		}
 
+		final List<IEventBasedResultUpdater> resultUpdaters = this.controller.getResultUpdaterComputer(experimentEntry.getExperiment());
+		final List<IExperimentTerminationCriterion> terminationCriteria = this.controller.getTerminationCriteria(experimentEntry.getExperiment());
+
 		algorithm.registerListener(new Object() {
 
 			@Subscribe
@@ -72,13 +59,13 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 
 				/* update result */
 				final Map<String, Object> results = new HashMap<>();
-				for (IEventBasedResultUpdater updater : AlgorithmBenchmarker.this.resultUpdaters) {
+				for (IEventBasedResultUpdater updater : resultUpdaters) {
 					updater.processEvent(e, results);
 				}
 				processor.processResults(results);
 
 				/* check whether one of the termination criteria is satisfied */
-				if (AlgorithmBenchmarker.this.terminationCriteria.stream().anyMatch(c -> c.doesTerminate(e))) {
+				if (terminationCriteria.stream().anyMatch(c -> c.doesTerminate(e))) {
 					algorithm.cancel();
 				}
 			}

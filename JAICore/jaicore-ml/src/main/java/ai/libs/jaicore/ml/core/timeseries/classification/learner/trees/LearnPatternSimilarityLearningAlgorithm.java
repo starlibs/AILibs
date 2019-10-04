@@ -8,7 +8,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
-import ai.libs.jaicore.basic.IOwnerBasedRandomizedAlgorithmConfig;
+import ai.libs.jaicore.basic.IOwnerBasedRandomConfig;
 import ai.libs.jaicore.ml.core.timeseries.classification.learner.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 import weka.core.Attribute;
@@ -27,7 +27,7 @@ import weka.core.Instances;
  */
 public class LearnPatternSimilarityLearningAlgorithm extends ASimplifiedTSCLearningAlgorithm<Integer, LearnPatternSimilarityClassifier> {
 
-	public interface IPatternSimilarityConfig extends IOwnerBasedRandomizedAlgorithmConfig {
+	public interface IPatternSimilarityConfig extends IOwnerBasedRandomConfig {
 		public static final String K_NUMTREES = "numtrees";
 		public static final String K_MAXDEPTH = "maxdepth";
 		public static final String K_NUMSEGMENTS = "numsegments";
