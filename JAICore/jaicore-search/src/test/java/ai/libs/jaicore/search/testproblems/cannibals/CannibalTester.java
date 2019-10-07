@@ -13,10 +13,10 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeDisplayInfoAlgorithmE
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
+import ai.libs.jaicore.problems.cannibals.CannibalProblem;
 import ai.libs.jaicore.search.algorithms.standard.astar.AStar;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNumberBasedAdditivePathEvaluation;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import ai.libs.jaicore.testproblems.cannibals.CannibalProblem;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 

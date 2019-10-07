@@ -75,10 +75,6 @@ allprojects {
 		maven { url "https://jitpack.io" }
 		maven { url "http://clojars.org/repo/" }
 		maven { url "https://plugins.gradle.org/m2/" }
-		maven { url "https://nexus.cs.upb.de/repository/maven-releases/" }
-		flatDir {
-			dirs 'lib'
-		}
 	}
 	//Dependencies for all(!) projects
 	dependencies {
@@ -125,22 +121,6 @@ allprojects {
 		}
 	}
 
-	publishing {
-		publications {
-			shadow(MavenPublication) { publication ->
-				project.shadow.component(publication)
-			}
-  		}	
-		repositories {
-			maven {
-				url "${nexusBaseUrl}/repository/${nexusUpRepo}-${'snapshots'}"
-				credentials {
-					username "${nexusUser}"
-					password "${nexusPassword}"
-				}
-			}
-		}
-	}
 	// This task creates a jar with test classes.
 	task testClassesJar(type: Jar) {
 		classifier = 'tests'

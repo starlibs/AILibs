@@ -10,8 +10,8 @@ import org.api4.java.datastructure.graph.implicit.SerializableGraphGenerator;
 import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
-import ai.libs.jaicore.testproblems.gridworld.GridWorldNode;
-import ai.libs.jaicore.testproblems.gridworld.GridWorldProblem;
+import ai.libs.jaicore.problems.gridworld.GridWorldNode;
+import ai.libs.jaicore.problems.gridworld.GridWorldProblem;
 
 @SuppressWarnings("serial")
 public class GridWorldBasicGraphGenerator implements SerializableGraphGenerator<GridWorldNode, String> {

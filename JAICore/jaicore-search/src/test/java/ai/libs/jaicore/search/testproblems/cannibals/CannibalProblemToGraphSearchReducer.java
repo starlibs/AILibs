@@ -3,9 +3,9 @@ package ai.libs.jaicore.search.testproblems.cannibals;
 import java.util.List;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.problems.cannibals.CannibalProblem;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.jaicore.testproblems.cannibals.CannibalProblem;
 
 public class CannibalProblemToGraphSearchReducer implements AlgorithmicProblemReduction<CannibalProblem, List<String>, GraphSearchWithPathEvaluationsInput<CannibalProblem, String, Integer>, SearchGraphPath<CannibalProblem, String>> {
 

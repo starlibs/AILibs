@@ -2,8 +2,8 @@ package ai.libs.jaicore.search.testproblems.enhancedttsp;
 
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
 
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPNode;
 
 public class EnhancedTTSPSolutionPredicate implements NodeGoalTester<EnhancedTTSPNode, String> {
 	private EnhancedTTSP problem;

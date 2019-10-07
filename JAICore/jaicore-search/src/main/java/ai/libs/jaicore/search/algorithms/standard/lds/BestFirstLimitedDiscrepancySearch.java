@@ -59,7 +59,7 @@ public class BestFirstLimitedDiscrepancySearch<T, A, V extends Comparable<V>> ex
 		}
 
 		@Override
-		public NodeOrderList f(final IPath<T, A> node) {
+		public NodeOrderList evaluate(final IPath<T, A> node) {
 			NodeOrderList list = new NodeOrderList();
 			BackPointerPath<T, A, ?> parent = ((BackPointerPath<T, A, ?>)node).getParent();
 			if (parent == null) {

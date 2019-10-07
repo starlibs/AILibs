@@ -9,10 +9,10 @@ import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.problems.knapsack.KnapsackConfiguration;
+import ai.libs.jaicore.problems.knapsack.KnapsackProblem;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
-import ai.libs.jaicore.testproblems.knapsack.KnapsackConfiguration;
-import ai.libs.jaicore.testproblems.knapsack.KnapsackProblem;
 
 public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction<KnapsackProblem, Set<String>, GraphSearchWithSubpathEvaluationsInput<KnapsackConfiguration, String, Double>, SearchGraphPath<KnapsackConfiguration, String>> {
 
@@ -32,7 +32,7 @@ public class KnapsackToGraphSearchReducer implements AlgorithmicProblemReduction
 		}, new IPathEvaluator<KnapsackConfiguration, String, Double>() {
 
 			@Override
-			public Double f(final IPath<KnapsackConfiguration, String> path) throws PathEvaluationException, InterruptedException {
+			public Double evaluate(final IPath<KnapsackConfiguration, String> path) throws PathEvaluationException, InterruptedException {
 				try {
 					return problem.getSolutionEvaluator().evaluate(path.getHead());
 				}

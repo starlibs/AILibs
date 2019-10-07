@@ -8,6 +8,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.junit.Test;
@@ -16,13 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.interrupt.Interrupter;
 import ai.libs.jaicore.interrupt.InterruptionTimerTask;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPGenerator;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPNode;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPGraphGenerator;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPSolutionPredicate;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPGenerator;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 
 public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPNode, String, Double>> {
 
@@ -37,7 +38,7 @@ public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPN
 	public abstract Collection<BackPointerPath<EnhancedTTSPNode, String, Double>> getNodesToTestInDifficultProblem(int numNodes);
 
 	@Test
-	public void testInterruptibility() throws InterruptedException, AlgorithmException {
+	public void testInterruptibility() throws InterruptedException, AlgorithmException, PathEvaluationException {
 		for (BackPointerPath<EnhancedTTSPNode, String, Double> node : this.getNodesToTestInDifficultProblem(1)) {
 
 			/* create a new node evaluator */
@@ -53,7 +54,7 @@ public abstract class NodeEvaluatorTester<N extends IPathEvaluator<EnhancedTTSPN
 			long start = System.currentTimeMillis();
 			try {
 				logger.info("Starting evaluation of root");
-				Double score = ne.f(node);
+				Double score = ne.evaluate(node);
 				fail("Obtained score " + score + " instead of interrupt. Either the node evaluation has caught and suppressed the InterruptedException, or the evaluation only took " + (System.currentTimeMillis() - start)
 						+ "ms, which was not enough to trigger the interrupt.");
 			} catch (InterruptedException e) {

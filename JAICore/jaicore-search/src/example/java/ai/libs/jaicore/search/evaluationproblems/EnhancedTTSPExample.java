@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSP;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPGenerator;
+import ai.libs.jaicore.problems.enhancedttsp.EnhancedTTSPNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirstEpsilon;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirst;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearch;
@@ -29,9 +32,6 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInp
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPGraphGenerator;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPSolutionPredicate;
 import ai.libs.jaicore.search.testproblems.enhancedttsp.EnhancedTTSPToGraphSearchReducer;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSP;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPGenerator;
-import ai.libs.jaicore.testproblems.enhancedttsp.EnhancedTTSPNode;
 
 public class EnhancedTTSPExample {
 
@@ -81,7 +81,7 @@ public class EnhancedTTSPExample {
 	private class AStarNodeEvaluator implements IPathEvaluator<EnhancedTTSPNode, String, Double> {
 
 		@Override
-		public Double f(final IPath<EnhancedTTSPNode, String> node) {
+		public Double evaluate(final IPath<EnhancedTTSPNode, String> node) {
 
 			double g = node.getHead().getTime();
 			double h = 0;

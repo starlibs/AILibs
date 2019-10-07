@@ -9,7 +9,7 @@ import org.api4.java.datastructure.graph.implicit.NodeType;
 import org.api4.java.datastructure.graph.implicit.SingleRootGenerator;
 import org.api4.java.datastructure.graph.implicit.SuccessorGenerator;
 
-import ai.libs.jaicore.testproblems.npuzzle.NPuzzleState;
+import ai.libs.jaicore.problems.npuzzle.NPuzzleState;
 
 /**
  * A simple generator for the normal NPuzzleProblem.
