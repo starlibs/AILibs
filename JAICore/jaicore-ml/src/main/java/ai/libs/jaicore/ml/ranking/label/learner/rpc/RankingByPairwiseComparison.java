@@ -1,5 +1,9 @@
 package ai.libs.jaicore.ml.ranking.label.learner.rpc;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -7,30 +11,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
+import org.api4.java.ai.ml.ranking.IRankingPrediction;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingDataset;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingInstance;
 import org.api4.java.ai.ml.ranking.label.learner.ILabelRanker;
 
 import ai.libs.jaicore.basic.Maps;
-import ai.libs.jaicore.ml.core.evaluation.Prediction;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.ranking.label.LabelRankingPrediction;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
 import weka.filters.unsupervised.attribute.Remove;
 
-public class RPC extends ASupervisedLearner<ILabelRankingInstance, ILabelRankingDataset> implements ILabelRanker {
+public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankingInstance, ILabelRankingDataset> implements ILabelRanker {
 
 	private RPCConfig config;
 	private Instances dataset;
-	private int labels;
 
 	private Instances plainPWDataset = null;
 	private List<Integer> labelIndices;
@@ -44,10 +48,9 @@ public class RPC extends ASupervisedLearner<ILabelRankingInstance, ILabelRanking
 
 	List<PairWiseClassifier> pwClassifiers = new LinkedList<>();
 
-	public RPC(final RPCConfig config, final Instances dataset, final int labels) throws Exception {
+	public RankingByPairwiseComparison(final RPCConfig config, final Instances dataset, final int labels) throws Exception {
 		this.config = config;
 		this.dataset = dataset;
-		this.labels = labels;
 		this.labelIndices = getLabelIndices(labels, dataset);
 		this.labelIndices.stream().map(x -> dataset.attribute(x).name()).forEach(this.labelSet::add);
 		this.plainPWDataset = this.applyFiltersToDataset(dataset);
@@ -82,19 +85,6 @@ public class RPC extends ASupervisedLearner<ILabelRankingInstance, ILabelRanking
 			}
 		}
 		return labelIndices;
-	}
-
-	private static List<String> getGroundTruthRanking(final Instance i, final int labels) {
-		List<Integer> labelIndices = getLabelIndices(labels, i.dataset());
-
-		List<String> labelList = new LinkedList<>();
-		for (Integer index : labelIndices) {
-			labelList.add(i.dataset().attribute(index).name());
-		}
-		List<String> labelListToSort = new LinkedList<>(labelList);
-		labelListToSort.sort((arg0, arg1) -> Double.valueOf(i.value(labelIndices.get(labelList.indexOf(arg1)))).compareTo(i.value(labelIndices.get(labelList.indexOf(arg0)))));
-
-		return labelListToSort;
 	}
 
 	@Override
@@ -132,7 +122,7 @@ public class RPC extends ASupervisedLearner<ILabelRankingInstance, ILabelRanking
 	}
 
 	@Override
-	public IPrediction predict(final ILabelRankingInstance xTest) throws PredictionException, InterruptedException {
+	public IRankingPrediction predict(final ILabelRankingInstance xTest) throws PredictionException, InterruptedException {
 		try {
 
 			Map<String, Double> vote = new HashMap<>();
@@ -160,11 +150,16 @@ public class RPC extends ASupervisedLearner<ILabelRankingInstance, ILabelRanking
 			List<String> ranking = new LinkedList<>(vote.keySet());
 			ranking.sort((arg0, arg1) -> vote.get(arg1).compareTo(vote.get(arg0)));
 
-			return new Prediction(new Ranking<>(ranking));
+			return new LabelRankingPrediction(new Ranking<>(ranking));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static void main(final String[] args) throws FileNotFoundException, IOException, Exception {
+		Instances data = new Instances(new FileReader(new File("classifier-rank.arff")));
+		RankingByPairwiseComparison rpc = new RankingByPairwiseComparison(ConfigFactory.create(RPCConfig.class),, -22);
 	}
 
 }

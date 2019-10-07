@@ -43,4 +43,9 @@ public class LoadDataSetInstructionForARFFFile extends LoadDataSetInstruction {
 	public Instruction clone() {
 		return new LoadDataSetInstructionForARFFFile(new File(this.getId()));
 	}
+
+	@Override
+	public List<IDataset<?>> getOutputInstances(final List<IDataset<?>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException {
+		return null;
+	}
 }

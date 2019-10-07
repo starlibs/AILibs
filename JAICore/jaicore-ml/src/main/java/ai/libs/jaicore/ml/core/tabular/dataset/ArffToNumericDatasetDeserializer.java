@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
@@ -18,6 +19,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.basic.OptionsParser;
 import ai.libs.jaicore.basic.kvstore.KVStore;
+import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.tabular.dataset.attribute.CategoricalAttribute;
 import ai.libs.jaicore.ml.core.tabular.dataset.attribute.NumericAttribute;
 import weka.core.UnsupportedAttributeTypeException;
@@ -91,7 +93,9 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<IL
 						listToAddAttributeTo.add(attributeList.get(i));
 					}
 
-					dataset = new Dataset((relationMetaData != null) ? relationMetaData.getAsString(K_RELATION_NAME) : "unnamed", instanceAttribute, targetAttribute);
+					ILabeledInstanceSchema schema = new LabeledInstanceSchema((relationMetaData != null) ? relationMetaData.getAsString(K_RELATION_NAME) : "unnamed", instanceAttribute, targetAttribute);
+
+					dataset = new Dataset(schema);
 
 				} else if (instanceReadMode && !line.trim().isEmpty() && !instanceAttribute.isEmpty() && !targetAttribute.isEmpty()) {
 					if (targetAttribute.size() > 1) {

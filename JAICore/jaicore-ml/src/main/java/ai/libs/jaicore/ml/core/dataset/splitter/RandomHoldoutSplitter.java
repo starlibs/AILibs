@@ -34,12 +34,12 @@ public class RandomHoldoutSplitter<I extends IInstance, D extends IDataset<I>> i
 	}
 
 	@Override
-	public List<IDataset<I>> split(final D data, final long seed) throws SplitFailedException, InterruptedException {
-		List<IDataset<I>> holdOutSplits = new ArrayList<>();
+	public List<D> split(final D data, final long seed) throws SplitFailedException, InterruptedException {
+		List<D> holdOutSplits = new ArrayList<>();
 
 		try {
 			for (int i = 0; i < ((this.portionSum < 1.0) ? this.portions.length + 1 : this.portions.length); i++) {
-				holdOutSplits.add(data.createEmptyCopy());
+				holdOutSplits.add((D) data.createEmptyCopy());
 			}
 		} catch (DatasetCreationException e) {
 			throw new SplitFailedException("Could not create empty hold out buckets.", e);

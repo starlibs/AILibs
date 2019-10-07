@@ -10,7 +10,6 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
-import org.api4.java.ai.ml.core.learner.algorithm.IPredictionBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,31 +22,31 @@ public abstract class ASupervisedLearner<I extends ILabeledInstance, D extends I
 	private Map<String, Object> config;
 
 	@Override
-	public IPrediction fitAndPredict(final D dTrain, final I xTest) throws TrainingException, PredictionException, InterruptedException {
+	public Object fitAndPredict(final D dTrain, final I xTest) throws TrainingException, PredictionException, InterruptedException {
 		this.fit(dTrain);
 		return this.predict(xTest);
 	}
 
 	@Override
-	public IPredictionBatch fitAndPredict(final D dTrain, final I[] xTest) throws TrainingException, PredictionException, InterruptedException {
+	public Object fitAndPredict(final D dTrain, final I[] xTest) throws TrainingException, PredictionException, InterruptedException {
 		this.fit(dTrain);
 		return this.predict(xTest);
 	}
 
 	@Override
-	public IPredictionBatch fitAndPredict(final D dTrain, final D dTest) throws TrainingException, PredictionException, InterruptedException {
+	public Object fitAndPredict(final D dTrain, final D dTest) throws TrainingException, PredictionException, InterruptedException {
 		this.fit(dTrain);
 		return this.predict(dTest);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IPredictionBatch predict(final D dTest) throws PredictionException, InterruptedException {
+	public Object predict(final D dTest) throws PredictionException, InterruptedException {
 		return this.predict((I[]) dTest.stream().toArray());
 	}
 
 	@Override
-	public IPredictionBatch predict(final I[] dTest) throws PredictionException, InterruptedException {
+	public Object predict(final I[] dTest) throws PredictionException, InterruptedException {
 		return new PredictionBatch((IPrediction[]) Arrays.stream(dTest).map(x -> {
 			try {
 				return this.predict(x);

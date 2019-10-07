@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.ml.core.timeseries.model.INDArrayTimeseries;
@@ -63,5 +64,23 @@ public class TimeSeriesInstance<L> implements ILabeledInstance {
 
 	public INDArrayTimeseries[] getAllFeatures() {
 		return this.attributeValues;
+	}
+
+	@Override
+	public double[] getPoint() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public double getPointValue(final int pos) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public ILabeledInstanceSchema getInstanceSchema() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

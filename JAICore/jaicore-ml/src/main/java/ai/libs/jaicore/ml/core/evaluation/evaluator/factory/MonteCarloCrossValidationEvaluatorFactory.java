@@ -1,6 +1,8 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 
 import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.ISplitBasedClassifierEvaluator;
@@ -11,55 +13,55 @@ import weka.core.Instances;
  * @author mwever
  *
  */
-public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossValidationBasedEvaluatorFactory {
+public class MonteCarloCrossValidationEvaluatorFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends AMonteCarloCrossValidationBasedEvaluatorFactory<I, D> {
 
 	/**
 	 * Standard C'tor.
 	 */
-	public MonteCarloCrossValidationEvaluatorFactory() {
+	public MonteCarloCrossValidationEvaluatorFactory<I,D>() {
 		super();
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withDatasetSplitter(final IDatasetSplitter datasetSplitter) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withDatasetSplitter(datasetSplitter);
+	public MonteCarloCrossValidationEvaluatorFactory<I,D> withDatasetSplitter(final IDatasetSplitter<I,D> datasetSplitter) {
+		return (MonteCarloCrossValidationEvaluatorFactory<I,D>) super.withDatasetSplitter(datasetSplitter);
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withSplitBasedEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedClassifierEvaluator) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withSplitBasedEvaluator(splitBasedClassifierEvaluator);
+	public MonteCarloCrossValidationEvaluatorFactory<I,D> withSplitBasedEvaluator(final ISplitBasedClassifierEvaluator<Double> splitBasedClassifierEvaluator) {
+		return (MonteCarloCrossValidationEvaluatorFactory<I,D>) super.withSplitBasedEvaluator(splitBasedClassifierEvaluator);
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withSeed(final int seed) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withSeed(seed);
+	public MonteCarloCrossValidationEvaluatorFactory<I,D> withSeed(final int seed) {
+		return (MonteCarloCrossValidationEvaluatorFactory<I,D>) super.withSeed(seed);
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withNumMCIterations(final int numMCIterations) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withNumMCIterations(numMCIterations);
+	public MonteCarloCrossValidationEvaluatorFactory<I,D> withNumMCIterations(final int numMCIterations) {
+		return (MonteCarloCrossValidationEvaluatorFactory<I,D>) super.withNumMCIterations(numMCIterations);
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withData(final Instances data) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withData(data);
+	public MonteCarloCrossValidationEvaluatorFactory<I,D> withData(final Instances data) {
+		return (MonteCarloCrossValidationEvaluatorFactory<I,D>) super.withData(data);
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withTrainFoldSize(final double trainFoldSize) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withTrainFoldSize(trainFoldSize);
+	public MonteCarloCrossValidationEvaluatorFactory<I,D> withTrainFoldSize(final double trainFoldSize) {
+		return (MonteCarloCrossValidationEvaluatorFactory<I,D>) super.withTrainFoldSize(trainFoldSize);
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluatorFactory withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
-		return (MonteCarloCrossValidationEvaluatorFactory) super.withTimeoutForSolutionEvaluation(timeoutForSolutionEvaluation);
+	public MonteCarloCrossValidationEvaluatorFactory<I,D> withTimeoutForSolutionEvaluation(final int timeoutForSolutionEvaluation) {
+		return (MonteCarloCrossValidationEvaluatorFactory<I,D>) super.withTimeoutForSolutionEvaluation(timeoutForSolutionEvaluation);
 	}
 
 	@Override
-	public MonteCarloCrossValidationEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) {
+	public MonteCarloCrossValidationEvaluator<I,D> getIClassifierEvaluator(final D dataset, final long seed) {
 		if (this.getSplitBasedEvaluator() == null) {
 			throw new IllegalStateException("Cannot create MCCV, because no splitBasedEvaluator has been set!");
 		}
-		return new MonteCarloCrossValidationEvaluator(this.getSplitBasedEvaluator(), this.getDatasetSplitter(), this.getNumMCIterations(), dataset, this.getTrainFoldSize(), seed);
+		return new MonteCarloCrossValidationEvaluator<>(this.getSplitBasedEvaluator(), this.getDatasetSplitter(), this.getNumMCIterations(), dataset, this.getTrainFoldSize(), seed);
 	}
 }

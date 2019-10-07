@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -351,6 +353,12 @@ public class TimeSeriesDataset<L> implements ILabeledDataset<TimeSeriesInstance<
 
 	@Override
 	public Object[] getLabelVector() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IDataset<TimeSeriesInstance<L>> createEmptyCopy() throws DatasetCreationException, InterruptedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

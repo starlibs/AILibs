@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.logging.LoggerUtil;
 import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.learner.reduction.EMCNodeType;
 import ai.libs.jaicore.ml.weka.learner.reduction.MCTreeNode;
 import ai.libs.jaicore.ml.weka.learner.reduction.MCTreeNodeLeaf;
@@ -34,6 +35,10 @@ import weka.core.Instances;
 
 public class ReductionOptimizer implements Classifier {
 
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -6241267445544412443L;
 	private final long seed;
 	private MCTreeNode root;
 	private transient Logger logger = LoggerFactory.getLogger(ReductionOptimizer.class);
@@ -45,8 +50,8 @@ public class ReductionOptimizer implements Classifier {
 
 	@Override
 	public void buildClassifier(final Instances data) throws Exception {
-		List<Instances> dataSplit = WekaUtil.getStratifiedSplit(data, this.seed, .6f);
-		Instances train = dataSplit.get(0);
+		List<WekaInstances> dataSplit = WekaUtil.getStratifiedSplit(new WekaInstances(data), this.seed, .6f);
+		Instances train = dataSplit.get(0).getList();
 		NodeGoalTester<RestProblem, Decision> tester = new NodeGoalTester<RestProblem, Decision>() {
 
 			@Override
@@ -132,11 +137,11 @@ public class ReductionOptimizer implements Classifier {
 			try {
 				DescriptiveStatistics stats = new DescriptiveStatistics();
 				for (int i = 0; i < 2; i++) {
-					List<Instances> split = (WekaUtil.getStratifiedSplit(data, this.seed + i, .6f));
-					tree.buildClassifier(split.get(0));
+					List<WekaInstances> split = (WekaUtil.getStratifiedSplit(new WekaInstances(data), this.seed + i, .6f));
+					tree.buildClassifier(split.get(0).getList());
 
 					Evaluation eval = new Evaluation(data);
-					eval.evaluateModel(tree, split.get(1));
+					eval.evaluateModel(tree, split.get(1).getList());
 					stats.addValue(eval.pctIncorrect());
 				}
 				return (int) Math.round((stats.getMean() * 100));

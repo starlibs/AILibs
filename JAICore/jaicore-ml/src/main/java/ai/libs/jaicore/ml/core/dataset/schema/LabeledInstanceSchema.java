@@ -9,8 +9,8 @@ public class LabeledInstanceSchema extends InstanceSchema implements ILabeledIns
 
 	private IAttribute labelAttribute;
 
-	public LabeledInstanceSchema(final Collection<IAttribute> attributeList, final IAttribute labelAttribute) {
-		super(attributeList);
+	public LabeledInstanceSchema(final String relationName, final Collection<IAttribute> attributeList, final IAttribute labelAttribute) {
+		super(relationName, attributeList);
 		this.labelAttribute = labelAttribute;
 	}
 

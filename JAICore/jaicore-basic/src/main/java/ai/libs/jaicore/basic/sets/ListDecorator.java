@@ -39,19 +39,23 @@ public class ListDecorator<L extends List<E>, E, D extends ElementDecorator<E>> 
 	private final Constructor<D> constructorForDecoratedItems;
 
 	@SuppressWarnings("unchecked")
-	public ListDecorator(final L list) throws ClassNotFoundException {
+	public ListDecorator(final L list) {
 		super();
-		this.list = list;
-		Type[] genericTypes = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
-		this.typeOfDecoratedItems = (Class<E>) this.getClassWithoutGenerics(genericTypes[1].getTypeName());
-		this.typeOfDecoratingItems = (Class<D>) this.getClassWithoutGenerics(genericTypes[2].getTypeName());
-		Constructor<D> vConstructorForDecoratedItems = null;
 		try {
-			vConstructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
-		} catch (NoSuchMethodException e) {
-			LOGGER.error("The constructor of the list class couldn ot be invoked.", e); // this should never be thrown
+			this.list = list;
+			Type[] genericTypes = ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments();
+			this.typeOfDecoratedItems = (Class<E>) this.getClassWithoutGenerics(genericTypes[1].getTypeName());
+			this.typeOfDecoratingItems = (Class<D>) this.getClassWithoutGenerics(genericTypes[2].getTypeName());
+			Constructor<D> vConstructorForDecoratedItems = null;
+			try {
+				vConstructorForDecoratedItems = this.typeOfDecoratingItems.getConstructor(this.typeOfDecoratedItems);
+			} catch (NoSuchMethodException e) {
+				LOGGER.error("The constructor of the list class couldn ot be invoked.", e); // this should never be thrown
+			}
+			this.constructorForDecoratedItems = vConstructorForDecoratedItems;
+		} catch (ClassNotFoundException e) {
+			throw new IllegalArgumentException("Could not determin class without generics", e);
 		}
-		this.constructorForDecoratedItems = vConstructorForDecoratedItems;
 	}
 
 	private D getDecorationForElement(final E element) {

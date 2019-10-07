@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 
 /**
@@ -27,26 +28,26 @@ public class RandomMultilabelCrossValidation implements IMultilabelCrossValidati
 	private static final String SPLIT_SEPARATOR = "/";
 
 	@Override
-	public Instances getTestSplit(final Instances data, final int seed, final int fold, final String splitInfo) {
+	public WekaInstances getTestSplit(final WekaInstances data, final int seed, final int fold, final String splitInfo) {
 		return this.getFolds(data, seed, splitInfo).get(fold);
 	}
 
 	@Override
-	public Instances getTrainSplit(final Instances data, final int seed, final int fold, final String splitInfo) {
+	public WekaInstances getTrainSplit(final WekaInstances data, final int seed, final int fold, final String splitInfo) {
 		/* Get all the folds */
-		List<Instances> folds = this.getFolds(data, seed, splitInfo);
+		List<WekaInstances> folds = this.getFolds(data, seed, splitInfo);
 
 		/* Copy meta data of original Instances object to the new training instances */
-		Instances trainInstances = new Instances(data, 0);
+		Instances trainInstances = new Instances(data.getList(), 0);
 
 		/* Merge all the training instances */
 		for (int i = 0; i < folds.size(); i++) {
 			if (i != fold) {
-				trainInstances.addAll(folds.get(i));
+				trainInstances.addAll(folds.get(i).getList());
 			}
 		}
 
-		return trainInstances;
+		return new WekaInstances(trainInstances);
 	}
 
 	/**
@@ -60,7 +61,7 @@ public class RandomMultilabelCrossValidation implements IMultilabelCrossValidati
 	 *            Information of portion sizes of folds
 	 * @return All the folds deriving from this split
 	 */
-	private List<Instances> getFolds(final Instances data, final int seed, final String splitInfo) {
+	private List<WekaInstances> getFolds(final WekaInstances data, final int seed, final String splitInfo) {
 		Collection<Integer>[] instancesInFolds = WekaUtil.getArbitrarySplit(data, new Random(seed), Arrays.stream(splitInfo.split(this.getSplitSeparator())).mapToDouble(Double::parseDouble).toArray());
 		return WekaUtil.realizeSplit(data, instancesInFolds);
 	}

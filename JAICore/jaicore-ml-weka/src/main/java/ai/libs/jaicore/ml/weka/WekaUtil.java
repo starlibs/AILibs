@@ -386,7 +386,7 @@ public class WekaUtil {
 		return getNumberOfInstancesFromClass(data, cs) / (1f * data.size());
 	}
 
-	public static Collection<Integer>[] getArbitrarySplit(final Instances data, final Random rand, final double... portions) {
+	public static Collection<Integer>[] getArbitrarySplit(final WekaInstances data, final Random rand, final double... portions) {
 
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
@@ -402,7 +402,7 @@ public class WekaUtil {
 
 		@SuppressWarnings("unchecked")
 		Collection<Integer>[] folds = new ArrayList[portions.length + 1];
-		Instances emptyInstances = new Instances(data);
+		Instances emptyInstances = new Instances(data.getList());
 		emptyInstances.clear();
 
 		/* distribute instances over the folds */
@@ -427,7 +427,7 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static List<Instances> realizeSplit(final Instances data, final Collection<Integer>[] split) {
+	public static List<WekaInstances> realizeSplit(final WekaInstances data, final Collection<Integer>[] split) {
 		return realizeSplitAsCopiedInstances(data, split);
 	}
 
@@ -445,14 +445,14 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static List<Instances> realizeSplitAsCopiedInstances(final Instances data, final Collection<Integer>[] split) {
+	public static List<WekaInstances> realizeSplitAsCopiedInstances(final WekaInstances data, final Collection<Integer>[] split) {
 		List<Instances> folds = new ArrayList<>();
 		for (Collection<Integer> foldIndices : split) {
-			Instances fold = new Instances(data, 0);
-			foldIndices.stream().forEach(i -> fold.add(data.get(i)));
+			Instances fold = new Instances(data.getList(), 0);
+			foldIndices.stream().forEach(i -> fold.add(data.get(i).getElement()));
 			folds.add(fold);
 		}
-		return folds;
+		return folds.stream().map(x -> new WekaInstances(x)).collect(Collectors.toList());
 	}
 
 	public static List<Instances> realizeSplitAsSubInstances(final Instances data, final Collection<Integer>[] split) {
@@ -475,23 +475,23 @@ public class WekaUtil {
 		return an;
 	}
 
-	public static List<Instances> getStratifiedSplit(final Instances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
+	public static List<WekaInstances> getStratifiedSplit(final WekaInstances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		return getStratifiedSplit(data, new Random(seed), portionOfFirstFold);
 	}
 
-	public static List<Instances> getStratifiedSplit(final Instances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
+	public static List<WekaInstances> getStratifiedSplit(final WekaInstances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		try {
 			List<Instances> split = new ArrayList<>();
-			AttributeBasedStratiAmountSelectorAndAssigner<Double, WekaInstance, WekaInstances> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
-			StratifiedSampling<Double, Double, WekaInstance, WekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, new WekaInstances(data));
+			AttributeBasedStratiAmountSelectorAndAssigner<WekaInstance, WekaInstances> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
+			StratifiedSampling<WekaInstance, WekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, data);
 			sampler.setSampleSize((int) Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
 			split.add(sampler.getComplement().getList());
 			if (split.get(0).size() + split.get(1).size() != data.size()) {
 				throw new IllegalStateException("The sum of fold sizes does not correspond to the size of the original dataset!");
 			}
-			return split;
-		} catch (ClassCastException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | ClassNotFoundException | DatasetCreationException e) {
+			return split.stream().map(x -> new WekaInstances(x)).collect(Collectors.toList());
+		} catch (ClassCastException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}
 	}

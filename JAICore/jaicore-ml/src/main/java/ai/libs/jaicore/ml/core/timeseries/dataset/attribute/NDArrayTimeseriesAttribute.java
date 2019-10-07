@@ -15,7 +15,7 @@ public class NDArrayTimeseriesAttribute extends ATimeseriesAttribute<INDArray> {
 	 */
 	private static final long serialVersionUID = -9188360800052241944L;
 
-	protected NDArrayTimeseriesAttribute(final String name, final int length) {
+	public NDArrayTimeseriesAttribute(final String name, final int length) {
 		super(name, length);
 	}
 
@@ -43,7 +43,7 @@ public class NDArrayTimeseriesAttribute extends ATimeseriesAttribute<INDArray> {
 
 	@Override
 	public ITimeseriesAttributeValue<INDArray> getAsAttributeValue(final Object object) {
-		return new NDArrayTimeseriesAttributeValue(this.getValueAsTypeInstance(object));
+		return new NDArrayTimeseriesAttributeValue(this, this.getValueAsTypeInstance(object));
 	}
 
 	@SuppressWarnings("unchecked")

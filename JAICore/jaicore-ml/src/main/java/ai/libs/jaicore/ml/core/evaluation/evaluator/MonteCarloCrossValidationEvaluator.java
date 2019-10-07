@@ -74,7 +74,7 @@ public class MonteCarloCrossValidationEvaluator<I extends ILabeledInstance, D ex
 	}
 
 	public MonteCarloCrossValidationEvaluator(final ISplitBasedClassifierEvaluator<Double, I, D> splitBasedEvaluator, final int repeats, final Instances data, final double trainingPortion, final long seed) {
-		this(splitBasedEvaluator, new MulticlassClassStratifiedSplitter(), repeats, data, trainingPortion, seed);
+		this(splitBasedEvaluator, new MulticlassClassStratifiedSplitter<I, D>(), repeats, data, trainingPortion, seed);
 	}
 
 	public void cancel() {

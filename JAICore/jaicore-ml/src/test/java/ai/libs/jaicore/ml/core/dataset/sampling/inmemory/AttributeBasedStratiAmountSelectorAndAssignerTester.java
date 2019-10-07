@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
@@ -15,16 +16,14 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.standard.SimpleDataset;
-import ai.libs.jaicore.ml.core.dataset.standard.SimpleInstance;
+import ai.libs.jaicore.ml.core.dataset.simple.SimpleDataset;
+import ai.libs.jaicore.ml.core.dataset.simple.SimpleInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
-import ai.libs.jaicore.ml.core.tabular.dataset.Dataset;
 import ai.libs.jaicore.ml.core.tabular.dataset.attribute.CategoricalAttribute;
 import ai.libs.jaicore.ml.core.tabular.dataset.attribute.CategoricalAttributeValue;
 import ai.libs.jaicore.ml.core.tabular.dataset.attribute.NumericAttribute;
@@ -239,54 +238,14 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		attributeTypeList.add(type1);
 		attributeTypeList.add(type2);
 
-		ILabeledInstanceSchema schema = new LabeledInstanceSchema(attributeTypeList, type3);
+		ILabeledInstanceSchema schema = new LabeledInstanceSchema("testData", attributeTypeList, type3);
 
-		ILabeledDataset<ILabeledInstance> simpleDataset = new Dataset(schema);
+		ILabeledDataset<IClusterableInstance> simpleDataset = new SimpleDataset(schema);
+		List<List<Object>> features = Arrays.asList(Arrays.asList("A", "C"), Arrays.asList("A", "C"), Arrays.asList("B", "C"), Arrays.asList("A", "C"));
+		List<Object> labels = Arrays.asList("X", "Y", "X", "Z");
 
-		// Instance 1
-		IAttributeValue value11 = new CategoricalAttributeValue((ICategoricalAttribute) type1, "A");
-		IAttributeValue value12 = new CategoricalAttributeValue((ICategoricalAttribute) type2, "C");
-		String value13 = "X";
-
-		List<IAttributeValue> values1 = new ArrayList<>();
-		values1.add(value11);
-		values1.add(value12);
-		SimpleInstance<String> i1 = new SimpleInstance<>(values1, value13);
-
-		// Instance 2
-		IAttributeValue value21 = new CategoricalAttributeValue((ICategoricalAttribute) type1, "A");
-		IAttributeValue value22 = new CategoricalAttributeValue((ICategoricalAttribute) type2, "C");
-		String value23 = "Y";
-
-		ArrayList<IAttributeValue> values2 = new ArrayList<>();
-		values2.add(value21);
-		values2.add(value22);
-		SimpleInstance<String> i2 = new SimpleInstance<>(values2, value23);
-
-		// Instance 3
-		IAttributeValue value31 = new CategoricalAttributeValue((ICategoricalAttribute) type1, "B");
-		IAttributeValue value32 = new CategoricalAttributeValue((ICategoricalAttribute) type2, "C");
-		String value33 = "X";
-
-		ArrayList<IAttributeValue> values3 = new ArrayList<>();
-		values3.add(value31);
-		values3.add(value32);
-		SimpleInstance<String> i3 = new SimpleInstance<>(values3, value33);
-
-		// Instance 4
-		IAttributeValue value41 = new CategoricalAttributeValue((ICategoricalAttribute) type1, "A");
-		IAttributeValue value42 = new CategoricalAttributeValue((ICategoricalAttribute) type2, "C");
-		String value43 = "Z";
-
-		ArrayList<IAttributeValue> values4 = new ArrayList<>();
-		values4.add(value41);
-		values4.add(value42);
-		SimpleInstance<String> i4 = new SimpleInstance<>(values4, value43);
-
-		simpleDataset.add(i1);
-		simpleDataset.add(i2);
-		simpleDataset.add(i3);
-		simpleDataset.add(i4);
+		// generate SimpleInstance objects and add to dataset
+		IntStream.range(0, features.size()).mapToObj(x -> new SimpleInstance(schema, features.get(x), labels.get(x))).forEach(simpleDataset::add);
 
 		return simpleDataset;
 	}
@@ -308,7 +267,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
 		ILabeledInstanceSchema schema = new LabeledInstanceSchema(attributeTypeList, type3);
 
-		SimpleDataset<Double> simpleDataset = new SimpleDataset<>(schema);
+		SimpleDataset simpleDataset = new SimpleDataset(schema);
 
 		// Instance 1
 		IAttributeValue value11 = new CategoricalAttributeValue((ICategoricalAttribute) type1, "A");
@@ -343,32 +302,32 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		ArrayList<IAttributeValue> values1 = new ArrayList<>();
 		values1.add(value11);
 		values1.add(value12);
-		SimpleInstance<Double> i1 = new SimpleInstance<>(values1, value13);
+		SimpleInstance i1 = new SimpleInstance(values1, value13);
 
 		ArrayList<IAttributeValue> values2 = new ArrayList<>();
 		values2.add(value21);
 		values2.add(value22);
-		SimpleInstance<Double> i2 = new SimpleInstance<>(values2, value23);
+		SimpleInstance i2 = new SimpleInstance(values2, value23);
 
 		ArrayList<IAttributeValue> values3 = new ArrayList<>();
 		values3.add(value31);
 		values3.add(value32);
-		SimpleInstance<Double> i3 = new SimpleInstance<>(values3, value33);
+		SimpleInstance i3 = new SimpleInstance(values3, value33);
 
 		ArrayList<IAttributeValue> values4 = new ArrayList<>();
 		values4.add(value41);
 		values4.add(value42);
-		SimpleInstance<Double> i4 = new SimpleInstance<>(values4, value43);
+		SimpleInstance i4 = new SimpleInstance(values4, value43);
 
 		ArrayList<IAttributeValue> values5 = new ArrayList<>();
 		values5.add(value51);
 		values5.add(value52);
-		SimpleInstance<Double> i5 = new SimpleInstance<>(values5, value53);
+		SimpleInstance i5 = new SimpleInstance(values5, value53);
 
 		ArrayList<IAttributeValue> values6 = new ArrayList<>();
 		values6.add(value61);
 		values6.add(value62);
-		SimpleInstance<Double> i6 = new SimpleInstance<>(values6, value63);
+		SimpleInstance i6 = new SimpleInstance(values6, value63);
 
 		simpleDataset.add(i1);
 		simpleDataset.add(i2);

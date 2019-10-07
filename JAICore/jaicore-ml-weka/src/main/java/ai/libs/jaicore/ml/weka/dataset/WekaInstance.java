@@ -1,41 +1,24 @@
 package ai.libs.jaicore.ml.weka.dataset;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.basic.sets.ElementDecorator;
-import ai.libs.jaicore.ml.core.dataset.InstanceSchema;
+import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import weka.core.Attribute;
 import weka.core.Instance;
 
 public class WekaInstance extends ElementDecorator<Instance> implements ILabeledInstance {
 
+	private ILabeledInstanceSchema schema;
+
 	public WekaInstance(final Instance instance) {
 		super(instance);
-	}
-
-	@Override
-	public Double getAttributeValue(final int pos) {
-		return this.getElement().value(pos);
-	}
-
-	private double getAttributeValue(final Attribute a) {
-		return this.getElement().value(a);
-	}
-
-	@Override
-	public double[] toDoubleVector() {
-		return this.getElement().toDoubleArray();
-	}
-
-	public InstanceSchema getSchema() {
 		List<IAttribute> attributeTypeList = new LinkedList<>();
 		for (int i = 0; i < this.getElement().numAttributes(); i++) {
 			if (i != this.getElement().classIndex()) {
@@ -43,7 +26,12 @@ public class WekaInstance extends ElementDecorator<Instance> implements ILabeled
 			}
 		}
 		IAttribute targetType = WekaInstancesUtil.transformWEKAAttributeToAttributeType(this.getElement().classAttribute());
-		return new InstanceSchema(attributeTypeList, targetType);
+		this.schema = new LabeledInstanceSchema(this.getRelationName(), attributeTypeList, targetType);
+	}
+
+	public WekaInstance(final ILabeledInstanceSchema schema, final Instance instance) {
+		super(instance);
+		this.schema = schema;
 	}
 
 	@Override
@@ -76,7 +64,27 @@ public class WekaInstance extends ElementDecorator<Instance> implements ILabeled
 	}
 
 	@Override
-	public Iterator<Double> iterator() {
-		return Arrays.stream(this.getElement().toDoubleArray()).iterator();
+	public Double getAttributeValue(final int pos) {
+		return this.getElement().value(pos);
+	}
+
+	@Override
+	public Object[] getAttributes() {
+		return null;
+	}
+
+	@Override
+	public double[] getPoint() {
+		return this.getElement().toDoubleArray();
+	}
+
+	@Override
+	public double getPointValue(final int pos) {
+		return this.getElement().value(pos);
+	}
+
+	@Override
+	public ILabeledInstanceSchema getInstanceSchema() {
+		return this.schema;
 	}
 }

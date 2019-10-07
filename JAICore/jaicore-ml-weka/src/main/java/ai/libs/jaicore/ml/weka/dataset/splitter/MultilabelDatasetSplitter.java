@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.weka.dataset.splitter;
 
-import weka.core.Instances;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 
 /**
 * This class provides methods to obtain train and test splits for a given data
@@ -34,7 +34,7 @@ public class MultilabelDatasetSplitter {
 	 *            The random seed to be used by the technique
 	 * @return The test fold
 	 */
-	public static Instances getTestSplit(final Instances data, final String splitDescription, final String testFold, final String seed) {
+	public static WekaInstances getTestSplit(final WekaInstances data, final String splitDescription, final String testFold, final String seed) {
 		// Check if to be trained on whole data
 		if (testFold.equals("-1")) {
 			return data;
@@ -73,7 +73,7 @@ public class MultilabelDatasetSplitter {
 	 *            The random seed to be used by the technique
 	 * @return The train fold
 	 */
-	public static Instances getTrainSplit(final Instances data, final String splitDescription, final String testFold, final String seed) {
+	public static WekaInstances getTrainSplit(final WekaInstances data, final String splitDescription, final String testFold, final String seed) {
 		// Check if to be tested on whole data
 		if (testFold.equals("-1")) {
 			return data;

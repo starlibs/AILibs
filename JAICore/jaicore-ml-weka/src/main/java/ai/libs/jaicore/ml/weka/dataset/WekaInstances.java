@@ -5,20 +5,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
-import org.api4.java.ai.ml.core.dataset.supervised.INumericFeatureSupervisedDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
 import ai.libs.jaicore.basic.sets.ListDecorator;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstance> implements INumericFeatureSupervisedDataset<Double, WekaInstance> {
+public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstance> implements ILabeledDataset<WekaInstance> {
 
 	private final List<IAttribute> featureTypes = new ArrayList<>();
 	private final List<IAttribute> labelTypes;
 
-	public WekaInstances(final Instances list) throws ClassNotFoundException {
+	public WekaInstances(final Instances list) {
 		super(list);
 		int targetIndex = list.classIndex();
 		if (targetIndex < 0) {
@@ -36,11 +37,7 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 
 	@Override
 	public WekaInstances createEmptyCopy() throws DatasetCreationException {
-		try {
-			return new WekaInstances(new Instances(this.getList(), 0));
-		} catch (ClassNotFoundException e) {
-			throw new DatasetCreationException(e);
-		}
+		return new WekaInstances(new Instances(this.getList(), 0));
 	}
 
 	@Override
@@ -83,22 +80,20 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 	}
 
 	@Override
-	public List<IAttribute> getLabelTypes() {
-		return this.labelTypes;
+	public ILabeledInstanceSchema getInstanceSchema() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public int getNumLabels() {
-		return this.labelTypes.size();
+	public Object[][] getFeatureMatrix() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
-	public List<IAttribute> getFeatureTypes() {
-		return this.featureTypes;
-	}
-
-	@Override
-	public int getNumFeatures() {
-		return this.featureTypes.size();
+	public Object[] getLabelVector() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

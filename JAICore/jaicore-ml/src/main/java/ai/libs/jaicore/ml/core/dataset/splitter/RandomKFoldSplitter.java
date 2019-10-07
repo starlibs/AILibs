@@ -27,12 +27,13 @@ public class RandomKFoldSplitter<I extends IInstance, D extends IDataset<I>> imp
 		this.rand = rand;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public List<IDataset<I>> split(final D data, final long seed) throws SplitFailedException, InterruptedException {
-		List<IDataset<I>> cvFolds = new ArrayList<>();
+	public List<D> split(final D data, final long seed) throws SplitFailedException, InterruptedException {
+		List<D> cvFolds = new ArrayList<>();
 		try {
 			for (int i = 0; i < this.folds; i++) {
-				cvFolds.add(data.createEmptyCopy());
+				cvFolds.add((D) data.createEmptyCopy());
 			}
 			List<Integer> indices = IntStream.range(0, data.size()).mapToObj(Integer::valueOf).collect(Collectors.toList());
 			Collections.shuffle(indices, this.rand);

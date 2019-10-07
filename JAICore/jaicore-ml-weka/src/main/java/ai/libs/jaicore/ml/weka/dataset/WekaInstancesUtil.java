@@ -6,8 +6,9 @@ import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
-import org.api4.java.ai.ml.core.dataset.supervised.INumericFeatureSupervisedDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.INumericFeatureSupervisedInstance;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.ml.core.tabular.dataset.attribute.CategoricalAttribute;
 import ai.libs.jaicore.ml.core.tabular.dataset.attribute.NumericAttribute;
@@ -22,11 +23,11 @@ public class WekaInstancesUtil {
 		/* Intentionally blank, hiding standard constructor for this util class. */
 	}
 
-	public static Instances datasetToWekaInstances(final INumericFeatureSupervisedDataset<Double, INumericFeatureSupervisedInstance<Double>> dataset) throws UnsupportedAttributeTypeException {
+	public static Instances datasetToWekaInstances(final ILabeledDataset<ILabeledInstance> dataset) throws UnsupportedAttributeTypeException {
 		List<Attribute> attributes = new LinkedList<>();
 
 		for (int i = 0; i < dataset.getNumAttributes(); i++) {
-			IAttribute attType = dataset.getFeatureTypes().getAttributeValue(i);
+			IAttribute attType = dataset.getListOfAttributes().get(i);
 			if (attType instanceof NumericAttribute) {
 				attributes.add(new Attribute("att" + i));
 			} else if (attType instanceof CategoricalAttribute) {
@@ -36,16 +37,12 @@ public class WekaInstancesUtil {
 			}
 		}
 
-		List<IAttribute> classTypeList = dataset.getLabelTypes();
-		if (classTypeList.size() > 1) {
-			throw new IllegalArgumentException("Cannot handle more than one label type");
-		}
-
-		IAttribute classType = classTypeList.get(0);
+		IAttribute classType = dataset.getLabelAttribute();
 		Attribute classAttribute;
-		if (classType instanceof NumericAttribute) {
+
+		if (classType instanceof INumericAttribute) {
 			classAttribute = new Attribute("class");
-		} else if (classType instanceof CategoricalAttribute) {
+		} else if (classType instanceof ICategoricalAttribute) {
 			classAttribute = new Attribute("class", ((CategoricalAttribute) classType).getValues());
 		} else {
 			throw new UnsupportedAttributeTypeException("The class attribute has an unsupported attribute type.");
@@ -57,7 +54,7 @@ public class WekaInstancesUtil {
 		Instances wekaInstances = new Instances("weka-instances", attributeList, 0);
 		wekaInstances.setClassIndex(wekaInstances.numAttributes() - 1);
 
-		for (INumericFeatureSupervisedInstance<Double> inst : dataset) {
+		for (ILabeledInstance inst : dataset) {
 			DenseInstance iNew = new DenseInstance(attributeList.size());
 			iNew.setDataset(wekaInstances);
 

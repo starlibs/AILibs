@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author jnowack
  *
  */
-public abstract class LoadDataSetInstruction implements IDatasetTraceInstruction<IInstance, IDataset<IInstance>> {
+public abstract class LoadDataSetInstruction extends Instruction implements IDatasetTraceInstruction<IInstance, IDataset<IInstance>> {
 
 	private static final long serialVersionUID = 7408937429274201748L;
 	private final DataProvider provider;

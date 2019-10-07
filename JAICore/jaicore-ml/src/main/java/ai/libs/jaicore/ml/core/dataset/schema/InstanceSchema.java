@@ -9,9 +9,11 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 
 public class InstanceSchema implements IInstanceSchema {
 
+	private String relationName;
 	private final List<IAttribute> attributeList;
 
-	public InstanceSchema(final Collection<IAttribute> attributeList) {
+	public InstanceSchema(final String relationName, final Collection<IAttribute> attributeList) {
+		this.relationName = relationName;
 		this.attributeList = new ArrayList<>(attributeList);
 	}
 
@@ -23,6 +25,11 @@ public class InstanceSchema implements IInstanceSchema {
 	@Override
 	public int getNumAttributes() {
 		return this.attributeList.size();
+	}
+
+	@Override
+	public String getRelationName() {
+		return this.relationName;
 	}
 
 }
