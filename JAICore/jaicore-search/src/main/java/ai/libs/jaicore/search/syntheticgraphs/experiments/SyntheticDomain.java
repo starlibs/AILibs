@@ -6,7 +6,7 @@ import ai.libs.jaicore.search.experiments.SearchExperimentDomain;
 import ai.libs.jaicore.search.syntheticgraphs.ISyntheticTreasureIslandProblem;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
-public class SyntheticDomain extends SearchExperimentDomain<SyntheticExperimentBuilder, ISyntheticTreasureIslandProblem, ITransparentTreeNode, Integer> {
+public class SyntheticDomain extends SearchExperimentDomain<TreasureIslandSearchExperimentBuilder, ISyntheticTreasureIslandProblem, ITransparentTreeNode, Integer> {
 
 	public SyntheticDomain() {
 		this(ConfigCache.getOrCreate(ISyntheticSearchExperimentConfig.class));
@@ -17,7 +17,12 @@ public class SyntheticDomain extends SearchExperimentDomain<SyntheticExperimentB
 	}
 
 	@Override
-	public Class<SyntheticExperimentBuilder> getBuilderClass() {
-		return SyntheticExperimentBuilder.class;
+	public Class<TreasureIslandSearchExperimentBuilder> getBuilderClass() {
+		return TreasureIslandSearchExperimentBuilder.class;
+	}
+
+	@Override
+	public SyntheticExperimentDecoder getDecoder() {
+		return (SyntheticExperimentDecoder)super.getDecoder();
 	}
 }

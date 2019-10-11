@@ -10,8 +10,8 @@ import java.util.Random;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearch;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 
-import ai.libs.jaicore.experiments.AExperimentDecoder;
 import ai.libs.jaicore.experiments.Experiment;
+import ai.libs.jaicore.search.experiments.ASearchExperimentDecoder;
 import ai.libs.jaicore.search.experiments.StandardExperimentSearchAlgorithmFactory;
 import ai.libs.jaicore.search.syntheticgraphs.ISyntheticTreasureIslandProblem;
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
@@ -19,14 +19,16 @@ import ai.libs.jaicore.search.syntheticgraphs.graphmodels.degenerated.Degenerate
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.equalsized.EqualSizedIslandsModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.ITreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.LinearTreasureModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.funnel.AbyssTreasureModel;
+import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.funnel.DominatedFunnelTreasureModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.funnel.FunnelTreasureModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.funnel.RelativeFunnelTreasureModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.LinkedTreasureIslandPathCostGenerator;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.NoisyMeanTreasureModel;
 import ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean.ShiftedSineTreasureGenerator;
 
-public class SyntheticExperimentDecoder extends AExperimentDecoder<ISyntheticTreasureIslandProblem, IOptimalPathInORGraphSearch<? extends ISyntheticTreasureIslandProblem, ? extends IEvaluatedPath<ITransparentTreeNode,Integer, Double>, ITransparentTreeNode, Integer, Double>> {
+public class SyntheticExperimentDecoder extends ASearchExperimentDecoder<ITransparentTreeNode, Integer, ISyntheticTreasureIslandProblem, IEvaluatedPath<ITransparentTreeNode, Integer, Double>, IOptimalPathInORGraphSearch<? extends ISyntheticTreasureIslandProblem, ? extends IEvaluatedPath<ITransparentTreeNode,Integer, Double>, ITransparentTreeNode, Integer, Double>> {
 
 	public SyntheticExperimentDecoder(final ISyntheticSearchExperimentConfig config) {
 		super(config);
@@ -43,8 +45,8 @@ public class SyntheticExperimentDecoder extends AExperimentDecoder<ISyntheticTre
 		int seed = Integer.parseInt(experimentData.get(ISyntheticSearchExperimentConfig.K_SEED));
 		int branchingFactor = Integer.parseInt(experimentData.get(ISyntheticSearchExperimentConfig.K_BRANCHING));
 		int depth = Integer.parseInt(experimentData.get(ISyntheticSearchExperimentConfig.K_DEPTH));
-		double maxIslandSize = Double.parseDouble(experimentData.get(ISyntheticSearchExperimentConfig.K_ISLANDS_MAXISLANDSIZE));
-		int numberOfIslandsWithTreasure = Integer.parseInt(experimentData.get(ISyntheticSearchExperimentConfig.K_ISLANDS_NUMBER_OF_TREASURES));
+		double maxIslandSize = Double.parseDouble(experimentData.get(ITreasureIslandExperimentSetConfig.K_ISLANDS_MAXISLANDSIZE));
+		int numberOfIslandsWithTreasure = Integer.parseInt(experimentData.get(ITreasureIslandExperimentSetConfig.K_ISLANDS_NUMBER_OF_TREASURES));
 
 		/* derive number of leafs in total */
 		BigInteger numberOfLeafs = BigInteger.valueOf(branchingFactor).pow(depth);
@@ -52,7 +54,6 @@ public class SyntheticExperimentDecoder extends AExperimentDecoder<ISyntheticTre
 
 		/* create graph search input */
 		IIslandModel islandModel = new EqualSizedIslandsModel(islandSize);
-		experimentData.put("treasuremodel", "abyss");
 		ITreasureModel treasureGenerator = this.getTreasureModel(islandModel, numberOfIslandsWithTreasure, new Random(seed), experimentData.get("treasuremodel"));
 		return new DegeneratedGraphSearchWithPathEvaluationsProblem(new Random(seed), 0, branchingFactor, depth, treasureGenerator);
 	}
@@ -66,6 +67,12 @@ public class SyntheticExperimentDecoder extends AExperimentDecoder<ISyntheticTre
 			return new FunnelTreasureModel(islandModel, numberOfIslandsWithTreasure, random);
 		case "relativefunnel":
 			return new RelativeFunnelTreasureModel(islandModel, numberOfIslandsWithTreasure, random);
+		case "dominatedfunnel":
+			return new DominatedFunnelTreasureModel(islandModel, random);
+		case "linear-asc":
+			return new LinearTreasureModel();
+		case "linear-desc":
+			return new LinearTreasureModel(false);
 
 		default:
 			throw new IllegalArgumentException("Model " + model + " is not supported.");

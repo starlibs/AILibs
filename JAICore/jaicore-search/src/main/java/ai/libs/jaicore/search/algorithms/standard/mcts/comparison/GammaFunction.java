@@ -16,11 +16,11 @@ public class GammaFunction implements IGammaFunction {
 	private final int shortMinObservationsEnforcedForAnyDecision = 2;
 	private final int shortAbsoluteMaxStepsToReachGammaOne = 4;
 	private final int shortAbsoluteMaxStepsToReachMaxGamma = 10;
-	private final double shortMaxGamma = 5;
+	private final double shortMaxGamma = 1;
 
 	/* long term exploration definintion */
-	private final int minObservationsEnforcedForAnyDecision = 5;
-	private final int absoluteMaxStepsToReachGammaOne = 100;
+	private final int minObservationsEnforcedForAnyDecision = 1;
+	private final int absoluteMaxStepsToReachGammaOne = 50;
 	private final int absoluteMinStepsToReachMaxGamma = this.absoluteMaxStepsToReachGammaOne  + 50;
 	private final int absoluteMaxStepsToReachMaxGamma = this.absoluteMinStepsToReachMaxGamma + 250;
 	private final double maxGamma = 1;
@@ -99,12 +99,11 @@ public class GammaFunction implements IGammaFunction {
 
 	@Override
 	public Double apply(final BTModel n) {
-		double probability = n.getPathProbability();
-		//		System.out.println(probability);
-		double gammaLong = this.getLongTermGamma(n);
-		double gammaShort = this.getShortTermGamma(n);
-		double gamma = gammaLong * probability + gammaShort * (1-probability);
-		//		System.out.println(n.depth + " (" + n.visits + " visits): " + gamma + " = " + gammaLong + " * " + probability + " + "  + gammaShort + " * " + (1-probability));
-		return gamma;
+		return this.getLongTermGamma(n);
+		//		double probability = n.getPathProbability();
+		//		double gammaLong = this.getLongTermGamma(n);
+		//		double gammaShort = this.getShortTermGamma(n);
+		//		double gamma = gammaLong * probability + gammaShort * (1-probability);
+		//		return gamma;
 	}
 }

@@ -19,7 +19,7 @@ public class BestAndLatestVsBestAndLatestWinComputer implements IWinComputer {
 
 	private Logger logger = LoggerFactory.getLogger(LatestVsLatestWinComputer.class);
 	private final int kBest;
-	private final int fBest = 0;
+	private final int fBest = 10;
 	private final int kLatest;
 
 	private Map<BTModel, MinMaxPriorityQueue<Double>> bestValues = new HashMap<>();

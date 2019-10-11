@@ -15,6 +15,8 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.MCTSWithPLKPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.SPUCTPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.UCTPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.BradleyTerryMCTSPathSearch;
+import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.FixedCommitmentMCTSPathSearch;
+import ai.libs.jaicore.search.algorithms.standard.mcts.tag.TAGMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.thompson.DNGMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.random.RandomSearchFactory;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
@@ -47,8 +49,14 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 			return new MCTSWithPLKPathSearch<>((I)input, 1, seed, 0.0, 100);
 		case "bt":
 			return new BradleyTerryMCTSPathSearch<>((I)input, seed, true);
+		case "mcts-kfix-100-mean":
+			return new FixedCommitmentMCTSPathSearch<>((I)input, 0.0, 100, d -> d.getMean());
+		case "mcts-kfix-200-mean":
+			return new FixedCommitmentMCTSPathSearch<>((I)input, 0.0, 200, d -> d.getMean());
 		case "dng":
 			return new DNGMCTSPathSearch<>((I)input, seed, 0.0);
+		case "tag":
+			return new TAGMCTSPathSearch<>((I)input, seed, 0.0);
 		case "dfs":
 			IteratingGraphSearchOptimizerFactory<I, N, A, Double> dfsFactory = new IteratingGraphSearchOptimizerFactory<I, N, A, Double>();
 			dfsFactory.setBaseAlgorithmFactory(new DepthFirstSearchFactory<>());

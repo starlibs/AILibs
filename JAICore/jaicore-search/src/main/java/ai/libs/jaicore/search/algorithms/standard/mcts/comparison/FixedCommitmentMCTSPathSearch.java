@@ -1,15 +1,18 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.comparison;
 
 import java.util.Random;
+import java.util.function.Function;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
 
 import ai.libs.jaicore.search.algorithms.standard.mcts.MCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.UniformRandomPolicy;
-import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 
-public class FixedCommitmentMCTSPathSearch<N, A> extends MCTSPathSearch<N, A, Double>{
+public class FixedCommitmentMCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends MCTSPathSearch<I ,N, A, Double>{
 
-	public FixedCommitmentMCTSPathSearch(final GraphSearchWithPathEvaluationsInput<N, A, Double> problem, final Double penaltyForFailedEvaluation, final int k) {
-		super(problem, new FixedCommitmentPolicy<>(k), new UniformRandomPolicy<>(new Random(0)), penaltyForFailedEvaluation, true);
+	public FixedCommitmentMCTSPathSearch(final I problem, final Double penaltyForFailedEvaluation, final int k, final Function<DescriptiveStatistics, Double> metric) {
+		super(problem, new FixedCommitmentPolicy<>(k, metric), new UniformRandomPolicy<>(new Random(0)), penaltyForFailedEvaluation, true);
 	}
 
 }

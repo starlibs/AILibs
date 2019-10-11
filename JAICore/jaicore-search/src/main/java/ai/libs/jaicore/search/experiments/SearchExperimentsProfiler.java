@@ -48,22 +48,22 @@ public class SearchExperimentsProfiler {
 		return folder;
 	}
 
-	public void plainLandscapeAnalysis(final Experiment experiment, final int probeSize) throws IOException, PathEvaluationException, InterruptedException {
-		try (FileWriter fw = new FileWriter(new File(this.getLandscapeFolder(experiment) + File.separator + probeSize + ".plainlandscape"))) {
+	public void plainLandscapeAnalysis(final Experiment experiment, final Number probeSize) throws IOException, PathEvaluationException, InterruptedException {
+		try (FileWriter fw = new FileWriter(new File(this.getLandscapeFolder(experiment) + File.separator + probeSize.intValue() + ".plainlandscape"))) {
 			for (double d : this.toolbox.getLandscapeAnalyzer(experiment).getValues(probeSize, LandscapeAnalysisCompletionTechnique.RANDOM)) {
 				fw.write(d + "\n");
 			}
 		}
 	}
 
-	public void iterativeLandscapeAnalysis(final Experiment experiment, final int probeSize) throws IOException, PathEvaluationException, InterruptedException {
+	public void iterativeLandscapeAnalysis(final Experiment experiment, final Number probeSize) throws IOException, PathEvaluationException, InterruptedException {
 		List<List<double[]>> iterativeAnalysisResults = this.toolbox.getLandscapeAnalyzer(experiment).getIterativeProbeValuesAlongRandomPath(probeSize);
 		int m = iterativeAnalysisResults.size();
 		for (int depth = 0; depth < m; depth++) {
 			List<double[]> probesInDepth = iterativeAnalysisResults.get(depth);
 			int n = probesInDepth.size();
 			for (int branch = 0; branch < n; branch++) {
-				try (FileWriter fw = new FileWriter(new File(this.getLandscapeFolder(experiment) + File.separator + "iterative-" + depth + "-" + branch + ".iterativelandscape"))) {
+				try (FileWriter fw = new FileWriter(new File(this.getLandscapeFolder(experiment) + File.separator + depth + "-" + branch + ".iterativelandscape"))) {
 					for (double d : probesInDepth.get(branch)) {
 						fw.write(d + "\n");
 					}

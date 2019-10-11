@@ -7,28 +7,29 @@ import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.search.syntheticgraphs.graphmodels.ITransparentTreeNode;
 
+/**
+ * Distributes scores according to a simple linear function from the left to the right.
+ *
+ * @author felix
+ *
+ */
 public class LinearTreasureModel implements ITreasureModel {
 
-	private final int d;
-	private final int b;
+	private final boolean asc;
 
-	public LinearTreasureModel(final int d, final int b) {
+	public LinearTreasureModel() {
+		this(true);
+	}
+
+	public LinearTreasureModel(final boolean asc) {
 		super();
-		this.d = d;
-		this.b = b;
+		this.asc = asc;
 	}
 
 	@Override
 	public Double evaluate(final IPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
-		BigInteger sum = BigInteger.ZERO;
-		for (int i = this.d - 1; i >= 0; i--) {
-			BigInteger factor = BigInteger.valueOf(this.b).pow(i).multiply(BigInteger.valueOf(path.getArcs().get(this.d - i - 1)));
-			sum = sum.add(factor);
-		}
-		while (sum.toString().length() > 20) {
-			sum = sum.divide(BigInteger.TEN);
-		}
-		return sum.doubleValue();
+		BigInteger numLeafsBefore = path.getHead().getNumberOfLeafsPriorToNodeViaDFS();
+		return this.asc ? numLeafsBefore.doubleValue() : path.getRoot().getNumberOfLeafsUnderNode().subtract(numLeafsBefore).doubleValue();
 	}
 
 	@Override

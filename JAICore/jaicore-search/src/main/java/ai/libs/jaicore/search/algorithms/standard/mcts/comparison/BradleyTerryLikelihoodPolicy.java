@@ -24,8 +24,7 @@ import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedExc
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathLikelihoodProvidingPolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.observationfilter.EmptyObservationFilter;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.EstimatorDistanceBasedWinComputer;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.ThresholdedRunsWinComputer;
+import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.wincomputer.BootstrappingWinComputer;
 import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 /**
@@ -224,9 +223,10 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 
 	private int numberOfEvaluations = 0;
 	private final Random random;
-	private final IWinComputer winComputer = new EstimatorDistanceBasedWinComputer();
+	private final IWinComputer winComputer = new BootstrappingWinComputer();
 	private final IObservationUpdate updater = new EmptyObservationFilter();
 	private final IGammaFunction gamma = new GammaFunction();
+	private final double explorationProb = .05;
 
 	public BradleyTerryLikelihoodPolicy(final Random random) {
 		super();
@@ -235,6 +235,10 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 
 	@Override
 	public A getAction(final N node, final Map<A, N> actionsWithSuccessors) throws ActionPredictionFailedException {
+		if (this.random.nextDouble() < this.explorationProb) {
+			List<A> actions = new ArrayList<>(actionsWithSuccessors.keySet());
+			return actions.get(this.random.nextInt(actions.size()));
+		}
 		BTModel nodeModel = this.nodeModels.get(node);
 		if (nodeModel == null) {
 			throw new IllegalArgumentException("Cannot derive any action with tree policy for node without a node model: " + node);

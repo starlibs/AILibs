@@ -28,7 +28,7 @@ public class GenericLandscapeAnalyzer<N, A> {
 		this.goalTester = problem.getGoalTester();
 	}
 
-	public double[] getValues(final int probeSize, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
+	public double[] getValues(final Number probeSize, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
 		return this.getValues(new SearchGraphPath<>(this.root), probeSize, technique);
 	}
 
@@ -47,7 +47,7 @@ public class GenericLandscapeAnalyzer<N, A> {
 		return this.getValues(path, probeSize, technique);
 	}
 
-	public double[] getValues(final IPath<N, A> path, final int probeSize, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
+	public double[] getValues(final IPath<N, A> path, final Number probeSize, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
 		List<Double> values = this.probeUnderPath(path, probeSize, technique);
 		int n = values.size();
 		double[] valuesAsArray = new double[n];
@@ -57,9 +57,10 @@ public class GenericLandscapeAnalyzer<N, A> {
 		return valuesAsArray;
 	}
 
-	private List<Double> probeUnderPath(final IPath<N, A> path, final int limit, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
+	private List<Double> probeUnderPath(final IPath<N, A> path, final Number limit, final LandscapeAnalysisCompletionTechnique technique) throws InterruptedException, PathEvaluationException {
 		N node = path.getHead();
-		List<Double> scoresUnderChildren = new ArrayList<>(limit);
+		int cLimit = limit.intValue();
+		List<Double> scoresUnderChildren = new ArrayList<>(cLimit);
 		if (this.goalTester.isGoal(path)) {
 			double score = this.problem.getPathEvaluator().evaluate(path);
 			if (score < this.min) {
@@ -72,7 +73,7 @@ public class GenericLandscapeAnalyzer<N, A> {
 		int n = successors.size();
 
 		/* if we cannot delve into all successors, order them by the defined technique */
-		if (n > limit) {
+		if (n > cLimit) {
 			switch (technique) {
 			case FIRST:
 
@@ -87,8 +88,8 @@ public class GenericLandscapeAnalyzer<N, A> {
 			}
 		}
 
-		int limitPerChild = (int)Math.floor(limit * 1.0 / n);
-		int numberOfChildrenWithExtra = limit % n;
+		int limitPerChild = (int)Math.floor(cLimit * 1.0 / n);
+		int numberOfChildrenWithExtra = cLimit % n;
 		for (int child = 0; child < n; child++) {
 			int limitForThisChild = limitPerChild + (child < numberOfChildrenWithExtra ? 1 : 0);
 			if (limitForThisChild <= 0) {
@@ -100,7 +101,7 @@ public class GenericLandscapeAnalyzer<N, A> {
 		return scoresUnderChildren;
 	}
 
-	public List<List<double[]>> getIterativeProbeValuesAlongRandomPath(final int probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
+	public List<List<double[]>> getIterativeProbeValuesAlongRandomPath(final Number probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
 		IPath<N, A> currentPath = new SearchGraphPath<>(this.root);
 		while (!this.goalTester.isGoal(currentPath)) {
 			List<NodeExpansionDescription<N, A>> nedList = this.problem.getGraphGenerator().getSuccessorGenerator().generateSuccessors(currentPath.getHead());
@@ -111,7 +112,7 @@ public class GenericLandscapeAnalyzer<N, A> {
 		return this.getIterativeProbeValues(currentPath, probSizePerLevelAndChild);
 	}
 
-	public List<List<double[]>> getIterativeProbeValues(final IPath<N, A> path, final int probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
+	public List<List<double[]>> getIterativeProbeValues(final IPath<N, A> path, final Number probSizePerLevelAndChild) throws PathEvaluationException, InterruptedException {
 		List<List<double[]>> iterativeProbes = new ArrayList<>();
 		for (int depth = 0; depth < path.getNumberOfNodes() - 1; depth++) {
 			System.out.println("Probing on level " + depth);

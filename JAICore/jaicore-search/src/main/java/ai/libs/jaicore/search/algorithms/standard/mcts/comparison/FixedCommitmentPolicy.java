@@ -1,22 +1,26 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.comparison;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 
 public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double> {
-	private final Map<N, Integer> numObservationsPerNode = new HashMap<>();
-	private final Map<N, Double> observedMin = new HashMap<>();
+	private final Map<N, DescriptiveStatistics> observationsPerNode = new HashMap<>();
 
 	private final int k;
+	private final Function<DescriptiveStatistics, Double> metric;
 
-	public FixedCommitmentPolicy(final int k) {
+	public FixedCommitmentPolicy(final int k, final Function<DescriptiveStatistics, Double> metric) {
 		super();
 		this.k = k;
+		this.metric = metric;
 	}
 
 	@Override
@@ -30,12 +34,13 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 		int numOfVisitsOfThatChild = Integer.MAX_VALUE;
 		double bestChildScore = Double.MAX_VALUE;
 		for (Entry<A, N> child : actionsWithSuccessors.entrySet()) {
-			int numOfVisitsOfThisChild = this.numObservationsPerNode.computeIfAbsent(child.getValue(), n -> 0);
+			DescriptiveStatistics observations = this.observationsPerNode.computeIfAbsent(child.getValue(), n -> new DescriptiveStatistics());
+			int numOfVisitsOfThisChild = (int)observations.getN();
 			if (numOfVisitsOfThisChild < numOfVisitsOfThatChild) {
 				actionAndChildWithLeastVisits = child;
 				numOfVisitsOfThatChild = numOfVisitsOfThisChild;
 			}
-			double bestScoreOfThisChild = this.observedMin.computeIfAbsent(child.getValue(), n -> Double.MAX_VALUE);
+			double bestScoreOfThisChild = this.metric.apply(observations);
 			if (bestScoreOfThisChild < bestChildScore) {
 				bestChildScore = bestScoreOfThisChild;
 				actionAndChildWithBestVisit = child;
@@ -51,14 +56,10 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 	}
 
 	@Override
-	public void updatePath(final List<N> path, final Double playout) {
-		for (N node : path) {
-			int numObservations = this.numObservationsPerNode.computeIfAbsent(node, n -> 0);
-			double bestScoreUpToNow = this.observedMin.computeIfAbsent(node, n -> Double.MAX_VALUE);
-			this.numObservationsPerNode.put(node, numObservations + 1);
-			if (bestScoreUpToNow > playout) {
-				this.observedMin.put(node, playout);
-			}
+	public void updatePath(final IPath<N, A> path, final Double playout) {
+		for (N node : path.getNodes()) {
+			DescriptiveStatistics statsOfNode = this.observationsPerNode.computeIfAbsent(node, n -> new DescriptiveStatistics());
+			statsOfNode.addValue(playout);
 		}
 	}
 }
