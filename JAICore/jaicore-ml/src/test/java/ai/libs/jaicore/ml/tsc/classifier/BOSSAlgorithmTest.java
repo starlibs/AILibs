@@ -12,8 +12,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.BOSSClassifier;
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.BOSSLearningAlgorithm.IBossAlgorithmConfig;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.BOSSClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 
 /**

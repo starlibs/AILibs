@@ -42,7 +42,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSpl
 import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;

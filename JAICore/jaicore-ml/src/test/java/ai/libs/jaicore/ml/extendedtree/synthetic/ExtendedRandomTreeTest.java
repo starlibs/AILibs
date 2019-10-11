@@ -9,7 +9,7 @@ import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.tabular.rqp.learner.intervaltree.ExtendedRandomTree;
+import ai.libs.jaicore.ml.rangequery.learner.intervaltree.ExtendedRandomTree;
 import junit.framework.Assert;
 import weka.core.DenseInstance;
 import weka.core.Instance;

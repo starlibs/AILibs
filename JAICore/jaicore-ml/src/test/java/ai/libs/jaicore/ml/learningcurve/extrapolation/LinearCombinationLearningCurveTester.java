@@ -13,11 +13,11 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.InvalidAnchorPointsException;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lc.LinearCombinationExtrapolationMethod;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lc.LinearCombinationLearningCurve;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lc.LinearCombinationLearningCurveConfiguration;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lc.LinearCombinationParameterSet;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.lc.LinearCombinationExtrapolationMethod;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.lc.LinearCombinationLearningCurve;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.lc.LinearCombinationLearningCurveConfiguration;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.lc.LinearCombinationParameterSet;
 
 public class LinearCombinationLearningCurveTester {
 

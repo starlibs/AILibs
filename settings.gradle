@@ -1,6 +1,8 @@
 def jaicorePrefix = 'JAICore/'
 def configPrefix = 'softwareconfiguration/'
 
+includeBuild "../api4"
+
 // JAICore
 
 include ":JAICore:jaicore-basic"

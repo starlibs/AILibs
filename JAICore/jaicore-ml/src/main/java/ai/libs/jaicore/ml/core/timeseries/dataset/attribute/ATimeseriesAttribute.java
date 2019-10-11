@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.core.timeseries.dataset.attribute;
 
 import org.api4.java.common.timeseries.ITimeseries;
 
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.AGenericObjectAttribute;
+import ai.libs.jaicore.ml.core.dataset.attribute.AGenericObjectAttribute;
 
 /**
  *

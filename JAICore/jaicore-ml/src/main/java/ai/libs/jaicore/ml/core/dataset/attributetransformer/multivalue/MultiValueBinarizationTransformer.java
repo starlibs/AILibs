@@ -6,8 +6,8 @@ import java.util.List;
 import org.api4.java.ai.ml.core.dataset.attribute.transformer.ISingleAttributeTransformer;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.MultiValueAttributeType;
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.MultiValueAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeType;
+import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
 
 /**
  * Transforms a multi-valued feature into a 0/1 Vector, where each dimension

@@ -10,8 +10,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.shapelets.ShapeletTransformLearningAlgorithm;
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.shapelets.ShapeletTransformTSClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.shapelets.ShapeletTransformLearningAlgorithm;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.shapelets.ShapeletTransformTSClassifier;
 import ai.libs.jaicore.ml.core.timeseries.loss.FStat;
 import ai.libs.jaicore.ml.core.timeseries.loss.IQualityMeasure;
 import ai.libs.jaicore.ml.core.timeseries.shapelets.Shapelet;

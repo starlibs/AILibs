@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.ipl.InversePowerLawLearningCurve;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawLearningCurve;
 
 public class InversePowerLawLearningCurveTest {
 

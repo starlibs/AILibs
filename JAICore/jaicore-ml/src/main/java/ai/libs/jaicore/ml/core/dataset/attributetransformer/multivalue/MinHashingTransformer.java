@@ -8,7 +8,7 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.attribute.transformer.ISingleAttributeTransformer;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.MultiValueAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
 
 /**
  * Converts the sets of multi-value features to short signatures. At first the

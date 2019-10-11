@@ -15,10 +15,10 @@ import com.google.common.eventbus.EventBus;
 import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.InvalidAnchorPointsException;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolator;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolator;
 import weka.classifiers.Classifier;
 
 /**

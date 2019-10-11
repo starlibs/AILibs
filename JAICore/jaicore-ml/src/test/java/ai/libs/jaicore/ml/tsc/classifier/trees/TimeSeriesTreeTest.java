@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.graph.TreeNode;
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeClassifier;
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeLearningAlgorithm;
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesTreeClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesTreeLearningAlgorithm;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesTreeLearningAlgorithm.ITimeSeriesTreeConfig;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesFeature;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesFeature.FeatureType;

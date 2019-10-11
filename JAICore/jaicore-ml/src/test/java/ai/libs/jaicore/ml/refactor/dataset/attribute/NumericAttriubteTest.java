@@ -8,8 +8,8 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.NumericAttribute;
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.NumericAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.attribute.NumericAttribute;
+import ai.libs.jaicore.ml.core.dataset.attribute.NumericAttributeValue;
 
 public class NumericAttriubteTest {
 

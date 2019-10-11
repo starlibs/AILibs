@@ -10,8 +10,8 @@ import org.api4.java.ai.ml.core.dataset.attribute.transformer.OneHotEncodingTran
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttributeValue;
 
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.CategoricalAttribute;
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.CategoricalAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttributeValue;
 
 public class OneHotEncodingTransformerTest {
 

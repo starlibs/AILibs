@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.InvalidAnchorPointsException;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolator;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolator;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.Classifier;
 import weka.core.Instances;

@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.core.dataset.attribute.DyadRankingAttribute;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
-import ai.libs.jaicore.ml.core.tabular.dataset.attribute.DyadRankingAttribute;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 
 /**

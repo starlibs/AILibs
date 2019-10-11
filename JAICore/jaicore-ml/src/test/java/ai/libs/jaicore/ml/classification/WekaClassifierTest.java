@@ -12,7 +12,7 @@ import org.api4.java.ai.ml.core.learner.algorithm.IPredictionBatch;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;
-import ai.libs.jaicore.ml.core.tabular.dataset.ArffToNumericDatasetDeserializer;
+import ai.libs.jaicore.ml.core.dataset.ArffToNumericDatasetDeserializer;
 import ai.libs.jaicore.ml.weka.learner.WekaClassifier;
 
 public class WekaClassifierTest {

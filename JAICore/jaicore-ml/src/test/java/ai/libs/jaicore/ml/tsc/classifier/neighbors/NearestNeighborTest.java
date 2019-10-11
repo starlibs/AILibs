@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import ai.libs.jaicore.basic.metric.EuclideanDistance;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.neighbors.NearestNeighborClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.neighbors.NearestNeighborClassifier;
 import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
 
 /**

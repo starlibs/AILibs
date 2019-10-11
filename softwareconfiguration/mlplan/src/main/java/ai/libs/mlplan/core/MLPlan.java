@@ -29,7 +29,7 @@ import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;

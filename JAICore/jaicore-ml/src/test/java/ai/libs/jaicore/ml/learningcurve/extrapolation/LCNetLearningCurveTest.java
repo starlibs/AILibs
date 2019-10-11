@@ -7,9 +7,9 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.InvalidAnchorPointsException;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lcnet.LCNetExtrapolationMethod;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.lcnet.PointWiseLearningCurve;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.lcnet.LCNetExtrapolationMethod;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.lcnet.PointWiseLearningCurve;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class LCNetLearningCurveTest {

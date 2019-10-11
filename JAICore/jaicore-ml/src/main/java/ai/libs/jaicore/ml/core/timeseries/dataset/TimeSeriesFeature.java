@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.core.timeseries.dataset;
 
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeClassifier;
-import ai.libs.jaicore.ml.core.timeseries.classification.learner.trees.TimeSeriesTreeLearningAlgorithm;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesTreeClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesTreeLearningAlgorithm;
 import ai.libs.jaicore.ml.core.timeseries.util.MathUtil;
 
 /**

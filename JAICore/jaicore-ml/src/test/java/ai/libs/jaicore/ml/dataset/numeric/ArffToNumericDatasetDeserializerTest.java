@@ -9,8 +9,8 @@ import java.util.List;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.tabular.dataset.ArffToNumericDatasetDeserializer;
-import ai.libs.jaicore.ml.core.tabular.dataset.Dataset;
+import ai.libs.jaicore.ml.core.dataset.ArffToNumericDatasetDeserializer;
+import ai.libs.jaicore.ml.core.dataset.Dataset;
 
 public class ArffToNumericDatasetDeserializerTest {
 

@@ -10,8 +10,8 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointE
 import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 

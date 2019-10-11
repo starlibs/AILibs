@@ -16,7 +16,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SystematicSamplingFactory;
-import ai.libs.jaicore.ml.core.tabular.funcpred.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
+import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.functions.SMO;
