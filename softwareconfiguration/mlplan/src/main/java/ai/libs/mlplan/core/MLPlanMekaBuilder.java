@@ -12,7 +12,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleMLCSpl
 import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
 import ai.libs.jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multilabel.MekaPipelineFactory;
 
 public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
@@ -37,7 +37,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new ArbitrarySplitter();
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_MEKA_COMPLETE, FS_SSC_MEKA_COMPLETE);
 	private static final File DEF_PREFERRED_COMPONENTS_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_PREFC_MEKA, FS_PREFC_MEKA);
-	private static final IClassifierFactory CLASSIFIER_FACTORY = new MekaPipelineFactory();
+	private static final ILearnerFactory CLASSIFIER_FACTORY = new MekaPipelineFactory();
 	private static final ProbabilisticMonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new ProbabilisticMonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SEARCH_NUM_MC_ITERATIONS)
 			.withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE).withSplitBasedEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(LOSS_FUNCTION)).withDatasetSplitter(new ArbitrarySplitter());
 	private static final ProbabilisticMonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new ProbabilisticMonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SELECTION_NUM_MC_ITERATIONS)

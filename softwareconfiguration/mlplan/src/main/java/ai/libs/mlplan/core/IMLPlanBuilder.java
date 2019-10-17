@@ -2,9 +2,10 @@ package ai.libs.mlplan.core;
 
 import java.io.File;
 
-import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
@@ -12,7 +13,7 @@ import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.gra
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 
 /**
  * The IMLPlanBuilder provides the general interface of an ML-Plan builder independent
@@ -22,9 +23,9 @@ import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
  * @author mwever
  *
  */
-public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>> {
+public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>, B extends IMLPlanBuilder<I, D, L, B>> {
 
-	public IDatasetSplitter<I, D> getSearchSelectionDatasetSplitter();
+	public IFoldSizeConfigurableRandomDatasetSplitter<D> getSearchSelectionDatasetSplitter();
 
 	public PipelineEvaluator getClassifierEvaluationInSearchPhase(D dataShownToSearch, int randomSeed, int size) throws ClassifierEvaluatorConstructionFailedException;
 
@@ -36,7 +37,7 @@ public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDa
 
 	public File getSearchSpaceConfigFile();
 
-	public IClassifierFactory<I, D> getClassifierFactory();
+	public ILearnerFactory<L> getLearnerFactory();
 
 	public HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getHASCOFactory();
 
@@ -48,4 +49,5 @@ public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDa
 
 	public boolean getUseCache();
 
+	public B getSelf();
 }

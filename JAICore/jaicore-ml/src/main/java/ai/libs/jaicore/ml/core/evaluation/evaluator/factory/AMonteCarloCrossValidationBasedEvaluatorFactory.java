@@ -13,7 +13,7 @@ import weka.core.Instances;
  * @author mwever
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IClassifierEvaluatorFactory<D> {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements ISupervisedLearnerEvaluatorFactory<D> {
 
 	private IDatasetSplitter<I, D> datasetSplitter;
 	private ISplitBasedClassifierEvaluator<Double, I, D> splitBasedEvaluator;

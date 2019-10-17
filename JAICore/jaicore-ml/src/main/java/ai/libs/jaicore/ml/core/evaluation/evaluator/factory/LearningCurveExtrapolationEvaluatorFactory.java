@@ -11,7 +11,7 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 
-public class LearningCurveExtrapolationEvaluatorFactory implements IClassifierEvaluatorFactory {
+public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory {
 
 	private int[] anchorpoints;
 	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledInstance, ILabeledDataset<ILabeledInstance>>> subsamplingAlgorithmFactory;

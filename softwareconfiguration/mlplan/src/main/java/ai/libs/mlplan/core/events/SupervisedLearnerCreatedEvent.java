@@ -1,15 +1,15 @@
 package ai.libs.mlplan.core.events;
 
-import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.events.IEvent;
 
-public class ClassifierCreatedEvent implements IEvent {
+public class SupervisedLearnerCreatedEvent implements IEvent {
 	private final ComponentInstance instance;
-	private final IClassifier<?, ?> classifier;
+	private final ISupervisedLearner<?, ?> classifier;
 
-	public ClassifierCreatedEvent(final ComponentInstance instance, final IClassifier<?, ?> classifier) {
+	public SupervisedLearnerCreatedEvent(final ComponentInstance instance, final ISupervisedLearner<?, ?> classifier) {
 		super();
 		this.instance = instance;
 		this.classifier = classifier;
@@ -19,7 +19,7 @@ public class ClassifierCreatedEvent implements IEvent {
 		return this.instance;
 	}
 
-	public IClassifier<?, ?> getClassifier() {
+	public ISupervisedLearner<?, ?> getClassifier() {
 		return this.classifier;
 	}
 }

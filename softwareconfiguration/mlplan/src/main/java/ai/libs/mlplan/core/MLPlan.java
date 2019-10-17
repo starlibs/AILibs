@@ -1,12 +1,13 @@
 package ai.libs.mlplan.core;
 
 import java.io.IOException;
+import java.util.Random;
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
-import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmFinishedEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
@@ -37,35 +38,35 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
+import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends AAlgorithm<D, IClassifier<I, D>> implements ILoggingCustomizable {
+public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>> extends AAlgorithm<D, L> implements ILoggingCustomizable {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlan.class);
 	private String loggerName;
 
-	private IClassifier<I, D> selectedClassifier;
+	private L selectedClassifier;
 	private double internalValidationErrorOfSelectedClassifier;
 	private ComponentInstance componentInstanceOfSelectedClassifier;
 
-	private final IMLPlanBuilder<I, D> builder;
+	private final IMLPlanBuilder<I, D, L, ?> builder;
 	private final D data;
 	private TwoPhaseHASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> twoPhaseHASCOFactory;
-	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, IClassifier<I, D>, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
+	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
 	private boolean buildSelectedClasifierOnGivenData = true;
 
-	public MLPlan(final IMLPlanBuilder<I, D> builder, final D data) {
+	public MLPlan(final IMLPlanBuilder<I, D, L, ?> builder, final D data) {
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 		/* sanity checks */
 		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
 			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");
 		}
-		if (builder.getClassifierFactory() == null) {
+		if (builder.getLearnerFactory() == null) {
 			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
 		}
 		/* store builder and data for main algorithm */
@@ -91,7 +92,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> ex
 			D dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
 				try {
-					dataShownToSearch = this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), this.getConfig().randomSeed(), dataPortionUsedForSelection).getAttributeValue(1);
+					dataShownToSearch = this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), new Random(this.getConfig().randomSeed()), dataPortionUsedForSelection).get(1); // attention; this is a bit tricky (data portion for selection is in 0)
 				} catch (SplitFailedException e) {
 					throw new AlgorithmException("Error in ML-Plan execution.", e);
 				}
@@ -150,7 +151,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> ex
 
 			/* create 2-phase HASCO */
 			this.logger.info("Creating the twoPhaseHASCOFactory.");
-			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, IClassifier<I, D>, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.builder.getClassifierFactory(), problem);
+			OptimizingFactoryProblem<TwoPhaseSoftwareConfigurationProblem, L, Double> optimizingFactoryProblem = new OptimizingFactoryProblem<>(this.builder.getLearnerFactory(), problem);
 			HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> hascoFactory = this.builder.getHASCOFactory();
 			this.twoPhaseHASCOFactory = new TwoPhaseHASCOFactory<>(hascoFactory);
 
@@ -176,7 +177,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> ex
 
 						if (dataPortionUsedForSelection == 0.0 && solution.getScore() < MLPlan.this.internalValidationErrorOfSelectedClassifier) {
 							try {
-								MLPlan.this.selectedClassifier = MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance());
+								MLPlan.this.selectedClassifier = MLPlan.this.builder.getLearnerFactory().getComponentInstantiation(solution.getComponentInstance());
 								MLPlan.this.internalValidationErrorOfSelectedClassifier = solution.getScore();
 								MLPlan.this.componentInstanceOfSelectedClassifier = solution.getComponentInstance();
 							} catch (ComponentInstantiationFailedException e) {
@@ -186,7 +187,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> ex
 
 						try {
 							MLPlan.this.post(
-									new ClassifierFoundEvent(MLPlan.this.getId(), solution.getComponentInstance(), MLPlan.this.builder.getClassifierFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
+									new ClassifierFoundEvent(MLPlan.this.getId(), solution.getComponentInstance(), MLPlan.this.builder.getLearnerFactory().getComponentInstantiation(solution.getComponentInstance()), solution.getScore()));
 						} catch (ComponentInstantiationFailedException e) {
 							MLPlan.this.logger.error("An issue occurred while preparing the description for the post of a ClassifierFoundEvent", e);
 						}
@@ -236,7 +237,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> ex
 	}
 
 	@Override
-	public IClassifier<I, D> call() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
+	public L call() throws AlgorithmException, InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException {
 		while (this.hasNext()) {
 			this.nextWithException();
 		}
@@ -277,7 +278,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> ex
 		this.getConfig().setProperty(MLPlanClassifierConfig.K_RANDOM_SEED, String.valueOf(seed));
 	}
 
-	public IClassifier<I, D> getSelectedClassifier() {
+	public L getSelectedClassifier() {
 		return this.selectedClassifier;
 	}
 
@@ -304,12 +305,12 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>> ex
 		this.logger.info("Completed cancellation of ML-Plan. Cancel status is {}", this.isCanceled());
 	}
 
-	public OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, IClassifier<I, D>, HASCOSolutionCandidate<Double>, Double> getOptimizingFactory() {
+	public OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> getOptimizingFactory() {
 		return this.optimizingFactory;
 	}
 
 	@Subscribe
-	public void receiveClassifierCreatedEvent(final ClassifierCreatedEvent e) {
+	public void receiveClassifierCreatedEvent(final SupervisedLearnerCreatedEvent e) {
 		this.post(e);
 	}
 

@@ -15,7 +15,7 @@ import ai.libs.hasco.model.CategoricalParameterDomain;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.Parameter;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import weka.classifiers.Classifier;
 
 /**
@@ -24,7 +24,7 @@ import weka.classifiers.Classifier;
  *
  * @author wever
  */
-public class SKLearnClassifierFactory implements IClassifierFactory, ILoggingCustomizable {
+public class SKLearnClassifierFactory implements ILearnerFactory, ILoggingCustomizable {
 
 	private static final CategoricalParameterDomain BOOL_DOMAIN = new CategoricalParameterDomain(Arrays.asList("True", "False"));
 

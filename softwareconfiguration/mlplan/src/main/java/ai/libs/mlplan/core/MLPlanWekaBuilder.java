@@ -3,6 +3,8 @@ package ai.libs.mlplan.core;
 import java.io.File;
 import java.io.IOException;
 
+import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
+
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.ResourceUtil;
@@ -15,10 +17,9 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISa
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 
 public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
@@ -35,7 +36,7 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
 
 	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new MulticlassClassStratifiedSplitter();
-	private static final IClassifierFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
+	private static final ILearnerFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_PREFERRED_COMPONENTS, FS_PREFERRED_COMPONENTS);
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_WEKA_COMPLETE, FS_SSC_WEKA);
 	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE)

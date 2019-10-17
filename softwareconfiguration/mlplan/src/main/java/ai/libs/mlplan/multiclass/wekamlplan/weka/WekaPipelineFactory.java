@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
@@ -21,7 +21,7 @@ import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.OptionHandler;
 
-public class WekaPipelineFactory implements IClassifierFactory {
+public class WekaPipelineFactory implements ILearnerFactory {
 
 	private Logger logger = LoggerFactory.getLogger(WekaPipelineFactory.class);
 

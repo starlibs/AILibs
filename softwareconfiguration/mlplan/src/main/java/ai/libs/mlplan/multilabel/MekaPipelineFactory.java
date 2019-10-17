@@ -11,7 +11,7 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.model.NumericParameterDomain;
 import ai.libs.jaicore.basic.sets.SetUtil;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import meka.classifiers.multilabel.MultiLabelClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;
@@ -24,7 +24,7 @@ import weka.core.OptionHandler;
 * components that correspond to MEKA algorithms to a MultiLabelClassifier.
 *
 */
-public class MekaPipelineFactory implements IClassifierFactory {
+public class MekaPipelineFactory implements ILearnerFactory {
 
 	private static final String PARAMETER_NAME_WITH_DASH_WARNING = "Required interface of component {} has dash or underscore in interface id {}";
 
