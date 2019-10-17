@@ -1,8 +1,8 @@
 package ai.libs.jaicore.ml.classification.multilabel.loss;
 
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.IInstanceWiseLossFunction;
 
-public class HammingLoss implements ILossFunction<double[]> {
+public class HammingLoss implements IInstanceWiseLossFunction<double[]> {
 
 	@Override
 	public double loss(final double[] actual, final double[] expected) {

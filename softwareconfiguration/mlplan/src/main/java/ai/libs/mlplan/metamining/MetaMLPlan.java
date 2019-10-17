@@ -23,8 +23,8 @@ import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.dataset.metafeature.GlobalCharacterizer;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearchFactory;
@@ -121,7 +121,7 @@ public class MetaMLPlan extends AbstractClassifier {
 		// Preparing the split for validating pipelines
 		this.logger.info("Preparing validation split");
 		SimpleSLCSplitBasedClassifierEvaluator classifierEval = new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss());
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(classifierEval, 5, data, .7f, this.seed);
+		MonteCarloCrossValidationSplitSetGenerator mccv = new MonteCarloCrossValidationSplitSetGenerator(classifierEval, 5, data, .7f, this.seed);
 
 		// Search for solutions
 		this.logger.info("Searching for solutions");

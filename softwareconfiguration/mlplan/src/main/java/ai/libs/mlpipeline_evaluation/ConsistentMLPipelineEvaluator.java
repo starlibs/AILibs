@@ -8,8 +8,8 @@ import org.apache.commons.lang.NotImplementedException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -101,7 +101,7 @@ public class ConsistentMLPipelineEvaluator {
 		String[] techniqueAndDescription = split_technique.split("_");
 
 		if (techniqueAndDescription[0].equals("3MCCV")) {
-			return new MonteCarloCrossValidationEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), 3, data, Float.parseFloat(techniqueAndDescription[1]), seed);
+			return new MonteCarloCrossValidationSplitSetGenerator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), 3, data, Float.parseFloat(techniqueAndDescription[1]), seed);
 		}
 
 		return null;

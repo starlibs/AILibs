@@ -3,19 +3,19 @@ package ai.libs.mlplan.core.events;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.algorithm.events.ASolutionCandidateFoundEvent;
 import org.api4.java.algorithm.events.ScoredSolutionCandidateFoundEvent;
 
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
-import weka.classifiers.Classifier;
 
-public class ClassifierFoundEvent extends ASolutionCandidateFoundEvent<Classifier> implements ScoredSolutionCandidateFoundEvent<Classifier, Double> {
+public class ClassifierFoundEvent extends ASolutionCandidateFoundEvent<IClassifier<?, ?>> implements ScoredSolutionCandidateFoundEvent<IClassifier<?, ?>, Double> {
 
 	private final double inSampleError;
 	private final ComponentInstance componentDescription;
 
-	public ClassifierFoundEvent(final String algorithmId, final ComponentInstance componentDescription, final Classifier solutionCandidate, final double inSampleError) {
+	public ClassifierFoundEvent(final String algorithmId, final ComponentInstance componentDescription, final IClassifier<?, ?> solutionCandidate, final double inSampleError) {
 		super(algorithmId, solutionCandidate);
 		this.inSampleError = inSampleError;
 		this.componentDescription = componentDescription;

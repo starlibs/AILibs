@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.classification.multilabel.loss;
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.ai.ml.core.evaluation.loss.IBatchLossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
 
 import meka.core.Metrics;
 
@@ -16,7 +16,7 @@ import meka.core.Metrics;
  * @author mwever
  *
  */
-public class InstanceWiseF1 implements IBatchLossFunction<double[]> {
+public class InstanceWiseF1 implements ILossFunction<double[]> {
 
 	@Override
 	public double loss(final List<double[]> actual, final List<double[]> expected) {

@@ -1,45 +1,18 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Arrays;
 
-import weka.classifiers.Classifier;
-import weka.classifiers.evaluation.Evaluation;
-import weka.core.Instances;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
 
-public class FixedSplitClassifierEvaluator implements IClassifierEvaluator {
+import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
+import ai.libs.jaicore.ml.core.evaluation.SingleSplitEvaluationMetric;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.ConstantSplitSetGenerator;
 
-	private final static Logger logger = LoggerFactory.getLogger(FixedSplitClassifierEvaluator.class);
-	private final Instances train, validate;
+public class FixedSplitClassifierEvaluator extends ExecutionBasedClassifierEvaluator {
 
-	public FixedSplitClassifierEvaluator(final Instances train, final Instances validate) {
-		super();
-		this.train = train;
-		this.validate = validate;
-	}
-
-	@Override
-	public Double evaluate(final Classifier c) throws InterruptedException {
-		try {
-			c.buildClassifier(this.train);
-			Evaluation eval = new Evaluation(this.train);
-			eval.evaluateModel(c, this.validate);
-			return eval.errorRate();
-		} catch (InterruptedException e) {
-			throw e;
-		}
-		catch (Exception e) {
-			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
-					e.getClass().getName(), e.getMessage());
-			return null;
-		}
-	}
-
-	public Instances getTrain() {
-		return this.train;
-	}
-
-	public Instances getValidate() {
-		return this.validate;
+	public <I extends ILabeledInstance, D extends ILabeledDataset<I>> FixedSplitClassifierEvaluator(final D train, final D validate, final ILossFunction lossFunction) {
+		super (new ConstantSplitSetGenerator<>(new DatasetSplitSet<>(Arrays.asList(Arrays.asList(train, validate)))), new SingleSplitEvaluationMetric(lossFunction));
 	}
 }

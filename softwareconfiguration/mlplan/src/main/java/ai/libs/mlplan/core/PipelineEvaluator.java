@@ -1,5 +1,7 @@
 package ai.libs.mlplan.core;
 
+import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -13,12 +15,10 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.events.IEvent;
 import ai.libs.jaicore.basic.events.IEventEmitter;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.ClassifierCreatedEvent;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
-import weka.classifiers.Classifier;
 
 /**
  * Evaluator used in the search phase of mlplan.
@@ -31,7 +31,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 
 	private final EventBus eventBus = new EventBus();
 	private final IClassifierFactory classifierFactory;
-	private final IClassifierEvaluator benchmark;
+	private final IClassifierEvaluator<IClassifier<?,?>> benchmark;
 	private final int timeoutForEvaluation;
 	private Double bestScore = 1.0;
 
@@ -70,7 +70,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
 				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).updateBestScore(this.bestScore);
 			}
-			Classifier classifier = this.classifierFactory.getComponentInstantiation(c);
+			IClassifier<?, ?> classifier = this.classifierFactory.getComponentInstantiation(c);
 			this.eventBus.post(new ClassifierCreatedEvent(c, classifier)); // inform listeners about the creation of the classifier
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (classifier instanceof ScikitLearnWrapper) ? classifier.toString() : classifier.getClass().getName());

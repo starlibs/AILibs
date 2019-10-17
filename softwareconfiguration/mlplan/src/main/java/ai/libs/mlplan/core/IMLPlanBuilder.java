@@ -2,15 +2,17 @@ package ai.libs.mlplan.core;
 
 import java.io.File;
 
+import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+
 import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
-import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
-import weka.core.Instances;
 
 /**
  * The IMLPlanBuilder provides the general interface of an ML-Plan builder independent
@@ -20,13 +22,13 @@ import weka.core.Instances;
  * @author mwever
  *
  */
-public interface IMLPlanBuilder {
+public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>> {
 
-	public IDatasetSplitter getSearchSelectionDatasetSplitter();
+	public IDatasetSplitter<I, D> getSearchSelectionDatasetSplitter();
 
-	public PipelineEvaluator getClassifierEvaluationInSearchPhase(Instances dataShownToSearch, int randomSeed, int size) throws ClassifierEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(D dataShownToSearch, int randomSeed, int size) throws ClassifierEvaluatorConstructionFailedException;
 
-	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(Instances dataShownToSearch, int randomSeed) throws ClassifierEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(D dataShownToSearch, int randomSeed) throws ClassifierEvaluatorConstructionFailedException;
 
 	public String getPerformanceMeasureName();
 
@@ -34,13 +36,13 @@ public interface IMLPlanBuilder {
 
 	public File getSearchSpaceConfigFile();
 
-	public IClassifierFactory getClassifierFactory();
+	public IClassifierFactory<I, D> getClassifierFactory();
 
 	public HASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String, Double> getHASCOFactory();
 
 	public MLPlanClassifierConfig getAlgorithmConfig();
 
-	public void prepareNodeEvaluatorInFactoryWithData(Instances data);
+	public void prepareNodeEvaluatorInFactoryWithData(D data);
 
 	public PerformanceDBAdapter getDBAdapter();
 

@@ -3,11 +3,11 @@ package ai.libs.jaicore.ml.classification.multilabel.loss;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.IInstanceWiseLossFunction;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-public class JaccardScore implements ILossFunction<double[]> {
+public class JaccardScore implements IInstanceWiseLossFunction<double[]> {
 
 	@Override
 	public double loss(final double[] expected, final double[] actual) {

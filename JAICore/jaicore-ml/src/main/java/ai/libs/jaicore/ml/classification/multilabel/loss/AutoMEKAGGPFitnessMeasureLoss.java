@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.classification.multilabel.loss;
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.ai.ml.core.evaluation.loss.IBatchLossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
 
 import meka.core.Metrics;
 
@@ -11,13 +11,13 @@ import meka.core.Metrics;
  * Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
  * implemented in inverse.
  *
- * de Sá, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
+ * de Sï¿½, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
  * classification algorithms." Proceedings of the Genetic and Evolutionary Computation Conference Companion. ACM, 2017.
  *
  * @author helegraf, mwever
  *
  */
-public class AutoMEKAGGPFitnessMeasureLoss implements IBatchLossFunction<double[]> {
+public class AutoMEKAGGPFitnessMeasureLoss implements ILossFunction<double[]> {
 
 	@Override
 	public double loss(final List<double[]> actual, final List<double[]> expected) {

@@ -2,9 +2,9 @@ package ai.libs.jaicore.ml.classification.multilabel.loss;
 
 import java.util.Arrays;
 
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.IInstanceWiseLossFunction;
 
-public class ExactMatchLoss implements ILossFunction<double[]> {
+public class ExactMatchLoss implements IInstanceWiseLossFunction<double[]> {
 
 	@Override
 	public double loss(final double[] actual, final double[] expected) {

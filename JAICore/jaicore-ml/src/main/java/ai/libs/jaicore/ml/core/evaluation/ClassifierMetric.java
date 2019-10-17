@@ -1,0 +1,30 @@
+package ai.libs.jaicore.ml.core.evaluation;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+import org.api4.java.ai.ml.classification.execution.IClassifierMetric;
+import org.api4.java.ai.ml.classification.execution.IClassifierRunReport;
+import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.common.aggregate.IAggregateFunction;
+
+import ai.libs.jaicore.basic.aggregate.reals.Mean;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.ErrorRate;
+
+public enum ClassifierMetric implements IClassifierMetric {
+
+	MEAN_ERRORRATE(new ErrorRate(), new Mean());
+
+	private final ILossFunction lossFunction;
+	private final IAggregateFunction<Double> aggregation;
+
+	private ClassifierMetric(final ILossFunction lossFunction, final IAggregateFunction<Double> aggregation) {
+		this.lossFunction = lossFunction;
+		this.aggregation = aggregation;
+	}
+
+	@Override
+	public double evaluateToDouble(final Collection<? extends IClassifierRunReport> reports) {
+		return this.aggregation.aggregate(reports.stream().map(r -> this.lossFunction.loss(r.getPredictionDiffList())).collect(Collectors.toList()));
+	}
+}

@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.core.evaluation.loss.IBatchLossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
 
 import ai.libs.jaicore.basic.StatisticsUtil;
 
-public class MeanSquaredError implements IBatchLossFunction<Double> {
+public class MeanSquaredError implements ILossFunction<Double> {
 
 	private static final SquaredError SQUARED_ERROR_LOSS = new SquaredError();
 

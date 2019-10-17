@@ -1,14 +1,15 @@
 package ai.libs.mlplan.core.events;
 
+import org.api4.java.ai.ml.classification.IClassifier;
+
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.basic.events.IEvent;
-import weka.classifiers.Classifier;
 
 public class ClassifierCreatedEvent implements IEvent {
 	private final ComponentInstance instance;
-	private final Classifier classifier;
+	private final IClassifier<?, ?> classifier;
 
-	public ClassifierCreatedEvent(final ComponentInstance instance, final Classifier classifier) {
+	public ClassifierCreatedEvent(final ComponentInstance instance, final IClassifier<?, ?> classifier) {
 		super();
 		this.instance = instance;
 		this.classifier = classifier;
@@ -18,7 +19,7 @@ public class ClassifierCreatedEvent implements IEvent {
 		return this.instance;
 	}
 
-	public Classifier getClassifier() {
+	public IClassifier<?, ?> getClassifier() {
 		return this.classifier;
 	}
 }

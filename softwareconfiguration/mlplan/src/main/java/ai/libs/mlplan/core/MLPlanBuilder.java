@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.ml.classification.IClassifierEvaluator;
+import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
 import org.api4.java.algorithm.TimeOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,6 @@ import ai.libs.jaicore.ml.classification.multilabel.loss.EMultilabelPerformanceM
 import ai.libs.jaicore.ml.classification.singlelabel.loss.EMultiClassPerformanceMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.MultiClassMeasureBuilder;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.IClassifierEvaluatorFactory;
@@ -46,7 +47,6 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
-import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;

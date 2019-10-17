@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
+import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.ILearningCurve;
@@ -19,7 +21,6 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolator;
-import weka.classifiers.Classifier;
 
 /**
  * Evaluates a classifier by predicting its learning curve with a few
@@ -31,7 +32,7 @@ import weka.classifiers.Classifier;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
+public class LearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IClassifierEvaluator<IClassifier<I,D>>, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
@@ -80,7 +81,7 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D e
 	 * Computes the (estimated) measure of the classifier on the full dataset
 	 */
 	@Override
-	public Double f(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final IClassifier<I, D> classifier) throws InterruptedException, ObjectEvaluationFailedException {
 
 		// Create the learning curve extrapolator with the given configuration.
 		this.logger.info("Receive request to evaluate classifier {}", classifier);

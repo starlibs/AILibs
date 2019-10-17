@@ -1,8 +1,9 @@
 package ai.libs.mlplan.multiclass.wekamlplan;
 
-import ai.libs.hasco.optimizingfactory.BaseFactory;
-import weka.classifiers.Classifier;
+import org.api4.java.ai.ml.classification.IClassifier;
 
-public interface IClassifierFactory extends BaseFactory<Classifier> {
+import ai.libs.hasco.optimizingfactory.BaseFactory;
+
+public interface IClassifierFactory<I, D> extends BaseFactory<IClassifier<I, D>> {
 
 }

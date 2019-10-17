@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.IInstanceWiseLossFunction;
 
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
@@ -12,7 +12,7 @@ import com.google.common.collect.Range;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-public class RankLoss implements ILossFunction<double[]> {
+public class RankLoss implements IInstanceWiseLossFunction<double[]> {
 
 	@Override
 	public double loss(final double[] actual, final double[] expected) {
