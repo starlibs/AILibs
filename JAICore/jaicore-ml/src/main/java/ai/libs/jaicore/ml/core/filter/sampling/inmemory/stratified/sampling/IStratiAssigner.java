@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.common.parallelization.IParallelizable;
 
 /**
@@ -9,7 +9,7 @@ import org.api4.java.common.parallelization.IParallelizable;
  *
  * @author Lukas Brandt
  */
-public interface IStratiAssigner<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends IParallelizable {
+public interface IStratiAssigner<I extends IInstance, D extends IDataset<I>> extends IParallelizable {
 
 	/**
 	 * Initialize custom assigner if necessary.

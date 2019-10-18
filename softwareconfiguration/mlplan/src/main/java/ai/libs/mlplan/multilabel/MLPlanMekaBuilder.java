@@ -1,4 +1,4 @@
-package ai.libs.mlplan.core;
+package ai.libs.mlplan.multilabel;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +12,8 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleMLCSpl
 import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
 import ai.libs.jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
+import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
-import ai.libs.mlplan.multilabel.MekaPipelineFactory;
 
 public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 

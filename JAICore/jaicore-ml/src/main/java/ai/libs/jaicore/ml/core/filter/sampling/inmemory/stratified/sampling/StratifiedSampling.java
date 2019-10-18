@@ -21,7 +21,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.WaitForSamplingStepEvent
  *
  * @author Lukas Brandt
  */
-public class StratifiedSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<I, D> {
+public class StratifiedSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Logger logger = LoggerFactory.getLogger(StratifiedSampling.class);
 	private IStratiAmountSelector<I, D> stratiAmountSelector;

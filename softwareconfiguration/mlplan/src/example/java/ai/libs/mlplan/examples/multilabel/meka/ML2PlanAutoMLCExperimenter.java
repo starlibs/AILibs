@@ -49,9 +49,9 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogr
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanMekaBuilder;
 import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import meka.classifiers.multilabel.Evaluation;

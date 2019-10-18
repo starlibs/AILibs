@@ -33,13 +33,13 @@ import ai.libs.hasco.variants.forwarddecomposition.twophase.TwoPhaseSoftwareConf
 import ai.libs.jaicore.basic.MathExt;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.events.MCCVSplitEvaluationEvent;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchInput;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.core.events.ClassifierFoundEvent;
+import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
 public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>> extends AAlgorithm<D, L> implements ILoggingCustomizable {
@@ -120,12 +120,12 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 
 			/* setup the pipeline evaluators */
 			this.logger.debug("Setting up the pipeline evaluators.");
-			PipelineEvaluator classifierEvaluatorForSearch;
-			PipelineEvaluator classifierEvaluatorForSelection;
+			PipelineEvaluator<I, D> classifierEvaluatorForSearch;
+			PipelineEvaluator<I, D> classifierEvaluatorForSelection;
 			try {
 				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
 				classifierEvaluatorForSelection = this.builder.getClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
-			} catch (ClassifierEvaluatorConstructionFailedException e2) {
+			} catch (LearnerEvaluatorConstructionFailedException e2) {
 				throw new AlgorithmException("Could not create the pipeline evaluator", e2);
 			}
 			classifierEvaluatorForSearch.registerListener(this); // events will be forwarded
@@ -135,7 +135,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 			if (this.logger.isInfoEnabled()) {
 				this.logger.info(
 						"Starting ML-Plan with the following setup:\n\tDataset: {}\n\tTarget: {}\n\tCPUs: {}\n\tTimeout: {}s\n\tTimeout for single candidate evaluation: {}s\n\tTimeout for node evaluation: {}s\n\tRandom Completions per node evaluation: {}\n\tPortion of data for selection phase: {}%\n\tPipeline evaluation during search: {}\n\tPipeline evaluation during selection: {}\n\tBlow-ups are {} for selection phase and {} for post-processing phase.",
-						this.getInput().hashCode(), this.builder.getPerformanceMeasureName(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
+						this.getInput().hashCode(), this.builder.getPerformanceMeasure(), this.getConfig().cpus(), this.getTimeout().seconds(), this.getConfig().timeoutForCandidateEvaluation() / 1000,
 						this.getConfig().timeoutForNodeEvaluation() / 1000, this.getConfig().numberOfRandomCompletions(), MathExt.round(this.getConfig().dataPortionForSelection() * 100, 2), classifierEvaluatorForSearch.getBenchmark(),
 						classifierEvaluatorForSelection.getBenchmark(), this.getConfig().expectedBlowupInSelection(), this.getConfig().expectedBlowupInPostprocessing());
 			}

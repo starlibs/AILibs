@@ -32,8 +32,8 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanWekaBuilder;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
 import weka.classifiers.Classifier;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Attribute;

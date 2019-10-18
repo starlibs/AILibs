@@ -86,7 +86,7 @@
 % CLASSINDEX: last
 %
 
-@relation car
+@relation 'car'
 
 @attribute buying {vhigh,high,med,low}
 @attribute maint {vhigh,high,med,low}

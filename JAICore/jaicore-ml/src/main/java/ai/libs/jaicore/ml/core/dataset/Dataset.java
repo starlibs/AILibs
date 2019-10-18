@@ -52,6 +52,11 @@ public class Dataset implements ILabeledDataset<ILabeledInstance> {
 		public ILabeledInstanceSchema getInstanceSchema() {
 			return null;
 		}
+
+		@Override
+		public Object[] getAttributes() {
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	class InstanceIterator implements Iterator<ILabeledInstance>, ListIterator<ILabeledInstance> {
@@ -117,8 +122,8 @@ public class Dataset implements ILabeledDataset<ILabeledInstance> {
 
 	private static final int DEFAULT_CAPACITY = 1;
 
-	private ArrayList<double[]> xMatrix;
-	private ArrayList<Object> yMatrix;
+	private List<double[]> xMatrix = new ArrayList<>();
+	private List<Object> yMatrix = new ArrayList<>();
 
 	private final ILabeledInstanceSchema instanceSchema;
 
@@ -182,128 +187,139 @@ public class Dataset implements ILabeledDataset<ILabeledInstance> {
 
 	@Override
 	public ILabeledInstanceSchema getInstanceSchema() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.instanceSchema;
 	}
 
 	@Override
 	public IDataset<ILabeledInstance> createEmptyCopy() throws DatasetCreationException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+		return new Dataset(this.instanceSchema);
 	}
 
 	@Override
 	public ILabeledInstance get(final int pos) {
-		// TODO Auto-generated method stub
-		return null;
+		return new ILabeledInstance() {
+
+			@Override
+			public ILabeledInstanceSchema getInstanceSchema() {
+				return Dataset.this.instanceSchema;
+			}
+
+			@Override
+			public double getPointValue(final int pos2) {
+				return Dataset.this.xMatrix.get(pos)[pos2];
+			}
+
+			@Override
+			public double[] getPoint() {
+				return Dataset.this.xMatrix.get(pos);
+			}
+
+			@Override
+			public Object[] getAttributes() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public Object getAttributeValue(final int pos) {
+				return null;
+			}
+
+			@Override
+			public Object getLabel() {
+				return Dataset.this.yMatrix.get(pos);
+			}
+		};
 	}
 
 	@Override
 	public Object[][] getFeatureMatrix() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return this.xMatrix.isEmpty();
 	}
 
 	@Override
 	public boolean contains(final Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public <T> T[] toArray(final T[] a) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public boolean remove(final Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public boolean containsAll(final Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public boolean addAll(final int index, final Collection<? extends ILabeledInstance> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public boolean removeAll(final Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public boolean retainAll(final Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public ILabeledInstance set(final int index, final ILabeledInstance element) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public ILabeledInstance remove(final int index) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public int indexOf(final Object o) {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public int lastIndexOf(final Object o) {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public ListIterator<ILabeledInstance> listIterator() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public ListIterator<ILabeledInstance> listIterator(final int index) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public List<ILabeledInstance> subList(final int fromIndex, final int toIndex) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 	@Override
 	public Object[] getLabelVector() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new UnsupportedOperationException("not implemented!");
 	}
 
 }

@@ -2,12 +2,9 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.filter.unsupervised.sampling.ISamplingAlgorithm;
 import org.api4.java.algorithm.events.AlgorithmEvent;
@@ -29,15 +26,96 @@ import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
  * @author Felix Weiland
  * @author jnowack
  */
-public abstract class ASamplingAlgorithm<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<I, D> {
+public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorithm<D, D> implements ISamplingAlgorithm<D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
 	protected Integer sampleSize = null;
 	protected D sample = null;
 
+	private class Caps<I extends IInstance> {
+		private IDataset<I> cloneOfOriginal; // this is also a D (so casts are admissible)
+		private IDataset<I> dataForSample; // this is also a D (so casts are admissible)
+
+		public Caps(final IDataset<I> clone) {
+			super();
+			this.cloneOfOriginal = clone;
+		}
+
+		private void computeSample() throws AlgorithmException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
+			Instant timeoutTime = null;
+			if (ASamplingAlgorithm.this.getTimeout().milliseconds() <= 0) {
+				LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
+				timeoutTime = Instant.MAX;
+			} else {
+				timeoutTime = Instant.now().plus(ASamplingAlgorithm.this.getTimeout().milliseconds(), ChronoUnit.MILLIS);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("Set timeout to {}", timeoutTime);
+				}
+			}
+			// Check missing or invalid configuration.
+			if (ASamplingAlgorithm.this.sampleSize == null) {
+				throw new AlgorithmException("No valid sample size specified");
+			}
+			if (ASamplingAlgorithm.this.sampleSize == 0) {
+				LOG.warn("Sample size is 0, so an empty data set is returned!");
+				try {
+					this.dataForSample = (IDataset<I>)ASamplingAlgorithm.this.getInput().createEmptyCopy();
+					return;
+				} catch (DatasetCreationException e) {
+					throw new AlgorithmException("Could not create a copy of the dataset.", e);
+				}
+			}
+			D dataset = ASamplingAlgorithm.this.getInput();
+			if (dataset == null || dataset.isEmpty()) {
+				throw new AlgorithmException("No dataset or an empty dataset was given as an input.");
+			}
+			if (dataset.size() < ASamplingAlgorithm.this.sampleSize) {
+				throw new AlgorithmException("Specified sample size is bigger than the dataset.");
+			} else if (dataset.size() == ASamplingAlgorithm.this.sampleSize) {
+				LOG.warn("Sample size and data set size are equal. Returning the original data set");
+				// The dataset size is exactly the specified sample size, so just return the
+				// whole dataset.
+				this.dataForSample = (IDataset<I>)dataset;
+				return;
+			} else {
+				// Working configuration, so create the actual sample.
+				ASamplingAlgorithm.this.setState(EAlgorithmState.CREATED);
+				while (ASamplingAlgorithm.this.hasNext()) {
+					try {
+						ASamplingAlgorithm.this.checkAndConductTermination();
+					} catch (AlgorithmTimeoutedException e) {
+						throw new AlgorithmException(e.getMessage());
+					}
+					if (Instant.now().isAfter(timeoutTime)) {
+						LOG.warn("Algorithm is running even though it has been timeouted. Cancelling..");
+						ASamplingAlgorithm.this.cancel();
+						throw new AlgorithmException("Algorithm is running even though it has been timeouted");
+					} else {
+						ASamplingAlgorithm.this.nextWithException();
+					}
+				}
+				this.dataForSample = (IDataset<I>)ASamplingAlgorithm.this.sample;
+			}
+		}
+
+		public IDataset<I> getComplement() throws DatasetCreationException, InterruptedException {
+			return new SampleComplementComputer().getComplement(this.cloneOfOriginal, this.dataForSample);
+		}
+	}
+
+	private final Caps<?> caps;
+
 	protected ASamplingAlgorithm(final D input) {
+		this(input, (Class<? extends IInstance>)input.get(0).getClass());
+	}
+
+
+
+	protected <I extends IInstance> ASamplingAlgorithm(final D input, final Class<I> instanceClass) {
 		super(input);
+		IDataset<I> dsCopy = (IDataset<I>)input;
+		this.caps = new Caps<>(dsCopy);
 	}
 
 	public void setSampleSize(final int size) {
@@ -47,59 +125,8 @@ public abstract class ASamplingAlgorithm<I extends ILabeledInstance, D extends I
 	@SuppressWarnings("unchecked")
 	@Override
 	public D call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
-		Instant timeoutTime = null;
-		if (this.getTimeout().milliseconds() <= 0) {
-			LOG.debug("Invalid or no timeout set. There will be no timeout in this algorithm run");
-			timeoutTime = Instant.MAX;
-		} else {
-			timeoutTime = Instant.now().plus(this.getTimeout().milliseconds(), ChronoUnit.MILLIS);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Set timeout to {}", timeoutTime);
-			}
-		}
-		// Check missing or invalid configuration.
-		if (this.sampleSize == null) {
-			throw new AlgorithmException("No valid sample size specified");
-		}
-		if (this.sampleSize == 0) {
-			LOG.warn("Sample size is 0, so an empty data set is returned!");
-			try {
-				return (D) this.getInput().createEmptyCopy();
-			} catch (DatasetCreationException e) {
-				throw new AlgorithmException("Could not create a copy of the dataset.", e);
-			}
-		}
-		D dataset = this.getInput();
-		if (dataset == null || dataset.isEmpty()) {
-			throw new AlgorithmException("No dataset or an empty dataset was given as an input.");
-		}
-		if (dataset.size() < this.sampleSize) {
-			throw new AlgorithmException("Specified sample size is bigger than the dataset.");
-		} else if (dataset.size() == this.sampleSize) {
-			LOG.warn("Sample size and data set size are equal. Returning the original data set");
-			// The dataset size is exactly the specified sample size, so just return the
-			// whole dataset.
-			return dataset;
-		} else {
-			// Working configuration, so create the actual sample.
-			this.setState(EAlgorithmState.CREATED);
-			while (this.hasNext()) {
-				try {
-					this.checkAndConductTermination();
-				} catch (AlgorithmTimeoutedException e) {
-					throw new AlgorithmException(e.getMessage());
-				}
-				if (Instant.now().isAfter(timeoutTime)) {
-					LOG.warn("Algorithm is running even though it has been timeouted. Cancelling..");
-					this.cancel();
-					throw new AlgorithmException("Algorithm is running even though it has been timeouted");
-				} else {
-					this.nextWithException();
-				}
-			}
-			return this.sample;
-		}
-
+		this.caps.computeSample();
+		return (D)this.caps.dataForSample;
 	}
 
 	protected AlgorithmEvent doInactiveStep() throws AlgorithmException {
@@ -116,49 +143,7 @@ public abstract class ASamplingAlgorithm<I extends ILabeledInstance, D extends I
 	 * @throws DatasetCreationException
 	 * @throws InterruptedException
 	 */
-	@SuppressWarnings("unchecked")
 	public D getComplement() throws DatasetCreationException, InterruptedException {
-
-		if (this.sample == null) {
-			throw new IllegalStateException("Sample computation has not started yet.");
-		}
-		D input = this.getInput();
-
-		/* compute frequencies (necessary, because items could occur several times) */
-		Map<Object, Integer> frequenciesInInput = new HashMap<>();
-		Map<Object, Integer> frequenciesInSubSample = new HashMap<>();
-		Map<Object, Integer> frequenciesInComplement = new HashMap<>();
-		for (Object instance : input) {
-			frequenciesInInput.put(instance, frequenciesInInput.computeIfAbsent(instance, k -> 0) + 1);
-			frequenciesInComplement.put(instance, 0);
-			frequenciesInSubSample.put(instance, 0);
-		}
-		for (Object instance : this.sample) {
-			frequenciesInSubSample.put(instance, frequenciesInSubSample.computeIfAbsent(instance, k -> 0) + 1); // inserts 0 if, for some reason, the value has not been defined before
-		}
-
-		/* now compute complement */
-		D complement = (D) input.createEmptyCopy();
-		for (I instance : input) {
-			int frequencyInComplement = frequenciesInComplement.get(instance);
-			if (frequenciesInSubSample.get(instance) + frequencyInComplement < frequenciesInInput.get(instance)) {
-				complement.add(instance);
-				frequenciesInComplement.put(instance, frequencyInComplement + 1);
-			}
-		}
-
-		/* check plausibility (sizes should sum up) */
-		if (this.sample.size() + complement.size() != input.size()) {
-			throw new IllegalStateException("The input set of size " + input.size() + " has been reduced to " + this.sample.size() + " + " + complement.size() + ". This is not plausible.");
-		} else {
-			for (Entry<Object, Integer> instanceWithFrequency : frequenciesInInput.entrySet()) {
-				Object inst = instanceWithFrequency.getKey();
-				int frequencyNow = frequenciesInSubSample.get(inst) + frequenciesInComplement.get(inst);
-				if (instanceWithFrequency.getValue() != frequencyNow) {
-					throw new IllegalStateException("Frequency of instance " + inst + " was " + instanceWithFrequency.getValue() + " but is now " + frequencyNow);
-				}
-			}
-		}
-		return complement;
+		return (D)this.caps.getComplement();
 	}
 }

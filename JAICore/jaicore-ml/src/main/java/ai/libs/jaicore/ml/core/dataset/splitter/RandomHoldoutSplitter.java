@@ -10,14 +10,13 @@ import java.util.stream.IntStream;
 import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.classification.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
 import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
 
-public class RandomHoldoutSplitter<I extends IInstance, D extends IDataset<I>> implements IRandomDatasetSplitter<I, D>, IDatasetSplitSetGenerator<D> {
+public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomDatasetSplitter<D>, IDatasetSplitSetGenerator<D> {
 
 	private final Random rand;
 	private final double[] portions;

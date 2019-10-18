@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
@@ -13,10 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import weka.classifiers.Classifier;
-import weka.classifiers.functions.Logistic;
-import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 
 public abstract class PilotEstimateSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends CaseControlLikeSampling<I, D> {
@@ -79,7 +76,12 @@ public abstract class PilotEstimateSampling<I extends ILabeledInstance, D extend
 		try {
 			this.sample = (D) this.getInput().createEmptyCopy();
 			if (this.probabilityBoundaries == null || this.chosenInstance == null) {
-				Classifier pilotEstimator = new Logistic();
+				ISingleLabelClassifier pilotEstimator = null;
+
+				if (pilotEstimator == null) {
+					/* this is currently all WEKA based stuff */
+					throw new UnsupportedOperationException();
+				}
 				// set preSampleSize to |Dataset|/2 as default value, if preSampleSize would be
 				// smaller than 1
 				if (this.preSampleSize < 1) {
@@ -119,33 +121,32 @@ public abstract class PilotEstimateSampling<I extends ILabeledInstance, D extend
 					} while (pilotEstimateSample.contains(choosenInstance));
 					pilotEstimateSample.add(choosenInstance);
 				}
-				D pilotEstimateInstances = ((WekaInstances) pilotEstimateSample).getList();
 
 				NumericToNominal numericToNominal = new NumericToNominal();
-				String[] options = new String[2];
-				options[0] = "-R";
-				options[1] = "last";
-				numericToNominal.setOptions(options);
-				numericToNominal.setInputFormat(pilotEstimateInstances);
+				//				String[] options = new String[2];
+				//				options[0] = "-R";
+				//				options[1] = "last";
+				//				numericToNominal.setOptions(options);
+				//				numericToNominal.setInputFormat(pilotEstimateSample);
 
-				pilotEstimateInstances = Filter.useFilter(pilotEstimateInstances, numericToNominal);
+				//				pilotEstimateSample = Filter.useFilter(pilotEstimateSample, numericToNominal);
 
 				ArrayList<Pair<Double, Double>> classMapping = new ArrayList<>();
-				boolean classNotInMapping;
-				for (I in : pilotEstimateInstances) {
-					classNotInMapping = true;
-					for (Pair<Double, Double> classPair : classMapping) {
-						if (in.classValue() == classPair.getX().doubleValue()) {
-							classNotInMapping = false;
-						}
-					}
-					if (classNotInMapping) {
-						classMapping.add(new Pair<Double, Double>(in.classValue(), (double) classMapping.size()));
-					}
-				}
+				//				boolean classNotInMapping;
+				//				for (I in : pilotEstimateInstances) {
+				//					classNotInMapping = true;
+				//					for (Pair<Double, Double> classPair : classMapping) {
+				//						if (in.classValue() == classPair.getX().doubleValue()) {
+				//							classNotInMapping = false;
+				//						}
+				//					}
+				//					if (classNotInMapping) {
+				//						classMapping.add(new Pair<Double, Double>(in.classValue(), (double) classMapping.size()));
+				//					}
+				//				}
 
-				pilotEstimator.buildClassifier(pilotEstimateInstances);
-				this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
+				//				pilotEstimator.fit(pilotEstimateInstances);
+				//				this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 			}
 		} catch (DatasetCreationException e1) {
 			throw new AlgorithmException("Could not create a copy of the dataset.", e1);
@@ -157,5 +158,5 @@ public abstract class PilotEstimateSampling<I extends ILabeledInstance, D extend
 		return this.activate();
 	}
 
-	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(D instances, Classifier pilotEstimator);
+	abstract ArrayList<Pair<I, Double>> calculateFinalInstanceBoundaries(D instances, ISingleLabelClassifier pilotEstimator);
 }

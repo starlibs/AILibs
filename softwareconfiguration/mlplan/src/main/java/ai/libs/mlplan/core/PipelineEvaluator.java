@@ -1,5 +1,7 @@
 package ai.libs.mlplan.core;
 
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.IInformedObjectEvaluatorExtension;
@@ -25,19 +27,19 @@ import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
  *
  * @author fmohr
  */
-public class PipelineEvaluator<L extends ISupervisedLearner<?, ?>> extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
+public class PipelineEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(PipelineEvaluator.class);
 
 	private final EventBus eventBus = new EventBus();
-	private final ILearnerFactory<L> classifierFactory;
-	private final ISupervisedLearnerEvaluator<L> benchmark;
+	private final ILearnerFactory<? extends ISupervisedLearner<I, D>> learnerFactory;
+	private final ISupervisedLearnerEvaluator<I, D> benchmark;
 	private final int timeoutForEvaluation;
 	private Double bestScore = 1.0;
 
-	public PipelineEvaluator(final ILearnerFactory<L> classifierFactory, final ISupervisedLearnerEvaluator<L> benchmark, final int timeoutForEvaluation) {
+	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<I, D>> learnerFactory, final ISupervisedLearnerEvaluator<I, D> benchmark, final int timeoutForEvaluation) {
 		super();
-		this.classifierFactory = classifierFactory;
+		this.learnerFactory = learnerFactory;
 		this.benchmark = benchmark;
 		if (benchmark instanceof IEventEmitter) {
 			((IEventEmitter) benchmark).registerListener(this);
@@ -70,7 +72,7 @@ public class PipelineEvaluator<L extends ISupervisedLearner<?, ?>> extends Timed
 			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
 				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).updateBestScore(this.bestScore);
 			}
-			L learner = this.classifierFactory.getComponentInstantiation(c);
+			ISupervisedLearner<I, D> learner = this.learnerFactory.getComponentInstantiation(c);
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
@@ -100,7 +102,7 @@ public class PipelineEvaluator<L extends ISupervisedLearner<?, ?>> extends Timed
 		return "Pipeline evaluation phase";
 	}
 
-	public ISupervisedLearnerEvaluator<L> getBenchmark() {
+	public ISupervisedLearnerEvaluator<I, D> getBenchmark() {
 		return this.benchmark;
 	}
 

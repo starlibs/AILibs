@@ -8,12 +8,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
@@ -35,8 +37,9 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
+import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
@@ -45,8 +48,11 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
+import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 
 /**
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.
@@ -81,16 +87,17 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
 	private ILearnerFactory<L> classifierFactory;
+	private ISupervisedLearnerMetric performanceMeasure = ClassifierMetric.MEAN_ERRORRATE;
 
 	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
 	private PipelineValidityCheckingNodeEvaluator<D> pipelineValidityCheckingNodeEvaluator;
+
 	/* The splitter is used to create the split for separating search and selection data */
 	private IFoldSizeConfigurableRandomDatasetSplitter<D> searchSelectionDatasetSplitter;
-	private ISupervisedLearnerEvaluatorFactory<D, L> factoryForPipelineEvaluationInSearchPhase = null;
-	private ISupervisedLearnerEvaluatorFactory<D, L> factoryForPipelineEvaluationInSelectionPhase = null;
+	private ISupervisedLearnerEvaluatorFactory<I, D> factoryForPipelineEvaluationInSearchPhase = null;
+	private ISupervisedLearnerEvaluatorFactory<I, D> factoryForPipelineEvaluationInSelectionPhase = null;
 
 	private Collection<Component> components = new LinkedList<>();
-	private String performanceMeasureName;
 
 	/* Use caching */
 	private boolean useCache;
@@ -215,15 +222,6 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	}
 
 	/**
-	 * Sets the name of the performance measure that is used.
-	 *
-	 * @param name The name of the performance measure.
-	 */
-	public void setPerformanceMeasureName(final String name) {
-		this.performanceMeasureName = name;
-	}
-
-	/**
 	 * Set the data for which ML-Plan is supposed to find the best pipeline.
 	 *
 	 * @param dataset The dataset for which ML-Plan is to be run.
@@ -328,10 +326,10 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	}
 
 	@Override
-	public PipelineEvaluator<L> getClassifierEvaluationInSearchPhase(final D data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator<I, D> getClassifierEvaluationInSearchPhase(final D data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
 
-		ISupervisedLearnerEvaluator<L> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getIClassifierEvaluator(data, seed);
+		ISupervisedLearnerEvaluator<I, D> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
 		}
@@ -340,11 +338,11 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	}
 
 	@Override
-	public PipelineEvaluator<L> getClassifierEvaluationInSelectionPhase(final D data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator<I, D> getClassifierEvaluationInSelectionPhase(final D data, final int seed) throws LearnerEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}
-		return new PipelineEvaluator<>(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getIClassifierEvaluator(data, seed), Integer.MAX_VALUE);
+		return new PipelineEvaluator<>(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed)), Integer.MAX_VALUE);
 	}
 
 	/**
@@ -353,14 +351,14 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	 * @param evaluatorFactory The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
-	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<D, L> evaluatorFactory) {
+	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<I, D> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSearchPhase = evaluatorFactory;
 	}
 
 	/**
 	 * @return The factory for the classifier evaluator of the search phase.
 	 */
-	protected ISupervisedLearnerEvaluatorFactory<D, L> getSearchEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<I, D> getSearchEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSearchPhase;
 	}
 
@@ -370,8 +368,18 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
-	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<D, L> evaluatorFactory) {
+	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<I, D> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
+		return this.getSelf();
+	}
+
+	/**
+	 * Sets the performance measure to evaluate a candidate solution's generalization performance. Caution: This resets the evaluators to MCCV for both search and selection phase if these are not already MCCVs.
+	 * @param performanceMeasure The loss function to be used.
+	 * @return The builder object.
+	 */
+	public B withPerformanceMeasure(final ISupervisedLearnerMetric performanceMeasure) {
+		this.performanceMeasure = performanceMeasure;
 		return this.getSelf();
 	}
 
@@ -390,13 +398,13 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	/**
 	 * @return The factory for the classifier evaluator of the selection phase.
 	 */
-	protected ISupervisedLearnerEvaluatorFactory<D, L> getSelectionEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<I, D> getSelectionEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSelectionPhase;
 	}
 
 	@Override
-	public String getPerformanceMeasureName() {
-		return this.performanceMeasureName;
+	public ISupervisedLearnerMetric getPerformanceMeasure() {
+		return this.performanceMeasure;
 	}
 
 	@SuppressWarnings("unchecked")

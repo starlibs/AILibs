@@ -1,10 +1,10 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
-import org.api4.java.ai.ml.classification.IClassifier;
-import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.ILearningCurve;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +24,13 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
  * @author noni4
  */
 
-public class ConfigurationLearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>>
-		implements IClassifierEvaluator<IClassifier<I, D>> {
+public class ConfigurationLearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements ISupervisedLearnerEvaluator<I, D> {
 
 	private Logger logger = LoggerFactory.getLogger(ConfigurationLearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<I, D>> samplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<D>> samplingAlgorithmFactory;
 	private D dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
@@ -39,10 +38,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator<I extends ILabeled
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<I, D>> samplingAlgorithmFactory, final D dataset,
-			final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier,
-			final double[] configurations) {
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D dataset,
+			final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -58,12 +55,11 @@ public class ConfigurationLearningCurveExtrapolationEvaluator<I extends ILabeled
 	}
 
 	@Override
-	public Double evaluate(final IClassifier<I, D> classifier) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ISupervisedLearner<I, D> classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		try {
-			ConfigurationLearningCurveExtrapolator<I, D> extrapolator = new ConfigurationLearningCurveExtrapolator<>(
-					classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints,
-					this.samplingAlgorithmFactory, this.seed, this.identifier, this.configurations);
+			ConfigurationLearningCurveExtrapolator<I, D> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
+					this.seed, this.identifier, this.configurations);
 
 			// Create the extrapolator and calculate the accuracy the classifier would have
 			// if it was trained on the complete dataset.
@@ -78,8 +74,7 @@ public class ConfigurationLearningCurveExtrapolationEvaluator<I extends ILabeled
 
 			return learningCurve.getCurveValue(evaluationPoint) * 100.0d;
 		} catch (Exception e) {
-			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.",
-					e.getClass().getName(), e.getMessage());
+			this.logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());
 			return null;
 		}
 	}

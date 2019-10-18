@@ -1,20 +1,21 @@
 package ai.libs.mlplan.core;
 
-import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
-import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
-import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
+import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
+import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
 
-public abstract class AbstractMLPlanSingleLabelBuilder extends AbstractMLPlanBuilder {
+import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
+
+public abstract class AbstractMLPlanSingleLabelBuilder<B extends AbstractMLPlanSingleLabelBuilder<B>> extends AbstractMLPlanBuilder<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, ISingleLabelClassifier, B> {
 
 	/* Default configuration values. */
-	protected static final int SEARCH_NUM_MC_ITERATIONS = 5;
-	protected static final double SEARCH_TRAIN_FOLD_SIZE = 0.7;
-	protected static final int SELECTION_NUM_MC_ITERATIONS = 5;
-	protected static final double SELECTION_TRAIN_FOLD_SIZE = 0.7;
-	protected static final IMeasure<Double, Double> LOSS_FUNCTION = new ZeroOneLoss();
+	protected static final int DEFAULT_SEARCH_NUM_MC_ITERATIONS = 5;
+	protected static final double DEFAULT_SEARCH_TRAIN_FOLD_SIZE = 0.7;
+	protected static final int DEFAULT_SELECTION_NUM_MC_ITERATIONS = 5;
+	protected static final double DEFAULT_SELECTION_TRAIN_FOLD_SIZE = 0.7;
+	protected static final ISupervisedLearnerMetric DEFAULT_PERFORMANCE_MEASURE = ClassifierMetric.MEAN_ERRORRATE;
 
 	protected AbstractMLPlanSingleLabelBuilder() {
 		super();
@@ -27,13 +28,13 @@ public abstract class AbstractMLPlanSingleLabelBuilder extends AbstractMLPlanBui
 	 * @param lossFunction The loss function to evaluate the performance of the classifier.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanSingleLabelBuilder withMonteCarloCrossValidationInSearchPhase(final int numIterations, final double trainFoldSize, final IMeasure<Double, Double> lossFunction) {
+	public B withMonteCarloCrossValidationInSearchPhase(final int numIterations, final double trainFoldSize) {
 		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(new MulticlassClassStratifiedSplitter()));
+			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory<>());
 		}
 
-		((MonteCarloCrossValidationEvaluatorFactory) this.getSearchEvaluatorFactory()).withNumMCIterations(numIterations).withTrainFoldSize(trainFoldSize).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(lossFunction));
-		return this;
+		((MonteCarloCrossValidationEvaluatorFactory) this.getSearchEvaluatorFactory()).withNumMCIterations(numIterations).withTrainFoldSize(trainFoldSize);
+		return this.getSelf();
 	}
 
 	/**
@@ -43,35 +44,12 @@ public abstract class AbstractMLPlanSingleLabelBuilder extends AbstractMLPlanBui
 	 * @param lossFunction The loss function to evaluate the performance of the classifier.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanSingleLabelBuilder withMonteCarloCrossValidationInSelectionPhase(final int numIterations, final double trainFoldSize, final IMeasure<Double, Double> lossFunction) {
+	public B withMonteCarloCrossValidationInSelectionPhase(final int numIterations, final double trainFoldSize) {
 		if (!(this.getSelectionEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(new MulticlassClassStratifiedSplitter()));
+			this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory<>());
 		}
 
-		((MonteCarloCrossValidationEvaluatorFactory) this.getSelectionEvaluatorFactory()).withNumMCIterations(numIterations).withTrainFoldSize(trainFoldSize).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(lossFunction));
-		return this;
-	}
-
-	/**
-	 * Sets the performance measure to evaluate a candidate solution's generalization performance. Caution: This resets the evaluators to MCCV for both search and selection phase if these are not already MCCVs.
-	 * @param lossFunction The loss function to be used.
-	 * @return The builder object.
-	 */
-	public AbstractMLPlanSingleLabelBuilder withPerformanceMeasure(final IMeasure<Double, Double> lossFunction) {
-		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSearchPhaseEvaluatorFactory(
-					new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(new MulticlassClassStratifiedSplitter()).withNumMCIterations(SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE));
-		}
-		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSearchPhaseEvaluatorFactory(
-					new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(new MulticlassClassStratifiedSplitter()).withNumMCIterations(SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(SELECTION_TRAIN_FOLD_SIZE));
-		}
-
-		((MonteCarloCrossValidationEvaluatorFactory) this.getSelectionEvaluatorFactory()).withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(lossFunction));
-		return this;
-	}
-
-	protected IDatasetSplitter getDefaultDatasetSplitter() {
-		return new MulticlassClassStratifiedSplitter();
+		((MonteCarloCrossValidationEvaluatorFactory) this.getSelectionEvaluatorFactory()).withNumMCIterations(numIterations).withTrainFoldSize(trainFoldSize);
+		return this.getSelf();
 	}
 }

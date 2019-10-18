@@ -26,11 +26,11 @@ import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
 public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDataset<?>> implements IDatasetSplitSetGenerator<D>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(MonteCarloCrossValidationSplitSetGenerator.class);
-	private final IRandomDatasetSplitter<?, D> datasetSplitter;
+	private final IRandomDatasetSplitter<D> datasetSplitter;
 	private final int repeats;
 	private final long seed;
 
-	public MonteCarloCrossValidationSplitSetGenerator(final IRandomDatasetSplitter<?, D> datasetSplitter, final int repeats, final Random random) {
+	public MonteCarloCrossValidationSplitSetGenerator(final IRandomDatasetSplitter<D> datasetSplitter, final int repeats, final Random random) {
 		super();
 		this.datasetSplitter = datasetSplitter;
 		this.repeats = repeats;

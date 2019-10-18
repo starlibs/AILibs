@@ -1,4 +1,4 @@
-package ai.libs.mlplan.core;
+package ai.libs.mlplan.multiclass.sklearn;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,8 +18,8 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValid
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
+import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.sklearn.SKLearnClassifierFactory;
 
 public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 
@@ -53,10 +53,10 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 	private static final ILearnerFactory DEF_CLASSIFIER_FACTORY = new SKLearnClassifierFactory();
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_SEARCHSPACE_CONFIG, FS_SEARCH_SPACE_CONFIG);
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_SKLEARN_PREFERRED_COMPONENTS, FS_SKLEARN_PREFERRED_COMPONENTS);
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(LOSS_FUNCTION)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(SELECTION_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(LOSS_FUNCTION)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE)
+			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE)
+			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
 
 	/**
 	 * Creates a new ML-Plan Builder for scikit-learn.
@@ -84,7 +84,7 @@ public class MLPlanSKLearnBuilder extends AbstractMLPlanSingleLabelBuilder {
 		this.withDatasetSplitterForSearchSelectionSplit(DEF_SELECTION_HOLDOUT_SPLITTER);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
 		this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
-		this.setPerformanceMeasureName(LOSS_FUNCTION.getClass().getSimpleName());
+		this.setPerformanceMeasureName(DEFAULT_PERFORMANCE_MEASURE.getClass().getSimpleName());
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package ai.libs.automl.mlplan.examples;
+package ai.libs.mlplan.examples.multiclass.weka;
 
 import java.io.BufferedReader;
 import java.io.File;

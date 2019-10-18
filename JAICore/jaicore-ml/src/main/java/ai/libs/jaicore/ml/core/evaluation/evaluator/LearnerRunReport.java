@@ -1,15 +1,15 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import org.api4.java.ai.ml.classification.execution.IClassificationPredictionAndGroundTruthTable;
-import org.api4.java.ai.ml.classification.execution.IClassifierRunReport;
+import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
 
-public class RunReport implements IClassifierRunReport {
+public class LearnerRunReport implements ILearnerRunReport {
 
 	private final int trainTime;
 	private final int testTime;
 	private final IClassificationPredictionAndGroundTruthTable diff;
 
-	public RunReport(final int trainTime, final int testTime, final IClassificationPredictionAndGroundTruthTable diff) {
+	public LearnerRunReport(final int trainTime, final int testTime, final IClassificationPredictionAndGroundTruthTable diff) {
 		super();
 		this.trainTime = trainTime;
 		this.testTime = testTime;

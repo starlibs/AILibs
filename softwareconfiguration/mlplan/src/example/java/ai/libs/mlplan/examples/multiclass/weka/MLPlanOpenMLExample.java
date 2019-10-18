@@ -1,4 +1,4 @@
-package ai.libs.automl.mlplan.examples;
+package ai.libs.mlplan.examples.multiclass.weka;
 
 import java.util.List;
 import java.util.NoSuchElementException;

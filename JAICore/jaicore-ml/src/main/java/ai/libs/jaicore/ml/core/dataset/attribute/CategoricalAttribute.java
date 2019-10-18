@@ -87,4 +87,9 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 		return this.getAsAttributeValue(this.decodeValue(encodedAttributeValue));
 	}
 
+	@Override
+	public double toDouble(final Object object) {
+		return object.hashCode();
+	}
+
 }

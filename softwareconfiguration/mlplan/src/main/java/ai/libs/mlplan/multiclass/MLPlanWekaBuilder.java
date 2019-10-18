@@ -1,9 +1,7 @@
-package ai.libs.mlplan.core;
+package ai.libs.mlplan.multiclass;
 
 import java.io.File;
 import java.io.IOException;
-
-import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
@@ -18,11 +16,11 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
-import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 
-public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
+public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanWekaBuilder> {
 
 	private static final String RES_SSC_TINY_WEKA = "automl/searchmodels/weka/tinytest.json";
 	private static final String RES_SSC_WEKA_COMPLETE = "automl/searchmodels/weka/weka-all-autoweka.json";
@@ -35,14 +33,13 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "AbstractClassifier";
 	private static final String DEF_PREFERRED_COMPONENT_NAME_PREFIX = "resolveAbstractClassifierWith";
 
-	private static final IDatasetSplitter DEF_SELECTION_HOLDOUT_SPLITTER = new MulticlassClassStratifiedSplitter();
 	private static final ILearnerFactory DEF_CLASSIFIER_FACTORY = new WekaPipelineFactory();
 	private static final File DEF_PREFERRED_COMPONENTS = FileUtil.getExistingFileWithHighestPriority(RES_PREFERRED_COMPONENTS, FS_PREFERRED_COMPONENTS);
 	private static final File DEF_SEARCH_SPACE_CONFIG = FileUtil.getExistingFileWithHighestPriority(RES_SSC_WEKA_COMPLETE, FS_SSC_WEKA);
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(LOSS_FUNCTION)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
-	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(SELECTION_TRAIN_FOLD_SIZE)
-			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(LOSS_FUNCTION)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SEARCH_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SEARCH_TRAIN_FOLD_SIZE)
+			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
+	private static final MonteCarloCrossValidationEvaluatorFactory DEF_SELECTION_PHASE_EVALUATOR = new MonteCarloCrossValidationEvaluatorFactory().withNumMCIterations(DEFAULT_SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(DEFAULT_SELECTION_TRAIN_FOLD_SIZE)
+			.withSplitBasedEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(DEFAULT_PERFORMANCE_MEASURE)).withDatasetSplitter(new MulticlassClassStratifiedSplitter());
 
 	public MLPlanWekaBuilder() throws IOException {
 		super();
@@ -50,15 +47,14 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder {
 		this.withPreferredComponentsFile(DEF_PREFERRED_COMPONENTS, DEF_PREFERRED_COMPONENT_NAME_PREFIX);
 		this.withRequestedInterface(DEF_REQUESTED_HASCO_INTERFACE);
 		this.withClassifierFactory(DEF_CLASSIFIER_FACTORY);
-		this.withDatasetSplitterForSearchSelectionSplit(DEF_SELECTION_HOLDOUT_SPLITTER);
 		this.withSearchPhaseEvaluatorFactory(DEF_SEARCH_PHASE_EVALUATOR);
 		this.withSelectionPhaseEvaluatorFactory(DEF_SELECTION_PHASE_EVALUATOR);
-		this.setPerformanceMeasureName(LOSS_FUNCTION.getClass().getSimpleName());
+		this.withPerformanceMeasure(DEFAULT_PERFORMANCE_MEASURE);
 
 		// /* configure blow-ups for MCCV */
-		double blowUpInSelectionPhase = MathExt.round(1f / SEARCH_TRAIN_FOLD_SIZE * SELECTION_NUM_MC_ITERATIONS / SEARCH_NUM_MC_ITERATIONS, 2);
+		double blowUpInSelectionPhase = MathExt.round(1f / DEFAULT_SEARCH_TRAIN_FOLD_SIZE * DEFAULT_SELECTION_NUM_MC_ITERATIONS / DEFAULT_SEARCH_NUM_MC_ITERATIONS, 2);
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
-		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getAlgorithmConfig().dataPortionForSelection())) / SELECTION_NUM_MC_ITERATIONS, 2);
+		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getAlgorithmConfig().dataPortionForSelection())) / DEFAULT_SELECTION_NUM_MC_ITERATIONS, 2);
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
 	}
 

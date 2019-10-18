@@ -57,7 +57,7 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<IL
 	}
 
 	@Override
-	public ILabeledDataset<ILabeledInstance> deserializeDataset(final File datasetFile) {
+	public Dataset deserializeDataset(final File datasetFile) {
 		try (BufferedReader br = Files.newBufferedReader(datasetFile.toPath())) {
 			KVStore relationMetaData = new KVStore();
 			Dataset dataset = null;
@@ -93,11 +93,20 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<IL
 						listToAddAttributeTo.add(attributeList.get(i));
 					}
 
-					ILabeledInstanceSchema schema = new LabeledInstanceSchema((relationMetaData != null) ? relationMetaData.getAsString(K_RELATION_NAME) : "unnamed", instanceAttribute, targetAttribute);
+					if (targetAttribute.size() != 1) {
+						throw new UnsupportedOperationException("Currently only datasets with exactly one attribute are supported.");
+					}
+					ILabeledInstanceSchema schema = new LabeledInstanceSchema((relationMetaData != null) ? relationMetaData.getAsString(K_RELATION_NAME) : "unnamed", instanceAttribute, targetAttribute.get(0));
 
 					dataset = new Dataset(schema);
 
 				} else if (instanceReadMode && !line.trim().isEmpty() && !instanceAttribute.isEmpty() && !targetAttribute.isEmpty()) {
+					if (dataset == null) {
+						throw new IllegalStateException("Cannot read instances, because dataset has not been defined properly yet.");
+					}
+					if (dataset.getInstanceSchema() == null) {
+						throw new IllegalStateException("Dataset has no schema!");
+					}
 					if (targetAttribute.size() > 1) {
 						throw new IllegalArgumentException("Cannot parse a dataset with more than one target");
 					}

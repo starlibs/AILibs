@@ -7,7 +7,7 @@ import org.api4.java.ai.ml.classification.singlelabel.loss.ISingleLabelClassific
 public class ErrorRate implements ISingleLabelClassificationBatchLossFunction {
 
 	@Override
-	public double loss(final List<String> expected, final List<String> actual) {
+	public double loss(final List<?> expected, final List<?> actual) {
 		if (expected.size() != actual.size()) {
 			throw new IllegalArgumentException("Expected and actual list must have the same length.");
 		}

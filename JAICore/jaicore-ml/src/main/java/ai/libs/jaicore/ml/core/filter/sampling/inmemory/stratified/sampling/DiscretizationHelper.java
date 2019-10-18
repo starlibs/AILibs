@@ -10,10 +10,10 @@ import java.util.Set;
 
 import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.apache.commons.math3.geometry.partitioning.Region.Location;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @param <I>
  *            The instance type
  */
-public class DiscretizationHelper<I extends ILabeledInstance, D extends ILabeledDataset<I>> {
+public class DiscretizationHelper<D extends IDataset<?>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
 
@@ -177,7 +177,9 @@ public class DiscretizationHelper<I extends ILabeledInstance, D extends ILabeled
 	private Set<Integer> getNumericIndicesFromDataset(final D dataset) {
 		Set<Integer> numericAttributes = new HashSet<>();
 		List<IAttribute> attributeTypes = new ArrayList<>(dataset.getListOfAttributes());
-		attributeTypes.add(dataset.getLabelAttribute());
+		if (dataset instanceof ILabeledDataset) {
+			attributeTypes.add(((ILabeledDataset<?>)dataset).getLabelAttribute());
+		}
 		for (int i = 0; i < attributeTypes.size(); i++) {
 			IAttribute attributeType = attributeTypes.get(i);
 			if (attributeType instanceof INumericAttribute) {

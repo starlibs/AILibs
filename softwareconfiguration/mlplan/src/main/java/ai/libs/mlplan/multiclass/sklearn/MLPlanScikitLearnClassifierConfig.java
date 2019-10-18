@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan.sklearn;
+package ai.libs.mlplan.multiclass.sklearn;
 
 import org.aeonbits.owner.Config.LoadPolicy;
 import org.aeonbits.owner.Config.LoadType;

@@ -1,4 +1,4 @@
-package ai.libs.mlplan.examples.multiclass.sklearn;
+package ai.libs.mlplan.examples.multiclass.weka;
 
 import java.io.File;
 import java.io.FileReader;
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.sklearn.SKLearnMLPlanWekaClassifier;
+import ai.libs.mlplan.multiclass.sklearn.SKLearnMLPlanWekaClassifier;
 import weka.core.Instances;
 
 public class MLPlanSKLearnExample {

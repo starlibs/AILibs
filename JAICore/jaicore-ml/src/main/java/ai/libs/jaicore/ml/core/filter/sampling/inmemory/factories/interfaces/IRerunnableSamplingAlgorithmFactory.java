@@ -13,7 +13,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
  * @param <I> Type of the dataset instances.
  * @param <A> Type of the sampling algorithm that will be created.
  */
-public interface IRerunnableSamplingAlgorithmFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>, A extends ASamplingAlgorithm<I, D>> extends ISamplingAlgorithmFactory<I, D, A> {
+public interface IRerunnableSamplingAlgorithmFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>, A extends ASamplingAlgorithm<D>> extends ISamplingAlgorithmFactory<I, D, A> {
 
 	/**
 	 * Set the previous run of the sampling algorithm, if one occurred, can be set

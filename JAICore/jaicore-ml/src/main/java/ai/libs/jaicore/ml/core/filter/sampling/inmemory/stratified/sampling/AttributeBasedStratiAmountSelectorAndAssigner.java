@@ -17,6 +17,8 @@ import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.slf4j.Logger;
@@ -34,7 +36,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.Disc
  * @author Felix Weiland
  *
  */
-public class AttributeBasedStratiAmountSelectorAndAssigner<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IStratiAmountSelector<I, D>, IStratiAssigner<I, D> {
+public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, D extends IDataset<I>> implements IStratiAmountSelector<I, D>, IStratiAssigner<I, D> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
 
@@ -195,7 +197,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends ILabeledIns
 		threadPool.shutdown();
 
 		// Discretize
-		DiscretizationHelper<I, D> discretizationHelper = new DiscretizationHelper<>();
+		DiscretizationHelper<D> discretizationHelper = new DiscretizationHelper<>();
 
 		if (this.discretizationPolicies == null) {
 			LOG.info("No discretization policies provided. Computing defaults..");
@@ -243,6 +245,22 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends ILabeledIns
 			LOG.info("No recomputation of the attribute values needed");
 		} else {
 			this.dataset = dataset;
+
+			/* consistency check of attribute indices */
+			int n = dataset.getNumAttributes();
+			for (int i : this.attributeIndices) {
+				if (i < 0) {
+					throw new IllegalArgumentException("Attribute index for stratified splits must not be negative!");
+				}
+				if (i > n) {
+					throw new IllegalArgumentException("Attribute index for stratified splits must not exceed number of attributes!");
+				}
+				if (i == n && !(dataset instanceof ILabeledDataset)) {
+					throw new IllegalArgumentException("Attribute index for stratified splits must only equal the number of attributes if the dataset is labeled, because then the label column id is the number of attributes!");
+				}
+			}
+
+			/* compute attribute values */
 			this.computeAttributeValues();
 		}
 
@@ -278,7 +296,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends ILabeledIns
 
 		// Compute concrete attribute values for the particular instance
 		Object[] instanceAttributeValues = new Object[this.attributeIndices.size()];
-		DiscretizationHelper<I, D> discretizationHelper = new DiscretizationHelper<>();
+		DiscretizationHelper<D> discretizationHelper = new DiscretizationHelper<>();
 		for (int i = 0; i < this.attributeIndices.size(); i++) {
 			int attributeIndex = this.attributeIndices.get(i);
 
@@ -286,15 +304,15 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends ILabeledIns
 			// Has value to be discretized?
 			if (this.toBeDiscretized(attributeIndex)) {
 				Object raw;
-				if (attributeIndex == this.dataset.getNumAttributes()) {
-					raw = datapoint.getLabel();
+				if (attributeIndex == this.dataset.getNumAttributes()) { // this can only happen for labeled instances
+					raw = ((ILabeledInstance)datapoint).getLabel();
 				} else {
 					raw = datapoint.getAttributeValue(attributeIndex);
 				}
 				value = discretizationHelper.discretize((double) raw, this.discretizationPolicies.get(attributeIndex));
 			} else {
-				if (attributeIndex == this.dataset.getNumAttributes()) {
-					value = datapoint.getLabel();
+				if (attributeIndex == this.dataset.getNumAttributes()) { // this can only happen for labeled instances
+					value = ((ILabeledInstance)datapoint).getLabel();
 				} else {
 					value = datapoint.getAttributeValue(attributeIndex);
 				}
@@ -331,7 +349,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends ILabeledIns
  * @author Felix Weiland
  *
  */
-class ListProcessor<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements Callable<Map<Integer, Set<Object>>> {
+class ListProcessor<I extends IInstance, D extends IDataset<I>> implements Callable<Map<Integer, Set<Object>>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ListProcessor.class);
 
@@ -365,10 +383,9 @@ class ListProcessor<I extends ILabeledInstance, D extends ILabeledDataset<I>> im
 		// Collect attribute values
 		for (I instance : this.list) {
 			for (int attributeIndex : this.attributeIndices) {
-
 				if (attributeIndex == this.dataset.getNumAttributes()) {
 					// Attribute index describes target attribute
-					attributeValues.get(attributeIndex).add(instance.getLabel());
+					attributeValues.get(attributeIndex).add(((ILabeledInstance)instance).getLabel());
 				} else {
 					attributeValues.get(attributeIndex).add(instance.getAttributeValue(attributeIndex));
 				}

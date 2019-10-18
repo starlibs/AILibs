@@ -2,13 +2,13 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
+import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol.LocalCaseControlSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class LocalCaseControlSamplingFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, LocalCaseControlSampling> {
+public class LocalCaseControlSamplingFactory implements IRerunnableSamplingAlgorithmFactory<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, LocalCaseControlSampling> {
 
 	private LocalCaseControlSampling previousRun = null;
 	private int preSampleSize = -1;
@@ -29,7 +29,7 @@ public class LocalCaseControlSamplingFactory<I extends ILabeledInstance, D exten
 	}
 
 	@Override
-	public LocalCaseControlSampling getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
+	public LocalCaseControlSampling getAlgorithm(final int sampleSize, final ISingleLabelClassificationDataset inputDataset, final Random random) {
 		LocalCaseControlSampling localCaseControlSampling = new LocalCaseControlSampling(random, this.preSampleSize, inputDataset);
 		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null) {
 			localCaseControlSampling.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
