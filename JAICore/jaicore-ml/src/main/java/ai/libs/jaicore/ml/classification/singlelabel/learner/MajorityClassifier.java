@@ -14,23 +14,15 @@ import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPr
 
 public class MajorityClassifier extends ASingleLabelClassifier implements ISingleLabelClassifier {
 
-	private String majorityLabel;
+	private int majorityLabel;
 
 	@Override
 	public void fit(final ISingleLabelClassificationDataset dTrain) throws TrainingException, InterruptedException {
-		Map<String, Integer> labelCounter = new HashMap<>();
+		Map<Integer, Integer> labelCounter = new HashMap<>();
 		for (ISingleLabelClassificationInstance i : dTrain) {
 			labelCounter.put(i.getLabel(), labelCounter.computeIfAbsent(i.getLabel(), t -> 0) + 1);
 		}
-
-		String mostFrequentClass = null;
-		for (String label : labelCounter.keySet()) {
-			if (mostFrequentClass == null || labelCounter.get(label) > labelCounter.get(mostFrequentClass)) {
-				mostFrequentClass = label;
-			}
-		}
-
-		this.majorityLabel = mostFrequentClass;
+		this.majorityLabel = labelCounter.keySet().stream().max((l1,l2) -> Integer.compare(labelCounter.get(l1), labelCounter.get(l2))).get();
 	}
 
 	@Override

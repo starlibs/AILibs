@@ -7,11 +7,11 @@ import org.api4.java.ai.ml.core.evaluation.loss.IInstanceWiseLossFunction;
  *
  * @author mwever
  */
-public class SquaredError implements IInstanceWiseLossFunction<Double> {
+public class SquaredError implements IInstanceWiseLossFunction {
 
 	@Override
-	public double loss(final Double actual, final Double expected) {
-		return Math.pow(actual - expected, 2);
+	public double loss(final Object actual, final Object expected) {
+		return Math.pow((double)actual - (double)expected, 2);
 	}
 
 }

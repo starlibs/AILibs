@@ -6,28 +6,32 @@ import ai.libs.jaicore.ml.core.evaluation.Prediction;
 
 public class SingleLabelClassificationPrediction extends Prediction implements ISingleLabelClassificationPrediction {
 
-	public SingleLabelClassificationPrediction(final String predicted) {
+	public SingleLabelClassificationPrediction(final int predicted) {
 		super(predicted);
 	}
 
 	@Override
-	public String getPrediction() {
-		return (String) super.getPrediction();
+	public int getIntPrediction() {
+		return (int)super.getPrediction();
 	}
 
 	@Override
-	public String getLabelWithHighestProbability() {
-		return null;
+	public Integer getPrediction() {
+		return this.getIntPrediction();
+	}
+
+	@Override
+	public int getLabelWithHighestProbability() {
+		throw new UnsupportedOperationException("This is not a probabilistic prediction");
 	}
 
 	@Override
 	public double[] getClassDistribution() {
-		return null;
+		throw new UnsupportedOperationException("This is not a probabilistic prediction");
 	}
 
 	@Override
-	public double getProbabilityOfLabel(final String label) {
-		return 0;
+	public double getProbabilityOfLabel(final int label) {
+		throw new UnsupportedOperationException("This is not a probabilistic prediction");
 	}
-
 }

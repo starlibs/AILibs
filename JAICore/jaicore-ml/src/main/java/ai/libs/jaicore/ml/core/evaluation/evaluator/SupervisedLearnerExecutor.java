@@ -35,7 +35,7 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<?>> implements 
 
 	private ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<?, D> learner, final D test, final int trainingTime) throws PredictionException, InterruptedException {
 		long start = System.currentTimeMillis();
-		List<?> predictions = learner.predict(test);
+		List<?> predictions = learner.predict(test).getPredictions();
 		long endTestTime = System.currentTimeMillis();
 
 		/* create difference table */

@@ -2,9 +2,9 @@ package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.singlelabel.loss.ISingleLabelClassificationBatchLossFunction;
+import ai.libs.jaicore.ml.core.evaluation.ALossFunction;
 
-public class ErrorRate implements ISingleLabelClassificationBatchLossFunction {
+public class ErrorRate extends ALossFunction {
 
 	@Override
 	public double loss(final List<?> expected, final List<?> actual) {
