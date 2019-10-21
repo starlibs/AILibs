@@ -2,8 +2,8 @@ package ai.libs.jaicore.ml.ranking.label.learner.clusterbased.modifiedisac;
 
 import java.util.Map;
 
-import ai.libs.jaicore.ml.core.dataset.metafeature.DatasetCharacterizerInitializationFailedException;
-import ai.libs.jaicore.ml.core.dataset.metafeature.GlobalCharacterizer;
+import ai.libs.jaicore.ml.core.metalearning.metafeature.DatasetCharacterizerInitializationFailedException;
+import ai.libs.jaicore.ml.core.metalearning.metafeature.GlobalCharacterizer;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.ProblemInstance;
 import weka.core.DenseInstance;
 import weka.core.Instance;

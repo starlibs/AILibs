@@ -6,7 +6,7 @@ import java.util.Set;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttributeValue;
 
-public class MultiValueAttributeType extends ACollectionOfObjectsAttribute<String> implements IMultiLabelAttribute {
+public class MultiValueAttribute extends ACollectionOfObjectsAttribute<String> implements IMultiLabelAttribute {
 
 	/**
 	 *
@@ -14,7 +14,7 @@ public class MultiValueAttributeType extends ACollectionOfObjectsAttribute<Strin
 	private static final long serialVersionUID = -6840951353348119686L;
 	private final Collection<String> domain;
 
-	public MultiValueAttributeType(final String name, final Collection<String> domain) {
+	public MultiValueAttribute(final String name, final Collection<String> domain) {
 		super(name);
 		this.domain = domain;
 	}
@@ -62,6 +62,21 @@ public class MultiValueAttributeType extends ACollectionOfObjectsAttribute<Strin
 		} else {
 			throw new IllegalArgumentException("No valid value for the type");
 		}
+	}
+
+	@Override
+	public double toDouble(final Object object) {
+		throw new UnsupportedOperationException("Not yet implemented in MultiValueAttribute");
+	}
+
+	@Override
+	public String serializeAttributeValue(final Object value) {
+		throw new UnsupportedOperationException("Not yet implemented.");// TODO
+	}
+
+	@Override
+	public Object deserializeAttributeValue(final String string) {
+		throw new UnsupportedOperationException("Not yet implemented.");// TODO
 	}
 
 }

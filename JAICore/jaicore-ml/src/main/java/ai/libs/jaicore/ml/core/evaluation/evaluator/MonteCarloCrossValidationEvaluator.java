@@ -83,11 +83,11 @@ public class MonteCarloCrossValidationEvaluator<I extends ILabeledInstance, D ex
 	}
 
 	@Override
-	public Double f(final IClassifier pl) throws ObjectEvaluationFailedException, InterruptedException {
+	public Double evaluate(final IClassifier pl) throws ObjectEvaluationFailedException, InterruptedException {
 		return this.evaluate(pl, new DescriptiveStatistics());
 	}
 
-	public Double f(final Classifier pl, final DescriptiveStatistics stats) throws ObjectEvaluationFailedException, InterruptedException {
+	public Double evaluate(final Classifier pl, final DescriptiveStatistics stats) throws ObjectEvaluationFailedException, InterruptedException {
 		if (pl == null) {
 			throw new IllegalArgumentException("Cannot compute score for null pipeline!");
 		}

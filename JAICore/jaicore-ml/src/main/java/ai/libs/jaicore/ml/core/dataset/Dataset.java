@@ -52,6 +52,12 @@ public class Dataset implements ILabeledDataset<ILabeledInstance> {
 		public ILabeledInstanceSchema getInstanceSchema() {
 			return null;
 		}
+
+		@Override
+		public Object[] getAttributes() {
+			// TODO Auto-generated method stub
+			return null;
+		}
 	}
 
 	class InstanceIterator implements Iterator<ILabeledInstance>, ListIterator<ILabeledInstance> {

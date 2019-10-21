@@ -6,7 +6,7 @@ import java.util.List;
 import org.api4.java.ai.ml.core.dataset.attribute.transformer.ISingleAttributeTransformer;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeType;
+import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttribute;
 import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
 
 /**
@@ -26,7 +26,7 @@ public class MultiValueBinarizationTransformer implements ISingleAttributeTransf
 
 		// Get the feature value and the type of the feature value.
 		MultiValueAttributeValue value = (MultiValueAttributeValue) attributeToTransform;
-		IMultiValueAttributeType type = (MultiValueAttributeType) value.getType();
+		IMultiValueAttributeType type = (MultiValueAttribute) value.getType();
 
 		// Created a sorted list of the domain to get a definitive mapping from the
 		// values to the dimensions via the index.

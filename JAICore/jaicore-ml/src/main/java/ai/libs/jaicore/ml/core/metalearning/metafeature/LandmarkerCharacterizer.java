@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.core.dataset.metafeature;
+package ai.libs.jaicore.ml.core.metalearning.metafeature;
 
 import java.util.ArrayList;
 

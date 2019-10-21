@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.core.dataset.metafeature;
+package ai.libs.jaicore.ml.core.metalearning.metafeature;
 
 /**
  * An exception that signifies something went wrong during the initialization of

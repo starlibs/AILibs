@@ -42,4 +42,19 @@ public class StringAttribute extends AGenericObjectAttribute<String> implements 
 		}
 	}
 
+	@Override
+	public double toDouble(final Object object) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
+	public String serializeAttributeValue(final Object value) {
+		return this.getValueAsTypeInstance(value);
+	}
+
+	@Override
+	public Object deserializeAttributeValue(final String string) {
+		return string;
+	}
+
 }

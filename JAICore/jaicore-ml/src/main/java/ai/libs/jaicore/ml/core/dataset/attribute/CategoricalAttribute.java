@@ -87,4 +87,26 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 		return this.getAsAttributeValue(this.decodeValue(encodedAttributeValue));
 	}
 
+	@Override
+	public double toDouble(final Object object) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
+	public String serializeAttributeValue(final Object value) {
+		return "\"" + value.toString() + "\"";
+	}
+
+	@Override
+	public Object deserializeAttributeValue(final String string) {
+		String trimmedString = string.trim();
+		if (string.startsWith("\"")) {
+			trimmedString = trimmedString.substring(1);
+		}
+		if (string.endsWith("\"")) {
+			trimmedString = trimmedString.substring(0, trimmedString.length() - 1);
+		}
+		return trimmedString;
+	}
+
 }

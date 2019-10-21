@@ -65,4 +65,19 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 		return new NumericAttributeValue(this, encodedAttributeValue);
 	}
 
+	@Override
+	public double toDouble(final Object object) {
+		return this.getAttributeValueAsDouble(object);
+	}
+
+	@Override
+	public String serializeAttributeValue(final Object value) {
+		return this.getAttributeValueAsDouble(value) + "";
+	}
+
+	@Override
+	public Object deserializeAttributeValue(final String string) {
+		return Double.parseDouble(string);
+	}
+
 }

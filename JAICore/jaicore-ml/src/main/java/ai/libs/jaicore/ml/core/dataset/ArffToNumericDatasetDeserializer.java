@@ -8,11 +8,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
-import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
-import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.IDatasetDeserializer;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
@@ -102,20 +101,7 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<IL
 						throw new IllegalArgumentException("Cannot parse a dataset with more than one target");
 					}
 
-					double[] instance = this.parseInstance(line, attributeList);
-					double[] x = new double[instanceAttribute.size()];
-					double[] y = new double[targetAttribute.size()];
-
-					for (int i = 0; i < attributeList.size(); i++) {
-						int instanceAttributeIndex = instanceAttribute.indexOf(attributeList.get(i));
-
-						if (instanceAttributeIndex >= 0) {
-							x[instanceAttributeIndex] = instance[i];
-						} else {
-							y[targetAttribute.indexOf(attributeList.get(i))] = instance[i];
-						}
-					}
-					dataset.add(x, y[0]);
+					dataset.add(this.parseInstance(line, schema));
 				}
 				lineCounter++;
 			}
@@ -181,24 +167,12 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<IL
 	 * Parse a string into a double vector which can then be transformed into an instance description.
 	 *
 	 * @param line The string describing the instance.
-	 * @param dataset
-	 * @return
-	 * @throws UnsupportedAttributeTypeException
+	 * @param attributes The list of attributes defined for this dataset.
+	 * @return The array of attribute values as parsed from the given string representation.
 	 */
-	private double[] parseInstance(final String line, final List<IAttribute> attributes) throws UnsupportedAttributeTypeException {
+	private Object[] parseInstance(final String line, final List<IAttribute> attributes) {
 		String[] instanceValueSplit = line.split(SEPARATOR_DENSE_INSTANCE_VALUES);
-		double[] instanceDescription = new double[instanceValueSplit.length];
-
-		for (int i = 0; i < instanceValueSplit.length; i++) {
-			if (attributes.get(i) instanceof INumericAttribute) {
-				instanceDescription[i] = Double.valueOf(instanceValueSplit[i]);
-			} else if (attributes.get(i) instanceof ICategoricalAttribute) {
-				instanceDescription[i] = ((ICategoricalAttribute) attributes.get(i)).toDouble(instanceValueSplit[i]);
-			} else {
-				throw new UnsupportedAttributeTypeException("Cannot parse the value of the attribute type " + attributes.get(i).getClass().getName());
-			}
-		}
-		return instanceDescription;
+		return IntStream.range(0, instanceValueSplit.length).mapToObj(x -> attributes.get(x).deserializeAttributeValue(instanceValueSplit[x])).toArray();
 	}
 
 }

@@ -3,26 +3,25 @@ package ai.libs.jaicore.ml.core.dataset.attribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IRankingAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IRankingAttributeValue;
 import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 
-import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
+public class DyadRankingAttributeValue implements IRankingAttributeValue<IDyad> {
 
-public class DyadRankingAttributeValue implements IRankingAttributeValue<Dyad> {
+	private final IRankingAttribute<IDyad> attribute;
+	private final IRanking<IDyad> value;
 
-	private final IRankingAttribute<Dyad> attribute;
-	private final IRanking<Dyad> value;
-
-	public DyadRankingAttributeValue(final IRankingAttribute<Dyad> attribute, final IRanking<Dyad> value) {
+	public DyadRankingAttributeValue(final IRankingAttribute<IDyad> attribute, final IRanking<IDyad> value) {
 		this.attribute = attribute;
 		this.value = value;
 	}
 
 	@Override
-	public IRanking<Dyad> getValue() {
+	public IRanking<IDyad> getValue() {
 		return this.value;
 	}
 
 	@Override
-	public IRankingAttribute<Dyad> getAttribute() {
+	public IRankingAttribute<IDyad> getAttribute() {
 		return null;
 	}
 

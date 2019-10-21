@@ -14,4 +14,8 @@ public class Ranking<O> extends ArrayList<O> implements IRanking<O> {
 	public Ranking(final Collection<O> items) {
 		super(items);
 	}
+
+	public Ranking() {
+		super();
+	}
 }

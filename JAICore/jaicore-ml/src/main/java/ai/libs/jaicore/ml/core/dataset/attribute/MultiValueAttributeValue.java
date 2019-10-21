@@ -7,10 +7,10 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttributeVal
 
 public class MultiValueAttributeValue implements IMultiLabelAttributeValue {
 
-	private MultiValueAttributeType attribute;
+	private MultiValueAttribute attribute;
 	private Collection<String> value;
 
-	public MultiValueAttributeValue(final MultiValueAttributeType attribute, final Collection<String> value) {
+	public MultiValueAttributeValue(final MultiValueAttribute attribute, final Collection<String> value) {
 		this.attribute = attribute;
 		this.value = value;
 	}

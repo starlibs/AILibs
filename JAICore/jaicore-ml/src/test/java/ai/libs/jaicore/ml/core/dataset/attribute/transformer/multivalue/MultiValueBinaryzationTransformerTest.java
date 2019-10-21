@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeType;
+import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttribute;
 import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attributetransformer.multivalue.MultiValueBinarizationTransformer;
 
@@ -22,7 +22,7 @@ public class MultiValueBinaryzationTransformerTest {
 		domain.add("a");
 		domain.add("b");
 		domain.add("c");
-		MultiValueAttributeType type = new MultiValueAttributeType("", domain);
+		MultiValueAttribute type = new MultiValueAttribute("", domain);
 		MultiValueBinarizationTransformer transformer = new MultiValueBinarizationTransformer();
 
 		assertArrayEquals(new double[] { 0.0d, 0.0d, 0.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, new LinkedList<>())), DELTA);

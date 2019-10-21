@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.ml.core.dataset.metafeature.DatasetCharacterizerInitializationFailedException;
-import ai.libs.jaicore.ml.core.dataset.metafeature.LandmarkerCharacterizer;
+import ai.libs.jaicore.ml.core.metalearning.metafeature.DatasetCharacterizerInitializationFailedException;
+import ai.libs.jaicore.ml.core.metalearning.metafeature.LandmarkerCharacterizer;
 import ai.libs.jaicore.ml.ranking.dyad.learner.search.ADyadRankedNodeQueueConfig;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;

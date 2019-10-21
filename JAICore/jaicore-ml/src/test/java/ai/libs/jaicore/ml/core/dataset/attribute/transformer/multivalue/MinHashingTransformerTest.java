@@ -8,7 +8,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeType;
+import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttribute;
 import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.attributetransformer.multivalue.MinHashingTransformer;
 
@@ -24,7 +24,7 @@ public class MinHashingTransformerTest {
 		domain.add("c");
 		domain.add("d");
 		domain.add("e");
-		MultiValueAttributeType type = new MultiValueAttributeType("a0", domain);
+		MultiValueAttribute type = new MultiValueAttribute("a0", domain);
 
 		MultiValueAttributeValue v1 = new MultiValueAttributeValue(type, Arrays.asList("a", "b", "c", "d", "e"));
 		MultiValueAttributeValue v2 = new MultiValueAttributeValue(type, Arrays.asList("a", "c", "d", "e"));
