@@ -1,30 +1,31 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.factory;
 
 import java.util.List;
+import java.util.Random;
 
+import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
+import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
-import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import weka.core.Instances;
 
-public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierEvaluatorFactory {
+public class ExtrapolatedSaturationPointEvaluatorFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements ISupervisedLearnerEvaluatorFactory<I, D> {
 
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledInstance, ILabeledDataset<ILabeledInstance>>> subsamplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<D>> subsamplingAlgorithmFactory;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 
 	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledInstance, ILabeledDataset<ILabeledInstance>>> subsamplingAlgorithmFactory,
-			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+			final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<D>> subsamplingAlgorithmFactory,
+					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.subsamplingAlgorithmFactory = subsamplingAlgorithmFactory;
@@ -33,17 +34,17 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements IClassifierE
 	}
 
 	@Override
-	public IClassifierEvaluator getIClassifierEvaluator(final Instances dataset, final long seed) throws ClassifierEvaluatorConstructionFailedException {
+	public ISupervisedLearnerEvaluator<I, D> getDataspecificRandomizedLearnerEvaluator(final D dataset, final ISupervisedLearnerMetric metric, final Random random) throws LearnerEvaluatorConstructionFailedException {
 		try {
-			List<Instances> split = WekaUtil.getStratifiedSplit(dataset, seed, 0.7);
-			WekaInstances train = new WekaInstances(split.get(0));
-			WekaInstances test = new WekaInstances(split.get(1));
-			return new ExtrapolatedSaturationPointEvaluator<>(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, seed, test);
+			List<D> split = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<I, D>(), .7f, random).split(dataset);
+			D train = split.get(0);
+			D test = split.get(1);
+			return new ExtrapolatedSaturationPointEvaluator<I, D>(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, random.nextLong(), test, metric.getLossFunction());
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
-			throw new ClassifierEvaluatorConstructionFailedException(e);
-		} catch (ClassNotFoundException | SplitFailedException e) {
-			throw new ClassifierEvaluatorConstructionFailedException(e);
+			throw new LearnerEvaluatorConstructionFailedException(e);
+		} catch (SplitFailedException e) {
+			throw new LearnerEvaluatorConstructionFailedException(e);
 		}
 	}
 

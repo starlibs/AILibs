@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.SQLAdapter;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import autofe.algorithm.hasco.AutoFEWekaPipeline;
 import autofe.util.DataSet;
 import weka.classifiers.Classifier;
@@ -51,7 +51,7 @@ public class AutoFEMLMCCVBenchmark implements IObjectEvaluator<AutoFEWekaPipelin
 	}
 
 	public AutoFEMLMCCVBenchmark(final DataSet data, final long seed, final int repeats, final double trainingPortion) {
-		this.internalEvaluator = new MonteCarloCrossValidationEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), repeats, data.getInstances(), trainingPortion, seed);
+		this.internalEvaluator = new MonteCarloCrossValidationSplitSetGenerator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), repeats, data.getInstances(), trainingPortion, seed);
 	}
 
 	@Override

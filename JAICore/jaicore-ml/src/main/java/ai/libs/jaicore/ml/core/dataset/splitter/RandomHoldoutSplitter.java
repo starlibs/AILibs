@@ -7,13 +7,16 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
+import org.api4.java.ai.ml.classification.execution.IDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IInstance;
-import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
-public class RandomHoldoutSplitter<I extends IInstance, D extends IDataset<I>> implements IDatasetSplitter<I, D> {
+import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
+
+public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomDatasetSplitter<D>, IDatasetSplitSetGenerator<D> {
 
 	private final Random rand;
 	private final double[] portions;
@@ -34,7 +37,7 @@ public class RandomHoldoutSplitter<I extends IInstance, D extends IDataset<I>> i
 	}
 
 	@Override
-	public List<D> split(final D data, final long seed) throws SplitFailedException, InterruptedException {
+	public List<D> split(final D data, final Random random) throws SplitFailedException, InterruptedException {
 		List<D> holdOutSplits = new ArrayList<>();
 
 		try {
@@ -47,7 +50,26 @@ public class RandomHoldoutSplitter<I extends IInstance, D extends IDataset<I>> i
 
 		List<Integer> indices = IntStream.range(0, data.size()).mapToObj(x -> Integer.valueOf(x)).collect(Collectors.toList());
 
-		return holdOutSplits;
+		throw new UnsupportedOperationException("Not implemented");
 	}
 
+	@Override
+	public int getNumberOfFoldsPerSplit() {
+		return this.portions.length;
+	}
+
+	@Override
+	public int getNumSplitsPerSet() {
+		return 1;
+	}
+
+	@Override
+	public int getNumFoldsPerSplit() {
+		return this.portions.length;
+	}
+
+	@Override
+	public IDatasetSplitSet<D> nextSplitSet(final D data) throws InterruptedException, SplitFailedException {
+		return new DatasetSplitSet<>(Arrays.asList(this.split(data)));
+	}
 }

@@ -413,6 +413,27 @@ public class SetUtil {
 	}
 
 	/**
+	 * Computes the set of elements which are disjoint, i.e., elements from the set (A \cup B) \ (A \cap B)
+	 *
+	 * @param a
+	 *            The set A.
+	 * @param b
+	 *            The set B.
+	 * @return The difference A \ B.
+	 */
+	public static <S, T extends S, U extends S> Collection<S> getDisjointSet(final Collection<T> a, final Collection<U> b) {
+		List<S> out = new ArrayList<>(difference(a, b));
+
+		for (S item : difference(b, a)) {
+			if (!out.contains(item)) {
+				out.add(item);
+			}
+		}
+
+		return out;
+	}
+
+	/**
 	 * @param a
 	 *            The set A.
 	 * @param b

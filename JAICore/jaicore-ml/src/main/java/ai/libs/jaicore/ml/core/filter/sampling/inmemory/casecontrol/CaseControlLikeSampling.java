@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
-public abstract class CaseControlLikeSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<I, D> {
+public abstract class CaseControlLikeSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<D> {
 
 	protected Random rand;
 	protected List<Pair<I, Double>> probabilityBoundaries = null;

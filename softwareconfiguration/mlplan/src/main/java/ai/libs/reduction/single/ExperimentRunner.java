@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.learner.reduction.MCTreeNodeReD;
 import ai.libs.jaicore.ml.weka.learner.reduction.splitter.ISplitter;
@@ -50,7 +50,7 @@ public class ExperimentRunner<T extends ISplitter> {
 		Classifier innerClassifier = AbstractClassifier.forName(experiment.getNameOfInnerClassifier(), null);
 		Classifier rightClassifier = AbstractClassifier.forName(experiment.getNameOfRightClassifier(), null);
 		List<Instances> outerSplit = WekaUtil.getStratifiedSplit(data, experiment.getSeed(), .7);
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), this.mccvRepeats, outerSplit.get(0), .7, seed);
+		MonteCarloCrossValidationSplitSetGenerator mccv = new MonteCarloCrossValidationSplitSetGenerator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), this.mccvRepeats, outerSplit.get(0), .7, seed);
 		ISplitter splitter = this.splitterFactory.getSplitter(seed);
 
 		/* compute best of k splits */

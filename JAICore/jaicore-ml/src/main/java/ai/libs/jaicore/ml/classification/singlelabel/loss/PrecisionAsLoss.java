@@ -2,9 +2,9 @@ package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.core.evaluation.loss.IBatchLossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
 
-public class PrecisionAsLoss implements IBatchLossFunction<Double> {
+public class PrecisionAsLoss implements ILossFunction<Double> {
 
 	private final int positiveClass;
 	private final double threshold;
@@ -19,7 +19,7 @@ public class PrecisionAsLoss implements IBatchLossFunction<Double> {
 	}
 
 	@Override
-	public double loss(final List<Double> expected, final List<Double> actual) {
+	public double loss(final List<Double> actual, final List<Double> expected) {
 		int tp = 0;
 		int fp = 0;
 

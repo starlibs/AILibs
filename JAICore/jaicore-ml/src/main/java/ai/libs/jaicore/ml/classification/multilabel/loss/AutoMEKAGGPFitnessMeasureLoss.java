@@ -2,43 +2,42 @@ package ai.libs.jaicore.ml.classification.multilabel.loss;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.OptionalDouble;
 
-import org.api4.java.ai.ml.core.evaluation.loss.IBatchLossFunction;
-
-import meka.core.Metrics;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 
 /**
  * Measure combining exact match, hamming loss, f1macroavgL and rankloss. Here
  * implemented in inverse.
  *
- * de Sá, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
+ * de Sï¿½, Alex GC, Gisele L. Pappa, and Alex A. Freitas. "Towards a method for automatically selecting and configuring multi-label
  * classification algorithms." Proceedings of the Genetic and Evolutionary Computation Conference Companion. ACM, 2017.
  *
  * @author helegraf, mwever
  *
  */
-public class AutoMEKAGGPFitnessMeasureLoss implements IBatchLossFunction<double[]> {
+public class AutoMEKAGGPFitnessMeasureLoss extends AMultiLabelClassificationMeasure {
+
+	private AMultiLabelClassificationMeasure[] measures;
+
+	public AutoMEKAGGPFitnessMeasureLoss() {
+		super();
+		this.measures = new AMultiLabelClassificationMeasure[] { new ExactMatch(), new F1MacroAverageL(), new Hamming(), new RankLoss() };
+	}
+
+	public AutoMEKAGGPFitnessMeasureLoss(final double threshold) {
+		super(threshold);
+		this.measures = new AMultiLabelClassificationMeasure[] { new ExactMatch(threshold), new F1MacroAverageL(threshold), new Hamming(threshold), new RankLoss(threshold) };
+	}
 
 	@Override
-	public double loss(final List<double[]> actual, final List<double[]> expected) {
-		double[][] ypred = new double[actual.size()][];
-		int[][] ypredint = new int[actual.size()][];
-		for (int i = 0; i < actual.size(); i++) {
-			ypred[i] = actual.get(i);
-			ypredint[i] = Arrays.stream(actual.get(i)).mapToInt(x -> (x >= 0.5) ? 1 : 0).toArray();
+	public double loss(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+		OptionalDouble res = Arrays.stream(this.measures).mapToDouble(x -> x.loss(expected, actual)).average();
+		if (res.isPresent()) {
+			return res.getAsDouble();
+		} else {
+			throw new IllegalStateException("Could not take the average of all base measures");
 		}
-
-		int[][] y = new int[expected.size()][];
-		for (int i = 0; i < expected.size(); i++) {
-			y[i] = Arrays.stream(expected.get(i)).mapToInt(x -> (x >= 0.5) ? 1 : 0).toArray();
-		}
-
-		double hamming = Metrics.L_Hamming(y, ypredint);
-		double rank = Metrics.L_RankLoss(y, ypred);
-		double macroF = Metrics.P_FmacroAvgL(y, ypredint);
-		double exactMatch = Metrics.P_Accuracy(y, ypredint);
-		double fitnessMeasure = (((1 - hamming) + (1 - rank) + macroF + exactMatch) / 4);
-		return 1 - fitnessMeasure;
 	}
 
 }

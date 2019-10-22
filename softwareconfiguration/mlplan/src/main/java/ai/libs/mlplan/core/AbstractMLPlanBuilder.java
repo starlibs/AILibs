@@ -8,12 +8,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
@@ -30,11 +37,10 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.IClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ClassifierEvaluatorConstructionFailedException;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.IClassifierEvaluatorFactory;
-import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -42,9 +48,11 @@ import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
 import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
-import weka.core.Instances;
+import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 
 /**
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.
@@ -55,7 +63,7 @@ import weka.core.Instances;
  *
  * @author mwever, fmohr
  */
-public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingCustomizable {
+public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>, B extends AbstractMLPlanBuilder<I, D, L, B>> implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 
 	/* Logging */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlanBuilder.class);
@@ -78,24 +86,25 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	private Predicate<TFDNode> priorizingPredicate = null;
 	private File searchSpaceFile;
 	private String requestedHASCOInterface;
-	private IClassifierFactory classifierFactory;
+	private ILearnerFactory<L> classifierFactory;
+	private ISupervisedLearnerMetric performanceMeasure = ClassifierMetric.MEAN_ERRORRATE;
 
 	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
-	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
+	private PipelineValidityCheckingNodeEvaluator<D> pipelineValidityCheckingNodeEvaluator;
+
 	/* The splitter is used to create the split for separating search and selection data */
-	private IDatasetSplitter searchSelectionDatasetSplitter;
-	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSearchPhase = null;
-	private IClassifierEvaluatorFactory factoryForPipelineEvaluationInSelectionPhase = null;
+	private IFoldSizeConfigurableRandomDatasetSplitter<D> searchSelectionDatasetSplitter;
+	private ISupervisedLearnerEvaluatorFactory<I, D> factoryForPipelineEvaluationInSearchPhase = null;
+	private ISupervisedLearnerEvaluatorFactory<I, D> factoryForPipelineEvaluationInSelectionPhase = null;
 
 	private Collection<Component> components = new LinkedList<>();
-	private String performanceMeasureName;
 
 	/* Use caching */
 	private boolean useCache;
 	private PerformanceDBAdapter dbAdapter = null;
 
 	/* The problem input for ML-Plan. */
-	private Instances dataset;
+	private D dataset;
 
 	protected AbstractMLPlanBuilder() {
 		super();
@@ -123,7 +132,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param preferredNodeEvaluator
 	 * @return
 	 */
-	public AbstractMLPlanBuilder withPreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
+	public B withPreferredNodeEvaluator(final IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator) {
 		if (this.factoryPreparedWithData) {
 			throw new IllegalStateException("The method prepareNodeEvaluatorInFactoryWithData has already been called. No changes to the preferred node evaluator possible anymore");
 		}
@@ -135,21 +144,21 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 			this.preferredNodeEvaluator = new AlternativeNodeEvaluator<>(preferredNodeEvaluator, this.preferredNodeEvaluator);
 		}
 		this.update();
-		return this;
+		return this.getSelf();
 	}
 
 	@SuppressWarnings("unchecked")
-	public AbstractMLPlanBuilder withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
+	public B withSearchFactory(@SuppressWarnings("rawtypes") final IOptimalPathInORGraphSearchFactory searchFactory, @SuppressWarnings("rawtypes") final AlgorithmicProblemReduction transformer) {
 		this.hascoFactory.setSearchFactory(searchFactory);
 		this.hascoFactory.setSearchProblemTransformer(transformer);
-		return this;
+		return this.getSelf();
 	}
 
 	@SuppressWarnings("unchecked")
-	public AbstractMLPlanBuilder withRandomCompletionBasedBestFirstSearch() {
+	public B withRandomCompletionBasedBestFirstSearch() {
 		this.hascoFactory.setSearchFactory(new StandardBestFirstFactory<TFDNode, String, Double>());
 		this.update();
-		return this;
+		return this.getSelf();
 	}
 
 	public Collection<Component> getComponents() throws IOException {
@@ -172,7 +181,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @return The MLPlanBuilder object.
 	 * @throws IOException An IOException is thrown if there are issues reading the config file.
 	 */
-	public AbstractMLPlanBuilder withAlgorithmConfigFile(final File algorithmConfigFile) {
+	public B withAlgorithmConfigFile(final File algorithmConfigFile) {
 		return this.withAlgorithmConfig((MLPlanClassifierConfig) ConfigFactory.create(MLPlanClassifierConfig.class).loadPropertiesFromFile(algorithmConfigFile));
 	}
 
@@ -183,11 +192,11 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @return The MLPlanBuilder object.
 	 * @throws IOException An IOException is thrown if there are issues reading the config file.
 	 */
-	public AbstractMLPlanBuilder withAlgorithmConfig(final MLPlanClassifierConfig config) {
+	public B withAlgorithmConfig(final MLPlanClassifierConfig config) {
 		this.algorithmConfig = config;
 		this.hascoFactory.withAlgorithmConfig(this.algorithmConfig);
 		this.update();
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -198,7 +207,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @return The builder object.
 	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
 	 */
-	public AbstractMLPlanBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+	public B withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
 		List<String> ordering;
 		if (preferredComponentsFile instanceof ResourceFile) {
@@ -213,23 +222,14 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	}
 
 	/**
-	 * Sets the name of the performance measure that is used.
-	 *
-	 * @param name The name of the performance measure.
-	 */
-	public void setPerformanceMeasureName(final String name) {
-		this.performanceMeasureName = name;
-	}
-
-	/**
 	 * Set the data for which ML-Plan is supposed to find the best pipeline.
 	 *
 	 * @param dataset The dataset for which ML-Plan is to be run.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withDataset(final Instances dataset) {
+	public B withDataset(final D dataset) {
 		this.dataset = dataset;
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -239,12 +239,12 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @return The builder object.
 	 * @throws IOException Thrown if the given file does not exist.
 	 */
-	public AbstractMLPlanBuilder withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
+	public B withSearchSpaceConfigFile(final File searchSpaceConfig) throws IOException {
 		FileUtil.requireFileExists(searchSpaceConfig);
 		this.searchSpaceFile = searchSpaceConfig;
 		this.components.clear();
 		this.components.addAll(new ComponentLoader(this.searchSpaceFile).getComponents());
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -253,9 +253,9 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param classifierFactory The classifier factory to be used to translate CompositionInstance objects to classifiers.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withClassifierFactory(final IClassifierFactory classifierFactory) {
+	public B withClassifierFactory(final ILearnerFactory<L> classifierFactory) {
 		this.classifierFactory = classifierFactory;
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -264,24 +264,24 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param datasetSplitter The dataset splitter to be used.
 	 * @return The builder obect.
 	 */
-	public AbstractMLPlanBuilder withDatasetSplitterForSearchSelectionSplit(final IDatasetSplitter datasetSplitter) {
+	public B withDatasetSplitterForSearchSelectionSplit(final IFoldSizeConfigurableRandomDatasetSplitter<D> datasetSplitter) {
 		this.searchSelectionDatasetSplitter = datasetSplitter;
-		return this;
+		return this.getSelf();
 	}
 
-	public AbstractMLPlanBuilder withRequestedInterface(final String requestedInterface) {
+	public B withRequestedInterface(final String requestedInterface) {
 		this.requestedHASCOInterface = requestedInterface;
-		return this;
+		return this.getSelf();
 	}
 
 	/**
 	 * @param timeout The timeout for ML-Plan to search for the best classifier.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withTimeOut(final TimeOut timeout) {
+	public B withTimeOut(final TimeOut timeout) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_TIMEOUT, timeout.milliseconds() + "");
 		this.update();
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -295,10 +295,10 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param timeout The timeout for a single candidate evaluation.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withNodeEvaluationTimeOut(final TimeOut timeout) {
+	public B withNodeEvaluationTimeOut(final TimeOut timeout) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_NODE, timeout.milliseconds() + "");
 		this.update();
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -312,10 +312,10 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param timeout The timeout for a single candidate evaluation.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withCandidateEvaluationTimeOut(final TimeOut timeout) {
+	public B withCandidateEvaluationTimeOut(final TimeOut timeout) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_RANDOM_COMPLETIONS_TIMEOUT_PATH, timeout.milliseconds() + "");
 		this.update();
-		return this;
+		return this.getSelf();
 	}
 
 	/**
@@ -326,23 +326,23 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	}
 
 	@Override
-	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final Instances data, final int seed, final int fullDatasetSize) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator<I, D> getClassifierEvaluationInSearchPhase(final D data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
 
-		IClassifierEvaluator evaluator = this.factoryForPipelineEvaluationInSearchPhase.getIClassifierEvaluator(data, seed);
+		ISupervisedLearnerEvaluator<I, D> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
 		}
 
-		return new PipelineEvaluator(this.getClassifierFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
+		return new PipelineEvaluator<>(this.getLearnerFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
 	}
 
 	@Override
-	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(final Instances data, final int seed) throws ClassifierEvaluatorConstructionFailedException {
+	public PipelineEvaluator<I, D> getClassifierEvaluationInSelectionPhase(final D data, final int seed) throws LearnerEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}
-		return new PipelineEvaluator(this.getClassifierFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getIClassifierEvaluator(data, seed), Integer.MAX_VALUE);
+		return new PipelineEvaluator<>(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed)), Integer.MAX_VALUE);
 	}
 
 	/**
@@ -351,14 +351,14 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param evaluatorFactory The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
-	public void withSearchPhaseEvaluatorFactory(final IClassifierEvaluatorFactory evaluatorFactory) {
+	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<I, D> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSearchPhase = evaluatorFactory;
 	}
 
 	/**
 	 * @return The factory for the classifier evaluator of the search phase.
 	 */
-	protected IClassifierEvaluatorFactory getSearchEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<I, D> getSearchEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSearchPhase;
 	}
 
@@ -368,9 +368,19 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withSelectionPhaseEvaluatorFactory(final IClassifierEvaluatorFactory evaluatorFactory) {
+	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<I, D> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
-		return this;
+		return this.getSelf();
+	}
+
+	/**
+	 * Sets the performance measure to evaluate a candidate solution's generalization performance. Caution: This resets the evaluators to MCCV for both search and selection phase if these are not already MCCVs.
+	 * @param performanceMeasure The loss function to be used.
+	 * @return The builder object.
+	 */
+	public B withPerformanceMeasure(final ISupervisedLearnerMetric performanceMeasure) {
+		this.performanceMeasure = performanceMeasure;
+		return this.getSelf();
 	}
 
 	/**
@@ -379,32 +389,32 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param numCpus The number of cpus to use.
 	 * @return The builder object.
 	 */
-	public AbstractMLPlanBuilder withNumCpus(final int numCpus) {
+	public B withNumCpus(final int numCpus) {
 		this.algorithmConfig.setProperty(MLPlanClassifierConfig.K_CPUS, numCpus + "");
 		this.update();
-		return this;
+		return this.getSelf();
 	}
 
 	/**
 	 * @return The factory for the classifier evaluator of the selection phase.
 	 */
-	protected IClassifierEvaluatorFactory getSelectionEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<I, D> getSelectionEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSelectionPhase;
 	}
 
 	@Override
-	public String getPerformanceMeasureName() {
-		return this.performanceMeasureName;
+	public ISupervisedLearnerMetric getPerformanceMeasure() {
+		return this.performanceMeasure;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	@SuppressWarnings("rawtypes")
 	public HASCOFactory getHASCOFactory() {
 		return this.hascoFactory;
 	}
 
 	@Override
-	public IClassifierFactory getClassifierFactory() {
+	public ILearnerFactory<L> getLearnerFactory() {
 		return this.classifierFactory;
 	}
 
@@ -425,7 +435,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	}
 
 	@Override
-	public IDatasetSplitter getSearchSelectionDatasetSplitter() {
+	public IFoldSizeConfigurableRandomDatasetSplitter<D> getSearchSelectionDatasetSplitter() {
 		return this.searchSelectionDatasetSplitter;
 	}
 
@@ -450,7 +460,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	}
 
 	@Override
-	public void prepareNodeEvaluatorInFactoryWithData(final Instances data) {
+	public void prepareNodeEvaluatorInFactoryWithData(final D data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
 		}
@@ -496,7 +506,7 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 * @param dataset The dataset for which an ML-Plan object is to be built.
 	 * @return The ML-Plan object configured with this builder.
 	 */
-	public MLPlan build(final Instances dataset) {
+	public MLPlan<I, D, L> build(final D dataset) {
 		this.dataset = dataset;
 		return this.build();
 	}
@@ -506,9 +516,9 @@ public abstract class AbstractMLPlanBuilder implements IMLPlanBuilder, ILoggingC
 	 *
 	 * @return The ML-Plan object configured with this builder.
 	 */
-	public MLPlan build() {
+	public MLPlan<I, D, L> build() {
 		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
-		MLPlan mlplan = new MLPlan(this, this.dataset);
+		MLPlan<I, D, L> mlplan = new MLPlan<>(this, this.dataset);
 		mlplan.setTimeout(this.getTimeOut());
 		return mlplan;
 	}

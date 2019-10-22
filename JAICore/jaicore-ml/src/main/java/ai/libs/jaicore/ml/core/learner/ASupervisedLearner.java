@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.core.learner;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -10,7 +11,6 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
-import org.api4.java.ai.ml.core.learner.algorithm.IPredictionBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,25 +29,25 @@ public abstract class ASupervisedLearner<I extends ILabeledInstance, D extends I
 	}
 
 	@Override
-	public IPredictionBatch fitAndPredict(final D dTrain, final I[] xTest) throws TrainingException, PredictionException, InterruptedException {
+	public List<IPrediction> fitAndPredict(final D dTrain, final I[] xTest) throws TrainingException, PredictionException, InterruptedException {
 		this.fit(dTrain);
 		return this.predict(xTest);
 	}
 
 	@Override
-	public IPredictionBatch fitAndPredict(final D dTrain, final D dTest) throws TrainingException, PredictionException, InterruptedException {
+	public List<IPrediction> fitAndPredict(final D dTrain, final D dTest) throws TrainingException, PredictionException, InterruptedException {
 		this.fit(dTrain);
 		return this.predict(dTest);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IPredictionBatch predict(final D dTest) throws PredictionException, InterruptedException {
+	public List<IPrediction> predict(final D dTest) throws PredictionException, InterruptedException {
 		return this.predict((I[]) dTest.stream().toArray());
 	}
 
 	@Override
-	public IPredictionBatch predict(final I[] dTest) throws PredictionException, InterruptedException {
+	public List<IPrediction> predict(final I[] dTest) throws PredictionException, InterruptedException {
 		return new PredictionBatch((IPrediction[]) Arrays.stream(dTest).map(x -> {
 			try {
 				return this.predict(x);

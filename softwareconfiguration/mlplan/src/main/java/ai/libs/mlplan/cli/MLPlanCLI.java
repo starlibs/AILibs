@@ -32,9 +32,9 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredS
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMEKAGGPFitnessMeasureLoss;
-import ai.libs.jaicore.ml.classification.multilabel.loss.ExactMatchLoss;
-import ai.libs.jaicore.ml.classification.multilabel.loss.F1MacroAverageLLoss;
-import ai.libs.jaicore.ml.classification.multilabel.loss.HammingLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.ExactMatch;
+import ai.libs.jaicore.ml.classification.multilabel.loss.F1MacroAverageL;
+import ai.libs.jaicore.ml.classification.multilabel.loss.Hamming;
 import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1AsLoss;
 import ai.libs.jaicore.ml.classification.multilabel.loss.JaccardLoss;
 import ai.libs.jaicore.ml.classification.multilabel.loss.RankLoss;
@@ -49,10 +49,10 @@ import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanMekaBuilder;
 import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
 import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
+import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import meka.classifiers.multilabel.MultiLabelClassifier;
@@ -233,16 +233,16 @@ public class MLPlanCLI {
 				mekaBuilder.withPerformanceMeasure(new AutoMEKAGGPFitnessMeasureLoss());
 				break;
 			case "EXACT_MATCH":
-				mekaBuilder.withPerformanceMeasure(new ExactMatchLoss());
+				mekaBuilder.withPerformanceMeasure(new ExactMatch());
 				break;
 			case "F1_MACRO_AVG_D":
 				mekaBuilder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
 				break;
 			case "F1_MACRO_AVG_L":
-				mekaBuilder.withPerformanceMeasure(new F1MacroAverageLLoss());
+				mekaBuilder.withPerformanceMeasure(new F1MacroAverageL());
 				break;
 			case "HAMMING":
-				mekaBuilder.withPerformanceMeasure(new HammingLoss());
+				mekaBuilder.withPerformanceMeasure(new Hamming());
 				break;
 			case "JACCARD":
 				mekaBuilder.withPerformanceMeasure(new JaccardLoss());

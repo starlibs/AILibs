@@ -1,51 +1,61 @@
 package ai.libs.jaicore.ml.classification.multilabel.loss;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.OptionalDouble;
+import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Range;
+public class RankLoss extends AMultiLabelClassificationMeasure {
 
-import ai.libs.jaicore.basic.sets.SetUtil;
+	private static final double DEFAULT_TIE_LOSS = 0.0;
 
-public class RankLoss implements ILossFunction<double[]> {
+	private final double tieLoss;
+
+	public RankLoss() {
+		this(DEFAULT_TIE_LOSS);
+	}
+
+	/**
+	 * Create a Ranking Loss measure instance.
+	 *
+	 * @param tieLoss The loss [0,1] which is accounted for a tie of the predicted relevant and irrelevant label's relevance score.
+	 */
+	public RankLoss(final double tieLoss) {
+		this.tieLoss = tieLoss;
+	}
+
+	private double rankingLoss(final IMultiLabelClassification expected, final IMultiLabelClassification actual) {
+		List<String> expectedRelevantLabels = expected.getPrediction();
+		List<String> expectedIrrelevantLabels = expected.getIrrelevantLabels();
+
+		List<String> actualLabelset = actual.getLabelSet();
+		double[] labelRelevance = actual.getLabelRelevanceVector();
+
+		double wrongRankingCounter = 0;
+		for (String expectedRel : expectedRelevantLabels) {
+			for (String expectedIrr : expectedIrrelevantLabels) {
+				double scoreRelLabel = labelRelevance[actualLabelset.indexOf(expectedRel)];
+				double scoreIrrLabel = labelRelevance[actualLabelset.indexOf(expectedIrr)];
+				if (scoreRelLabel == scoreIrrLabel) {
+					wrongRankingCounter += this.tieLoss;
+				} else if (scoreRelLabel < scoreIrrLabel) {
+					wrongRankingCounter += 1.0;
+				}
+			}
+		}
+		return wrongRankingCounter / (expectedRelevantLabels.size() + expectedIrrelevantLabels.size());
+	}
 
 	@Override
-	public double loss(final double[] actual, final double[] expected) {
-		int numLabels = actual.length;
-		List<Set<Integer>> labelPairs = SetUtil.getAllPossibleSubsetsWithSize(ContiguousSet.create(Range.closed(0, numLabels - 1), DiscreteDomain.integers()).asList(), 2);
+	public double loss(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+		this.checkConsistency(expected, actual);
 
-		int mistakes = 0;
-		int differentPairs = 0;
-		for (Set<Integer> pair : labelPairs) {
-			Iterator<Integer> it = pair.iterator();
-			int x = it.next();
-			int y = it.next();
-			double xProb = expected[x];
-			double yProb = expected[y];
-			double xTrue = actual[x];
-			double yTrue = actual[y];
-			if (xTrue == yTrue) {
-				continue;
-			}
-			differentPairs++;
-			if (xProb == yProb) {
-				mistakes += 0.5;
-			} else if (xTrue == 1 && xProb < yProb) {
-				mistakes++;
-			} else if (yTrue == 1 && yProb < xProb) {
-				mistakes++;
-			}
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.rankingLoss(expected.get(x), actual.get(x))).average();
+		if (res.isPresent()) {
+			return res.getAsDouble();
+		} else {
+			throw new IllegalStateException("The ranking loss could not be averaged across all the instances.");
 		}
-
-		if (differentPairs == 0) {
-			return Double.NaN;
-		}
-
-		return (double) mistakes / differentPairs;
 	}
 }

@@ -12,7 +12,7 @@ import org.api4.java.algorithm.events.AlgorithmEvent;
 
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 
-public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<I, D> {
+public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<D> {
 
 	protected List<CentroidCluster<I>> clusterResults = null;
 	protected int currentCluster = 0;

@@ -25,6 +25,24 @@ import weka.core.UnsupportedAttributeTypeException;
 
 public class ArffDatasetReader implements IDatasetLoader {
 
+	private static final String M_RELATION = "@relation";
+	private static final String M_ATTRIBUTE = "@attribute";
+	private static final String M_DATA = "@data";
+
+	private static final String M_NUMERIC_ATT = "numeric";
+	private static final String M_NOMINAL_ATT = "nominal";
+
+	private static final String F_CLASS_INDEX = "C";
+	private static final String F_MULTI_TARGET = "MT";
+	private static final String F_DATASET_SIZE = "I";
+
+	private static final String K_RELATION_NAME = "relationName";
+	private static final String K_CLASS_INDEX = "classIndex";
+
+	private static final String SEPARATOR_RELATIONNAME = ":";
+	private static final String SEPARATOR_ATTRIBUTE_DESCRIPTION = " ";
+	private static final String SEPARATOR_DENSE_INSTANCE_VALUES = ",";
+
 	private final File datasetFile;
 
 	public ArffDatasetReader(final File datasetFile) {

@@ -27,7 +27,7 @@ import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEEvaluator;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFENodeEvaluator;

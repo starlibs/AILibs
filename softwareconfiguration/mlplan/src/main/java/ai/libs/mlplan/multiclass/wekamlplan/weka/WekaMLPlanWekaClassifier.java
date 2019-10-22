@@ -2,7 +2,7 @@ package ai.libs.mlplan.multiclass.wekamlplan.weka;
 
 import java.io.IOException;
 
-import ai.libs.mlplan.core.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 
 public class WekaMLPlanWekaClassifier extends MLPlanWekaClassifier {

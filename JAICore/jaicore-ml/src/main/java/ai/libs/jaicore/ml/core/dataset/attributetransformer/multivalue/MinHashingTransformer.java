@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.attribute.transformer.ISingleAttributeTransformer;
-import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttributeValue;
 
 import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
 
@@ -61,7 +60,7 @@ public class MinHashingTransformer implements ISingleAttributeTransformer {
 	}
 
 	@Override
-	public double[] transformAttribute(final IAttributeValue<?> attributeToTransform) {
+	public double[] transformAttribute(final Object attributeToTransform) {
 		if (!(attributeToTransform instanceof MultiValueAttributeValue)) {
 			throw new IllegalArgumentException("Can only perform Multi-Value Binaryzation for multi-value attributes.");
 		}

@@ -4,8 +4,8 @@ import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import autofe.util.DataSet;
 import weka.core.Instances;
 
@@ -25,7 +25,7 @@ public class AutoFEWekaPipelineEvaluator implements IObjectEvaluator<AutoFEWekaP
 	public Double evaluate(final AutoFEWekaPipeline object) throws ObjectEvaluationFailedException {
 		try {
 			Instances wekaData = object.transformData(this.data);
-			MonteCarloCrossValidationEvaluator evaluator = new MonteCarloCrossValidationEvaluator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), 5, wekaData, this.trainingPortion, this.seed);
+			MonteCarloCrossValidationSplitSetGenerator evaluator = new MonteCarloCrossValidationSplitSetGenerator(new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss()), 5, wekaData, this.trainingPortion, this.seed);
 			return evaluator.evaluate(object);
 		} catch (Exception e) {
 			throw new ObjectEvaluationFailedException("Could not evaluate pipeline", e);

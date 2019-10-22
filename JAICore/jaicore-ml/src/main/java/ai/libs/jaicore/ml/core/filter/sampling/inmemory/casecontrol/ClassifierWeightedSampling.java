@@ -8,8 +8,6 @@ import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassi
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPrediction;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -34,7 +32,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
  * @param <I>
  */
 
-public class ClassifierWeightedSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends CaseControlLikeSampling<I, D> {
+public class ClassifierWeightedSampling<D extends ISingleLabelClassificationDataset> extends CaseControlLikeSampling<ISingleLabelClassificationInstance, D> {
 
 	private Logger logger = LoggerFactory.getLogger(ClassifierWeightedSampling.class);
 
@@ -66,17 +64,17 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance, D extends IL
 			try {
 				this.sample = (D) this.getInput().createEmptyCopy();
 				D sampleCopy = (D) this.getInput().createEmptyCopy();
-				for (I instance : this.getInput()) {
+				for (ISingleLabelClassificationInstance instance : this.getInput()) {
 					sampleCopy.add(instance);
 				}
-				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(((WekaInstances) sampleCopy).getList(), this.pilotEstimator);
+				this.finalDistribution = this.calculateFinalInstanceBoundariesWithDiscaring(sampleCopy, this.pilotEstimator);
 				this.finalDistribution.reseedRandomGenerator(this.rand.nextLong());
 			} catch (DatasetCreationException e) {
 				throw new AlgorithmException("Could not create a copy of the dataset.", e);
 			}
 			return this.activate();
 		case ACTIVE:
-			I choosenInstance;
+			ISingleLabelClassificationInstance choosenInstance;
 			if (this.sample.size() < this.sampleSize) {
 				do {
 					choosenInstance = this.getInput().get(this.finalDistribution.sample());
@@ -100,7 +98,7 @@ public class ClassifierWeightedSampling<I extends ILabeledInstance, D extends IL
 		for (int i = 0; i < instances.size(); i++) {
 			try {
 				ISingleLabelClassificationPrediction prediction = this.pilotEstimator.predict(instances.get(i));
-				if (prediction.getLabelWithHighestProbability().equals(instances.get(i).getLabel())) {
+				if (prediction.getLabelWithHighestProbability() == instances.get(i).getIntLabel()) {
 					weights[i] = this.addForRightClassification - prediction.getProbabilityOfLabel(instances.get(i).getLabel());
 				} else {
 					weights[i] = this.baseValue + prediction.getProbabilityOfLabel(prediction.getLabelWithHighestProbability());

@@ -18,7 +18,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
  *
  * @author Lukas Brandt
  */
-public class SystematicSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<I, D> {
+public class SystematicSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Random random;
 	private D sortedDataset = null;

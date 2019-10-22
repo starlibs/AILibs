@@ -1,28 +1,33 @@
 package ai.libs.jaicore.ml.classification.multilabel.loss;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
+import java.util.OptionalDouble;
+import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 
-public class JaccardScore implements ILossFunction<double[]> {
+public class JaccardScore extends AMultiLabelClassificationMeasure {
+
+	private double jaccardScore(final Collection<String> expected, final Collection<String> actual) {
+		return ((double) SetUtil.intersection(expected, actual).size()) / SetUtil.union(expected, actual).size();
+	}
 
 	@Override
-	public double loss(final double[] expected, final double[] actual) {
-		Collection<Integer> t = new HashSet<>();
-		Collection<Integer> p = new HashSet<>();
-		int numLabels = actual.length;
-		for (int label = 0; label < numLabels; label++) {
-			if (actual[label] == 1) {
-				t.add(label);
-			}
-			if (expected[label] == 1) {
-				p.add(label);
-			}
+	public double score(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
+		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.jaccardScore(expected.get(x).getPrediction(), actual.get(x).getPrediction())).average();
+		if (!res.isPresent()) {
+			throw new IllegalStateException("Could not average the jaccord score.");
+		} else {
+			return res.getAsDouble();
 		}
-		return ((double) SetUtil.intersection(t, p).size()) / SetUtil.union(t, p).size();
+	}
+
+	@Override
+	public double loss(final List<IMultiLabelClassification> actual, final List<IMultiLabelClassification> expected) {
+		return 1 - this.score(expected, actual);
 	}
 
 }

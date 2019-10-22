@@ -22,9 +22,17 @@ import ai.libs.hasco.metamining.MetaMinerBasedSorter;
 import ai.libs.hasco.model.Component;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
+<<<<<<< HEAD
 import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
+=======
+import ai.libs.jaicore.ml.core.dataset.metafeature.GlobalCharacterizer;
+>>>>>>> branch 'general/improvement/outsourcedinterfaces' of https://github.com/fmohr/AILibs.git
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+<<<<<<< HEAD
 import ai.libs.jaicore.ml.core.metalearning.metafeature.GlobalCharacterizer;
+=======
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
+>>>>>>> branch 'general/improvement/outsourcedinterfaces' of https://github.com/fmohr/AILibs.git
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearch;
 import ai.libs.jaicore.search.algorithms.standard.lds.BestFirstLimitedDiscrepancySearchFactory;
@@ -34,8 +42,8 @@ import ai.libs.jaicore.search.model.travesaltree.ReducedGraphGenerator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithNodeRecommenderInput;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanWekaBuilder;
 import ai.libs.mlplan.metamining.databaseconnection.ExperimentRepository;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.MLPipelineComponentInstanceFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.AbstractClassifier;
@@ -121,7 +129,7 @@ public class MetaMLPlan extends AbstractClassifier {
 		// Preparing the split for validating pipelines
 		this.logger.info("Preparing validation split");
 		SimpleSLCSplitBasedClassifierEvaluator classifierEval = new SimpleSLCSplitBasedClassifierEvaluator(new ZeroOneLoss());
-		MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(classifierEval, 5, data, .7f, this.seed);
+		MonteCarloCrossValidationSplitSetGenerator mccv = new MonteCarloCrossValidationSplitSetGenerator(classifierEval, 5, data, .7f, this.seed);
 
 		// Search for solutions
 		this.logger.info("Searching for solutions");

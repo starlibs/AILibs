@@ -42,9 +42,9 @@ import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.ISplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
+import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
@@ -246,7 +246,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 		this.logger.info("Using the following preferred node evaluator: {}", this.preferredNodeEvaluator);
 
 		/* create HASCO problem */
-		IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationEvaluator(this.benchmark, NUMBER_OF_MC_ITERATIONS_IN_SEARCH, dataShownToSearch, 0.7, this.config.seed());
+		IObjectEvaluator<Classifier, Double> searchBenchmark = new MonteCarloCrossValidationSplitSetGenerator(this.benchmark, NUMBER_OF_MC_ITERATIONS_IN_SEARCH, dataShownToSearch, 0.7, this.config.seed());
 		IObjectEvaluator<ComponentInstance, Double> wrappedSearchBenchmark = c -> {
 			try {
 				return searchBenchmark.evaluate(this.factory.getComponentInstantiation(c));
@@ -259,7 +259,7 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 			this.logger.info("Evaluating object {}...", object);
 
 			/* first conduct MCCV */
-			MonteCarloCrossValidationEvaluator mccv = new MonteCarloCrossValidationEvaluator(this.benchmark, NUMBER_OF_MC_ITERATIONS_IN_SELECTION, dataForComplete.getInstances(), NUMBER_OF_MC_FOLDS_IN_SELECTION, this.config.seed());
+			MonteCarloCrossValidationSplitSetGenerator mccv = new MonteCarloCrossValidationSplitSetGenerator(this.benchmark, NUMBER_OF_MC_ITERATIONS_IN_SELECTION, dataForComplete.getInstances(), NUMBER_OF_MC_FOLDS_IN_SELECTION, this.config.seed());
 			double score;
 			try {
 				score = mccv.evaluate(object);

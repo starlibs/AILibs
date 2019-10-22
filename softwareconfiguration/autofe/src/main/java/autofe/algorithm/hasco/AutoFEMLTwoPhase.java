@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
-import ai.libs.mlplan.core.MLPlanWekaBuilder;
+import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.MLPlanWekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaMLPlanWekaClassifier;
 import autofe.algorithm.hasco.evaluation.AbstractHASCOFEObjectEvaluator;

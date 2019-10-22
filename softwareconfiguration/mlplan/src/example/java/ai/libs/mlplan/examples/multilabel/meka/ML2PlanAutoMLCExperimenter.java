@@ -38,8 +38,8 @@ import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.Solutio
 import ai.libs.jaicore.graphvisualizer.window.AlgorithmVisualizationWindow;
 import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMEKAGGPFitnessMeasureLoss;
 import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMekaGGPFitness;
-import ai.libs.jaicore.ml.classification.multilabel.loss.F1MacroAverageLLoss;
-import ai.libs.jaicore.ml.classification.multilabel.loss.HammingLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.F1MacroAverageL;
+import ai.libs.jaicore.ml.classification.multilabel.loss.Hamming;
 import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1AsLoss;
 import ai.libs.jaicore.ml.classification.multilabel.loss.RankLoss;
 import ai.libs.jaicore.ml.weka.WekaUtil;
@@ -49,9 +49,9 @@ import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogr
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.core.MLPlan;
-import ai.libs.mlplan.core.MLPlanMekaBuilder;
 import ai.libs.mlplan.gui.outofsampleplots.WekaClassifierSolutionCandidateRepresenter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import meka.classifiers.multilabel.Evaluation;
@@ -122,13 +122,13 @@ public class ML2PlanAutoMLCExperimenter implements IExperimentSetEvaluator {
 				builder.withPerformanceMeasure(new RankLoss());
 				break;
 			case 1: // hamming
-				builder.withPerformanceMeasure(new HammingLoss());
+				builder.withPerformanceMeasure(new Hamming());
 				break;
 			case 62: // F1Measure avgd by instances
 				builder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
 				break;
 			case 74: // F1Measure avgd by labels (standard F1 measure for MLC)
-				builder.withPerformanceMeasure(new F1MacroAverageLLoss());
+				builder.withPerformanceMeasure(new F1MacroAverageL());
 				break;
 			case 73: // fitness
 			default:

@@ -51,7 +51,7 @@ public class DyadRankingLossUtil {
 		for (int i = 0; i < trueOrderings.size(); i++) {
 			IRanking<?> expected = trueOrderings.get(i);
 			IRanking<?> actual = predictedOrderings.get(i).getPrediction();
-			avgLoss += lossFunction.loss(expected, actual);
+			avgLoss += lossFunction.loss(actual, expected);
 		}
 
 		avgLoss /= trueOrderings.size();
@@ -84,7 +84,7 @@ public class DyadRankingLossUtil {
 			Collections.shuffle(shuffleContainer, random);
 			IDyadRankingInstance shuffledActual = new DyadRankingInstance(trueOrderings.getInstanceSchema(), shuffleContainer);
 			IRankingPrediction predicted = ranker.predict(shuffledActual);
-			avgLoss += lossFunction.loss(expected, predicted.getPrediction());
+			avgLoss += lossFunction.loss(predicted.getPrediction(), expected);
 		}
 
 		avgLoss /= trueOrderings.size();

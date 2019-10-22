@@ -3,26 +3,26 @@ package ai.libs.mlplan.core;
 import java.util.Collection;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
-import weka.core.Instances;
 
-public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
+public abstract class PipelineValidityCheckingNodeEvaluator<D extends ILabeledDataset<?>> implements IPathEvaluator<TFDNode, String, Double> {
 
-	private Instances data;
+	private D data;
 	private Collection<Component> components;
 
 	public PipelineValidityCheckingNodeEvaluator() {
 
 	}
 
-	public PipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final Instances data) {
+	public PipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final D data) {
 		this.data = data;
 		this.components = components;
 	}
 
-	public void setData(final Instances data) {
+	public void setData(final D data) {
 		this.data = data;
 	}
 
@@ -30,7 +30,7 @@ public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEval
 		this.components = components;
 	}
 
-	public Instances getData() {
+	public D getData() {
 		return this.data;
 	}
 

@@ -1,9 +1,11 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
+import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.ILearningCurve;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
+import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
@@ -19,7 +21,6 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolatedEvent;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolator;
-import weka.classifiers.Classifier;
 
 /**
  * Evaluates a classifier by predicting its learning curve with a few
@@ -31,13 +32,13 @@ import weka.classifiers.Classifier;
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
+public class LearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IClassifierEvaluator<I, D>, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<?, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
 	private D dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
@@ -61,7 +62,7 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D e
 	 *            measurements at the anchorpoints.
 	 * @param seed Random seed.
 	 */
-	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<I, D>> samplingAlgorithmFactory, final D dataset, final double trainSplitForAnchorpointsMeasurement,
+	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<?, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D dataset, final double trainSplitForAnchorpointsMeasurement,
 			final LearningCurveExtrapolationMethod extrapolationMethod, final long seed) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -80,12 +81,12 @@ public class LearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D e
 	 * Computes the (estimated) measure of the classifier on the full dataset
 	 */
 	@Override
-	public Double f(final Classifier classifier) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ISupervisedLearner<I, D> classifier) throws InterruptedException, ObjectEvaluationFailedException {
 
 		// Create the learning curve extrapolator with the given configuration.
 		this.logger.info("Receive request to evaluate classifier {}", classifier);
 		try {
-			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
+			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<I, D>(this.extrapolationMethod, classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
 					this.seed);
 			extrapolator.setLoggerName(this.getLoggerName() + ".extrapolator");
 

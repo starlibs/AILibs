@@ -69,7 +69,7 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithSubpathEvaluationsInput;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.ComponentInstanceVectorFeatureGenerator;
 import ai.libs.mlplan.metamining.pipelinecharacterizing.IPipelineCharacterizer;
-import ai.libs.mlplan.multiclass.wekamlplan.IClassifierFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import weka.core.Instances;
 
 /**
@@ -154,7 +154,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 	 * Used to create landmarker values for pipelines where no such landmarker has
 	 * yet been evaluated.
 	 */
-	private IClassifierFactory classifierFactory;
+	private ILearnerFactory classifierFactory;
 
 	/*
 	 * Defines if a landmarking based approach is used for defining the meta
@@ -175,7 +175,7 @@ public class DyadRankingBasedNodeEvaluator<T, A, V extends Comparable<V>> implem
 
 	private DyadMinMaxScaler scaler = null;
 
-	public void setClassifierFactory(final IClassifierFactory classifierFactory) {
+	public void setClassifierFactory(final ILearnerFactory classifierFactory) {
 		this.classifierFactory = classifierFactory;
 	}
 

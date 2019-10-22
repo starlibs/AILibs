@@ -10,7 +10,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 
-public class SimpleRandomSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<I, D> {
+public class SimpleRandomSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Random random;
 
