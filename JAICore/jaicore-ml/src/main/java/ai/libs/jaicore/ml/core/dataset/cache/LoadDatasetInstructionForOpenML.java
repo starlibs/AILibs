@@ -1,22 +1,21 @@
 package ai.libs.jaicore.ml.core.dataset.cache;
 
-import java.io.IOException;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
+import org.openml.apiconnector.io.OpenmlConnector;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ai.libs.jaicore.ml.core.dataset.loader.OpenMLHelper;
-import weka.core.Instances;
+import ai.libs.jaicore.ml.core.newdataset.reader.ArffDatasetReader;
 
 @JsonIgnoreProperties({ "provider" })
 public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
-
 	private static final long serialVersionUID = 2125875356626308199L;
 	private final String apiKey;
 
@@ -26,14 +25,13 @@ public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
 	}
 
 	@Override
-	public List<IDataset<IInstance>> getOutputDatasets(final List<IDataset<IInstance>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException {
-
-		// load openml or local dataset
-		OpenMLHelper.setApiKey(this.apiKey);
+	public List<IDataset<? extends IInstance>> getOutputDatasets(final List<IDataset<?>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException {
 		try {
-			Instances instances = OpenMLHelper.getInstancesById(Integer.valueOf(this.getId()));
-			return Arrays.asList(new WekaInstances(instances));
-		} catch (NumberFormatException | IOException | ClassNotFoundException e) {
+			OpenmlConnector connector = new OpenmlConnector(this.apiKey);
+			File f = connector.datasetGet(connector.dataGet(Integer.parseInt(this.getId())));
+			ArffDatasetReader reader = new ArffDatasetReader(f);
+			return Arrays.asList(reader.loadDataset());
+		} catch (Exception e) {
 			throw new DatasetTraceInstructionFailedException(e);
 		}
 	}
@@ -46,4 +44,5 @@ public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
 	public Instruction clone() {
 		return new LoadDatasetInstructionForOpenML(this.apiKey, Integer.valueOf(this.getId()));
 	}
+
 }

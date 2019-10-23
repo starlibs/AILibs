@@ -170,7 +170,7 @@ public class ReproducibleInstances extends Instances {
 			throws ClassNotFoundException, DatasetTraceInstructionFailedException, InterruptedException {
 		this.history.addNode(nameOfRefinementInstruction, instruction, Arrays.asList(this.getOutputUnit()));
 		this.outputUnitOfHistory = new Pair<>(nameOfRefinementInstruction, outputOfRefinementInstruction);
-		WekaInstances remainingData = ((WekaInstances) instruction.getOutputInstances(Arrays.asList(new WekaInstances(this))).get(outputOfRefinementInstruction));
+		WekaInstances remainingData = ((WekaInstances) instruction.getOutputDatasets(Arrays.asList(new WekaInstances(this))).get(outputOfRefinementInstruction));
 		this.removeIf(i -> !remainingData.contains(new WekaInstance(i)));
 		return this;
 	}

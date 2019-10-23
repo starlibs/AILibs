@@ -41,7 +41,7 @@ public class StratifiedSplitSubsetInstruction extends SplitInstruction {
 	}
 
 	@Override
-	public List<IDataset<?>> getOutputInstances(final List<IDataset<?>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException {
+	public List<IDataset<?>> getOutputDatasets(final List<IDataset<?>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException {
 
 		/* there must be exactly one input */
 		if (inputs.size() != 1) {

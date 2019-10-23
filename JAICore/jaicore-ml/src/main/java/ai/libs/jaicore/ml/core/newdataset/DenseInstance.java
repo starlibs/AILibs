@@ -1,27 +1,35 @@
 package ai.libs.jaicore.ml.core.newdataset;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class DenseInstance extends AInstance {
 
-	private Object[] attributes;
+	private List<Object> attributes;
 
 	public DenseInstance(final Object[] attributes, final Object label) {
+		this(Arrays.asList(attributes), label);
+	}
+
+	public DenseInstance(final List<Object> attributes, final Object label) {
 		super(label);
 		this.attributes = attributes;
 	}
 
 	@Override
 	public Object getAttributeValue(final int pos) {
-		return this.attributes[pos];
+		return this.attributes.get(pos);
 	}
 
 	@Override
 	public void setAttributeValue(final int pos, final Object value) {
-		this.attributes[pos] = value;
+		this.attributes.remove(pos);
+		this.attributes.add(pos, value);
 	}
 
 	@Override
 	public Object[] getAttributes() {
-		return this.attributes;
+		return this.attributes.toArray();
 	}
 
 	@Override
@@ -32,6 +40,11 @@ public class DenseInstance extends AInstance {
 	@Override
 	public double getPointValue(final int pos) {
 		throw new UnsupportedOperationException("Not yet implemented in DenseInstance.");
+	}
+
+	@Override
+	public void removeColumn(final int columnPos) {
+		this.attributes.remove(columnPos);
 	}
 
 }

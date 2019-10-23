@@ -87,7 +87,7 @@ public class InstructionGraph extends ArrayList<InstructionNode> {
 				inputs.add(input);
 			}
 		}
-		return node.getInstruction().getOutputInstances(inputs).get(unit.getY());
+		return node.getInstruction().getOutputDatasets(inputs).get(unit.getY());
 	}
 
 	@Override

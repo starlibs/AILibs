@@ -1,7 +1,5 @@
 package ai.libs.jaicore.ml.core.dataset.cache;
 
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.trace.IDatasetTraceInstruction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author jnowack
  *
  */
-public abstract class LoadDataSetInstruction extends Instruction implements IDatasetTraceInstruction<IInstance, IDataset<IInstance>> {
+public abstract class LoadDataSetInstruction extends Instruction implements IDatasetTraceInstruction {
 
 	private static final long serialVersionUID = 7408937429274201748L;
 	private final DataProvider provider;

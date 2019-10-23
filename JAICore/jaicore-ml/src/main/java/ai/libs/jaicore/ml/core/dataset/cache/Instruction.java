@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
@@ -31,7 +32,7 @@ public abstract class Instruction implements Serializable {
 	 *
 	 * @return The instances computed by this node
 	 */
-	public abstract List<IDataset<?>> getOutputInstances(final List<IDataset<?>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException;
+	public abstract List<IDataset<? extends IInstance>> getOutputDatasets(final List<IDataset<?>> inputs) throws DatasetTraceInstructionFailedException, InterruptedException;
 
 	@Override
 	public abstract Instruction clone();

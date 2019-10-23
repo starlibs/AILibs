@@ -23,7 +23,7 @@ import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.newdataset.reader.arff.EArffItem;
 import weka.core.UnsupportedAttributeTypeException;
 
-public class ArffDatasetReader implements IDatasetLoader {
+public class ArffDatasetReader implements IArffDatasetReader {
 
 	private static final String M_RELATION = "@relation";
 	private static final String M_ATTRIBUTE = "@attribute";

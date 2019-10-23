@@ -34,7 +34,6 @@ public class ArffToNumericDatasetDeserializer implements IDatasetDeserializer<IL
 
 	private static final String F_CLASS_INDEX = "C";
 	private static final String F_MULTI_TARGET = "MT";
-	private static final String F_DATASET_SIZE = "I";
 
 	private static final String K_RELATION_NAME = "relationName";
 	private static final String K_CLASS_INDEX = "classIndex";

@@ -18,6 +18,11 @@ public class InstanceSchema implements IInstanceSchema {
 	}
 
 	@Override
+	public List<IAttribute> getAttributeList() {
+		return this.attributeList;
+	}
+
+	@Override
 	public IAttribute getAttribute(final int pos) {
 		return this.attributeList.get(pos);
 	}
@@ -30,6 +35,21 @@ public class InstanceSchema implements IInstanceSchema {
 	@Override
 	public String getRelationName() {
 		return this.relationName;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("%attributes\n");
+		for (IAttribute t : this.attributeList) {
+			sb.append(t.toString() + "\n");
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public void removeAttribute(final int columnPos) {
+		this.attributeList.remove(columnPos);
 	}
 
 }
