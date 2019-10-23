@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.execution.IClassificationPredictionAndGroundTruthTable;
+import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 
 
-public class PredictionDiff<T> implements IClassificationPredictionAndGroundTruthTable {
+public class PredictionDiff<T> implements IPredictionAndGroundTruthTable {
 
 	private final Class<?> classInGeneric;
 	private final List<T> predictions = new ArrayList<>();

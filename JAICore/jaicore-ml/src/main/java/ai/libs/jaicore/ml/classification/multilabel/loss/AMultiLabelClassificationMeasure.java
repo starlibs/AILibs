@@ -7,48 +7,26 @@ import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClass
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassificationPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationMeasure;
 
-public abstract class AMultiLabelClassificationMeasure implements IMultiLabelClassificationMeasure {
+import ai.libs.jaicore.ml.core.evaluation.loss.AMeasure;
+
+public abstract class AMultiLabelClassificationMeasure extends AMeasure<IMultiLabelClassification, IMultiLabelClassificationPredictionAndGroundTruthTable> implements IMultiLabelClassificationMeasure {
 
 	private static final double DEFAULT_THRESHOLD = 0.5;
 
 	private final double threshold;
 
 	protected AMultiLabelClassificationMeasure(final double threshold) {
+		super();
 		this.threshold = threshold;
 	}
 
 	protected AMultiLabelClassificationMeasure() {
+		super();
 		this.threshold = DEFAULT_THRESHOLD;
 	}
 
 	public double getThreshold() {
 		return this.threshold;
-	}
-
-	protected void checkConsistency(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
-		if (expected.size() != actual.size()) {
-			throw new IllegalArgumentException("The expected and predicted classification lists must be of the same length.");
-		}
-	}
-
-	@Override
-	public double loss(final IMultiLabelClassificationPredictionAndGroundTruthTable pairTable) {
-		return this.loss(pairTable.getPredictionsAsList(), pairTable.getGroundTruthAsList());
-	}
-
-	@Override
-	public double loss(final List<IMultiLabelClassification> actual, final List<IMultiLabelClassification> expected) {
-		return 1 - this.score(expected, actual);
-	}
-
-	@Override
-	public double score(final List<IMultiLabelClassification> expected, final List<IMultiLabelClassification> actual) {
-		return 1 - this.loss(actual, expected);
-	}
-
-	@Override
-	public double score(final IMultiLabelClassificationPredictionAndGroundTruthTable pairTable) {
-		return this.score(pairTable.getGroundTruthAsList(), pairTable.getPredictionsAsList());
 	}
 
 	protected double[][] listToRelevanceMatrix(final List<IMultiLabelClassification> classificationList) {

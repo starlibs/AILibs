@@ -6,9 +6,9 @@ import java.io.IOException;
 
 import org.api4.java.ai.ml.core.dataset.supervised.INumericFeatureSupervisedDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.INumericFeatureSupervisedInstance;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.api4.java.ai.ml.core.learner.algorithm.IPredictionBatch;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.kvstore.KVStore;

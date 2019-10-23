@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core.timeseries.dataset.attribute;
 
+import org.api4.java.ai.ml.core.dataset.schema.attribute.ITimeseriesAttribute;
 import org.api4.java.common.timeseries.ITimeseries;
 
 import ai.libs.jaicore.ml.core.dataset.attribute.AGenericObjectAttribute;
@@ -10,7 +11,7 @@ import ai.libs.jaicore.ml.core.dataset.attribute.AGenericObjectAttribute;
  *
  * @param <O> Type of the representation of a timeseries.
  */
-public abstract class ATimeseriesAttribute<O> extends AGenericObjectAttribute<ITimeseries<O>> {
+public abstract class ATimeseriesAttribute<O> extends AGenericObjectAttribute<ITimeseries<O>> implements ITimeseriesAttribute<O> {
 
 	/**
 	 *

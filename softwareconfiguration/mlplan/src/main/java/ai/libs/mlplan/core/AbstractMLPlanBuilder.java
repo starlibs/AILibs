@@ -16,6 +16,7 @@ import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.loss.ISingleLabelClassificationMeasure;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
@@ -39,8 +40,8 @@ import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ISupervisedLearnerEvaluatorFactory;
+import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
@@ -63,7 +64,8 @@ import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
  *
  * @author mwever, fmohr
  */
-public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>, B extends AbstractMLPlanBuilder<I, D, L, B>> implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
+public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>, B extends AbstractMLPlanBuilder<I, D, L, B>>
+		implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 
 	/* Logging */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlanBuilder.class);
@@ -378,7 +380,7 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	 * @param performanceMeasure The loss function to be used.
 	 * @return The builder object.
 	 */
-	public B withPerformanceMeasure(final ISupervisedLearnerMetric performanceMeasure) {
+	public B withPerformanceMeasure(final ISingleLabelClassificationMeasure performanceMeasure) {
 		this.performanceMeasure = performanceMeasure;
 		return this.getSelf();
 	}

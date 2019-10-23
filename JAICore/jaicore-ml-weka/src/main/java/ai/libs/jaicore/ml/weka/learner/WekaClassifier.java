@@ -13,11 +13,11 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.LearnerConfigurationFailedException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
-import org.api4.java.ai.ml.core.learner.algorithm.IPredictionBatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

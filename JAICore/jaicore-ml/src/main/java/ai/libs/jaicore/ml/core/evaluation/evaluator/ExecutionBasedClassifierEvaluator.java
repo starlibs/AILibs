@@ -17,7 +17,6 @@ import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
 public class ExecutionBasedClassifierEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements ISupervisedLearnerEvaluator<I, D> {
 
-
 	private final IFixedDatasetSplitSetGenerator<D> splitGenerator;
 	private final SupervisedLearnerExecutor<D> executor = new SupervisedLearnerExecutor<>();
 	private final ISupervisedLearnerMetric metric;
@@ -35,7 +34,7 @@ public class ExecutionBasedClassifierEvaluator<I extends ILabeledInstance, D ext
 				List<D> folds = splitSet.getFolds(i);
 				reports.add(this.executor.execute(learner, folds.get(0), folds.get(1)));
 			}
-			return this.metric.evaluateToDouble(reports);
+			return this.metric.evaluate(reports);
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
 			throw new ObjectEvaluationFailedException(e);
 		}

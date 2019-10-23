@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Queue;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.exception.PredictionException;
-import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
 import org.api4.java.ai.ml.ranking.dataset.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.slf4j.Logger;

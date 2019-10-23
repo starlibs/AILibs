@@ -60,4 +60,19 @@ public class NDArrayTimeseriesAttribute extends ATimeseriesAttribute<INDArray> {
 		}
 	}
 
+	@Override
+	public double toDouble(final Object object) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
+	public String serializeAttributeValue(final Object value) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
+	@Override
+	public Object deserializeAttributeValue(final String string) {
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+
 }

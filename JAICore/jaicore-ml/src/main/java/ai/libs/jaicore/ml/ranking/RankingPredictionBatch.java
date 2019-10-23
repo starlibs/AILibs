@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.ranking;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
 
 import ai.libs.jaicore.ml.core.evaluation.PredictionBatch;
 

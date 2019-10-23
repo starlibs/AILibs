@@ -2,15 +2,15 @@ package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.singlelabel.loss.ISingleLabelClassificationBatchLossFunction;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 
-public class ErrorRate implements ISingleLabelClassificationBatchLossFunction {
+public class ErrorRate extends ASingleLabelClassificationMeasure {
+
+	private final ZeroOneLoss zeroOneLoss = new ZeroOneLoss();
 
 	@Override
-	public double loss(final List<?> actual, final List<?> expected) {
-		if (expected.size() != actual.size()) {
-			throw new IllegalArgumentException("Expected and actual list must have the same length.");
-		}
+	public double loss(final List<ISingleLabelClassification> expected, final List<ISingleLabelClassification> actual) {
+		this.checkConsistency(expected, actual);
 
 		ZeroOneLoss zeroOneLoss = new ZeroOneLoss();
 		double sumOfZOLoss = 0.0;

@@ -1,15 +1,15 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
-import org.api4.java.ai.ml.classification.execution.IClassificationPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
+import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 
 public class LearnerRunReport implements ILearnerRunReport {
 
 	private final int trainTime;
 	private final int testTime;
-	private final IClassificationPredictionAndGroundTruthTable diff;
+	private final IPredictionAndGroundTruthTable diff;
 
-	public LearnerRunReport(final int trainTime, final int testTime, final IClassificationPredictionAndGroundTruthTable diff) {
+	public LearnerRunReport(final int trainTime, final int testTime, final IPredictionAndGroundTruthTable diff) {
 		super();
 		this.trainTime = trainTime;
 		this.testTime = testTime;
@@ -37,7 +37,7 @@ public class LearnerRunReport implements ILearnerRunReport {
 	}
 
 	@Override
-	public IClassificationPredictionAndGroundTruthTable getPredictionDiffList() {
+	public IPredictionAndGroundTruthTable getPredictionDiffList() {
 		return this.diff;
 	}
 }

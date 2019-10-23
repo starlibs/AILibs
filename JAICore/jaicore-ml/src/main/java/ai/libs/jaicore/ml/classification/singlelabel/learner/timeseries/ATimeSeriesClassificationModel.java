@@ -1,5 +1,7 @@
 package ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries;
 
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPrediction;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
@@ -20,7 +22,7 @@ import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesInstance;
  *            The type of the time series data set used to learn from and
  *            predict batches.
  */
-public abstract class ATimeSeriesClassificationModel<L, D extends TimeSeriesDataset<L>> extends ASupervisedLearner<TimeSeriesInstance<L>, D> {
+public abstract class ATimeSeriesClassificationModel<L, D extends TimeSeriesDataset<L>> extends ASupervisedLearner<TimeSeriesInstance<L>, D, ISingleLabelClassificationPrediction, ISingleLabelClassificationPredictionBatch> {
 
 	/**
 	 * The algorithm object used for the training of the classifier.

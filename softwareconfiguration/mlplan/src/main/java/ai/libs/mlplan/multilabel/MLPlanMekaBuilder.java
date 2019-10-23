@@ -3,15 +3,15 @@ package ai.libs.mlplan.multilabel;
 import java.io.File;
 import java.io.IOException;
 
+import org.api4.java.ai.ml.classification.multilabel.evaluation.loss.IMultiLabelClassificationMeasure;
+import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
+
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMEKAGGPFitnessMeasureLoss;
-import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1AsLoss;
-import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
+import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.ProbabilisticMonteCarloCrossValidationEvaluatorFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleMLCSplitBasedClassifierEvaluator;
-import ai.libs.jaicore.ml.core.evaluation.measure.IMeasure;
 import ai.libs.jaicore.ml.weka.dataset.splitter.ArbitrarySplitter;
-import ai.libs.jaicore.ml.weka.dataset.splitter.IDatasetSplitter;
 import ai.libs.mlplan.core.AbstractMLPlanBuilder;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 
@@ -28,7 +28,7 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 	private static final double SEARCH_TRAIN_FOLD_SIZE = 0.7;
 	private static final int SELECTION_NUM_MC_ITERATIONS = 5;
 	private static final double SELECTION_TRAIN_FOLD_SIZE = 0.7;
-	private static final IMeasure<double[], Double> LOSS_FUNCTION = new InstanceWiseF1AsLoss();
+	private static final IMultiLabelClassificationMeasure LOSS_FUNCTION = new InstanceWiseF1();
 
 	/* Default configurations */
 	private static final String DEF_REQUESTED_HASCO_INTERFACE = "MLClassifier";
@@ -68,21 +68,18 @@ public class MLPlanMekaBuilder extends AbstractMLPlanBuilder {
 	 * @param lossFunction The loss function to be used.
 	 * @return The builder object.
 	 */
-	public MLPlanMekaBuilder withPerformanceMeasure(final IMeasure<double[], Double> lossFunction) {
-		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(this.getDefaultDatasetSplitter()).withNumMCIterations(SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE));
-		}
-		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSearchPhaseEvaluatorFactory(
-					new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(this.getDefaultDatasetSplitter()).withNumMCIterations(SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(SELECTION_TRAIN_FOLD_SIZE));
-		}
-
-		((MonteCarloCrossValidationEvaluatorFactory) this.getSelectionEvaluatorFactory()).withSplitBasedEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(lossFunction));
-		return this;
-	}
-
-	protected IDatasetSplitter getDefaultDatasetSplitter() {
-		return new ArbitrarySplitter();
+	public MLPlanMekaBuilder withPerformanceMeasure(final IMultiLabelClassificationMeasure measure) {
+		throw new UnsupportedOperationException("This method is not yet implemented and needs to be fixed.");
+//		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
+//			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(this.getDefaultDatasetSplitter()).withNumMCIterations(SEARCH_NUM_MC_ITERATIONS).withTrainFoldSize(SEARCH_TRAIN_FOLD_SIZE));
+//		}
+//		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
+//			this.withSearchPhaseEvaluatorFactory(
+//					new MonteCarloCrossValidationEvaluatorFactory().withDatasetSplitter(this.getDefaultDatasetSplitter()).withNumMCIterations(SELECTION_NUM_MC_ITERATIONS).withTrainFoldSize(SELECTION_TRAIN_FOLD_SIZE));
+//		}
+//
+//		((MonteCarloCrossValidationEvaluatorFactory) this.getSelectionEvaluatorFactory()).withSplitBasedEvaluator(new SimpleMLCSplitBasedClassifierEvaluator(lossFunction));
+//		return this;
 	}
 
 }

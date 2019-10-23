@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.Arrays;
 import java.util.List;
 
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
 import org.api4.java.ai.ml.ranking.dataset.IRanking;
 import org.checkerframework.checker.units.qual.C;
 import org.junit.Before;

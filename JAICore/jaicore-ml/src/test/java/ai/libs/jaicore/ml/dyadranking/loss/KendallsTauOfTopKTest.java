@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.dyadranking.loss;
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.ai.ml.core.learner.algorithm.IPredictionBatch;
+import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.ranking.dataset.IRanking;
 import org.junit.Test;
 

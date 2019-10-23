@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.evaluation.learningcurve.IAnalyticalLearningCurve;
-import org.api4.java.ai.ml.core.evaluation.loss.ILossFunction;
+import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -49,7 +49,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D 
 	// Configuration for the measurement at the saturation point.
 	private double epsilon;
 	private D test;
-	private ILossFunction lossFunction;
+	private IMeasure measure;
 
 	/**
 	 * Create a classifier evaluator with an accuracy measurement at the
@@ -75,7 +75,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D 
 	 *            Test dataset to measure the accuracy.
 	 */
 	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D train, final double trainSplitForAnchorpointsMeasurement,
-			final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final D test, final ILossFunction lossFunction) {
+			final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final D test, final IMeasure measure) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -85,7 +85,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D 
 		this.seed = seed;
 		this.epsilon = DEFAULT_EPSILON;
 		this.test = test;
-		this.lossFunction = lossFunction;
+		this.measure = measure;
 
 	}
 
@@ -109,7 +109,7 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D 
 			D saturationPointTrainSet = samplingAlgorithm.call();
 
 			// Measure the accuracy with this subsample
-			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointTrainSet, this.test, this.lossFunction);
+			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointTrainSet, this.test, this.measure);
 			return evaluator.evaluate(learner);
 		} catch (AlgorithmException | InvalidAnchorPointsException | AlgorithmExecutionCanceledException | DatasetCreationException | AlgorithmTimeoutedException e) {
 			logger.warn("Evaluation of classifier failed due Exception {} with message {}. Returning null.", e.getClass().getName(), e.getMessage());

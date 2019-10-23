@@ -18,6 +18,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.api4.java.algorithm.TimeOut;
+import org.nd4j.linalg.api.ops.impl.loss.MeanSquaredErrorLoss;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +36,10 @@ import ai.libs.jaicore.ml.classification.multilabel.loss.AutoMEKAGGPFitnessMeasu
 import ai.libs.jaicore.ml.classification.multilabel.loss.ExactMatch;
 import ai.libs.jaicore.ml.classification.multilabel.loss.F1MacroAverageL;
 import ai.libs.jaicore.ml.classification.multilabel.loss.Hamming;
-import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1AsLoss;
-import ai.libs.jaicore.ml.classification.multilabel.loss.JaccardLoss;
+import ai.libs.jaicore.ml.classification.multilabel.loss.InstanceWiseF1;
+import ai.libs.jaicore.ml.classification.multilabel.loss.JaccardScore;
 import ai.libs.jaicore.ml.classification.multilabel.loss.RankLoss;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.MeanSquaredErrorLoss;
-import ai.libs.jaicore.ml.classification.singlelabel.loss.PrecisionAsLoss;
+import ai.libs.jaicore.ml.classification.singlelabel.loss.Precision;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.regression.loss.RootMeanSquaredError;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
@@ -236,7 +236,7 @@ public class MLPlanCLI {
 				mekaBuilder.withPerformanceMeasure(new ExactMatch());
 				break;
 			case "F1_MACRO_AVG_D":
-				mekaBuilder.withPerformanceMeasure(new InstanceWiseF1AsLoss());
+				mekaBuilder.withPerformanceMeasure(new InstanceWiseF1());
 				break;
 			case "F1_MACRO_AVG_L":
 				mekaBuilder.withPerformanceMeasure(new F1MacroAverageL());
@@ -245,7 +245,7 @@ public class MLPlanCLI {
 				mekaBuilder.withPerformanceMeasure(new Hamming());
 				break;
 			case "JACCARD":
-				mekaBuilder.withPerformanceMeasure(new JaccardLoss());
+				mekaBuilder.withPerformanceMeasure(new JaccardScore());
 				break;
 			case "RANK_LOSS":
 				mekaBuilder.withPerformanceMeasure(new RankLoss());
@@ -265,7 +265,7 @@ public class MLPlanCLI {
 				break;
 			case "PRECISION":
 				int classIndex = Integer.parseInt(commandLine.getOptionValue(positiveClassIndex, "0"));
-				slcBuilder.withPerformanceMeasure(new PrecisionAsLoss(classIndex));
+				slcBuilder.withPerformanceMeasure(new Precision(classIndex));
 				break;
 			case "ROOT_MEAN_SQUARED_ERROR":
 				slcBuilder.withPerformanceMeasure(new RootMeanSquaredError());

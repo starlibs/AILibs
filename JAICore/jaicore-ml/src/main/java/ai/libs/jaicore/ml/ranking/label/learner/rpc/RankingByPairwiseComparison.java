@@ -12,9 +12,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
-import org.api4.java.ai.ml.core.learner.algorithm.IPrediction;
 import org.api4.java.ai.ml.ranking.IRankingPrediction;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingDataset;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingInstance;

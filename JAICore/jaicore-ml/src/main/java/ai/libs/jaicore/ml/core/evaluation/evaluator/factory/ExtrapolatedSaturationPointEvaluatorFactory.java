@@ -39,7 +39,7 @@ public class ExtrapolatedSaturationPointEvaluatorFactory<I extends ILabeledInsta
 			List<D> split = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<I, D>(), .7f, random).split(dataset);
 			D train = split.get(0);
 			D test = split.get(1);
-			return new ExtrapolatedSaturationPointEvaluator<I, D>(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, random.nextLong(), test, metric.getLossFunction());
+			return new ExtrapolatedSaturationPointEvaluator<I, D>(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, random.nextLong(), test, metric.getMeasure());
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 			throw new LearnerEvaluatorConstructionFailedException(e);
