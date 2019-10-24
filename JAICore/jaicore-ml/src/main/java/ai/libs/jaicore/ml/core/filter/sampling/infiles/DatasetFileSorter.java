@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.Comparator;
 
 import ai.libs.jaicore.basic.TempFileHandler;
-import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
 
 /**
  * Sorts a Dataset file with a Mergesort. A TempFileHandler can be given or a

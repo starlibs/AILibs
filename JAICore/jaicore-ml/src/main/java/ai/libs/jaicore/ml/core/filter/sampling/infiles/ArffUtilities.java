@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.core.olddataset;
+package ai.libs.jaicore.ml.core.filter.sampling.infiles;
 
 import java.io.BufferedReader;
 import java.io.File;

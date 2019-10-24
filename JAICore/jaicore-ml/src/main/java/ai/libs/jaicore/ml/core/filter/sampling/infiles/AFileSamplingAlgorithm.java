@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
-import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
 
 /**
  * An abstract class for file-based sampling algorithms providing basic

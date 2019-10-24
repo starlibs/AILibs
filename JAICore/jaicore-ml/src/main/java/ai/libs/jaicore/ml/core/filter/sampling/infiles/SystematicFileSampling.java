@@ -16,7 +16,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
 import ai.libs.jaicore.basic.TempFileHandler;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
-import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
 
 /**
  * File-level implementation of Systematic Sampling: Sort datapoints and pick

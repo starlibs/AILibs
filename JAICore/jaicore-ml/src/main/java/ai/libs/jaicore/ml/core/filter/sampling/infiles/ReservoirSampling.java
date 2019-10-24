@@ -11,7 +11,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
-import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
 
 /**
  * Implementation of the Reservoir Sampling algorithm(comparable to a Simple

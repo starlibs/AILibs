@@ -7,9 +7,9 @@ import java.util.Random;
 import org.api4.java.algorithm.IAlgorithm;
 
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
+import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.stratified.sampling.ClassStratiFileAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.stratified.sampling.StratifiedFileSampling;
-import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
 
 public class ClassStratifiedFileSamplingTester extends GeneralFileSamplingTester {
 

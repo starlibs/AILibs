@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.basic.TempFileHandler;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
+import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.ReservoirSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.WaitForSamplingStepEvent;
-import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
 
 public class StratifiedFileSampling extends AFileSamplingAlgorithm {
 

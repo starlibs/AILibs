@@ -9,7 +9,7 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
+import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 
 public class ArffUtilitiesTest {
 
