@@ -12,7 +12,7 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ai.libs.jaicore.ml.core.dataset.reader.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 
 @JsonIgnoreProperties({ "provider" })
 public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {

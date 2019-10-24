@@ -9,7 +9,7 @@ import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 
-import ai.libs.jaicore.ml.core.dataset.reader.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 import weka.core.Instances;
 
 public class LoadDataSetInstructionForARFFFile extends LoadDataSetInstruction {

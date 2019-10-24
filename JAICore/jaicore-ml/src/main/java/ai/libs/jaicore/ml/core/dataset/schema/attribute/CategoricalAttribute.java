@@ -94,7 +94,7 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		return "\"" + value.toString() + "\"";
+		return "\"" + this.domain.get((int) value) + "\"";
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class CategoricalAttribute extends AAttribute implements ICategoricalAttr
 		if (string.endsWith("\"")) {
 			trimmedString = trimmedString.substring(0, trimmedString.length() - 1);
 		}
-		return trimmedString;
+		return this.domain.indexOf(trimmedString);
 	}
 
 }

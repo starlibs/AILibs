@@ -13,7 +13,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.dataset.reader.ArffDatasetAdapter;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 
 public class LatexDatasetTableGenerator {
 	private static final Logger logger = LoggerFactory.getLogger(LatexDatasetTableGenerator.class);
