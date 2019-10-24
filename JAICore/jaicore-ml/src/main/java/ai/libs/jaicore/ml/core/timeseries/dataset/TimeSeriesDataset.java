@@ -1,17 +1,12 @@
 package ai.libs.jaicore.ml.core.timeseries.dataset;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -22,7 +17,7 @@ import ai.libs.jaicore.ml.core.timeseries.model.NDArrayTimeseries;
 /**
  * Time Series Dataset.
  */
-public class TimeSeriesDataset<L> implements ILabeledDataset<TimeSeriesInstance<L>> {
+public class TimeSeriesDataset<L> implements ILabeledDataset<ITimeSeriesInstance> {
 
 	/** Number of instances contained in the dataset. */
 	private long numberOfInstances;
@@ -103,7 +98,7 @@ public class TimeSeriesDataset<L> implements ILabeledDataset<TimeSeriesInstance<
 	 * @throws IndexOutOfBoundsException
 	 */
 	@Override
-	public TimeSeriesInstance<L> remove(final int index) {
+	public ITimeSeriesInstance remove(final int index) {
 		TimeSeriesInstance<L> instance = this.get(index);
 		this.valueMatrices.remove(index);
 		this.timestampMatrices.remove(index);
@@ -203,8 +198,7 @@ public class TimeSeriesDataset<L> implements ILabeledDataset<TimeSeriesInstance<
 	 * Iterator for the @{@link}TimeSeriesDataset. Iterates and implicitly creates
 	 * the @{link}TimeSeriesInstance.
 	 */
-	class TimeSeriesDatasetIterator implements Iterator<TimeSeriesInstance<L>> {
-
+	class TimeSeriesDatasetIterator implements Iterator<ITimeSeriesInstance> {
 		private int current = 0;
 
 		@Override
@@ -213,7 +207,7 @@ public class TimeSeriesDataset<L> implements ILabeledDataset<TimeSeriesInstance<
 		}
 
 		@Override
-		public TimeSeriesInstance<L> next() {
+		public ITimeSeriesInstance next() {
 			if (!this.hasNext()) {
 				throw new NoSuchElementException();
 			}
@@ -236,131 +230,8 @@ public class TimeSeriesDataset<L> implements ILabeledDataset<TimeSeriesInstance<
 	}
 
 	@Override
-	public Iterator<TimeSeriesInstance<L>> iterator() {
+	public Iterator<ITimeSeriesInstance> iterator() {
 		return new TimeSeriesDatasetIterator();
-	}
-
-	@Override
-	public boolean add(final TimeSeriesInstance<L> e) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean addAll(final Collection<? extends TimeSeriesInstance<L>> c) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void clear() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean contains(final Object o) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean containsAll(final Collection<?> c) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean remove(final Object o) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean removeAll(final Collection<?> c) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean retainAll(final Collection<?> c) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int size() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public Object[] toArray() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public <T> T[] toArray(final T[] a) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void add(final int arg0, final TimeSeriesInstance<L> arg1) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public boolean addAll(final int arg0, final Collection<? extends TimeSeriesInstance<L>> arg1) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int indexOf(final Object arg0) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public int lastIndexOf(final Object arg0) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ListIterator<TimeSeriesInstance<L>> listIterator() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public ListIterator<TimeSeriesInstance<L>> listIterator(final int arg0) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public TimeSeriesInstance<L> set(final int arg0, final TimeSeriesInstance<L> arg1) {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public List<TimeSeriesInstance<L>> subList(final int arg0, final int arg1) {
-		throw new UnsupportedOperationException();
-	}
-
-	public int getFrequency(final TimeSeriesInstance<L> instance) {
-		return (int) this.stream().filter(instance::equals).count();
-	}
-
-	@Override
-	public ILabeledInstanceSchema getInstanceSchema() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object[][] getFeatureMatrix() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Object[] getLabelVector() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IDataset<TimeSeriesInstance<L>> createEmptyCopy() throws DatasetCreationException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

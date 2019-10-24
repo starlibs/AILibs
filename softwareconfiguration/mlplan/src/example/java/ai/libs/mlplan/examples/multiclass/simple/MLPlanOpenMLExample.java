@@ -12,12 +12,12 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.algorithm.TimeOut;
 
-import ai.libs.jaicore.ml.core.dataset.ArffToNumericDatasetDeserializer;
-import ai.libs.jaicore.ml.core.dataset.Dataset;
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SupervisedLearnerExecutor;
 import ai.libs.jaicore.ml.core.filter.FilterBasedDatasetSplitter;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStratifiedSamplingFactory;
+import ai.libs.jaicore.ml.core.olddataset.ArffToNumericDatasetDeserializer;
+import ai.libs.jaicore.ml.core.olddataset.Dataset;
 import ai.libs.mlplan.core.MLPlan;
 import ai.libs.mlplan.core.MLPlanSimpleBuilder;
 

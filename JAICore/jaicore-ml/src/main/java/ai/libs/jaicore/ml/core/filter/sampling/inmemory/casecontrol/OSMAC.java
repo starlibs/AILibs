@@ -27,11 +27,11 @@ public class OSMAC<D extends ILabeledDataset<ISingleLabelClassificationInstance>
 		double loss;
 		for (ISingleLabelClassificationInstance instance : instances) {
 			vectorLength = 0;
-			for (double dimensionLength : (Double[])instance.getAttributes()) {
+			for (double dimensionLength : (Double[]) instance.getAttributes()) {
 				vectorLength += dimensionLength;
 			}
 			try {
-				loss = 1 - pilotEstimator.predict(instance).getClassDistribution()[instance.getIntLabel()];
+				loss = 1 - pilotEstimator.predict(instance).getClassDistribution().get(instance.getIntLabel());
 			} catch (Exception e) {
 				loss = 1;
 			}
@@ -39,11 +39,11 @@ public class OSMAC<D extends ILabeledDataset<ISingleLabelClassificationInstance>
 		}
 		for (ISingleLabelClassificationInstance instance : instances) {
 			vectorLength = 0;
-			for (double dimensionLength : (Double[])instance.getAttributes()) {
+			for (double dimensionLength : (Double[]) instance.getAttributes()) {
 				vectorLength += dimensionLength;
 			}
 			try {
-				loss = 1 - pilotEstimator.predict(instance).getClassDistribution()[instance.getIntLabel()];
+				loss = 1 - pilotEstimator.predict(instance).getClassDistribution().get(instance.getIntLabel());
 			} catch (Exception e) {
 				loss = 1;
 			}

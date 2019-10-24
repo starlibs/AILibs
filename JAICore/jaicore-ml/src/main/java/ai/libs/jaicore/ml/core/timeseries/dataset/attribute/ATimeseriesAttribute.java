@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.core.timeseries.dataset.attribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ITimeseriesAttribute;
 import org.api4.java.common.timeseries.ITimeseries;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.AGenericObjectAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.AGenericObjectAttribute;
 
 /**
  *

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.core.dataset.loader.OpenMLHelper;
+import ai.libs.jaicore.ml.core.olddataset.loader.OpenMLHelper;
 import weka.core.converters.ConverterUtils.DataSource;
 
 public class OpenMLProblemSet extends MLProblemSet {

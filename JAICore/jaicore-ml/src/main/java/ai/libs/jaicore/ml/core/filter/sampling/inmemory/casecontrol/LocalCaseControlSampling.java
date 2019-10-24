@@ -33,7 +33,7 @@ public class LocalCaseControlSampling extends PilotEstimateSampling<ISingleLabel
 		}
 		for (ISingleLabelClassificationInstance instance : instances) {
 			try {
-				loss = 1 - pilotEstimator.predict(instance).getClassDistribution()[instance.getIntLabel()];
+				loss = 1 - pilotEstimator.predict(instance).getClassDistribution().get(instance.getIntLabel());
 			} catch (Exception e) {
 				loss = 1;
 			}

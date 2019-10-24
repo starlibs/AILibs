@@ -4,15 +4,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
 import ai.libs.jaicore.ml.core.timeseries.model.INDArrayTimeseries;
 
 /**
  * TimeSeriesInstance
  */
-public class TimeSeriesInstance<L> implements ILabeledInstance {
+public class TimeSeriesInstance<L> implements ITimeSeriesInstance {
 
 	/** Attribute values of the instance. */
 	private INDArrayTimeseries[] attributeValues;
@@ -73,14 +75,62 @@ public class TimeSeriesInstance<L> implements ILabeledInstance {
 	}
 
 	@Override
+	public ILabeledInstanceSchema getInstanceSchema() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object[] getAttributes() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void removeColumn(final int columnPos) {
+
+	}
+
+	@Override
 	public double getPointValue(final int pos) {
 		// TODO Auto-generated method stub
 		return 0;
 	}
 
 	@Override
-	public ILabeledInstanceSchema getInstanceSchema() {
+	public Object[] getLabelVector() {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public IDataset createEmptyCopy() throws DatasetCreationException, InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IInstance get(final int pos) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void add(final IInstance instance) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void add(final int index, final IInstance instance) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Object[][] getFeatureMatrix() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

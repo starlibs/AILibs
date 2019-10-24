@@ -10,8 +10,8 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttribute;
-import ai.libs.jaicore.ml.core.dataset.attribute.NumericAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;

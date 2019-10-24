@@ -9,6 +9,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import ai.libs.jaicore.ml.core.olddataset.ArffUtilities;
+
 public class ArffUtilitiesTest {
 
 	@Test

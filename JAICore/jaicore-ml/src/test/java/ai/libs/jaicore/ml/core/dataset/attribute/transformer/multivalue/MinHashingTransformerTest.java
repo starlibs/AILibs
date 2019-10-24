@@ -8,9 +8,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttribute;
-import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attributetransformer.multivalue.MinHashingTransformer;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttributeValue;
+import ai.libs.jaicore.ml.core.olddataset.attributetransformer.multivalue.MinHashingTransformer;
 
 public class MinHashingTransformerTest {
 

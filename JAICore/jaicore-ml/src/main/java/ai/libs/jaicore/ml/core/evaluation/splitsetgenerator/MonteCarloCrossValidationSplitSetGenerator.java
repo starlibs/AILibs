@@ -13,7 +13,7 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
+import ai.libs.jaicore.ml.core.dataset.splitter.DatasetSplitSet;
 
 /**
  * A DatasetSplitSetGenerator that create k independent splits of the given dataset.

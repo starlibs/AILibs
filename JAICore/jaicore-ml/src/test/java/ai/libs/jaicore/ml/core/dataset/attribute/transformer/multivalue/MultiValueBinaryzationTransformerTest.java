@@ -9,9 +9,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttribute;
-import ai.libs.jaicore.ml.core.dataset.attribute.MultiValueAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attributetransformer.multivalue.MultiValueBinarizationTransformer;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttributeValue;
+import ai.libs.jaicore.ml.core.olddataset.attributetransformer.multivalue.MultiValueBinarizationTransformer;
 
 public class MultiValueBinaryzationTransformerTest {
 	private static final double DELTA = 0.00001;

@@ -9,8 +9,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttribute;
-import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttributeValue;
 
 public class NominalAttributeTest {
 

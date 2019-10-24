@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
+import ai.libs.jaicore.ml.core.dataset.splitter.DatasetSplitSet;
 
 public class ConstantSplitSetGenerator<I extends IInstance, D extends IDataset<I>> implements IFixedDatasetSplitSetGenerator<D> {
 

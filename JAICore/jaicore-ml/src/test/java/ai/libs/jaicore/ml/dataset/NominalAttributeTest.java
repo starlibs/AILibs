@@ -8,7 +8,7 @@ import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttribute;
 
 public class NominalAttributeTest {
 

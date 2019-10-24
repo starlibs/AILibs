@@ -12,7 +12,7 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import ai.libs.jaicore.ml.core.newdataset.reader.ArffDatasetReader;
+import ai.libs.jaicore.ml.core.dataset.reader.ArffDatasetAdapter;
 
 @JsonIgnoreProperties({ "provider" })
 public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
@@ -29,8 +29,7 @@ public class LoadDatasetInstructionForOpenML extends LoadDataSetInstruction {
 		try {
 			OpenmlConnector connector = new OpenmlConnector(this.apiKey);
 			File f = connector.datasetGet(connector.dataGet(Integer.parseInt(this.getId())));
-			ArffDatasetReader reader = new ArffDatasetReader(f);
-			return Arrays.asList(reader.loadDataset());
+			return Arrays.asList(ArffDatasetAdapter.readDataset(f));
 		} catch (Exception e) {
 			throw new DatasetTraceInstructionFailedException(e);
 		}

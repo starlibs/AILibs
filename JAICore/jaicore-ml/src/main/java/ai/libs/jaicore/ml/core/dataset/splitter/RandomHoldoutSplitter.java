@@ -14,8 +14,6 @@ import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
-
 public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomDatasetSplitter<D>, IDatasetSplitSetGenerator<D> {
 
 	private final Random rand;

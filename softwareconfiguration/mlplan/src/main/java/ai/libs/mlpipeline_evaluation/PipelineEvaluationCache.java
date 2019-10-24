@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.serialization.CompositionSerializer;
 import ai.libs.jaicore.basic.kvstore.IKVStore;
-import ai.libs.jaicore.ml.core.dataset.loader.OpenMLHelper;
+import ai.libs.jaicore.ml.core.olddataset.loader.OpenMLHelper;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.Classifier;
 import weka.core.converters.ConverterUtils.DataSource;

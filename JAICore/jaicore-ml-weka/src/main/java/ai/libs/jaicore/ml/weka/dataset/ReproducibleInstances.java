@@ -13,7 +13,7 @@ import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
 import ai.libs.jaicore.ml.core.dataset.cache.LoadDataSetInstruction;
 import ai.libs.jaicore.ml.core.dataset.cache.LoadDataSetInstructionForARFFFile;
 import ai.libs.jaicore.ml.core.dataset.cache.LoadDatasetInstructionForOpenML;
-import ai.libs.jaicore.ml.core.dataset.loader.OpenMLHelper;
+import ai.libs.jaicore.ml.core.olddataset.loader.OpenMLHelper;
 import weka.core.Instances;
 
 /**

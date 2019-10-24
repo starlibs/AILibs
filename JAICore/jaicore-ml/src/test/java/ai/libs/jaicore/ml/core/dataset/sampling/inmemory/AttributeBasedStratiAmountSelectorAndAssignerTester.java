@@ -18,16 +18,16 @@ import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttribute;
-import ai.libs.jaicore.ml.core.dataset.attribute.CategoricalAttributeValue;
-import ai.libs.jaicore.ml.core.dataset.attribute.NumericAttribute;
-import ai.libs.jaicore.ml.core.dataset.attribute.NumericAttributeValue;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
-import ai.libs.jaicore.ml.core.dataset.simple.SimpleDataset;
-import ai.libs.jaicore.ml.core.dataset.simple.SimpleInstance;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.CategoricalAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttributeValue;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
+import ai.libs.jaicore.ml.core.olddataset.simple.SimpleDataset;
+import ai.libs.jaicore.ml.core.olddataset.simple.SimpleInstance;
 
 public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 

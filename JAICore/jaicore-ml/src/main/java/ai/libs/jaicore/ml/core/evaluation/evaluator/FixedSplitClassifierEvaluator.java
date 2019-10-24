@@ -6,7 +6,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
 
-import ai.libs.jaicore.ml.core.dataset.DatasetSplitSet;
+import ai.libs.jaicore.ml.core.dataset.splitter.DatasetSplitSet;
 import ai.libs.jaicore.ml.core.evaluation.SingleSplitEvaluationMetric;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.ConstantSplitSetGenerator;
 
