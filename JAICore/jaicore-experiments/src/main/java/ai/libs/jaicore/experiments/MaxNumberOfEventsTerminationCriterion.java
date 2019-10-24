@@ -3,6 +3,7 @@ package ai.libs.jaicore.experiments;
 import java.util.Arrays;
 import java.util.List;
 
+import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 
 public class MaxNumberOfEventsTerminationCriterion implements IExperimentTerminationCriterion {
@@ -21,7 +22,7 @@ public class MaxNumberOfEventsTerminationCriterion implements IExperimentTermina
 	}
 
 	@Override
-	public boolean doesTerminate(final AlgorithmEvent e) {
+	public boolean doesTerminate(final AlgorithmEvent e, final IAlgorithm<?, ?> algorithm) {
 		if (this.matchedClasses.stream().anyMatch(c -> c.isInstance(e))) {
 			this.numOfSeenEvents ++;
 			if (this.numOfSeenEvents >= this.maxNumberOfEvents) {

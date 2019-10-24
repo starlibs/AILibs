@@ -1,30 +1,55 @@
 package ai.libs.jaicore.problems.samegame;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import ai.libs.jaicore.basic.sets.Pair;
 
 public class SameGameState {
 	private final int score;
-	private final int[][] board; // 0 for empty cells, positive ints for the colors
+	private final byte[][] board; // 0 for empty cells, positive ints for the colors
+	private final int numPieces;
+	private final List<Integer> boardHashHistory; // this is to ensure that we search a tree.
 
-	public SameGameState(final int[][] board) {
-		this(0, board);
+	public SameGameState(final byte[][] board) {
+		this.score = 0;
+		this.board = board;
+		int tmpNumPieces = 0;
+		for (int i= 0; i < board.length; i++) {
+			for (int j = 0; j < board[i].length; j++) {
+				if (board[i][j] != 0) {
+					tmpNumPieces ++;
+				}
+			}
+		}
+		this.numPieces = tmpNumPieces;
+		this.boardHashHistory = Arrays.asList(board.hashCode());
 	}
 
-	public SameGameState(final int score, final int[][] board) {
+	private SameGameState(final int score, final byte[][] board, final int numPieces, final List<Integer> boardHashHistoryOfParent) {
 		super();
 		this.score = score;
 		this.board = board;
+		this.numPieces = numPieces;
+		List<Integer> newHistory = new ArrayList<>(boardHashHistoryOfParent);
+		newHistory.add(board.hashCode());
+		this.boardHashHistory = newHistory;
 	}
 
-	public SameGameState getStateAfterMove(final int row, final int col) {
+	public SameGameState getStateAfterMove(final Collection<Pair<Integer, Integer>> block) {
+
+		if (block.size() < 2) {
+			throw new IllegalArgumentException("Removed blocks must have size at least 2.");
+		}
 
 		/* create a copy of the board */
-		int[][] boardCopy = new int[this.board.length][this.board[0].length];
+		byte[][] boardCopy = new byte[this.board.length][this.board[0].length];
 		for (int i = 0; i < this.board.length; i++) {
 			for (int j = 0; j < this.board[i].length; j++) {
 				boardCopy[i][j] = this.board[i][j];
@@ -32,23 +57,22 @@ public class SameGameState {
 		}
 
 		/* first remove all the blocks associated to the field */
-		List<Pair<Integer, Integer>> removedBlocks = this.getAllConnectedPiecesOfSameColor(row, col);
-		if (removedBlocks.size() < 2) {
+		Collection<Pair<Integer, Integer>> removedPieces = block;
+		if (removedPieces.size() < 2) {
 			throw new IllegalArgumentException();
 		}
 		int maximumAffectedRow = 0;
 		Set<Integer> colsToDrop = new HashSet<>();
-		for (Pair<Integer, Integer> block : removedBlocks) {
-			boardCopy[block.getX()][block.getY()] = 0;
-			colsToDrop.add(block.getY());
-			maximumAffectedRow = Math.max(maximumAffectedRow, block.getX());
+		for (Pair<Integer, Integer> piece : removedPieces) {
+			boardCopy[piece.getX()][piece.getY()] = 0;
+			colsToDrop.add(piece.getY());
+			maximumAffectedRow = Math.max(maximumAffectedRow, piece.getX());
 		}
 
 		/* now drop all the blocks in the affected columns */
 		for (int c : colsToDrop) {
 			int fallHeightInColumn = 0;
 			boolean touchedFirstEmpty = false;
-			boolean touchedAnyNonEmpty = false;
 			for (int r = this.board.length - 1; r >= 0; r --) {
 				if (boardCopy[r][c] == 0) {
 					fallHeightInColumn ++;
@@ -62,21 +86,11 @@ public class SameGameState {
 				}
 			}
 		}
+		return new SameGameState(this.score + (int)Math.pow(removedPieces.size() - 2, 2), boardCopy, this.numPieces - removedPieces.size(), this.boardHashHistory);
+	}
 
-		/* move non-empty columns */
-		for (int c = 0; c < boardCopy[0].length; c++) {
-			boolean colapsCol = boardCopy[boardCopy.length - 1][c] == 0;
-			if (colapsCol) {
-				for (int cp = c + 1; cp < boardCopy[0].length; cp ++) {
-					for (int r = 0; r < this.board.length; r ++) {
-						boardCopy[r][cp - 1] = boardCopy[r][cp];
-						boardCopy[r][cp] = 0;
-					}
-				}
-			}
-		}
-
-		return new SameGameState(this.score + (int)Math.pow(removedBlocks.size() - 2, 2), boardCopy);
+	public SameGameState getStateAfterMove(final int row, final int col) {
+		return this.getStateAfterMove(this.getAllConnectedPiecesOfSameColor(row, col));
 	}
 
 	public List<Pair<Integer, Integer>> getAllConnectedPiecesOfSameColor(final int row, final int col) {
@@ -128,5 +142,97 @@ public class SameGameState {
 			sb.append("\n");
 		}
 		return sb.toString();
+	}
+
+	public byte[][] getBoard() {
+		return this.board;
+	}
+
+	public int getNumRows() {
+		return this.board.length;
+	}
+
+	public int getNumCols() {
+		return this.board[0].length;
+	}
+
+	public Collection<Collection<Pair<Integer, Integer>>> getBlocksOfPieces() {
+
+		/* Collect one representative for each block */
+		Map<Integer, Collection<Pair<Integer, Integer>>> identifiedBlocks = new HashMap<>();
+		Set<Pair<Integer, Integer>> consideredBlocks = new HashSet<>();
+		int blockId = 0;
+		for (int row = 0; row < this.board.length; row ++) {
+			for (int col = 0; col < this.board[row].length; col ++) {
+				boolean isNewBlock = false;
+				if (this.board[row][col] == 0 || consideredBlocks.contains(new Pair<>(row, col))) {
+					continue;
+				}
+				for (Pair<Integer, Integer> pieceInBlock : this.getAllConnectedPiecesOfSameColor(row, col)) {
+					consideredBlocks.add(pieceInBlock);
+					if (!isNewBlock) {
+						isNewBlock = true;
+						identifiedBlocks.put(blockId, new HashSet<>());
+					}
+					identifiedBlocks.get(blockId).add(pieceInBlock);
+				}
+				if (isNewBlock) {
+					blockId ++;
+				}
+			}
+		}
+		return identifiedBlocks.values();
+	}
+
+	public int getScore() {
+		return this.score * -1;
+	}
+
+	public int getNumPieces() {
+		return this.numPieces;
+	}
+
+	public Map<Integer, Integer> getNumberOfPiecesPerColor() {
+		Map<Integer, Integer> map = new HashMap<>();
+		for (int row = 0; row < this.board.length; row ++) {
+			for (int col = 0; col < this.board[row].length; col ++) {
+				int color = this.board[row][col];
+				if (color == 0) {
+					continue;
+				}
+				map.put(color, map.computeIfAbsent(color, c -> 0) + 1);
+			}
+		}
+		return map;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.boardHashHistory == null) ? 0 : this.boardHashHistory.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (this.getClass() != obj.getClass()) {
+			return false;
+		}
+		SameGameState other = (SameGameState) obj;
+		if (this.boardHashHistory == null) {
+			if (other.boardHashHistory != null) {
+				return false;
+			}
+		} else if (!this.boardHashHistory.equals(other.boardHashHistory)) {
+			return false;
+		}
+		return true;
 	}
 }

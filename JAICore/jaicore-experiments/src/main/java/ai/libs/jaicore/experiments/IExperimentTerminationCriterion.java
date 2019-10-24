@@ -1,5 +1,6 @@
 package ai.libs.jaicore.experiments;
 
+import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 
 /**
@@ -9,5 +10,5 @@ import org.api4.java.algorithm.events.AlgorithmEvent;
  *
  */
 public interface IExperimentTerminationCriterion {
-	public boolean doesTerminate(AlgorithmEvent e);
+	public boolean doesTerminate(AlgorithmEvent e, IAlgorithm<?, ?> algorithm);
 }

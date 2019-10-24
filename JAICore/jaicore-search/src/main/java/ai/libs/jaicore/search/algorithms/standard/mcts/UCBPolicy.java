@@ -36,8 +36,8 @@ public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 	@Override
 	public double getScore(final NodeLabel labelOfNode, final NodeLabel labelOfChild) {
 		double explorationTerm = (this.isMaximize() ? 1 : -1) * this.explorationConstant * Math.sqrt(Math.log(labelOfNode.visits) / labelOfChild.visits);
-		double score = labelOfChild.scores.getMean() + explorationTerm;
-		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, labelOfChild.scores.getMean(), this.isMaximize() ? 1 : -1, this.explorationConstant, labelOfNode.visits, labelOfChild.visits, explorationTerm);
+		double score = labelOfChild.mean + explorationTerm;
+		this.logger.trace("Computed UCB score {} = {} + {} * {} * sqrt(log({})/{}). That is, exploration term is {}", score, labelOfChild.mean, this.isMaximize() ? 1 : -1, this.explorationConstant, labelOfNode.visits, labelOfChild.visits, explorationTerm);
 		return score;
 	}
 

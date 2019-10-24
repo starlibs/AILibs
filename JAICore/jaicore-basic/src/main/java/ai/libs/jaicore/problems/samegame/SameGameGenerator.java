@@ -11,10 +11,10 @@ public class SameGameGenerator {
 	public SameGameState generate(final int rows, final int cols, final int numColors, final double fillRate, final Random random) {
 		int maxPieces = (int)Math.round(rows * cols * fillRate);
 		int i = 0;
-		int[][] board = new int[rows][cols];
+		byte[][] board = new byte[rows][cols];
 		for (int row = rows - 1; row >= 0 && i < maxPieces; row --) {
 			for (int col = 0; col < cols && i < maxPieces; col ++) {
-				board[row][col] = random.nextInt(numColors) + 1;
+				board[row][col] = (byte)(random.nextInt(numColors) + 1);
 				i++;
 			}
 		}

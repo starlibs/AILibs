@@ -65,7 +65,7 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 				processor.processResults(results);
 
 				/* check whether one of the termination criteria is satisfied */
-				if (terminationCriteria.stream().anyMatch(c -> c.doesTerminate(e))) {
+				if (terminationCriteria.stream().anyMatch(c -> c.doesTerminate(e, algorithm))) {
 					algorithm.cancel();
 				}
 			}
