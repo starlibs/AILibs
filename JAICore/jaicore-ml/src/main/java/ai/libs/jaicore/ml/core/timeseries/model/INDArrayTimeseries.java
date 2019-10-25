@@ -5,4 +5,8 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 
 public interface INDArrayTimeseries extends ITimeseries<INDArray> {
 
+	public int length();
+
+	public double[] getPoint();
+
 }

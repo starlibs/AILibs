@@ -15,4 +15,14 @@ public class NDArrayTimeseries extends ElementDecorator<INDArray> implements IND
 		return this.getElement();
 	}
 
+	@Override
+	public int length() {
+		return (int) this.getElement().length();
+	}
+
+	@Override
+	public double[] getPoint() {
+		return this.getElement().toDoubleVector();
+	}
+
 }

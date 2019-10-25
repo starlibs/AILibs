@@ -74,7 +74,7 @@ public class WekaUtil {
 	 * @return Returns the Weka instance containing the time series data and the
 	 *         class information.
 	 */
-	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance<?> instance) {
+	public static Instance tsInstanceToWekaInstance(final TimeSeriesInstance instance) {
 		List<INDArray> indArrays = new ArrayList<>();
 
 		for (INDArrayTimeseries timeseries : instance) {
@@ -112,7 +112,7 @@ public class WekaUtil {
 	 *             Throws exception if the training could not be finished
 	 *             successfully
 	 */
-	public static <L> void buildWekaClassifierFromTS(final Classifier classifier, final TimeSeriesDataset<L> timeSeriesDataset) throws TrainingException {
+	public static <L> void buildWekaClassifierFromTS(final Classifier classifier, final TimeSeriesDataset timeSeriesDataset) throws TrainingException {
 
 		final Instances trainingInstances = timeSeriesDatasetToWekaInstances(timeSeriesDataset);
 
@@ -187,7 +187,7 @@ public class WekaUtil {
 	 *            Data set which is transformed
 	 * @return Transformed Weka Instances object
 	 */
-	public static <L> Instances timeSeriesDatasetToWekaInstances(final TimeSeriesDataset<L> dataSet) {
+	public static Instances timeSeriesDatasetToWekaInstances(final TimeSeriesDataset dataSet) {
 		List<INDArray> matrices = new ArrayList<>();
 		for (int i = 0; i < dataSet.getNumberOfVariables(); i++) {
 			matrices.add(dataSet.getValues(i));

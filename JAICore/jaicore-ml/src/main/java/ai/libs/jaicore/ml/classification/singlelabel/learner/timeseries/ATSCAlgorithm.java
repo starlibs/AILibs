@@ -23,7 +23,7 @@ import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset;
  *            The time series classifier which is modified and returned as
  *            algorithm result.
  */
-public abstract class ATSCAlgorithm<Y, D extends TimeSeriesDataset<Y>, C extends ATimeSeriesClassificationModel<Y, D>> implements IAlgorithm<TimeSeriesDataset<Y>, C> {
+public abstract class ATSCAlgorithm<Y, D extends TimeSeriesDataset, C extends ATimeSeriesClassificationModel<Y, D>> implements IAlgorithm<TimeSeriesDataset, C> {
 
 	/**
 	 * The model which is maintained during algorithm calls

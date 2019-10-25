@@ -15,7 +15,7 @@ public class TimeSeriesInstance implements ITimeSeriesInstance {
 	private List<INDArrayTimeseries> attributeValues;
 
 	/** Target value of the instance. */
-	private Object targetValue;
+	private Object label;
 
 	/**
 	 * Constructor.
@@ -24,16 +24,13 @@ public class TimeSeriesInstance implements ITimeSeriesInstance {
 	 * @param attributeValues
 	 * @param targetValue
 	 */
-	public TimeSeriesInstance(final INDArrayTimeseries[] attributeValues, final L targetValue) {
-		// Set attributes.
-		this.attributeValues = Arrays.asList(attributeValues);
-		this.targetValue = targetValue;
+	public TimeSeriesInstance(final INDArrayTimeseries[] attributeValues, final Object targetValue) {
+		this(Arrays.asList(attributeValues), targetValue);
 	}
 
-	public TimeSeriesInstance(final List<INDArrayTimeseries> attributeValues, final L targetValue) {
-		int n = attributeValues.size();
+	public TimeSeriesInstance(final List<INDArrayTimeseries> attributeValues, final Object targetValue) {
 		this.attributeValues = attributeValues;
-		this.targetValue = targetValue;
+		this.label = targetValue;
 	}
 
 	@Override
@@ -43,39 +40,58 @@ public class TimeSeriesInstance implements ITimeSeriesInstance {
 
 	@Override
 	public Object getLabel() {
-		return this.targetValue;
+		return this.label;
 	}
 
 	@Override
 	public Iterator<INDArrayTimeseries> iterator() {
-		return Arrays.stream(this.attributeValues).iterator();
-	}
-
-	public INDArrayTimeseries[] getAllFeatures() {
-		return this.attributeValues;
+		return this.attributeValues.iterator();
 	}
 
 	@Override
 	public double[] getPoint() {
-		// TODO Auto-generated method stub
-		return null;
+		double[] point = new double[this.attributeValues.stream().mapToInt(x -> x.length()).sum()];
+
+		int i = 0;
+		for (INDArrayTimeseries series : this.attributeValues) {
+			double[] seriesPoint = series.getPoint();
+			for (int j = 0; j < seriesPoint.length; j++) {
+				point[i++] = seriesPoint[j];
+			}
+		}
+		return point;
 	}
 
 	@Override
 	public Object[] getAttributes() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.attributeValues.toArray();
 	}
 
 	@Override
 	public void removeColumn(final int columnPos) {
-
+		if (columnPos < this.attributeValues.size() && columnPos >= 0) {
+			this.attributeValues.remove(columnPos);
+		} else {
+			throw new IllegalArgumentException("The index is not valid.");
+		}
 	}
 
 	@Override
 	public double getPointValue(final int pos) {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException("This operation is not supported.");
+	}
+
+	@Override
+	public void setLabel(final Object label) {
+		this.label = label;
+	}
+
+	@Override
+	public void setAttributeValue(final int pos, final Object value) {
+		if (!(value instanceof INDArrayTimeseries)) {
+			throw new IllegalArgumentException("The given value is no timeseries.");
+		}
+		this.attributeValues.add((INDArrayTimeseries) value);
 	}
 
 }
