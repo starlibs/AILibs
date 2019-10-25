@@ -1,12 +1,17 @@
 package ai.libs.jaicore.ml.core.timeseries.dataset;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
@@ -232,6 +237,162 @@ public class TimeSeriesDataset<L> implements ILabeledDataset<ITimeSeriesInstance
 	@Override
 	public Iterator<ITimeSeriesInstance> iterator() {
 		return new TimeSeriesDatasetIterator();
+	}
+
+	@Override
+	public ILabeledInstanceSchema getInstanceSchema() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IDataset<ITimeSeriesInstance> createEmptyCopy() throws DatasetCreationException, InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object[][] getFeatureMatrix() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void removeColumn(final int columnPos) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void removeColumn(final String columnName) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void removeColumn(final IAttribute attribute) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean contains(final Object o) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Object[] toArray() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T[] toArray(final T[] a) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean add(final ITimeSeriesInstance e) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean remove(final Object o) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean containsAll(final Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addAll(final Collection<? extends ITimeSeriesInstance> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean addAll(final int index, final Collection<? extends ITimeSeriesInstance> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean removeAll(final Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean retainAll(final Collection<?> c) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void clear() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public ITimeSeriesInstance set(final int index, final ITimeSeriesInstance element) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void add(final int index, final ITimeSeriesInstance element) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public int indexOf(final Object o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int lastIndexOf(final Object o) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public ListIterator<ITimeSeriesInstance> listIterator() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ListIterator<ITimeSeriesInstance> listIterator(final int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ITimeSeriesInstance> subList(final int fromIndex, final int toIndex) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object[] getLabelVector() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

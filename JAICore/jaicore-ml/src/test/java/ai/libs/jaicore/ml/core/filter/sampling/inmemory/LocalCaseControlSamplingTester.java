@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
@@ -16,11 +17,12 @@ public class LocalCaseControlSamplingTester extends GeneralSamplingTester<Object
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
-		LocalCaseControlSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new LocalCaseControlSamplingFactory<>();
+		ISingleLabelClassificationDataset slcDataset = new SingleLabelClassificationDataset(dataset);
+		LocalCaseControlSamplingFactory factory = new LocalCaseControlSamplingFactory();
 		if (dataset != null) {
 			factory.setPreSampleSize((int) (PRE_SAMPLING_FRACTION * dataset.size()));
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
-			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
+			return factory.getAlgorithm(sampleSize, slcDataset, new Random(RANDOM_SEED));
 		}
 		return null;
 	}

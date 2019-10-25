@@ -15,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.openml.apiconnector.io.OpenmlConnector;
-import org.openml.apiconnector.xml.DataSetDescription;
 
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.ml.core.filter.sampling.infiles.AFileSamplingAlgorithm;
@@ -25,20 +24,19 @@ import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
  * This class provides tests for assuring some basic sampling algorithm
  * properties on file level for the datasets whine quality and higgs. For actual
  * sampling algorithm implementation it has to be extended.
- * 
+ *
  * @author Lukas Brandt
  */
 @RunWith(JUnit4.class)
 public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
-	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 	protected static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator + UUID.randomUUID().toString() + ".arff";
 
 	/**
 	 * This test verifies that the produced sample file has the specified amount of
 	 * datapoints for a small dataset file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -50,7 +48,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	/**
 	 * This test verifies that the produced sample file has the specified amount of
 	 * datapoints for a big dataset file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -59,7 +57,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 		this.testSampleSize(input);
 	}
 
-	private void testSampleSize(File input) throws Exception {
+	private void testSampleSize(final File input) throws Exception {
 		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
@@ -74,7 +72,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	/**
 	 * This test verifies that the produced sample file contains no duplicated
 	 * samples for a small dataset file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -86,7 +84,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	/**
 	 * This test verifies that the produced sample file contains no duplicated
 	 * samples for a big dataset file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -95,7 +93,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 		this.testNoDuplicates(input);
 	}
 
-	private void testNoDuplicates(File input) throws Exception {
+	private void testNoDuplicates(final File input) throws Exception {
 		AFileSamplingAlgorithm samplingAlgorithm = (AFileSamplingAlgorithm) this.getAlgorithm(input);
 		int inputSize = ArffUtilities.countDatasetEntries(input, true);
 		int sampleSize = (int) (inputSize * DEFAULT_SAMPLE_FRACTION);
@@ -125,7 +123,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 	/**
 	 * Verifies that the sampling algorithm does not modify the original input
 	 * dataset file.
-	 * 
+	 *
 	 * @throws Exception
 	 */
 	@Test
@@ -143,16 +141,12 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
 	public File getSimpleProblemInputForGeneralTestPurposes() throws Exception {
 		OpenmlConnector client = new OpenmlConnector();
-		DataSetDescription description = client.dataGet(188);
-		File file = description.getDataset(OPENML_API_KEY);
-		return file;
+		return client.datasetGet(client.dataGet(188));
 	}
 
 	public File getDifficultProblemInputForGeneralTestPurposes() throws Exception {
 		OpenmlConnector client = new OpenmlConnector();
-		DataSetDescription description = client.dataGet(182);
-		File file = description.getDataset(OPENML_API_KEY);
-		return file;
+		return client.datasetGet(client.dataGet(182));
 	}
 
 	@AfterClass

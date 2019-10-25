@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
@@ -28,6 +27,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.Attr
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
 import ai.libs.jaicore.ml.core.olddataset.simple.SimpleDataset;
 import ai.libs.jaicore.ml.core.olddataset.simple.SimpleInstance;
+import ai.libs.jaicore.ml.core.util.TestDatasetGenerator;
 
 public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 
@@ -222,32 +222,17 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 	}
 
 	public ILabeledDataset<IClusterableInstance> createToyDatasetOnlyCategorical() {
-		// Attribute 1
-		String[] domain1 = { "A", "B" };
-		IAttribute type1 = new CategoricalAttribute("a1", Arrays.asList(domain1));
+		// Features
+		IAttribute type1 = new CategoricalAttribute("a1", Arrays.asList("A", "B"));
+		IAttribute type2 = new CategoricalAttribute("a2", Arrays.asList("C"));
+		// Label
+		IAttribute type3 = new CategoricalAttribute("a3", Arrays.asList("X", "Y", "Z"));
 
-		// Attribute 2
-		String[] domain2 = { "C" };
-		IAttribute type2 = new CategoricalAttribute("a2", Arrays.asList(domain2));
+		ILabeledInstanceSchema schema = new LabeledInstanceSchema("testData", Arrays.asList(type1, type2), type3);
 
-		// Attribute 3
-		String[] domain3 = { "X", "Y", "Z" };
-		IAttribute type3 = new CategoricalAttribute("a3", Arrays.asList(domain3));
-
-		List<IAttribute> attributeTypeList = new ArrayList<>();
-		attributeTypeList.add(type1);
-		attributeTypeList.add(type2);
-
-		ILabeledInstanceSchema schema = new LabeledInstanceSchema("testData", attributeTypeList, type3);
-
-		ILabeledDataset<IClusterableInstance> simpleDataset = new SimpleDataset(schema);
-		List<List<Object>> features = Arrays.asList(Arrays.asList("A", "C"), Arrays.asList("A", "C"), Arrays.asList("B", "C"), Arrays.asList("A", "C"));
-		List<Object> labels = Arrays.asList("X", "Y", "X", "Z");
-
-		// generate SimpleInstance objects and add to dataset
-		IntStream.range(0, features.size()).mapToObj(x -> new SimpleInstance(schema, features.get(x), labels.get(x))).forEach(simpleDataset::add);
-
-		return simpleDataset;
+		String[] features = { "A,C", "A,C", "B,C", "A,C" };
+		String[] labels = { "X", "Y", "X", "Z" };
+		return TestDatasetGenerator.generateLabeledDataset(schema, features, labels);
 	}
 
 	public ILabeledDataset<IClusterableInstance> createToyDatasetMixed() {

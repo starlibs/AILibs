@@ -2,7 +2,9 @@ package ai.libs.jaicore.ml.core.dataset;
 
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
-public abstract class AInstance implements ILabeledInstance {
+import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
+
+public abstract class AInstance implements IClusterableInstance, ILabeledInstance {
 
 	private Object label;
 
