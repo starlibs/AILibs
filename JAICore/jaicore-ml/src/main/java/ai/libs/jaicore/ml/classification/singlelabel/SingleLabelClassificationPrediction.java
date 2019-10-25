@@ -28,7 +28,7 @@ public class SingleLabelClassificationPrediction extends Prediction implements I
 	}
 
 	@Override
-	public Map<String, Double> getClassDistribution() {
+	public Map<Integer, Double> getClassDistribution() {
 		throw new UnsupportedOperationException("This is not a probabilistic prediction");
 	}
 

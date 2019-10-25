@@ -23,6 +23,9 @@ include ":JAICore:jaicore-search"
 include 'hasco'
 project(":hasco").projectDir = new File(configPrefix,"hasco")
 
+include 'hyperopt'
+project(":hyperopt").projectDir = new File(configPrefix,"hyperopt")
+
 include 'mlplan'
 project(":mlplan").projectDir = new File(configPrefix,"mlplan")
 

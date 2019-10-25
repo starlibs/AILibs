@@ -21,7 +21,6 @@ import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
 /**
  * This class provides some tests that verify basic properties of a sampling
@@ -101,7 +100,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 
 	private <I extends ILabeledInstance> void testSampleSize(final ILabeledDataset<I> dataset, final double sampleFraction) {
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I, ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<I, ILabeledDataset<I>>) this.getAlgorithm(dataset);
+		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		ILabeledDataset<?> sample = this.getSample(samplingAlgorithm);
@@ -147,7 +146,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 
 	private <I extends ILabeledInstance> void testNoDuplicates(final ILabeledDataset<I> dataset) throws AlgorithmCreationException {
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I, ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<I, ILabeledDataset<I>>) this.getAlgorithm(dataset);
+		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		ILabeledDataset<I> sample = this.getSample(samplingAlgorithm);
@@ -175,14 +174,14 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 		ILabeledDataset<ILabeledInstance> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")
-		ASamplingAlgorithm<I, ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<I, ILabeledDataset<I>>) this.getAlgorithm(dataset);
+		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
 		this.getSample(samplingAlgorithm);
 		assertEquals(hashCode, dataset.hashCode());
 	}
 
-	private <I extends ILabeledInstance> ILabeledDataset<I> getSample(final ASamplingAlgorithm<I, ILabeledDataset<I>> samplingAlgorithm) {
+	private <I extends ILabeledInstance> ILabeledDataset<I> getSample(final ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm) {
 		ILabeledDataset<I> sample = null;
 		try {
 			sample = samplingAlgorithm.call();

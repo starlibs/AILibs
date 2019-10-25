@@ -1,0 +1,14 @@
+@relation performance_samples
+
+@attribute weka.classifiers.bayes.BayesNet::Q {weka.classifiers.bayes.net.search.local.K2,weka.classifiers.bayes.net.search.local.HillClimber,weka.classifiers.bayes.net.search.local.LAGDHillClimber,weka.classifiers.bayes.net.search.local.SimulatedAnnealing,weka.classifiers.bayes.net.search.local.TabuSearch,weka.classifiers.bayes.net.search.local.TAN}
+@attribute weka.classifiers.bayes.BayesNet::D {true,false}
+@attribute performance_score numeric
+
+@data
+weka.classifiers.bayes.net.search.local.HillClimber,true,0.473766
+weka.classifiers.bayes.net.search.local.TAN,false,0.477226
+weka.classifiers.bayes.net.search.local.K2,false,0.483292
+weka.classifiers.bayes.net.search.local.TAN,true,0.482247
+weka.classifiers.bayes.net.search.local.K2,true,0.482476
+weka.classifiers.bayes.net.search.local.HillClimber,false,0.482317
+weka.classifiers.bayes.net.search.local.TabuSearch,false,0.482395
