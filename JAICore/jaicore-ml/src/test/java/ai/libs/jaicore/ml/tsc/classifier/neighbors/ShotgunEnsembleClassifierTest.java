@@ -12,12 +12,12 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.neighbors.ShotgunEnsembleClassifier;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.neighbors.ShotgunEnsembleLearnerAlgorithm;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbors.ShotgunEnsembleClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbors.ShotgunEnsembleLearnerAlgorithm;
 
 /**
  * Test suite for the
- * {@link ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.neighbors.ShotgunEnsembleLearnerAlgorithm}
+ * {@link ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.neighbors.ShotgunEnsembleLearnerAlgorithm}
  * implementation.
  *
  * @author fischor

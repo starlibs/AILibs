@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.tsc.classifier.trees;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.LearnPatternSimilarityClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.LearnPatternSimilarityClassifier;
 import junit.framework.Assert;
 
 /**

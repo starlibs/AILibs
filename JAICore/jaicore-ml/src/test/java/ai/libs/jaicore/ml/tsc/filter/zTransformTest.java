@@ -10,9 +10,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.core.timeseries.exceptions.NoneFittedFilterExeception;
-import ai.libs.jaicore.ml.core.timeseries.filter.ZTransformer;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.NoneFittedFilterExeception;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.ZTransformer;
 
 
 @RunWith(JUnit4.class)

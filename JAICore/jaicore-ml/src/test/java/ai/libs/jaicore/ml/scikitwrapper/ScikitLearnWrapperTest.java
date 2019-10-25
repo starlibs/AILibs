@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper.ProblemType;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader.ArffReader;

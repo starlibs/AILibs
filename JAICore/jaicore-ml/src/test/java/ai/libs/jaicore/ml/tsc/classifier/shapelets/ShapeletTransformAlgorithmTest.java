@@ -10,15 +10,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.shapelets.ShapeletTransformLearningAlgorithm;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.shapelets.ShapeletTransformTSClassifier;
-import ai.libs.jaicore.ml.core.timeseries.loss.FStat;
-import ai.libs.jaicore.ml.core.timeseries.loss.IQualityMeasure;
-import ai.libs.jaicore.ml.core.timeseries.shapelets.Shapelet;
-import ai.libs.jaicore.ml.core.timeseries.shapelets.search.EarlyAbandonMinimumDistanceSearchStrategy;
-import ai.libs.jaicore.ml.core.timeseries.shapelets.search.ExhaustiveMinimumDistanceSearchStrategy;
-import ai.libs.jaicore.ml.core.timeseries.util.MathUtil;
-import ai.libs.jaicore.ml.core.timeseries.util.TimeSeriesUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets.ShapeletTransformLearningAlgorithm;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets.ShapeletTransformTSClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.IQualityMeasure;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.Shapelet;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.EarlyAbandonMinimumDistanceSearchStrategy;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.ExhaustiveMinimumDistanceSearchStrategy;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
 
 /**
  * Unit tests for {@link ShapeletTransformLearningAlgorithm}.

@@ -9,9 +9,9 @@ import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.AccessibleRandomTree;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.LearnPatternSimilarityClassifier;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.LearnPatternSimilarityLearningAlgorithm;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.AccessibleRandomTree;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.LearnPatternSimilarityClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.LearnPatternSimilarityLearningAlgorithm;
 import junit.framework.Assert;
 import weka.core.Attribute;
 import weka.core.Instance;

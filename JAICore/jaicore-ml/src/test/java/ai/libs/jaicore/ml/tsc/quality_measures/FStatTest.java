@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.timeseries.loss.FStat;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
 import junit.framework.Assert;
 
 /**

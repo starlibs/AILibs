@@ -5,8 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesBagOfFeaturesClassifier;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesBagOfFeaturesLearningAlgorithm;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.TimeSeriesBagOfFeaturesClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.TimeSeriesBagOfFeaturesLearningAlgorithm;
 
 /**
  * Unit tests of the TSBF algorithm class.

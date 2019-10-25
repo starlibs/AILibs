@@ -6,7 +6,7 @@ import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-import ai.libs.jaicore.ml.core.timeseries.dataset.attribute.NDArrayTimeseriesAttribute;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.attribute.NDArrayTimeseriesAttribute;
 
 /**
  * Unit test cases for the {@link NDArrayTimeseriesAttribute} class.

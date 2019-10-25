@@ -8,9 +8,9 @@ import org.junit.Test;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.NumericAttribute;
-import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset;
-import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
 import junit.framework.Assert;
 import weka.core.Instances;
 

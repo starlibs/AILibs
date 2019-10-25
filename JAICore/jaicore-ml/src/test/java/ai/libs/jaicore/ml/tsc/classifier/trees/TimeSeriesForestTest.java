@@ -8,8 +8,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.trees.TimeSeriesForestClassifier;
-import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.TimeSeriesForestClassifier;
 
 /**
  * Unit tests of the time series forest classifier.

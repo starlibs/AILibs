@@ -11,10 +11,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.core.timeseries.filter.SFA;
-import ai.libs.jaicore.ml.core.timeseries.filter.SlidingWindowBuilder;
-import ai.libs.jaicore.ml.core.timeseries.util.HistogramBuilder;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SFA;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SlidingWindowBuilder;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.HistogramBuilder;
 
 @RunWith(JUnit4.class)
 public class HistogramBuilderTest {

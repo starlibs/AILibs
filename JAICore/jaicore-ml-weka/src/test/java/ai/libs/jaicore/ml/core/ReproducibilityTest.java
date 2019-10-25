@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
 import ai.libs.jaicore.ml.core.dataset.cache.InstructionNode;
-import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 
 public class ReproducibilityTest {

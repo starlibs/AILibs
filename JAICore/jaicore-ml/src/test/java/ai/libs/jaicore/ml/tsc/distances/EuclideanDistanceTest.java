@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.metric.EuclideanDistance;
-import ai.libs.jaicore.ml.core.timeseries.exceptions.TimeSeriesLengthException;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.TimeSeriesLengthException;
 
 /**
  * Test suite for the {@link ai.libs.jaicore.basic.metric.EuclideanDistance}

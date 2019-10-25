@@ -12,10 +12,10 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.core.timeseries.exceptions.NoneFittedFilterExeception;
-import ai.libs.jaicore.ml.core.timeseries.filter.DFT;
-import ai.libs.jaicore.ml.core.timeseries.filter.SlidingWindowBuilder;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.NoneFittedFilterExeception;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.DFT;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.filter.SlidingWindowBuilder;
 
 /**
  * @author Helen

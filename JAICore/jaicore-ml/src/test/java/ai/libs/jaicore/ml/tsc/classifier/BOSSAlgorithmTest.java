@@ -12,9 +12,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.BOSSClassifier;
-import ai.libs.jaicore.ml.classification.singlelabel.learner.timeseries.BOSSLearningAlgorithm.IBossAlgorithmConfig;
-import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.BOSSClassifier;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.BOSSLearningAlgorithm.IBossAlgorithmConfig;
 
 /**
  * @author Helen DFT JUnit test

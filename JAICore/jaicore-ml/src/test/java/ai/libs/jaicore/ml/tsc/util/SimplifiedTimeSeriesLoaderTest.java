@@ -9,10 +9,10 @@ import java.util.List;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.core.timeseries.dataset.TimeSeriesDataset2;
-import ai.libs.jaicore.ml.core.timeseries.exceptions.TimeSeriesLoadingException;
-import ai.libs.jaicore.ml.core.timeseries.util.ClassMapper;
-import ai.libs.jaicore.ml.core.timeseries.util.SimplifiedTimeSeriesLoader;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeriesDataset2;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.exception.TimeSeriesLoadingException;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.ClassMapper;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.SimplifiedTimeSeriesLoader;
 
 /**
  * Unit tests for loading simplified, native Java array using time series
