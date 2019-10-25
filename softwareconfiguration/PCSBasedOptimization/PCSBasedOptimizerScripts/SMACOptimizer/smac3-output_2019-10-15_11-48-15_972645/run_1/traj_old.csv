@@ -1,0 +1,5 @@
+"CPU Time Used","Estimated Training Performance","Wallclock Time","Incumbent ID","Automatic Configurator (CPU) Time","Configuration..."
+0.000000, 2147483648.000000, 0.000000, 1, 0.000000, weka.classifiers.functions.Logistic.R='1e-07'
+-1.000000, 93.333333, 5.153815, 1, 6.153815, weka.classifiers.functions.Logistic.R='1e-07'
+-2.000000, 84.444444, 6.285622, 2, 8.285622, weka.classifiers.functions.Logistic.R='3.6977169498859626'
+-6.000000, 82.222222, 9.990018, 3, 15.990018, weka.classifiers.functions.Logistic.R='9.627494166784153'

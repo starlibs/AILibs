@@ -1,0 +1,3 @@
+weka.classifiers.meta.Vote.S {1}[1]
+weka.classifiers.meta.Vote.R {AVG,PROD,MAJ,MIN,MAX}[AVG]
+Conditionals:

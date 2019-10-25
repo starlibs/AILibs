@@ -1,0 +1,13 @@
+ta = python SMACOptimizerClient.py
+execdir = .
+deterministic = True
+run_obj = quality
+overall_obj = par10
+par_factor = 10
+cost_for_crash = 2147483647.0
+algo_runs_timelimit = 99.0
+wallclock_limit = inf
+always_race_default = False
+ta_run_limit = 11.0
+initial_incumbent = DEFAULT
+pcs_fn = smac3-output_2019-10-15_22-52-52_323138\run_1\Logistic.json

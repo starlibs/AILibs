@@ -1,0 +1,9 @@
+weka.classifiers.trees.RandomTree.depthActivator {0,1}[0]
+weka.classifiers.trees.RandomTree.backActivator {0,1}[0]
+weka.classifiers.trees.RandomTree.featuresActivator {0,1}[0]
+weka.classifiers.trees.RandomTree.depth [0.0,0.0] [0.0]
+weka.classifiers.trees.RandomTree.U {true,false}[true]
+weka.classifiers.trees.RandomTree.N [0.0,0.0] [0.0]
+weka.classifiers.trees.RandomTree.M [1.0,64.0] [1.0]
+weka.classifiers.trees.RandomTree.K [0.0,0.0] [0.0]
+Conditionals:

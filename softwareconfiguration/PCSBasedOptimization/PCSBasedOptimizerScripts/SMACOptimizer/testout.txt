@@ -1,0 +1,4362 @@
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TAN
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TabuSearch
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TAN
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TabuSearch
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TAN
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TabuSearch
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.K2
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TAN
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.HillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.TabuSearch
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+true
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.LAGDHillClimber
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.bayes.BayesNet.D
+false
+-weka.classifiers.bayes.BayesNet.Q
+weka.classifiers.bayes.net.search.local.SimulatedAnnealing
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.801572092615652
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.818677512642143
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.993389779090616
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.9500125532723644
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.265621572235878
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.987582392402427
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.6124764535116538
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.83870766515673
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.2509462538417386
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.984499996153431
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.70619200725499
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.808154563164223
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.305204894879667
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.9994228263219955
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+8.558238270067797
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.6792667400585195
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.59946258033513
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.610187105430012
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.52579382660283
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.514630306149279
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.452393926328684
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.4409667436427975
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.559726838050308
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.621476014547131
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+6.281617584993686
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+6.24813357122644
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.356286623184574
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.50680347890997
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.6219252821167545
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.2864617047682927
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.51546952349976
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.514274088750979
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.696870226792238
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.513341198880138
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.5092493022931635
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.506979182733
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.8354546472805098
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.3903053281222357
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.643790710700044
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+8.873943970645382
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.7276500929114067
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.271016445373848
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.325547743339941
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+6.138411746103131
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.510504369094284
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+4.2509703150181375
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.057399588706119
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.013568648618563
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.044858270372911
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+4.352318374773943
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.9723728480172702
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.512585486519297
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+8.969753544754017
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+2.22218828954511
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+8.939618227034943
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.512630353552863
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.873091678483718
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.081505554352781
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.891183253372099
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.8948274234623033
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.711584385391078
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.399067319176414
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+6.297090482699683
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.119731732011883
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.511624891859215
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+7.970381571766604
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1e-07
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.6977169498859626
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.0291468456757735
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+5.358047033169776
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.150364001305337
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.627494166784153
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+1.4020196705120909
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.872897186658071
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+9.280331331397104
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+3.5492995899993685
+### end run ###
+
+### start run ###
+SMACOptimizerClient.py
+0
+0
+99999999999999.0
+0
+0
+-weka.classifiers.functions.Logistic.R
+0.3960592548592601
+### end run ###
+

@@ -1,0 +1,4 @@
+weka.classifiers.meta.RandomSubSpace.P [0.1,1.0] [0.5]
+weka.classifiers.meta.RandomSubSpace.S {1}[1]
+weka.classifiers.meta.RandomSubSpace.I [2.0,64.0] [10.0]
+Conditionals:

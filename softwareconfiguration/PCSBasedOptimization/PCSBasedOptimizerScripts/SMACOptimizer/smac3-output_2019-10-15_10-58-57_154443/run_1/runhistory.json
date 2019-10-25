@@ -1,0 +1,217 @@
+{
+  "data": [
+    [
+      [
+        1,
+        null,
+        0
+      ],
+      [
+        93.333333,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        2,
+        null,
+        0
+      ],
+      [
+        84.444444,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        3,
+        null,
+        0
+      ],
+      [
+        91.111111,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        4,
+        null,
+        0
+      ],
+      [
+        84.444444,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        5,
+        null,
+        0
+      ],
+      [
+        84.444444,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        6,
+        null,
+        0
+      ],
+      [
+        82.222222,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        7,
+        null,
+        0
+      ],
+      [
+        88.888889,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        8,
+        null,
+        0
+      ],
+      [
+        84.444444,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        9,
+        null,
+        0
+      ],
+      [
+        82.222222,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        10,
+        null,
+        0
+      ],
+      [
+        84.444444,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ],
+    [
+      [
+        11,
+        null,
+        0
+      ],
+      [
+        95.555556,
+        -1.0,
+        {
+          "__enum__": "StatusType.SUCCESS"
+        },
+        {}
+      ]
+    ]
+  ],
+  "config_origins": {
+    "1": "Default",
+    "2": "Random Search",
+    "3": "Random Search (sorted)",
+    "4": "Random Search (sorted)",
+    "5": "Random Search (sorted)",
+    "6": "Random Search",
+    "7": "Random Search",
+    "8": "Random Search (sorted)",
+    "9": "Random Search (sorted)",
+    "10": "Random Search",
+    "11": "Random Search"
+  },
+  "configs": {
+    "1": {
+      "weka.classifiers.functions.Logistic.R": 1e-07
+    },
+    "2": {
+      "weka.classifiers.functions.Logistic.R": 3.6977169498859626
+    },
+    "3": {
+      "weka.classifiers.functions.Logistic.R": 1.0291468456757735
+    },
+    "4": {
+      "weka.classifiers.functions.Logistic.R": 5.358047033169776
+    },
+    "5": {
+      "weka.classifiers.functions.Logistic.R": 3.150364001305337
+    },
+    "6": {
+      "weka.classifiers.functions.Logistic.R": 9.627494166784153
+    },
+    "7": {
+      "weka.classifiers.functions.Logistic.R": 1.4020196705120909
+    },
+    "8": {
+      "weka.classifiers.functions.Logistic.R": 3.872897186658071
+    },
+    "9": {
+      "weka.classifiers.functions.Logistic.R": 9.280331331397104
+    },
+    "10": {
+      "weka.classifiers.functions.Logistic.R": 3.5492995899993685
+    },
+    "11": {
+      "weka.classifiers.functions.Logistic.R": 0.3960592548592601
+    }
+  }
+}

@@ -1,0 +1,5 @@
+weka.classifiers.trees.M5P.U {true,false}[true]
+weka.classifiers.trees.M5P.R {true,false}[true]
+weka.classifiers.trees.M5P.M [1.0,64.0] [4.0]
+weka.classifiers.trees.M5P.N {true,false}[true]
+Conditionals:

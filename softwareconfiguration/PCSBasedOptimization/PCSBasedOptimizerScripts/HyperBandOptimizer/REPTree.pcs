@@ -1,0 +1,6 @@
+weka.classifiers.trees.REPTree.depthActivator {0,1}[0]
+weka.classifiers.trees.REPTree.P {true,false}[true]
+weka.classifiers.trees.REPTree.V [1.0E-5,0.1] [0.001]
+weka.classifiers.trees.REPTree.M [1.0,64.0] [2.0]
+weka.classifiers.trees.REPTree.L [-1.0,-1.0] [-1.0]
+Conditionals:

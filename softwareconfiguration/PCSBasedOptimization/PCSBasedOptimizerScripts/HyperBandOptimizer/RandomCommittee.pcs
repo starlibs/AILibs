@@ -1,0 +1,3 @@
+weka.classifiers.meta.RandomCommittee.S {1}[1]
+weka.classifiers.meta.RandomCommittee.I [2.0,64.0] [10.0]
+Conditionals:

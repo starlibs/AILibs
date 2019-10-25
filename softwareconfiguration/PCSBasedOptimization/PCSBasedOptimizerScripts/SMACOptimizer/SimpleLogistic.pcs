@@ -1,0 +1,5 @@
+weka.classifiers.functions.SimpleLogistic.WActivator {0,1}[0]
+weka.classifiers.functions.SimpleLogistic.S {true,false}[true]
+weka.classifiers.functions.SimpleLogistic.W [0.0,0.0] [0.0]
+weka.classifiers.functions.SimpleLogistic.A {true,false}[true]
+Conditionals:

@@ -1,0 +1,4 @@
+{"cpu_time": 0, "total_cpu_time": null, "wallclock_time": 0.0, "evaluations": 0, "cost": 2147483648, "incumbent": ["weka.classifiers.functions.Logistic.R='1e-07'"], "origin": "Default"}
+{"cpu_time": -1.0, "total_cpu_time": null, "wallclock_time": 6.717935085296631, "evaluations": 1, "cost": 93.333333, "incumbent": ["weka.classifiers.functions.Logistic.R='1e-07'"], "origin": "Default"}
+{"cpu_time": -2.0, "total_cpu_time": null, "wallclock_time": 7.906666040420532, "evaluations": 2, "cost": 84.444444, "incumbent": ["weka.classifiers.functions.Logistic.R='3.6977169498859626'"], "origin": "Random Search"}
+{"cpu_time": -6.0, "total_cpu_time": null, "wallclock_time": 12.117988586425781, "evaluations": 6, "cost": 82.222222, "incumbent": ["weka.classifiers.functions.Logistic.R='9.627494166784153'"], "origin": "Random Search"}

@@ -1,0 +1,3 @@
+weka.classifiers.meta.Stacking.X {10}[10]
+weka.classifiers.meta.Stacking.S {1}[1]
+Conditionals:

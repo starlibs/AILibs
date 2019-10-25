@@ -1,0 +1,9 @@
+weka.classifiers.trees.LMT.WActivator {0,1}[0]
+weka.classifiers.trees.LMT.C {true,false}[true]
+weka.classifiers.trees.LMT.P {true,false}[true]
+weka.classifiers.trees.LMT.W [0.0,0.0] [0.0]
+weka.classifiers.trees.LMT.R {true,false}[true]
+weka.classifiers.trees.LMT.B {true,false}[true]
+weka.classifiers.trees.LMT.A {true,false}[true]
+weka.classifiers.trees.LMT.M [1.0,64.0] [15.0]
+Conditionals:

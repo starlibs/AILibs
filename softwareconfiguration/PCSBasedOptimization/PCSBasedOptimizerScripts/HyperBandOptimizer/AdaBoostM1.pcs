@@ -1,0 +1,6 @@
+weka.classifiers.meta.AdaBoostM1.pActivator {0,1}[0]
+weka.classifiers.meta.AdaBoostM1.Q {true,false}[true]
+weka.classifiers.meta.AdaBoostM1.S {1}[1]
+weka.classifiers.meta.AdaBoostM1.I [2.0,128.0] [10.0]
+weka.classifiers.meta.AdaBoostM1.P [100.0,100.0] [100.0]
+Conditionals:
