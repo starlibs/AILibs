@@ -6,6 +6,7 @@ import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassi
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
+import ai.libs.jaicore.ml.classification.singlelabel.dataset.SingleLabelClassificationDataset;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LocalCaseControlSamplingFactory;
 

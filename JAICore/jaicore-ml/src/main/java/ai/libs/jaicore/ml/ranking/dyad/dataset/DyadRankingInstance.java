@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 

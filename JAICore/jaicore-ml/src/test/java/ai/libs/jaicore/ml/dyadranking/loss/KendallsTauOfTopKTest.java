@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.IRanking;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;

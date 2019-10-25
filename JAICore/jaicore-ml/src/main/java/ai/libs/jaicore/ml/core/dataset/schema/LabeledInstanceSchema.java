@@ -19,4 +19,9 @@ public class LabeledInstanceSchema extends InstanceSchema implements ILabeledIns
 		return this.labelAttribute;
 	}
 
+	@Override
+	public void replaceLabelAttribute(final IAttribute labelAttribute) {
+		this.labelAttribute = labelAttribute;
+	}
+
 }

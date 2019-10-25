@@ -8,8 +8,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttribute;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttributeValue;
 import ai.libs.jaicore.ml.core.olddataset.attributetransformer.multivalue.MinHashingTransformer;
 
 public class MinHashingTransformerTest {
@@ -24,10 +24,10 @@ public class MinHashingTransformerTest {
 		domain.add("c");
 		domain.add("d");
 		domain.add("e");
-		MultiValueAttribute type = new MultiValueAttribute("a0", domain);
+		MultiLabelAttribute type = new MultiLabelAttribute("a0", domain);
 
-		MultiValueAttributeValue v1 = new MultiValueAttributeValue(type, Arrays.asList("a", "b", "c", "d", "e"));
-		MultiValueAttributeValue v2 = new MultiValueAttributeValue(type, Arrays.asList("a", "c", "d", "e"));
+		MultiLabelAttributeValue v1 = new MultiLabelAttributeValue(type, Arrays.asList("a", "b", "c", "d", "e"));
+		MultiLabelAttributeValue v2 = new MultiLabelAttributeValue(type, Arrays.asList("a", "c", "d", "e"));
 
 		MinHashingTransformer transformer = new MinHashingTransformer(5, 3, 1l);
 		double[] h1 = transformer.transformAttribute(v1);

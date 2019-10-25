@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.attribute.transformer.ISingleAttributeTransformer;
 
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttributeValue;
 
 /**
  * Converts the sets of multi-value features to short signatures. At first the
@@ -61,7 +61,7 @@ public class MinHashingTransformer implements ISingleAttributeTransformer {
 
 	@Override
 	public double[] transformAttribute(final Object attributeToTransform) {
-		if (!(attributeToTransform instanceof MultiValueAttributeValue)) {
+		if (!(attributeToTransform instanceof MultiLabelAttributeValue)) {
 			throw new IllegalArgumentException("Can only perform Multi-Value Binaryzation for multi-value attributes.");
 		}
 

@@ -1,20 +1,21 @@
 package ai.libs.jaicore.ml.core.dataset.schema.attribute;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IMultiLabelAttributeValue;
 
-public class MultiValueAttribute extends ACollectionOfObjectsAttribute<String> implements IMultiLabelAttribute {
+public class MultiLabelAttribute extends ACollectionOfObjectsAttribute<String> implements IMultiLabelAttribute {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = -6840951353348119686L;
-	private final Collection<String> domain;
+	private final List<String> domain;
 
-	public MultiValueAttribute(final String name, final Collection<String> domain) {
+	public MultiLabelAttribute(final String name, final List<String> domain) {
 		super(name);
 		this.domain = domain;
 	}
@@ -41,9 +42,9 @@ public class MultiValueAttribute extends ACollectionOfObjectsAttribute<String> i
 	public IMultiLabelAttributeValue getAsAttributeValue(final Object object) {
 		if (this.isValidValue(object)) {
 			if (object instanceof IMultiLabelAttributeValue) {
-				return new MultiValueAttributeValue(this, ((IMultiLabelAttributeValue) object).getValue());
+				return new MultiLabelAttributeValue(this, ((IMultiLabelAttributeValue) object).getValue());
 			} else {
-				return new MultiValueAttributeValue(this, (Collection<String>) object);
+				return new MultiLabelAttributeValue(this, (Collection<String>) object);
 			}
 		} else {
 			throw new IllegalArgumentException("No valid value for the type");
@@ -77,6 +78,11 @@ public class MultiValueAttribute extends ACollectionOfObjectsAttribute<String> i
 	@Override
 	public Object deserializeAttributeValue(final String string) {
 		throw new UnsupportedOperationException("Not yet implemented.");// TODO
+	}
+
+	@Override
+	public List<String> getValues() {
+		return this.domain;
 	}
 
 }

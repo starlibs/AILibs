@@ -12,7 +12,6 @@ import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
-import org.openml.apiconnector.xml.DataSetDescription;
 
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SystematicSamplingFactory;
@@ -34,8 +33,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		// Load dataset from OpenML and create stratified split
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
-		DataSetDescription description = client.dataGet(42);
-		File file = client.datasetGet(description);
+		File file = client.datasetGet(client.dataGet(42));
 		DataSource source = new DataSource(file.getCanonicalPath());
 		dataset = source.getDataSet();
 		dataset.setClassIndex(dataset.numAttributes() - 1);

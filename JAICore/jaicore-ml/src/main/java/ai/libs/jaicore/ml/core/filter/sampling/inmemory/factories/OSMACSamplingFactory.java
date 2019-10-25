@@ -2,15 +2,15 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories;
 
 import java.util.Random;
 
+import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol.OSMAC;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class OSMACSamplingFactory<D extends ILabeledDataset<ISingleLabelClassificationInstance>> implements IRerunnableSamplingAlgorithmFactory<ISingleLabelClassificationInstance, D, OSMAC<D>> {
+public class OSMACSamplingFactory implements IRerunnableSamplingAlgorithmFactory<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, OSMAC<ISingleLabelClassificationDataset>> {
 
-	private OSMAC<D> previousRun;
+	private OSMAC<ISingleLabelClassificationDataset> previousRun;
 	private int preSampleSize = -1;
 
 	/**
@@ -24,13 +24,13 @@ public class OSMACSamplingFactory<D extends ILabeledDataset<ISingleLabelClassifi
 	}
 
 	@Override
-	public void setPreviousRun(final OSMAC<D> previousRun) {
+	public void setPreviousRun(final OSMAC<ISingleLabelClassificationDataset> previousRun) {
 		this.previousRun = previousRun;
 	}
 
 	@Override
-	public OSMAC<D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
-		OSMAC<D> osmac = new OSMAC<>(random, this.preSampleSize, inputDataset);
+	public OSMAC<ISingleLabelClassificationDataset> getAlgorithm(final int sampleSize, final ISingleLabelClassificationDataset inputDataset, final Random random) {
+		OSMAC<ISingleLabelClassificationDataset> osmac = new OSMAC<>(random, this.preSampleSize, inputDataset);
 		if (this.previousRun != null && this.previousRun.getProbabilityBoundaries() != null) {
 			osmac.setProbabilityBoundaries(this.previousRun.getProbabilityBoundaries());
 			osmac.setChosenInstance(this.previousRun.getChosenInstance());

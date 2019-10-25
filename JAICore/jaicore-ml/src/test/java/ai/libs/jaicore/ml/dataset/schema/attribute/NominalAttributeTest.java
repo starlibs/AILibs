@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dataset;
+package ai.libs.jaicore.ml.dataset.schema.attribute;
 
 import static org.junit.Assert.assertEquals;
 
@@ -16,7 +16,7 @@ public class NominalAttributeTest {
 	private static final List<String> VALUES = Arrays.asList("a", "b", "c", "d", "e");
 
 	private static final String ELEMENT = "c";
-	private static final double ELEMENT_VALUE = 2.0;
+	private static final double ELEMENT_VALUE = 2;
 
 	private static CategoricalAttribute attributeToTest;
 
@@ -33,11 +33,6 @@ public class NominalAttributeTest {
 	@Test
 	public void testValues() {
 		assertEquals("The internal values in the attribute do not match the defined ones.", VALUES, attributeToTest.getValues());
-	}
-
-	@Test
-	public void testgetValueID() {
-		assertEquals("The returned value id does not match the expected one", ELEMENT_VALUE, attributeToTest.getValueID(ELEMENT), 0.00001);
 	}
 
 }

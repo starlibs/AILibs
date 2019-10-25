@@ -9,8 +9,8 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttribute;
-import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiValueAttributeValue;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.MultiLabelAttributeValue;
 import ai.libs.jaicore.ml.core.olddataset.attributetransformer.multivalue.MultiValueBinarizationTransformer;
 
 public class MultiValueBinaryzationTransformerTest {
@@ -22,17 +22,17 @@ public class MultiValueBinaryzationTransformerTest {
 		domain.add("a");
 		domain.add("b");
 		domain.add("c");
-		MultiValueAttribute type = new MultiValueAttribute("", domain);
+		MultiLabelAttribute type = new MultiLabelAttribute("", domain);
 		MultiValueBinarizationTransformer transformer = new MultiValueBinarizationTransformer();
 
-		assertArrayEquals(new double[] { 0.0d, 0.0d, 0.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, new LinkedList<>())), DELTA);
-		assertArrayEquals(new double[] { 1.0d, 0.0d, 0.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, Arrays.asList("a"))), DELTA);
-		assertArrayEquals(new double[] { 0.0d, 1.0d, 0.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, Arrays.asList("b"))), DELTA);
-		assertArrayEquals(new double[] { 0.0d, 0.0d, 1.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, Arrays.asList("c"))), DELTA);
-		assertArrayEquals(new double[] { 1.0d, 1.0d, 0.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, Arrays.asList("a", "b"))), DELTA);
-		assertArrayEquals(new double[] { 1.0d, 0.0d, 1.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, Arrays.asList("a", "c"))), DELTA);
-		assertArrayEquals(new double[] { 0.0d, 1.0d, 1.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, Arrays.asList("b", "c"))), DELTA);
-		assertArrayEquals(new double[] { 1.0d, 1.0d, 1.0d }, transformer.transformAttribute(new MultiValueAttributeValue(type, Arrays.asList("a", "b", "c"))), DELTA);
+		assertArrayEquals(new double[] { 0.0d, 0.0d, 0.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, new LinkedList<>())), DELTA);
+		assertArrayEquals(new double[] { 1.0d, 0.0d, 0.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, Arrays.asList("a"))), DELTA);
+		assertArrayEquals(new double[] { 0.0d, 1.0d, 0.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, Arrays.asList("b"))), DELTA);
+		assertArrayEquals(new double[] { 0.0d, 0.0d, 1.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, Arrays.asList("c"))), DELTA);
+		assertArrayEquals(new double[] { 1.0d, 1.0d, 0.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, Arrays.asList("a", "b"))), DELTA);
+		assertArrayEquals(new double[] { 1.0d, 0.0d, 1.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, Arrays.asList("a", "c"))), DELTA);
+		assertArrayEquals(new double[] { 0.0d, 1.0d, 1.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, Arrays.asList("b", "c"))), DELTA);
+		assertArrayEquals(new double[] { 1.0d, 1.0d, 1.0d }, transformer.transformAttribute(new MultiLabelAttributeValue(type, Arrays.asList("a", "b", "c"))), DELTA);
 	}
 
 }

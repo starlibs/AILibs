@@ -10,9 +10,15 @@ import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassi
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 
 public class SingleLabelClassificationDataset implements ISingleLabelClassificationDataset {
+
+	public SingleLabelClassificationDataset(final ILabeledDataset<? extends ILabeledInstance> dataset) {
+
+	}
 
 	public SingleLabelClassificationDataset() {
 		// TODO Auto-generated constructor stub
