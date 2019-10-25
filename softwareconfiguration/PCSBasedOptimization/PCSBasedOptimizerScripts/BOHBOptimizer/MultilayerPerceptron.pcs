@@ -1,9 +1,0 @@
-weka.classifiers.functions.MultilayerPerceptron.L [0.1,1.0] [0.3]
-weka.classifiers.functions.MultilayerPerceptron.M [0.1,1.0] [0.2]
-weka.classifiers.functions.MultilayerPerceptron.D {true,false}[true]
-weka.classifiers.functions.MultilayerPerceptron.C {true,false}[true]
-weka.classifiers.functions.MultilayerPerceptron.H {a,i,o,t}[a]
-weka.classifiers.functions.MultilayerPerceptron.R {true,false}[true]
-weka.classifiers.functions.MultilayerPerceptron.B {true,false}[true]
-weka.classifiers.functions.MultilayerPerceptron.S {1}[1]
-Conditionals:

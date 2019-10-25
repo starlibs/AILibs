@@ -1,5 +1,0 @@
-weka.classifiers.meta.Bagging.P [10.0,100.0] [100.0]
-weka.classifiers.meta.Bagging.O {true,false}[true]
-weka.classifiers.meta.Bagging.S {1}[1]
-weka.classifiers.meta.Bagging.I [2.0,128.0] [10.0]
-Conditionals:

@@ -1,5 +1,0 @@
-weka.classifiers.rules.M5Rules.U {true,false}[true]
-weka.classifiers.rules.M5Rules.R {true,false}[true]
-weka.classifiers.rules.M5Rules.M [1.0,64.0] [4.0]
-weka.classifiers.rules.M5Rules.N {true,false}[true]
-Conditionals:

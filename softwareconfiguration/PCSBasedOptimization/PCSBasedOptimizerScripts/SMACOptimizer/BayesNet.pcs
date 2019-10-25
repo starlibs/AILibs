@@ -1,3 +1,0 @@
-weka.classifiers.bayes.BayesNet.Q {weka.classifiers.bayes.net.search.local.K2,weka.classifiers.bayes.net.search.local.HillClimber,weka.classifiers.bayes.net.search.local.LAGDHillClimber,weka.classifiers.bayes.net.search.local.SimulatedAnnealing,weka.classifiers.bayes.net.search.local.TabuSearch,weka.classifiers.bayes.net.search.local.TAN}[weka.classifiers.bayes.net.search.local.K2]
-weka.classifiers.bayes.BayesNet.D {true,false}[true]
-Conditionals:

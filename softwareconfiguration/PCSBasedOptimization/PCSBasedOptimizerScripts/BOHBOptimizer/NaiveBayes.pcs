@@ -1,3 +1,0 @@
-weka.classifiers.bayes.NaiveBayes.D {true,false}[true]
-weka.classifiers.bayes.NaiveBayes.K {true,false}[true]
-Conditionals:

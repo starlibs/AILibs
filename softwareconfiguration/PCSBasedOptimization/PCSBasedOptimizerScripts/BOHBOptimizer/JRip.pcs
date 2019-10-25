@@ -1,5 +1,0 @@
-weka.classifiers.rules.JRip.N [1.0,5.0] [2.0]
-weka.classifiers.rules.JRip.O [1.0,5.0] [2.0]
-weka.classifiers.rules.JRip.E {true,false}[true]
-weka.classifiers.rules.JRip.P {true,false}[true]
-Conditionals:

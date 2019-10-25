@@ -1,6 +1,0 @@
-K {weka.classifiers.functions.supportVector.NormalizedPolyKernel,weka.classifiers.functions.supportVector.PolyKernel,weka.classifiers.functions.supportVector.RBFKernel,weka.classifiers.functions.supportVector.Puk}[weka.classifiers.functions.supportVector.NormalizedPolyKernel]
-
-weka.classifiers.functions.SMO.N {0,1,2}[0]
-weka.classifiers.functions.SMO.C [0.5,1.5] [1.0]
-weka.classifiers.functions.SMO.M {true,false}[true]
-Conditionals:

@@ -1,6 +1,0 @@
-weka.classifiers.lazy.IBk.I {true,false}[true]
-weka.classifiers.lazy.IBk.X {true,false}[true]
-weka.classifiers.lazy.IBk.F {true,false}[true]
-weka.classifiers.lazy.IBk.E {true,false}[true]
-weka.classifiers.lazy.IBk.K [1.0,64.0] [1.0]
-Conditionals:

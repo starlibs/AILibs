@@ -1,4 +1,0 @@
-weka.classifiers.meta.AdditiveRegression.sActivator {0,1}[0]
-weka.classifiers.meta.AdditiveRegression.S [1.0,1.0] [1.0]
-weka.classifiers.meta.AdditiveRegression.I [2.0,128.0] [10.0]
-Conditionals:

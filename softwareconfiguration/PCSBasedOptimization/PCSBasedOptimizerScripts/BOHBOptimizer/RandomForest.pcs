@@ -1,6 +1,0 @@
-weka.classifiers.trees.RandomForest.depthActivator {0,1}[0]
-weka.classifiers.trees.RandomForest.featuresActivator {0,1}[0]
-weka.classifiers.trees.RandomForest.depth [0.0,0.0] [0.0]
-weka.classifiers.trees.RandomForest.I [2.0,256.0] [10.0]
-weka.classifiers.trees.RandomForest.K [0.0,0.0] [0.0]
-Conditionals:

@@ -1,5 +1,0 @@
-weka.classifiers.rules.PART.R {true,false}[true]
-weka.classifiers.rules.PART.N [2.0,5.0] [3.0]
-weka.classifiers.rules.PART.B {true,false}[true]
-weka.classifiers.rules.PART.M [1.0,64.0] [2.0]
-Conditionals:

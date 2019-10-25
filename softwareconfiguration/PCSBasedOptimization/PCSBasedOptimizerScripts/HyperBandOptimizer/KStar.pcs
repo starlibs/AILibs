@@ -1,4 +1,0 @@
-weka.classifiers.lazy.KStar.M {a,d,m,n}[a]
-weka.classifiers.lazy.KStar.E {true,false}[true]
-weka.classifiers.lazy.KStar.B [1.0,100.0] [20.0]
-Conditionals:

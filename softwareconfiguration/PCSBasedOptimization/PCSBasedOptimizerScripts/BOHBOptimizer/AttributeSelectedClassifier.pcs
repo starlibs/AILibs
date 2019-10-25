@@ -1,3 +1,0 @@
-weka.classifiers.meta.AttributeSelectedClassifier.E {weka.attributeSelection.CfsSubsetEval}[weka.attributeSelection.CfsSubsetEval]
-weka.classifiers.meta.AttributeSelectedClassifier.S {weka.attributeSelection.BestFirst,weka.attributeSelection.GreedyStepwise}[weka.attributeSelection.BestFirst]
-Conditionals:
