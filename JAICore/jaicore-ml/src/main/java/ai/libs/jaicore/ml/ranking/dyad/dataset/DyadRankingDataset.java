@@ -12,10 +12,8 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
-import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
-import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
@@ -26,8 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
+import ai.libs.jaicore.ml.core.dataset.Dataset;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.DyadRankingAttribute;
+import ai.libs.jaicore.ml.core.dataset.schema.attribute.SetOfObjectsAttribute;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 
 /**
@@ -39,43 +39,31 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
  * @author Helena Graf, Mirko J�rgens, Michael Braun, Jonas Hanselle
  *
  */
-public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implements IDyadRankingDataset {
+public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankingInstance> implements IDyadRankingDataset {
 
 	private transient Logger logger = LoggerFactory.getLogger(DyadRankingDataset.class);
 
-	private static final long serialVersionUID = -1102494546233523992L;
+	private LabeledInstanceSchema labeledInstanceSchema;
 
-	private List<IAttribute> featureTypes;
-	private IAttribute labelTypes;
-
-	/**
-	 * Creates an empty dyad ranking dataset.
-	 */
-	public DyadRankingDataset() {
-		super();
+	public DyadRankingDataset(String relationName) {
+		createInstanceSchema(relationName);
+		setInternalDataset(new Dataset(this.labeledInstanceSchema));
 	}
 
-	/**
-	 * Creates a dyad ranking dataset containing all elements in the given
-	 * {@link Collection} in the order specified by the collections iterator.
-	 *
-	 * @param c {@link Collection} containing {@link IInstance} objects
-	 */
-	public DyadRankingDataset(final Collection<IDyadRankingInstance> c) {
-		super(c);
+	public DyadRankingDataset(LabeledInstanceSchema labeledInstanceSchema) {
+		this.labeledInstanceSchema = labeledInstanceSchema.getCopy();
+		setInternalDataset(new Dataset(this.labeledInstanceSchema));
 	}
 
-	/**
-	 * Creates an empty dyad ranking dataset with the given initial capacity.
-	 *
-	 * @param initialCapacity initial capacity of the dyad ranking dataset
-	 */
-	public DyadRankingDataset(final int initialCapacity) {
-		super(initialCapacity);
+	public DyadRankingDataset(String relationName, final Collection<IDyadRankingInstance> c) {
+		this(relationName);
+		addAll(c);
 	}
 
-	public DyadRankingDataset(final List<IDyadRankingInstance> dyadRankingInstances) {
-		super(dyadRankingInstances);
+	private void createInstanceSchema(String relationName) {
+		IAttribute dyadSetAttribute = new SetOfObjectsAttribute<IDyad>("dyads");
+		IAttribute dyadRankingAttribute = new DyadRankingAttribute("ranking");
+		labeledInstanceSchema = new LabeledInstanceSchema(relationName, Arrays.asList(dyadSetAttribute), dyadRankingAttribute);
 	}
 
 	public void serialize(final OutputStream out) {
@@ -83,7 +71,7 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 		// ranking dataset
 		try {
 			for (IDyadRankingInstance instance : this) {
-				for (Dyad dyad : instance) {
+				for (IDyad dyad : instance) {
 					out.write(dyad.getContext().toString().getBytes());
 					out.write(";".getBytes());
 					out.write(dyad.getAlternative().toString().getBytes());
@@ -126,7 +114,7 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 						dyads.add(dyad);
 					}
 				}
-				this.add(new DenseDyadRankingInstance(new LabeledInstanceSchema(new LinkedList<>(), new DyadRankingAttribute("label")), dyads));
+				this.add(new DenseDyadRankingInstance(dyads));
 			}
 		} catch (IOException e) {
 			this.logger.warn(e.getMessage());
@@ -187,15 +175,10 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 	 * @param dyad The dyad to convert.
 	 * @return The dyad in {@link INDArray} row vector form.
 	 */
-	private INDArray dyadToVector(final Dyad dyad) {
+	private INDArray dyadToVector(final IDyad dyad) {
 		INDArray instanceOfDyad = Nd4j.create(dyad.getContext().asArray());
 		INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
 		return Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
-	}
-
-	public static DyadRankingDataset fromOrderedDyadList(final List<Dyad> orderedDyad) {
-		List<IDyadRankingInstance> dyadRankingInstance = Arrays.asList(new DenseDyadRankingInstance(orderedDyad));
-		return new DyadRankingDataset(dyadRankingInstance);
 	}
 
 	/**
@@ -206,7 +189,7 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 	 * @return The dyad ranking in {@link INDArray} matrix form.
 	 */
 	private INDArray dyadRankingToMatrix(final IDyadRankingInstance drInstance) {
-		List<INDArray> dyadList = new ArrayList<>(drInstance.getNumAttributes());
+		List<INDArray> dyadList = new ArrayList<>(drInstance.getNumberOfRankedElements());
 		for (IDyad dyad : drInstance) {
 			INDArray dyadVector = this.dyadToVector(dyad);
 			dyadList.add(dyadVector);
@@ -217,87 +200,38 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 	}
 
 	@Override
-	public IAttribute getLabelAttribute() {
-		return this.labelTypes;
-	}
-
-	@Override
-	public int getNumLabels() {
-		return this.labelTypes.size();
-	}
-
-	@Override
-	public DyadRankingDataset createEmptyCopy() throws DatasetCreationException, InterruptedException {
-		return new DyadRankingDataset();
-	}
-
-	@Override
-	public List<IAttribute> getFeatureTypes() {
-		return this.featureTypes;
-	}
-
-	@Override
-	public int getNumFeatures() {
-		return this.featureTypes.size();
-	}
-
-	@Override
 	public ILabeledInstanceSchema getInstanceSchema() {
-		// TODO Auto-generated method stub
-		return null;
+		return labeledInstanceSchema;
 	}
 
 	@Override
 	public Object[] getLabelVector() {
-		// TODO Auto-generated method stub
-		return null;
+		return getInternalDataset().getLabelVector();
+	}
+
+	@Override
+	public DyadRankingDataset createEmptyCopy() {
+		return new DyadRankingDataset(labeledInstanceSchema);
 	}
 
 	@Override
 	public Object[][] getFeatureMatrix() {
-		// TODO Auto-generated method stub
-		return null;
+		return getInternalDataset().getFeatureMatrix();
 	}
 
 	@Override
-	public boolean add(final org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	public void removeColumn(int columnPos) {
+		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
 	}
 
 	@Override
-	public void add(final int arg0, final org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance arg1) {
-		// TODO Auto-generated method stub
-
+	public void removeColumn(String columnName) {
+		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
 	}
 
 	@Override
-	public boolean addAll(final Collection<? extends org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance> arg0) {
-		// TODO Auto-generated method stub
-		return false;
+	public void removeColumn(IAttribute attribute) {
+		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
 	}
 
-	@Override
-	public boolean addAll(final int arg0, final Collection<? extends org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance> arg1) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance set(final int arg0, final org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance arg1) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IDyadRankingInstance get(final int arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public IDyadRankingInstance remove(final int arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
