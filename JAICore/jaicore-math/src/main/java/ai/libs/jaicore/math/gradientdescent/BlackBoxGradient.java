@@ -1,7 +1,8 @@
 package ai.libs.jaicore.math.gradientdescent;
 
+import org.api4.java.common.math.IVector;
+
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 
 /**
  * Difference quotient based gradient estimation. This class will give a
@@ -21,7 +22,7 @@ import ai.libs.jaicore.math.linearalgebra.IVector;
  * Obviously, this is a highly inefficient approach for estimating the gradient
  * (if we have n partial derivatives, we need 2 *n estimations).
  *
- * @author Mirko Jürgens
+ * @author Mirko Jï¿½rgens
  *
  */
 public class BlackBoxGradient implements IGradientFunction {
@@ -32,6 +33,7 @@ public class BlackBoxGradient implements IGradientFunction {
 
 	/**
 	 * Sets up a gradient-estimator for the given function. The estimation of the gradient can be tuned by the precision parameter.
+	 * 
 	 * @param underlyingFunction the function for which the gradient shall be estimated
 	 * @param precision the precision of the estimation, the close this value is to zero the better is the estimation
 	 */

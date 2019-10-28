@@ -1,10 +1,9 @@
 package ai.libs.jaicore.math.gradientdescent;
 
 import org.aeonbits.owner.ConfigFactory;
+import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ai.libs.jaicore.math.linearalgebra.IVector;
 
 /**
  * An optimizer based on the gradient descent method [1]. This optimizer is the
@@ -19,7 +18,7 @@ import ai.libs.jaicore.math.linearalgebra.IVector;
  * [1] Jonathan Barzilai and Jonathan M. Borwein, "Two-point step size gradient
  * methods", in: IMA journal of numerical analysis, 8.1 (1998), pp. 141-148.
  *
- * @author Mirko Jürgens
+ * @author Mirko Jï¿½rgens
  *
  */
 public class GradientDescentOptimizer implements IGradientBasedOptimizer {
@@ -47,8 +46,7 @@ public class GradientDescentOptimizer implements IGradientBasedOptimizer {
 	}
 
 	@Override
-	public IVector optimize(final IGradientDescendableFunction descendableFunction, final IGradientFunction gradient,
-			final IVector initialGuess) {
+	public IVector optimize(final IGradientDescendableFunction descendableFunction, final IGradientFunction gradient, final IVector initialGuess) {
 		int iterations = 0;
 		IVector gradients;
 		do {
