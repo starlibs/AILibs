@@ -242,7 +242,7 @@ public class DyadRankerGATSPTest {
 					trimmedAlternatives.add((IVector) instance.getLabel().get(i).getAlternative());
 				}
 			}
-			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) instance.getLabel().get(0).getInstance(), trimmedAlternatives);
+			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) instance.getLabel().get(0).getContext(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;

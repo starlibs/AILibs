@@ -63,7 +63,7 @@ public class UCBPoolBasedActiveDyadRanker extends ARandomlyInitializingDyadRanke
 			alts.add((IVector) d1.getAlternative());
 			alts.add((IVector) d2.getAlternative());
 
-			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) d1.getInstance(), alts);
+			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) d1.getContext(), alts);
 
 			IDyadRankingInstance groundTruthPair = this.poolProvider.query(sparseQueryPair);
 

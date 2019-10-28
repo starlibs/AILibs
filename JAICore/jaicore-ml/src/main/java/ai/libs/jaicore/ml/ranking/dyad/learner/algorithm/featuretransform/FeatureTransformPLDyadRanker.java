@@ -36,7 +36,7 @@ import edu.stanford.nlp.optimization.QNMinimizer;
  * [1].
  *
  *
- * [1] Schäfer, D. & Hüllermeier, Dyad ranking using Plackett-Luce models based
+ * [1] Schï¿½fer, D. & Hï¿½llermeier, Dyad ranking using Plackett-Luce models based
  * on joint feature representations,
  * https://link.springer.com/article/10.1007%2Fs10994-017-5694-9
  *
@@ -130,7 +130,7 @@ public class FeatureTransformPLDyadRanker extends ASupervisedLearner<IDyadRankin
 		this.negativeLogLikelihoodDerivative.initialize(dataset, featureTransforms);
 
 		int alternativeLength = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
-		int instanceLength = ((IVector) dataset.get(0).getLabel().get(0).getInstance()).length();
+		int instanceLength = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
 		this.w = new DenseDoubleVector(this.featureTransform.getTransformedVectorLength(alternativeLength, instanceLength), 0.3);
 		log.debug("Likelihood of the randomly filled w is {}", this.likelihoodOfParameter(this.w, dataset));
 		BilinFunction fun = new BilinFunction(featureTransforms, dataset, this.featureTransform.getTransformedVectorLength(alternativeLength, instanceLength));

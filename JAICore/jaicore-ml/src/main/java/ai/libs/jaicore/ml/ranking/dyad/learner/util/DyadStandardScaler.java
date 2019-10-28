@@ -23,14 +23,14 @@ public class DyadStandardScaler extends AbstractDyadScaler {
 
 	@Override
 	public void transformInstances(final IDyad dyad, final List<Integer> ignoredIndices) {
-		for (int i = 0; i < ((IVector) dyad.getInstance()).length(); i++) {
+		for (int i = 0; i < ((IVector) dyad.getContext()).length(); i++) {
 			if (!ignoredIndices.contains(i)) {
-				double value = ((IVector) dyad.getInstance()).getValue(i);
+				double value = ((IVector) dyad.getContext()).getValue(i);
 				value -= this.statsX[i].getMean();
 				if (this.statsX[i].getStandardDeviation() != 0) {
 					value /= this.statsX[i].getStandardDeviation();
 				}
-				((IVector) dyad.getInstance()).setValue(i, value);
+				((IVector) dyad.getContext()).setValue(i, value);
 			}
 		}
 	}

@@ -67,7 +67,7 @@ public abstract class ARandomlyInitializingDyadRanker extends ActiveDyadRanker {
 					LinkedList<IVector> alternatives = new LinkedList<>();
 					alternatives.add((IVector) dyads.get(0).getAlternative());
 					alternatives.add((IVector) dyads.get(1).getAlternative());
-					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) dyads.get(0).getInstance(), alternatives);
+					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) dyads.get(0).getContext(), alternatives);
 					IDyadRankingInstance trueRanking = this.poolProvider.query(queryInstance);
 					minibatch.add(trueRanking);
 				}

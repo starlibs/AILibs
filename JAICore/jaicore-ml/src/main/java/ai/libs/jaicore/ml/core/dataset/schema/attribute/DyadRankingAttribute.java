@@ -70,7 +70,7 @@ public class DyadRankingAttribute extends ARankingAttribute<IDyad> {
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
-		return this.getValueAsTypeInstance(value).stream().map(x -> "(" + x.getInstance() + ";" + x.getAlternative() + ")").reduce("", (a, b) -> a + (a.isEmpty() ? "" : ">") + b);
+		return this.getValueAsTypeInstance(value).stream().map(x -> "(" + x.getContext() + ";" + x.getAlternative() + ")").reduce("", (a, b) -> a + (a.isEmpty() ? "" : ">") + b);
 	}
 
 	@Override

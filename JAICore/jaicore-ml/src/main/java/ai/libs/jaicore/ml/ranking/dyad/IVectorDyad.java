@@ -7,7 +7,7 @@ import ai.libs.jaicore.math.linearalgebra.IVector;
 public interface IVectorDyad extends IDyad {
 
 	@Override
-	public IVector getInstance();
+	public IVector getContext();
 
 	@Override
 	public IVector getAlternative();

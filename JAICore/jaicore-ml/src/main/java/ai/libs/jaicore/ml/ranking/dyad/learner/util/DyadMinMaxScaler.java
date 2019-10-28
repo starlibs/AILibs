@@ -29,7 +29,7 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	private static final long serialVersionUID = -1319262573945961139L;
 
 	public void untransform(final DyadRankingDataset dataset) {
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getInstance()).length();
+		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
 		int lengthY = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
 
 		if (lengthX != this.statsX.length || lengthY != this.statsY.length) {
@@ -74,15 +74,15 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param dyad
 	 */
 	public void untransformInstance(final IDyad dyad) {
-		int lengthX = ((IVector) dyad.getInstance()).length();
+		int lengthX = ((IVector) dyad.getContext()).length();
 		if (lengthX != this.statsX.length) {
 			throw new IllegalArgumentException("The scaler was fit to instances of length " + this.statsX.length + " but received an instance of length " + lengthX + ".");
 		}
 		for (int i = 0; i < lengthX; i++) {
-			double value = ((IVector) dyad.getInstance()).getValue(i);
+			double value = ((IVector) dyad.getContext()).getValue(i);
 			value *= this.statsX[i].getMax() - this.statsX[i].getMin();
 			value += this.statsX[i].getMin();
-			((IVector) dyad.getInstance()).setValue(i, value);
+			((IVector) dyad.getContext()).setValue(i, value);
 		}
 	}
 
@@ -98,16 +98,16 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 		for (int i = 0; i < decimals; i++) {
 			pattern.append("#");
 		}
-		int lengthX = ((IVector) dyad.getInstance()).length();
+		int lengthX = ((IVector) dyad.getContext()).length();
 		if (lengthX != this.statsX.length) {
 			throw new IllegalArgumentException("The scaler was fit to instances of length " + this.statsX.length + " but received an instance of length " + lengthX + ".");
 		}
 		DecimalFormat df = new DecimalFormat(pattern.toString());
 		for (int i = 0; i < lengthX; i++) {
-			double value = ((IVector) dyad.getInstance()).getValue(i);
+			double value = ((IVector) dyad.getContext()).getValue(i);
 			value *= this.statsX[i].getMax() - this.statsX[i].getMin();
 			value += this.statsX[i].getMin();
-			((IVector) dyad.getInstance()).setValue(i, Double.valueOf(df.format(value)));
+			((IVector) dyad.getContext()).setValue(i, Double.valueOf(df.format(value)));
 		}
 	}
 
@@ -236,14 +236,14 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 
 	@Override
 	public void transformInstances(final IDyad dyad, final List<Integer> ignoredIndices) {
-		for (int i = 0; i < ((IVector) dyad.getInstance()).length(); i++) {
-			double value = ((IVector) dyad.getInstance()).getValue(i);
+		for (int i = 0; i < ((IVector) dyad.getContext()).length(); i++) {
+			double value = ((IVector) dyad.getContext()).getValue(i);
 			value -= this.statsX[i].getMin();
 			// prevent division by zero
 			if ((this.statsX[i].getMax() - this.statsX[i].getMin()) != 0) {
 				value /= this.statsX[i].getMax() - this.statsX[i].getMin();
 			}
-			((IVector) dyad.getInstance()).setValue(i, value);
+			((IVector) dyad.getContext()).setValue(i, value);
 		}
 	}
 

@@ -15,7 +15,7 @@ public class BiliniearFeatureTransform implements IDyadFeatureTransform {
 
 	@Override
 	public IVector transform(final IDyad dyad) {
-		IVector x = (IVector) dyad.getInstance();
+		IVector x = (IVector) dyad.getContext();
 		IVector y = (IVector) dyad.getAlternative();
 		return x.kroneckerProduct(y.asArray());
 	}

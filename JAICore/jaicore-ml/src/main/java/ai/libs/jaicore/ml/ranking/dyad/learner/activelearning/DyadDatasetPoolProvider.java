@@ -16,12 +16,12 @@ import org.nd4j.linalg.primitives.Pair;
 
 import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
 
 /**
  * A pool provider which is created out of a {@link DyadRankingDataset}. Each
- * {@link SparseDyadRankingInstance} or {@link DyadRankingInstance} of the
+ * {@link SparseDyadRankingInstance} or {@link DenseDyadRankingInstance} of the
  * {@link DyadRankingDataset} must represent a full ranking. Only queries of
  * rankings over the same instance features can be answered.
  *
@@ -76,7 +76,7 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 		for (Pair<IDyad, Integer> pair : dyadPositionPairs) {
 			dyadList.add(pair.getFirst());
 		}
-		IDyadRankingInstance trueRanking = new DyadRankingInstance(queryInstance.getInstanceSchema(), dyadList);
+		IDyadRankingInstance trueRanking = new DenseDyadRankingInstance(queryInstance.getInstanceSchema(), dyadList);
 		if (this.removeDyadsWhenQueried) {
 			for (IDyad dyad : dyadList) {
 				this.removeDyadFromPool(dyad);
@@ -112,15 +112,15 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 		this.pool.add(instance);
 
 		// Add the dyad ranking instances to the hash maps
-		this.dyadRankingsByInstances.put((IVector) instance.getLabel().get(0).getInstance(), instance);
+		this.dyadRankingsByInstances.put((IVector) instance.getLabel().get(0).getContext(), instance);
 		this.dyadRankingsByAlternatives.put((IVector) instance.getLabel().get(0).getAlternative(), instance);
 
 		for (IDyad dyad : instance) {
 			// Add all dyads to the HashMap with instance features as key
-			if (!this.dyadsByInstances.containsKey(dyad.getInstance())) {
-				this.dyadsByInstances.put((IVector) dyad.getInstance(), new HashSet<IDyad>());
+			if (!this.dyadsByInstances.containsKey(dyad.getContext())) {
+				this.dyadsByInstances.put((IVector) dyad.getContext(), new HashSet<IDyad>());
 			}
-			this.dyadsByInstances.get(dyad.getInstance()).add(dyad);
+			this.dyadsByInstances.get(dyad.getContext()).add(dyad);
 
 			// Add all dyads to the HashMap with alternative features as key
 			if (!this.dyadsByAlternatives.containsKey(dyad.getAlternative())) {
@@ -139,10 +139,10 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	 *         contain the dyad.
 	 */
 	private int getPositionInRankingByInstanceFeatures(final IDyad dyad) {
-		if (!this.dyadRankingsByInstances.containsKey(dyad.getInstance())) {
+		if (!this.dyadRankingsByInstances.containsKey(dyad.getContext())) {
 			return -1;
 		} else {
-			IDyadRankingInstance ranking = this.dyadRankingsByInstances.get(dyad.getInstance());
+			IDyadRankingInstance ranking = this.dyadRankingsByInstances.get(dyad.getContext());
 			boolean found = false;
 			int curPos = 0;
 			while (curPos < ranking.getNumAttributes() && !found) {
@@ -163,10 +163,10 @@ public class DyadDatasetPoolProvider implements IDyadRankingPoolProvider {
 	}
 
 	private void removeDyadFromPool(final IDyad dyad) {
-		if (this.dyadsByInstances.containsKey(dyad.getInstance())) {
-			this.dyadsByInstances.get(dyad.getInstance()).remove(dyad);
-			if (this.dyadsByInstances.get(dyad.getInstance()).size() < 2) {
-				this.dyadsByInstances.remove(dyad.getInstance());
+		if (this.dyadsByInstances.containsKey(dyad.getContext())) {
+			this.dyadsByInstances.get(dyad.getContext()).remove(dyad);
+			if (this.dyadsByInstances.get(dyad.getContext()).size() < 2) {
+				this.dyadsByInstances.remove(dyad.getContext());
 			}
 		}
 		if (this.dyadsByAlternatives.containsKey(dyad.getAlternative())) {

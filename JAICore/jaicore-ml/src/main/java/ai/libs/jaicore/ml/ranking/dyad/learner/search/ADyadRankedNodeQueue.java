@@ -20,7 +20,7 @@ import com.google.common.collect.HashBiMap;
 
 import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;
@@ -223,7 +223,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				if (this.useScaler) {
 					// scale node
 					DyadRankingDataset dataset = new DyadRankingDataset();
-					dataset.add(new DyadRankingInstance(dataset.getInstanceSchema(), Arrays.asList(newDyad)));
+					dataset.add(new DenseDyadRankingInstance(dataset.getInstanceSchema(), Arrays.asList(newDyad)));
 					this.scaler.transformAlternatives(dataset);
 				}
 
@@ -233,7 +233,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				this.nodesAndCharacterizationsMap.put(e, characterization);
 
 				// predict new ranking and reorder queue accordingly
-				IPrediction prediction = this.dyadRanker.predict(new DyadRankingInstance(new DyadRankingDataset().getInstanceSchema(), this.queryDyads));
+				IPrediction prediction = this.dyadRanker.predict(new DenseDyadRankingInstance(new DyadRankingDataset().getInstanceSchema(), this.queryDyads));
 				this.queue.clear();
 				for (int i = 0; i < ((IRanking<Dyad>) prediction.getPrediction()).size(); i++) {
 					IEvaluatedPath<N, ?, V> toAdd = this.nodesAndCharacterizationsMap.inverse().get(((IRanking<Dyad>) prediction.getPrediction()).get(i).getAlternative());
@@ -366,7 +366,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 		this.logger.trace("Transform context characterization with scaler {}", this.scaler.getClass());
 		Dyad dyad = new Dyad(this.contextCharacterization, this.contextCharacterization);
 		DyadRankingDataset dataset = new DyadRankingDataset();
-		DyadRankingInstance instance = new DyadRankingInstance(dataset.getInstanceSchema(), Arrays.asList(dyad));
+		DenseDyadRankingInstance instance = new DenseDyadRankingInstance(dataset.getInstanceSchema(), Arrays.asList(dyad));
 		dataset.add(instance);
 		this.scaler.transformInstances(dataset);
 	}

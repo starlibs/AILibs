@@ -19,13 +19,13 @@ import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.core.dataset.schema.LabeledInstanceSchema;
 import ai.libs.jaicore.ml.core.dataset.schema.attribute.DyadRankingAttribute;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
@@ -36,7 +36,7 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
  * extension to the {@link ArrayList} implementation with typecasts to
  * {@link IDyadRankingInstance}.
  *
- * @author Helena Graf, Mirko Jürgens, Michael Braun, Jonas Hanselle
+ * @author Helena Graf, Mirko Jï¿½rgens, Michael Braun, Jonas Hanselle
  *
  */
 public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implements IDyadRankingDataset {
@@ -84,7 +84,7 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 		try {
 			for (IDyadRankingInstance instance : this) {
 				for (Dyad dyad : instance) {
-					out.write(dyad.getInstance().toString().getBytes());
+					out.write(dyad.getContext().toString().getBytes());
 					out.write(";".getBytes());
 					out.write(dyad.getAlternative().toString().getBytes());
 					out.write("|".getBytes());
@@ -126,7 +126,7 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 						dyads.add(dyad);
 					}
 				}
-				this.add(new DyadRankingInstance(new LabeledInstanceSchema(new LinkedList<>(), new DyadRankingAttribute("label")), dyads));
+				this.add(new DenseDyadRankingInstance(new LabeledInstanceSchema(new LinkedList<>(), new DyadRankingAttribute("label")), dyads));
 			}
 		} catch (IOException e) {
 			this.logger.warn(e.getMessage());
@@ -188,13 +188,13 @@ public class DyadRankingDataset extends ArrayList<IDyadRankingInstance> implemen
 	 * @return The dyad in {@link INDArray} row vector form.
 	 */
 	private INDArray dyadToVector(final Dyad dyad) {
-		INDArray instanceOfDyad = Nd4j.create(dyad.getInstance().asArray());
+		INDArray instanceOfDyad = Nd4j.create(dyad.getContext().asArray());
 		INDArray alternativeOfDyad = Nd4j.create(dyad.getAlternative().asArray());
 		return Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 	}
 
 	public static DyadRankingDataset fromOrderedDyadList(final List<Dyad> orderedDyad) {
-		List<IDyadRankingInstance> dyadRankingInstance = Arrays.asList(new DyadRankingInstance(orderedDyad));
+		List<IDyadRankingInstance> dyadRankingInstance = Arrays.asList(new DenseDyadRankingInstance(orderedDyad));
 		return new DyadRankingDataset(dyadRankingInstance);
 	}
 

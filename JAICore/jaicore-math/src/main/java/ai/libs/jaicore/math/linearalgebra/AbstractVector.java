@@ -1,9 +1,11 @@
 package ai.libs.jaicore.math.linearalgebra;
 
+import org.api4.java.common.math.IVector;
+
 /**
  * An abstract vector class, implementing several common methods for different vector implementations. All vector implementations should subclass this class.
  * 
- * @author Alexander Hetzer
+ * @author Alexander Tornede
  */
 public abstract class AbstractVector implements IVector {
 
@@ -65,18 +67,17 @@ public abstract class AbstractVector implements IVector {
 		return sb.toString();
 	}
 
-	protected double [] kroneckerProductInternal(double[] vectorAsArray) {
-		double [] kroneckerProduct = new double [ this.length() * vectorAsArray.length];
+	protected double[] kroneckerProductInternal(double[] vectorAsArray) {
+		double[] kroneckerProduct = new double[this.length() * vectorAsArray.length];
 		int counter = 0;
 		for (int i = 0; i < this.length(); i++) {
 			for (int j = 0; j < vectorAsArray.length; j++) {
-				kroneckerProduct [counter++] =  this.getValue(i) * vectorAsArray[j];
+				kroneckerProduct[counter++] = this.getValue(i) * vectorAsArray[j];
 			}
 		}
 		return kroneckerProduct;
 	}
-	
-	
+
 	@Override
 	public void zeroAllDimensions() {
 		for (int i = 0; i < length(); i++) {

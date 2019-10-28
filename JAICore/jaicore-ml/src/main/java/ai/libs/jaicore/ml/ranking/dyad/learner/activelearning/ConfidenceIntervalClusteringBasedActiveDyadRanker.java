@@ -145,7 +145,7 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 			LinkedList<IVector> alternatives = new LinkedList<>();
 			alternatives.add((IVector) curDyads.get(curPair[0]).getAlternative());
 			alternatives.add((IVector) curDyads.get(curPair[1]).getAlternative());
-			SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) curDyads.get(curPair[0]).getInstance(), alternatives);
+			SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) curDyads.get(curPair[0]).getContext(), alternatives);
 			IDyadRankingInstance trueRanking = this.poolProvider.query(queryInstance);
 			minibatch.add(trueRanking);
 		}

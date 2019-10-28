@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 
 import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
 
 /**
@@ -46,7 +46,7 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * @param dataset The dataset the scaler should be fit to.
 	 */
 	public void fit(final IDyadRankingDataset dataset) {
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getInstance()).length();
+		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
 		int lengthY = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
 		this.statsX = new SummaryStatistics[lengthX];
 		this.statsY = new SummaryStatistics[lengthY];
@@ -59,7 +59,7 @@ public abstract class AbstractDyadScaler implements Serializable {
 		for (IDyadRankingInstance instance : dataset) {
 			for (IDyad dyad : instance) {
 				for (int i = 0; i < lengthX; i++) {
-					this.statsX[i].addValue(((IVector) dyad.getInstance()).getValue(i));
+					this.statsX[i].addValue(((IVector) dyad.getContext()).getValue(i));
 				}
 				for (int i = 0; i < lengthY; i++) {
 					this.statsY[i].addValue(((IVector) dyad.getAlternative()).getValue(i));
@@ -75,7 +75,7 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 * @param dataset The dataset to be standardized.
 	 */
 	public void transform(final IDyadRankingDataset dataset) {
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getInstance()).length();
+		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
 		int lengthY = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
 
 		if (lengthX != this.statsX.length || lengthY != this.statsY.length) {
@@ -150,12 +150,12 @@ public abstract class AbstractDyadScaler implements Serializable {
 	 *                       the scaler.
 	 */
 	public void transformInstances(final SparseDyadRankingInstance drInstance, final List<Integer> ignoredIndices) {
-		this.transformInstaceVector(drInstance.getAttributeValue(0).getInstance(), ignoredIndices);
+		this.transformInstaceVector(drInstance.getAttributeValue(0).getContext(), ignoredIndices);
 	}
 
 	/**
 	 * Transforms only the instances of each dyad in a
-	 * {@link DyadRankingInstance} according to the mean and standard
+	 * {@link DenseDyadRankingInstance} according to the mean and standard
 	 * deviation of the data the scaler has been fit to. The attributes with indices
 	 * contained in ignoredIndices are not transformed. {
 	 *
@@ -203,8 +203,8 @@ public abstract class AbstractDyadScaler implements Serializable {
 			if (instance instanceof SparseDyadRankingInstance) {
 				SparseDyadRankingInstance drSparseInstance = (SparseDyadRankingInstance) instance;
 				this.transformInstances(drSparseInstance, ignoredIndices);
-			} else if (instance instanceof DyadRankingInstance) {
-				DyadRankingInstance drDenseInstance = (DyadRankingInstance) instance;
+			} else if (instance instanceof DenseDyadRankingInstance) {
+				DenseDyadRankingInstance drDenseInstance = (DenseDyadRankingInstance) instance;
 				this.transformInstances(drDenseInstance, ignoredIndices);
 			} else {
 				throw new IllegalArgumentException("The scalers only support SparseDyadRankingInstance and DyadRankingInstance!");

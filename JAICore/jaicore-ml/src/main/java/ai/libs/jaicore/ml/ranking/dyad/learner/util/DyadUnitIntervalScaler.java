@@ -24,7 +24,7 @@ public class DyadUnitIntervalScaler extends AbstractDyadScaler {
 	@Override
 	public void fit(final IDyadRankingDataset dataset) {
 		super.fit(dataset);
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getInstance()).length();
+		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
 		this.lengthOfX = new double[lengthX];
 		for (int i = 0; i < lengthX; i++) {
 			this.lengthOfX[i] = Math.sqrt(this.statsX[i].getSumsq());
@@ -43,15 +43,15 @@ public class DyadUnitIntervalScaler extends AbstractDyadScaler {
 
 	@Override
 	public void transformInstances(final IDyadRankingDataset dataset, final List<Integer> ignoredIndices) {
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getInstance()).length();
+		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
 		for (IDyadRankingInstance instance : dataset) {
 			for (IDyad dyad : instance) {
 				for (int i = 0; i < lengthX; i++) {
-					double value = ((IVector) dyad.getInstance()).getValue(i);
+					double value = ((IVector) dyad.getContext()).getValue(i);
 					if (value != 0.0d) {
 						value /= this.lengthOfX[i];
 					}
-					((IVector) dyad.getInstance()).setValue(i, value);
+					((IVector) dyad.getContext()).setValue(i, value);
 				}
 			}
 		}

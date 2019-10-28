@@ -62,7 +62,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ARandomlyInitializing
 			if (dyads.size() < 2) {
 				break;
 			}
-			IVector instance = (IVector) dyads.get(0).getInstance();
+			IVector instance = (IVector) dyads.get(0).getContext();
 			List<IVector> alternatives = new ArrayList<>(dyads.size());
 			for (IDyad dyad : dyads) {
 				alternatives.add((IVector) dyad.getAlternative());
@@ -78,7 +78,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ARandomlyInitializing
 			for (IDyad dyad : queryPair) {
 				alternativePair.add((IVector) dyad.getAlternative());
 			}
-			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) queryPair.getLabel().get(0).getInstance(), alternativePair);
+			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) queryPair.getLabel().get(0).getContext(), alternativePair);
 
 			// query the pool provider to get the ground truth ranking for the pair
 			IDyadRankingInstance groundTruthPair = this.poolProvider.query(sparseQueryPair);
