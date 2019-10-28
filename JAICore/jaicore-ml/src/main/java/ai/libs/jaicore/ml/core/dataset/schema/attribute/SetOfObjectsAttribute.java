@@ -9,43 +9,50 @@ public class SetOfObjectsAttribute<O> extends ACollectionOfObjectsAttribute<O> i
 
 	private static final long serialVersionUID = 4372755490714119056L;
 
-	public SetOfObjectsAttribute(String name) {
+	public SetOfObjectsAttribute(final String name) {
 		super(name);
 	}
 
 	@Override
-	public boolean isValidValue(Object value) {
-		asd
+	public boolean isValidValue(final Object value) {
+		// TODO implement me
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
 	public String getStringDescriptionOfDomain() {
-		asd
+		// TODO implement me
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
-	public IAttributeValue getAsAttributeValue(Object object) {
-		asd
+	public IAttributeValue getAsAttributeValue(final Object object) {
+		// TODO implement me
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
-	public double toDouble(Object object) {
-		asd
+	public double toDouble(final Object object) {
+		// TODO implement me
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
-	public String serializeAttributeValue(Object value) {
-		/asd
+	public String serializeAttributeValue(final Object value) {
+		// TODO implement me
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
-	public Object deserializeAttributeValue(String string) {
-		asd
+	public Object deserializeAttributeValue(final String string) {
+		// TODO implement me
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
-	protected Collection<O> getValueAsTypeInstance(Object object) {
-		asd
+	protected Collection<O> getValueAsTypeInstance(final Object object) {
+		// TODO implement me
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 }
