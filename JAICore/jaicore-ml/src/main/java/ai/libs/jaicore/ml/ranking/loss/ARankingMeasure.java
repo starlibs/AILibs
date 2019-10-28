@@ -16,9 +16,8 @@ public abstract class ARankingMeasure extends AMeasure<IRanking<?>, IRankingPred
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.loss(expected.get(0), actual.get(0))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
-		} else {
-			throw new IllegalStateException("Could not aggregate " + this.getClass().getSimpleName());
 		}
+		throw new IllegalStateException("Could not aggregate " + this.getClass().getSimpleName());
 	}
 
 	public abstract double loss(final IRanking<?> expected, IRanking<?> actual);

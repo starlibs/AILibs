@@ -37,9 +37,8 @@ public class NDCGLoss extends ARankingMeasure implements IRankingMeasure {
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.loss(expected.get(0), actual.get(0))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
-		} else {
-			throw new IllegalStateException("Could not aggregate kendalls tau of top k");
 		}
+		throw new IllegalStateException("Could not aggregate kendalls tau of top k");
 	}
 
 	@Override
@@ -62,9 +61,8 @@ public class NDCGLoss extends ARankingMeasure implements IRankingMeasure {
 
 		if (dcg != 0) {
 			return idcg / dcg;
-		} else {
-			return 0;
 		}
+		return 0;
 	}
 
 	private double computeDCG(final IRanking<?> ranking, final Map<Object, Integer> relevance) {
