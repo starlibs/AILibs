@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 
 import ai.libs.jaicore.ml.ranking.IRankingPredictionBatch;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IDyadRanker;
 
@@ -82,7 +82,7 @@ public class DyadRankingLossUtil {
 			// up with a perfect result
 			List<Object> shuffleContainer = Lists.newArrayList(expected.iterator());
 			Collections.shuffle(shuffleContainer, random);
-			IDyadRankingInstance shuffledActual = new DyadRankingInstance(trueOrderings.getInstanceSchema(), shuffleContainer);
+			IDyadRankingInstance shuffledActual = new DenseDyadRankingInstance(trueOrderings.getInstanceSchema(), shuffleContainer);
 			IRankingPrediction predicted = ranker.predict(shuffledActual);
 			avgLoss += lossFunction.loss(predicted.getPrediction(), expected);
 		}

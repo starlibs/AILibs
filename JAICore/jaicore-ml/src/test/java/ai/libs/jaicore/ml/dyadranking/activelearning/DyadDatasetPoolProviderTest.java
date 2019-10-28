@@ -59,9 +59,9 @@ public class DyadDatasetPoolProviderTest {
 			alternatives3.add((IVector) dyad.getAlternative());
 		}
 
-		SparseDyadRankingInstance si1 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking1.getLabel().get(0).getInstance(), alternatives1);
-		SparseDyadRankingInstance si2 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking2.getLabel().get(0).getInstance(), alternatives1);
-		SparseDyadRankingInstance si3 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking3.getLabel().get(0).getInstance(), alternatives1);
+		SparseDyadRankingInstance si1 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking1.getLabel().get(0).getContext(), alternatives1);
+		SparseDyadRankingInstance si2 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking2.getLabel().get(0).getContext(), alternatives1);
+		SparseDyadRankingInstance si3 = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) trueRanking3.getLabel().get(0).getContext(), alternatives1);
 
 		// shuffle the sparse instances
 		Collections.shuffle(alternatives1);

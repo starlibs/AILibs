@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.schema;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
@@ -22,6 +23,11 @@ public class LabeledInstanceSchema extends InstanceSchema implements ILabeledIns
 	@Override
 	public void replaceLabelAttribute(final IAttribute labelAttribute) {
 		this.labelAttribute = labelAttribute;
+	}
+
+	@Override
+	public LabeledInstanceSchema getCopy() {
+		return new LabeledInstanceSchema(getRelationName(), new ArrayList<>(getAttributeList()), labelAttribute);
 	}
 
 }

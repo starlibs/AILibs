@@ -12,10 +12,10 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
@@ -143,9 +143,9 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 
 			// query them
 			LinkedList<IVector> alternatives = new LinkedList<>();
-			alternatives.add((IVector) curDyads.get(curPair[0]).getAlternative());
-			alternatives.add((IVector) curDyads.get(curPair[1]).getAlternative());
-			SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) curDyads.get(curPair[0]).getInstance(), alternatives);
+			alternatives.add(curDyads.get(curPair[0]).getAlternative());
+			alternatives.add(curDyads.get(curPair[1]).getAlternative());
+			SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(curDyads.get(curPair[0]).getContext(), alternatives);
 			IDyadRankingInstance trueRanking = this.poolProvider.query(queryInstance);
 			minibatch.add(trueRanking);
 		}
@@ -171,11 +171,9 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 			return 0.0d;
 		}
 		// else compute intersection
-		else {
-			double upperlower = Math.max(lower1, lower2);
-			double lowerupper = Math.min(upper1, upper2);
-			return Math.abs((lowerupper - upperlower));
-		}
+		double upperlower = Math.max(lower1, lower2);
+		double lowerupper = Math.min(upper1, upper2);
+		return Math.abs((lowerupper - upperlower));
 	}
 
 	private class ListComparator implements Comparator<List<IDyad>> {

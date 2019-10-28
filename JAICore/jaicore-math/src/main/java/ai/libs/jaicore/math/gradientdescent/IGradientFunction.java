@@ -1,11 +1,11 @@
 package ai.libs.jaicore.math.gradientdescent;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import org.api4.java.common.math.IVector;
 
 /**
  * Represents the gradient of a function that is differentiable.
  *
- * @author Helena Graf, Mirko Jürgens
+ * @author Helena Graf, Mirko Jï¿½rgens
  *
  */
 public interface IGradientFunction {

@@ -18,4 +18,9 @@ public class Ranking<O> extends ArrayList<O> implements IRanking<O> {
 	public Ranking() {
 		super();
 	}
+
+	@Override
+	public Ranking<O> getPrediction() {
+		return this;
+	}
 }
