@@ -6,8 +6,8 @@ import java.util.List;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 
 /**
@@ -29,8 +29,8 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	private static final long serialVersionUID = -1319262573945961139L;
 
 	public void untransform(final DyadRankingDataset dataset) {
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
-		int lengthY = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
+		int lengthX = dataset.get(0).getLabel().get(0).getContext().length();
+		int lengthY = dataset.get(0).getLabel().get(0).getAlternative().length();
 
 		if (lengthX != this.statsX.length || lengthY != this.statsY.length) {
 			throw new IllegalArgumentException("The scaler was fit to dyads with instances of length " + this.statsX.length + " and alternatives of length " + this.statsY.length + "\n but received instances of length " + lengthX
@@ -74,15 +74,15 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param dyad
 	 */
 	public void untransformInstance(final IDyad dyad) {
-		int lengthX = ((IVector) dyad.getContext()).length();
+		int lengthX = dyad.getContext().length();
 		if (lengthX != this.statsX.length) {
 			throw new IllegalArgumentException("The scaler was fit to instances of length " + this.statsX.length + " but received an instance of length " + lengthX + ".");
 		}
 		for (int i = 0; i < lengthX; i++) {
-			double value = ((IVector) dyad.getContext()).getValue(i);
+			double value = dyad.getContext().getValue(i);
 			value *= this.statsX[i].getMax() - this.statsX[i].getMin();
 			value += this.statsX[i].getMin();
-			((IVector) dyad.getContext()).setValue(i, value);
+			dyad.getContext().setValue(i, value);
 		}
 	}
 
@@ -98,16 +98,16 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 		for (int i = 0; i < decimals; i++) {
 			pattern.append("#");
 		}
-		int lengthX = ((IVector) dyad.getContext()).length();
+		int lengthX = dyad.getContext().length();
 		if (lengthX != this.statsX.length) {
 			throw new IllegalArgumentException("The scaler was fit to instances of length " + this.statsX.length + " but received an instance of length " + lengthX + ".");
 		}
 		DecimalFormat df = new DecimalFormat(pattern.toString());
 		for (int i = 0; i < lengthX; i++) {
-			double value = ((IVector) dyad.getContext()).getValue(i);
+			double value = dyad.getContext().getValue(i);
 			value *= this.statsX[i].getMax() - this.statsX[i].getMin();
 			value += this.statsX[i].getMin();
-			((IVector) dyad.getContext()).setValue(i, Double.valueOf(df.format(value)));
+			dyad.getContext().setValue(i, Double.valueOf(df.format(value)));
 		}
 	}
 
@@ -144,15 +144,15 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 	 * @param dyad
 	 */
 	public void untransformAlternative(final IDyad dyad) {
-		int lengthY = ((IVector) dyad.getAlternative()).length();
+		int lengthY = dyad.getAlternative().length();
 		if (lengthY != this.statsY.length) {
 			throw new IllegalArgumentException("The scaler was fit to alternatives of length " + this.statsY.length + " but received an alternative of length " + lengthY + ".");
 		}
 		for (int i = 0; i < lengthY; i++) {
-			double value = ((IVector) dyad.getAlternative()).getValue(i);
+			double value = dyad.getAlternative().getValue(i);
 			value *= this.statsY[i].getMax() - this.statsY[i].getMin();
 			value += this.statsY[i].getMin();
-			((IVector) dyad.getAlternative()).setValue(i, value);
+			dyad.getAlternative().setValue(i, value);
 		}
 	}
 
@@ -167,16 +167,16 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 		for (int i = 0; i < decimals; i++) {
 			pattern.append("#");
 		}
-		int lengthY = ((IVector) dyad.getAlternative()).length();
+		int lengthY = dyad.getAlternative().length();
 		if (lengthY != this.statsY.length) {
 			throw new IllegalArgumentException("The scaler was fit to alternatives of length " + this.statsY.length + " but received an alternative of length " + lengthY + ".");
 		}
 		DecimalFormat df = new DecimalFormat(pattern.toString());
 		for (int i = 0; i < lengthY; i++) {
-			double value = ((IVector) dyad.getAlternative()).getValue(i);
+			double value = dyad.getAlternative().getValue(i);
 			value *= this.statsY[i].getMax() - this.statsY[i].getMin();
 			value += this.statsY[i].getMin();
-			((IVector) dyad.getAlternative()).setValue(i, Double.valueOf(df.format(value)));
+			dyad.getAlternative().setValue(i, Double.valueOf(df.format(value)));
 		}
 	}
 
@@ -236,28 +236,28 @@ public class DyadMinMaxScaler extends AbstractDyadScaler {
 
 	@Override
 	public void transformInstances(final IDyad dyad, final List<Integer> ignoredIndices) {
-		for (int i = 0; i < ((IVector) dyad.getContext()).length(); i++) {
-			double value = ((IVector) dyad.getContext()).getValue(i);
+		for (int i = 0; i < dyad.getContext().length(); i++) {
+			double value = dyad.getContext().getValue(i);
 			value -= this.statsX[i].getMin();
 			// prevent division by zero
 			if ((this.statsX[i].getMax() - this.statsX[i].getMin()) != 0) {
 				value /= this.statsX[i].getMax() - this.statsX[i].getMin();
 			}
-			((IVector) dyad.getContext()).setValue(i, value);
+			dyad.getContext().setValue(i, value);
 		}
 	}
 
 	@Override
 	public void transformAlternatives(final IDyad dyad, final List<Integer> ignoredIndices) {
-		for (int i = 0; i < ((IVector) dyad.getAlternative()).length(); i++) {
+		for (int i = 0; i < dyad.getAlternative().length(); i++) {
 			if (!ignoredIndices.contains(i)) {
-				double value = ((IVector) dyad.getAlternative()).getValue(i);
+				double value = dyad.getAlternative().getValue(i);
 				value -= this.statsY[i].getMin();
 				// prevent division by zero
 				if ((this.statsY[i].getMax() - this.statsY[i].getMin()) != 0) {
 					value /= this.statsY[i].getMax() - this.statsY[i].getMin();
 				}
-				((IVector) dyad.getAlternative()).setValue(i, value);
+				dyad.getAlternative().setValue(i, value);
 			}
 		}
 	}

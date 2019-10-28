@@ -5,8 +5,7 @@ import java.util.List;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
-
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import org.api4.java.common.math.IVector;
 
 /**
  * A scaler that can be fit to a certain dataset and then be used to normalize
@@ -24,12 +23,12 @@ public class DyadUnitIntervalScaler extends AbstractDyadScaler {
 	@Override
 	public void fit(final IDyadRankingDataset dataset) {
 		super.fit(dataset);
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
+		int lengthX = dataset.get(0).getLabel().get(0).getContext().length();
 		this.lengthOfX = new double[lengthX];
 		for (int i = 0; i < lengthX; i++) {
 			this.lengthOfX[i] = Math.sqrt(this.statsX[i].getSumsq());
 		}
-		int lengthY = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
+		int lengthY = dataset.get(0).getLabel().get(0).getAlternative().length();
 		this.lengthOfY = new double[lengthY];
 		for (int i = 0; i < lengthY; i++) {
 			this.lengthOfY[i] = Math.sqrt(this.statsY[i].getSumsq());
@@ -43,15 +42,15 @@ public class DyadUnitIntervalScaler extends AbstractDyadScaler {
 
 	@Override
 	public void transformInstances(final IDyadRankingDataset dataset, final List<Integer> ignoredIndices) {
-		int lengthX = ((IVector) dataset.get(0).getLabel().get(0).getContext()).length();
+		int lengthX = dataset.get(0).getLabel().get(0).getContext().length();
 		for (IDyadRankingInstance instance : dataset) {
 			for (IDyad dyad : instance) {
 				for (int i = 0; i < lengthX; i++) {
-					double value = ((IVector) dyad.getContext()).getValue(i);
+					double value = dyad.getContext().getValue(i);
 					if (value != 0.0d) {
 						value /= this.lengthOfX[i];
 					}
-					((IVector) dyad.getContext()).setValue(i, value);
+					dyad.getContext().setValue(i, value);
 				}
 			}
 		}
@@ -59,15 +58,15 @@ public class DyadUnitIntervalScaler extends AbstractDyadScaler {
 
 	@Override
 	public void transformAlternatives(final IDyadRankingDataset dataset, final List<Integer> ignoredIndices) {
-		int lengthY = ((IVector) dataset.get(0).getLabel().get(0).getAlternative()).length();
+		int lengthY = dataset.get(0).getLabel().get(0).getAlternative().length();
 		for (IDyadRankingInstance instance : dataset) {
 			for (IDyad dyad : instance) {
 				for (int i = 0; i < lengthY; i++) {
-					double value = ((IVector) dyad.getAlternative()).getValue(i);
+					double value = dyad.getAlternative().getValue(i);
 					if (value != 0.0d) {
 						value /= this.lengthOfY[i];
 					}
-					((IVector) dyad.getAlternative()).setValue(i, value);
+					dyad.getAlternative().setValue(i, value);
 				}
 			}
 		}
