@@ -12,10 +12,10 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
@@ -65,9 +65,9 @@ public abstract class ARandomlyInitializingDyadRanker extends ActiveDyadRanker {
 
 					// query them
 					LinkedList<IVector> alternatives = new LinkedList<>();
-					alternatives.add((IVector) dyads.get(0).getAlternative());
-					alternatives.add((IVector) dyads.get(1).getAlternative());
-					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) dyads.get(0).getContext(), alternatives);
+					alternatives.add(dyads.get(0).getAlternative());
+					alternatives.add(dyads.get(1).getAlternative());
+					SparseDyadRankingInstance queryInstance = new SparseDyadRankingInstance(dyads.get(0).getContext(), alternatives);
 					IDyadRankingInstance trueRanking = this.poolProvider.query(queryInstance);
 					minibatch.add(trueRanking);
 				}

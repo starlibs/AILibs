@@ -8,9 +8,9 @@ import java.util.List;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.nd4j.linalg.primitives.Pair;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
@@ -52,7 +52,7 @@ public class UCBPoolBasedActiveDyadRanker extends ARandomlyInitializingDyadRanke
 				double skill = this.ranker.getSkillForDyad(dyad);
 				double std = this.getDyadStats().get(dyad).getStandardDeviation();
 				double ucb = skill + std;
-				dyadsWithUCB.add(new Pair<IDyad, Double>(dyad, ucb));
+				dyadsWithUCB.add(new Pair<>(dyad, ucb));
 			}
 
 			// query the two dyads with highest ucb
@@ -60,10 +60,10 @@ public class UCBPoolBasedActiveDyadRanker extends ARandomlyInitializingDyadRanke
 			IDyad d1 = dyadsWithUCB.get(0).getFirst();
 			IDyad d2 = dyadsWithUCB.get(1).getFirst();
 			List<IVector> alts = new ArrayList<>(2);
-			alts.add((IVector) d1.getAlternative());
-			alts.add((IVector) d2.getAlternative());
+			alts.add(d1.getAlternative());
+			alts.add(d2.getAlternative());
 
-			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) d1.getContext(), alts);
+			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(d1.getContext(), alts);
 
 			IDyadRankingInstance groundTruthPair = this.poolProvider.query(sparseQueryPair);
 
