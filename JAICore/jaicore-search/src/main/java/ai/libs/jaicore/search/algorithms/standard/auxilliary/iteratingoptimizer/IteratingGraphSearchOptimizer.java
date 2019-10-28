@@ -10,7 +10,6 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 import org.api4.java.common.control.ILoggingCustomizable;
-import org.api4.java.datastructure.graph.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +57,7 @@ public class IteratingGraphSearchOptimizer<I extends IGraphSearchWithPathEvaluat
 	}
 
 	private RolloutEvent<N, V> recomputeRolloutEventWithScore(final RolloutEvent<N, V> e) throws PathEvaluationException, InterruptedException {
-		V score = this.getInput().getPathEvaluator().evaluate((IPath<N,A>)e.getPath());
+		V score = this.getInput().getPathEvaluator().evaluate(new SearchGraphPath<>(e.getPath()));
 		return new RolloutEvent<>(e.getAlgorithmId(), e.getPath(), score);
 	}
 

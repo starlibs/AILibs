@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,9 +19,10 @@ public class Graph<T> implements Serializable {
 	private static final long serialVersionUID = 3912962578399588845L;
 
 	private T root;
-	private final Set<T> nodes = new HashSet<>();
 	private final Map<T, Set<T>> successors = new HashMap<>();
 	private final Map<T, Set<T>> predecessors = new HashMap<>();
+	private boolean useBackPointers = true;
+	private boolean useForwardPointers = true;
 
 	public Graph() {
 	}
@@ -39,10 +41,7 @@ public class Graph<T> implements Serializable {
 
 	public Graph(final Graph<T> toClone) {
 		this();
-		for (T i : toClone.nodes) {
-			this.addItem(i);
-		}
-		for (T i : this.nodes) {
+		for (T i : toClone.getItems()) {
 			for (T i2 : toClone.getSuccessors(i)) {
 				this.addEdge(i, i2);
 			}
@@ -50,7 +49,10 @@ public class Graph<T> implements Serializable {
 	}
 
 	public void addItem(final T item) {
-		this.nodes.add(item);
+		if (this.getItems().contains(item)) {
+			throw new IllegalArgumentException("Cannot add node " + item + " to graph since such a node exists already. Current nodes: " + this.getItems().stream().map(e -> "\n\t" + e).collect(Collectors.joining()));
+		}
+		this.successors.put(item, new HashSet<>());
 		if (this.root == null) {
 			this.root = item;
 		}
@@ -73,11 +75,11 @@ public class Graph<T> implements Serializable {
 	}
 
 	public Set<T> getItems() {
-		return Collections.unmodifiableSet(this.nodes);
+		return Collections.unmodifiableSet(this.successors.keySet());
 	}
 
 	public boolean hasItem(final T item) {
-		return this.nodes.contains(item);
+		return this.successors.containsKey(item);
 	}
 
 	public boolean hasEdge(final T from, final T to) {
@@ -98,25 +100,28 @@ public class Graph<T> implements Serializable {
 	}
 
 	public void removeItem(final T item) {
-		for (T successor : this.getSuccessors(item)) {
-			this.removeEdge(item, successor);
+		this.successors.remove(item);
+		if (this.useBackPointers) {
+			for (T predecessor : this.getPredecessors(item)) {
+				this.removeEdge(predecessor, item);
+			}
 		}
-		for (T predecessor : this.getPredecessors(item)) {
-			this.removeEdge(predecessor, item);
-		}
-		this.nodes.remove(item);
 	}
 
 	public void addEdge(final T from, final T to) {
 		this.checkNodeExistence(from);
 		this.checkNodeExistence(to);
-		this.successors.computeIfAbsent(from, n -> new HashSet<>()).add(to);
-		this.predecessors.computeIfAbsent(to, n -> new HashSet<>()).add(from);
+		if (this.useForwardPointers) {
+			this.successors.get(from).add(to);
+		}
+		if (this.useBackPointers) {
+			this.predecessors.get(to).add(from);
+		}
 
 		/* update root if necessary */
 		if (to == this.root) {
 			this.root = null;
-			if (this.getPredecessors(from).isEmpty()) {
+			if (this.predecessors.get(from).isEmpty()) {
 				this.root = from;
 			}
 		}
@@ -138,23 +143,50 @@ public class Graph<T> implements Serializable {
 	}
 
 	public Set<T> getSuccessors(final T item) {
+		if (!this.useForwardPointers) {
+			throw new UnsupportedOperationException();
+		}
 		this.checkNodeExistence(item);
 		return Collections.unmodifiableSet(this.successors.containsKey(item) ? this.successors.get(item) : new HashSet<>());
 	}
 
 	public Set<T> getPredecessors(final T item) {
+		if (!this.useBackPointers) {
+			throw new UnsupportedOperationException();
+		}
 		this.checkNodeExistence(item);
 		return Collections.unmodifiableSet(this.predecessors.containsKey(item) ? this.predecessors.get(item) : new HashSet<>());
 	}
 
 	private void checkNodeExistence(final T item) {
-		if (!this.nodes.contains(item)) {
+		if (!this.hasItem(item)) {
 			throw new IllegalArgumentException("Cannot perform operation on node " + item + ", which does not exist!");
 		}
 	}
 
 	public final Collection<T> getSources() {
-		return this.nodes.stream().filter(n -> !this.predecessors.containsKey(n) || this.predecessors.get(n).isEmpty()).collect(Collectors.toList());
+		Collection<T> sources;
+		if (this.useBackPointers) {
+			sources = new ArrayList<>();
+			for (Entry<T, Set<T>> parentRelations : this.predecessors.entrySet()) {
+				if (parentRelations.getValue().isEmpty()) {
+					sources.add(parentRelations.getKey());
+				}
+			}
+		}
+		else if (this.useForwardPointers){
+			if (true) {
+				throw new UnsupportedOperationException("Determining sources without backpointers is inefficient!");
+			}
+			sources = new HashSet<>(this.successors.keySet());
+			for (Entry<T, Set<T>> childRelations : this.successors.entrySet()) {
+				sources.removeAll(childRelations.getValue());
+			}
+		}
+		else {
+			throw new UnsupportedOperationException("Neither forward edges nor backward edges are contained.");
+		}
+		return sources;
 	}
 
 	public final T getRoot() {
@@ -162,7 +194,25 @@ public class Graph<T> implements Serializable {
 	}
 
 	public final Collection<T> getSinks() {
-		return this.nodes.stream().filter(n -> !this.successors.containsKey(n) || this.successors.get(n).isEmpty()).collect(Collectors.toList());
+		Collection<T> sinks;
+		if (this.useForwardPointers) {
+			sinks = new ArrayList<>();
+			for (Entry<T, Set<T>> childRelations : this.successors.entrySet()) {
+				if (childRelations.getValue().isEmpty()) {
+					sinks.add(childRelations.getKey());
+				}
+			}
+		}
+		else if (this.useBackPointers){
+			sinks = new HashSet<>(this.predecessors.keySet());
+			for (Entry<T, Set<T>> parentRelations : this.predecessors.entrySet()) {
+				sinks.removeAll(parentRelations.getValue());
+			}
+		}
+		else {
+			throw new UnsupportedOperationException("Neither forward edges nor backward edges are contained.");
+		}
+		return sinks;
 	}
 
 	public final void addGraph(final Graph<T> g) {
@@ -177,15 +227,18 @@ public class Graph<T> implements Serializable {
 	}
 
 	public boolean isEmpty() {
-		return this.nodes.isEmpty();
+		return this.useForwardPointers ? this.successors.isEmpty() : this.predecessors.isEmpty();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.nodes == null) ? 0 : this.nodes.hashCode());
+		result = prime * result + ((this.predecessors == null) ? 0 : this.predecessors.hashCode());
+		result = prime * result + ((this.root == null) ? 0 : this.root.hashCode());
 		result = prime * result + ((this.successors == null) ? 0 : this.successors.hashCode());
+		result = prime * result + (this.useBackPointers ? 1231 : 1237);
+		result = prime * result + (this.useForwardPointers ? 1231 : 1237);
 		return result;
 	}
 
@@ -201,11 +254,18 @@ public class Graph<T> implements Serializable {
 			return false;
 		}
 		Graph other = (Graph) obj;
-		if (this.nodes == null) {
-			if (other.nodes != null) {
+		if (this.predecessors == null) {
+			if (other.predecessors != null) {
 				return false;
 			}
-		} else if (!this.nodes.equals(other.nodes)) {
+		} else if (!this.predecessors.equals(other.predecessors)) {
+			return false;
+		}
+		if (this.root == null) {
+			if (other.root != null) {
+				return false;
+			}
+		} else if (!this.root.equals(other.root)) {
 			return false;
 		}
 		if (this.successors == null) {
@@ -213,6 +273,12 @@ public class Graph<T> implements Serializable {
 				return false;
 			}
 		} else if (!this.successors.equals(other.successors)) {
+			return false;
+		}
+		if (this.useBackPointers != other.useBackPointers) {
+			return false;
+		}
+		if (this.useForwardPointers != other.useForwardPointers) {
 			return false;
 		}
 		return true;
@@ -262,14 +328,14 @@ public class Graph<T> implements Serializable {
 	public boolean isGraphSane() {
 
 		/* check that all nodes are contained */
-		boolean allNodesContained = this.nodes.stream().allMatch(this::hasItem);
+		boolean allNodesContained = this.getItems().stream().allMatch(this::hasItem);
 		if (!allNodesContained) {
 			assert allNodesContained : "Not every node n in the node map have positive responses for a call of hasItem(n)";
 		return false;
 		}
 
 		/* check that all successors are contained */
-		boolean allSuccessorsContained = this.nodes.stream().allMatch(n -> this.getSuccessors(n).stream().allMatch(this::hasItem));
+		boolean allSuccessorsContained = this.getItems().stream().allMatch(n -> this.getSuccessors(n).stream().allMatch(this::hasItem));
 		if (!allSuccessorsContained) {
 			assert allSuccessorsContained : "There is a node in the graph such that not every successor n of it has a positive response for a call of hasItem(n)";
 		return false;
@@ -277,5 +343,27 @@ public class Graph<T> implements Serializable {
 
 		/* check that all predecessors are contained */
 		return true;
+	}
+
+	public boolean isUseBackPointers() {
+		return this.useBackPointers;
+	}
+
+	public void setUseBackPointers(final boolean useBackPointers) {
+		this.useBackPointers = useBackPointers;
+		if (!useBackPointers) {
+			this.predecessors.clear();
+		}
+	}
+
+	public boolean isUseForwardPointers() {
+		return this.useForwardPointers;
+	}
+
+	public void setUseForwardPointers(final boolean useForwardPointers) {
+		this.useForwardPointers = useForwardPointers;
+		if (!useForwardPointers) {
+			this.successors.clear();
+		}
 	}
 }

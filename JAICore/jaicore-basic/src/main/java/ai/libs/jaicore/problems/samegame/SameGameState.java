@@ -4,23 +4,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
-import ai.libs.jaicore.basic.sets.Pair;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import it.unimi.dsi.fastutil.shorts.ShortRBTreeSet;
+import it.unimi.dsi.fastutil.shorts.ShortSet;
 
 public class SameGameState {
-	private final int score;
+	private final short score;
 	private final byte[][] board; // 0 for empty cells, positive ints for the colors
-	private final int numPieces;
-	private final List<Integer> boardHashHistory; // this is to ensure that we search a tree.
+	private final short numPieces;
 
 	public SameGameState(final byte[][] board) {
 		this.score = 0;
 		this.board = board;
-		int tmpNumPieces = 0;
+		short tmpNumPieces = 0;
 		for (int i= 0; i < board.length; i++) {
 			for (int j = 0; j < board[i].length; j++) {
 				if (board[i][j] != 0) {
@@ -29,20 +30,16 @@ public class SameGameState {
 			}
 		}
 		this.numPieces = tmpNumPieces;
-		this.boardHashHistory = Arrays.asList(board.hashCode());
 	}
 
-	private SameGameState(final int score, final byte[][] board, final int numPieces, final List<Integer> boardHashHistoryOfParent) {
+	private SameGameState(final short score, final byte[][] board, final short numPieces) {
 		super();
 		this.score = score;
 		this.board = board;
 		this.numPieces = numPieces;
-		List<Integer> newHistory = new ArrayList<>(boardHashHistoryOfParent);
-		newHistory.add(board.hashCode());
-		this.boardHashHistory = newHistory;
 	}
 
-	public SameGameState getStateAfterMove(final Collection<Pair<Integer, Integer>> block) {
+	public SameGameState getStateAfterMove(final Collection<SameGameCell> block) {
 
 		if (block.size() < 2) {
 			throw new IllegalArgumentException("Removed blocks must have size at least 2.");
@@ -57,16 +54,16 @@ public class SameGameState {
 		}
 
 		/* first remove all the blocks associated to the field */
-		Collection<Pair<Integer, Integer>> removedPieces = block;
+		Collection<SameGameCell> removedPieces = block;
 		if (removedPieces.size() < 2) {
 			throw new IllegalArgumentException();
 		}
 		int maximumAffectedRow = 0;
-		Set<Integer> colsToDrop = new HashSet<>();
-		for (Pair<Integer, Integer> piece : removedPieces) {
-			boardCopy[piece.getX()][piece.getY()] = 0;
-			colsToDrop.add(piece.getY());
-			maximumAffectedRow = Math.max(maximumAffectedRow, piece.getX());
+		ShortSet colsToDrop = new ShortRBTreeSet();
+		for (SameGameCell piece : removedPieces) {
+			boardCopy[piece.getRow()][piece.getCol()] = 0;
+			colsToDrop.add(piece.getCol());
+			maximumAffectedRow = Math.max(maximumAffectedRow, piece.getCol());
 		}
 
 		/* now drop all the blocks in the affected columns */
@@ -86,48 +83,52 @@ public class SameGameState {
 				}
 			}
 		}
-		return new SameGameState(this.score + (int)Math.pow(removedPieces.size() - 2, 2), boardCopy, this.numPieces - removedPieces.size(), this.boardHashHistory);
+		return new SameGameState((short)(this.score + (int)Math.pow(removedPieces.size() - 2, 2)), boardCopy, (short)(this.numPieces - removedPieces.size()));
 	}
 
-	public SameGameState getStateAfterMove(final int row, final int col) {
+	public SameGameState getStateAfterMove(final byte row, final byte col) {
 		return this.getStateAfterMove(this.getAllConnectedPiecesOfSameColor(row, col));
 	}
 
-	public List<Pair<Integer, Integer>> getAllConnectedPiecesOfSameColor(final int row, final int col) {
+	public List<SameGameCell> getAllConnectedPiecesOfSameColor(final byte row, final byte col) {
 		if (this.board[row][col] == 0) {
 			throw new IllegalArgumentException("There is no block in row " + row + " and col " + col);
 		}
-		Set<Pair<Integer, Integer>> removed = new HashSet<>();
-		removed.add(new Pair<>(row, col));
+		List<SameGameCell> removed = new ArrayList<>();
+		removed.add(new SameGameCell(row, col));
 		this.getAllConnectedPiecesOfSameColor(row, col, removed);
-		return new ArrayList<>(removed);
+		return removed;
 	}
 
-	private boolean getAllConnectedPiecesOfSameColor(final int row, final int col, final Set<Pair<Integer, Integer>> countedPieces) {
-		int color = this.board[row][col];
+	private boolean getAllConnectedPiecesOfSameColor(final byte row, final byte col, final List<SameGameCell> countedPieces) {
+		byte color = this.board[row][col];
 		boolean addedOne = false;
 		int colorLeft = col > 0 ? this.board[row][col - 1] : 0;
-		if (colorLeft == color && !countedPieces.contains(new Pair<>(row, col - 1))) {
-			countedPieces.add(new Pair<>(row, col - 1));
-			this.getAllConnectedPiecesOfSameColor(row, col - 1, countedPieces);
+		SameGameCell leftCell = new SameGameCell(row, (byte)(col - 1));
+		if (colorLeft == color && !countedPieces.contains(leftCell)) {
+			countedPieces.add(leftCell);
+			this.getAllConnectedPiecesOfSameColor(row, leftCell.getCol(), countedPieces);
 			addedOne = true;
 		}
 		int colorRight = col < this.board[row].length - 1 ? this.board[row][col + 1] : 0;
-		if (colorRight == color && !countedPieces.contains(new Pair<>(row, col + 1))) {
-			countedPieces.add(new Pair<>(row, col + 1));
-			this.getAllConnectedPiecesOfSameColor(row, col + 1, countedPieces);
+		SameGameCell rightCell = new SameGameCell(row, (byte)(col + 1));
+		if (colorRight == color && !countedPieces.contains(rightCell)) {
+			countedPieces.add(rightCell);
+			this.getAllConnectedPiecesOfSameColor(row, rightCell.getCol(), countedPieces);
 			addedOne = true;
 		}
 		int colorUp = row > 0 ? this.board[row - 1][col] : 0;
-		if (colorUp == color && !countedPieces.contains(new Pair<>(row - 1, col))) {
-			countedPieces.add(new Pair<>(row - 1, col));
-			this.getAllConnectedPiecesOfSameColor(row - 1, col, countedPieces);
+		SameGameCell upCell = new SameGameCell((byte)(row - 1), col);
+		if (colorUp == color && !countedPieces.contains(upCell)) {
+			countedPieces.add(upCell);
+			this.getAllConnectedPiecesOfSameColor(upCell.getRow(), col, countedPieces);
 			addedOne = true;
 		}
 		int colorDown = row < this.board.length - 1 ? this.board[row + 1][col] : 0;
-		if (colorDown == color && !countedPieces.contains(new Pair<>(row + 1, col))) {
-			countedPieces.add(new Pair<>(row + 1, col));
-			this.getAllConnectedPiecesOfSameColor(row + 1, col, countedPieces);
+		SameGameCell downCell = new SameGameCell((byte)(row + 1), col);
+		if (colorDown == color && !countedPieces.contains(downCell)) {
+			countedPieces.add(downCell);
+			this.getAllConnectedPiecesOfSameColor(downCell.getRow(), col, countedPieces);
 			addedOne = true;
 		}
 		return addedOne;
@@ -156,40 +157,103 @@ public class SameGameState {
 		return this.board[0].length;
 	}
 
-	public Collection<Collection<Pair<Integer, Integer>>> getBlocksOfPieces() {
+	public Collection<Collection<SameGameCell>> getBlocksOfPieces() {
 
 		/* Collect one representative for each block */
-		Map<Integer, Collection<Pair<Integer, Integer>>> identifiedBlocks = new HashMap<>();
-		Set<Pair<Integer, Integer>> consideredBlocks = new HashSet<>();
-		int blockId = 0;
-		for (int row = 0; row < this.board.length; row ++) {
-			for (int col = 0; col < this.board[row].length; col ++) {
-				boolean isNewBlock = false;
-				if (this.board[row][col] == 0 || consideredBlocks.contains(new Pair<>(row, col))) {
-					continue;
-				}
-				for (Pair<Integer, Integer> pieceInBlock : this.getAllConnectedPiecesOfSameColor(row, col)) {
-					consideredBlocks.add(pieceInBlock);
-					if (!isNewBlock) {
-						isNewBlock = true;
-						identifiedBlocks.put(blockId, new HashSet<>());
+		List<Collection<SameGameCell>> identifiedBlocks = new ArrayList<>();
+		Map<SameGameCell, Integer> blocksOfCells = new HashMap<>();
+		SameGameCell[][] cellObjects = new SameGameCell[this.board.length][this.board[0].length];
+		byte lastRow = -1;
+		byte lastCol;
+		IntList indicesToRemove = new IntArrayList();
+		for (byte row = 0; row < this.board.length; row ++) {
+			lastCol = -1;
+			for (byte col = 0; col < this.board[row].length; col ++) {
+				byte color = this.board[row][col];
+				if (color != 0) {
+					SameGameCell cell = new SameGameCell(row, col);
+					cellObjects[row][col] = cell;
+
+					/* if the cell has the same color as the cell above, put it into the same group */
+					if (row > 0 && this.board[lastRow][col] == color) {
+						int topBlockId = blocksOfCells.get(cellObjects[lastRow][col]);
+						blocksOfCells.put(cell, topBlockId);
+						identifiedBlocks.get(topBlockId).add(cell);
+
+						/* if the cell has ALSO the same value as the left neighbor, merge the groups (unless those groups already HAVE been merged) */
+						if (col > 0 && this.board[row][lastCol] == color) {
+							int leftBlockId = blocksOfCells.get(cellObjects[row][lastCol]); // gets the id of the block of the piece on the left
+							if (identifiedBlocks.get(leftBlockId) != identifiedBlocks.get(topBlockId)) {
+								identifiedBlocks.get(topBlockId).addAll(identifiedBlocks.get(leftBlockId)); // adds all the elements of the left block to the top block
+								identifiedBlocks.set(leftBlockId, identifiedBlocks.get(topBlockId)); // sets the left block to be equal with the top block
+								indicesToRemove.add(leftBlockId);
+							}
+						}
 					}
-					identifiedBlocks.get(blockId).add(pieceInBlock);
+
+					/* else, if the cell has ONLY the same value as its left neighbor, joint them */
+					else if (col > 0 && this.board[row][lastCol] == color) {
+						int blockId = blocksOfCells.get(cellObjects[row][lastCol]);
+						blocksOfCells.put(cell, blockId);
+						identifiedBlocks.get(blockId).add(cell);
+					}
+
+					/* otherwise, the cell cannot be merged with left or top and, hence, opens a new block */
+					else {
+						int blockId = identifiedBlocks.size();
+						Collection<SameGameCell> block = new ArrayList<>();
+						block.add(cell);
+						blocksOfCells.put(cell, blockId);
+						identifiedBlocks.add(block);
+					}
 				}
-				if (isNewBlock) {
-					blockId ++;
-				}
+				lastCol = col;
 			}
+			lastRow = row;
 		}
-		return identifiedBlocks.values();
+		for (int r : indicesToRemove.stream().sorted((i1,i2) -> Integer.compare(i2, i1)).collect(Collectors.toList())) {
+			identifiedBlocks.remove(r);
+		}
+		return identifiedBlocks;
 	}
 
-	public int getScore() {
-		return this.score * -1;
+	public short getScore() {
+		return (short)(this.score * -1);
 	}
 
 	public int getNumPieces() {
 		return this.numPieces;
+	}
+
+	public boolean isMovePossible() {
+		for (int row = 0; row < this.board.length; row ++) {
+			for (int col = 0; col < this.board[row].length; col ++) {
+				if (this.canCellBeSelected(row, col)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public boolean canCellBeSelected(final int row, final int col) {
+		byte color = this.board[row][col];
+		if (color == 0) {
+			return false;
+		}
+		if (row > 0 && this.board[row - 1][col] == color) {
+			return true;
+		}
+		if (row < this.board.length - 1 && this.board[row + 1][col] == color) {
+			return true;
+		}
+		if (col < this.board[row].length - 1 && this.board[row][col + 1] == color) {
+			return true;
+		}
+		if (col > 0 && this.board[row][col - 1] == color) {
+			return true;
+		}
+		return false;
 	}
 
 	public Map<Integer, Integer> getNumberOfPiecesPerColor() {
@@ -210,7 +274,8 @@ public class SameGameState {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((this.boardHashHistory == null) ? 0 : this.boardHashHistory.hashCode());
+		result = prime * result + Arrays.deepHashCode(this.board);
+		result = prime * result + this.score;
 		return result;
 	}
 
@@ -226,11 +291,10 @@ public class SameGameState {
 			return false;
 		}
 		SameGameState other = (SameGameState) obj;
-		if (this.boardHashHistory == null) {
-			if (other.boardHashHistory != null) {
-				return false;
-			}
-		} else if (!this.boardHashHistory.equals(other.boardHashHistory)) {
+		if (!Arrays.deepEquals(this.board, other.board)) {
+			return false;
+		}
+		if (this.score != other.score) {
 			return false;
 		}
 		return true;

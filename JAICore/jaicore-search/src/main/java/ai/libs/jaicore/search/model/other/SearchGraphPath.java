@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -37,6 +38,10 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 
 	public SearchGraphPath(final N node) {
 		this(Arrays.asList(node), new ArrayList<>(), new HashMap<>());
+	}
+
+	public SearchGraphPath(final List<N> nodes) {
+		this(nodes, nodes.stream().filter(n -> n != nodes.get(0)).map(n -> (A)null).collect(Collectors.toList()), new HashMap<>());
 	}
 
 	public SearchGraphPath(final List<N> nodes, final List<A> edges) {

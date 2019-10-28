@@ -1,31 +1,41 @@
 package ai.libs.jaicore.search.algorithms.standard.mcts.tag;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import org.api4.java.common.control.ILoggingCustomizable;
+import org.api4.java.datastructure.graph.IPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.search.algorithms.standard.mcts.AUpdatingPolicy;
+import ai.libs.jaicore.graph.LabeledGraph;
+import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
+import ai.libs.jaicore.search.algorithms.standard.mcts.IGraphDependentPolicy;
+import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 
-public class TAGPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCustomizable {
+public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGraphDependentPolicy<T, A>, ILoggingCustomizable {
 
 	private String loggerName;
 	private Logger logger = LoggerFactory.getLogger(TAGPolicy.class);
+	private LabeledGraph<T, A> explorationGraph;
 	private double explorationConstant = Math.sqrt(2);
 	private final int s = 10;
 	private final double delta = 0.01; // must be smaller than 1
+	private final boolean isMaximize;
+	private final Map<T, PriorityQueue<Double>> statsPerNode = new HashMap<>();
+	private final Map<T, Integer> visitsPerNode = new HashMap<>();
 
 	public TAGPolicy() {
-		super();
+		this(false);
 	}
 
 	public TAGPolicy(final boolean maximize) {
-		super(maximize);
+		this.isMaximize = maximize;
 	}
 
 	@Override
@@ -36,50 +46,26 @@ public class TAGPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 	@Override
 	public void setLoggerName(final String name) {
 		this.loggerName = name;
-		super.setLoggerName(name + "._updating");
 		this.logger = LoggerFactory.getLogger(name);
 	}
 
-	private List<Double> getBestScores(final double[] scores, final int k) {
-		List<Double> vals = new ArrayList<>();
-		for (double score : scores) {
-			vals.add(score);
-		}
-		return vals.stream().sorted().limit(k).collect(Collectors.toList());
-	}
+	public double getScoreOfChild(final T node, final T consideredChild) {
 
-	private List<Double> getScoresNotWorseThanThreshold(final double[] scores, final double threshold) {
-		List<Double> vals = new ArrayList<>();
-		for (double score : scores) {
-			if (score <= threshold) {
-				vals.add(score);
-			}
-		}
-		return vals;
-	}
-
-
-	@Override
-	public double getScore(final NodeLabel labelOfNode, final NodeLabel labelOfChild) {
-
-		List<Double> bestScoresObservedInparent = this.getBestScores(labelOfNode.scores.getValues(), this.s);
-		double threshold = bestScoresObservedInparent.get(bestScoresObservedInparent.size() - 1);
-		List<Double> relevantScoresOfChild = this.getScoresNotWorseThanThreshold(labelOfChild.scores.getValues(), threshold);
+		Queue<Double> bestScoresObservedInparent = this.statsPerNode.get(node);
+		double worstObservationAmongSBestInparent = bestScoresObservedInparent.peek();
+		List<Double> relevantScoresOfChild = this.statsPerNode.get(consideredChild).stream().filter(v -> this.isMaximize ? v >= worstObservationAmongSBestInparent : v <= worstObservationAmongSBestInparent).collect(Collectors.toList());
 		int sChild = relevantScoresOfChild.size();
-		//		System.out.println("Best score is " + threshold + ". " + relevantScoresOfChild.size() + "/" + labelOfChild.scores.getN() + " scores of the child are relevant. All scores: " + Arrays.toString(labelOfChild.scores.getSortedValues()));
-		double k = 2; // TODO: This is the number of child nodes, SHOULD NOT BE CONSTANT!
-		double alpha = Math.log(2 * labelOfNode.scores.getN() * k / this.delta);
+		double k = this.explorationGraph.getSuccessors(node).size();
+		double alpha = Math.log(2 * this.visitsPerNode.get(node) * k / this.delta);
 		if (alpha < 0) {
 			throw new IllegalStateException("Alpha must not be negative. Check delta value (must be smaller than 1)");
 		}
-		int childVisits = (int)labelOfChild.scores.getN();
+		int childVisits = this.visitsPerNode.get(consideredChild);
 		if (childVisits == 0) {
 			throw new IllegalArgumentException("Cannot compute score for child with no visits!");
 		}
 
 		Double h = (sChild + alpha + Math.sqrt(2 * sChild * alpha + Math.pow(alpha, 2))) / childVisits;
-		//		System.out.println("(" + sChild + " + " + alpha + " + sqrt(2 * " + sChild + " * " + alpha + " + " + Math.pow(alpha, 2) + ") / " + childVisits);
-
 		this.logger.trace("Compute TAG score of {}", h);
 		return h;
 	}
@@ -93,17 +79,17 @@ public class TAGPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 	}
 
 	@Override
-	public A getActionBasedOnScores(final Map<A, Double> scores) {
+	public A getAction(final T node, final Map<A, T> actionsWithSuccessors) throws ActionPredictionFailedException {
 		A choice = null;
-		this.logger.debug("Getting action for scores {}", scores);
-		double best = -1;
-		for (Entry<A, Double> entry : scores.entrySet()) {
+		double best = (this.isMaximize ? -1 : 1) * Double.MAX_VALUE;
+		for (Entry<A, T> entry : actionsWithSuccessors.entrySet()) {
 			A action = entry.getKey();
-			Double score = entry.getValue();
+			T childNode = entry.getValue();
+			Double score = this.getScoreOfChild(node, childNode);
 			if (score.isNaN()) {
 				throw new IllegalStateException("Score for option " + action + " is NaN");
 			}
-			if (score > best) {
+			if (this.isMaximize && score > best || !this.isMaximize && score < best) {
 				this.logger.trace("Updating best choice {} with {} since it is better than the current solution with performance {}", choice, action, best);
 				best = score;
 				choice = action;
@@ -112,5 +98,27 @@ public class TAGPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 			}
 		}
 		return choice;
+	}
+
+	@Override
+	public void updatePath(final IPath<T, A> path, final Double playout) {
+		for (T node : path.getNodes()) {
+			this.visitsPerNode.put(node, this.visitsPerNode.computeIfAbsent(node, n -> 0) + 1);
+
+			/* update list of best observed scores */
+			PriorityQueue<Double> bestScores = this.statsPerNode.computeIfAbsent(node, n -> this.isMaximize ? new PriorityQueue<>() : new PriorityQueue<>((c1,c2) -> Double.compare(c2, c1)));
+			if (bestScores.size() < this.s) {
+				bestScores.add(playout);
+			}
+			else if (bestScores.peek() < playout) {
+				bestScores.poll();
+				bestScores.add(playout);
+			}
+		}
+	}
+
+	@Override
+	public void setGraph(final LabeledGraph<T, A> graph) {
+		this.explorationGraph = graph;
 	}
 }

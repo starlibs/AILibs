@@ -23,6 +23,12 @@ public class ExperimenterFrontend {
 	private IExperimentSetEvaluator evaluator;
 	private ExperimentDomain<?, ?, ?> domain;
 	private IExperimentRunController<?> controller;
+	private String loggerNameForAlgorithm;
+
+	public ExperimenterFrontend withLoggerNameForAlgorithm(final String loggerName) {
+		this.loggerNameForAlgorithm = loggerName;
+		return this;
+	}
 
 	public ExperimenterFrontend withDatabaseConfig(final String databaseConfigFileName) {
 		return this.withDatabaseConfig(new File(databaseConfigFileName));
@@ -81,6 +87,9 @@ public class ExperimenterFrontend {
 		}
 		if (this.domain != null) {
 			this.evaluator = new AlgorithmBenchmarker(this.domain.getDecoder(), this.controller);
+			if (this.loggerNameForAlgorithm != null) {
+				((AlgorithmBenchmarker)this.evaluator).setLoggerName(this.loggerNameForAlgorithm);
+			}
 		}
 	}
 

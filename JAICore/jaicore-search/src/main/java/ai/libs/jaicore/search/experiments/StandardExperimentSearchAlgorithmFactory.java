@@ -26,6 +26,7 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 
 	public IOptimalPathInORGraphSearch<I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double> getAlgorithm(final Experiment experiment, final IGraphSearchWithPathEvaluationsInput<N, A, Double> input) {
 		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get(IOwnerBasedRandomConfig.K_SEED));
+		System.out.println(seed);
 		final String algorithm = experiment.getValuesOfKeyFields().get(IAlgorithmNameConfig.K_ALGORITHM_NAME);
 		switch (algorithm) {
 		case "random":
@@ -42,9 +43,9 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 					n -> false, seed, 3, 10000, 10000);
 			return new BestFirst<>((I)reducer2.encodeProblem(input));
 		case "uct":
-			return new UCTPathSearch<I, N, A>((I)input, seed, 0.0, false);
+			return new UCTPathSearch<I, N, A>((I)input, seed, 0.0);
 		case "uct-sp":
-			return new SPUCTPathSearch<>((I)input, seed, 0.0, Math.sqrt(2), 100, false);
+			return new SPUCTPathSearch<>((I)input, seed, 0.0, 5000, 10000);
 		case "uct-pl":
 			return new MCTSWithPLKPathSearch<>((I)input, 1, seed, 0.0, 100);
 		case "bt":

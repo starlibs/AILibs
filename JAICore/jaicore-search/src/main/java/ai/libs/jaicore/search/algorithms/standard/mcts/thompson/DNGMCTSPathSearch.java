@@ -13,6 +13,6 @@ public class DNGMCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N,
 
 	public DNGMCTSPathSearch(final I problem, final long seed, final double varianceFactor) {
 		super(problem, new DNGPolicy<>((NodeGoalTester<N, A>) problem.getGoalTester(), n -> problem.getPathEvaluator().evaluate(new SearchGraphPath<>(n)), varianceFactor),
-				new UniformRandomPolicy<>(new Random(seed + DNGMCTSPathSearch.class.hashCode())), 0.0, true);
+				new UniformRandomPolicy<>(new Random(seed + DNGMCTSPathSearch.class.hashCode())), 0.0);
 	}
 }

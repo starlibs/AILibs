@@ -22,12 +22,12 @@ import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput
  */
 public class SPUCTPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends MCTSPathSearch<I, N, A, Double> {
 
-	public SPUCTPathSearch(final I problem, final boolean maximization, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD, final boolean forbidDoublePaths) {
-		super(problem, new SPUCBPolicy<>(maximization, bigD), new UniformRandomPolicy<>(new Random(seed)), evaluationFailurePenalty, forbidDoublePaths);
+	public SPUCTPathSearch(final I problem, final boolean maximization, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD) {
+		super(problem, new SPUCBPolicy<>(maximization, bigD), new UniformRandomPolicy<>(new Random(seed)), evaluationFailurePenalty);
 		((SPUCBPolicy<N, A>)this.getTreePolicy()).setExplorationConstant(explorationC);
 	}
 
-	public SPUCTPathSearch(final I problem, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD, final boolean forbidDoublePaths) {
-		this(problem, false, seed, evaluationFailurePenalty, explorationC, bigD, forbidDoublePaths);
+	public SPUCTPathSearch(final I problem, final int seed, final double evaluationFailurePenalty, final double explorationC, final double bigD) {
+		this(problem, false, seed, evaluationFailurePenalty, explorationC, bigD);
 	}
 }

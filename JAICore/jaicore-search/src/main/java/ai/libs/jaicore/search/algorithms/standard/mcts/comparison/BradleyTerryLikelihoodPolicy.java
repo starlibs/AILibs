@@ -21,6 +21,7 @@ import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.graph.Graph;
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.search.algorithms.standard.mcts.ActionPredictionFailedException;
+import ai.libs.jaicore.search.algorithms.standard.mcts.IGraphDependentPolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathLikelihoodProvidingPolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.IPathUpdatablePolicy;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.observationfilter.EmptyObservationFilter;
@@ -36,7 +37,7 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
  * @param <N>
  * @param <A>
  */
-public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, IPathLikelihoodProvidingPolicy<N, A>, ILoggingCustomizable, IEventEmitter {
+public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, IPathLikelihoodProvidingPolicy<N, A>, ILoggingCustomizable, IGraphDependentPolicy<N, A>, IEventEmitter {
 
 	private EventBus eventBus = new EventBus();
 	private Logger logger = LoggerFactory.getLogger(BradleyTerryLikelihoodPolicy.class);
@@ -374,7 +375,8 @@ public class BradleyTerryLikelihoodPolicy<N, A> implements IPathUpdatablePolicy<
 		return this.explorationGraph;
 	}
 
-	public void setExplorationGraph(final LabeledGraph<N, A> explorationGraph) {
+	@Override
+	public void setGraph(final LabeledGraph<N, A> explorationGraph) {
 		this.explorationGraph = explorationGraph;
 	}
 
