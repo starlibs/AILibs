@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dyadranking.loss;
+package ai.libs.jaicore.ml.ranking.dyad.loss;
 
 import java.util.Arrays;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.junit.Test;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.ml.core.evaluation.Prediction;
 import ai.libs.jaicore.ml.core.evaluation.PredictionBatch;
-import ai.libs.jaicore.ml.dyadranking.DyadRankingLossUtil;
+import ai.libs.jaicore.ml.ranking.dyad.DyadRankingLossUtil;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
 import ai.libs.jaicore.ml.ranking.loss.KendallsTauOfTopK;

@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dyadranking.general;
+package ai.libs.jaicore.ml.ranking.dyad.general;
 
 import static org.junit.Assert.assertEquals;
 

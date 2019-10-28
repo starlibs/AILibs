@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dyadranking;
+package ai.libs.jaicore.ml.ranking.dyad;
 
 import static org.junit.Assert.assertEquals;
 
@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.IVector;
-import ai.libs.jaicore.ml.dyadranking.general.DyadSupplier;
+import ai.libs.jaicore.ml.ranking.dyad.general.DyadSupplier;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.featuretransform.BiliniearFeatureTransform;
 

@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dyadranking.activelearning;
+package ai.libs.jaicore.ml.ranking.dyad.activelearning;
 
 import static org.junit.Assert.assertEquals;
 

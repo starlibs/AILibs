@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dyadranking.general.inputopt;
+package ai.libs.jaicore.ml.ranking.dyad.general.inputopt;
 
 import java.util.Random;
 
@@ -8,8 +8,8 @@ import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.primitives.Pair;
 
-import ai.libs.jaicore.ml.dyadranking.general.DyadRankingInstanceSupplier;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
+import ai.libs.jaicore.ml.ranking.dyad.general.DyadRankingInstanceSupplier;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLNetDyadRankerConfiguration;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.zeroshot.inputoptimization.NegIdentityInpOptLoss;

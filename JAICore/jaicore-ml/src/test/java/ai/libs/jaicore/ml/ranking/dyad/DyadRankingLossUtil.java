@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dyadranking;
+package ai.libs.jaicore.ml.ranking.dyad;
 
 import java.util.Collections;
 import java.util.List;

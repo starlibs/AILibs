@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.dyadranking.general;
+package ai.libs.jaicore.ml.ranking.dyad.general;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -23,7 +23,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.math.linearalgebra.IVector;
-import ai.libs.jaicore.ml.dyadranking.DyadRankingLossUtil;
+import ai.libs.jaicore.ml.ranking.dyad.DyadRankingLossUtil;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
