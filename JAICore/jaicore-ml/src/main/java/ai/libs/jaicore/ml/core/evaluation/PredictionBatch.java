@@ -30,4 +30,9 @@ public class PredictionBatch implements IPredictionBatch {
 		return this.predictions.size();
 	}
 
+	@Override
+	public IPrediction get(final int index) {
+		return this.predictions.get(index);
+	}
+
 }

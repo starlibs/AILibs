@@ -4,17 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPrediction;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionBatch;
 
-public class SingleLabelClassificationPredictionBatch extends ArrayList<ISingleLabelClassificationPrediction> implements ISingleLabelClassificationPredictionBatch {
+public class SingleLabelClassificationPredictionBatch extends ArrayList<ISingleLabelClassification> implements ISingleLabelClassificationPredictionBatch {
 
 	/**
 	 *
 	 */
 	private static final long serialVersionUID = 3575940001172802462L;
 
-	public SingleLabelClassificationPredictionBatch(final Collection<ISingleLabelClassificationPrediction> predictions) {
+	public SingleLabelClassificationPredictionBatch(final Collection<ISingleLabelClassification> predictions) {
 		this.addAll(predictions);
 	}
 
@@ -24,7 +24,7 @@ public class SingleLabelClassificationPredictionBatch extends ArrayList<ISingleL
 	}
 
 	@Override
-	public List<? extends ISingleLabelClassificationPrediction> getPredictions() {
+	public List<? extends ISingleLabelClassification> getPredictions() {
 		return this;
 	}
 }

@@ -6,14 +6,14 @@ import java.util.Map;
 
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPrediction;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
-public abstract class ASingleLabelClassifier extends ASupervisedLearner<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, ISingleLabelClassificationPrediction, ISingleLabelClassificationPredictionBatch> {
+public abstract class ASingleLabelClassifier extends ASupervisedLearner<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> {
 
 	protected ASingleLabelClassifier(final Map<String, Object> config) {
 		super(config);
@@ -25,7 +25,7 @@ public abstract class ASingleLabelClassifier extends ASupervisedLearner<ISingleL
 
 	@Override
 	public ISingleLabelClassificationPredictionBatch predict(final ISingleLabelClassificationInstance[] dTest) throws PredictionException, InterruptedException {
-		List<ISingleLabelClassificationPrediction> batchList = new LinkedList<>();
+		List<ISingleLabelClassification> batchList = new LinkedList<>();
 		for (ISingleLabelClassificationInstance i : dTest) {
 			batchList.add(this.predict(i));
 		}

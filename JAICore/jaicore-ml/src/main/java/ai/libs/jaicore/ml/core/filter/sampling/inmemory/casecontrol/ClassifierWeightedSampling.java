@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPrediction;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
@@ -97,7 +97,7 @@ public class ClassifierWeightedSampling<D extends ISingleLabelClassificationData
 		double[] weights = new double[instances.size()];
 		for (int i = 0; i < instances.size(); i++) {
 			try {
-				ISingleLabelClassificationPrediction prediction = this.pilotEstimator.predict(instances.get(i));
+				ISingleLabelClassification prediction = this.pilotEstimator.predict(instances.get(i));
 				if (prediction.getLabelWithHighestProbability() == instances.get(i).getIntLabel()) {
 					weights[i] = this.addForRightClassification - prediction.getProbabilityOfLabel(instances.get(i).getLabel());
 				} else {
