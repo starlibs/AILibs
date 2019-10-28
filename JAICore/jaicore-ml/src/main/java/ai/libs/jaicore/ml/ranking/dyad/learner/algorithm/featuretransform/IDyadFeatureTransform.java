@@ -6,8 +6,7 @@ import java.util.Map;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
-
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import org.api4.java.common.math.IVector;
 
 /**
  * Feature transformation interface for the
