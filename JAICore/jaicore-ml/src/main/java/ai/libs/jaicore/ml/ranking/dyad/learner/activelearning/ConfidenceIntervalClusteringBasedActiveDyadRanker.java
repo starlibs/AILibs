@@ -171,11 +171,9 @@ public class ConfidenceIntervalClusteringBasedActiveDyadRanker extends ARandomly
 			return 0.0d;
 		}
 		// else compute intersection
-		else {
-			double upperlower = Math.max(lower1, lower2);
-			double lowerupper = Math.min(upper1, upper2);
-			return Math.abs((lowerupper - upperlower));
-		}
+		double upperlower = Math.max(lower1, lower2);
+		double lowerupper = Math.min(upper1, upper2);
+		return Math.abs((lowerupper - upperlower));
 	}
 
 	private class ListComparator implements Comparator<List<IDyad>> {
