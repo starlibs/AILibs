@@ -45,6 +45,10 @@ public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankin
 
 	private LabeledInstanceSchema labeledInstanceSchema;
 
+	public DyadRankingDataset() {
+		this("");
+	}
+
 	public DyadRankingDataset(String relationName) {
 		createInstanceSchema(relationName);
 		setInternalDataset(new Dataset(this.labeledInstanceSchema));
@@ -58,6 +62,10 @@ public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankin
 	public DyadRankingDataset(String relationName, final Collection<IDyadRankingInstance> c) {
 		this(relationName);
 		addAll(c);
+	}
+
+	public DyadRankingDataset(final Collection<IDyadRankingInstance> c) {
+		this("", c);
 	}
 
 	private void createInstanceSchema(String relationName) {

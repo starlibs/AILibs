@@ -4,14 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadMinMaxScaler;

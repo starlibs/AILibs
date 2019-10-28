@@ -31,9 +31,8 @@ public class KendallsTauOfTopK extends ARankingMeasure implements IRankingLossFu
 		OptionalDouble res = IntStream.range(0, expected.size()).mapToDouble(x -> this.loss(expected.get(0), actual.get(0))).average();
 		if (res.isPresent()) {
 			return res.getAsDouble();
-		} else {
-			throw new IllegalStateException("Could not aggregate kendalls tau of top k");
 		}
+		throw new IllegalStateException("Could not aggregate kendalls tau of top k");
 	}
 
 	@Override

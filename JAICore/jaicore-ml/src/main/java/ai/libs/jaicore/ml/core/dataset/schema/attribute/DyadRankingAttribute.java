@@ -5,9 +5,9 @@ import java.util.Arrays;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IRankingAttributeValue;
 import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
+import org.api4.java.common.math.IVector;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
 
@@ -76,7 +76,7 @@ public class DyadRankingAttribute extends ARankingAttribute<IDyad> {
 	@Override
 	public Object deserializeAttributeValue(final String string) {
 		String[] split = string.split(">");
-		IRanking<IDyad> ranking = new Ranking<IDyad>();
+		IRanking<IDyad> ranking = new Ranking<>();
 		Arrays.stream(split).map(x -> x.substring(1, x.length() - 1)).map(x -> new Dyad(this.parseVector(x.split(";")[0]), this.parseVector(x.split(",")[1]))).forEach(ranking::add);
 		return ranking;
 	}

@@ -62,4 +62,9 @@ public class InstanceSchema implements IInstanceSchema {
 		this.attributeList.add(attribute);
 	}
 
+	@Override
+	public IInstanceSchema getCopy() {
+		return new InstanceSchema(relationName, new ArrayList<>(attributeList));
+	}
+
 }
