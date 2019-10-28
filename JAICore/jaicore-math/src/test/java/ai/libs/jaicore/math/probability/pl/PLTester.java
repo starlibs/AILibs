@@ -33,6 +33,6 @@ public class PLTester {
 		/* create PL problem */
 		PLInferenceProblem prob = new PLInferenceProblem(rankings);
 		PLMMAlgorithm algo = new PLMMAlgorithm(prob);
-		algo.call();
+		System.out.println(algo.call());
 	}
 }

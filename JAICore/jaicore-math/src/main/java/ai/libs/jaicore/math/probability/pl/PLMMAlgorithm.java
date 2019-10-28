@@ -56,37 +56,32 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, PLSkillMap> {
 		}
 		this.skillVector = this.normalizeSkillVector(this.skillVector);
 		this.objects = this.getInput().getComparedObjects().toArray();
-		System.out.println(this.winVector);
 	}
 
 	@Override
 	public AlgorithmEvent nextWithException() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		DoubleList lastSkillVector = null;
-		DoubleList skillVector = this.skillVector;
 		double epsilon = 0.00000001;
 		double currentPerf = Double.MAX_VALUE * -1;
 		double lastPerf = Double.MAX_VALUE * -1;
 		do {
-			System.out.println(skillVector);
-			this.checkMinorization(skillVector, new Random(0));
-			skillVector = this.normalizeSkillVector(this.getUpdatedSkillVector(skillVector));
+			this.checkMinorization(this.skillVector, new Random(0));
+			this.skillVector = this.normalizeSkillVector(this.getUpdatedSkillVector(this.skillVector));
 			lastPerf = currentPerf;
-			currentPerf = this.evaluateLogLikelihood(skillVector);
+			currentPerf = this.evaluateLogLikelihood(this.skillVector);
 			if (lastSkillVector != null) {
-				System.out.println(currentPerf);
 				if (currentPerf < this.evaluateLogLikelihood(lastSkillVector)) {
 					System.err.println("New value is WORSE than old value!");
 
 					/* check whether the new skill vector is better in the surrogate */
-					double performanceOfNewSkillVectorInSurrogate = this.evaluateMinorant(skillVector, lastSkillVector);
+					double performanceOfNewSkillVectorInSurrogate = this.evaluateMinorant(this.skillVector, lastSkillVector);
 					double performanceOfOldSkillVectorInSurrogate = this.evaluateMinorant(lastSkillVector, lastSkillVector);
 					if (performanceOfNewSkillVectorInSurrogate < performanceOfOldSkillVectorInSurrogate) {
 						System.err.println("New skill vector is NOT better than the old one even on the surrogate.");
 					}
 				}
 			}
-			lastSkillVector = skillVector;
-			System.out.println(lastPerf + " vs " + currentPerf);
+			lastSkillVector = this.skillVector;
 		}
 		while (currentPerf - lastPerf > epsilon);
 		return null;
@@ -211,7 +206,11 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, PLSkillMap> {
 	@Override
 	public PLSkillMap call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.next();
-		return null;
+		PLSkillMap map = new PLSkillMap();
+		for (int i = 0; i < this.numObjects; i++) {
+			map.put(this.objects[i], this.skillVector.getDouble(i));
+		}
+		return map;
 	}
 
 }
