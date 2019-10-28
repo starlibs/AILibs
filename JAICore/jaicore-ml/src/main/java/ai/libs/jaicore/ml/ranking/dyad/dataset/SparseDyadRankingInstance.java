@@ -79,6 +79,10 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance {
 		};
 	}
 
+	public IVector getContext() {
+		return context;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
