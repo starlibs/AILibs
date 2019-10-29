@@ -13,11 +13,11 @@ import org.aeonbits.owner.ConfigFactory;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.IProbabilisticPredictor;
 import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.IRankingPredictionBatch;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
@@ -39,8 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.ml.core.evaluation.Prediction;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.ranking.RankingPredictionBatch;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.ADyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
@@ -60,7 +61,7 @@ import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ran
  * @author Helena Graf, Jonas Hanselle, Michael Braun
  *
  */
-public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, IDyadRankingDataset> implements IPLDyadRanker, IProbabilisticPredictor {
+public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, IDyadRankingDataset, IRanking<IDyad>, IRankingPredictionBatch> implements IPLDyadRanker, IProbabilisticPredictor {
 
 	private static final Logger log = LoggerFactory.getLogger(PLNetDyadRanker.class);
 
@@ -217,7 +218,10 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 				this.plNet = this.createNetwork(dyadSize);
 				this.plNet.init();
 			}
-			minibatch.add(instance.toMatrix());
+			if (!(instance instanceof ADyadRankingInstance)) {
+				throw new TrainingException("Can only with with instances of type ADyadRankingInstance.");
+			}
+			minibatch.add(((ADyadRankingInstance) instance).toMatrix());
 		}
 		this.updateWithMinibatch(minibatch);
 	}
@@ -408,7 +412,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		List<IDyad> leastCertainDyads = new LinkedList<>();
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty).getLeft());
 		leastCertainDyads.add(dyadUtilityPairs.get(indexOfPairWithLeastCertainty + 1).getLeft());
-		return new DenseDyadRankingInstance(drInstance.getInstanceSchema(), leastCertainDyads);
+		return new DenseDyadRankingInstance(leastCertainDyads);
 	}
 
 	/**
@@ -646,11 +650,14 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 
 	@Override
 	public void fit(final IDyadRankingDataset dTrain) throws TrainingException, InterruptedException {
-		this.fit(dTrain.toND4j());
+		if (!(dTrain instanceof DyadRankingDataset)) {
+			throw new TrainingException("Can only with with instances of type DyadRankingDataset.");
+		}
+		this.fit(((DyadRankingDataset) dTrain).toND4j());
 	}
 
 	@Override
-	public IPrediction predict(final IDyadRankingInstance xTest) throws PredictionException, InterruptedException {
+	public IRanking<IDyad> predict(final IDyadRankingInstance xTest) throws PredictionException, InterruptedException {
 		if (this.plNet == null) {
 			int dyadSize = (xTest.getLabel().get(0).getContext().length()) + (xTest.getLabel().get(0).getAlternative().length());
 			this.plNet = this.createNetwork(dyadSize);
@@ -667,7 +674,7 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 		Collections.sort(dyadUtilityPairs, Comparator.comparing(p -> -p.getRight()));
 		List<IDyad> ranking = new ArrayList<>();
 		dyadUtilityPairs.stream().map(Pair::getLeft).forEach(ranking::add);
-		return new Prediction(new Ranking<>(ranking));
+		return new Ranking<>(ranking);
 	}
 
 	public double getCertainty(final IDyadRankingInstance queryInstance, final IRanking<IDyad> sizeTwoRanking) {
@@ -685,8 +692,16 @@ public class PLNetDyadRanker extends ASupervisedLearner<IDyadRankingInstance, ID
 
 	@Override
 	public double getCertainty(final ILabeledInstance testInstance, final Object label) throws PredictionException, InterruptedException {
-		// TODO Auto-generated method stub
-		return 0;
+		throw new UnsupportedOperationException("Not yet implemented.");
+	}
+
+	@Override
+	public IRankingPredictionBatch predict(IDyadRankingInstance[] dTest) throws PredictionException, InterruptedException {
+		List<IRanking<?>> rankings = new ArrayList<>();
+		for (IDyadRankingInstance instance : dTest) {
+			rankings.add(predict(instance));
+		}
+		return new RankingPredictionBatch(rankings);
 	}
 
 }
