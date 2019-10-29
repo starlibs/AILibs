@@ -1,43 +1,64 @@
 package ai.libs.jaicore.ml.weka.dataset;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import static ai.libs.jaicore.ml.weka.dataset.WekaInstancesUtil.extractSchema;
+
+import java.lang.reflect.Constructor;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
-import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
+import org.api4.java.common.attributedobjects.IListDecorator;
 
-import ai.libs.jaicore.basic.sets.ListDecorator;
+import ai.libs.jaicore.ml.core.dataset.ADataset;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.UnsupportedAttributeTypeException;
 
-public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstance> implements ILabeledDataset<WekaInstance> {
+public class WekaInstances extends ADataset<WekaInstance> implements ILabeledDataset<WekaInstance>, IListDecorator<Instances, Instance, WekaInstance> {
 
-	private final List<IAttribute> featureTypes = new ArrayList<>();
-	private final List<IAttribute> labelTypes;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -1980814429448333405L;
 
-	public WekaInstances(final Instances list) {
-		super(list);
-		int targetIndex = list.classIndex();
-		if (targetIndex < 0) {
-			throw new IllegalArgumentException("Class index of Instances object is not set!");
+	private Instances dataset;
+
+	public WekaInstances(final Instances dataset) {
+		this(dataset, extractSchema(dataset));
+	}
+
+	public WekaInstances(final Instances dataset, final ILabeledInstanceSchema schema) {
+		super(schema);
+		this.dataset = dataset;
+	}
+
+	public WekaInstances(final ILabeledDataset<? extends ILabeledInstance> dataset) {
+		super(dataset.getInstanceSchema());
+		if (dataset instanceof WekaInstances) {
+			this.dataset = ((WekaInstances) dataset).dataset;
+		} else {
+			try {
+				this.dataset = WekaInstancesUtil.datasetToWekaInstances(dataset);
+			} catch (UnsupportedAttributeTypeException e) {
+				throw new IllegalArgumentException("Could not convert dataset to weka's Instances.", e);
+			}
 		}
+	}
 
-		int numAttributes = list.numAttributes();
-		for (int i = 0; i < numAttributes; i++) {
-			this.featureTypes.add(WekaInstancesUtil.transformWEKAAttributeToAttributeType(list.attribute(i)));
-		}
+	public Instances getInstances() {
+		return this.dataset;
+	}
 
-		this.labelTypes = new LinkedList<>();
-		this.labelTypes.add(this.featureTypes.remove(targetIndex));
+	@Override
+	public void removeColumn(final int columnPos) {
+
 	}
 
 	@Override
 	public WekaInstances createEmptyCopy() throws DatasetCreationException {
-		return new WekaInstances(new Instances(this.getList(), 0));
+		return new WekaInstances(new Instances(this.dataset, 0));
 	}
 
 	@Override
@@ -76,24 +97,31 @@ public class WekaInstances extends ListDecorator<Instances, Instance, WekaInstan
 
 	@Override
 	public String toString() {
-		return "WekaInstances [targetType=" + this.labelTypes + ", attributeTypes=" + this.featureTypes + "]\n" + this.getList();
+		return "WekaInstances [schema=" + this.getInstanceSchema() + "]\n" + this.dataset;
 	}
 
 	@Override
-	public ILabeledInstanceSchema getInstanceSchema() {
-		// TODO Auto-generated method stub
-		return null;
+	public Class<WekaInstance> getTypeOfDecoratingItems() {
+		return WekaInstance.class;
 	}
 
 	@Override
-	public Object[][] getFeatureMatrix() {
-		// TODO Auto-generated method stub
-		return null;
+	public Class<Instance> getTypeOfDecoratedItems() {
+		return Instance.class;
 	}
 
 	@Override
-	public Object[] getLabelVector() {
-		// TODO Auto-generated method stub
-		return null;
+	public Constructor<WekaInstance> getConstructorForDecoratedItems() {
+		try {
+			return WekaInstance.class.getConstructor(this.getTypeOfDecoratedItems());
+		} catch (Exception e) {
+			throw new IllegalArgumentException("The constructor of the list class could not be invoked.");
+		}
 	}
+
+	@Override
+	public Instances getList() {
+		return this.dataset;
+	}
+
 }

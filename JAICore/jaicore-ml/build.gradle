@@ -65,6 +65,8 @@ dependencies {
 
 configurations.all {
     exclude module: 'weka-dev'
+    exclude module: 'interruptible-weka'
+    exclude module: 'weka'
 }
 
 uploadArchives {
