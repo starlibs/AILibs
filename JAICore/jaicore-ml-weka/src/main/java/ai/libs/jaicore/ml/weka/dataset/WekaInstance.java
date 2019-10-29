@@ -6,6 +6,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
+import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.basic.sets.ElementDecorator;

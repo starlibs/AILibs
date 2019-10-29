@@ -6,6 +6,7 @@ import java.lang.reflect.Constructor;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
+import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
@@ -14,7 +15,6 @@ import org.api4.java.common.attributedobjects.IListDecorator;
 import ai.libs.jaicore.ml.core.dataset.ADataset;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.UnsupportedAttributeTypeException;
 
 public class WekaInstances extends ADataset<WekaInstance> implements ILabeledDataset<WekaInstance>, IListDecorator<Instances, Instance, WekaInstance> {
 
