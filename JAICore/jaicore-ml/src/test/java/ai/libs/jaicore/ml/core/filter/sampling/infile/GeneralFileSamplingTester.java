@@ -30,7 +30,6 @@ import ai.libs.jaicore.ml.core.filter.sampling.infiles.ArffUtilities;
 @RunWith(JUnit4.class)
 public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 
-	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
 	protected static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 	protected static final String OUTPUT_FILE_NAME = System.getProperty("user.home") + File.separator + UUID.randomUUID().toString() + ".arff";
 

@@ -16,10 +16,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
 import ai.libs.jaicore.ml.core.dataset.cache.LoadDatasetInstructionForOpenML;
 import ai.libs.jaicore.ml.core.dataset.cache.StratifiedSplitSubsetInstruction;
-import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;

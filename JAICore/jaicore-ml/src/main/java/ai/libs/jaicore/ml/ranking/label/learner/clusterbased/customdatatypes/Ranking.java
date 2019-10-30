@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.IRanking;
 
 public class Ranking<O> extends ArrayList<O> implements IRanking<O> {
 	/**
@@ -17,5 +17,10 @@ public class Ranking<O> extends ArrayList<O> implements IRanking<O> {
 
 	public Ranking() {
 		super();
+	}
+
+	@Override
+	public Ranking<O> getPrediction() {
+		return this;
 	}
 }

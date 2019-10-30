@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IRankingAttributeValue;
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.IRanking;
 
 public class LabelRankingAttribute extends ARankingAttribute<String> {
 

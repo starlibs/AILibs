@@ -6,12 +6,10 @@ import java.io.IOException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.openml.apiconnector.io.OpenmlConnector;
-import org.openml.apiconnector.xml.DataSetDescription;
 
 import ai.libs.jaicore.basic.algorithm.AAlgorithmTestProblemSet;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
-import weka.core.Attribute;
-import weka.core.converters.ConverterUtils.DataSource;
+import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 
 public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<ILabeledDataset<ILabeledInstance>> {
 
@@ -42,21 +40,15 @@ public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<IL
 	}
 
 	private ILabeledDataset<ILabeledInstance> loadDatasetFromOpenML(final int id) throws IOException, ClassNotFoundException {
-		Dataset dataset = null;
+		ILabeledDataset<ILabeledInstance> dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
 		try {
-			DataSetDescription description = client.dataGet(id);
-			File file = client.datasetGet(description);
-			DataSource source = new DataSource(file.getCanonicalPath());
-			dataset = source.getDataSet();
-			dataset.setClassIndex(dataset.numAttributes() - 1);
-			Attribute targetAttribute = dataset.attribute(description.getDefault_target_attribute());
-			dataset.setClassIndex(targetAttribute.index());
+			File file = client.datasetGet(client.dataGet(id));
+			dataset = ArffDatasetAdapter.readDataset(file);
 		} catch (Exception e) {
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
-
-		return new Dataset<>(dataset);
+		return dataset;
 	}
 
 }

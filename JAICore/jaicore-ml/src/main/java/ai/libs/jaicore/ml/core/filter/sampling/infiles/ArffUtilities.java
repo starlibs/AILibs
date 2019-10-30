@@ -7,7 +7,7 @@ import java.io.IOException;
 
 /**
  * Utility class for handling Arff dataset files.
- * 
+ *
  * @author Lukas Brandt
  */
 public class ArffUtilities {
@@ -19,14 +19,14 @@ public class ArffUtilities {
 
 	/**
 	 * Extract the header of an ARFF file as a string.
-	 * 
+	 *
 	 * @param file
 	 *            Given ARFF file of which the header shall be extracted.
 	 * @return Header of the given ARFF file.
 	 * @throws IOException
 	 *             Could not read from the given file.
 	 */
-	public static String extractArffHeader(File file) throws IOException {
+	public static String extractArffHeader(final File file) throws IOException {
 		StringBuilder header = new StringBuilder();
 		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
 			String line;
@@ -47,7 +47,7 @@ public class ArffUtilities {
 
 	/**
 	 * Counts the amount of datapoint entries in an ARFF file.
-	 * 
+	 *
 	 * @param file
 	 *            Given ARFF file where the entries are written in.
 	 * @param hasHeader
@@ -57,7 +57,7 @@ public class ArffUtilities {
 	 * @throws IOException
 	 *             Could not read from the given file.
 	 */
-	public static int countDatasetEntries(File file, boolean hasHeader) throws IOException {
+	public static int countDatasetEntries(final File file, final boolean hasHeader) throws IOException {
 		int result = 0;
 		boolean startCounting = !hasHeader;
 		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
@@ -81,13 +81,13 @@ public class ArffUtilities {
 	/**
 	 * Skips with a given reader all comment lines and the header lines of an ARFF
 	 * file until the first datapoint is reached.
-	 * 
+	 *
 	 * @param reader
 	 *            Reader that should be skipped to the data.
 	 * @throws IOException
 	 *             Reader was not able to read the file.
 	 */
-	public static void skipWithReaderToDatapoints(BufferedReader reader) throws IOException {
+	public static void skipWithReaderToDatapoints(final BufferedReader reader) throws IOException {
 		String line;
 		while ((line = reader.readLine()) != null) {
 			if (line.trim().equals(DATA_TAG)) {

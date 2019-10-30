@@ -11,7 +11,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 
-import com.clearspring.analytics.util.Lists;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -44,7 +43,7 @@ public class InstructionGraph extends ArrayList<InstructionNode> {
 	}
 
 	public InstructionNode addNode(final String name, final Instruction instruction) {
-		return this.addNode(name, instruction, Lists.newArrayList());
+		return this.addNode(name, instruction, new ArrayList<>());
 	}
 
 	public InstructionNode addNode(final String name, final Instruction instruction, final List<Pair<String, Integer>> inputs) {

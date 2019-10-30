@@ -13,45 +13,12 @@ dependencies {
 	compile 'org.openml:apiconnector:1.0.23'
 	compile 'org.openml:EvaluationEngine:0.1.0'
 	
-	compile ('ai.libs.thirdparty:interruptible-meka:0.1.0') 
-    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '1.3.0'
-
-	
-	// dependencies for meka
-	compile group: 'org.kramerlab', name: 'bmad', version: '2.4'
-	compile group: 'gov.nist.math', name: 'jama', version: '1.0.3'
-	compile group: 'net.sf.trove4j', name: 'trove4j', version: '3.0.1'
-	compile group: 'org.markdownj', name: 'markdownj', version: '0.3.0-1.0.2b4'
-	compile group: 'net.sf.meka.thirdparty', name: 'mst', version: '4.0'
-	
-	// weka requiring projects
-	compile group: 'org.kramerlab', name: 'autoencoder', version: '0.1'
-	compile group: 'com.github.fracpete', name: 'multisearch-weka-package', version: '2017.10.1'
-	
-	compile ('net.sf.meka.thirdparty:mulan:1.4.0')
-	
-	// deep learning
-	compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
-	
 	// linear algebra
-  compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
+  	compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
 
-	// end dependencies for meka
-	
-	// weka dependencies
-	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
-			exclude group: 'log4j'
-			exclude group: 'org.slf4j'
-	}
-
-	compile ('nz.ac.waikato.cms.weka:rotationForest:1.0.3') {
-		exclude group: 'weka-dev'
-	}
-	
-	
     // d4j dependencies: https://deeplearning4j.org/docs/latest/deeplearning4j-config-buildtools
-    compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
-    compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
+    //compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
+    //compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
 	
 	//JTwig template engine
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
@@ -65,6 +32,8 @@ dependencies {
 
 configurations.all {
     exclude module: 'weka-dev'
+    exclude module: 'interruptible-weka'
+    exclude module: 'weka'
 }
 
 uploadArchives {

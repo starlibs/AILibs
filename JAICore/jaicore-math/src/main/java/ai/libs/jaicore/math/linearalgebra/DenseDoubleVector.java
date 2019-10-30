@@ -2,6 +2,8 @@ package ai.libs.jaicore.math.linearalgebra;
 
 import java.util.Arrays;
 
+import org.api4.java.common.math.IVector;
+
 import ai.libs.jaicore.math.random.RandomGenerator;
 import no.uib.cipr.matrix.DenseVector;
 import no.uib.cipr.matrix.Vector.Norm;
@@ -9,7 +11,7 @@ import no.uib.cipr.matrix.Vector.Norm;
 /**
  * Dense vector implementation wrapping the MTJ implementation of a dense vector.
  *
- * @author Alexander Hetzer
+ * @author Alexander Tornede
  */
 public class DenseDoubleVector extends AbstractVector {
 

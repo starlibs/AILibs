@@ -1,10 +1,9 @@
 package ai.libs.jaicore.ml.ranking.dyad.learner;
 
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
+import org.api4.java.common.math.IVector;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
-
-import ai.libs.jaicore.math.linearalgebra.IVector;
 
 /**
  * Represents a dyad consisting of an instance and an alternative, represented
@@ -16,7 +15,7 @@ import ai.libs.jaicore.math.linearalgebra.IVector;
 public class Dyad implements IDyad {
 
 	/* The 'x' value of the dyad */
-	private IVector instance;
+	private IVector context;
 
 	/* The 'y' value of the dyad */
 	private IVector alternative;
@@ -30,7 +29,7 @@ public class Dyad implements IDyad {
 	 *            The alternative
 	 */
 	public Dyad(final IVector instance, final IVector alternative) {
-		this.instance = instance;
+		this.context = instance;
 		this.alternative = alternative;
 	}
 
@@ -40,8 +39,8 @@ public class Dyad implements IDyad {
 	 * @return the instance
 	 */
 	@Override
-	public IVector getInstance() {
-		return this.instance;
+	public IVector getContext() {
+		return this.context;
 	}
 
 	/**
@@ -59,7 +58,7 @@ public class Dyad implements IDyad {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Dyad (");
 		builder.append("instance (");
-		builder.append(this.instance);
+		builder.append(this.context);
 		builder.append(")");
 		builder.append("alternative (");
 		builder.append(this.alternative);
@@ -76,9 +75,9 @@ public class Dyad implements IDyad {
 
 		Dyad other = (Dyad) o;
 
-		if (((this.instance != null && other.instance != null && this.alternative != null && other.alternative != null) && other.instance.equals(this.instance) && other.alternative.equals(this.alternative))) {
-			return (this.instance.equals(other.instance) && this.alternative.equals(other.alternative));
-		} else if ((this.instance == null && other.instance == null && this.alternative == null && other.alternative == null)) {
+		if (((this.context != null && other.context != null && this.alternative != null && other.alternative != null) && other.context.equals(this.context) && other.alternative.equals(this.alternative))) {
+			return (this.context.equals(other.context) && this.alternative.equals(other.alternative));
+		} else if ((this.context == null && other.context == null && this.alternative == null && other.alternative == null)) {
 			return true;
 		}
 
@@ -88,7 +87,7 @@ public class Dyad implements IDyad {
 	@Override
 	public int hashCode() {
 		int result = 42;
-		result = result * 31 + this.instance.hashCode();
+		result = result * 31 + this.context.hashCode();
 		result = result * 31 + this.alternative.hashCode();
 		return result;
 	}
@@ -100,16 +99,16 @@ public class Dyad implements IDyad {
 	 * @return The dyad in {@link INDArray} row vector form.
 	 */
 	public INDArray toVector() {
-		INDArray instanceOfDyad = Nd4j.create(this.getInstance().asArray());
+		INDArray instanceOfDyad = Nd4j.create(this.getContext().asArray());
 		INDArray alternativeOfDyad = Nd4j.create(this.getAlternative().asArray());
 		return Nd4j.hstack(instanceOfDyad, alternativeOfDyad);
 	}
 
 	@Override
 	public double[] toDoubleVector() {
-		double[] array = new double[this.getInstance().length() + this.getAlternative().length()];
-		this.getInstance().asArray();
-		System.arraycopy(array, 0, this.getInstance(), 0, this.getInstance().length());
+		double[] array = new double[this.getContext().length() + this.getAlternative().length()];
+		this.getContext().asArray();
+		System.arraycopy(array, 0, this.getContext(), 0, this.getContext().length());
 		return array;
 	}
 }

@@ -52,4 +52,19 @@ public class InstanceSchema implements IInstanceSchema {
 		this.attributeList.remove(columnPos);
 	}
 
+	@Override
+	public void addAttribute(final int pos, final IAttribute attribute) {
+		this.attributeList.add(pos, attribute);
+	}
+
+	@Override
+	public void addAttribute(final IAttribute attribute) {
+		this.attributeList.add(attribute);
+	}
+
+	@Override
+	public IInstanceSchema getCopy() {
+		return new InstanceSchema(relationName, new ArrayList<>(attributeList));
+	}
+
 }

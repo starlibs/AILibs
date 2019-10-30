@@ -6,8 +6,7 @@ import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import org.api4.java.algorithm.IOptimizationAlgorithm;
-
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import org.api4.java.common.math.IVector;
 
 /**
  * Implements the negative log-likelihood function for the feature
@@ -50,7 +49,7 @@ public class DyadRankingFeatureTransformNegativeLogLikelihood implements IDyadRa
 		int largeN = this.dataset.size();
 		for (int smallN = 0; smallN < largeN; smallN++) {
 			IDyadRankingInstance instance = this.dataset.get(smallN);
-			int mN = instance.getNumAttributes();
+			int mN = instance.getNumberOfRankedElements();
 			for (int m = 0; m < mN; m++) {
 				IDyad dyad = instance.getLabel().get(m);
 				firstSum = firstSum + w.dotProduct(this.featureTransforms.get(instance).get(dyad));

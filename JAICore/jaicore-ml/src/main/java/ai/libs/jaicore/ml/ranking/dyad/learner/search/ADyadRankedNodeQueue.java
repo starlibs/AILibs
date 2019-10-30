@@ -10,17 +10,17 @@ import java.util.Queue;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
 import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.exception.PredictionException;
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
+import org.api4.java.common.math.IVector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.AbstractDyadScaler;
@@ -153,12 +153,11 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 			if (index != -1) {
 				this.removeNodeAtPosition(index);
 				return true;
-			} else {
-				return false;
 			}
-		} else {
 			return false;
+
 		}
+		return false;
 	}
 
 	@Override
@@ -223,7 +222,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				if (this.useScaler) {
 					// scale node
 					DyadRankingDataset dataset = new DyadRankingDataset();
-					dataset.add(new DyadRankingInstance(dataset.getInstanceSchema(), Arrays.asList(newDyad)));
+					dataset.add(new DenseDyadRankingInstance(Arrays.asList(newDyad)));
 					this.scaler.transformAlternatives(dataset);
 				}
 
@@ -233,7 +232,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 				this.nodesAndCharacterizationsMap.put(e, characterization);
 
 				// predict new ranking and reorder queue accordingly
-				IPrediction prediction = this.dyadRanker.predict(new DyadRankingInstance(new DyadRankingDataset().getInstanceSchema(), this.queryDyads));
+				IPrediction prediction = this.dyadRanker.predict(new DenseDyadRankingInstance(this.queryDyads));
 				this.queue.clear();
 				for (int i = 0; i < ((IRanking<Dyad>) prediction.getPrediction()).size(); i++) {
 					IEvaluatedPath<N, ?, V> toAdd = this.nodesAndCharacterizationsMap.inverse().get(((IRanking<Dyad>) prediction.getPrediction()).get(i).getAlternative());
@@ -301,9 +300,8 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 	public IEvaluatedPath<N, ?, V> poll() {
 		if (!this.queue.isEmpty()) {
 			return this.remove();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	@Override
@@ -316,9 +314,8 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 		if (!this.queue.isEmpty()) {
 			this.logger.trace("Peek from OPEN.");
 			return this.element();
-		} else {
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -366,7 +363,7 @@ public abstract class ADyadRankedNodeQueue<N, V extends Comparable<V>> implement
 		this.logger.trace("Transform context characterization with scaler {}", this.scaler.getClass());
 		Dyad dyad = new Dyad(this.contextCharacterization, this.contextCharacterization);
 		DyadRankingDataset dataset = new DyadRankingDataset();
-		DyadRankingInstance instance = new DyadRankingInstance(dataset.getInstanceSchema(), Arrays.asList(dyad));
+		DenseDyadRankingInstance instance = new DenseDyadRankingInstance(Arrays.asList(dyad));
 		dataset.add(instance);
 		this.scaler.transformInstances(dataset);
 	}

@@ -46,4 +46,19 @@ public abstract class ADataset<I extends ILabeledInstance> extends ArrayList<I> 
 			throw new IllegalArgumentException("There is no such attribute with name " + attribute.getName() + " to remove.");
 		}
 	}
+
+	@Override
+	public Object[][] getFeatureMatrix() {
+		Object[][] featureMatrix = new Object[this.size()][];
+		for (int i = 0; i < this.size(); i++) {
+			featureMatrix[i] = this.get(i).getAttributes();
+		}
+		return featureMatrix;
+	}
+
+	@Override
+	public Object[] getLabelVector() {
+		return this.stream().map(x -> x.getLabel()).toArray();
+	}
+
 }

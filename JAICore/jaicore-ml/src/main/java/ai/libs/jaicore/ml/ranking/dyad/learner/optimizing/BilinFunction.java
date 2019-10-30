@@ -5,9 +5,9 @@ import java.util.Map;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.featuretransform.BiliniearFeatureTransform;
 import edu.stanford.nlp.optimization.DiffFunction;
 import edu.stanford.nlp.optimization.QNMinimizer;
@@ -28,6 +28,7 @@ public class BilinFunction implements DiffFunction {
 
 	/**
 	 * Creates a NLL optimizing problem for the kronecker product as the bilinear feature transform.
+	 * 
 	 * @param featureTransform the feature transform, must be an instance of {@link BiliniearFeatureTransform}
 	 * @param drDataset the dataset to optimize
 	 * @param dimension the dimension of the optimized vector

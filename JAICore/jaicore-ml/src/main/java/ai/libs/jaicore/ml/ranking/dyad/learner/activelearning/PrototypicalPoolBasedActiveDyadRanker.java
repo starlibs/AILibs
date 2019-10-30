@@ -7,9 +7,9 @@ import java.util.List;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.nd4j.linalg.primitives.Pair;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
@@ -48,7 +48,7 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ARandomlyInitializing
 		DyadRankingDataset minibatch = new DyadRankingDataset();
 		List<Pair<IVector, Double>> dStarWithProbability = new ArrayList<>(this.getMinibatchSize());
 		for (IVector instanceFeatures : this.poolProvider.getInstanceFeatures()) {
-			dStarWithProbability.add(new Pair<IVector, Double>(instanceFeatures, 54d));
+			dStarWithProbability.add(new Pair<>(instanceFeatures, 54d));
 		}
 
 		Collections.shuffle(dStarWithProbability);
@@ -62,23 +62,23 @@ public class PrototypicalPoolBasedActiveDyadRanker extends ARandomlyInitializing
 			if (dyads.size() < 2) {
 				break;
 			}
-			IVector instance = (IVector) dyads.get(0).getInstance();
+			IVector instance = dyads.get(0).getContext();
 			List<IVector> alternatives = new ArrayList<>(dyads.size());
 			for (IDyad dyad : dyads) {
-				alternatives.add((IVector) dyad.getAlternative());
+				alternatives.add(dyad.getAlternative());
 			}
 
-			SparseDyadRankingInstance queryRanking = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), instance, alternatives);
+			SparseDyadRankingInstance queryRanking = new SparseDyadRankingInstance(instance, alternatives);
 
 			// get the alternatives pair for which the PLNet is most uncertain
 			IDyadRankingInstance queryPair = this.ranker.getPairWithLeastCertainty(queryRanking);
 
 			// convert to SparseDyadRankingInstance
-			List<IVector> alternativePair = new ArrayList<>(queryPair.getNumAttributes());
+			List<IVector> alternativePair = new ArrayList<>(queryPair.getNumberOfRankedElements());
 			for (IDyad dyad : queryPair) {
-				alternativePair.add((IVector) dyad.getAlternative());
+				alternativePair.add(dyad.getAlternative());
 			}
-			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(minibatch.getInstanceSchema(), (IVector) queryPair.getLabel().get(0).getInstance(), alternativePair);
+			SparseDyadRankingInstance sparseQueryPair = new SparseDyadRankingInstance(queryPair.getLabel().get(0).getContext(), alternativePair);
 
 			// query the pool provider to get the ground truth ranking for the pair
 			IDyadRankingInstance groundTruthPair = this.poolProvider.query(sparseQueryPair);

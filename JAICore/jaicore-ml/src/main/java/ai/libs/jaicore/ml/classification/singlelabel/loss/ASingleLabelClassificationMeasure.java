@@ -1,8 +1,8 @@
 package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.loss.ISingleLabelClassificationMeasure;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionAndGroundTruthTable;
 
 import ai.libs.jaicore.ml.core.evaluation.loss.AMeasure;
 

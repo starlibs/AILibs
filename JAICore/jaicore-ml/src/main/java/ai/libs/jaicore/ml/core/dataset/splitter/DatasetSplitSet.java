@@ -40,6 +40,10 @@ public class DatasetSplitSet<D extends IDataset<?>> implements IDatasetSplitSet<
 		return this.splits.get(0).size();
 	}
 
+	public int getNumberOfFoldsForSplit(final int pos) {
+		return this.splits.get(pos).size();
+	}
+
 	@Override
 	public List<D> getFolds(final int splitId) {
 		return Collections.unmodifiableList(this.splits.get(splitId));

@@ -8,13 +8,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.ICategoricalAttribute;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.INumericAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.core.exception.LearnerConfigurationFailedException;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
@@ -24,20 +24,20 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.ml.core.evaluation.Prediction;
 import ai.libs.jaicore.ml.core.evaluation.PredictionBatch;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> implements IWekaClassifier {
+public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WekaClassifier.class);
 
 	private final String name;
 	private String[] options;
-	private Classifier wrappedClassifier;
+	private AbstractClassifier wrappedClassifier;
 	private Instances metaData;
 	private Map<Double, String> targetValueToClass = new HashMap<>();
 
@@ -45,14 +45,10 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		this.name = name;
 		this.options = options;
 		try {
-			this.wrappedClassifier = AbstractClassifier.forName(name, options);
+			this.wrappedClassifier = (AbstractClassifier) AbstractClassifier.forName(name, options);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Could not find classifier for name " + name + " or could not set its options to " + Arrays.toString(options), e);
 		}
-	}
-
-	public WekaClassifier(final Classifier classifier) {
-		this.wrappedClassifier = classifier;
 	}
 
 	public String getName() {
@@ -94,8 +90,13 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public void fit(final ILabeledDataset<ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
-		WekaInstances data = new WekaInstances(dTrain);
-		// extract the dataset's meta data and prepare the instances.
+		WekaInstances data;
+		if (dTrain instanceof WekaInstances) {
+			this.data = (WekaInstances) dTrain;
+		} else {
+			data = new WekaInstances(dTrain);
+		}
+
 		this.metaData = this.extractMetaData(dTrain);
 		System.out.println(this.metaData);
 
@@ -123,7 +124,14 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	}
 
 	@Override
-	public IPrediction predict(final ILabeledInstance xTest) throws PredictionException, InterruptedException {
+	public ISingleLabelClassification predict(final ILabeledInstance xTest) throws PredictionException, InterruptedException {
+		WekaInstance instance;
+		if (xTest instanceof WekaInstance) {
+			instance = (WekaInstance) xTest;
+		} else {
+			instance = new WekaInstance(xTest);
+		}
+
 		Instance testInstance = new DenseInstance(this.metaData.numAttributes());
 		testInstance.setDataset(this.metaData);
 		IntStream.range(0, xTest.getNumAttributes()).forEach(ix -> testInstance.setValue(ix, xTest.getAttribute(ix).toDouble(xTest.getAttribute(ix))));
@@ -136,12 +144,12 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IPredictionBatch predict(final ILabeledDataset<ILabeledInstance> dTest) throws PredictionException, InterruptedException {
+	public ISingleLabelClassificationPredictionBatch predict(final ILabeledDataset<ILabeledInstance> dTest) throws PredictionException, InterruptedException {
 		return this.predict((ILabeledInstance[]) dTest.stream().toArray());
 	}
 
 	@Override
-	public IPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
+	public ISingleLabelClassificationPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		return new PredictionBatch(Arrays.stream(dTest).map(x -> {
 			try {
 				return this.predict(x);
@@ -163,11 +171,6 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		} catch (Exception e) {
 			throw new LearnerConfigurationFailedException("Could not set config for " + WekaClassifier.class.getSimpleName());
 		}
-	}
-
-	@Override
-	public Classifier getClassifier() {
-		return this.wrappedClassifier;
 	}
 
 }

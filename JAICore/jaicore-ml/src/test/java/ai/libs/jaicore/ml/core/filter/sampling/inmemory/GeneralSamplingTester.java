@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
@@ -20,6 +21,7 @@ import org.junit.runners.Parameterized.Parameters;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.ml.core.dataset.clusterable.ClusterableDataset;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 
 /**
@@ -58,7 +60,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	@Override
 	public final IAlgorithm<?, ?> getAlgorithm(final Object problem) {
 		@SuppressWarnings("unchecked")
-		ILabeledDataset<ILabeledInstance> dataset = (ILabeledDataset<ILabeledInstance>) problem;
+		ILabeledDataset<IClusterableInstance> dataset = new ClusterableDataset((ILabeledDataset<ILabeledInstance>) problem);
 		return this.getAlgorithm(dataset);
 	}
 
@@ -103,7 +105,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * sampleFraction);
 		samplingAlgorithm.setSampleSize(sampleSize);
-		ILabeledDataset<?> sample = this.getSample(samplingAlgorithm);
+		IDataset<?> sample = this.getSample(samplingAlgorithm);
 		assertNotNull(sample);
 		if (sample != null) {
 			assertEquals(sampleSize, sample.size());

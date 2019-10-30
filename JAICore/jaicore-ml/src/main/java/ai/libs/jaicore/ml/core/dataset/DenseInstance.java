@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.core.dataset;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class DenseInstance extends AInstance {
 
@@ -34,12 +35,13 @@ public class DenseInstance extends AInstance {
 
 	@Override
 	public double[] getPoint() {
-		throw new UnsupportedOperationException("Not yet implemented in DenseInstance.");
+		return IntStream.range(0, this.attributes.size())
+				.mapToDouble(x -> (this.attributes.get(x) instanceof String) ? 0 : (this.attributes.get(x) instanceof Double) ? (Double) this.attributes.get(x) : (double) ((Integer) this.attributes.get(x))).toArray();
 	}
 
 	@Override
 	public double getPointValue(final int pos) {
-		throw new UnsupportedOperationException("Not yet implemented in DenseInstance.");
+		return this.getPoint()[pos];
 	}
 
 	@Override

@@ -1,14 +1,13 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
-import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.ml.clustering.learner.GMeans;
+import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 
 /**
  * Implementation of a sampling method using gmeans-clustering. This algorithm
@@ -21,7 +20,7 @@ import ai.libs.jaicore.ml.clustering.learner.GMeans;
  * @author jnowack
  *
  */
-public class GmeansSampling<I extends ILabeledInstance & Clusterable, D extends ILabeledDataset<I>> extends ClusterSampling<I, D> {
+public class GmeansSampling<I extends IClusterableInstance, D extends ILabeledDataset<I>> extends ClusterSampling<I, D> {
 
 	public GmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);

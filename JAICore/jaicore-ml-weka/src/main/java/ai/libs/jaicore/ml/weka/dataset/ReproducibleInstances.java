@@ -13,7 +13,6 @@ import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
 import ai.libs.jaicore.ml.core.dataset.cache.LoadDataSetInstruction;
 import ai.libs.jaicore.ml.core.dataset.cache.LoadDataSetInstructionForARFFFile;
 import ai.libs.jaicore.ml.core.dataset.cache.LoadDatasetInstructionForOpenML;
-import ai.libs.jaicore.ml.core.olddataset.loader.OpenMLHelper;
 import weka.core.Instances;
 
 /**
@@ -78,7 +77,6 @@ public class ReproducibleInstances extends Instances {
 	 * @throws DatasetTraceInstructionFailedException
 	 */
 	public static ReproducibleInstances fromOpenML(final int id, final String apiKey) throws DatasetTraceInstructionFailedException, InterruptedException {
-		OpenMLHelper.setApiKey(apiKey);
 		InstructionGraph graph = new InstructionGraph();
 		graph.addNode("load", new LoadDatasetInstructionForOpenML(apiKey, id));
 		Pair<String, Integer> outputUnit = new Pair<>("load", 0);

@@ -5,12 +5,12 @@ import java.util.Map;
 
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPrediction;
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 
-import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPrediction;
+import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassification;
 
 public class MajorityClassifier extends ASingleLabelClassifier implements ISingleLabelClassifier {
 
@@ -22,12 +22,12 @@ public class MajorityClassifier extends ASingleLabelClassifier implements ISingl
 		for (ISingleLabelClassificationInstance i : dTrain) {
 			labelCounter.put(i.getLabel(), labelCounter.computeIfAbsent(i.getLabel(), t -> 0) + 1);
 		}
-		this.majorityLabel = labelCounter.keySet().stream().max((l1,l2) -> Integer.compare(labelCounter.get(l1), labelCounter.get(l2))).get();
+		this.majorityLabel = labelCounter.keySet().stream().max((l1, l2) -> Integer.compare(labelCounter.get(l1), labelCounter.get(l2))).get();
 	}
 
 	@Override
-	public ISingleLabelClassificationPrediction predict(final ISingleLabelClassificationInstance xTest) throws PredictionException, InterruptedException {
-		return new SingleLabelClassificationPrediction(this.majorityLabel);
+	public ISingleLabelClassification predict(final ISingleLabelClassificationInstance xTest) throws PredictionException, InterruptedException {
+		return new SingleLabelClassification(this.majorityLabel);
 	}
 
 }

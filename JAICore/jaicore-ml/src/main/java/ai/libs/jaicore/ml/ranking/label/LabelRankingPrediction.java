@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.ranking.label;
 
-import org.api4.java.ai.ml.ranking.dataset.IRanking;
+import org.api4.java.ai.ml.ranking.IRanking;
 import org.api4.java.ai.ml.ranking.label.learner.ILabelRankingPrediction;
 
 import ai.libs.jaicore.ml.core.evaluation.Prediction;
