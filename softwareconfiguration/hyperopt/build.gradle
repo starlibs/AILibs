@@ -2,15 +2,23 @@ plugins {
 	id 'eclipse-wtp'
 }
 
+sourceSets {
+	main {
+		java {
+			srcDirs 'src/proto/java'
+		}
+	}
+}
+
 dependencies {
     compile project(':hasco')
+    compile project(':JAICore:jaicore-ml-weka')
+    compile project(':mlplan')
     
-    // TODO: Check if we need all of them
-    compile project(':JAICore:jaicore-logic')
-	compile project(':JAICore:jaicore-basic')
-	compile project(':JAICore:jaicore-planning')
-	compile project(':JAICore:jaicore-search')
-	compile project(':JAICore:jaicore-ml')
-	compile project(':JAICore:jaicore-experiments')
-	
+    compile 'io.grpc:grpc-api:1.24.1'
+    compile 'io.grpc:grpc-core:1.24.1'
+    compile 'io.grpc:grpc-stub:1.24.1'
+    compile 'io.grpc:grpc-protobuf:1.24.1'
+    
+	compile 'com.google.protobuf:protobuf-java:3.10.0'
 }

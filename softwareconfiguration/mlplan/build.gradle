@@ -18,6 +18,7 @@ dependencies {
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
+	compile project(':JAICore:jaicore-ml-weka')
 	
 	compile ('org.api4:ai.ml')
 

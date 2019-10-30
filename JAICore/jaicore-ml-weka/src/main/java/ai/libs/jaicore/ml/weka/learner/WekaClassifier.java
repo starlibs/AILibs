@@ -24,18 +24,20 @@ import org.slf4j.LoggerFactory;
 import ai.libs.jaicore.ml.core.evaluation.Prediction;
 import ai.libs.jaicore.ml.core.evaluation.PredictionBatch;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> {
+public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> implements IWekaClassifier {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WekaClassifier.class);
 
 	private final String name;
 	private String[] options;
-	private AbstractClassifier wrappedClassifier;
+	private Classifier wrappedClassifier;
 	private Instances metaData;
 	private Map<Double, String> targetValueToClass = new HashMap<>();
 
@@ -43,10 +45,14 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		this.name = name;
 		this.options = options;
 		try {
-			this.wrappedClassifier = (AbstractClassifier) AbstractClassifier.forName(name, options);
+			this.wrappedClassifier = AbstractClassifier.forName(name, options);
 		} catch (Exception e) {
 			throw new IllegalArgumentException("Could not find classifier for name " + name + " or could not set its options to " + Arrays.toString(options), e);
 		}
+	}
+
+	public WekaClassifier(final Classifier classifier) {
+		this.wrappedClassifier = classifier;
 	}
 
 	public String getName() {
@@ -88,6 +94,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 
 	@Override
 	public void fit(final ILabeledDataset<ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
+		WekaInstances data = new WekaInstances(dTrain);
 		// extract the dataset's meta data and prepare the instances.
 		this.metaData = this.extractMetaData(dTrain);
 		System.out.println(this.metaData);
@@ -156,6 +163,11 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 		} catch (Exception e) {
 			throw new LearnerConfigurationFailedException("Could not set config for " + WekaClassifier.class.getSimpleName());
 		}
+	}
+
+	@Override
+	public Classifier getClassifier() {
+		return this.wrappedClassifier;
 	}
 
 }

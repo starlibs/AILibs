@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
+import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.ASEvaluation;
@@ -21,14 +22,14 @@ import weka.classifiers.functions.SMO;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.core.OptionHandler;
 
-public class WekaPipelineFactory implements ILearnerFactory {
+public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 
 	private Logger logger = LoggerFactory.getLogger(WekaPipelineFactory.class);
 
 	private static final String L_CLASSIFIER = "classifier";
 
 	@Override
-	public Classifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
+	public IWekaClassifier getComponentInstantiation(final ComponentInstance groundComponent) throws ComponentInstantiationFailedException {
 		try {
 			if (groundComponent.getComponent().getName().equals("pipeline")) {
 				ComponentInstance preprocessorCI = null;
@@ -40,7 +41,7 @@ public class WekaPipelineFactory implements ILearnerFactory {
 				ASEvaluation eval = ASEvaluation.forName(evaluatorCI.getComponent().getName(), this.getParameterList(evaluatorCI).toArray(new String[0]));
 				ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[0]));
 
-				Classifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER));
+				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER));
 				return new MLPipeline(search, eval, c);
 
 			} else {
