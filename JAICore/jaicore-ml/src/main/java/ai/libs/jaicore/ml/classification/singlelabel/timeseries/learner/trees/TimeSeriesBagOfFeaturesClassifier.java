@@ -16,7 +16,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeri
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSClassifier;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.TimeSeriesBagOfFeaturesLearningAlgorithm.ITimeSeriesBagOfFeaturesConfig;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 
@@ -172,7 +172,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 		}
 
 		// Prepare Weka instances for generated features
-		Instances subseriesInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(TimeSeriesUtil.createDatasetForMatrix(intervalFeatures),
+		Instances subseriesInstances = WekaTimeseriesUtil.simplifiedTimeSeriesDatasetToWekaInstances(TimeSeriesUtil.createDatasetForMatrix(intervalFeatures),
 				IntStream.rangeClosed(0, this.numClasses - 1).boxed().map(String::valueOf).collect(Collectors.toList()));
 
 		// Predict probabilities using the subseries Random Forest classifier
@@ -195,7 +195,7 @@ public class TimeSeriesBagOfFeaturesClassifier extends ASimplifiedTSClassifier<I
 
 		// Prepare final Weka instance
 		double[][] finalHistogramInstances = TimeSeriesBagOfFeaturesLearningAlgorithm.generateHistogramInstances(histograms, relativeFrequencies);
-		Instances finalInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(TimeSeriesUtil.createDatasetForMatrix(finalHistogramInstances),
+		Instances finalInstances = WekaTimeseriesUtil.simplifiedTimeSeriesDatasetToWekaInstances(TimeSeriesUtil.createDatasetForMatrix(finalHistogramInstances),
 				IntStream.rangeClosed(0, this.numClasses - 1).boxed().map(String::valueOf).collect(Collectors.toList()));
 
 		// Ensure that only on instance has been generated out of the given

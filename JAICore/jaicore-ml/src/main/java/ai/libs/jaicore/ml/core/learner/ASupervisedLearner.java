@@ -12,7 +12,7 @@ import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
-public abstract class ASupervisedLearner<I extends ILabeledInstance, D extends ILabeledDataset<I>, P extends IPrediction, B extends IPredictionBatch> implements ISupervisedLearner<I, D> {
+public abstract class ASupervisedLearner<I extends ILabeledInstance, D extends ILabeledDataset<? extends I>, P extends IPrediction, B extends IPredictionBatch> implements ISupervisedLearner<I, D> {
 
 	private Map<String, Object> config;
 

@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import ai.libs.jaicore.ml.weka.learner.reduction.MCTreeNodeReD;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -33,7 +33,7 @@ public class MCTreeNodeReDTest {
 		data.setClassIndex(data.numAttributes() - 1);
 
 		for (int s = 0; s < 10; s++) {
-			List<Instances> stratifiedSplit = WekaUtil.getStratifiedSplit(data, s, 0.7);
+			List<Instances> stratifiedSplit = WekaTimeseriesUtil.getStratifiedSplit(data, s, 0.7);
 
 			List<String> classValues = new LinkedList<>();
 			for (int i = 0; i < data.numClasses(); i++) {

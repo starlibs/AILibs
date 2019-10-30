@@ -37,6 +37,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 import org.api4.java.datastructure.graph.IPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
+import org.openml.webapplication.fantail.dc.LandmarkerCharacterizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,6 @@ import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
 import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluator;
-import ai.libs.jaicore.ml.core.metalearning.metafeature.LandmarkerCharacterizer;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.IDyadRankingInstance;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;

@@ -42,8 +42,9 @@ import ai.libs.jaicore.basic.sets.LDSRelationComputer;
 import ai.libs.jaicore.ml.core.dataset.cache.StratifiedSplitSubsetInstruction;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import weka.classifiers.AbstractClassifier;
@@ -71,9 +72,6 @@ public class WekaUtil {
 
 	private static final String MSG_SUM1 = "Portions must sum up to at most 1.";
 	private static final String MSG_DEVIATING_NUMBER_OF_INSTANCES = "The number of instances in the folds does not equal the number of instances in the original dataset";
-
-	private static final String NAME_LABEL = "label";
-	private static final String NAME_INSTANCES = "JAICore-extracted dataset";
 
 	private static boolean debug = false;
 
@@ -386,7 +384,7 @@ public class WekaUtil {
 		return getNumberOfInstancesFromClass(data, cs) / (1f * data.size());
 	}
 
-	public static Collection<Integer>[] getArbitrarySplit(final WekaInstances data, final Random rand, final double... portions) {
+	public static Collection<Integer>[] getArbitrarySplit(final IWekaInstances data, final Random rand, final double... portions) {
 
 		/* check that portions sum up to s.th. smaller than 1 */
 		double sum = 0;
@@ -427,7 +425,7 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static List<WekaInstances> realizeSplit(final WekaInstances data, final Collection<Integer>[] split) {
+	public static List<IWekaInstances> realizeSplit(final IWekaInstances data, final Collection<Integer>[] split) {
 		return realizeSplitAsCopiedInstances(data, split);
 	}
 
@@ -445,7 +443,7 @@ public class WekaUtil {
 		return folds;
 	}
 
-	public static List<WekaInstances> realizeSplitAsCopiedInstances(final WekaInstances data, final Collection<Integer>[] split) {
+	public static List<IWekaInstances> realizeSplitAsCopiedInstances(final IWekaInstances data, final Collection<Integer>[] split) {
 		List<Instances> folds = new ArrayList<>();
 		for (Collection<Integer> foldIndices : split) {
 			Instances fold = new Instances(data.getList(), 0);
@@ -475,15 +473,15 @@ public class WekaUtil {
 		return an;
 	}
 
-	public static List<WekaInstances> getStratifiedSplit(final WekaInstances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
+	public static List<IWekaInstances> getStratifiedSplit(final IWekaInstances data, final long seed, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		return getStratifiedSplit(data, new Random(seed), portionOfFirstFold);
 	}
 
-	public static List<WekaInstances> getStratifiedSplit(final WekaInstances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
+	public static List<IWekaInstances> getStratifiedSplit(final IWekaInstances data, final Random random, final double portionOfFirstFold) throws SplitFailedException, InterruptedException {
 		try {
 			List<Instances> split = new ArrayList<>();
-			AttributeBasedStratiAmountSelectorAndAssigner<WekaInstance, WekaInstances> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
-			StratifiedSampling<WekaInstance, WekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, data);
+			AttributeBasedStratiAmountSelectorAndAssigner<IWekaInstance, IWekaInstances> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
+			StratifiedSampling<IWekaInstance, IWekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, data);
 			sampler.setSampleSize((int) Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
 			split.add(sampler.getComplement().getList());

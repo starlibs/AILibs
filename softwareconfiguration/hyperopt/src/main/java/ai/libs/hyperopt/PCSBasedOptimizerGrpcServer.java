@@ -75,7 +75,7 @@ public class PCSBasedOptimizerGrpcServer {
 		String requestedInterface = "BaseClassifier";
 		input = new PCSBasedOptimizerInput(components, requestedInterface);
 		WekaPipelineFactory classifierFactory = new WekaPipelineFactory();
-		evaluator = new ComponentInstanceEvaluator(classifierFactory, "iris.arff");
+		evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "iris.arff");
 	}
 
 }

@@ -23,7 +23,9 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
@@ -58,9 +60,9 @@ public class WekaInstancesTester {
 		/* check that attribute types coincide */
 		int numAttributes = data.numAttributes() - 1;
 		assertEquals(numAttributes, wrapped.getNumAttributes());
-		assertEquals(numAttributes, wrapped.getFeatureTypes().size());
+		assertEquals(numAttributes, wrapped.getListOfAttributes().size());
 		for (int i = 0; i < numAttributes; i++) {
-			IAttribute type = wrapped.getFeatureTypes().getAttributeValue(i);
+			IAttribute type = wrapped.getListOfAttributes().get(i);
 			assertEquals(data.attribute(i).isNumeric(), type instanceof INumericAttribute);
 			if (data.attribute(i).isNominal()) {
 				boolean isBinary = data.attribute(i).numValues() == 2;
@@ -77,33 +79,33 @@ public class WekaInstancesTester {
 		/* check that data is transferred correctly */
 		assertEquals(n, wrapped.size());
 		for (int i = 0; i < n; i++) {
-			WekaInstance inst = wrapped.getAttributeValue(i);
+			IWekaInstance inst = wrapped.get(i);
 			assertNotNull(inst.getElement());
 			assertEquals(inst.getElement(), data.get(i)); // instance has not changed
 
 			/* check for each value that the contained information is correct */
 			for (int j = 0; j <= numAttributes; j++) {
 				if (j < numAttributes) {
-					Double value = inst.getAttributeValue(j);
+					Double value = (Double) inst.getAttributeValue(j);
 					if (data.attribute(j).isNumeric()) {
 						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + value + " but should have " + data.get(i).value(j), data.get(i).value(j), value, 0.0);
 					} else if (data.attribute(j).isNominal()) {
 						String expectedValue = data.attribute(j).value((int) data.get(i).value(j));
 
-						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getFeatureTypes().getAttributeValue(j);
+						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getListOfAttributes().get(j);
 						String wrappedValue = type.decodeToString(value);
 						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + wrappedValue + " but should have " + expectedValue, expectedValue, wrappedValue);
 					} else {
 						fail("Unsupported attribute value type " + value.getClass());
 					}
 				} else {
-					if (wrapped.getLabelTypes().getAttributeValue(0) instanceof INumericAttribute) {
+					if (wrapped.getLabelAttribute() instanceof INumericAttribute) {
 						assertEquals("Class has value " + inst.getLabel() + " but should have" + data.get(i).classValue(), data.get(i).classValue(), inst.getLabel(), 0.0);
 					} else {
 						String expectedValue = data.attribute(j).value((int) data.get(i).value(j));
-						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getFeatureTypes().getAttributeValue(j);
-						String wrappedValue = type.decodeToString(inst.getLabel());
-						assertEquals("Class has value " + wrappedValue + " but should have " + WekaUtil.getClassName(data.get(i)), expectedValue);
+						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getListOfAttributes().get(j);
+						String wrappedValue = type.serializeAttributeValue(inst.getLabel());
+						assertEquals("Class has value " + wrappedValue + " but should have " + WekaTimeseriesUtil.getClassName(data.get(i)), expectedValue);
 					}
 				}
 			}
@@ -115,17 +117,17 @@ public class WekaInstancesTester {
 	public void testCreateEmpty() throws Exception {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
-		WekaInstances wrapped = new WekaInstances(data);
+		IWekaInstances wrapped = new WekaInstances(data);
 		int size = wrapped.size();
-		WekaInstances emptyCopy = wrapped.createEmptyCopy();
+		IWekaInstances emptyCopy = wrapped.createEmptyCopy();
 
 		/* check that the empty copy indeed IS empty and that the original list is unchanged */
 		assertTrue(emptyCopy.isEmpty());
 		assertEquals(size, wrapped.size());
 
 		/* check that attribute types coincide */
-		List<IAttribute> attributeTypesOfDataset = wrapped.getFeatureTypes();
-		List<IAttribute> attributeTypesOfEmptyCopy = emptyCopy.getFeatureTypes();
+		List<IAttribute> attributeTypesOfDataset = wrapped.getListOfAttributes();
+		List<IAttribute> attributeTypesOfEmptyCopy = emptyCopy.getListOfAttributes();
 		int n = attributeTypesOfDataset.size();
 		assertEquals(n, attributeTypesOfEmptyCopy.size());
 		for (int i = 0; i < n; i++) {
@@ -133,7 +135,7 @@ public class WekaInstancesTester {
 		}
 
 		/* check that target type is the same */
-		assertEquals(wrapped.getLabelTypes().getAttributeValue(0).getClass(), emptyCopy.getLabelTypes().getAttributeValue(0).getClass());
+		assertEquals(wrapped.getLabelAttribute().getClass(), emptyCopy.getLabelAttribute().getClass());
 	}
 
 	@Test
@@ -141,7 +143,7 @@ public class WekaInstancesTester {
 		Instances data = new Instances(new FileReader(this.dataset));
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
-		for (WekaInstance wi : wrapped) {
+		for (IWekaInstance wi : wrapped) {
 			assertTrue(data.contains(wi.getElement()));
 		}
 	}
@@ -160,8 +162,8 @@ public class WekaInstancesTester {
 		int n = ds1.size();
 		assertEquals("Copy of dataset has different length than the original.", n, ds2.size());
 		for (int i = 0; i < n; i++) {
-			WekaInstance i1 = wrapped1.getAttributeValue(i);
-			WekaInstance i2 = wrapped2.getAttributeValue(i);
+			IWekaInstance i1 = wrapped1.get(i);
+			IWekaInstance i2 = wrapped2.get(i);
 			assertEquals("Hash codes of single instance don't match!", i1.hashCode(), i2.hashCode());
 			assertEquals("Comparing the instances with equals yields false.", i1, i2);
 			assertTrue("The second dataset does not contain " + i1 + ", which is contained in the first.", wrapped2.contains(i1));
@@ -179,7 +181,7 @@ public class WekaInstancesTester {
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 
-		for (WekaInstance i : wrapped) {
+		for (IWekaInstance i : wrapped) {
 			assertTrue(wrapped.contains(i));
 		}
 	}
@@ -190,7 +192,7 @@ public class WekaInstancesTester {
 		data.setClassIndex(data.numAttributes() - 1);
 		WekaInstances wrapped = new WekaInstances(data);
 
-		for (WekaInstance i : wrapped) {
+		for (IWekaInstance i : wrapped) {
 			assertTrue(i.equals(i));
 		}
 		assertEquals(wrapped, wrapped);
@@ -204,12 +206,11 @@ public class WekaInstancesTester {
 		int n = wrapped.size();
 
 		for (int i = 0; i < n; i++) {
-			WekaInstance x = wrapped.getAttributeValue(i);
+			IWekaInstance x = wrapped.get(i);
 			for (int j = 0; j < n; j++) {
 				if (i != j) {
-					WekaInstance y = wrapped.getAttributeValue(j);
-					assertFalse("Instance " + i + " and " + j + " are identical:\n\t" + Arrays.toString(x.toDoubleVector()) + " with label " + x.getLabel() + "\n\t" + Arrays.toString(y.toDoubleVector()) + " with label " + y.getLabel(),
-							x.equals(y));
+					IWekaInstance y = wrapped.get(j);
+					assertFalse("Instance " + i + " and " + j + " are identical:\n\t" + Arrays.toString(x.getPoint()) + " with label " + x.getLabel() + "\n\t" + Arrays.toString(y.getPoint()) + " with label " + y.getLabel(), x.equals(y));
 				}
 			}
 		}
@@ -226,7 +227,7 @@ public class WekaInstancesTester {
 		int n = dataAsArray.length;
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {
-			assertTrue(wrapped.getAttributeValue(i).equals(dataAsArray[i]));
+			assertTrue(wrapped.get(i).equals(dataAsArray[i]));
 		}
 
 		/* check Instance array */
@@ -234,7 +235,7 @@ public class WekaInstancesTester {
 		n = dataAsSpecificArray.length;
 		assertEquals(wrapped.size(), n);
 		for (int i = 0; i < n; i++) {
-			assertTrue(wrapped.getAttributeValue(i).equals(dataAsSpecificArray[i]));
+			assertTrue(wrapped.get(i).equals(dataAsSpecificArray[i]));
 		}
 	}
 }

@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.weka.dataset.splitter;
 
-import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 
 /**
  * Represents an algorithm that realizes a split of a given multilabel instances in folds, given a seed, custom information about the split represented as a string, and the fold that is left out for testing.
@@ -23,7 +23,7 @@ public interface IMultilabelCrossValidation {
 	 *            Information about the split for the class executing the split (e.g. portion sizes of folds)
 	 * @return A test Instances derived from the given instances
 	 */
-	public WekaInstances getTestSplit(WekaInstances data, int seed, int fold, String splitInfo);
+	public IWekaInstances getTestSplit(IWekaInstances data, int seed, int fold, String splitInfo);
 
 	/**
 	 * Gets a train split from the given data based on the seed. The given fold is the test fold, which is the left out fold for this case.
@@ -38,7 +38,7 @@ public interface IMultilabelCrossValidation {
 	 *            Information about the split for the class executing the split (e.g. portion sized of folds)
 	 * @return A train Instances derived from the given instances
 	 */
-	public WekaInstances getTrainSplit(WekaInstances data, int seed, int fold, String splitInfo);
+	public IWekaInstances getTrainSplit(IWekaInstances data, int seed, int fold, String splitInfo);
 
 	/**
 	 * Generate a String that represents a split of a data set into portions from the given portions sizes (must add up to <1).

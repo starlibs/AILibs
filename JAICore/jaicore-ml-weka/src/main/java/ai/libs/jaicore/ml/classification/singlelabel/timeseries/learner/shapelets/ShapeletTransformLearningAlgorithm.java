@@ -30,7 +30,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.Shapel
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.AMinimumDistanceSearchStrategy;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.EarlyAbandonMinimumDistanceSearchStrategy;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import weka.classifiers.Classifier;
 
 /**
@@ -244,7 +244,7 @@ public class ShapeletTransformLearningAlgorithm extends ASimplifiedTSCLearningAl
 		// Train Weka ensemble using the data
 		logger.debug("Starting ensemble training...");
 		try {
-			WekaUtil.buildWekaClassifierFromSimplifiedTS(classifier, transfTrainingData);
+			WekaTimeseriesUtil.buildWekaClassifierFromSimplifiedTS(classifier, transfTrainingData);
 		} catch (TrainingException e) {
 			throw new AlgorithmException("Could not train classifier due to a training exception.", e);
 		}

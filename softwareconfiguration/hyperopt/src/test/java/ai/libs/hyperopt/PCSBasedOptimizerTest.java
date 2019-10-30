@@ -37,7 +37,7 @@ public class PCSBasedOptimizerTest {
 	private static final File HASCOFileInput = new File("../mlplan/resources/automl/searchmodels/weka/autoweka.json");
 
 	PCSBasedOptimizerInput input;
-	ComponentInstanceEvaluator evaluator;
+	WekaComponentInstanceEvaluator evaluator;
 
 	@Before
 	public void init() {
@@ -51,7 +51,7 @@ public class PCSBasedOptimizerTest {
 		String requestedInterface = "BaseClassifier";
 		this.input = new PCSBasedOptimizerInput(components, requestedInterface);
 		ILearnerFactory classifierFactory = new WekaPipelineFactory();
-		this.evaluator = new ComponentInstanceEvaluator(classifierFactory, "testrsc/iris.arff");
+		this.evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "testrsc/iris.arff");
 	}
 
 	@Ignore

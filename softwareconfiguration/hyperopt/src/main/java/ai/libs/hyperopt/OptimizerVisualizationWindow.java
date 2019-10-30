@@ -73,7 +73,7 @@ public class OptimizerVisualizationWindow implements Runnable {
 	 * @param mainPlugin The main {@link IGUIPlugin} which will be displayed as the main information source.
 	 * @param visualizationPlugins A list of additional {@link IGUIPlugin}s displaying side information.
 	 */
-	public OptimizerVisualizationWindow(final ComponentInstanceEvaluator evaluator, final List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers, final IGUIPlugin mainPlugin, final IGUIPlugin... visualizationPlugins) {
+	public OptimizerVisualizationWindow(final WekaComponentInstanceEvaluator evaluator, final List<AlgorithmEventPropertyComputer> algorithmEventPropertyComputers, final IGUIPlugin mainPlugin, final IGUIPlugin... visualizationPlugins) {
 		this.mainPlugin = mainPlugin;
 		AlgorithmEventHistoryRecorder historyRecorder = new AlgorithmEventHistoryRecorder(algorithmEventPropertyComputers);
 		evaluator.registerListener(historyRecorder);

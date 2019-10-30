@@ -32,14 +32,13 @@ public class FilterBasedDatasetSplitter<I extends IInstance, D extends IDataset<
 
 	@Override
 	public List<D> split(final D data) throws SplitFailedException, InterruptedException {
-		int size = (int)Math.round(data.size() * this.relSampleSize);
+		int size = (int) Math.round(data.size() * this.relSampleSize);
 		ISamplingAlgorithm<D> sampler = this.samplerFactory.getAlgorithm(size, data, this.random);
 		try {
 			D firstFold = sampler.call();
 			D secondFold = new SampleComplementComputer().getComplement(data, firstFold);
 			return Arrays.asList(firstFold, secondFold);
-		}
-		catch (DatasetCreationException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
+		} catch (DatasetCreationException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
 			throw new SplitFailedException(e);
 		}
 	}

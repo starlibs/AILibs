@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.core.metalearning.metafeature;
+package org.openml.webapplication.fantail.dc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,7 +86,8 @@ public class GlobalCharacterizer extends Characterizer {
 
 		TreeMap<String, Double> metaFeatures = new TreeMap<>();
 		StopWatch watch = new StopWatch();
-		this.characterizers.forEach(characterizer -> {
+
+		for (Characterizer characterizer : this.characterizers) {
 			try {
 				watch.reset();
 				watch.start();
@@ -99,7 +100,7 @@ public class GlobalCharacterizer extends Characterizer {
 				}
 				this.computationTimes.put(characterizer.toString(), Double.NaN);
 			}
-		});
+		}
 
 		this.logger.trace("Done characterizing dataset. Feature length: {}", metaFeatures.size());
 

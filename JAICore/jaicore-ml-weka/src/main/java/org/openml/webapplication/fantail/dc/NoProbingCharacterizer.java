@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.core.metalearning.metafeature;
+package org.openml.webapplication.fantail.dc;
 
 import java.util.ArrayList;
 import java.util.Arrays;

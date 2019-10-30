@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.learner.WekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.ASEvaluation;
@@ -42,7 +43,7 @@ public class WekaPipelineFactory implements ILearnerFactory<IWekaClassifier> {
 				ASSearch search = ASSearch.forName(searcherCI.getComponent().getName(), this.getParameterList(searcherCI).toArray(new String[0]));
 
 				IWekaClassifier c = this.getComponentInstantiation(groundComponent.getSatisfactionOfRequiredInterfaces().get(L_CLASSIFIER));
-				return new MLPipeline(search, eval, c);
+				return new WekaClassifier(new MLPipeline(search, eval, c));
 
 			} else {
 				Classifier c = AbstractClassifier.forName(groundComponent.getComponent().getName(), this.getParameterList(groundComponent).toArray(new String[0]));

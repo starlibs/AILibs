@@ -16,7 +16,8 @@ import org.openml.apiconnector.io.OpenmlConnector;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.ExtrapolatedSaturationPointEvaluator;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SystematicSamplingFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
-import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.functions.SMO;
 import weka.core.Attribute;
@@ -25,8 +26,8 @@ import weka.core.converters.ConverterUtils.DataSource;
 
 public class ExtrapolatedSaturationPointEvaluationTester {
 
-	private WekaInstances train;
-	private WekaInstances test;
+	private IWekaInstances train;
+	private IWekaInstances test;
 
 	@Test
 	public void testClassifierEvaluationAtSaturationPoint() throws Exception {
@@ -49,10 +50,10 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
 
-	private void createSplit(final WekaInstances dataset, final double trainsplit, final long seed) throws DatasetCreationException {
+	private void createSplit(final IWekaInstances dataset, final double trainsplit, final long seed) throws DatasetCreationException, InterruptedException {
 		this.train = dataset.createEmptyCopy();
 		this.test = dataset.createEmptyCopy();
-		WekaInstances data = dataset.createEmptyCopy();
+		IWekaInstances data = dataset.createEmptyCopy();
 		data.addAll(dataset);
 
 		// Shuffle the data
@@ -60,46 +61,46 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		Collections.shuffle(data, random);
 
 		// Stratify the data by class
-		Map<Object, WekaInstances> classStrati = new HashMap<>();
-		for (WekaInstance d : dataset) {
+		Map<Object, IWekaInstances> classStrati = new HashMap<>();
+		for (IWekaInstance d : dataset) {
 			Object c = d.getLabel();
 			if (!classStrati.containsKey(c)) {
 				classStrati.put(c, dataset.createEmptyCopy());
 			}
-			classStrati.getAttributeValue(c).add(d);
+			classStrati.get(c).add(d);
 		}
 		;
 
 		// Retrieve strati sizes
 		Map<Object, Integer> classStratiSizes = new HashMap<>(classStrati.size());
 		for (Object c : classStrati.keySet()) {
-			classStratiSizes.put(c, classStrati.getAttributeValue(c).size());
+			classStratiSizes.put(c, classStrati.get(c).size());
 		}
 
 		// First assign one item of each class to train and test
 		for (Object c : classStrati.keySet()) {
-			WekaInstances availableInstances = classStrati.getAttributeValue(c);
+			IWekaInstances availableInstances = classStrati.get(c);
 			if (!availableInstances.isEmpty()) {
-				this.train.add(availableInstances.getAttributeValue(0));
+				this.train.add(availableInstances.get(0));
 				availableInstances.remove(0);
 			}
 			if (!availableInstances.isEmpty()) {
-				this.test.add(availableInstances.getAttributeValue(0));
+				this.test.add(availableInstances.get(0));
 				availableInstances.remove(0);
 			}
 		}
 
 		// Distribute remaining instances over train test
 		for (Object c : classStrati.keySet()) {
-			WekaInstances availableInstances = classStrati.getAttributeValue(c);
+			IWekaInstances availableInstances = classStrati.get(c);
 			int trainItems = (int) Math.min(availableInstances.size(), Math.ceil(trainsplit * classStratiSizes.get(c)));
 			for (int j = 0; j < trainItems; j++) {
-				this.train.add(availableInstances.getAttributeValue(0));
+				this.train.add(availableInstances.get(0));
 				availableInstances.remove(0);
 			}
 			int testItems = (int) Math.min(availableInstances.size(), Math.ceil((1 - trainsplit) * classStratiSizes.get(c)));
 			for (int j = 0; j < testItems; j++) {
-				this.test.add(availableInstances.getAttributeValue(0));
+				this.test.add(availableInstances.get(0));
 				availableInstances.remove(0);
 			}
 		}

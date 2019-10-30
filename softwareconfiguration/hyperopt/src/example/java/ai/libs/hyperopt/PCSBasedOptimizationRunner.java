@@ -37,7 +37,7 @@ public class PCSBasedOptimizationRunner {
 		String requestedInterface = "BaseClassifier";
 		PCSBasedOptimizerInput input = new PCSBasedOptimizerInput(components, requestedInterface);
 		WekaPipelineFactory classifierFactory = new WekaPipelineFactory();
-		ComponentInstanceEvaluator evaluator = new ComponentInstanceEvaluator(classifierFactory, "testrsc/iris.arff", "HyperBandOptimizer");
+		WekaComponentInstanceEvaluator evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "testrsc/iris.arff", "HyperBandOptimizer");
 
 		// generate PCS files
 		HASCOToPCSConverter.generatePCSFile(input, "PCSBasedOptimizerScripts/HyperBandOptimizer/");

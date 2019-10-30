@@ -15,7 +15,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.IQualityMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.Shapelet;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.AMinimumDistanceSearchStrategy;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import weka.classifiers.Classifier;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -209,7 +209,7 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 
 		double[] transformedInstance = ShapeletTransformLearningAlgorithm.shapeletTransform(univInstance, this.shapelets, this.minDistanceSearchStrategy);
 
-		Instance inst = WekaUtil.simplifiedTSInstanceToWekaInstance(transformedInstance);
+		Instance inst = WekaTimeseriesUtil.simplifiedTSInstanceToWekaInstance(transformedInstance);
 
 		try {
 			return (int) Math.round(this.classifier.classifyInstance(inst));
@@ -259,7 +259,7 @@ public class ShapeletTransformTSClassifier extends ASimplifiedTSClassifier<Integ
 
 		// Prepare transformed Weka instances to let the ensemble predict
 		LOGGER.debug("Converting time series dataset to Weka instances...");
-		Instances insts = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(transformedDataset);
+		Instances insts = WekaTimeseriesUtil.simplifiedTimeSeriesDatasetToWekaInstances(transformedDataset);
 		LOGGER.debug("Converted time series dataset to Weka instances.");
 
 		// Prediction

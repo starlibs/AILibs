@@ -16,7 +16,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeri
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 
@@ -204,7 +204,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 
 		// Train final subseries classifier
 		try {
-			WekaUtil.buildWekaClassifierFromSimplifiedTS(subseriesClf, TimeSeriesUtil.createDatasetForMatrix(targetMatrix, subSeqValueMatrix));
+			WekaTimeseriesUtil.buildWekaClassifierFromSimplifiedTS(subseriesClf, TimeSeriesUtil.createDatasetForMatrix(targetMatrix, subSeqValueMatrix));
 		} catch (TrainingException e) {
 			throw new AlgorithmException("Could not train the sub series Random Forest classifier due to an internal Weka exception.", e);
 		}
@@ -220,7 +220,7 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 		RandomForest finalClf = new RandomForest();
 		finalClf.setNumIterations(NUM_TREES_IN_FOREST);
 		try {
-			WekaUtil.buildWekaClassifierFromSimplifiedTS(finalClf, TimeSeriesUtil.createDatasetForMatrix(targets, finalInstances));
+			WekaTimeseriesUtil.buildWekaClassifierFromSimplifiedTS(finalClf, TimeSeriesUtil.createDatasetForMatrix(targets, finalInstances));
 		} catch (TrainingException e) {
 			throw new AlgorithmException("Could not train the final Random Forest classifier due to an internal Weka exception.", e);
 		}
@@ -419,11 +419,11 @@ public class TimeSeriesBagOfFeaturesLearningAlgorithm extends ASimplifiedTSCLear
 			Pair<TimeSeriesDataset2, TimeSeriesDataset2> trainingTestDatasets = TimeSeriesUtil.getTrainingAndTestDataForFold(i, numFolds, subSeqValueMatrix, targetMatrix);
 			TimeSeriesDataset2 trainingDS = trainingTestDatasets.getX();
 
-			WekaUtil.buildWekaClassifierFromSimplifiedTS(rf, trainingDS);
+			WekaTimeseriesUtil.buildWekaClassifierFromSimplifiedTS(rf, trainingDS);
 
 			// Prepare test instances
 			TimeSeriesDataset2 testDataset = trainingTestDatasets.getY();
-			Instances testInstances = WekaUtil.simplifiedTimeSeriesDatasetToWekaInstances(testDataset, IntStream.rangeClosed(0, numClasses - 1).boxed().map(String::valueOf).collect(Collectors.toList()));
+			Instances testInstances = WekaTimeseriesUtil.simplifiedTimeSeriesDatasetToWekaInstances(testDataset, IntStream.rangeClosed(0, numClasses - 1).boxed().map(String::valueOf).collect(Collectors.toList()));
 
 			double[][] testProbs = null;
 			try {

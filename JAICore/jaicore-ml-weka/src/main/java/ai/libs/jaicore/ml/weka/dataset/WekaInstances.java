@@ -53,7 +53,7 @@ public class WekaInstances extends ADataset<IWekaInstance> implements IWekaInsta
 
 	@Override
 	public void removeColumn(final int columnPos) {
-
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
 	@Override

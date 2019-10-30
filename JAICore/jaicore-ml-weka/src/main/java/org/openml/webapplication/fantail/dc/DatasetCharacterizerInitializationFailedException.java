@@ -1,4 +1,4 @@
-package ai.libs.jaicore.ml.core.metalearning.metafeature;
+package org.openml.webapplication.fantail.dc;
 
 /**
  * An exception that signifies something went wrong during the initialization of

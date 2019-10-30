@@ -26,7 +26,7 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.TimeSeri
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.ASimplifiedTSCLearningAlgorithm;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Instances;
 
@@ -207,7 +207,7 @@ public class LearnShapeletsLearningAlgorithm extends ASimplifiedTSCLearningAlgor
 			}
 
 			// Transform instances
-			Instances wekaInstances = WekaUtil.matrixToWekaInstances(tmpSegments);
+			Instances wekaInstances = WekaTimeseriesUtil.matrixToWekaInstances(tmpSegments);
 
 			// Cluster using k-Means
 			SimpleKMeans kMeans = new SimpleKMeans();

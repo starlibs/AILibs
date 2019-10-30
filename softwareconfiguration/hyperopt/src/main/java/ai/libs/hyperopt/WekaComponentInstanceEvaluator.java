@@ -12,7 +12,8 @@ import com.google.common.eventbus.EventBus;
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
-import ai.libs.jaicore.ml.core.timeseries.util.WekaUtil;
+import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -24,13 +25,13 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @author kadirayk
  *
  */
-public class ComponentInstanceEvaluator implements IComponentInstanceEvaluator {
+public class WekaComponentInstanceEvaluator implements IComponentInstanceEvaluator {
 
-	private Logger logger = LoggerFactory.getLogger(ComponentInstanceEvaluator.class);
+	private Logger logger = LoggerFactory.getLogger(WekaComponentInstanceEvaluator.class);
 
 	private String algorithmId;
 
-	private final ILearnerFactory classifierFactory;
+	private final ILearnerFactory<IWekaClassifier> classifierFactory;
 
 	private String filePath;
 
@@ -38,7 +39,7 @@ public class ComponentInstanceEvaluator implements IComponentInstanceEvaluator {
 
 	private List<Instances> split;
 
-	public ComponentInstanceEvaluator(final ILearnerFactory classifierFactory, final String filePath, final String algorithmId) {
+	public WekaComponentInstanceEvaluator(final ILearnerFactory<IWekaClassifier> classifierFactory, final String filePath, final String algorithmId) {
 		this.classifierFactory = classifierFactory;
 		this.filePath = filePath;
 		this.eventBus = new EventBus();
@@ -103,7 +104,7 @@ public class ComponentInstanceEvaluator implements IComponentInstanceEvaluator {
 		this.eventBus.register(listener);
 	}
 
-	public void UnregisterListener(final AlgorithmEventListener listener) {
+	public void unregisterListener(final AlgorithmEventListener listener) {
 		this.eventBus.unregister(listener);
 	}
 

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 
@@ -28,14 +29,14 @@ public class RandomMultilabelCrossValidation implements IMultilabelCrossValidati
 	private static final String SPLIT_SEPARATOR = "/";
 
 	@Override
-	public WekaInstances getTestSplit(final WekaInstances data, final int seed, final int fold, final String splitInfo) {
+	public IWekaInstances getTestSplit(final IWekaInstances data, final int seed, final int fold, final String splitInfo) {
 		return this.getFolds(data, seed, splitInfo).get(fold);
 	}
 
 	@Override
-	public WekaInstances getTrainSplit(final WekaInstances data, final int seed, final int fold, final String splitInfo) {
+	public IWekaInstances getTrainSplit(final IWekaInstances data, final int seed, final int fold, final String splitInfo) {
 		/* Get all the folds */
-		List<WekaInstances> folds = this.getFolds(data, seed, splitInfo);
+		List<IWekaInstances> folds = this.getFolds(data, seed, splitInfo);
 
 		/* Copy meta data of original Instances object to the new training instances */
 		Instances trainInstances = new Instances(data.getList(), 0);
@@ -61,7 +62,7 @@ public class RandomMultilabelCrossValidation implements IMultilabelCrossValidati
 	 *            Information of portion sizes of folds
 	 * @return All the folds deriving from this split
 	 */
-	private List<WekaInstances> getFolds(final WekaInstances data, final int seed, final String splitInfo) {
+	private List<IWekaInstances> getFolds(final IWekaInstances data, final int seed, final String splitInfo) {
 		Collection<Integer>[] instancesInFolds = WekaUtil.getArbitrarySplit(data, new Random(seed), Arrays.stream(splitInfo.split(this.getSplitSeparator())).mapToDouble(Double::parseDouble).toArray());
 		return WekaUtil.realizeSplit(data, instancesInFolds);
 	}

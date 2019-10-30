@@ -19,11 +19,11 @@ import weka.core.Instances;
 /**
  * WekaUtil
  */
-public class WekaUtil {
+public class WekaTimeseriesUtil {
 
 	private static final String I_NAME = "Instances";
 
-	private WekaUtil() {
+	private WekaTimeseriesUtil() {
 		/* no instantiation desired */
 	}
 
