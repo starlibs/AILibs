@@ -16,7 +16,7 @@ import ai.libs.jaicore.ml.core.dataset.ADataset;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class WekaInstances extends ADataset<WekaInstance> implements ILabeledDataset<WekaInstance>, IListDecorator<Instances, Instance, WekaInstance> {
+public class WekaInstances extends ADataset<IWekaInstance> implements IWekaInstances, IListDecorator<Instances, Instance, IWekaInstance> {
 
 	/**
 	 *
@@ -57,14 +57,14 @@ public class WekaInstances extends ADataset<WekaInstance> implements ILabeledDat
 	}
 
 	@Override
-	public WekaInstances createEmptyCopy() throws DatasetCreationException {
+	public IWekaInstances createEmptyCopy() throws DatasetCreationException {
 		return new WekaInstances(new Instances(this.dataset, 0));
 	}
 
 	@Override
 	public int hashCode() {
 		HashCodeBuilder hb = new HashCodeBuilder();
-		for (WekaInstance inst : this) {
+		for (IWekaInstance inst : this) {
 			hb.append(inst.hashCode());
 		}
 		return hb.toHashCode();
@@ -91,7 +91,7 @@ public class WekaInstances extends ADataset<WekaInstance> implements ILabeledDat
 		return true;
 	}
 
-	public int getFrequency(final WekaInstance instance) {
+	public int getFrequency(final IWekaInstance instance) {
 		return (int) this.stream().filter(instance::equals).count();
 	}
 
@@ -101,8 +101,8 @@ public class WekaInstances extends ADataset<WekaInstance> implements ILabeledDat
 	}
 
 	@Override
-	public Class<WekaInstance> getTypeOfDecoratingItems() {
-		return WekaInstance.class;
+	public Class<IWekaInstance> getTypeOfDecoratingItems() {
+		return IWekaInstance.class;
 	}
 
 	@Override
@@ -111,7 +111,7 @@ public class WekaInstances extends ADataset<WekaInstance> implements ILabeledDat
 	}
 
 	@Override
-	public Constructor<WekaInstance> getConstructorForDecoratedItems() {
+	public Constructor<? extends IWekaInstance> getConstructorForDecoratedItems() {
 		try {
 			return WekaInstance.class.getConstructor(this.getTypeOfDecoratedItems());
 		} catch (Exception e) {

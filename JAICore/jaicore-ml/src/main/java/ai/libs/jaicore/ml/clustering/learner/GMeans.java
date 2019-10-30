@@ -119,7 +119,14 @@ public class GMeans<C extends Clusterable> {
 			if (loopPoints.size() < 2) {
 				break;
 			}
-			List<CentroidCluster<C>> intermediatePointsTemp = loopCluster.cluster(loopPoints);
+			List<CentroidCluster<C>> intermediatePointsTemp = null;
+			try {
+				intermediatePointsTemp = loopCluster.cluster(loopPoints);
+			} catch (Exception e) {
+				e.printStackTrace();
+				loopPoints.stream().forEach(System.out::println);
+				System.exit(0);
+			}
 			for (CentroidCluster<C> centroidCluster : intermediatePointsTemp) {
 				this.intermediatePoints.put(centroidCluster.getCenter().getPoint(), centroidCluster.getPoints());
 				// intermediate Center saves the found two Center C`_1 und C`_2

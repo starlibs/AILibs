@@ -72,12 +72,19 @@ public class NumericAttribute extends AAttribute implements INumericAttribute {
 
 	@Override
 	public String serializeAttributeValue(final Object value) {
+		if (value instanceof String && value.equals("?")) {
+			return "?";
+		}
 		return this.getAttributeValueAsDouble(value) + "";
 	}
 
 	@Override
 	public Object deserializeAttributeValue(final String string) {
-		return Double.parseDouble(string);
+		if (string.equals("?")) {
+			return "?";
+		} else {
+			return Double.parseDouble(string);
+		}
 	}
 
 }

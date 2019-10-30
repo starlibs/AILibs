@@ -14,6 +14,7 @@ public class SystematicFileSamplingTester extends GeneralFileSamplingTester {
 
 	private static final long RANDOM_SEED = 1;
 
+	// FIXME (better not test with SSD: writes many small files which might kill an SSD)
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final Object problem) {
 		File input = (File) problem;

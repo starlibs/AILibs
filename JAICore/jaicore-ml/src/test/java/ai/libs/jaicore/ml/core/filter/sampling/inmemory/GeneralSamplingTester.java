@@ -21,6 +21,7 @@ import org.junit.runners.Parameterized.Parameters;
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.AlgorithmTestProblemSetCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
+import ai.libs.jaicore.ml.core.dataset.clusterable.ClusterableDataset;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 
 /**
@@ -59,7 +60,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	@Override
 	public final IAlgorithm<?, ?> getAlgorithm(final Object problem) {
 		@SuppressWarnings("unchecked")
-		ILabeledDataset<ILabeledInstance> dataset = (ILabeledDataset<ILabeledInstance>) problem;
+		ILabeledDataset<IClusterableInstance> dataset = new ClusterableDataset((ILabeledDataset<ILabeledInstance>) problem);
 		return this.getAlgorithm(dataset);
 	}
 

@@ -14,7 +14,7 @@ import ai.libs.jaicore.ml.weka.WekaUtil;
 import weka.core.Attribute;
 import weka.core.Instance;
 
-public class WekaInstance extends ElementDecorator<Instance> implements ILabeledInstance {
+public class WekaInstance extends ElementDecorator<Instance> implements IWekaInstance {
 
 	public WekaInstance(final Instance instance) {
 		super(instance);

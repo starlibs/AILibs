@@ -80,12 +80,19 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	 */
 	protected static KVStore parseRelation(final String line) {
 		KVStore metaData = new KVStore();
-		String[] relationNameAndOptions = line.substring(line.indexOf('\'') + 1, line.lastIndexOf('\'')).split(SEPARATOR_RELATIONNAME);
 
-		metaData.put(K_RELATION_NAME, relationNameAndOptions[0].trim());
-		if (relationNameAndOptions.length > 1) {
-			OptionsParser optParser = new OptionsParser(relationNameAndOptions[1]);
-			metaData.put(K_CLASS_INDEX, optParser.get(F_CLASS_INDEX));
+		// cut off relation tag
+		String relationDescription = line.substring(EArffItem.RELATION.getValue().length()).trim();
+
+		if (relationDescription.startsWith("'") && relationDescription.endsWith("'")) {
+			String[] relationNameAndOptions = line.substring(line.indexOf('\'') + 1, line.lastIndexOf('\'')).split(SEPARATOR_RELATIONNAME);
+			metaData.put(K_RELATION_NAME, relationNameAndOptions[0].trim());
+			if (relationNameAndOptions.length > 1) {
+				OptionsParser optParser = new OptionsParser(relationNameAndOptions[1]);
+				metaData.put(K_CLASS_INDEX, optParser.get(F_CLASS_INDEX));
+			}
+		} else {
+			metaData.put(K_RELATION_NAME, relationDescription);
 		}
 
 		return metaData;
