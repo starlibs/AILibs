@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,7 +41,7 @@ public class PCSBasedOptimizerTest {
 	WekaComponentInstanceEvaluator evaluator;
 
 	@Before
-	public void init() {
+	public void init() throws SplitFailedException {
 		ComponentLoader cl = null;
 		try {
 			cl = new ComponentLoader(HASCOFileInput);
@@ -51,7 +52,7 @@ public class PCSBasedOptimizerTest {
 		String requestedInterface = "BaseClassifier";
 		this.input = new PCSBasedOptimizerInput(components, requestedInterface);
 		ILearnerFactory classifierFactory = new WekaPipelineFactory();
-		this.evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "testrsc/iris.arff");
+		this.evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "testrsc/iris.arff", "algorithmID");
 	}
 
 	@Ignore
@@ -309,7 +310,7 @@ public class PCSBasedOptimizerTest {
 	public void EventBusTest() throws Exception {
 		HASCOToPCSConverter.generatePCSFile(this.input, "PCSBasedOptimizerScripts/HyperBandOptimizer/");
 		AlgorithmEventListener listener = new PCSBasedOptimizationEventListener();
-		this.evaluator.registerEventListener(listener);
+		this.evaluator.registerListener(listener);
 		HyperBandOptimizer optimizer = HyperBandOptimizer.HyperBandOptimizerBuilder(this.input, this.evaluator).executionPath("PCSBasedOptimizerScripts/HyperBandOptimizer").maxBudget(230.0).minBudget(9.0).nIterations(4).build();
 		optimizer.optimize("weka.classifiers.functions.Logistic");
 	}

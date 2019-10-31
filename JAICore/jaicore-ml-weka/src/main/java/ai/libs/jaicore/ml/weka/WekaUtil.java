@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.exception.DatasetTraceInstructionFailedException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -46,7 +47,6 @@ import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
-import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.MultipleClassifiersCombiner;

@@ -1,6 +1,7 @@
 package ai.libs.hyperopt;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
@@ -13,6 +14,7 @@ import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.jaicore.graphvisualizer.events.graph.bus.AlgorithmEventListener;
 import ai.libs.jaicore.ml.weka.WekaUtil;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import weka.classifiers.Classifier;
@@ -39,16 +41,15 @@ public class WekaComponentInstanceEvaluator implements IComponentInstanceEvaluat
 
 	private List<Instances> split;
 
-	public WekaComponentInstanceEvaluator(final ILearnerFactory<IWekaClassifier> classifierFactory, final String filePath, final String algorithmId) {
+	public WekaComponentInstanceEvaluator(final ILearnerFactory<IWekaClassifier> classifierFactory, final String filePath, final String algorithmId) throws SplitFailedException {
 		this.classifierFactory = classifierFactory;
 		this.filePath = filePath;
 		this.eventBus = new EventBus();
 		this.algorithmId = algorithmId;
 		Instances dataset = this.loadDataset(filePath);
 		try {
-			this.split = WekaUtil.getStratifiedSplit(dataset, 0, .7f);
+			this.split = WekaUtil.getStratifiedSplit(new WekaInstances(dataset), 0, .7f).stream().map(x -> x.getList()).collect(Collectors.toList());
 		} catch (SplitFailedException | InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -60,7 +61,7 @@ public class WekaComponentInstanceEvaluator implements IComponentInstanceEvaluat
 	public Double evaluate(final ComponentInstance componentInstance) throws InterruptedException, ObjectEvaluationFailedException {
 		Double score = 0.0;
 		try {
-			Classifier classifier = this.classifierFactory.getComponentInstantiation(componentInstance);
+			Classifier classifier = this.classifierFactory.getComponentInstantiation(componentInstance).getClassifier();
 			Evaluation eval = null;
 			try {
 

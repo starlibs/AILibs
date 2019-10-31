@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.common.attributedobjects.IObjectEvaluator;
 
 import ai.libs.hasco.model.Component;
@@ -11,6 +12,8 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedOptimizerService;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hyperopt.optimizer.PCSBasedOptimizerConfig;
+import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
@@ -64,7 +67,7 @@ public class PCSBasedOptimizerGrpcServer {
 
 	}
 
-	private static void init() {
+	private static void init() throws SplitFailedException {
 		ComponentLoader cl = null;
 		try {
 			cl = new ComponentLoader(HASCOFileInput);
@@ -74,8 +77,8 @@ public class PCSBasedOptimizerGrpcServer {
 		Collection<Component> components = cl.getComponents();
 		String requestedInterface = "BaseClassifier";
 		input = new PCSBasedOptimizerInput(components, requestedInterface);
-		WekaPipelineFactory classifierFactory = new WekaPipelineFactory();
-		evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "iris.arff");
+		ILearnerFactory<IWekaClassifier> classifierFactory = new WekaPipelineFactory();
+		evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "iris.arff", "algoID");
 	}
 
 }
