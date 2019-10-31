@@ -18,10 +18,14 @@ import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoAlgorithmEventPro
 import ai.libs.jaicore.graphvisualizer.plugin.nodeinfo.NodeInfoGUIPlugin;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.ScoredSolutionCandidateInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.graphvisualizer.plugin.solutionperformanceplotter.SolutionPerformanceTimelinePlugin;
+import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNodeInfoGenerator;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.RolloutInfoAlgorithmEventPropertyComputer;
 import ai.libs.jaicore.search.gui.plugins.rollouthistograms.SearchRolloutHistogramPlugin;
 import ai.libs.jaicore.search.model.travesaltree.JaicoreNodeInfoGenerator;
+import ai.libs.mlplan.gui.outofsampleplots.OutOfSampleErrorPlotPlugin;
+import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 
@@ -36,7 +40,7 @@ public class PCSBasedOptimizationRunner {
 		Collection<Component> components = cl.getComponents();
 		String requestedInterface = "BaseClassifier";
 		PCSBasedOptimizerInput input = new PCSBasedOptimizerInput(components, requestedInterface);
-		WekaPipelineFactory classifierFactory = new WekaPipelineFactory();
+		ILearnerFactory<IWekaClassifier> classifierFactory = new WekaPipelineFactory();
 		WekaComponentInstanceEvaluator evaluator = new WekaComponentInstanceEvaluator(classifierFactory, "testrsc/iris.arff", "HyperBandOptimizer");
 
 		// generate PCS files
