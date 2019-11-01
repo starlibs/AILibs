@@ -39,7 +39,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	private EventBus eventBus = new EventBus();
 
 	/* initialization according to section 6.2 in the paper */
-	private final double initLambda = 10000.0;
+	private final double initLambda = 1.0;
 	private final double initAlpha = 1.0;
 	private final double initBeta = 1 / this.initLambda;
 	private final double initMu = 0.0;

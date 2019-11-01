@@ -18,9 +18,9 @@ public class PLTester {
 
 		/* create rankings */
 		Random random = new Random(0);
-		List<String> objects = Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J");
+		List<String> objects = Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M");
 		List<List<String>> rankings = new ArrayList<>();
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 1000; i++) {
 			int splitIndex = random.nextInt(objects.size());
 			List<String> firstHalf = new ArrayList<>(objects.subList(0, splitIndex));
 			List<String> secondHalf = new ArrayList<>(objects.subList(splitIndex, objects.size()));
@@ -31,7 +31,8 @@ public class PLTester {
 		}
 
 		/* create PL problem */
-		PLInferenceProblem prob = new PLInferenceProblem(rankings);
+		PLInferenceProblemEncoder encoder = new PLInferenceProblemEncoder();
+		PLInferenceProblem prob = encoder.encode(rankings);
 		PLMMAlgorithm algo = new PLMMAlgorithm(prob);
 		System.out.println(algo.call());
 	}

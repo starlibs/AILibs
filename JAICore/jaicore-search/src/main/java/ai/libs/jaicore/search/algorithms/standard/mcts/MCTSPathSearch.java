@@ -77,7 +77,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 	private final Collection<N> visitedNodes = new HashSet<>();
 	private final Collection<N> unexpandedNodes = new HashSet<>();
 	protected final LabeledGraph<N, A> exploredGraph;
-	//	private final Collection<N> fullyExploredNodes = new HashSet<>(); // set of nodes under which the tree is completely known
+	private final Collection<N> fullyExploredNodes = new HashSet<>(); // set of nodes under which the tree is completely known
 	//	private final Collection<N> deadLeafNodes = new HashSet<>();
 	private final V penaltyForFailedEvaluation;
 
@@ -230,7 +230,9 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			}
 			this.logger.trace("{} available actions of expanded node {}: {}. Corresponding {} successor states: {}", availableActions.size(), current, availableActions, successorStates.size(), successorStates);
 			A chosenAction = this.treePolicy.getAction(current, successorStates);
-			assert chosenAction != null : "Chosen action must not be null!";
+			if (chosenAction == null) {
+				throw new IllegalStateException("Chosen action must not be null!");
+			}
 			next = successorStates.get(chosenAction);
 			if (next == null) {
 				throw new IllegalStateException("Next action must not be null!");
@@ -278,6 +280,9 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		if (this.unexpandedNodes.contains(current)) {
 			this.logger.trace("Step 2: This is the first time we visit this node, so compute its successors and add them to explicit graph model.");
 			untriedActionsAndTheirSuccessors.putAll(this.expandNode(current, true));
+			if (untriedActionsAndTheirSuccessors.isEmpty()) {
+				System.out.println("FOUND LEAF");
+			}
 		} else {
 			for (N child : SetUtil.difference(childrenOfCurrent, this.visitedNodes)) {
 				A action = this.exploredGraph.getEdgeLabel(current, child);
@@ -334,7 +339,13 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 
 			/* instead of using the default policy, we only generate one successor right away (which SHOULD be random but is not here) */
 			try {
-				NodeExpansionDescription<N, A> ed = ((LazySuccessorGenerator<N,A>)this.successorGenerator).getRandomSuccessor(current, new Random());
+				NodeExpansionDescription<N, A> ed;
+				if (this.successorGenerator instanceof LazySuccessorGenerator) {
+					ed = ((LazySuccessorGenerator<N,A>)this.successorGenerator).getRandomSuccessor(current, new Random());
+				}
+				else {
+					ed = SetUtil.getRandomElement(this.successorGenerator.generateSuccessors(current), new Random().nextLong());
+				}
 				A chosenAction = ed.getAction();
 				current = ed.getTo();
 
@@ -343,6 +354,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 				}
 				pathNodes.add(current);
 				pathActions.add(chosenAction);
+				this.logger.debug("Step 3: Default policy chose action {} with successor node {}", chosenAction, current);
 			}
 			catch (NoSuchElementException e) {
 				System.err.println("Node " + current + " does not have any successors even though it is not a goal!");
@@ -368,16 +380,16 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 	 *
 	 * @param node
 	 */
-	//	private void propagateFullyKnownNodes(final N node) {
-	//		if (this.fullyExploredNodes.containsAll(this.exploredGraph.getSuccessors(node))) {
-	//			this.fullyExploredNodes.add(node);
-	//			assert this.exploredGraph.getPredecessors(node).size() <= 1;
-	//			if (this.exploredGraph.getPredecessors(node).isEmpty()) {
-	//				return;
-	//			}
-	//			this.propagateFullyKnownNodes(this.exploredGraph.getPredecessors(node).iterator().next());
-	//		}
-	//	}
+	private void propagateFullyKnownNodes(final N node) {
+		if (this.fullyExploredNodes.containsAll(this.exploredGraph.getSuccessors(node))) {
+			this.fullyExploredNodes.add(node);
+			assert this.exploredGraph.getPredecessors(node).size() <= 1;
+			if (this.exploredGraph.getPredecessors(node).isEmpty()) {
+				return;
+			}
+			this.propagateFullyKnownNodes(this.exploredGraph.getPredecessors(node).iterator().next());
+		}
+	}
 
 	/**
 	 * This creates all successors of a node AND adds them to the exploration graph.

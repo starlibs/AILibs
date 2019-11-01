@@ -17,6 +17,10 @@ public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 		super();
 	}
 
+	public UCBPolicy(final double explorationConstant) {
+		this.explorationConstant = explorationConstant;
+	}
+
 	public UCBPolicy(final boolean maximize) {
 		super(maximize);
 	}
@@ -55,7 +59,7 @@ public class UCBPolicy<T, A> extends AUpdatingPolicy<T, A> implements ILoggingCu
 	public A getActionBasedOnScores(final Map<A, Double> scores) {
 		A choice = null;
 		this.logger.debug("Getting action for scores {}", scores);
-		double best = this.isMaximize() ? 0 : Double.MAX_VALUE;
+		double best = (this.isMaximize() ? (-1) : 1) * Double.MAX_VALUE;
 		for (Entry<A, Double> entry : scores.entrySet()) {
 			A action = entry.getKey();
 			double score = entry.getValue();

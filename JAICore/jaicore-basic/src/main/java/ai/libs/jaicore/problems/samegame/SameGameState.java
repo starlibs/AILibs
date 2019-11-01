@@ -83,7 +83,32 @@ public class SameGameState {
 				}
 			}
 		}
-		return new SameGameState((short)(this.score + (int)Math.pow(removedPieces.size() - 2, 2)), boardCopy, (short)(this.numPieces - removedPieces.size()));
+
+		/* if a column has been cleared, move the others left */
+		int offset = 0;
+		for (int c = 0; c < boardCopy[0].length; c++) {
+			if (boardCopy[boardCopy.length - 1][c] == 0) {
+				offset ++;
+			}
+			else if (offset > 0) {
+				for (int r = 0; r < boardCopy.length; r++) {
+					boardCopy[r][c - offset] = boardCopy[r][c];
+					boardCopy[r][c] = 0;
+				}
+			}
+		}
+
+		short newScore = (short)(this.score + (int)Math.pow(removedPieces.size() - 2, 2));
+		short newNumPieces = (short)(this.numPieces - removedPieces.size());
+		if (!isMovePossible(boardCopy)) {
+			if (newNumPieces == 0) {
+				newScore += 1000;
+			}
+			else {
+				newScore -= Math.pow(newNumPieces-2,2);
+			}
+		}
+		return new SameGameState(newScore, boardCopy, newNumPieces);
 	}
 
 	public SameGameState getStateAfterMove(final byte row, final byte col) {
@@ -218,17 +243,17 @@ public class SameGameState {
 	}
 
 	public short getScore() {
-		return (short)(this.score * -1);
+		return this.score;
 	}
 
 	public int getNumPieces() {
 		return this.numPieces;
 	}
 
-	public boolean isMovePossible() {
-		for (int row = 0; row < this.board.length; row ++) {
-			for (int col = 0; col < this.board[row].length; col ++) {
-				if (this.canCellBeSelected(row, col)) {
+	public static boolean isMovePossible(final byte[][] board) {
+		for (int row = 0; row < board.length; row ++) {
+			for (int col = 0; col < board[row].length; col ++) {
+				if (canCellBeSelected(board, row, col)) {
 					return true;
 				}
 			}
@@ -236,21 +261,29 @@ public class SameGameState {
 		return false;
 	}
 
+	public boolean isMovePossible() {
+		return isMovePossible(this.board);
+	}
+
 	public boolean canCellBeSelected(final int row, final int col) {
-		byte color = this.board[row][col];
+		return canCellBeSelected(this.board, row, col);
+	}
+
+	public static boolean canCellBeSelected(final byte[][] board, final int row, final int col) {
+		byte color = board[row][col];
 		if (color == 0) {
 			return false;
 		}
-		if (row > 0 && this.board[row - 1][col] == color) {
+		if (row > 0 && board[row - 1][col] == color) {
 			return true;
 		}
-		if (row < this.board.length - 1 && this.board[row + 1][col] == color) {
+		if (row < board.length - 1 && board[row + 1][col] == color) {
 			return true;
 		}
-		if (col < this.board[row].length - 1 && this.board[row][col + 1] == color) {
+		if (col < board[row].length - 1 && board[row][col + 1] == color) {
 			return true;
 		}
-		if (col > 0 && this.board[row][col - 1] == color) {
+		if (col > 0 && board[row][col - 1] == color) {
 			return true;
 		}
 		return false;

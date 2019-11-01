@@ -34,7 +34,7 @@ public class SameGameNode implements ISuccessorGenerationRelevantRemovalNode {
 		this.isGoalState = !state.isMovePossible();
 		this.score = state.getScore();
 		List<SameGameCell> pathToRoot = this.getDecisionPathToRoot();
-		this.keepInMemory =  parent.getDecisionPathToRoot().size() % 10 == 0 && pathToRoot.size() < 30;
+		this.keepInMemory =  parent.getDecisionPathToRoot().size() % 1 == 0;
 		if (this.keepInMemory) {
 			this.state = state;
 		}
@@ -76,6 +76,17 @@ public class SameGameNode implements ISuccessorGenerationRelevantRemovalNode {
 
 	public int getScore() {
 		return this.score;
+	}
+
+	public List<SameGameNode> getPath() {
+		if (this.parent == null) {
+			List<SameGameNode> rootList = new ArrayList<>();
+			rootList.add(this);
+			return rootList;
+		}
+		List<SameGameNode> path = this.parent.getPath();
+		path.add(this);
+		return path;
 	}
 
 	public List<SameGameCell> getDecisionPathToRoot() {

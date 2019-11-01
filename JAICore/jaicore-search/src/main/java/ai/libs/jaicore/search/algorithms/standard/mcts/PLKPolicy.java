@@ -76,7 +76,7 @@ public class PLKPolicy<N, A> extends AUpdatingPolicy<N, A> implements ILoggingCu
 		if (labelOfNode.scores.getMax() < labelOfChild.scores.getMax()) {
 			throw new IllegalArgumentException("Maximum in parent cannot be smaller than maximum in child.");
 		}
-		int n = (int)labelOfChild.scores.getN();
+		int n = (int)labelOfChild.scores.getNumObjects();
 
 		/* first get mean of minimum k observations under this child */
 		int m = Math.min(n, this.k);

@@ -99,7 +99,9 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 		A choice = this.getActionBasedOnScores(scores);
 
 		/* quick sanity check */
-		assert choice != null : "Would return null, but this must not be the case!";
+		if (choice == null) {
+			throw new IllegalStateException("Would return null, but this must not be the case! Check the method that chooses an action given the scores.");
+		}
 		this.logger.info("Recommending action {}.", choice);
 		return choice;
 	}
