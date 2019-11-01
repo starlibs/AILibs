@@ -19,7 +19,7 @@ dependencies {
 	compile project(':JAICore:jaicore-search')
 	compile project(':JAICore:jaicore-ml')
 	
-	compile ('org.api4:ai.ml')
+	compile ('org.api4:api4-ai-ml')
 		
 	// https://mvnrepository.com/artifact/commons-cli/commons-cli
 	compile group: 'commons-cli', name: 'commons-cli', version: '1.4'

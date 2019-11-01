@@ -1,5 +1,5 @@
 dependencies {
-	compile ('org.api4:ai.ml')
+	compile ('org.api4:api4-ai-ml')
 	compile project(":JAICore:jaicore-ml")
 	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
