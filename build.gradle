@@ -163,7 +163,13 @@ dependencies{
 	compile project(":hyperopt")
 	//compile project(":autofe")
 	//compile project(":autofe-reldata")
-	compile project(":mlplan")
+	compile project(":mlplan-core")
+	compile project(":mlplan-weka")
+	compile project(":mlplan-sklearn")
+	compile project(":mlplan-meka")
+	compile project(":mlplan-ext-metalearning")
+	compile project(":mlplan-ext-reduction")
+	compile project(":mlplan-ext-bigdata")
 	compile project(":JAICore:jaicore-basic")
 	compile (project(":JAICore:jaicore-ea")) {
 		exclude group: 'commons-cli'

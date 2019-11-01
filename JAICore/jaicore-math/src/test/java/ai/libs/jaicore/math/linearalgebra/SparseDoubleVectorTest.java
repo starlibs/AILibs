@@ -4,11 +4,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
+import org.api4.java.common.math.IVector;
 import org.junit.Test;
 
 /**
  * This class tests every method which can be called on the {@link SparseDoubleVector}.
- * 
+ *
  * @author Alexander Hetzer
  *
  */
@@ -122,7 +123,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.subtractVectorFromCopy(toSubtract);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -135,7 +136,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.subtractVector(toSubtractData);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -148,7 +149,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.subtractVectorFromCopy(toSubtractData);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.subtractConstant(toSubtract);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -174,7 +175,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.subtractConstantFromCopy(toSubtract);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -187,7 +188,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.multiplyByVectorPairwise(toMultiply);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -200,7 +201,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.multiplyByVectorPairwiseToCopy(toMultiply);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -212,7 +213,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.multiplyByVectorPairwise(data);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -224,7 +225,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.multiplyByVectorPairwiseToCopy(data);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -237,7 +238,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.multiplyByConstant(toMultiply);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -250,7 +251,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.multiplyByConstantToCopy(toMultiply);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -265,7 +266,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.divideByVectorPairwise(toDivide);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -280,7 +281,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.divideByVectorPairwiseToCopy(toDivide);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -294,7 +295,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.divideByVectorPairwise(toDivideData);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -308,7 +309,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.divideByVectorPairwiseToCopy(toDivideData);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -321,7 +322,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		vector.divideByConstant(toDivide);
 
-		assertResultVectorIs4(vector);
+		this.assertResultVectorIs4(vector);
 	}
 
 	/**
@@ -334,7 +335,7 @@ public class SparseDoubleVectorTest {
 		IVector vector = new SparseDoubleVector(data);
 		IVector resultVector = vector.divideByConstantToCopy(toDivide);
 
-		assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
+		this.assertResultVectorIs4AndCalleeIsUnchanged(data, vector, resultVector);
 	}
 
 	/**
@@ -461,11 +462,11 @@ public class SparseDoubleVectorTest {
 
 	/**
 	 * Asserts that the given vector is a (4,4) vector.
-	 * 
+	 *
 	 * @param resultVector
 	 *            The vector to be tested.
 	 */
-	private void assertResultVectorIs4(IVector resultVector) {
+	private void assertResultVectorIs4(final IVector resultVector) {
 		double[] expectedVectorValues = { 4, 4 };
 		IVector expectedVector = new SparseDoubleVector(expectedVectorValues);
 		// assert that the operation yields the correct result
@@ -474,7 +475,7 @@ public class SparseDoubleVectorTest {
 
 	/**
 	 * Asserts that the given vector is a (4,4) vector and that the given callee did not change.
-	 * 
+	 *
 	 * @param expectedCalleeData
 	 *            The expected callee data.
 	 * @param callee
@@ -482,8 +483,8 @@ public class SparseDoubleVectorTest {
 	 * @param resultVector
 	 *            The vector to be checked to be (4,4).
 	 */
-	private void assertResultVectorIs4AndCalleeIsUnchanged(double[] expectedCalleeData, IVector callee, IVector resultVector) {
-		assertResultVectorIs4(resultVector);
+	private void assertResultVectorIs4AndCalleeIsUnchanged(final double[] expectedCalleeData, final IVector callee, final IVector resultVector) {
+		this.assertResultVectorIs4(resultVector);
 		// assert that the original vector did not change
 		assertArrayEquals(expectedCalleeData, callee.asArray(), DOUBLE_COMPARISON_DELTA);
 	}

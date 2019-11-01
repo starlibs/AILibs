@@ -13,7 +13,7 @@ sourceSets {
 dependencies {
     compile project(':hasco')
     compile project(':JAICore:jaicore-ml-weka')
-    compile project(':mlplan')
+    compile project(':mlplan-core')
     
     compile 'io.grpc:grpc-api:1.24.1'
     compile 'io.grpc:grpc-core:1.24.1'

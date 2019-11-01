@@ -1,5 +1,5 @@
 dependencies {
-    compile project(':mlplan')
+    compile project(':mlplan-core')
     
     // TODO: Check if we need all of them
     compile project(':JAICore:jaicore-logic')
