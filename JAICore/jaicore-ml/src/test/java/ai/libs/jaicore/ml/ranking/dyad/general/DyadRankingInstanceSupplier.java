@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
-import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
+import org.api4.java.common.math.IVector;
+
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DenseDyadRankingInstance;
+import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 
 /**
@@ -21,7 +23,7 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 public class DyadRankingInstanceSupplier {
 
 	private DyadRankingInstanceSupplier() {
-		//Intentionally left blank
+		// Intentionally left blank
 	}
 
 	/**
@@ -33,17 +35,17 @@ public class DyadRankingInstanceSupplier {
 	 * @return random dyad ranking instance of length at most maxLength
 	 */
 	public static DenseDyadRankingInstance getDyadRankingInstance(final int maxLength, final int seed) {
-		List<Dyad> dyads = new ArrayList<>();
+		List<IDyad> dyads = new ArrayList<>();
 
-		int actualLength = new Random(seed).nextInt(maxLength+1);
+		int actualLength = new Random(seed).nextInt(maxLength + 1);
 		while (actualLength == 0) {
-			actualLength = new Random(seed).nextInt(maxLength+1);
+			actualLength = new Random(seed).nextInt(maxLength + 1);
 		}
-		for(int i = 0; i < actualLength; i++) {
+		for (int i = 0; i < actualLength; i++) {
 			Dyad dyad = DyadSupplier.getRandomDyad(i, 2, 2);
 			dyads.add(dyad);
 		}
-		Comparator<Dyad> comparator = complexDyadRanker();
+		Comparator<IDyad> comparator = complexDyadRanker();
 		Collections.sort(dyads, comparator);
 		return new DenseDyadRankingInstance(dyads);
 	}
@@ -56,9 +58,8 @@ public class DyadRankingInstanceSupplier {
 	 *
 	 * @return Comparator for dyads with 2 instances and 2 alternatives
 	 */
-	public static Comparator<Dyad> complexDyadRanker() {
-		return (final Dyad d1, final Dyad d2) ->
-		{
+	public static Comparator<IDyad> complexDyadRanker() {
+		return (final IDyad d1, final IDyad d2) -> {
 			IVector scoreVecI = d1.getContext();
 			IVector scoreVecA = d1.getAlternative();
 			IVector scoreVecI2 = d2.getContext();
@@ -76,13 +77,13 @@ public class DyadRankingInstanceSupplier {
 	 * <code>
 	 * f((x_1,y_1) , (x_2, y_2)) = x1*y1 + x2*y2 + x1*y2 + x2*y1
 	 * </code>
+	 * 
 	 * @param scoreVec1 (x_1, y_1)
 	 * @param scoreVec2 (x_2, y_2)
 	 * @return
 	 */
 	private static final double bilinFunc(final IVector scoreVec1, final IVector scoreVec2) {
-		double score = scoreVec1.getValue(0) * scoreVec2.getValue(0) + scoreVec1.getValue(1) * scoreVec2.getValue(1)
-				+ scoreVec1.getValue(0) * scoreVec2.getValue(1) + scoreVec1.getValue(1) * scoreVec2.getValue(0);
+		double score = scoreVec1.getValue(0) * scoreVec2.getValue(0) + scoreVec1.getValue(1) * scoreVec2.getValue(1) + scoreVec1.getValue(0) * scoreVec2.getValue(1) + scoreVec1.getValue(1) * scoreVec2.getValue(0);
 		return Math.exp(score);
 	}
 
@@ -99,21 +100,20 @@ public class DyadRankingInstanceSupplier {
 	 */
 	public static DyadRankingDataset getDyadRankingDataset(final int maxLengthDyadRankingInstance, final int length) {
 		DyadRankingDataset dataset = new DyadRankingDataset();
-		for(int i = 0; i < length; i++) {
+		for (int i = 0; i < length; i++) {
 			dataset.add(DyadRankingInstanceSupplier.getDyadRankingInstance(maxLengthDyadRankingInstance, i));
 		}
 		return dataset;
 	}
 
-	public static double inputOptimizerTestScore(final Dyad dyad) {
+	public static double inputOptimizerTestScore(final IDyad dyad) {
 		IVector inst = dyad.getContext();
 		IVector alt = dyad.getAlternative();
 		return Math.abs(inst.getValue(0) + inst.getValue(1) - alt.getValue(0) - alt.getValue(1));
 	}
 
-	public static Comparator<Dyad> inputOptimizerTestRanker() {
-		return (final Dyad d1, final Dyad d2) ->
-		{
+	public static Comparator<IDyad> inputOptimizerTestRanker() {
+		return (final IDyad d1, final IDyad d2) -> {
 			double score1 = inputOptimizerTestScore(d1);
 			double score2 = inputOptimizerTestScore(d2);
 			int comparison = score1 - score2 > 0 ? 1 : -1;
@@ -122,14 +122,14 @@ public class DyadRankingInstanceSupplier {
 	}
 
 	public static DenseDyadRankingInstance getInputOptDyadRankingInstance(final int maxLength) {
-		List<Dyad> dyads = new ArrayList<>();
+		List<IDyad> dyads = new ArrayList<>();
 		int actualLength = ThreadLocalRandom.current().nextInt(2, maxLength + 1);
 
 		for (int i = 0; i < actualLength; i++) {
 			Dyad dyad = DyadSupplier.getRandomDyad(2, 2);
 			dyads.add(dyad);
 		}
-		Comparator<Dyad> comparator = inputOptimizerTestRanker();
+		Comparator<IDyad> comparator = inputOptimizerTestRanker();
 		Collections.sort(dyads, comparator);
 		return new DenseDyadRankingInstance(dyads);
 	}

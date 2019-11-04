@@ -1,20 +1,18 @@
 package ai.libs.jaicore.ml.ranking.loss;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
 
-import org.api4.java.ai.ml.core.evaluation.IPredictionBatch;
 import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.ml.core.evaluation.Prediction;
-import ai.libs.jaicore.ml.core.evaluation.PredictionBatch;
 import ai.libs.jaicore.ml.ranking.dyad.DyadRankingLossUtil;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
-import ai.libs.jaicore.ml.ranking.loss.KendallsTauOfTopK;
-import junit.framework.Assert;
 
 public class KendallsTauOfTopKTest {
 
@@ -35,41 +33,41 @@ public class KendallsTauOfTopKTest {
 	private static final Dyad DYAD_4 = new Dyad(new DenseDoubleVector(INST_4), new DenseDoubleVector(ALT_4));
 
 	private static final List<Dyad> GT_DYAD_LIST = Arrays.asList(DYAD_1, DYAD_2, DYAD_3, DYAD_4);
-	private static final List<IRanking<Dyad>> GT_RANKINGS = Arrays.asList(new Ranking<>(GT_DYAD_LIST));
+	private static final List<IRanking<?>> GT_RANKINGS = Arrays.asList(new Ranking<>(GT_DYAD_LIST));
 
 	@Test
 	public void testTop2Isolation() {
 		// Case 1: i and j appear in both top k lists
-		List<Dyad> dyadList = Arrays.asList(DYAD_1, DYAD_2, DYAD_4, DYAD_3);
-		IPredictionBatch<IRanking<Dyad>> predBatch = new PredictionBatch<IRanking<Dyad>>(Arrays.asList(new Prediction<>(new Ranking<>(dyadList))));
+		List<IDyad> dyadList = Arrays.asList(DYAD_1, DYAD_2, DYAD_4, DYAD_3);
+		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList));
 		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), GT_RANKINGS, predBatch);
 
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_1, DYAD_2, DYAD_3, DYAD_4);
-		IPredictionBatch<IRanking<Dyad>> predBatch2 = new PredictionBatch<IRanking<Dyad>>(Arrays.asList(new Prediction<>(new Ranking<>(dyadList2))));
+		List<IRanking<?>> predBatch2 = Arrays.asList(new Ranking<>(dyadList2));
 		double distance2 = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), GT_RANKINGS, predBatch2);
 
 		// distance should be 0 as the last two do not influence the ranking
-		Assert.assertEquals(distance, distance2, 0);
+		assertEquals(distance, distance2, 0.0);
 	}
 
 	@Test
 	public void testTop2CorrectOrder() {
 		// Case 1: i and j appear in both top k lists
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_1, DYAD_2, DYAD_4, DYAD_3);
-		IPredictionBatch<IRanking<Dyad>> predBatch = new PredictionBatch<IRanking<Dyad>>(Arrays.asList(new Prediction<>(new Ranking<>(dyadList2))));
+		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));
 		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), GT_RANKINGS, predBatch);
 		// distance should be 0 as the last two do not influence the ranking
-		Assert.assertEquals(0.0d, distance, 0);
+		assertEquals(0.0d, distance, 0.0);
 	}
 
 	@Test
 	public void testTop2WrongOrder() {
 		// Case 1: i and j appear in both top k lists
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_2, DYAD_1, DYAD_3, DYAD_4);
-		IPredictionBatch<IRanking<Dyad>> predBatch = new PredictionBatch<IRanking<Dyad>>(Arrays.asList(new Prediction<>(new Ranking<>(dyadList2))));
+		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));
 		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), GT_RANKINGS, predBatch);
 		// distance should be 1 as the last two do not influence the ranking
-		Assert.assertEquals(1.0d, distance, 0);
+		assertEquals(1.0d, distance, 0.0);
 	}
 
 	/**
@@ -78,11 +76,11 @@ public class KendallsTauOfTopKTest {
 	@Test
 	public void testOnlyOneTop2ElementFirst() {
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_1, DYAD_3, DYAD_2, DYAD_4);
-		IPredictionBatch<IRanking<Dyad>> predBatch = new PredictionBatch<IRanking<Dyad>>(Arrays.asList(new Prediction<>(new Ranking<>(dyadList2))));
+		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));
 		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), GT_RANKINGS, predBatch);
 		// for the pair 1,2 we should gain no loss (as 1 < 2 holds for the second pair as well)
 		// but 3 > 2 holds which is wrong!
-		Assert.assertEquals(1.0d, distance, 0);
+		assertEquals(1.0d, distance, 0.0);
 	}
 
 	/**
@@ -91,25 +89,25 @@ public class KendallsTauOfTopKTest {
 	@Test
 	public void testOnlyOneTop2ElementSecond() {
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_2, DYAD_3, DYAD_1, DYAD_4);
-		IPredictionBatch<IRanking<Dyad>> predBatch = new PredictionBatch<IRanking<Dyad>>(Arrays.asList(new Prediction<>(new Ranking<>(dyadList2))));
+		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));
 		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), GT_RANKINGS, predBatch);
 		// only 2 appears the in the predicted ranking, thus, we know that 2 > 1 which is wrong
 		// 1 > 3 and 2 > 1 hold which are bot wrong -> 2 pens
-		Assert.assertEquals(2.0d, distance, 0);
+		assertEquals(2.0d, distance, 0.0);
 	}
 
 	/**
-	 *  Case 4
-	 *  the top k lists are disjoint. For k = 2 we have 6 unordered pairs in total, 4 pairs for which both elements are in
-	 *  opposing top k lists (case 3) and 2 pairs for which both elements are in one top k list and none in the other (case 4).
-	 *  With a penalty parameter of p = 0.5 we expect the overall distance to be 5.
+	 * Case 4
+	 * the top k lists are disjoint. For k = 2 we have 6 unordered pairs in total, 4 pairs for which both elements are in
+	 * opposing top k lists (case 3) and 2 pairs for which both elements are in one top k list and none in the other (case 4).
+	 * With a penalty parameter of p = 0.5 we expect the overall distance to be 5.
 	 */
 	@Test
 	public void testWrongRanking() {
 		List<Dyad> dyadList2 = Arrays.asList(DYAD_4, DYAD_3, DYAD_1, DYAD_2);
-		IPredictionBatch<IRanking<Dyad>> predBatch = new PredictionBatch<IRanking<Dyad>>(Arrays.asList(new Prediction<>(new Ranking<>(dyadList2))));
+		List<IRanking<?>> predBatch = Arrays.asList(new Ranking<>(dyadList2));
 		double distance = DyadRankingLossUtil.computeAverageLoss(new KendallsTauOfTopK(2, P), GT_RANKINGS, predBatch);
-		Assert.assertEquals(5.0d, distance, 0);
+		assertEquals(5.0d, distance, 0.0);
 	}
 
 }

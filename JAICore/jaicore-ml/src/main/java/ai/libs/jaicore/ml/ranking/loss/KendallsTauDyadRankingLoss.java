@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.ranking.loss;
 
 import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.loss.IRankingLossFunction;
 
 /**
  * Computes the rank correlation measure known as Kendall's tau coefficient, i.e.
@@ -14,7 +15,7 @@ import org.api4.java.ai.ml.ranking.IRanking;
  *
  */
 
-public class KendallsTauDyadRankingLoss extends ARankingMeasure {
+public class KendallsTauDyadRankingLoss extends ARankingMeasure implements IRankingLossFunction {
 
 	@Override
 	public double loss(final IRanking<?> expected, final IRanking<?> predicted) {

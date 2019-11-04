@@ -2,11 +2,11 @@ package ai.libs.jaicore.ml.ranking.dyad;
 
 import static org.junit.Assert.assertEquals;
 
+import org.api4.java.common.math.IVector;
 import org.junit.Assert;
 import org.junit.Test;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.general.DyadSupplier;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.featuretransform.BiliniearFeatureTransform;
@@ -55,8 +55,7 @@ public class BilinearFeatureTransformTest {
 		 * 0.350858, 0.380886)
 		 */
 
-		IVector expectedResult = new DenseDoubleVector(
-				new double[] { 0.402352, 0.436786, 0.1324, 0.143731, 0.350858, 0.380886 });
+		IVector expectedResult = new DenseDoubleVector(new double[] { 0.402352, 0.436786, 0.1324, 0.143731, 0.350858, 0.380886 });
 
 		BiliniearFeatureTransform bft = new BiliniearFeatureTransform();
 		IVector actualResult = bft.transform(dyad);

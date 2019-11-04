@@ -16,13 +16,13 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.DyadRankingLossUtil;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
@@ -99,7 +99,7 @@ public class DyadRankerMetaminingTest {
 			System.out.println("Average Kendall's tau for " + this.ranker.getClass().getSimpleName() + ": " + avgKendallTau);
 			assertTrue(avgKendallTau > 0.5d);
 			IDyadRankingInstance drInstance = testData.get(0);
-			List<Dyad> dyads = new LinkedList<Dyad>();
+			List<Dyad> dyads = new LinkedList<>();
 			// for(int i = 0; i < drInstance.length(); i++) {
 			// dyads.add(drInstance.getDyadAtPosition(i));
 			// }
@@ -148,13 +148,13 @@ public class DyadRankerMetaminingTest {
 				flagVector.add(Boolean.FALSE);
 			}
 			Collections.shuffle(flagVector);
-			List<IVector> trimmedAlternatives = new ArrayList<IVector>(dyadRankingLength);
+			List<IVector> trimmedAlternatives = new ArrayList<>(dyadRankingLength);
 			for (int i = 0; i < instance.getNumAttributes(); i++) {
 				if (flagVector.get(i)) {
-					trimmedAlternatives.add((IVector) instance.getLabel().get(i).getAlternative());
+					trimmedAlternatives.add(instance.getLabel().get(i).getAlternative());
 				}
 			}
-			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) instance.getLabel().get(0).getContext(), trimmedAlternatives);
+			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(instance.getLabel().get(0).getContext(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;

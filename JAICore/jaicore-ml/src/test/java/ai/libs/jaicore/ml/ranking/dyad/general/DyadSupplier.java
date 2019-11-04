@@ -2,8 +2,9 @@ package ai.libs.jaicore.ml.ranking.dyad.general;
 
 import java.util.Random;
 
+import org.api4.java.common.math.IVector;
+
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.learner.Dyad;
 
 /**

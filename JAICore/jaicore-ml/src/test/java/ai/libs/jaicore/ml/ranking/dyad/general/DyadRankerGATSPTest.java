@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
+import org.api4.java.common.math.IVector;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,7 +21,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import ai.libs.jaicore.math.linearalgebra.DenseDoubleVector;
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import ai.libs.jaicore.ml.ranking.dyad.DyadRankingLossUtil;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.DyadRankingDataset;
 import ai.libs.jaicore.ml.ranking.dyad.dataset.SparseDyadRankingInstance;
@@ -203,7 +203,7 @@ public class DyadRankerGATSPTest {
 			}
 
 			for (int i = 0; i < instanceFeatures.size(); i++) {
-				dataset.add(new SparseDyadRankingInstance(dataset.getInstanceSchema(), instanceFeatures.get(i), alternativesList.get(i)));
+				dataset.add(new SparseDyadRankingInstance(instanceFeatures.get(i), alternativesList.get(i)));
 			}
 
 			reader.close();
@@ -239,10 +239,10 @@ public class DyadRankerGATSPTest {
 			List<IVector> trimmedAlternatives = new ArrayList<>(dyadRankingLength);
 			for (int i = 0; i < instance.getNumAttributes(); i++) {
 				if (flagVector.get(i)) {
-					trimmedAlternatives.add((IVector) instance.getLabel().get(i).getAlternative());
+					trimmedAlternatives.add(instance.getLabel().get(i).getAlternative());
 				}
 			}
-			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(dataset.getInstanceSchema(), (IVector) instance.getLabel().get(0).getContext(), trimmedAlternatives);
+			SparseDyadRankingInstance trimmedDRInstance = new SparseDyadRankingInstance(instance.getLabel().get(0).getContext(), trimmedAlternatives);
 			trimmedDataset.add(trimmedDRInstance);
 		}
 		return trimmedDataset;
