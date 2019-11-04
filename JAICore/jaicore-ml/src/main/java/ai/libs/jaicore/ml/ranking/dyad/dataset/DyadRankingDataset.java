@@ -69,7 +69,7 @@ public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankin
 	}
 
 	private void createInstanceSchema(String relationName) {
-		IAttribute dyadSetAttribute = new SetOfObjectsAttribute<IDyad>("dyads");
+		IAttribute dyadSetAttribute = new SetOfObjectsAttribute<>("dyads", IDyad.class);
 		IAttribute dyadRankingAttribute = new DyadRankingAttribute("ranking");
 		labeledInstanceSchema = new LabeledInstanceSchema(relationName, Arrays.asList(dyadSetAttribute), dyadRankingAttribute);
 	}

@@ -48,7 +48,7 @@ public class BilinearFeatureTransformTest {
 		 * x_1 * y_2, x_2 * y_1, x_2 * y_2, x_3 * y_1, x_3* y_2)
 		 *
 		 */
-		Dyad dyad = DyadSupplier.getRandomDyad(0, 3, 2);
+		Dyad dyad = new Dyad(new DenseDoubleVector(new double[] { 0.730967787376657, 0.24053641567148587, 0.6374174253501083 }), new DenseDoubleVector(new double[] { 0.5504370051176339, 0.5975452777972018 }));
 
 		/**
 		 * This should yield the vector y = (0.402352, 0.436786, 0.1324, 0.143731,

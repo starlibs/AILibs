@@ -1,6 +1,7 @@
 package ai.libs.jaicore.ml.ranking.dyad;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -109,12 +110,14 @@ public class DyadScalerTest {
 		System.out.println("Testing transform instances...");
 		stdScaler.transformInstances(this.testingSet);
 		for (int i = 0; i < 4; i++) {
-			Assert.assertEquals(this.expectedStdResultX[i], ((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().collect(Collectors.toList()).get(i).getContext().getValue(0), 0.0001);
+			Assert.assertEquals(this.expectedStdResultX[i],
+					((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().sorted(Comparator.comparingDouble(d -> d.getContext().getValue(0))).collect(Collectors.toList()).get(i).getContext().getValue(0), 0.0001);
 		}
 		System.out.println("Testing transform alternatives...");
 		stdScaler.transformAlternatives(this.testingSet);
 		for (int i = 0; i < 4; i++) {
-			Assert.assertEquals(this.expectedStdResultY[i], ((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().collect(Collectors.toList()).get(i).getAlternative().getValue(0), 0.0001);
+			Assert.assertEquals(this.expectedStdResultY[i],
+					((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().sorted(Comparator.comparingDouble(d -> d.getContext().getValue(0))).collect(Collectors.toList()).get(i).getAlternative().getValue(0), 0.0001);
 		}
 	}
 
@@ -127,12 +130,14 @@ public class DyadScalerTest {
 		System.out.println("Testing transform instances...");
 		stdScaler.transformInstances(this.testingSet);
 		for (int i = 0; i < 4; i++) {
-			Assert.assertEquals(this.expectedUnitResultX[i], ((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().collect(Collectors.toList()).get(i).getContext().getValue(0), 0.0001);
+			Assert.assertEquals(this.expectedUnitResultX[i],
+					((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().sorted(Comparator.comparingDouble(d -> d.getContext().getValue(0))).collect(Collectors.toList()).get(i).getContext().getValue(0), 0.0001);
 		}
 		System.out.println("Testing transform alternatives...");
 		stdScaler.transformAlternatives(this.testingSet);
 		for (int i = 0; i < 4; i++) {
-			Assert.assertEquals(this.expectedUnitResultY[i], ((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().collect(Collectors.toList()).get(i).getAlternative().getValue(0), 0.0001);
+			Assert.assertEquals(this.expectedUnitResultY[i],
+					((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().sorted(Comparator.comparingDouble(d -> d.getContext().getValue(0))).collect(Collectors.toList()).get(i).getAlternative().getValue(0), 0.0001);
 		}
 	}
 
@@ -145,12 +150,14 @@ public class DyadScalerTest {
 		System.out.println("Testing transform instances...");
 		stdScaler.transformInstances(this.testingSet);
 		for (int i = 0; i < 4; i++) {
-			Assert.assertEquals(this.expectedMinMaxResultX[i], ((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().collect(Collectors.toList()).get(i).getContext().getValue(0), 0.0001);
+			Assert.assertEquals(this.expectedMinMaxResultX[i],
+					((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().sorted(Comparator.comparingDouble(d -> d.getContext().getValue(0))).collect(Collectors.toList()).get(i).getContext().getValue(0), 0.0001);
 		}
 		System.out.println("Testing transform alternatives...");
 		stdScaler.transformAlternatives(this.testingSet);
 		for (int i = 0; i < 4; i++) {
-			Assert.assertEquals(this.expectedMinMaxResultY[i], ((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().collect(Collectors.toList()).get(i).getAlternative().getValue(0), 0.0001);
+			Assert.assertEquals(this.expectedMinMaxResultY[i],
+					((Set<IDyad>) this.testingSet.get(0).getAttributeValue(0)).stream().sorted(Comparator.comparingDouble(d -> d.getContext().getValue(0))).collect(Collectors.toList()).get(i).getAlternative().getValue(0), 0.0001);
 		}
 	}
 }
