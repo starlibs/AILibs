@@ -17,8 +17,11 @@ dependencies {
   	compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
 
     // d4j dependencies: https://deeplearning4j.org/docs/latest/deeplearning4j-config-buildtools
-    //compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
+    compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
     //compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
+    
+    //optimization algorithms
+    compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.9.2'
 	
 	//JTwig template engine
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
