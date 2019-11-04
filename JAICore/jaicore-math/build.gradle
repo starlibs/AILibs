@@ -2,7 +2,7 @@ dependencies {
 	compile project(":JAICore:jaicore-basic")
     compile group: 'de.upb.isys', name: 'mtj', version: '0.0.1'
     
-    compile ("org.api4:api4-ai-ml")
+    compile ("org.api4:api4-common")
 	//compile ('org.api4:ai.ml:0.0.1')
 }
 uploadArchives {
