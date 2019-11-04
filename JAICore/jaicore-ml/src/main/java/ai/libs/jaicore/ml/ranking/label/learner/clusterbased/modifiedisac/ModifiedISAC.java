@@ -9,13 +9,14 @@ import java.util.Map.Entry;
 
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
+import org.api4.java.ai.ml.ranking.IRanking;
+import org.api4.java.ai.ml.ranking.IRankingPredictionBatch;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingDataset;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingInstance;
-import org.api4.java.ai.ml.ranking.label.learner.ILabelRankingPrediction;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
-import ai.libs.jaicore.ml.ranking.label.LabelRankingPrediction;
+import ai.libs.jaicore.ml.ranking.RankingPredictionBatch;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.IGroupBasedRanker;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Group;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.ProblemInstance;
@@ -27,7 +28,7 @@ import weka.core.Instance;
  *         ModifiedISAC handles the preparation of the data and the clustering of it as well as the
  *         the search for a cluster for a new instance.
  */
-public class ModifiedISAC extends ASupervisedLearner<ILabelRankingInstance, ILabelRankingDataset> implements IGroupBasedRanker<String, ILabelRankingInstance, ILabelRankingDataset, double[]> {
+public class ModifiedISAC extends ASupervisedLearner<ILabelRankingInstance, ILabelRankingDataset, IRanking<String>, IRankingPredictionBatch> implements IGroupBasedRanker<String, ILabelRankingInstance, ILabelRankingDataset, double[]> {
 	// Saves the position of the points in the original list to save their relation to the corresponding
 	// instance.
 	private Map<double[], Integer> positionOfInstance = new HashMap<>();
@@ -165,7 +166,16 @@ public class ModifiedISAC extends ASupervisedLearner<ILabelRankingInstance, ILab
 	}
 
 	@Override
-	public ILabelRankingPrediction predict(final ILabelRankingInstance xTest) throws PredictionException, InterruptedException {
-		return new LabelRankingPrediction(this.getRanking(xTest));
+	public IRanking<String> predict(final ILabelRankingInstance xTest) throws PredictionException, InterruptedException {
+		return this.getRanking(xTest);
+	}
+
+	@Override
+	public IRankingPredictionBatch predict(ILabelRankingInstance[] dTest) throws PredictionException, InterruptedException {
+		List<IRanking<?>> rankings = new ArrayList<>();
+		for (ILabelRankingInstance instance : dTest) {
+			rankings.add(predict(instance));
+		}
+		return new RankingPredictionBatch(rankings);
 	}
 }
