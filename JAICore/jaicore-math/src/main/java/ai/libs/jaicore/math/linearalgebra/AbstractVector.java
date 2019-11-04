@@ -208,4 +208,8 @@ public abstract class AbstractVector implements IVector {
 		return hashCode;
 	}
 
+	public abstract DenseDoubleVector toDenseVector();
+
+	public abstract SparseDoubleVector toSparseVector();
+
 }

@@ -88,7 +88,10 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public void addVector(final IVector vector) {
-		this.internalVector = this.internalVector.add(vector.toDenseVector().internalVector);
+		if (!(vector instanceof AbstractVector)) {
+			throw new UnsupportedOperationException("Not implemented for non-AbstractVector vectors.");
+		}
+		this.internalVector = this.internalVector.add(((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override
@@ -98,7 +101,7 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public void subtractVector(final IVector vector) {
-		this.internalVector = this.internalVector.add(-1, vector.toDenseVector().internalVector);
+		this.internalVector = this.internalVector.add(-1, ((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override
@@ -127,7 +130,7 @@ public class DenseDoubleVector extends AbstractVector {
 
 	@Override
 	public double dotProduct(final IVector vector) {
-		return this.internalVector.dot(vector.toDenseVector().internalVector);
+		return this.internalVector.dot(((AbstractVector) vector).toDenseVector().internalVector);
 	}
 
 	@Override

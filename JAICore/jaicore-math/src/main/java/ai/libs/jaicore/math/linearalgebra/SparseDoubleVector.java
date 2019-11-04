@@ -135,13 +135,13 @@ public class SparseDoubleVector extends AbstractVector {
 	@Override
 	public void addVector(final IVector vector) {
 		this.setIsChanged();
-		this.internalVector = (SparseVector) this.internalVector.add(vector.toSparseVector().internalVector);
+		this.internalVector = (SparseVector) this.internalVector.add(((AbstractVector) vector).toSparseVector().internalVector);
 	}
 
 	@Override
 	public void subtractVector(final IVector vector) {
 		this.setIsChanged();
-		this.internalVector = (SparseVector) this.internalVector.add(-1, vector.toSparseVector().internalVector);
+		this.internalVector = (SparseVector) this.internalVector.add(-1, ((AbstractVector) vector).toSparseVector().internalVector);
 	}
 
 	@Override
@@ -178,7 +178,7 @@ public class SparseDoubleVector extends AbstractVector {
 
 	@Override
 	public double dotProduct(final IVector vector) {
-		return this.internalVector.dot(vector.toSparseVector().internalVector);
+		return this.internalVector.dot(((AbstractVector) vector).toSparseVector().internalVector);
 	}
 
 	@Override

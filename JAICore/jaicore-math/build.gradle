@@ -1,6 +1,7 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-    compile group: 'de.upb.isys', name: 'mtj', version: '0.0.1'
+	
+	compile group: 'io.github.andreas-solti.matrix-toolkits-java', name: 'mtj', version: '1.0.8'
     
     compile ("org.api4:api4-common")
 	//compile ('org.api4:ai.ml:0.0.1')
