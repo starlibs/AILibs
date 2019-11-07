@@ -12,7 +12,8 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.IAlgorithmConfig;
 import org.api4.java.algorithm.TimeOut;
@@ -46,7 +47,6 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.ISplitBasedC
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.dataset.splitter.SplitFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineValidityCheckingNodeEvaluator;
@@ -259,7 +259,8 @@ public class AutoFEMLComplete extends AbstractAutoFEMLClassifier implements Capa
 			this.logger.info("Evaluating object {}...", object);
 
 			/* first conduct MCCV */
-			MonteCarloCrossValidationSplitSetGenerator mccv = new MonteCarloCrossValidationSplitSetGenerator(this.benchmark, NUMBER_OF_MC_ITERATIONS_IN_SELECTION, dataForComplete.getInstances(), NUMBER_OF_MC_FOLDS_IN_SELECTION, this.config.seed());
+			MonteCarloCrossValidationSplitSetGenerator mccv = new MonteCarloCrossValidationSplitSetGenerator(this.benchmark, NUMBER_OF_MC_ITERATIONS_IN_SELECTION, dataForComplete.getInstances(), NUMBER_OF_MC_FOLDS_IN_SELECTION,
+					this.config.seed());
 			double score;
 			try {
 				score = mccv.evaluate(object);

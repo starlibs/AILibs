@@ -17,7 +17,6 @@ import org.api4.java.ai.ml.ranking.label.learner.ILabelRanker;
 
 import ai.libs.jaicore.basic.Maps;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
-import ai.libs.jaicore.ml.ranking.label.LabelRankingPrediction;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -28,7 +27,7 @@ import weka.filters.unsupervised.attribute.Remove;
 
 public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankingInstance, ILabelRankingDataset, IRanking<String>, IRankingPredictionBatch> implements ILabelRanker {
 
-	private RPCConfig config;
+	private IRPCConfig config;
 	private Instances dataset;
 
 	private Instances plainPWDataset = null;
@@ -43,7 +42,7 @@ public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankin
 
 	List<PairWiseClassifier> pwClassifiers = new LinkedList<>();
 
-	public RankingByPairwiseComparison(final RPCConfig config, final Instances dataset, final int labels) throws Exception {
+	public RankingByPairwiseComparison(final IRPCConfig config, final Instances dataset, final int labels) throws Exception {
 		this.config = config;
 		this.dataset = dataset;
 		this.labelIndices = getLabelIndices(labels, dataset);
@@ -124,10 +123,10 @@ public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankin
 			this.labelSet.stream().forEach(x -> vote.put(x, 0.0));
 
 			for (PairWiseClassifier pwc : this.pwClassifiers) {
-				double[] dist = pwc.c.distributionForInstance(datasetCopy.get(0));
+				double[] dist = pwc.c.predict(xTest);
 
 				switch (this.config.getVotingStrategy()) {
-				case RPCConfig.V_VOTING_STRATEGY_CLASSIFY:
+				case IRPCConfig.V_VOTING_STRATEGY_CLASSIFY:
 					if (dist[0] > dist[1]) {
 						Maps.increaseCounterInDoubleMap(vote, pwc.a);
 					} else {
@@ -135,7 +134,7 @@ public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankin
 					}
 					break;
 				default:
-				case RPCConfig.V_VOTING_STRATEGY_PROBABILITY:
+				case IRPCConfig.V_VOTING_STRATEGY_PROBABILITY:
 					Maps.increaseCounterInDoubleMap(vote, pwc.a, dist[0]);
 					Maps.increaseCounterInDoubleMap(vote, pwc.b, dist[1]);
 					break;
@@ -145,10 +144,15 @@ public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankin
 			List<String> ranking = new LinkedList<>(vote.keySet());
 			ranking.sort((arg0, arg1) -> vote.get(arg1).compareTo(vote.get(arg0)));
 
-			return new LabelRankingPrediction(new Ranking<>(ranking));
+			return new Ranking<>(ranking);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return null;
+	}
+
+	@Override
+	public IRankingPredictionBatch predict(final ILabelRankingInstance[] dTest) throws PredictionException, InterruptedException {
 		return null;
 	}
 

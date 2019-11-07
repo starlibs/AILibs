@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionBatch;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;

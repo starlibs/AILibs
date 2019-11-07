@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionBatch;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 
 public class SingleLabelClassificationPredictionBatch extends ArrayList<ISingleLabelClassification> implements ISingleLabelClassificationPredictionBatch {
 

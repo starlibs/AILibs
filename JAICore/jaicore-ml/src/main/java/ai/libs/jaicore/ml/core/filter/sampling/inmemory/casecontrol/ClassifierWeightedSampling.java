@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 import org.apache.commons.math3.distribution.EnumeratedIntegerDistribution;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;

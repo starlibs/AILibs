@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 
-import ai.libs.jaicore.ml.core.evaluation.loss.F1MeasureLoss;
+import ai.libs.jaicore.ml.core.evaluation.loss.F1Measure;
 
 public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
 
@@ -29,7 +29,7 @@ public class F1MacroAverageL extends AMultiLabelClassificationMeasure {
 		int[][] expectedMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(expected));
 		int[][] actualMatrix = this.transposeMatrix(this.listToThresholdedRelevanceMatrix(actual));
 
-		F1MeasureLoss loss = new F1MeasureLoss(1);
+		F1Measure loss = new F1Measure(1);
 		OptionalDouble res = IntStream.range(0, expectedMatrix.length).mapToDouble(x -> loss.score(expectedMatrix[x], actualMatrix[x])).average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not determine average label-wise f measure.");

@@ -1,16 +1,21 @@
 dependencies {
-	compile ('org.api4:api4-ai-ml')
+	compile ("org.api4:ai-ml")
 	compile project(":JAICore:jaicore-ml")
-	testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
 	// weka dependencies
 	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
 			exclude group: 'log4j'
 			exclude group: 'org.slf4j'
 	}
+	compile('ai.libs.thirdparty:interruptible-meka:0.1.0') {
+			exclude group: 'log4j'
+			exclude group: 'org.slf4j'
+	}
 	compile ('nz.ac.waikato.cms.weka:rotationForest:1.0.3') {
 		exclude group: 'weka-dev'
 	}
+	
+	testCompile project(path:':JAICore:jaicore-basic', configuration:'testArtifacts')
 }
 
 configurations.all {

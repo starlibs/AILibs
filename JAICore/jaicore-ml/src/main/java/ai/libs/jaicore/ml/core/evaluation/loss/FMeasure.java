@@ -1,43 +1,25 @@
 package ai.libs.jaicore.ml.core.evaluation.loss;
 
-public class FMeasure {
+public class FMeasure extends AInstanceMeasure<int[]> {
 
 	private final double beta;
-	private int positiveClass;
+	private final Precision precision;
+	private final Recall recall;
 
 	public FMeasure(final double beta, final int positiveClass) {
 		this.beta = beta;
+		this.precision = new Precision(positiveClass);
+		this.recall = new Recall(positiveClass);
 	}
 
-	public double loss(final int[] expected, final int[] actual) {
-		return 1 - this.score(expected, actual);
-	}
-
+	@Override
 	public double score(final int[] expected, final int[] actual) {
 		if (expected.length != actual.length) {
 			throw new IllegalArgumentException("Expected and actual must be of the same length.");
 		}
 
-		int tp = 0;
-		int fp = 0;
-		int fn = 0;
-
-		for (int i = 0; i < expected.length; i++) {
-			if (expected[i] == actual[i]) {
-				if (actual[i] == this.positiveClass) {
-					tp++;
-				}
-			} else {
-				if (actual[i] == this.positiveClass) {
-					fp++;
-				} else if (expected[i] == this.positiveClass) {
-					fn++;
-				}
-			}
-		}
-
-		double precision = (double) tp / (tp + fp);
-		double recall = (double) tp / (tp + fn);
+		double precision = this.precision.score(expected, actual);
+		double recall = this.recall.score(expected, actual);
 		return (1 + Math.pow(this.beta, 2)) * (precision * recall) / (Math.pow(this.beta, 2) * precision + recall);
 	}
 

@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.ranking.label.learner.rpc;
 
 import org.aeonbits.owner.Config;
 
-public interface RPCConfig extends Config {
+public interface IRPCConfig extends Config {
 
 	public static final String K_BASE_LEARNER = "rpc.baselearner";
 	public static final String K_VOTING_STRATEGY = "rpc.votingstrategy";

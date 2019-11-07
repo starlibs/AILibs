@@ -1,7 +1,7 @@
 package autofe.algorithm.hasco;
 
-import org.api4.java.ai.ml.algorithm.PredictionException;
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.PredictionException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.nd4j.linalg.api.ndarray.INDArray;
 
 import autofe.util.DataSet;

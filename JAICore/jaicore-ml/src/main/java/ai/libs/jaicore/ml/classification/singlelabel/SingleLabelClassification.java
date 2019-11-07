@@ -3,7 +3,7 @@ package ai.libs.jaicore.ml.classification.singlelabel;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 
 import ai.libs.jaicore.ml.core.evaluation.Prediction;
 

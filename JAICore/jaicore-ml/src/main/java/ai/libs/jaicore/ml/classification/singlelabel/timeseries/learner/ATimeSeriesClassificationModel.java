@@ -1,7 +1,7 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner;
 
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassification;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassificationPredictionBatch;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
+import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset.ITimeSeriesInstance;

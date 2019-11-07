@@ -6,7 +6,7 @@ import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.multilabel.evaluation.IMultiLabelClassification;
 
-import ai.libs.jaicore.ml.core.evaluation.loss.F1MeasureLoss;
+import ai.libs.jaicore.ml.core.evaluation.loss.F1Measure;
 
 /**
  * Instance-wise F1 measure for multi-label classifiers.
@@ -38,7 +38,7 @@ public class InstanceWiseF1 extends AMultiLabelClassificationMeasure {
 		int[][] expectedMatrix = this.listToThresholdedRelevanceMatrix(expected);
 		int[][] actualMatrix = this.listToThresholdedRelevanceMatrix(actual);
 
-		F1MeasureLoss baseMeasure = new F1MeasureLoss(1);
+		F1Measure baseMeasure = new F1Measure(1);
 		OptionalDouble res = IntStream.range(0, expectedMatrix.length).mapToDouble(x -> baseMeasure.score(expectedMatrix[x], actualMatrix[x])).average();
 		if (!res.isPresent()) {
 			throw new IllegalStateException("Could not determine average label-wise f measure.");

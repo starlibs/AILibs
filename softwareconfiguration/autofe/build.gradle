@@ -5,6 +5,7 @@ plugins {
 dependencies {
     compile project(':hasco')
     compile project(':mlplan-core')
+    compile project(':mlplan-weka')
     
     // TODO: Check if we need all of them
     compile project(':JAICore:jaicore-logic')

@@ -3,10 +3,10 @@ package ai.libs.mlplan.metamining.pipelinecharacterizing;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.api4.java.ai.ml.algorithm.TrainingException;
+import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.common.math.IVector;
 
-import ai.libs.jaicore.math.linearalgebra.IVector;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instances;
@@ -18,20 +18,17 @@ import weka.core.Instances;
  * @author Helena Graf
  *
  */
-public abstract class AWEKAPerformanceDecisionTreeBasedFeatureGenerator
-implements IPerformanceDecisionTreeBasedFeatureGenerator {
+public abstract class AWEKAPerformanceDecisionTreeBasedFeatureGenerator implements IPerformanceDecisionTreeBasedFeatureGenerator {
 
 	@Override
 	public void train(final Map<IVector, Double> intermediatePipelineRepresentationsWithPerformanceValues) throws TrainingException {
 		// Step 1: Transform to Instances Object
 		ArrayList<Attribute> attInfo = new ArrayList<>();
-		for (int i = 0; i < intermediatePipelineRepresentationsWithPerformanceValues.keySet().toArray(new IVector[0])[0]
-				.length(); i++) {
+		for (int i = 0; i < intermediatePipelineRepresentationsWithPerformanceValues.keySet().toArray(new IVector[0])[0].length(); i++) {
 			attInfo.add(new Attribute("Attribute-" + i));
 		}
 		attInfo.add(new Attribute("Target"));
-		Instances train = new Instances("train", attInfo,
-				intermediatePipelineRepresentationsWithPerformanceValues.size());
+		Instances train = new Instances("train", attInfo, intermediatePipelineRepresentationsWithPerformanceValues.size());
 		train.setClassIndex(train.numAttributes() - 1);
 		intermediatePipelineRepresentationsWithPerformanceValues.forEach((features, value) -> {
 			double[] values = new double[features.length() + 1];

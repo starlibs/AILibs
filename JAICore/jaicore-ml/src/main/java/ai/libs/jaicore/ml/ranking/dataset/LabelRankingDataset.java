@@ -1,33 +1,32 @@
 package ai.libs.jaicore.ml.ranking.dataset;
 
-import java.util.ArrayList;
-
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingDataset;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingInstance;
 
-public class LabelRankingDataset extends ArrayList<ILabelRankingInstance> implements ILabelRankingDataset {
+import ai.libs.jaicore.ml.core.dataset.ADataset;
 
-	@Override
-	public ILabeledInstanceSchema getInstanceSchema() {
-		return null;
-	}
+public class LabelRankingDataset extends ADataset<ILabelRankingInstance> implements ILabelRankingDataset {
 
-	@Override
-	public Object[] getLabelVector() {
-		return null;
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = -2831991433001656508L;
+
+	protected LabelRankingDataset(final ILabeledInstanceSchema schema) {
+		super(schema);
 	}
 
 	@Override
 	public ILabeledDataset<ILabelRankingInstance> createEmptyCopy() throws DatasetCreationException, InterruptedException {
-		return null;
+		return new LabelRankingDataset(this.getInstanceSchema());
 	}
 
 	@Override
-	public Object[][] getFeatureMatrix() {
-		return null;
+	public void removeColumn(final int columnPos) {
+		throw new UnsupportedOperationException("Not yet implemented.");
 	}
 
 }

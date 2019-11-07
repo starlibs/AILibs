@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
 import ai.libs.jaicore.ml.core.dataset.cache.InstructionNode;
+import ai.libs.jaicore.ml.weka.WekaUtil;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
 
 public class ReproducibilityTest {
@@ -43,8 +43,8 @@ public class ReproducibilityTest {
 	public void testStratifiedSplit() throws DatasetTraceInstructionFailedException, InterruptedException, SplitFailedException {
 		ReproducibleInstances instances = ReproducibleInstances.fromOpenML(3, "");
 		int n = instances.size();
-		List<ReproducibleInstances> outerSplit = WekaTimeseriesUtil.getStratifiedSplit(instances, 5, 0.7);
-		List<ReproducibleInstances> innerSplit = WekaTimeseriesUtil.getStratifiedSplit(outerSplit.get(1), 3, 0.7);
+		List<ReproducibleInstances> outerSplit = WekaUtil.getStratifiedSplit(instances, 5, 0.7);
+		List<ReproducibleInstances> innerSplit = WekaUtil.getStratifiedSplit(outerSplit.get(1), 3, 0.7);
 
 		/* check history, size and disjointness of outer split */
 		InstructionGraph historyOfFirstInOuter = outerSplit.get(0).getInstructions();

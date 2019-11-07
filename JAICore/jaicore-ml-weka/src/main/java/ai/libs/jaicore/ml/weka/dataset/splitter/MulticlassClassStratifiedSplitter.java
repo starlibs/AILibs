@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.weka.dataset.splitter;
 
 import java.util.List;
 
+import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 

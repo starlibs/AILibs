@@ -154,6 +154,11 @@ allprojects {
 	signing {
 		sign configurations.archives
 	}
+	
+
+	eclipse {
+	    project.natures "org.eclipse.buildship.core.gradleprojectnature"
+	}
 }
 
 

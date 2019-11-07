@@ -25,7 +25,7 @@ public class LearningCurveExtrapolationEvaluationTester {
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
 		DataSetDescription description = client.dataGet(42);
-		File file = description.getDataset("4350e421cdc16404033ef1812ea38c01");
+		File file = client.datasetGet(description);
 		DataSource source = new DataSource(file.getCanonicalPath());
 		dataset = source.getDataSet();
 		dataset.setClassIndex(dataset.numAttributes() - 1);
@@ -33,8 +33,8 @@ public class LearningCurveExtrapolationEvaluationTester {
 		dataset.setClassIndex(targetAttribute.index());
 
 		// Test classifier evaluation by learning curve extrapolation
-		LearningCurveExtrapolationEvaluator<Double, Double, WekaInstance, WekaInstances> evaluator = new LearningCurveExtrapolationEvaluator<>(new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), new WekaInstances(dataset),
-				0.8d, new InversePowerLawExtrapolationMethod(), 123l);
+		LearningCurveExtrapolationEvaluator<WekaInstance, WekaInstances> evaluator = new LearningCurveExtrapolationEvaluator<>(new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), new WekaInstances(dataset), 0.8d,
+				new InversePowerLawExtrapolationMethod(), 123l);
 		double evaluationResult = evaluator.evaluate(new SMO());
 		Assert.assertTrue(evaluationResult > 0 && evaluationResult <= 100);
 	}
