@@ -11,8 +11,8 @@ import ai.libs.jaicore.search.model.other.SearchGraphPath;
 
 public class DNGMCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A, Double>, N, A> extends MCTSPathSearch<I, N, A, Double> {
 
-	public DNGMCTSPathSearch(final I problem, final long seed, final double varianceFactor) {
-		super(problem, new DNGPolicy<>((NodeGoalTester<N, A>) problem.getGoalTester(), n -> problem.getPathEvaluator().evaluate(new SearchGraphPath<>(n)), varianceFactor),
+	public DNGMCTSPathSearch(final I problem, final long seed, final double varianceFactor, final double initLambda) {
+		super(problem, new DNGPolicy<>((NodeGoalTester<N, A>) problem.getGoalTester(), n -> problem.getPathEvaluator().evaluate(new SearchGraphPath<>(n)), varianceFactor, initLambda),
 				new UniformRandomPolicy<>(new Random(seed + DNGMCTSPathSearch.class.hashCode())), 0.0);
 	}
 }

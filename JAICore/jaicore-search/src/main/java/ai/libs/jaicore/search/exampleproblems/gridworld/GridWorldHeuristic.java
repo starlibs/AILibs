@@ -20,6 +20,6 @@ public class GridWorldHeuristic implements IPathEvaluator<GridWorldNode, Object,
 	public Double evaluate(final IPath<GridWorldNode, Object> node) {
 		int x_ = Math.abs(this.targetX - node.getHead().getX());
 		int y_ = Math.abs(this.targetY - node.getHead().getY());
-		return new Double(x_ + y_);
+		return Double.valueOf(x_ + y_);
 	}
 }

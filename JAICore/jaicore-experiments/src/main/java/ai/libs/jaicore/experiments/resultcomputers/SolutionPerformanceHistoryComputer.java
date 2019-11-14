@@ -18,12 +18,21 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 	@Override
 	public void processEvent(final AlgorithmEvent e, final Map<String, Object> currentResults) {
 		if (e instanceof ScoredSolutionCandidateFoundEvent) {
-			double score = (double)((ScoredSolutionCandidateFoundEvent<?, ?>)e).getScore();
+			@SuppressWarnings("rawtypes")
+			double score = (double) ((ScoredSolutionCandidateFoundEvent) e).getScore();
 			ArrayNode observation = new ObjectMapper().createArrayNode();
 			observation.insert(0, System.currentTimeMillis() - this.start); // relative time
 			observation.insert(1, MathExt.round(score, 5)); // score
 			this.observations.add(observation);
-			currentResults.put("history", this.observations);
+			if (this.observations.size() % 1000 == 0) {
+				currentResults.put("history", this.observations);
+				System.out.println("Communicating history with: " + this.observations.size() + " entries.");
+			}
 		}
+	}
+
+	@Override
+	public void finish(final Map<String, Object> currentResults) {
+		currentResults.put("history", this.observations);
 	}
 }

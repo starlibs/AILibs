@@ -4,9 +4,10 @@ import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
-import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
+import org.api4.java.datastructure.graph.IPath;
 import org.api4.java.datastructure.graph.implicit.IGraphGenerator;
 
+import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import ai.libs.jaicore.search.model.travesaltree.BackPointerPath;
 
 /**
@@ -32,11 +33,15 @@ public class GraphSearchWithSubpathEvaluationsInput<N, A, V extends Comparable<V
 	}
 
 	public GraphSearchWithSubpathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IPathEvaluator<N, A, V> nodeEvaluator) {
-		super(graphGenerator, goalTester, p -> {
-			try {
-				return nodeEvaluator.evaluate(new BackPointerPath<>(null, p.getHead(), null));
-			} catch (PathEvaluationException e) {
-				throw new ObjectEvaluationFailedException("Could not evaluate path", e);
+		super(graphGenerator, goalTester, new DecoratingNodeEvaluator<N, A, V>(nodeEvaluator) {
+
+			@Override
+			public V evaluate(final IPath<N, A> p) throws InterruptedException, PathEvaluationException {
+				try {
+					return this.getEvaluator().evaluate(new BackPointerPath<>(null, p.getHead(), null));
+				} catch (PathEvaluationException e) {
+					throw new PathEvaluationException("Could not evaluate path", e);
+				}
 			}
 		});
 		this.nodeEvaluator = nodeEvaluator;

@@ -13,15 +13,18 @@ import org.api4.java.datastructure.graph.IPath;
 
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.IPreferenceKernel;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 
 public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N, A> {
 
 	private LabeledGraph<N, A> explorationGraph;
-	private final Map<N, DescriptiveStatistics> observations = new HashMap<>();
+	private final Map<N, DoubleList> observations = new HashMap<>();
 	private final IBootstrappingParameterComputer bootstrapParameterComputer;
 
-	private final int maxNumSamples = 100;
-	private final int numBootstraps = 100;
+	private final int maxNumSamplesInHistory = 1000; // 100 worked quite well
+	private final int maxNumSamplesInBootstrap = 10; // 20 worked quite well
+	private final int numBootstrapsPerChild = 10; // 20 worked quite well
 	private final Random random = new Random(0);
 	private final Map<N, List<List<N>>> rankingsForNodes = new HashMap<>();
 	private final int minSamplesToCreateRankings;
@@ -40,8 +43,11 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 		int l = nodes.size();
 		for (int i = l - 1; i >= 0; i --) {
 			N node = nodes.get(i);
-			this.observations.computeIfAbsent(node, n -> new DescriptiveStatistics()).addValue(newScore);
-			this.rankingsForNodes.put(node,this.drawNewRankingsForChildrenOfNode(node, this.bootstrapParameterComputer));
+			DoubleList list = this.observations.computeIfAbsent(node, n -> new DoubleArrayList());
+			list.add(newScore);
+			if (list.size() > this.maxNumSamplesInHistory) {
+				list.removeDouble(0);
+			}
 		}
 	}
 
@@ -53,23 +59,25 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 	 * @return
 	 */
 	public List<List<N>> drawNewRankingsForChildrenOfNode(final N node, final IBootstrappingParameterComputer parameterComputer) {
-		List<List<N>> rankings = new ArrayList<>(this.numBootstraps);
 		Collection<N> children = this.explorationGraph.getSuccessors(node);
-		Map<N, double[]> observationsPerChild = new HashMap<>();
+		int numChildren = children.size();
+		List<List<N>> rankings = new ArrayList<>(this.numBootstrapsPerChild * numChildren);
+		Map<N, DoubleList> observationsPerChild = new HashMap<>();
 		for (N child : children) {
 			if (!this.observations.containsKey(child)) {
 				return null;
 			}
-			observationsPerChild.put(child, this.observations.get(child).getValues());
+			observationsPerChild.put(child, this.observations.get(child));
 		}
 
-		for (int bootstrap = 0; bootstrap < this.numBootstraps; bootstrap++) {
+		int numBootstraps = this.numBootstrapsPerChild * numChildren;
+		for (int bootstrap = 0; bootstrap < numBootstraps; bootstrap++) {
 			Map<N, Double> scorePerChild = new HashMap<>();
 			for (N child : children) {
-				double[] observedScoresForChild = observationsPerChild.get(child);
+				DoubleList observedScoresForChild = observationsPerChild.get(child);
 				DescriptiveStatistics statsForThisChild = new DescriptiveStatistics();
-				for (int sample = 0; sample < this.maxNumSamples; sample++) {
-					statsForThisChild.addValue(observedScoresForChild[this.random.nextInt(observedScoresForChild.length)]);
+				for (int sample = 0; sample < this.maxNumSamplesInBootstrap; sample++) {
+					statsForThisChild.addValue(observedScoresForChild.getDouble(this.random.nextInt(observedScoresForChild.size())));
 				}
 				scorePerChild.put(child, parameterComputer.getParameter(statsForThisChild));
 			}
@@ -81,6 +89,7 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 
 	@Override
 	public List<List<N>> getRankingsForChildrenOfNode(final N node) {
+		this.rankingsForNodes.put(node,this.drawNewRankingsForChildrenOfNode(node, this.bootstrapParameterComputer));
 		return this.rankingsForNodes.get(node);
 	}
 
@@ -93,7 +102,7 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 	public boolean canProduceReliableRankings(final N node) {
 		int minObservations = Integer.MAX_VALUE;
 		for (N child : this.explorationGraph.getSuccessors(node)) {
-			minObservations = (int)Math.min(minObservations, this.observations.get(child).getN());
+			minObservations = Math.min(minObservations, this.observations.get(child).size());
 		}
 		return minObservations > this.minSamplesToCreateRankings;
 	}

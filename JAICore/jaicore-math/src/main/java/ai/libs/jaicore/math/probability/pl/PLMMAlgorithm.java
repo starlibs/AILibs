@@ -7,6 +7,7 @@ import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
+import ai.libs.jaicore.basic.IOwnerBasedAlgorithmConfig;
 import ai.libs.jaicore.basic.algorithm.AAlgorithm;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
@@ -38,14 +39,15 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	private final List<ShortList> rankings;
 	private final int numRankings;
 	private final int numObjects;
+	private final IntList winVector;
 	private DoubleList skillVector;
 
-	public PLMMAlgorithm(final PLInferenceProblem input) {
-		this(input, null);
+	public PLMMAlgorithm(final PLInferenceProblem input, final IOwnerBasedAlgorithmConfig config) {
+		this(input, null, config);
 	}
 
-	public PLMMAlgorithm(final PLInferenceProblem input, final DoubleList skillVector) {
-		super(input);
+	public PLMMAlgorithm(final PLInferenceProblem input, final DoubleList skillVector, final IOwnerBasedAlgorithmConfig config) {
+		super(config, input);
 		this.numRankings = this.getInput().getRankings().size();
 		this.numObjects = this.getInput().getNumObjects();
 		this.rankings = input.getRankings();
@@ -55,6 +57,7 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 			}
 		}
 		this.skillVector = skillVector != null ? skillVector : getDefaultSkillVector(this.numObjects);
+		this.winVector = this.getWinVector();
 	}
 
 	//	private DoubleList getSkillVectorForSkillMap(final Map<Object, Double> skillMap) {
@@ -65,7 +68,7 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	//		return skillVector;
 	//	}
 
-	private static DoubleList getDefaultSkillVector(final int n) {
+	public static DoubleList getDefaultSkillVector(final int n) {
 		DoubleList skillVector = new DoubleArrayList();
 		double p = 1.0 / n;
 		for (int i = 0; i < n; i++) {
@@ -92,7 +95,6 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 			else {
 				diffToLast = Double.MAX_VALUE;
 			}
-			//			System.out.println(this.skillVector);
 			//			lastPerf = currentPerf;
 			//			currentPerf = this.evaluateLogLikelihood(this.skillVector);
 			//			System.out.println(currentPerf);
@@ -228,7 +230,7 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 					}
 				}
 			}
-			updatedVector.add(this.numRankings / denominator);
+			updatedVector.add(this.winVector.getInt(t) / denominator);
 		}
 		return updatedVector;
 	}
@@ -251,9 +253,9 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 
 	private IntList getWinVector() {
 		IntList wins = new IntArrayList();
-		for (int t = 0; t < this.numObjects; t ++) {
+		for (short t = 0; t < this.numObjects; t ++) {
 			int w = 0;
-			for (List<?> ranking : this.getInput().getRankings()) {
+			for (ShortList ranking : this.getInput().getRankings()) {
 				if (ranking.indexOf(t) < ranking.size() - 1) {
 					w ++;
 				}
@@ -266,6 +268,9 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	@Override
 	public DoubleList call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException {
 		this.next();
+		if (this.skillVector.size() != this.numObjects) {
+			throw new IllegalStateException("Have " + this.skillVector.size() + " skills (" + this.skillVector + ") for " + this.numObjects + " objects.");
+		}
 		return this.skillVector;
 	}
 

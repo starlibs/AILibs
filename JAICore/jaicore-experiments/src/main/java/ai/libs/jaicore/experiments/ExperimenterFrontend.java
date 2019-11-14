@@ -34,8 +34,8 @@ public class ExperimenterFrontend {
 		return this.withDatabaseConfig(new File(databaseConfigFileName));
 	}
 
-	public ExperimenterFrontend withDatabaseConfig(final File databaseConfigFile) {
-		return this.withDatabaseConfig((IDatabaseConfig)ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFile(databaseConfigFile));
+	public ExperimenterFrontend withDatabaseConfig(final File... databaseConfigFiles) {
+		return this.withDatabaseConfig((IDatabaseConfig)ConfigFactory.create(IDatabaseConfig.class).loadPropertiesFromFileArray(databaseConfigFiles));
 	}
 
 	public ExperimenterFrontend withDatabaseConfig(final IDatabaseConfig databaseConfig) {
@@ -99,8 +99,16 @@ public class ExperimenterFrontend {
 	}
 
 	public ExperimenterFrontend randomlyConductExperiments(final int limit) throws ExperimentDBInteractionFailedException, InterruptedException {
+		if (this.config == null) {
+			throw new IllegalStateException("Cannot conduct experiments. No experiment config has been set, yet.");
+		}
+		if (this.databaseHandle == null) {
+			throw new IllegalStateException("Cannot conduct experiments. No database handle has been set, yet.");
+		}
 		this.prepareEvaluator();
-		new ExperimentRunner(this.config, this.evaluator, this.databaseHandle).randomlyConductExperiments(limit);
+		ExperimentRunner runner = new ExperimentRunner(this.config, this.evaluator, this.databaseHandle);
+		runner.setLoggerName(this.loggerNameForAlgorithm + ".runner");
+		runner.randomlyConductExperiments(limit);
 		return this;
 	}
 
@@ -110,6 +118,8 @@ public class ExperimenterFrontend {
 		ExperimentDBEntry experimentEntry = new ExperimentDBEntry(-1, experiment);
 		Map<String, Object> results = new HashMap<>();
 		this.evaluator.evaluate(experimentEntry, r -> results.putAll(r));
-		return controller.parseResultMap(results);
+		Experiment expCopy = new Experiment(experiment);
+		expCopy.setValuesOfResultFields(results);
+		return controller.parseResultMap(expCopy);
 	}
 }

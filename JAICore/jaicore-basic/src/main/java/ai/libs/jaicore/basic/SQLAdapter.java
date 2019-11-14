@@ -484,6 +484,9 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 */
 	public int update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
+		if (updateValues.isEmpty()) {
+			throw new IllegalArgumentException("No update values provided.");
+		}
 
 		// build the update mapping.
 		StringBuilder updateSB = new StringBuilder();
@@ -513,9 +516,9 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 
 		// Build query for the update command.
 		StringBuilder sqlBuilder = new StringBuilder();
-		sqlBuilder.append("UPDATE ");
+		sqlBuilder.append("UPDATE `");
 		sqlBuilder.append(table);
-		sqlBuilder.append(" SET ");
+		sqlBuilder.append("` SET ");
 		sqlBuilder.append(updateSB.toString());
 		sqlBuilder.append(" WHERE ");
 		sqlBuilder.append(conditionSB.toString());

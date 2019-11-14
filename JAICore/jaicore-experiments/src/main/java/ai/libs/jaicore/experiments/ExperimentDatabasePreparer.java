@@ -71,7 +71,7 @@ public class ExperimentDatabasePreparer implements ILoggingCustomizable {
 	public List<ExperimentDBEntry> synchronizeExperiments() throws ExperimentDBInteractionFailedException, IllegalExperimentSetupException, ExperimentAlreadyExistsInDatabaseException, AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 
 		/* get set of all POSSIBLE experiments and all CREATED experiments */
-		List<Map<String, String>> tmpPossibleKeyCombinations = this.configAnalyzer.getAllPossibleKeyCombinations();
+		List<Map<String, String>> tmpPossibleKeyCombinations = new ArrayList<>(this.configAnalyzer.getAllPossibleKeyCombinations());
 		this.logger.debug("Determined {} possible combinations. Will now remove keys that are already contained.", tmpPossibleKeyCombinations.size());
 		Collection<ExperimentDBEntry> installedExperiments = this.handle.getAllExperiments();
 		this.logger.debug("Identified {} installed experiments. Removing these from the list of all possible experiments.", installedExperiments.size());

@@ -1,10 +1,11 @@
 package ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean;
 
+import java.math.BigInteger;
 import java.util.function.Function;
 
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 
-public abstract class ATreasureMeanFunction implements Function<Long, Double> {
+public abstract class ATreasureMeanFunction implements Function<BigInteger, Double> {
 
 	private final IIslandModel islandModel;
 	private final long numberOfTreasures;
@@ -15,7 +16,7 @@ public abstract class ATreasureMeanFunction implements Function<Long, Double> {
 		this.numberOfTreasures = numberOfTreasures;
 	}
 
-	public long getTotalNumberOfIslands() {
+	public BigInteger getTotalNumberOfIslands() {
 		return this.islandModel.getNumberOfIslands();
 	}
 

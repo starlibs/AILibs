@@ -39,9 +39,9 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	private EventBus eventBus = new EventBus();
 
 	/* initialization according to section 6.2 in the paper */
-	private final double initLambda = 1.0;
+	private final double initLambda;
 	private final double initAlpha = 1.0;
-	private final double initBeta = 1 / this.initLambda;
+	private final double initBeta;
 	private final double initMu = 0.0;
 
 	private final Map<N, Double> alpha = new HashMap<>();
@@ -53,11 +53,13 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	private final IObjectEvaluator<N, Double> leafNodeEvaluator;
 	private final double varianceFactor;
 
-	public DNGPolicy(final NodeGoalTester<N, A> goalTester, final IObjectEvaluator<N, Double> leafNodeEvaluator, final double varianceFactor) {
+	public DNGPolicy(final NodeGoalTester<N, A> goalTester, final IObjectEvaluator<N, Double> leafNodeEvaluator, final double varianceFactor, final double lambda) {
 		super();
 		this.goalTester = goalTester;
 		this.leafNodeEvaluator = leafNodeEvaluator;
 		this.varianceFactor = varianceFactor;
+		this.initLambda = lambda;
+		this.initBeta = 1 / this.initLambda;
 	}
 
 	@Override

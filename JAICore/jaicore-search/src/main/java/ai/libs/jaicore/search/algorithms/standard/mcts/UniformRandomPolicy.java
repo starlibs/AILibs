@@ -9,8 +9,10 @@ import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.basic.IRandomizable;
 
-public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPolicy<T, A, V>, ILoggingCustomizable {
+
+public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPolicy<T, A, V>, IRandomizable, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(UniformRandomPolicy.class);
 	private final Random r;
@@ -48,5 +50,15 @@ public class UniformRandomPolicy<T, A, V extends Comparable<V>> implements IPoli
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+	}
+
+	@Override
+	public Random getRandom() {
+		return this.r;
+	}
+
+	@Override
+	public void setRandom(final Random random) {
+		throw new UnsupportedOperationException("Random source cannot be overwritten.");
 	}
 }

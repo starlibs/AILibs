@@ -13,10 +13,8 @@ import ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer.
 import ai.libs.jaicore.search.algorithms.standard.auxilliary.iteratingoptimizer.IteratingGraphSearchOptimizerFactory;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.BestFirst;
 import ai.libs.jaicore.search.algorithms.standard.dfs.DepthFirstSearchFactory;
-import ai.libs.jaicore.search.algorithms.standard.mcts.MCTSWithPLKPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.SPUCTPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.UCTPathSearch;
-import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.BradleyTerryMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.FixedCommitmentMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.PlackettLuceMCTSPathSearch;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.preferencekernel.BootstrappingPreferenceKernel;
@@ -30,7 +28,6 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 
 	public IOptimalPathInORGraphSearch<I, ? extends IEvaluatedPath<N, A, Double>, N, A, Double> getAlgorithm(final Experiment experiment, final IGraphSearchWithPathEvaluationsInput<N, A, Double> input) {
 		final int seed = Integer.parseInt(experiment.getValuesOfKeyFields().get(IOwnerBasedRandomConfig.K_SEED));
-		System.out.println(seed);
 		final String algorithm = experiment.getValuesOfKeyFields().get(IAlgorithmNameConfig.K_ALGORITHM_NAME);
 		switch (algorithm) {
 		case "random":
@@ -48,22 +45,20 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 			return new BestFirst<>((I)reducer2.encodeProblem(input));
 		case "uct":
 			return new UCTPathSearch<I, N, A>((I)input, false, Math.sqrt(2), seed, 0.0);
-		case "uct-sp":
+		case "sp-uct":
 			return new SPUCTPathSearch<>((I)input, seed, 0.0, .5, 10000);
-		case "uct-pl":
-			return new MCTSWithPLKPathSearch<>((I)input, 1, seed, 0.0, 100);
-		case "bt":
-			return new BradleyTerryMCTSPathSearch<>((I)input, seed, true);
 		case "pl-mcts-mean":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean(), 15), new Random(seed), new Random(seed));
+			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean(), 5), new Random(seed), new Random(seed));
+		case "pl-mcts-mean-std":
+			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean() - d.getStandardDeviation(), 5), new Random(seed), new Random(seed));
 		case "pl-mcts-min":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMin(), 2), new Random(seed), new Random(seed));
+			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMin(), 5), new Random(seed), new Random(seed));
 		case "mcts-kfix-100-mean":
 			return new FixedCommitmentMCTSPathSearch<>((I)input, 0.0, 100, d -> d.getMean());
 		case "mcts-kfix-200-mean":
 			return new FixedCommitmentMCTSPathSearch<>((I)input, 0.0, 200, d -> d.getMean());
 		case "dng":
-			return new DNGMCTSPathSearch<>((I)input, seed, 0.0);
+			return new DNGMCTSPathSearch<>((I)input, seed, 0.0, 1.0);
 		case "tag":
 			return new TAGMCTSPathSearch<>((I)input, seed, 0.0);
 		case "dfs":

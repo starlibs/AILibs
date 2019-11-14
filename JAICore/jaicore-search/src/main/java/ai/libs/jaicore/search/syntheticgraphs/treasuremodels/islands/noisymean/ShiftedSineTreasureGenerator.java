@@ -1,5 +1,8 @@
 package ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
 
 public class ShiftedSineTreasureGenerator extends ATreasureMeanFunction {
@@ -18,9 +21,9 @@ public class ShiftedSineTreasureGenerator extends ATreasureMeanFunction {
 	}
 
 	@Override
-	public Double apply(final Long t) {
+	public Double apply(final BigInteger t) {
 		double max = this.getNumberOfTreasures() * 2 * Math.PI;
-		double positionInInterval = t * max / this.getTotalNumberOfIslands();
+		double positionInInterval = new BigDecimal(t).multiply(BigDecimal.valueOf(max)).divide(BigDecimal.valueOf(this.getTotalNumberOfIslands().intValue())).doubleValue();
 		int periodOffset = (int) Math.floor(positionInInterval / (2 * Math.PI));
 
 		// double relativePositionWithinOptCurve = positionInInterval % (2 * Math.PI) - this.s + this.d;

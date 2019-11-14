@@ -1,5 +1,6 @@
 package ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean;
 
+import java.math.BigInteger;
 import java.util.Random;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
@@ -25,12 +26,12 @@ public abstract class NoisyMeanTreasureModel extends AIslandTreasureModel implem
 		super(islandModel);
 	}
 
-	public abstract double getMeanOfIsland(long island);
+	public abstract double getMeanOfIsland(BigInteger island);
 
 	@Override
 	public Double evaluate(final IPath<ITransparentTreeNode, Integer> path) throws PathEvaluationException, InterruptedException {
 		this.getIslandModel().setRootNode(path.getRoot());
-		long island = this.getIslandModel().getIsland(path);
+		BigInteger island = this.getIslandModel().getIsland(path);
 		double mean = this.getMeanOfIsland(island);
 		double maxDeviationFactor = mean < 10 ? mean : Math.sqrt(mean);
 		final Random r2 = new Random(path.hashCode());

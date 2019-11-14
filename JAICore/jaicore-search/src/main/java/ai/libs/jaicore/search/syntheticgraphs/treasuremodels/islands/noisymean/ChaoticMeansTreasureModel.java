@@ -1,5 +1,6 @@
 package ai.libs.jaicore.search.syntheticgraphs.treasuremodels.islands.noisymean;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,9 +21,9 @@ import ai.libs.jaicore.search.syntheticgraphs.islandmodels.IIslandModel;
  */
 public class ChaoticMeansTreasureModel extends NoisyMeanTreasureModel {
 	private final int numberOfIslandsWithTreasure;
-	private final Map<Long, Double> means = new HashMap<>();
+	private final Map<BigInteger, Double> means = new HashMap<>();
 	private final Random random;
-	private final Set<Long> indicesOfIslands = new HashSet<>();
+	private final Set<BigInteger> indicesOfIslands = new HashSet<>();
 
 	public ChaoticMeansTreasureModel(final int numberOfIslandsWithTreasure, final IIslandModel islandModel, final long seed) {
 		this(numberOfIslandsWithTreasure, islandModel, new Random(seed));
@@ -36,26 +37,31 @@ public class ChaoticMeansTreasureModel extends NoisyMeanTreasureModel {
 
 	private void distributeTreasures() {
 		while (this.indicesOfIslands.size() < this.numberOfIslandsWithTreasure) {
-			long newTreasureIsland = this.random.nextInt(Math.abs((int)this.getIslandModel().getNumberOfIslands()));
-			assert newTreasureIsland >= 0 && newTreasureIsland < this.getIslandModel().getNumberOfIslands();
-			this.indicesOfIslands.add(newTreasureIsland);
+			long newTreasureIsland = this.random.nextInt(Math.abs(this.getIslandModel().getNumberOfIslands().intValue()));
+			//			assert newTreasureIsland >= 0 && newTreasureIsland < this.getIslandModel().getNumberOfIslands;
+			this.indicesOfIslands.add(BigInteger.valueOf(newTreasureIsland));
 		}
 	}
 
 	@Override
-	public double getMeanOfIsland(final long island) {
+	public double getMeanOfIsland(final BigInteger island) {
 		if (this.indicesOfIslands.isEmpty()) {
 			this.distributeTreasures();
 		}
-		final Random r1 = new Random(this.random.nextInt() + island); // this randomness includes the random source of the generator
+		final Random r1 = new Random(this.random.nextInt() + island.intValue()); // this randomness includes the random source of the generator
 		return this.means.computeIfAbsent(island, p -> this.isTreasureIsland(p) ? 1 + r1.nextDouble() * 5 : 20 + r1.nextDouble() * 85);
 	}
 
-	public boolean isTreasureIsland(final long island) {
+	public boolean isTreasureIsland(final BigInteger island) {
 		return this.indicesOfIslands.contains(island);
 	}
 
 	public boolean isPathToTreasureIsland(final IPath<ITransparentTreeNode, Integer> path) {
 		return this.isTreasureIsland(this.getIslandModel().getIsland(path));
+	}
+
+	@Override
+	public double getMinimumAchievable() {
+		throw new UnsupportedOperationException();
 	}
 }

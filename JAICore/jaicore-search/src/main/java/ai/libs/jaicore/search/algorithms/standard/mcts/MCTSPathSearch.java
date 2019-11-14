@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.basic.IRandomizable;
 import ai.libs.jaicore.basic.algorithm.EAlgorithmState;
 import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.basic.sets.SetUtil;
@@ -83,6 +84,9 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 
 	private int numberOfPlayouts = 0;
 	private IPath<N, A> enforcedPrefixPath = null;
+	private boolean treePolicyReachedLeafs = false;
+	private final Random random;
+	private boolean logDoublePathsAsWarnings = false;
 
 	public MCTSPathSearch(final I problem, final IPathUpdatablePolicy<N, A, V> treePolicy, final IPolicy<N, A, V> defaultPolicy, final V penaltyForFailedEvaluation) {
 		super(problem);
@@ -95,11 +99,11 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		}
 		this.goalTester = tmpGoalTester;
 
+		this.random = ((IRandomizable)defaultPolicy).getRandom();
 		this.treePolicy = treePolicy;
 		this.defaultPolicy = defaultPolicy;
 		this.playoutSimulator = problem.getPathEvaluator();
 		this.exploredGraph = new LabeledGraph<>();
-		this.exploredGraph.setUseBackPointers(false);
 		this.root = ((SingleRootGenerator<N>) this.rootGenerator).getRoot();
 		this.unexpandedNodes.add(this.root);
 		this.exploredGraph.addItem(this.root);
@@ -184,7 +188,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			assert this.exploredGraph.hasPath(pathNodes);
 			assert current == pathNodes.get(pathNodes.size() - 1) : "Current does not coincide with the head of the current path!";
 
-			this.logger.trace("Step 1 (level {}): choose one of the {} successors {} of current node {}", level, childrenOfCurrent.size(), childrenOfCurrent, current);
+			this.logger.debug("Step 1 (level {}): choose one of the {} successors {} of current node {}", level, childrenOfCurrent.size(), childrenOfCurrent, current);
 
 			/* determine all actions applicable in this node that are not known to lead into a dead-end */
 			this.checkAndConductTermination();
@@ -194,10 +198,11 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 				//				if (this.deadLeafNodes.contains(child)) {
 				//					this.logger.trace("Ignoring child {}, which is known to be a dead end", child);
 				//					continue;
-				//				} else if (this.fullyExploredNodes.contains(child)) {
-				//					this.logger.trace("Ignoring child {}, which has been fully explored.", child);
-				//					continue;
-				//				}
+				//				} else
+				if (this.fullyExploredNodes.contains(child)) {
+					this.logger.trace("Ignoring child {}, which has been fully explored.", child);
+					continue;
+				}
 				A action = this.exploredGraph.getEdgeLabel(current, child);
 				if (action == null) {
 					throw new IllegalStateException("MCTS does not accept NULL edge labels!");
@@ -228,7 +233,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			if (availableActions.size() != successorStates.size()) {
 				throw new IllegalStateException("Number of available actions and successor states does not match! " + availableActions.size() + " available actions but " + successorStates.size() + " successor states. Actions: " + availableActions.stream().map(a -> "\n\t\t" + a + (a != null ? a.hashCode() : "")).collect(Collectors.joining()));
 			}
-			this.logger.trace("{} available actions of expanded node {}: {}. Corresponding {} successor states: {}", availableActions.size(), current, availableActions, successorStates.size(), successorStates);
+			this.logger.debug("Now consulting tree policy. We have {} available actions of expanded node {}: {}. Corresponding {} successor states: {}", availableActions.size(), current, availableActions, successorStates.size(), successorStates);
 			A chosenAction = this.treePolicy.getAction(current, successorStates);
 			if (chosenAction == null) {
 				throw new IllegalStateException("Chosen action must not be null!");
@@ -246,6 +251,8 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			/* if the current path is a goal path, return it */
 			if (this.goalTester.isGoal(path)) {
 				this.logger.debug("Constructed complete solution with tree policy within {}ms.", System.currentTimeMillis() - startPlayout);
+				this.treePolicyReachedLeafs = true;
+				this.propagateFullyKnownNodes(path.getHead());
 				return new SearchGraphPath<>(pathNodes, pathActions);
 			}
 			this.post(new NodeTypeSwitchEvent<N>(this.getId(), next, NODESTATE_ROLLOUT));
@@ -341,10 +348,10 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 			try {
 				NodeExpansionDescription<N, A> ed;
 				if (this.successorGenerator instanceof LazySuccessorGenerator) {
-					ed = ((LazySuccessorGenerator<N,A>)this.successorGenerator).getRandomSuccessor(current, new Random());
+					ed = ((LazySuccessorGenerator<N,A>)this.successorGenerator).getRandomSuccessor(current, this.random);
 				}
 				else {
-					ed = SetUtil.getRandomElement(this.successorGenerator.generateSuccessors(current), new Random().nextLong());
+					ed = SetUtil.getRandomElement(this.successorGenerator.generateSuccessors(current), this.random.nextLong());
 				}
 				A chosenAction = ed.getAction();
 				current = ed.getTo();
@@ -503,6 +510,13 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 						return finishEvent;
 					}
 
+					/* if the tree policy has touched a leaf node, quit */
+					else if (this.fullyExploredNodes.contains(this.root)) {
+						AlgorithmEvent finishEvent = this.terminate();
+						this.logger.info("Finishing MCTS as all nodes have been expanded; the search graph has been exhausted.");
+						return finishEvent;
+					}
+
 					/* otherwise, compute a playout and, if the path is a solution, compute its score and update the path */
 					else {
 						this.logger.debug("There are {} known unexpanded nodes. Starting computation of next playout path.", this.unexpandedNodes.size());
@@ -540,7 +554,13 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 							//								throw new IllegalStateException("Second time path " + path.getArcs() + " has been generated even though double paths are forbidden!");
 							//							}
 							V playoutScore = this.scoreCache.get(path);
-							this.logger.warn("Drawn path {} a repeated time. Looking up the score in the cache {}. This should occur rarely, or the graph is so small that MCTS does not make sense.", path, playoutScore);
+							String logMessage = "Drawn path {} a repeated time. Looking up the score in the cache {}. This should occur rarely, or the graph is so small that MCTS does not make sense.";
+							if (this.logDoublePathsAsWarnings) {
+								this.logger.warn(logMessage, path, playoutScore);
+							}
+							else {
+								this.logger.debug(logMessage, path, playoutScore);
+							}
 							this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore);
 							this.closePath(path); // visualize that path rollout has been completed
 							this.post(new RolloutEvent<>(this.getId(), path.getNodes(), this.scoreCache.get(path)));

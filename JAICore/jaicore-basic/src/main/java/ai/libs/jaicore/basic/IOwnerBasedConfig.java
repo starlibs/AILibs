@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,8 +21,16 @@ public interface IOwnerBasedConfig extends Mutable, IConfig {
 	 */
 	@Override
 	default IOwnerBasedConfig loadPropertiesFromFile(final File file) {
+		return this.loadPropertiesFromFileArray(file);
+	}
+
+	default IOwnerBasedConfig loadPropertiesFromFileArray(final File... files) {
 		try {
-			return loadPropertiesFromList(FileUtil.readFileAsList(file));
+			List<String> configLines = new ArrayList<>();
+			for (File f : files) {
+				configLines.addAll(FileUtil.readFileAsList(f));
+			}
+			return this.loadPropertiesFromList(configLines);
 		} catch (IOException e) {
 			throw new PropertiesLoadFailedException("Could not load properties from the given file.", e);
 		}
@@ -48,7 +57,7 @@ public interface IOwnerBasedConfig extends Mutable, IConfig {
 		}
 
 		if (content != null) {
-			return loadPropertiesFromList(Arrays.asList(content.split("\n")));
+			return this.loadPropertiesFromList(Arrays.asList(content.split("\n")));
 		}
 		return this;
 	}
@@ -65,7 +74,7 @@ public interface IOwnerBasedConfig extends Mutable, IConfig {
 				continue;
 			}
 			String[] split = line.split("=");
-			setProperty(split[0].trim(), split[1].trim());
+			this.setProperty(split[0].trim(), split[1].trim());
 		}
 		return this;
 	}

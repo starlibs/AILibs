@@ -52,7 +52,7 @@ public class GraphSearchWithPathEvaluationsInput<N, A, V extends Comparable<V>> 
 		});
 	}
 
-	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IObjectEvaluator<IPath<N, A>, V> pathEvaluator) {
+	public GraphSearchWithPathEvaluationsInput(final IGraphGenerator<N, A> graphGenerator, final PathGoalTester<N, A> goalTester, final IPathEvaluator<N, A, V> pathEvaluator) {
 		this(new GraphSearchInput<>(graphGenerator, goalTester), pathEvaluator);
 	}
 

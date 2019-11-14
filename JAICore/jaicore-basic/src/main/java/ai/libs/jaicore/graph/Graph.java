@@ -115,7 +115,7 @@ public class Graph<T> implements Serializable {
 			this.successors.get(from).add(to);
 		}
 		if (this.useBackPointers) {
-			this.predecessors.get(to).add(from);
+			this.predecessors.computeIfAbsent(to, n -> new HashSet<>()).add(from);
 		}
 
 		/* update root if necessary */

@@ -1,5 +1,6 @@
 package ai.libs.jaicore.search.syntheticgraphs.graphmodels.balanced;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,30 +25,31 @@ class BalancedGraphGeneratorGenerator {
 		return (int)Math.pow(this.branchingFactor, assumedDepthOfTree - depthOfRequestedNode);
 	}
 
-	public int getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final long maxNumberOfNodes) {
+	public BigInteger getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(final int depth, final BigInteger maxNumberOfNodes) {
 
 		/* determine possible height */
 		int height = 0;
-		long numberOfNodesForHeight = 1;
-		while (numberOfNodesForHeight < maxNumberOfNodes) {
+		BigInteger numberOfNodesForHeight = BigInteger.ONE;
+		while (numberOfNodesForHeight.compareTo(maxNumberOfNodes) < 0) {
 			height ++;
-			numberOfNodesForHeight = (long)Math.pow(BalancedGraphGeneratorGenerator.this.branchingFactor, height);
+			numberOfNodesForHeight = BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).pow(height);
 		}
 		height --;
 		int missingLayers = BalancedGraphGeneratorGenerator.this.maxDepth - depth;
-		return (int)Math.pow(BalancedGraphGeneratorGenerator.this.branchingFactor, missingLayers - height);
+		return BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).pow(missingLayers - height);
 	}
 
 	public class BalancedTreeNode implements ITransparentTreeNode {
 		int depth;
-		long idOfNodeOnLayer;
+		BigInteger idOfNodeOnLayer;
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + this.getEnclosingInstance().hashCode();
 			result = prime * result + this.depth;
-			result = prime * result + (int)this.idOfNodeOnLayer;
+			result = prime * result + ((this.idOfNodeOnLayer == null) ? 0 : this.idOfNodeOnLayer.hashCode());
 			return result;
 		}
 
@@ -63,10 +65,17 @@ class BalancedGraphGeneratorGenerator {
 				return false;
 			}
 			BalancedTreeNode other = (BalancedTreeNode) obj;
+			if (!this.getEnclosingInstance().equals(other.getEnclosingInstance())) {
+				return false;
+			}
 			if (this.depth != other.depth) {
 				return false;
 			}
-			if (this.idOfNodeOnLayer != other.idOfNodeOnLayer) {
+			if (this.idOfNodeOnLayer == null) {
+				if (other.idOfNodeOnLayer != null) {
+					return false;
+				}
+			} else if (!this.idOfNodeOnLayer.equals(other.idOfNodeOnLayer)) {
 				return false;
 			}
 			return true;
@@ -83,28 +92,28 @@ class BalancedGraphGeneratorGenerator {
 		}
 
 		@Override
-		public long getNumberOfLeftRelativesInSameGeneration() {
+		public BigInteger getNumberOfLeftRelativesInSameGeneration() {
 			return this.idOfNodeOnLayer;
 		}
 
 		@Override
-		public long getNumberOfRightRelativesInSameGeneration() {
-			return (long)(Math.pow(BalancedGraphGeneratorGenerator.this.branchingFactor, this.depth) - this.idOfNodeOnLayer - 1);
+		public BigInteger getNumberOfRightRelativesInSameGeneration() {
+			return BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).pow(this.depth).subtract(this.idOfNodeOnLayer).subtract(BigInteger.ONE);
 		}
 
 		@Override
-		public long getNumberOfLeafsStemmingFromLeftRelativesInSameGeneration() {
-			return this.getNumberOfLeafsUnderNode() * this.getNumberOfLeftRelativesInSameGeneration();
+		public BigInteger getNumberOfLeafsStemmingFromLeftRelativesInSameGeneration() {
+			return this.getNumberOfLeafsUnderNode().multiply(this.getNumberOfLeftRelativesInSameGeneration());
 		}
 
 		@Override
-		public long getNumberOfLeafsUnderNode() {
-			return (long)Math.pow(BalancedGraphGeneratorGenerator.this.branchingFactor, BalancedGraphGeneratorGenerator.this.maxDepth - this.depth);
+		public BigInteger getNumberOfLeafsUnderNode() {
+			return BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).pow(BalancedGraphGeneratorGenerator.this.maxDepth - this.depth);
 		}
 
 		@Override
-		public long getNumberOfLeafsStemmingFromRightRelativesInSameGeneration() {
-			return this.getNumberOfLeafsUnderNode() * this.getNumberOfRightRelativesInSameGeneration();
+		public BigInteger getNumberOfLeafsStemmingFromRightRelativesInSameGeneration() {
+			return this.getNumberOfLeafsUnderNode().multiply(this.getNumberOfRightRelativesInSameGeneration());
 		}
 
 		@Override
@@ -118,22 +127,31 @@ class BalancedGraphGeneratorGenerator {
 		}
 
 		@Override
-		public long getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(final long maxNumberOfNodes) {
+		public BigInteger getNumberOfSubtreesWithMaxNumberOfNodesPriorToThisNode(final BigInteger maxNumberOfNodes) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public long getNumberOfSubtreesWithMaxNumberOfNodes(final long maxNumberOfNodes) {
+		public BigInteger getNumberOfSubtreesWithMaxNumberOfNodes(final BigInteger maxNumberOfNodes) {
 			return BalancedGraphGeneratorGenerator.this.getNumberOfMaxSubtreesOfMaxLengthUnderNonTerminalNodeInDepth(this.depth, maxNumberOfNodes);
 		}
 
 		@Override
-		public long getNumberOfLeafsPriorToNodeViaDFS() {
+		public BigInteger getNumberOfLeafsPriorToNodeViaDFS() {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public long getNumberOfLeafsInSubtreesWithMaxNumberOfNodesPriorToThisNode(final long maxNumberOfNodes) {
+		public BigInteger getNumberOfLeafsInSubtreesWithMaxNumberOfNodesPriorToThisNode(final BigInteger maxNumberOfNodes) {
+			throw new UnsupportedOperationException();
+		}
+
+		private BalancedGraphGeneratorGenerator getEnclosingInstance() {
+			return BalancedGraphGeneratorGenerator.this;
+		}
+
+		@Override
+		public boolean hasChildren() {
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -175,10 +193,10 @@ class BalancedGraphGeneratorGenerator {
 					public NodeExpansionDescription<ITransparentTreeNode, Integer> generateSuccessor(final ITransparentTreeNode node, final int i) throws InterruptedException {
 						int j = i % BalancedGraphGeneratorGenerator.this.branchingFactor;
 						int d = node.getDepth() + 1;
-						long offsetForIdOnLayer = BalancedGraphGeneratorGenerator.this.branchingFactor * node.getNumberOfLeftRelativesInSameGeneration();
+						BigInteger offsetForIdOnLayer = BigInteger.valueOf(BalancedGraphGeneratorGenerator.this.branchingFactor).multiply(node.getNumberOfLeftRelativesInSameGeneration());
 						BalancedTreeNode successor = new BalancedTreeNode();
 						successor.depth = d;
-						successor.idOfNodeOnLayer = offsetForIdOnLayer + j;
+						successor.idOfNodeOnLayer = offsetForIdOnLayer.add(BigInteger.valueOf(j));
 						this.successors.computeIfAbsent(node, n -> new HashSet<>()).add(j);
 						return new NodeExpansionDescription<>(successor, j, NodeType.OR);
 					}

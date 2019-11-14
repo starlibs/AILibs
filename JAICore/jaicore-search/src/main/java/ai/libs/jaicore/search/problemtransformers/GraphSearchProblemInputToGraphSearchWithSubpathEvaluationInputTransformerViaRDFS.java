@@ -58,7 +58,9 @@ public class GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTrans
 		} else {
 			this.setNodeEvaluator(rdfsNodeEvaluator);
 		}
-		return super.encodeProblem(problem);
+		System.out.println(this.getNodeEvaluator().getClass().getName());
+		GraphSearchWithSubpathEvaluationsInput<N, A, V> prob = super.encodeProblem(problem);
+		System.out.println(problem.getPathEvaluator().getClass().getName());
+		return prob;
 	}
-
 }
