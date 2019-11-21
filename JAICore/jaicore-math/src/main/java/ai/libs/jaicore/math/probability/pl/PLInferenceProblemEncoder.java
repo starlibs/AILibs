@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.shorts.ShortList;
 
 public class PLInferenceProblemEncoder {
 	private Map<Object, Short> ext2int;
+	private List<Object> items;
 
 	public PLInferenceProblem encode(final Collection<? extends List<?>> rankings) {
 		if (this.ext2int != null) {
@@ -18,10 +19,14 @@ public class PLInferenceProblemEncoder {
 		}
 		this.ext2int = new HashMap<>();
 		List<ShortList> encodedRankings = new ArrayList<>(rankings.size());
+		this.items = new ArrayList<>();
 		for (List<?> ranking : rankings) {
 			ShortList encodedRanking = new ShortArrayList();
 			for (Object o : ranking) {
 				short index = this.ext2int.computeIfAbsent(o, obj -> (short)this.ext2int.size());
+				if (!this.items.contains(o)) {
+					this.items.add(o);
+				}
 				encodedRanking.add(index);
 			}
 			encodedRankings.add(encodedRanking);
@@ -31,5 +36,9 @@ public class PLInferenceProblemEncoder {
 
 	public short getIndexOfObject(final Object o) {
 		return this.ext2int.get(o);
+	}
+
+	public Object getObjectAtIndex(final int index) {
+		return this.items.get(index);
 	}
 }

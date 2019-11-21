@@ -56,7 +56,7 @@ public class FixedCommitmentPolicy<N, A> implements IPathUpdatablePolicy<N, A, D
 	}
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double playout) {
+	public void updatePath(final IPath<N, A> path, final Double playout, final int pathLength) {
 		for (N node : path.getNodes()) {
 			DescriptiveStatistics statsOfNode = this.observationsPerNode.computeIfAbsent(node, n -> new DescriptiveStatistics());
 			statsOfNode.addValue(playout);

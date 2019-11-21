@@ -35,23 +35,22 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	private final IPreferenceKernel<N, A> preferenceKernel;
 	private final Map<N, DoubleList> skillVectorsForNodes = new HashMap<>();
 	private final Map<N, Integer> numVisits = new HashMap<>();
-	private final Map<N, IPath<N, A>> longestObservedPathsContaintingNodes = new HashMap<>();
+	private final Map<N, Double> deepestRelativeNodeDepthsOfNodes = new HashMap<>();
 	private final Map<N, Double> lastLocalProbabilityOfNode = new HashMap<>();
 	private final Random random;
 	private final UniformRandomPolicy<N, A, Double> randomPolicy;
 	private LabeledGraph<N, A> graph;
 	private final IGammaFunction gammaShort = new CosLinGammaFunction(3, 4, 20, 2, 2);
-	private final double epsilon = 0.1;
+	private final double epsilon = 0.0;
 	private IOwnerBasedAlgorithmConfig config = ConfigFactory.create(IOwnerBasedAlgorithmConfig.class);
 
 	/* configuration of gamma-shape. this depends on the branching factor.
 	 * Note that "per child" does not mean that each child needs so many visits but for k children, the parent needs k * p observations. */
-	private final static int GAMMA_LONG_MAX = 3;
-	private final static int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 2;
+	private final static int GAMMA_LONG_MAX = 5;
+	private final static int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT = 5;
 	private final static int GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS = 2;
-	private final static int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE = 50;
-	private final static int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_MAX = 500;
-
+	private final static int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE = 10;
+	private final static int GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_MAX = 20;
 	public PlackettLucePolicy(final IPreferenceKernel<N, A> preferenceKernel, final Random random) {
 		super();
 		this.preferenceKernel = preferenceKernel;
@@ -75,10 +74,20 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 			int numChildren = this.graph.getSuccessors(node).size();
 			this.logger.info("Computing action for node {} with {} successors.", node, numChildren);
 			IGammaFunction gammaFunction = new CombinedGammaFunction(this.gammaShort, new CosLinGammaFunction(GAMMA_LONG_MAX, numChildren * GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_ONE, numChildren * GAMMA_LONG_OBSERVATIONS_PER_CHILD_FOR_MAX, numChildren * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_INIT, numChildren * GAMMA_LONG_MIN_OBSERVATIONS_PER_CHILD_FOR_SUPPORT_ABS));
-			IPath<N, A> longestPathToNow = this.longestObservedPathsContaintingNodes.get(node);
-			double relativeDepth = longestPathToNow.getNodes().indexOf(node) * 1.0 / longestPathToNow.getNumberOfNodes();
-			double gammaValue = gammaFunction.getNodeGamma(visits, this.getProbabilityOfNode(node), relativeDepth);
+			double relativeDepth = this.deepestRelativeNodeDepthsOfNodes.get(node);
+			double nodeProbability = this.getProbabilityOfNode(node);
+			double gammaValue = gammaFunction.getNodeGamma(visits, nodeProbability, relativeDepth);
 
+			/* check whether there is only one child */
+			if (numChildren <= 1) {
+				if (numChildren < 1) {
+					throw new UnsupportedOperationException("Cannot compute action for nodes without successors.");
+				}
+				if (actionsWithSuccessors.size() != 1) {
+					throw new IllegalStateException();
+				}
+				return actionsWithSuccessors.keySet().iterator().next();
+			}
 
 			/* check whether epsilon forces us to explore */
 			if (this.random.nextDouble() < this.epsilon * (1 - relativeDepth)) {
@@ -91,7 +100,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 			PLInferenceProblem problem = encoder.encode(this.preferenceKernel.getRankingsForChildrenOfNode(node));
 			DoubleList skills;
 			if (gammaValue != 0) {
-				this.logger.debug("Start computation of skills for {}", node);
+				this.logger.debug("Start computation of skills for {}. Using {} rankings based on {} visits. Gamma value is {} based on node probability {} and depth {}", node, problem.getRankings().size(), visits, gammaValue, nodeProbability, relativeDepth);
 				skills = new PLMMAlgorithm(problem, this.skillVectorsForNodes.get(node), this.config).call();
 				this.skillVectorsForNodes.put(node, skills);
 			}
@@ -110,10 +119,15 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 				skills.set(i, newVal);
 				sum += newVal;
 			}
+			if (sum == 0) {
+				throw new IllegalStateException();
+			}
 			for (int i = 0; i < n; i++) {
+				if (this.logger.isDebugEnabled()) {
+					this.logger.debug("Estimating skill of successor {} with action {} and {} visits by {} -> {}", i, encoder.getObjectAtIndex(i), this.numVisits.get(encoder.getObjectAtIndex(i)), skills.getDouble(i), skills.getDouble(i) / sum);
+				}
 				skills.set(i, skills.getDouble(i) / sum);
 			}
-			this.logger.debug("Computed skill vector {}", skills);
 
 			//			System.out.println(this.getProbabilityOfNode(node) + " (" + visits + ") " + " -> " + gammaValue + " -> " + skills);
 
@@ -136,6 +150,9 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 			A succ = null;
 			for (Entry<A, N> entry : actionsWithSuccessors.entrySet()) {
 				double newProbOfNode = skills.getDouble(encoder.getIndexOfObject(entry.getValue()));
+				if (Double.isNaN(newProbOfNode)) {
+					this.logger.error("Probability of successor is NaN! Skill vector: {}", skills);
+				}
 				this.lastLocalProbabilityOfNode.put(entry.getValue(), newProbOfNode);
 				sum += newProbOfNode;
 				if (succ == null && sum >= randomNumber) {
@@ -144,7 +161,7 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 				}
 			}
 			if (succ == null) {
-				throw new IllegalStateException("Could not find child among successors. Mass of remaining options is " + massOfRemainingOptions + ". Drawn random number is " + randomNumber + ". Sum of skimmed probs is " + sum);
+				throw new IllegalStateException("Could not find child among " + actionsWithSuccessors.size() + " successors. Mass of remaining options is " + massOfRemainingOptions + ". Drawn random number is " + randomNumber + ". Sum of skimmed probs is " + sum);
 			}
 			return succ;
 		} catch (AlgorithmTimeoutedException | InterruptedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
@@ -186,20 +203,26 @@ public class PlackettLucePolicy<N, A> implements IPathUpdatablePolicy<N, A, Doub
 	@Override
 	public void setLoggerName(final String name) {
 		this.logger = LoggerFactory.getLogger(name);
+		if (this.preferenceKernel instanceof ILoggingCustomizable) {
+			((ILoggingCustomizable) this.preferenceKernel).setLoggerName(name + ".kernel");
+		}
 	}
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double playout) {
-		this.preferenceKernel.signalNewScore(path, playout);
+	public void updatePath(final IPath<N, A> path, final Double playoutScore, final int lengthOfPlayout) {
+		this.preferenceKernel.signalNewScore(path, playoutScore);
 		int numNodes = path.getNumberOfNodes();
+		int depth = 0;
 		for (N node : path.getNodes()) {
+			double relativeDepth = depth * 1.0 / lengthOfPlayout;
 			this.numVisits.put(node, this.numVisits.computeIfAbsent(node, n -> 0) + 1);
-			if (!this.longestObservedPathsContaintingNodes.containsKey(node)) {
-				this.longestObservedPathsContaintingNodes.put(node, path);
+			if (!this.deepestRelativeNodeDepthsOfNodes.containsKey(node)) {
+				this.deepestRelativeNodeDepthsOfNodes.put(node, relativeDepth);
 			}
-			else if (this.longestObservedPathsContaintingNodes.get(node).getNumberOfNodes() < numNodes) {
-				this.longestObservedPathsContaintingNodes.put(node, path);
+			else if (this.deepestRelativeNodeDepthsOfNodes.get(node) < relativeDepth) {
+				this.deepestRelativeNodeDepthsOfNodes.put(node, relativeDepth);
 			}
+			depth ++;
 		}
 	}
 

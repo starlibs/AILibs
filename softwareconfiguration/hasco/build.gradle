@@ -1,14 +1,16 @@
 dependencies {
 	compile project(':JAICore:jaicore-basic')
 	compile project(':JAICore:jaicore-logic')
-	compile project(':JAICore:jaicore-ml')
 	compile project(':JAICore:jaicore-algorithminspector')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
-	compile project(':JAICore:jaicore-ml')
 	
 	// interface definitions
 	// compile ('org.api4:algorithm')
+	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
+			exclude group: 'log4j'
+			exclude group: 'org.slf4j'
+	}
 	
 	// basic dependencies
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.8'

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.eventbus.Subscribe;
 
+import ai.libs.jaicore.experiments.exceptions.ExperimentDecodingException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 
 public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCustomizable {
@@ -114,6 +115,8 @@ public class AlgorithmBenchmarker implements IExperimentSetEvaluator, ILoggingCu
 			if (!results.isEmpty()) {
 				processor.processResults(results);
 			}
+		} catch (ExperimentDecodingException e1) {
+			throw new ExperimentEvaluationFailedException(e1);
 		}
 		finally {
 			if (this.eventThread != null) {

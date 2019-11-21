@@ -13,7 +13,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearchWithPathEvaluationsInput;
-import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.NodeGoalTester;
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
@@ -94,9 +93,6 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 		this.rootGenerator = this.graphGenerator.getRootGenerator();
 		this.successorGenerator = this.graphGenerator.getSuccessorGenerator();
 		PathGoalTester<N, A> tmpGoalTester = problem.getGoalTester();
-		if (!(tmpGoalTester instanceof NodeGoalTester)) {
-			throw new IllegalArgumentException("MCTS must be run with a NodeGoalEvaluator!");
-		}
 		this.goalTester = tmpGoalTester;
 
 		this.random = ((IRandomizable)defaultPolicy).getRandom();
@@ -149,8 +145,8 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 	 */
 	private IPath<N, A> getPlayout() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmTimeoutedException, AlgorithmException, ActionPredictionFailedException {
 		long startPlayout = System.currentTimeMillis();
-		this.logger.debug("Computing a new playout ...");
 		this.numberOfPlayouts++;
+		this.logger.debug("Computing a new playout ... (#{}). Best seen score up to now has been {}.", this.numberOfPlayouts, this.getBestSeenSolution() != null ? this.getBestSeenSolution().getScore() : null);
 		N current = this.root;
 		List<N> pathNodes = new ArrayList<>();
 		List<A> pathActions = new ArrayList<>();
@@ -532,7 +528,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 								this.logger.info("Determined playout score {}. Is goal: {}. Now updating the path of tree policy {}.", playoutScore, isSolutionPlayout, this.treePolicy);
 								this.scoreCache.put(path, playoutScore);
 								this.post(new RolloutEvent<>(this.getId(), path.getNodes(), this.scoreCache.get(path)));
-								this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore);
+								this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore, path.getNumberOfNodes());
 								if (isSolutionPlayout) {
 									return this.registerSolution(new EvaluatedSearchGraphPath<>(path.getNodes(), path.getArcs(), playoutScore));
 								}
@@ -544,7 +540,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 								this.scoreCache.put(path, this.penaltyForFailedEvaluation);
 								this.post(new RolloutEvent<>(this.getId(), path.getNodes(), this.scoreCache.get(path)));
 								this.post(new NodeTypeSwitchEvent<>(this.getId(), path.getHead(), "or_ffail"));
-								this.treePolicy.updatePath(subPathToLatestRegistered, this.penaltyForFailedEvaluation);
+								this.treePolicy.updatePath(subPathToLatestRegistered, this.penaltyForFailedEvaluation, path.getNumberOfNodes());
 								this.logger.warn("Could not evaluate playout {}", e);
 							} finally {
 								this.closePath(path); // visualize that path rollout has been completed
@@ -561,7 +557,7 @@ public class MCTSPathSearch<I extends IGraphSearchWithPathEvaluationsInput<N, A,
 							else {
 								this.logger.debug(logMessage, path, playoutScore);
 							}
-							this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore);
+							this.treePolicy.updatePath(subPathToLatestRegistered, playoutScore, path.getNumberOfNodes());
 							this.closePath(path); // visualize that path rollout has been completed
 							this.post(new RolloutEvent<>(this.getId(), path.getNodes(), this.scoreCache.get(path)));
 						}

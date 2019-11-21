@@ -45,4 +45,8 @@ public class SameGameGraphSearchProblem implements IGraphSearchWithPathEvaluatio
 	public IPathEvaluator<SameGameNode, SameGameCell, Double> getPathEvaluator() {
 		return p -> (this.maximize ? 1 : (-1)) * ((double)p.getHead().getScore()) / (this.relativeScores ? this.maxScore : 1);
 	}
+
+	public int getMaxScore() {
+		return this.maxScore;
+	}
 }

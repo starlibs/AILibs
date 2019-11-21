@@ -2,8 +2,6 @@ package ai.libs.jaicore.search.algorithms.standard.mcts.comparison;
 
 import java.util.function.DoubleFunction;
 
-import ai.libs.jaicore.math.linearalgebra.AffineFunction;
-
 public class CosLinGammaFunction implements IGammaFunction {
 
 	private final double maxGamma;
@@ -56,7 +54,8 @@ public class CosLinGammaFunction implements IGammaFunction {
 			return 0.0;
 		}
 		if (visits > this.visitsToReachOne) {
-			g = Math.min(this.maxGamma, new AffineFunction(this.visitsToReachOne, 1, this.visitsToReachMax, this.maxGamma).apply(visits));
+			//			g = Math.min(this.maxGamma, new AffineFunction(this.visitsToReachOne, 1, this.visitsToReachMax, this.maxGamma).apply(visits));
+			g = Math.min(this.maxGamma, Math.pow(visits - this.visitsToReachOne, 1.0/3));
 		}
 		else {
 			double scaledValue = (visits - minThreshold) * 1.0 / (this.visitsToReachOne - minThreshold);

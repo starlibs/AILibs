@@ -1,7 +1,9 @@
 package ai.libs.jaicore.experiments;
 
-public interface IExperimentDecoder<I, A> {
-	public I getProblem(Experiment experiment);
+import ai.libs.jaicore.experiments.exceptions.ExperimentDecodingException;
 
-	public A getAlgorithm(Experiment experiment);
+public interface IExperimentDecoder<I, A> {
+	public I getProblem(Experiment experiment) throws ExperimentDecodingException;
+
+	public A getAlgorithm(Experiment experiment) throws ExperimentDecodingException;
 }

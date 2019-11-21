@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.experiments.Experiment;
+import ai.libs.jaicore.experiments.exceptions.ExperimentDecodingException;
 import ai.libs.jaicore.search.landscapeanalysis.GenericLandscapeAnalyzer;
 import ai.libs.jaicore.search.landscapeanalysis.LandscapeAnalysisCompletionTechnique;
 
@@ -29,7 +30,11 @@ public class SearchExperimentsProfiler {
 		}
 
 		public GenericLandscapeAnalyzer<N, A> getLandscapeAnalyzer(final Experiment experiment) {
-			return new GenericLandscapeAnalyzer<>(this.decoder.getProblem(experiment));
+			try {
+				return new GenericLandscapeAnalyzer<>(this.decoder.getProblem(experiment));
+			} catch (ExperimentDecodingException e) {
+				throw new IllegalStateException(e);
+			}
 		}
 	}
 

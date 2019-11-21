@@ -48,11 +48,13 @@ public class StandardExperimentSearchAlgorithmFactory<N, A, I extends IGraphSear
 		case "sp-uct":
 			return new SPUCTPathSearch<>((I)input, seed, 0.0, .5, 10000);
 		case "pl-mcts-mean":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean(), 5), new Random(seed), new Random(seed));
+			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean(), 1), new Random(seed), new Random(seed));
+		case "pl-mcts-mean+std":
+			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean() + d.getStandardDeviation(), 1), new Random(seed), new Random(seed));
 		case "pl-mcts-mean-std":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean() - d.getStandardDeviation(), 5), new Random(seed), new Random(seed));
+			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMean() - d.getStandardDeviation(), 1), new Random(seed), new Random(seed));
 		case "pl-mcts-min":
-			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMin(), 5), new Random(seed), new Random(seed));
+			return new PlackettLuceMCTSPathSearch<>((I)input, new BootstrappingPreferenceKernel<>(d -> d.getMin(), 1), new Random(seed), new Random(seed));
 		case "mcts-kfix-100-mean":
 			return new FixedCommitmentMCTSPathSearch<>((I)input, 0.0, 100, d -> d.getMean());
 		case "mcts-kfix-200-mean":

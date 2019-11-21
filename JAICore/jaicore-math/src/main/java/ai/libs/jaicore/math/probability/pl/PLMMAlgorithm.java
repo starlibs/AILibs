@@ -50,6 +50,9 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 		super(config, input);
 		this.numRankings = this.getInput().getRankings().size();
 		this.numObjects = this.getInput().getNumObjects();
+		if (this.numObjects < 2) {
+			throw new IllegalArgumentException("Cannot create PL-Algorithm for choice problems with only one option.");
+		}
 		this.rankings = input.getRankings();
 		for (ShortList ranking : this.rankings) {
 			if (ranking.size() != this.numObjects) {
@@ -119,10 +122,16 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 	private DoubleList normalizeSkillVector(final DoubleList skillVector) {
 		double sum = 0;
 		for (double d : skillVector) {
+			if (Double.isNaN(d)) {
+				throw new IllegalArgumentException("Skill vector has NaN entry: " + skillVector);
+			}
 			sum += d;
 		}
 		if (sum < 0) {
 			sum *= -1;
+		}
+		if (sum == 0) {
+			throw new IllegalArgumentException("Cannot normalize null skill vector: " + skillVector);
 		}
 		DoubleList copy = new DoubleArrayList();
 		for (double d : skillVector) {
@@ -270,6 +279,11 @@ public class PLMMAlgorithm extends AAlgorithm<PLInferenceProblem, DoubleList> {
 		this.next();
 		if (this.skillVector.size() != this.numObjects) {
 			throw new IllegalStateException("Have " + this.skillVector.size() + " skills (" + this.skillVector + ") for " + this.numObjects + " objects.");
+		}
+		for (double d : this.skillVector) {
+			if (Double.isNaN(d)) {
+				throw new IllegalStateException("Illegal skill return value: " + this.skillVector);
+			}
 		}
 		return this.skillVector;
 	}

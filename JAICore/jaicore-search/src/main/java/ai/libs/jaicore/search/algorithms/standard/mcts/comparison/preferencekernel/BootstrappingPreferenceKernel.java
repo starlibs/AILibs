@@ -9,22 +9,26 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.api4.java.common.control.ILoggingCustomizable;
 import org.api4.java.datastructure.graph.IPath;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.graph.LabeledGraph;
 import ai.libs.jaicore.search.algorithms.standard.mcts.comparison.IPreferenceKernel;
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 
-public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N, A> {
+public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N, A>, ILoggingCustomizable {
 
+	private Logger logger = LoggerFactory.getLogger(BootstrappingPreferenceKernel.class);
 	private LabeledGraph<N, A> explorationGraph;
 	private final Map<N, DoubleList> observations = new HashMap<>();
 	private final IBootstrappingParameterComputer bootstrapParameterComputer;
 
-	private final int maxNumSamplesInHistory = 1000; // 100 worked quite well
-	private final int maxNumSamplesInBootstrap = 10; // 20 worked quite well
-	private final int numBootstrapsPerChild = 10; // 20 worked quite well
+	private final int maxNumSamplesInHistory = 10000; // 100 worked quite well
+	private final int maxNumSamplesInBootstrap = 200; // 20 worked quite well
+	private final int numBootstrapsPerChild = 1; // 20 worked quite well
 	private final Random random = new Random(0);
 	private final Map<N, List<List<N>>> rankingsForNodes = new HashMap<>();
 	private final int minSamplesToCreateRankings;
@@ -68,9 +72,11 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 				return null;
 			}
 			observationsPerChild.put(child, this.observations.get(child));
+			this.logger.debug("Considering {} observations of child {}", observationsPerChild.get(child).size(), child);
 		}
 
 		int numBootstraps = this.numBootstrapsPerChild * numChildren;
+		this.logger.debug("Now creating {} bootstraps (rankings)", numBootstraps);
 		for (int bootstrap = 0; bootstrap < numBootstraps; bootstrap++) {
 			Map<N, Double> scorePerChild = new HashMap<>();
 			for (N child : children) {
@@ -104,6 +110,17 @@ public class BootstrappingPreferenceKernel<N, A> implements IPreferenceKernel<N,
 		for (N child : this.explorationGraph.getSuccessors(node)) {
 			minObservations = Math.min(minObservations, this.observations.get(child).size());
 		}
-		return minObservations > this.minSamplesToCreateRankings;
+		this.logger.debug("Refusing production of rankings, because there is a node with only {} observations, which is less than the required {}.", minObservations, this.minSamplesToCreateRankings);
+		return minObservations >= this.minSamplesToCreateRankings;
+	}
+
+	@Override
+	public String getLoggerName() {
+		return this.logger.getName();
+	}
+
+	@Override
+	public void setLoggerName(final String name) {
+		this.logger = LoggerFactory.getLogger(name);
 	}
 }

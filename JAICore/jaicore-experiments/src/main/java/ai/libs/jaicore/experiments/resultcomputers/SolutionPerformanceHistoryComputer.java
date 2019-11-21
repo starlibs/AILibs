@@ -15,6 +15,12 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 	ArrayNode observations = new ObjectMapper().createArrayNode();
 	final long start = System.currentTimeMillis();
 
+	private final int saveRate;
+
+	public SolutionPerformanceHistoryComputer(final int saveRate) {
+		super();		this.saveRate = saveRate;
+	}
+
 	@Override
 	public void processEvent(final AlgorithmEvent e, final Map<String, Object> currentResults) {
 		if (e instanceof ScoredSolutionCandidateFoundEvent) {
@@ -24,7 +30,7 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 			observation.insert(0, System.currentTimeMillis() - this.start); // relative time
 			observation.insert(1, MathExt.round(score, 5)); // score
 			this.observations.add(observation);
-			if (this.observations.size() % 1000 == 0) {
+			if (this.observations.size() % this.saveRate == 0) {
 				currentResults.put("history", this.observations);
 				System.out.println("Communicating history with: " + this.observations.size() + " entries.");
 			}
@@ -33,6 +39,7 @@ public class SolutionPerformanceHistoryComputer implements IEventBasedResultUpda
 
 	@Override
 	public void finish(final Map<String, Object> currentResults) {
+		System.out.println("Finishing with complete history.");
 		currentResults.put("history", this.observations);
 	}
 }

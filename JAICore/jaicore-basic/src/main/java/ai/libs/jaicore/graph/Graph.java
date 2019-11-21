@@ -52,7 +52,12 @@ public class Graph<T> implements Serializable {
 		if (this.getItems().contains(item)) {
 			throw new IllegalArgumentException("Cannot add node " + item + " to graph since such a node exists already. Current nodes: " + this.getItems().stream().map(e -> "\n\t" + e).collect(Collectors.joining()));
 		}
-		this.successors.put(item, new HashSet<>());
+		if (this.useForwardPointers) {
+			this.successors.put(item, new HashSet<>());
+		}
+		if (this.useBackPointers) {
+			this.predecessors.put(item, new HashSet<>());
+		}
 		if (this.root == null) {
 			this.root = item;
 		}

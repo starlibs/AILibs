@@ -50,7 +50,7 @@ public abstract class AUpdatingPolicy<N, A> implements IPathUpdatablePolicy<N, A
 	public abstract A getActionBasedOnScores(Map<A, Double> scores);
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double score) {
+	public void updatePath(final IPath<N, A> path, final Double score, final int lengthOfActualPlayoutPath) {
 		this.logger.debug("Updating path {} with score {}", path, score);
 		int lastVisits = Integer.MAX_VALUE;
 		for (N node : path.getNodes()) {

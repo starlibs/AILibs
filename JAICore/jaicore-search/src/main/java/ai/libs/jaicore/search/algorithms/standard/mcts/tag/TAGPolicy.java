@@ -101,7 +101,7 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGra
 	}
 
 	@Override
-	public void updatePath(final IPath<T, A> path, final Double playout) {
+	public void updatePath(final IPath<T, A> path, final Double playout, final int playoutLength) {
 		for (T node : path.getNodes()) {
 			this.visitsPerNode.put(node, this.visitsPerNode.computeIfAbsent(node, n -> 0) + 1);
 

@@ -39,6 +39,12 @@ public class Experiment {
 		return this.valuesOfResultFields;
 	}
 
+	public Map<String, Object> getJointMapOfKeysAndResults() {
+		Map<String, Object> map = new HashMap<>(this.valuesOfKeyFields);
+		map.putAll(this.valuesOfResultFields);
+		return map;
+	}
+
 	public void setValuesOfResultFields(final Map<String, Object> valuesOfResultFields) {
 		this.valuesOfResultFields = valuesOfResultFields;
 	}

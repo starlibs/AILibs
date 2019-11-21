@@ -34,7 +34,7 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 	private static final String LABEL_GROUP_SIZE = "GROUP_SIZE";
 
 	public enum EGroupMethod {
-		AVG, MIN, MAX, MAJORITY, MINORITY, LIST, ADD;
+		AVG, AVG_TRIMMED, MIN, MAX, MAJORITY, MINORITY, LIST, ADD;
 
 		public static EGroupMethod getStandardGroupingHandler() {
 			return EGroupMethod.LIST;
@@ -280,8 +280,17 @@ public class KVStoreCollection extends LinkedList<IKVStore> {
 
 				Object value = null;
 				switch (groupingMethod) {
+				case AVG_TRIMMED:
 				case AVG:
 					List<Double> valueList = valueEntry.getValue().stream().map(x -> Double.valueOf(x.toString())).collect(Collectors.toList());
+					if (groupingMethod == EGroupMethod.AVG_TRIMMED && valueList.size() > 5) {
+						for (int i = 0; i < 2; i++) {
+							double min = valueList.stream().min((d1,d2) -> Double.compare(d1, d2)).get();
+							double max = valueList.stream().max((d1,d2) -> Double.compare(d1, d2)).get();
+							valueList.remove(min);
+							valueList.remove(max);
+						}
+					}
 					groupedTask.put(valueEntry.getKey() + "_stdDev", StatisticsUtil.standardDeviation(valueList));
 					groupedTask.put(valueEntry.getKey() + "_max", StatisticsUtil.max(valueList));
 					groupedTask.put(valueEntry.getKey() + "_min", StatisticsUtil.min(valueList));

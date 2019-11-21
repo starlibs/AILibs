@@ -37,8 +37,8 @@ public class SPUCBPolicy<N, A> extends UCBPolicy<N, A> implements ILoggingCustom
 	}
 
 	@Override
-	public void updatePath(final IPath<N, A> path, final Double score) {
-		super.updatePath(path, score); // careful! the visits stats has already been updated here!
+	public void updatePath(final IPath<N, A> path, final Double score, final int pathLength) {
+		super.updatePath(path, score, pathLength); // careful! the visits stats has already been updated here!
 		for (N node : path.getNodes()) {
 			NodeLabel nl = this.getLabelOfNode(node);
 			this.squaredObservations.put(nl, this.squaredObservations.computeIfAbsent(nl, l -> 0.0) + Math.pow(score, 2));
