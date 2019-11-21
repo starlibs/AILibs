@@ -205,10 +205,10 @@ public class MLPlanCLI {
 		if (commandLine.hasOption(searchSpaceConfigurationOption)) {
 			switch (commandLine.getOptionValue(searchSpaceConfigurationOption)) {
 			case "weka":
-				builder = AbstractMLPlanBuilder.forWeka();
+				builder = new MLPlanWekaBuilder();
 				break;
 			case "weka-tiny":
-				builder = AbstractMLPlanBuilder.forWeka().withTinyWekaSearchSpace();
+				builder = new MLPlanWekaBuilder().withTinyWekaSearchSpace();
 				break;
 			case "sklearn":
 				builder = AbstractMLPlanBuilder.forSKLearn();

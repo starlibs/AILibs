@@ -64,7 +64,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	@Override
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final File datasetFile) throws DatasetDeserializationFailedException, InterruptedException {
-		Objects.requireNonNull(this.datasetFile, "No dataset has been configured.");
+		Objects.requireNonNull(datasetFile, "No dataset has been configured.");
 		return readDataset(this.sparseMode, datasetFile);
 	}
 

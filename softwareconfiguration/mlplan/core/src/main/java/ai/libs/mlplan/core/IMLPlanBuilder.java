@@ -12,9 +12,7 @@ import ai.libs.hasco.core.HASCOFactory;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearnerEvaluatorConstructionFailedException;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
-import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 
 /**
  * The IMLPlanBuilder provides the general interface of an ML-Plan builder independent
@@ -46,8 +44,6 @@ public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDa
 	public MLPlanClassifierConfig getAlgorithmConfig();
 
 	public void prepareNodeEvaluatorInFactoryWithData(D data);
-
-	public PerformanceDBAdapter getDBAdapter();
 
 	public boolean getUseCache();
 

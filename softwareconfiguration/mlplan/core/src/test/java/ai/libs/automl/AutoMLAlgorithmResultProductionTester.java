@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.IAlgorithm;
 import org.api4.java.algorithm.TimeOut;
 import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
@@ -30,10 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.concurrent.GlobalTimer;
 import ai.libs.jaicore.interrupt.Interrupter;
+import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils.DataSink;
 
@@ -44,7 +45,7 @@ import weka.core.converters.ConverterUtils.DataSink;
  *
  */
 @RunWith(Parameterized.class)
-public abstract class AutoMLAlgorithmResultProductionTester {
+public abstract class AutoMLAlgorithmResultProductionTester<I extends ILabeledInstance, D extends ILabeledDataset<I>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(AutoMLAlgorithmResultProductionTester.class);
 	private static final TimeOut timeout = new TimeOut(10, TimeUnit.MINUTES);
@@ -89,7 +90,7 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
-	public abstract IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(Instances data);
+	public abstract IAlgorithm<D, IClassifier<I, D>> getAutoMLAlgorithm(D data);
 
 	@Test
 	public void testThatModelIsTrained() throws Exception {
@@ -99,17 +100,17 @@ public abstract class AutoMLAlgorithmResultProductionTester {
 			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
 
 			/* create instances and set attribute */
-			logger.info("Loading dataset {} from {} for test.", this.problemSet.getName(), this.problemSet.getDatasetSource().getX());
+			logger.info("Loading dataset {} from {} for test.", this.problemSet.getName(), this.problemSet.getDataset().getX());
 			File cacheFile = new File("testrsc/openml/" + this.problemSet.getId() + ".arff");
 			if (!cacheFile.exists()) {
 				logger.info("Cache file does not exist, creating it.");
 				cacheFile.getParentFile().mkdirs();
-				Instances dataset = this.problemSet.getDatasetSource().getX().getDataSet();
+				D dataset = this.problemSet.getDataset().getX().getDataSet();
 				DataSink.write(cacheFile.getAbsolutePath(), dataset);
 			}
 			logger.info("Loading ARFF file from cache.");
 			Instances dataset = new Instances(new FileReader(cacheFile));
-			Attribute targetAttribute = dataset.attribute(this.problemSet.getDatasetSource().getY());
+			Attribute targetAttribute = dataset.attribute(this.problemSet.getDataset().getY());
 			dataset.setClassIndex(targetAttribute.index());
 			String datasetname = dataset.relationName();
 

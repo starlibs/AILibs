@@ -11,7 +11,7 @@ dependencies {
 	//compile ('org.api4:ai.ml:0.0.1')
 	
 	compile 'org.openml:apiconnector:1.0.23'
-	compile 'org.openml:EvaluationEngine:0.1.0'
+	// compile 'org.openml:EvaluationEngine:0.1.0' // this induces a dependency on WEKA
 	
 	// linear algebra
   	compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"

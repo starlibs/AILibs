@@ -5,7 +5,6 @@ dependencies {
 	compile project(':JAICore:jaicore-algorithminspector')
 	compile project(':JAICore:jaicore-planning')
 	compile project(':JAICore:jaicore-search')
-	compile project(':JAICore:jaicore-ml')
 	
 	// interface definitions
 	// compile ('org.api4:algorithm')

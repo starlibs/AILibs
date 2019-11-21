@@ -25,8 +25,8 @@ import ai.libs.hasco.serialization.HASCOJacksonModule;
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.dataset.cache.InstructionGraph;
+import ai.libs.jaicore.ml.experiments.CacheEvaluatorMeasureBridge;
 import ai.libs.jaicore.ml.weka.dataset.ReproducibleInstances;
-import ai.libs.mlpipeline_evaluation.CacheEvaluatorMeasureBridge;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import weka.classifiers.Classifier;
 

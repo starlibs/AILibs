@@ -1,4 +1,4 @@
-package ai.libs.mlplan.multiclass.wekamlplan;
+package ai.libs.mlplan.core;
 
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 

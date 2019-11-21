@@ -2,10 +2,8 @@ package ai.libs.mlplan.core;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -16,7 +14,6 @@ import org.aeonbits.owner.ConfigFactory;
 import org.api4.java.ai.graphsearch.problem.IOptimalPathInORGraphSearchFactory;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvaluator;
 import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.loss.ISingleLabelClassificationMeasure;
 import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
@@ -35,8 +32,6 @@ import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDAndBestFirstFactory;
 import ai.libs.hasco.variants.forwarddecomposition.HASCOViaFDFactory;
 import ai.libs.jaicore.basic.FileUtil;
-import ai.libs.jaicore.basic.ResourceFile;
-import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.basic.algorithm.reduction.AlgorithmicProblemReduction;
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.LearningCurveExtrapolationEvaluator;
@@ -47,13 +42,7 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.StandardBestFirstFac
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.AlternativeNodeEvaluator;
 import ai.libs.jaicore.search.probleminputs.GraphSearchWithPathEvaluationsInput;
 import ai.libs.jaicore.search.problemtransformers.GraphSearchProblemInputToGraphSearchWithSubpathEvaluationInputTransformerViaRDFS;
-import ai.libs.mlpipeline_evaluation.PerformanceDBAdapter;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
-import ai.libs.mlplan.multiclass.MLPlanWekaBuilder;
-import ai.libs.mlplan.multiclass.sklearn.MLPlanSKLearnBuilder;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
-import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
-import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
 
 /**
  * The MLPlanBuilder helps to easily configure and initialize ML-Plan with specific parameter settings.
@@ -65,7 +54,7 @@ import ai.libs.mlplan.multilabel.MLPlanMekaBuilder;
  * @author mwever, fmohr
  */
 public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>, B extends AbstractMLPlanBuilder<I, D, L, B>>
-		implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
+implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 
 	/* Logging */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlanBuilder.class);
@@ -103,7 +92,6 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 
 	/* Use caching */
 	private boolean useCache;
-	private PerformanceDBAdapter dbAdapter = null;
 
 	/* The problem input for ML-Plan. */
 	private D dataset;
@@ -112,18 +100,6 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 		super();
 		this.withAlgorithmConfigFile(DEF_ALGORITHM_CONFIG);
 		this.withRandomCompletionBasedBestFirstSearch();
-	}
-
-	public static MLPlanSKLearnBuilder forSKLearn() throws IOException {
-		return new MLPlanSKLearnBuilder();
-	}
-
-	public static MLPlanWekaBuilder forWeka() throws IOException {
-		return new MLPlanWekaBuilder();
-	}
-
-	public static MLPlanMekaBuilder forMeka() throws IOException {
-		return new MLPlanMekaBuilder();
 	}
 
 	/**
@@ -199,28 +175,6 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 		this.hascoFactory.withAlgorithmConfig(this.algorithmConfig);
 		this.update();
 		return this.getSelf();
-	}
-
-	/**
-	 * Creates a preferred node evaluator that can be used to prefer components over other components.
-	 *
-	 * @param preferredComponentsFile The file containing a priority list of component names.
-	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
-	 * @return The builder object.
-	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
-	 */
-	public B withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
-		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
-		List<String> ordering;
-		if (preferredComponentsFile instanceof ResourceFile) {
-			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
-		} else if (!preferredComponentsFile.exists()) {
-			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
-			ordering = new ArrayList<>();
-		} else {
-			ordering = FileUtil.readFileAsList(preferredComponentsFile);
-		}
-		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.components, ordering, preferableCompnentMethodPrefix));
 	}
 
 	/**
@@ -380,7 +334,7 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	 * @param performanceMeasure The loss function to be used.
 	 * @return The builder object.
 	 */
-	public B withPerformanceMeasure(final ISingleLabelClassificationMeasure performanceMeasure) {
+	public B withPerformanceMeasure(final ISupervisedLearnerMetric performanceMeasure) {
 		this.performanceMeasure = performanceMeasure;
 		return this.getSelf();
 	}
@@ -454,11 +408,6 @@ public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extend
 	@Override
 	public boolean getUseCache() {
 		return this.useCache;
-	}
-
-	@Override
-	public PerformanceDBAdapter getDBAdapter() {
-		return this.dbAdapter;
 	}
 
 	@Override

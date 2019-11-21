@@ -1,4 +1,4 @@
-package ai.libs.mlpipeline_evaluation;
+package ai.libs.jaicore.ml.experiments;
 
 import java.time.Duration;
 import java.time.Instant;

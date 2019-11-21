@@ -62,6 +62,7 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 	public MLPlan(final IMLPlanBuilder<I, D, L, ?> builder, final D data) {
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
+
 		/* sanity checks */
 		if (builder.getSearchSpaceConfigFile() == null || !builder.getSearchSpaceConfigFile().exists()) {
 			throw new IllegalArgumentException("The search space configuration file must be set in MLPlanBuilder, and it must be set to a file that exists!");

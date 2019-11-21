@@ -175,6 +175,7 @@ dependencies{
 	compile project(":mlplan-ext-metalearning")
 	compile project(":mlplan-ext-reduction")
 	compile project(":mlplan-ext-bigdata")
+	compile project(":mlplan-full")
 	compile project(":JAICore:jaicore-basic")
 	compile (project(":JAICore:jaicore-ea")) {
 		exclude group: 'commons-cli'

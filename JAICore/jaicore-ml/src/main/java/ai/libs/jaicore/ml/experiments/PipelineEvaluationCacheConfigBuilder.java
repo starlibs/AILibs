@@ -1,4 +1,4 @@
-package ai.libs.mlpipeline_evaluation;
+package ai.libs.jaicore.ml.experiments;
 
 import ai.libs.jaicore.basic.SQLAdapter;
 import weka.core.Instances;

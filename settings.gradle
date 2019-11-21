@@ -50,6 +50,9 @@ project(":mlplan-ext-reduction").projectDir = new File(configPrefix, "mlplan/ext
 include 'mlplan-ext-metalearning'
 project(":mlplan-ext-metalearning").projectDir = new File(configPrefix, "mlplan/extensions/metalearning")
 
+include 'mlplan-full'
+project(":mlplan-full").projectDir = new File(configPrefix, "mlplan/full")
+
 include 'autofe'
 project(":autofe").projectDir = new File(configPrefix,"autofe")
 

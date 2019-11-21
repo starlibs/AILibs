@@ -1,4 +1,4 @@
-package ai.libs.mlpipeline_evaluation;
+package ai.libs.jaicore.ml.experiments;
 
 /**
  * Allowed origins for datasets. Must be in db mapping table.
