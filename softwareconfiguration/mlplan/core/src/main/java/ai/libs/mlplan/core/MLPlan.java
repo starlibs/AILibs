@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import org.api4.java.ai.graphsearch.problem.IGraphSearchInput;
+import org.api4.java.ai.ml.core.dataset.splitter.IFoldSizeConfigurableRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
@@ -70,6 +71,9 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 		if (builder.getLearnerFactory() == null) {
 			throw new IllegalArgumentException("ClassifierFactory must be set in MLPlanBuilder!");
 		}
+		if (builder.getRequestedInterface() == null || builder.getRequestedInterface().isEmpty()) {
+			throw new IllegalArgumentException("No requested HASCO interface defined!");
+		}
 		/* store builder and data for main algorithm */
 		this.builder = builder;
 		this.data = data;
@@ -93,7 +97,12 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 			D dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
 				try {
-					dataShownToSearch = this.builder.getSearchSelectionDatasetSplitter().split(this.getInput(), new Random(this.getConfig().randomSeed()), dataPortionUsedForSelection).get(1); // attention; this is a bit tricky (data portion for selection is in 0)
+					int seed = this.getConfig().randomSeed();
+					IFoldSizeConfigurableRandomDatasetSplitter<D> splitter = this.builder.getSearchSelectionDatasetSplitter();
+					if (splitter == null) {
+						throw new IllegalArgumentException("The builder does not specify a dataset splitter");
+					}
+					dataShownToSearch = splitter.split(this.getInput(), new Random(seed), dataPortionUsedForSelection).get(1); // attention; this is a bit tricky (data portion for selection is in 0)
 				} catch (SplitFailedException e) {
 					throw new AlgorithmException("Error in ML-Plan execution.", e);
 				}

@@ -38,6 +38,9 @@ public class HASCOFactory<S extends GraphSearchWithPathEvaluationsInput<N, A, V>
 
 	@Override
 	public HASCO<S, N, A, V> getAlgorithm(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
+		if (problem.getRequiredInterface() == null || problem.getRequiredInterface().isEmpty()) {
+			throw new IllegalArgumentException("No required interface defined!");
+		}
 		if (this.planningGraphGeneratorDeriver == null) {
 			throw new IllegalStateException("Cannot create HASCO, because no planningGraphGeneratorDeriver has been specified.");
 		}

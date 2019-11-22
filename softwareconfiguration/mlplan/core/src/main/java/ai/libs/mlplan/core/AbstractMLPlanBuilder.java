@@ -284,7 +284,6 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	@Override
 	public PipelineEvaluator<I, D> getClassifierEvaluationInSearchPhase(final D data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
-
 		ISupervisedLearnerEvaluator<I, D> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
@@ -469,6 +468,8 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	 */
 	public MLPlan<I, D, L> build() {
 		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
+		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
+		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
 		MLPlan<I, D, L> mlplan = new MLPlan<>(this, this.dataset);
 		mlplan.setTimeout(this.getTimeOut());
 		return mlplan;

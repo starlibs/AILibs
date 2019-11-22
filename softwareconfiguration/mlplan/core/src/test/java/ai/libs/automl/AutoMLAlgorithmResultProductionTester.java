@@ -105,7 +105,7 @@ public abstract class AutoMLAlgorithmResultProductionTester<I extends ILabeledIn
 			if (!cacheFile.exists()) {
 				logger.info("Cache file does not exist, creating it.");
 				cacheFile.getParentFile().mkdirs();
-				D dataset = this.problemSet.getDataset().getX().getDataSet();
+				D dataset = this.problemSet.getDataset();
 				DataSink.write(cacheFile.getAbsolutePath(), dataset);
 			}
 			logger.info("Loading ARFF file from cache.");

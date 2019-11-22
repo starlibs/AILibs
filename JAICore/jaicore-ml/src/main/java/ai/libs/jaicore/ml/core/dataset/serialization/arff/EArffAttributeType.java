@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.core.dataset.serialization.arff;
 
 public enum EArffAttributeType {
 
-	NOMINAL("nominal"), NUMERIC("numeric");
+	NOMINAL("nominal"), NUMERIC("numeric"), REAL("real");
 
 	private final String name;
 
