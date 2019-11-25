@@ -8,21 +8,21 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import ai.libs.hasco.model.Component;
 import ai.libs.jaicore.planning.hierarchical.algorithms.forwarddecomposition.graphgenerators.tfd.TFDNode;
 
-public abstract class PipelineValidityCheckingNodeEvaluator<D extends ILabeledDataset<?>> implements IPathEvaluator<TFDNode, String, Double> {
+public abstract class PipelineValidityCheckingNodeEvaluator implements IPathEvaluator<TFDNode, String, Double> {
 
-	private D data;
+	private ILabeledDataset<?> data;
 	private Collection<Component> components;
 
 	public PipelineValidityCheckingNodeEvaluator() {
 
 	}
 
-	public PipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final D data) {
+	public PipelineValidityCheckingNodeEvaluator(final Collection<Component> components, final ILabeledDataset<?> data) {
 		this.data = data;
 		this.components = components;
 	}
 
-	public void setData(final D data) {
+	public void setData(final ILabeledDataset<?> data) {
 		this.data = data;
 	}
 
@@ -30,7 +30,7 @@ public abstract class PipelineValidityCheckingNodeEvaluator<D extends ILabeledDa
 		this.components = components;
 	}
 
-	public D getData() {
+	public ILabeledDataset<?> getData() {
 		return this.data;
 	}
 

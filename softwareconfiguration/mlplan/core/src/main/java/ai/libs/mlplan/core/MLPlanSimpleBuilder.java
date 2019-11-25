@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import ai.libs.jaicore.ml.classification.singlelabel.learner.MajorityClassifier;
+
 public class MLPlanSimpleBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanSimpleBuilder> {
 
 	public MLPlanSimpleBuilder() {
@@ -11,11 +13,7 @@ public class MLPlanSimpleBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlan
 			this.withSearchSpaceConfigFile(new File("resources/mlplan/mlplan-simple.searchspace.json"));
 
 			/* configure classifier factory */
-			this.withClassifierFactory(ci -> {
-				System.out.println("CI: " + ci);
-				System.exit(0);
-				return null;
-			});
+			this.withClassifierFactory(ci -> new MajorityClassifier());
 
 			/* configure dataset splitter */
 			this.withDatasetSplitterForSearchSelectionSplit((data, random, relativeFoldSizes) -> {

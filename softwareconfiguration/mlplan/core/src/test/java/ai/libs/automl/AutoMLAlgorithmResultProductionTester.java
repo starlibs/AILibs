@@ -90,7 +90,7 @@ public abstract class AutoMLAlgorithmResultProductionTester<I extends ILabeledIn
 	@Parameter(0)
 	public OpenMLProblemSet problemSet;
 
-	public abstract IAlgorithm<D, IClassifier<I, D>> getAutoMLAlgorithm(D data);
+	public abstract IAlgorithm<ILabeledDataset<?>, IClassifier> getAutoMLAlgorithm(D data);
 
 	@Test
 	public void testThatModelIsTrained() throws Exception {
@@ -100,12 +100,12 @@ public abstract class AutoMLAlgorithmResultProductionTester<I extends ILabeledIn
 			assertFalse("The thread should not be interrupted when calling the AutoML-tool!", Thread.currentThread().isInterrupted());
 
 			/* create instances and set attribute */
-			logger.info("Loading dataset {} from {} for test.", this.problemSet.getName(), this.problemSet.getDataset().getX());
+			logger.info("Loading dataset {} from {} for test.", this.problemSet.getName(), this.problemSet.getDataset());
 			File cacheFile = new File("testrsc/openml/" + this.problemSet.getId() + ".arff");
 			if (!cacheFile.exists()) {
 				logger.info("Cache file does not exist, creating it.");
 				cacheFile.getParentFile().mkdirs();
-				D dataset = this.problemSet.getDataset();
+				ILabeledDataset<?> dataset = this.problemSet.getDataset();
 				DataSink.write(cacheFile.getAbsolutePath(), dataset);
 			}
 			logger.info("Loading ARFF file from cache.");

@@ -2,13 +2,11 @@ package ai.libs.mlplan.core;
 
 import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerMetric;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.MonteCarloCrossValidationEvaluatorFactory;
 
-public abstract class AbstractMLPlanSingleLabelBuilder<B extends AbstractMLPlanSingleLabelBuilder<B>> extends AbstractMLPlanBuilder<ILabeledInstance, ILabeledDataset<ILabeledInstance>, IClassifier<ILabeledInstance, ILabeledDataset<ILabeledInstance>>, B> {
+public abstract class AbstractMLPlanSingleLabelBuilder<B extends AbstractMLPlanSingleLabelBuilder<B>> extends AbstractMLPlanBuilder<IClassifier, B> {
 
 	/* Default configuration values. */
 	protected static final int DEFAULT_SEARCH_NUM_MC_ITERATIONS = 5;
@@ -30,7 +28,7 @@ public abstract class AbstractMLPlanSingleLabelBuilder<B extends AbstractMLPlanS
 	 */
 	public B withMonteCarloCrossValidationInSearchPhase(final int numIterations, final double trainFoldSize) {
 		if (!(this.getSearchEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory<>());
+			this.withSearchPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory());
 		}
 
 		((MonteCarloCrossValidationEvaluatorFactory) this.getSearchEvaluatorFactory()).withNumMCIterations(numIterations).withTrainFoldSize(trainFoldSize);
@@ -46,7 +44,7 @@ public abstract class AbstractMLPlanSingleLabelBuilder<B extends AbstractMLPlanS
 	 */
 	public B withMonteCarloCrossValidationInSelectionPhase(final int numIterations, final double trainFoldSize) {
 		if (!(this.getSelectionEvaluatorFactory() instanceof MonteCarloCrossValidationEvaluatorFactory)) {
-			this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory<>());
+			this.withSelectionPhaseEvaluatorFactory(new MonteCarloCrossValidationEvaluatorFactory());
 		}
 
 		((MonteCarloCrossValidationEvaluatorFactory) this.getSelectionEvaluatorFactory()).withNumMCIterations(numIterations).withTrainFoldSize(trainFoldSize);

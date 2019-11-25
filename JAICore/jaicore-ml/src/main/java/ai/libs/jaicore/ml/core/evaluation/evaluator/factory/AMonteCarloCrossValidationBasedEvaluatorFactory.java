@@ -11,12 +11,12 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
  * @author fmohr
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>, F extends AMonteCarloCrossValidationBasedEvaluatorFactory<I, D, F>> implements ISupervisedLearnerEvaluatorFactory<I, D> {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> {
 
-	private IDatasetSplitter<D> datasetSplitter;
+	private IDatasetSplitter<ILabeledDataset<?>> datasetSplitter;
 	private int seed;
 	private int numMCIterations;
-	private D data;
+	private ILabeledDataset<?> data;
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
 
@@ -31,7 +31,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * Getter for the dataset splitter.
 	 * @return Returns the dataset spliiter.
 	 */
-	public IDatasetSplitter<D> getDatasetSplitter() {
+	public IDatasetSplitter<ILabeledDataset<?>> getDatasetSplitter() {
 		return this.datasetSplitter;
 	}
 
@@ -55,7 +55,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * Getter for the dataset which is used for splitting.
 	 * @return The original dataset that is being split.
 	 */
-	public D getData() {
+	public ILabeledDataset<?> getData() {
 		return this.data;
 	}
 
@@ -80,7 +80,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param datasetSplitter The dataset splitter to be used.
 	 * @return The factory object.
 	 */
-	public F withDatasetSplitter(final IDatasetSplitter<D> datasetSplitter) {
+	public F withDatasetSplitter(final IDatasetSplitter<ILabeledDataset<?>> datasetSplitter) {
 		this.datasetSplitter = datasetSplitter;
 		return this.getSelf();
 	}
@@ -110,7 +110,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param data The dataset to be split.
 	 * @return The factory object.
 	 */
-	public F withData(final D data) {
+	public F withData(final ILabeledDataset<?> data) {
 		this.data = data;
 		return this.getSelf();
 	}
