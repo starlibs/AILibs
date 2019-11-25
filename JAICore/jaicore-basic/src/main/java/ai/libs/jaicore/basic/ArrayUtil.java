@@ -60,4 +60,54 @@ public class ArrayUtil {
 		return arrayCopy;
 	}
 
+	/**
+	 * Transposes a matrix A and returns A^T.
+	 * @param matrix The given matrix A.
+	 * @return The transposed matrix A^T originating from A.
+	 */
+	public static double[][] transposeDoubleMatrix(final double[][] matrix) {
+		double[][] transposed = new double[matrix[0].length][matrix.length];
+		for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[0].length; j++) {
+				transposed[j][i] = matrix[i][j];
+			}
+		}
+		return transposed;
+	}
+
+	/**
+	 * Transposes a matrix A and returns A^T.
+	 * @param matrix The given matrix A.
+	 * @return The transposed matrix A^T originating from A.
+	 */
+	public static int[][] transposeIntegerMatrix(final int[][] matrix) {
+		int[][] transposed = new int[matrix[0].length][matrix.length];
+		for (int i = 0; i < matrix.length; i++) {
+			for (int j = 0; j < matrix[0].length; j++) {
+				transposed[j][i] = matrix[i][j];
+			}
+		}
+		return transposed;
+	}
+
+	private static String cleanArrayString(final String arrayString) {
+		String cleanArrayString = arrayString.trim();
+		if (cleanArrayString.startsWith("[") && cleanArrayString.endsWith("]")) {
+			cleanArrayString = cleanArrayString.substring(1, cleanArrayString.length() - 1);
+		}
+		return cleanArrayString;
+	}
+
+	public static double[] parseStringToDoubleArray(final String arrayString) {
+		return Arrays.stream(cleanArrayString(arrayString).split(",")).mapToDouble(Double::parseDouble).toArray();
+	}
+
+	public static int[] parseStringToIntArray(final String arrayString) {
+		return Arrays.stream(cleanArrayString(arrayString).split(",")).mapToInt(Integer::parseInt).toArray();
+	}
+
+	public static String[] parseStringToStringArray(final String arrayString) {
+		return (String[]) Arrays.stream(cleanArrayString(arrayString).split(",")).toArray();
+	}
+
 }

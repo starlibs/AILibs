@@ -1,6 +1,7 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
-	compile 'mysql:mysql-connector-java:5.1.45'
+	
+	compile("$mysql")
 }
 uploadArchives {
 	repositories {

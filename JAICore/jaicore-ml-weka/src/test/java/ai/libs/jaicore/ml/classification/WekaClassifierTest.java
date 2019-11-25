@@ -13,7 +13,7 @@ import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.junit.Test;
 
 import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
-import ai.libs.jaicore.ml.weka.learner.WekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 
 public class WekaClassifierTest {
 

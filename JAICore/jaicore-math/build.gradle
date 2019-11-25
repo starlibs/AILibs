@@ -1,11 +1,10 @@
 dependencies {
 	compile project(":JAICore:jaicore-basic")
 	
-	compile group: 'io.github.andreas-solti.matrix-toolkits-java', name: 'mtj', version: '1.0.8'
-    
-    compile ("org.api4:common")
-	//compile ('org.api4:ai.ml:0.0.1')
+	compile("$api4common")
+	compile("$mtj")
 }
+
 uploadArchives {
 	repositories {
 		mavenDeployer {

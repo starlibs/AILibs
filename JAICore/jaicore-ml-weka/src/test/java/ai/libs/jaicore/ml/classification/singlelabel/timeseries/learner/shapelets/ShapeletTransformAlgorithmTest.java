@@ -10,8 +10,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets.ShapeletTransformLearningAlgorithm;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets.ShapeletTransformTSClassifier;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.FStat;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.quality.IQualityMeasure;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.Shapelet;
@@ -19,6 +17,8 @@ import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.shapelets.search.ExhaustiveMinimumDistanceSearchStrategy;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.TimeSeriesUtil;
+import ai.libs.jaicore.ml.weka.classification.timeseries.learner.shapelets.ShapeletTransformLearningAlgorithm;
+import ai.libs.jaicore.ml.weka.classification.timeseries.learner.shapelets.ShapeletTransformTSClassifier;
 
 /**
  * Unit tests for {@link ShapeletTransformLearningAlgorithm}.

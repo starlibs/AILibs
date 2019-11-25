@@ -453,19 +453,6 @@ public class WekaUtil {
 		return folds.stream().map(x -> new WekaInstances(x)).collect(Collectors.toList());
 	}
 
-	public static List<Instances> realizeSplitAsSubInstances(final Instances data, final Collection<Integer>[] split) {
-		List<Instances> folds = new ArrayList<>();
-		for (Collection<Integer> foldIndices : split) {
-			int[] indices = new int[foldIndices.size()];
-			int i = 0;
-			for (Integer x : foldIndices) {
-				indices[i++] = x;
-			}
-			folds.add(new SubInstances(data, indices));
-		}
-		return folds;
-	}
-
 	public static ArrayNode splitToJsonArray(final Collection<Integer>[] splitDecision) {
 		ObjectMapper om = new ObjectMapper();
 		ArrayNode an = om.createArrayNode();

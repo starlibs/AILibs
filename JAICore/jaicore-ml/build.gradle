@@ -7,18 +7,15 @@ dependencies {
 	compile project(":JAICore:jaicore-math")
 	//testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	
-	compile ("org.api4:ai-ml")
-	//compile ('org.api4:ai.ml:0.0.1')
+	compile ("$api4AIml")
 	
-	compile 'org.openml:apiconnector:1.0.23'
-	// compile 'org.openml:EvaluationEngine:0.1.0' // this induces a dependency on WEKA
+	
+	compile ("$apacheCommonsCollections")
+	compile ("$openmlAPIConnector")
 	
 	// linear algebra
   	compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
-
-    // d4j dependencies: https://deeplearning4j.org/docs/latest/deeplearning4j-config-buildtools
     compile "org.deeplearning4j:deeplearning4j-core:1.0.0-beta3"
-    //compile "org.nd4j:nd4j-native-platform:1.0.0-beta3"
     
     //optimization algorithms
     compile group: 'edu.stanford.nlp', name: 'stanford-corenlp', version: '3.9.2'
@@ -26,7 +23,6 @@ dependencies {
 	//JTwig template engine
 	compile "org.jtwig:jtwig-core:5.87.0.RELEASE"
 	
-	compile group: 'org.apache.commons', name: 'commons-collections4', version: '4.1'
 	
 	compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.28'
 	compile group: 'org.glassfish.jersey.inject', name: 'jersey-hk2', version: '2.28'

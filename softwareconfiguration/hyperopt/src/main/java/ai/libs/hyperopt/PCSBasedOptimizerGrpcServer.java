@@ -12,7 +12,7 @@ import ai.libs.hasco.model.ComponentInstance;
 import ai.libs.hasco.pcsbasedoptimization.proto.PCSBasedOptimizerService;
 import ai.libs.hasco.serialization.ComponentLoader;
 import ai.libs.hyperopt.optimizer.PCSBasedOptimizerConfig;
-import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 import io.grpc.Server;

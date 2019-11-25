@@ -1,17 +1,18 @@
 dependencies {
-	compile ("org.api4:ai-ml")
 	compile project(":JAICore:jaicore-ml")
 	
+	compile ("$api4AIml")
+	
 	// weka dependencies
-	compile ('ai.libs.thirdparty:interruptible-weka:0.1.2') {
+	compile ("$weka") {
 			exclude group: 'log4j'
 			exclude group: 'org.slf4j'
 	}
-	compile('ai.libs.thirdparty:interruptible-meka:0.1.0') {
+	compile("$meka") {
 			exclude group: 'log4j'
 			exclude group: 'org.slf4j'
 	}
-	compile ('nz.ac.waikato.cms.weka:rotationForest:1.0.3') {
+	compile ("$wekaRotationForest") {
 		exclude group: 'weka-dev'
 	}
 	

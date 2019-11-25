@@ -2,8 +2,8 @@ package ai.libs.jaicore.ml.core.dataset.serialization;
 
 import java.io.File;
 
-import org.api4.java.ai.ml.core.IDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.IDatasetBuilder;
+import org.api4.java.ai.ml.core.dataset.IDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;

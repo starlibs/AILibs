@@ -1,8 +1,10 @@
 package ai.libs.jaicore.ml.ranking.label.learner.rpc;
 
+import java.util.Map;
+
 import org.aeonbits.owner.Config;
 
-public interface IRPCConfig extends Config {
+public interface IRPCConfig extends Config, Map<String, Config> {
 
 	public static final String K_BASE_LEARNER = "rpc.baselearner";
 	public static final String K_VOTING_STRATEGY = "rpc.votingstrategy";

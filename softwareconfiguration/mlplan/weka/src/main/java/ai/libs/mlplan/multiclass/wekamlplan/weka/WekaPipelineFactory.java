@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.hasco.exceptions.ComponentInstantiationFailedException;
 import ai.libs.hasco.model.ComponentInstance;
-import ai.libs.jaicore.ml.weka.learner.IWekaClassifier;
-import ai.libs.jaicore.ml.weka.learner.WekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.learner.IWekaClassifier;
+import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;

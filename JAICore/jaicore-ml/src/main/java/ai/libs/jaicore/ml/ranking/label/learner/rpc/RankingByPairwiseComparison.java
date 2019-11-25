@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.ranking.IRanking;
@@ -19,16 +20,12 @@ import ai.libs.jaicore.basic.Maps;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 import ai.libs.jaicore.ml.ranking.label.learner.clusterbased.customdatatypes.Ranking;
 import weka.classifiers.AbstractClassifier;
-import weka.classifiers.Classifier;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Add;
-import weka.filters.unsupervised.attribute.Remove;
 
 public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankingInstance, ILabelRankingDataset, IRanking<String>, IRankingPredictionBatch> implements ILabelRanker {
 
+	// Parameter configuration of RankingByPairwiseComparison
 	private IRPCConfig config;
-	private Instances dataset;
 
 	private Instances plainPWDataset = null;
 	private List<Integer> labelIndices;
@@ -37,48 +34,13 @@ public class RankingByPairwiseComparison extends ASupervisedLearner<ILabelRankin
 	class PairWiseClassifier {
 		String a;
 		String b;
-		Classifier c;
+		ISingleLabelClassifier c;
 	}
 
 	List<PairWiseClassifier> pwClassifiers = new LinkedList<>();
 
-	public RankingByPairwiseComparison(final IRPCConfig config, final Instances dataset, final int labels) throws Exception {
+	public RankingByPairwiseComparison(final IRPCConfig config) throws Exception {
 		this.config = config;
-		this.dataset = dataset;
-		this.labelIndices = getLabelIndices(labels, dataset);
-		this.labelIndices.stream().map(x -> dataset.attribute(x).name()).forEach(this.labelSet::add);
-		this.plainPWDataset = this.applyFiltersToDataset(dataset);
-	}
-
-	private Instances applyFiltersToDataset(final Instances dataset) throws Exception {
-		Remove removeFilter = new Remove();
-		removeFilter.setAttributeIndicesArray(this.labelIndices.stream().mapToInt(x -> x).toArray());
-		removeFilter.setInvertSelection(false);
-		removeFilter.setInputFormat(dataset);
-		Instances filteredDataset = Filter.useFilter(dataset, removeFilter);
-
-		Add addTarget = new Add();
-		addTarget.setAttributeIndex("last");
-		addTarget.setNominalLabels("true,false");
-		addTarget.setAttributeName("a>b");
-		addTarget.setInputFormat(filteredDataset);
-		filteredDataset = Filter.useFilter(filteredDataset, addTarget);
-		filteredDataset.setClassIndex(filteredDataset.numAttributes() - 1);
-		return filteredDataset;
-	}
-
-	private static List<Integer> getLabelIndices(final int labels, final Instances dataset) {
-		List<Integer> labelIndices = new LinkedList<>();
-		if (labels < 0) {
-			for (int i = dataset.numAttributes() - 1; i >= dataset.numAttributes() + labels; i--) {
-				labelIndices.add(i);
-			}
-		} else {
-			for (int i = 0; i < labels; i++) {
-				labelIndices.add(i);
-			}
-		}
-		return labelIndices;
 	}
 
 	@Override

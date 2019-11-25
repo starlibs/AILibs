@@ -20,7 +20,8 @@ public class FMeasure extends AInstanceMeasure<int[]> {
 
 		double precision = this.precision.score(expected, actual);
 		double recall = this.recall.score(expected, actual);
-		return (1 + Math.pow(this.beta, 2)) * (precision * recall) / (Math.pow(this.beta, 2) * precision + recall);
+		double denominator = ((Math.pow(this.beta, 2) * precision) + recall);
+		return denominator == 0.0 ? 0 : (1 + Math.pow(this.beta, 2)) * (precision * recall) / denominator;
 	}
 
 }

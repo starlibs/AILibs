@@ -1,6 +1,6 @@
 package ai.libs.jaicore.ml.core.dataset.serialization;
 
-import org.api4.java.ai.ml.core.IDatasetDescriptor;
+import org.api4.java.ai.ml.core.dataset.IDatasetDescriptor;
 
 public class OpenMLDatasetDescriptor implements IDatasetDescriptor {
 

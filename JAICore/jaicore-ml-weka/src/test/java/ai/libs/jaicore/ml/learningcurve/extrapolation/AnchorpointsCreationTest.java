@@ -15,6 +15,7 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SystematicSamplingFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolator;
+import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
@@ -40,14 +41,17 @@ public class AnchorpointsCreationTest {
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
 
+		// final LearningCurveExtrapolationMethod extrapolationMethod, final ISupervisedLearner<I, D> learner, final D dataset, final double trainsplit, final int[] anchorPoints,
+		// final ISamplingAlgorithmFactory<?, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final long seed
+
 		WekaInstances simpleDataset = new WekaInstances(dataset);
-		LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> extrapolator = new LearningCurveExtrapolator<>((x, y, ds) -> {
+		LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> extrapolator = new LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>>((x, y, ds) -> {
 			Assert.assertArrayEquals(x, xValues);
 			for (int i = 0; i < y.length; i++) {
 				Assert.assertTrue(y[i] > 0.0d);
 			}
 			return null;
-		}, new J48(), simpleDataset, 0.7d, xValues, new SystematicSamplingFactory<>(), 1l);
+		}, new WekaClassifier(new J48()), simpleDataset, 0.7d, xValues, new SystematicSamplingFactory<>(), 1l);
 		extrapolator.extrapolateLearningCurve();
 	}
 

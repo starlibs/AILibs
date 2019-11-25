@@ -12,7 +12,7 @@ import org.apache.commons.math3.geometry.euclidean.oned.Interval;
 import org.junit.Before;
 import org.junit.Test;
 
-import ai.libs.jaicore.ml.rangequery.learner.intervaltree.ExtendedM5Forest;
+import ai.libs.jaicore.ml.weka.rangequery.learner.intervaltree.ExtendedM5Forest;
 import junit.framework.Assert;
 import weka.core.DenseInstance;
 import weka.core.Instance;

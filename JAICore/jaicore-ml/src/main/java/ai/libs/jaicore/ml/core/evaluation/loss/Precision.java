@@ -13,7 +13,8 @@ public class Precision extends AInstanceMeasure<int[]> {
 	@Override
 	public double score(final int[] expected, final int[] actual) {
 		double truePositives = this.tp.score(expected, actual);
-		return truePositives / (truePositives + this.fp.score(expected, actual));
+		double denominator = (truePositives + this.fp.score(expected, actual));
+		return denominator == 0.0 ? 0 : truePositives / denominator;
 	}
 
 }

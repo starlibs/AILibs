@@ -17,9 +17,9 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.FixedSplitClassifierEvaluato
 import ai.libs.jaicore.ml.core.evaluation.evaluator.splitevaluation.SimpleSLCSplitBasedClassifierEvaluator;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.learner.reduction.MCTreeNodeReD;
-import ai.libs.jaicore.ml.weka.learner.reduction.splitter.ISplitter;
-import ai.libs.jaicore.ml.weka.learner.reduction.splitter.ISplitterFactory;
+import ai.libs.jaicore.ml.weka.classification.learner.reduction.MCTreeNodeReD;
+import ai.libs.jaicore.ml.weka.classification.learner.reduction.splitter.ISplitter;
+import ai.libs.jaicore.ml.weka.classification.learner.reduction.splitter.ISplitterFactory;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;

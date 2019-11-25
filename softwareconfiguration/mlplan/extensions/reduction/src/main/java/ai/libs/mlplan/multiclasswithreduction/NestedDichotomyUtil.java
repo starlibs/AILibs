@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.SetUtil;
 import ai.libs.jaicore.ml.weka.WekaUtil;
-import ai.libs.jaicore.ml.weka.learner.reduction.splitter.RPNDSplitter;
+import ai.libs.jaicore.ml.weka.classification.learner.reduction.splitter.RPNDSplitter;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.model.MLPipeline;
 import weka.attributeSelection.InfoGainAttributeEval;
 import weka.attributeSelection.Ranker;
