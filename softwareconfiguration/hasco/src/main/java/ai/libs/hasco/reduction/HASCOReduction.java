@@ -282,6 +282,10 @@ implements AlgorithmicProblemReduction<RefinementConfiguredSoftwareConfiguration
 	@Override
 	public CostSensitiveHTNPlanningProblem<CEOCIPSTNPlanningProblem, V> encodeProblem(final RefinementConfiguredSoftwareConfigurationProblem<V> problem) {
 
+		if (problem.getRequiredInterface() == null) {
+			throw new IllegalArgumentException("No required interface defined in the problem!");
+		}
+
 		/* set object variables that will be important for several methods in the reduction */
 		this.originalProblem = problem;
 		this.components = this.originalProblem.getComponents();

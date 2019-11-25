@@ -19,6 +19,9 @@ public class MonteCarloCrossValidationEvaluatorFactory<I extends ILabeledInstanc
 
 	@Override
 	public MonteCarloCrossValidationEvaluator<I, D> getDataspecificRandomizedLearnerEvaluator(final D dataset, final ISupervisedLearnerMetric metric, final Random random) {
+		if (this.getTrainFoldSize() <= 0 || this.getTrainFoldSize() >= 1) {
+			throw new IllegalStateException("Train fold size is configured to " + this.getTrainFoldSize() + " but must be strictly greater than 0 and strictly smaller than 1.");
+		}
 		return new MonteCarloCrossValidationEvaluator<>(dataset, this.getNumMCIterations(), this.getTrainFoldSize(), random, metric);
 	}
 

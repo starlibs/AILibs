@@ -64,7 +64,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 	@Override
 	public ILabeledDataset<ILabeledInstance> deserializeDataset(final File datasetFile) throws DatasetDeserializationFailedException, InterruptedException {
-		Objects.requireNonNull(this.datasetFile, "No dataset has been configured.");
+		Objects.requireNonNull(datasetFile, "No dataset has been configured.");
 		return readDataset(this.sparseMode, datasetFile);
 	}
 
@@ -112,11 +112,17 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			values = type.substring(1, type.length() - 1).split(SEPARATOR_DENSE_INSTANCE_VALUES);
 			attType = EArffAttributeType.NOMINAL;
 		} else {
-			attType = EArffAttributeType.valueOf(type.toUpperCase());
+			try {
+				attType = EArffAttributeType.valueOf(type.toUpperCase());
+			}
+			catch (IllegalArgumentException e) {
+				throw new UnsupportedAttributeTypeException("The attribute type " + type.toUpperCase() + " is not supported in the EArffAttributeType ENUM.");
+			}
 		}
 
 		switch (attType) {
 		case NUMERIC:
+		case REAL:
 			return new NumericAttribute(name);
 		case NOMINAL:
 			if (values != null) {
@@ -130,11 +136,14 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	protected static Object parseInstance(final boolean sparseData, final List<IAttribute> attributes, final String line) {
+		if (line.trim().startsWith("%")) {
+			throw new IllegalArgumentException("Cannot create object for commented line!");
+		}
 		String[] lineSplit = line.split(",");
 
 		if (!sparseData) {
 			if (lineSplit.length != attributes.size()) {
-				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined.");
+				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: " + lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
 			}
 
 			Object[] parsedDenseInstance = new Object[lineSplit.length];
@@ -203,20 +212,23 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 						}
 					}
 				} else {
-					Object parsedInstance = parseInstance(sparseMode, attributes, line);
-					ILabeledInstance newI;
-					if (parsedInstance instanceof Object[]) {
-						Object[] parsedDenseInstance = (Object[]) parsedInstance;
-						newI = new DenseInstance(ArrayUtil.copyArrayExlcuding(parsedDenseInstance, relationMetaData.getAsIntList(K_CLASS_INDEX)), parsedDenseInstance[relationMetaData.getAsInt(K_CLASS_INDEX)]);
-					} else if (parsedInstance instanceof Map) {
-						@SuppressWarnings("unchecked")
-						Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
-						Object label = parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX));
-						newI = new SparseInstance(attributes.size(), parsedSparseInstance, label);
-					} else {
-						throw new IllegalStateException("Severe Error: The format of the parsed instance is not as expected.");
+					line = line.trim();
+					if (!line.isEmpty() && !line.startsWith("%")) { // ignore empty and comment lines
+						Object parsedInstance = parseInstance(sparseMode, attributes, line);
+						ILabeledInstance newI;
+						if (parsedInstance instanceof Object[]) {
+							Object[] parsedDenseInstance = (Object[]) parsedInstance;
+							newI = new DenseInstance(ArrayUtil.copyArrayExlcuding(parsedDenseInstance, relationMetaData.getAsIntList(K_CLASS_INDEX)), parsedDenseInstance[relationMetaData.getAsInt(K_CLASS_INDEX)]);
+						} else if (parsedInstance instanceof Map) {
+							@SuppressWarnings("unchecked")
+							Map<Integer, Object> parsedSparseInstance = (Map<Integer, Object>) parsedInstance;
+							Object label = parsedSparseInstance.remove(relationMetaData.getAsInt(K_CLASS_INDEX));
+							newI = new SparseInstance(attributes.size(), parsedSparseInstance, label);
+						} else {
+							throw new IllegalStateException("Severe Error: The format of the parsed instance is not as expected.");
+						}
+						dataset.add(newI);
 					}
-					dataset.add(newI);
 				}
 			}
 			lineCounter++;

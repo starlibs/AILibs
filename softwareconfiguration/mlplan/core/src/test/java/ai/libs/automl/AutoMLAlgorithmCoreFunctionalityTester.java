@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 import org.junit.runners.Parameterized.Parameters;
 import org.slf4j.Logger;
@@ -13,11 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.algorithm.AlgorithmCreationException;
 import ai.libs.jaicore.basic.algorithm.GeneralAlgorithmTester;
-import ai.libs.jaicore.basic.sets.Pair;
-import weka.classifiers.Classifier;
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.converters.ConverterUtils.DataSource;
+import ai.libs.jaicore.ml.experiments.OpenMLProblemSet;
 
 public abstract class AutoMLAlgorithmCoreFunctionalityTester extends GeneralAlgorithmTester {
 
@@ -28,8 +25,8 @@ public abstract class AutoMLAlgorithmCoreFunctionalityTester extends GeneralAlgo
 	public static Collection<Object[]> data() throws IOException, Exception {
 		List<Object> problemSets = new ArrayList<>();
 		problemSets.add(new OpenMLProblemSet(3)); // kr-vs-kp
-		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
-		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
+		//		problemSets.add(new OpenMLProblemSet(1150)); // AP_Breast_Lung
+		//		problemSets.add(new OpenMLProblemSet(1156)); // AP_Omentum_Ovary
 		//				problemSets.add(new OpenMLProblemSet(1152)); // AP_Prostate_Ovary
 		//				problemSets.add(new OpenMLProblemSet(1240)); // AirlinesCodrnaAdult
 		//				problemSets.add(new OpenMLProblemSet(1457)); // amazon
@@ -45,16 +42,13 @@ public abstract class AutoMLAlgorithmCoreFunctionalityTester extends GeneralAlgo
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final Object problem) throws AlgorithmCreationException {
-		Pair<DataSource, String> sourceClassAttributePair = (Pair<DataSource, String>) problem;
 		try {
-			Instances dataset = sourceClassAttributePair.getX().getDataSet();
-			Attribute targetAttribute = dataset.attribute(sourceClassAttributePair.getY());
-			dataset.setClassIndex(targetAttribute.index());
+			ILabeledDataset<?> dataset = (ILabeledDataset<?>) problem;
 			return this.getAutoMLAlgorithm(dataset);
 		} catch (Exception e) {
 			throw new AlgorithmCreationException(e);
 		}
 	}
 
-	public abstract IAlgorithm<Instances, Classifier> getAutoMLAlgorithm(Instances data);
+	public abstract IAlgorithm getAutoMLAlgorithm(ILabeledDataset data);
 }

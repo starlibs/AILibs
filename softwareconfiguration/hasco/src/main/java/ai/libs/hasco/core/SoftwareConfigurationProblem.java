@@ -23,6 +23,9 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		cl.loadComponents(configurationFile);
 		this.components = cl.getComponents();
 		this.requiredInterface = requiredInerface;
+		if (requiredInerface == null || requiredInerface.isEmpty()) {
+			throw new IllegalArgumentException("Invalid required interface \"" + requiredInerface + "\"");
+		}
 		this.compositionEvaluator = compositionEvaluator;
 	}
 
@@ -31,12 +34,13 @@ public class SoftwareConfigurationProblem<V extends Comparable<V>> {
 		this.components = components;
 		this.requiredInterface = requiredInterface;
 		this.compositionEvaluator = compositionEvaluator;
+		if (requiredInterface == null || requiredInterface.isEmpty()) {
+			throw new IllegalArgumentException("Invalid required interface \"" + requiredInterface + "\"");
+		}
 	}
 
 	public SoftwareConfigurationProblem(final SoftwareConfigurationProblem<V> problem) {
-		this.components = problem.getComponents();
-		this.requiredInterface = problem.requiredInterface;
-		this.compositionEvaluator = problem.compositionEvaluator;
+		this(problem.getComponents(), problem.requiredInterface, problem.compositionEvaluator);
 	}
 
 	public Collection<Component> getComponents() {

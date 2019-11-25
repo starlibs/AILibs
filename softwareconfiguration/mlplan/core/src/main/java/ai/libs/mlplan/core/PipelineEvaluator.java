@@ -20,7 +20,6 @@ import ai.libs.jaicore.basic.events.IEventEmitter;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.timing.TimedObjectEvaluator;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
-import ai.libs.mlplan.multiclass.wekamlplan.ILearnerFactory;
 
 /**
  * Evaluator used in the search phase of mlplan.

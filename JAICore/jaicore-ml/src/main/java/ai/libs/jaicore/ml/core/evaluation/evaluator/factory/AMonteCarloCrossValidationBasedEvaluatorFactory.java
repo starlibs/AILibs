@@ -4,8 +4,6 @@ import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
-import weka.core.Instances;
-
 /**
  * An abstract factory for configuring Monte Carlo cross-validation based evaluators.
  *
@@ -18,7 +16,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	private IDatasetSplitter<D> datasetSplitter;
 	private int seed;
 	private int numMCIterations;
-	private Instances data;
+	private D data;
 	private double trainFoldSize;
 	private int timeoutForSolutionEvaluation;
 
@@ -57,7 +55,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * Getter for the dataset which is used for splitting.
 	 * @return The original dataset that is being split.
 	 */
-	public Instances getData() {
+	public D getData() {
 		return this.data;
 	}
 
@@ -112,7 +110,7 @@ public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<I extends 
 	 * @param data The dataset to be split.
 	 * @return The factory object.
 	 */
-	public F withData(final Instances data) {
+	public F withData(final D data) {
 		this.data = data;
 		return this.getSelf();
 	}

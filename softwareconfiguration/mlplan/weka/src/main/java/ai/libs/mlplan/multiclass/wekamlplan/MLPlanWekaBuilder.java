@@ -2,9 +2,12 @@ package wekamlplan;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import ai.libs.jaicore.basic.FileUtil;
 import ai.libs.jaicore.basic.MathExt;
+import ai.libs.jaicore.basic.ResourceFile;
 import ai.libs.jaicore.basic.ResourceUtil;
 import ai.libs.jaicore.ml.classification.singlelabel.loss.ZeroOneLoss;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.factory.LearningCurveExtrapolationEvaluatorFactory;
@@ -17,6 +20,9 @@ import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.splitter.MulticlassClassStratifiedSplitter;
 import ai.libs.mlplan.core.AbstractMLPlanSingleLabelBuilder;
+import ai.libs.mlplan.core.ILearnerFactory;
+import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
+import ai.libs.mlplan.multiclass.wekamlplan.weka.PreferenceBasedNodeEvaluator;
 import ai.libs.mlplan.multiclass.wekamlplan.weka.WekaPipelineFactory;
 
 public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanWekaBuilder> {
@@ -55,6 +61,29 @@ public class MLPlanWekaBuilder extends AbstractMLPlanSingleLabelBuilder<MLPlanWe
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_SELECTION, String.valueOf(blowUpInSelectionPhase));
 		double blowUpInPostprocessing = MathExt.round((1 / (1 - this.getAlgorithmConfig().dataPortionForSelection())) / DEFAULT_SELECTION_NUM_MC_ITERATIONS, 2);
 		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.K_BLOWUP_POSTPROCESS, String.valueOf(blowUpInPostprocessing));
+	}
+
+
+	/**
+	 * Creates a preferred node evaluator that can be used to prefer components over other components.
+	 *
+	 * @param preferredComponentsFile The file containing a priority list of component names.
+	 * @param preferableCompnentMethodPrefix The prefix of a method's name for refining a complex task to preferable components.
+	 * @return The builder object.
+	 * @throws IOException Thrown if a problem occurs while trying to read the file containing the priority list.
+	 */
+	public MLPlanWekaBuilder withPreferredComponentsFile(final File preferredComponentsFile, final String preferableCompnentMethodPrefix) throws IOException {
+		this.getAlgorithmConfig().setProperty(MLPlanClassifierConfig.PREFERRED_COMPONENTS, preferredComponentsFile.getAbsolutePath());
+		List<String> ordering;
+		if (preferredComponentsFile instanceof ResourceFile) {
+			ordering = ResourceUtil.readResourceFileToStringList((ResourceFile) preferredComponentsFile);
+		} else if (!preferredComponentsFile.exists()) {
+			this.logger.warn("The configured file for preferred components \"{}\" does not exist. Not using any particular ordering.", preferredComponentsFile.getAbsolutePath());
+			ordering = new ArrayList<>();
+		} else {
+			ordering = FileUtil.readFileAsList(preferredComponentsFile);
+		}
+		return this.withPreferredNodeEvaluator(new PreferenceBasedNodeEvaluator(this.getComponents(), ordering, preferableCompnentMethodPrefix));
 	}
 
 	/**

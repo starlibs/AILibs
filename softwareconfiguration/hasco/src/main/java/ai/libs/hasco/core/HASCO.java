@@ -94,6 +94,9 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 		if (configurationProblem == null) {
 			throw new IllegalArgumentException("Cannot work with configuration problem NULL");
 		}
+		if (configurationProblem.getRequiredInterface() == null || configurationProblem.getRequiredInterface().isEmpty()) {
+			throw new IllegalArgumentException("Not required interface defined in the input");
+		}
 		this.planningGraphGeneratorDeriver = planningGraphGeneratorDeriver;
 		this.searchFactory = searchFactory;
 		this.searchProblemTransformer = searchProblemTransformer;

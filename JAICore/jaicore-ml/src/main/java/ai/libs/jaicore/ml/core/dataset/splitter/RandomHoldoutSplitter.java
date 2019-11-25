@@ -27,7 +27,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 	public RandomHoldoutSplitter(final Random rand, final double... portions) {
 		double portionSum = Arrays.stream(portions).sum();
 		if (!(portionSum > 0 && portionSum <= 1.0)) {
-			throw new IllegalArgumentException("The sum of the given portions must not be less or equal 0 or larger than 1.");
+			throw new IllegalArgumentException("The sum of the given portions must not be less or equal 0 or larger than 1. Given portions: " + Arrays.toString(portions));
 		}
 		this.portionSum = portionSum;
 		this.rand = rand;
