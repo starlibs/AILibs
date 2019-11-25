@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * @author mwever
  */
-class TwoLayerKVStoreCollectionPartition implements Iterable<Entry<String, Map<String, KVStoreCollection>>> {
+public class KVStoreCollectionTwoLayerPartition implements Iterable<Entry<String, Map<String, KVStoreCollection>>> {
 
 	/* Keys for partitioning. */
 	private final String firstLayerKey;
@@ -27,7 +27,7 @@ class TwoLayerKVStoreCollectionPartition implements Iterable<Entry<String, Map<S
 	 * @param secondLayerKey The field name for the second level partition.
 	 * @param collection The {@link KVStoreCollection} to initialize this two-layer partition.
 	 */
-	TwoLayerKVStoreCollectionPartition(final String firstLayerKey, final String secondLayerKey, final KVStoreCollection collection) {
+	public KVStoreCollectionTwoLayerPartition(final String firstLayerKey, final String secondLayerKey, final KVStoreCollection collection) {
 		this(firstLayerKey, secondLayerKey);
 		this.addAll(collection);
 	}
@@ -38,17 +38,21 @@ class TwoLayerKVStoreCollectionPartition implements Iterable<Entry<String, Map<S
 	 * @param firstLevelKey The field name for the first level partition.
 	 * @param secondLevelKey The field name for the second level partition.
 	 */
-	TwoLayerKVStoreCollectionPartition(final String firstLevelKey, final String secondLevelKey) {
+	public KVStoreCollectionTwoLayerPartition(final String firstLevelKey, final String secondLevelKey) {
 		this.firstLayerKey = firstLevelKey;
 		this.secondLayerKey = secondLevelKey;
 		this.data = new HashMap<>();
 	}
 
+	public Map<String, Map<String, KVStoreCollection>> getData() {
+		return this.data;
+	}
+
 	/**
-	 * Adds a signle {@link KVStore} to this {@link TwoLayerKVStoreCollectionPartition}.
+	 * Adds a signle {@link KVStore} to this {@link KVStoreCollectionTwoLayerPartition}.
 	 * @param store
 	 */
-	void add(final IKVStore store) {
+	public void add(final IKVStore store) {
 		/* First ensure that nested maps contain the required keys and KVStoreCollection respectively. */
 		String firstLevelValue = store.getAsString(this.firstLayerKey);
 		String secondLevelValue = store.getAsString(this.secondLayerKey);
@@ -63,17 +67,17 @@ class TwoLayerKVStoreCollectionPartition implements Iterable<Entry<String, Map<S
 	}
 
 	/**
-	 * Adds an entire {@link KVStoreCollection to this {@link TwoLayerKVStoreCollectionPartition}.
+	 * Adds an entire {@link KVStoreCollection to this {@link KVStoreCollectionTwoLayerPartition}.
 	 * @param collection The collection to be added to this partition.
 	 */
-	void addAll(final KVStoreCollection collection) {
+	public void addAll(final KVStoreCollection collection) {
 		collection.forEach(this::add);
 	}
 
 	/**
 	 * @return The set of entries of this partition.
 	 */
-	Set<Entry<String, Map<String, KVStoreCollection>>> entrySet() {
+	public Set<Entry<String, Map<String, KVStoreCollection>>> entrySet() {
 		return this.data.entrySet();
 	}
 

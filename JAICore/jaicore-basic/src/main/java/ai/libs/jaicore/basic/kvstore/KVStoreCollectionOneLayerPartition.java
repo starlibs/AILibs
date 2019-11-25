@@ -13,7 +13,7 @@ import ai.libs.jaicore.logging.ToJSONStringUtil;
  *
  * @author mwever
  */
-public class KVStoreCollectionPartition implements Iterable<Entry<String, KVStoreCollection>> {
+public class KVStoreCollectionOneLayerPartition implements Iterable<Entry<String, KVStoreCollection>> {
 
 	/* Key for partitioning. */
 	private final String partitionKey;
@@ -27,7 +27,7 @@ public class KVStoreCollectionPartition implements Iterable<Entry<String, KVStor
 		 * @param partitionKey The field name for the partitioning key.
 		 * @param collection The {@link KVStoreCollection} to initialize this partition.
 		 */
-	KVStoreCollectionPartition(final String partitionKey, final KVStoreCollection collection) {
+	public KVStoreCollectionOneLayerPartition(final String partitionKey, final KVStoreCollection collection) {
 		this(partitionKey);
 		this.addAll(collection);
 	}
@@ -37,16 +37,20 @@ public class KVStoreCollectionPartition implements Iterable<Entry<String, KVStor
 		 *
 		 * @param partitionKey The field name for the first level partition.
 		 */
-	KVStoreCollectionPartition(final String firstLevelKey) {
+	public KVStoreCollectionOneLayerPartition(final String firstLevelKey) {
 		this.partitionKey = firstLevelKey;
 		this.data = new HashMap<>();
 	}
 
+	public Map<String, KVStoreCollection> getData() {
+		return this.data;
+	}
+
 	/**
-		 * Adds a signle {@link KVStore} to this {@link KVStoreCollectionPartition}.
+		 * Adds a signle {@link KVStore} to this {@link KVStoreCollectionOneLayerPartition}.
 		 * @param store
 		 */
-	void add(final IKVStore store) {
+	public void add(final IKVStore store) {
 		/* First ensure that nested maps contain the required keys and KVStoreCollection respectively. */
 		String keyForPartition = store.getAsString(this.partitionKey);
 		if (!this.data.containsKey(keyForPartition)) {
@@ -56,17 +60,17 @@ public class KVStoreCollectionPartition implements Iterable<Entry<String, KVStor
 	}
 
 	/**
-	 * Adds an entire {@link KVStoreCollection to this {@link KVStoreCollectionPartition}.
+	 * Adds an entire {@link KVStoreCollection to this {@link KVStoreCollectionOneLayerPartition}.
 	 * @param collection The collection to be added to this partition.
 	 */
-	void addAll(final KVStoreCollection collection) {
+	public void addAll(final KVStoreCollection collection) {
 		collection.forEach(this::add);
 	}
 
 	/**
 	 * @return The set of entries of this partition.
 	 */
-	Set<Entry<String, KVStoreCollection>> entrySet() {
+	public Set<Entry<String, KVStoreCollection>> entrySet() {
 		return this.data.entrySet();
 	}
 
