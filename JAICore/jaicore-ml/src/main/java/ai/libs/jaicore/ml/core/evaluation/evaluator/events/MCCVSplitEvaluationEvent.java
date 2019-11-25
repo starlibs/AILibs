@@ -1,16 +1,17 @@
 package ai.libs.jaicore.ml.core.evaluation.evaluator.events;
 
+import org.api4.java.ai.ml.classification.IClassifier;
+
 import ai.libs.jaicore.basic.events.IEvent;
-import weka.classifiers.Classifier;
 
 public class MCCVSplitEvaluationEvent implements IEvent {
-	private final Classifier classifier;
+	private final IClassifier classifier;
 	private final int numInstancesUsedForTraining;
 	private final int numInstancesUsedForValidation;
 	private final int splitEvaluationTime;
 	private final double observedScore;
 
-	public MCCVSplitEvaluationEvent(final Classifier classifier, final int numInstancesUsedForTraining, final int numInstancesUsedForValidation, final int splitEvaluationTime, final double observedScore) {
+	public MCCVSplitEvaluationEvent(final IClassifier classifier, final int numInstancesUsedForTraining, final int numInstancesUsedForValidation, final int splitEvaluationTime, final double observedScore) {
 		super();
 		this.classifier = classifier;
 		this.numInstancesUsedForTraining = numInstancesUsedForTraining;
@@ -19,7 +20,7 @@ public class MCCVSplitEvaluationEvent implements IEvent {
 		this.observedScore = observedScore;
 	}
 
-	public Classifier getClassifier() {
+	public IClassifier getClassifier() {
 		return this.classifier;
 	}
 

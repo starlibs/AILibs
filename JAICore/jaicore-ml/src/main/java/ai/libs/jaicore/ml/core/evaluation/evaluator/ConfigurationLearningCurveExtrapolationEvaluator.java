@@ -24,22 +24,23 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
  * @author noni4
  */
 
-public class ConfigurationLearningCurveExtrapolationEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements ISupervisedLearnerEvaluator<I, D> {
+public class ConfigurationLearningCurveExtrapolationEvaluator implements ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private Logger logger = LoggerFactory.getLogger(ConfigurationLearningCurveExtrapolationEvaluator.class);
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<D>> samplingAlgorithmFactory;
-	private D dataset;
+	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> samplingAlgorithmFactory;
+	private ILabeledDataset<ILabeledInstance> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
 	private String identifier;
 	private double[] configurations;
 	private int fullDatasetSize = -1;
 
-	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D dataset,
-			final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
+	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
+			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> samplingAlgorithmFactory,
+			final ILabeledDataset<ILabeledInstance> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -55,11 +56,11 @@ public class ConfigurationLearningCurveExtrapolationEvaluator<I extends ILabeled
 	}
 
 	@Override
-	public Double evaluate(final ISupervisedLearner<I, D> classifier) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> classifier) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		try {
-			ConfigurationLearningCurveExtrapolator<I, D> extrapolator = new ConfigurationLearningCurveExtrapolator<>(classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
-					this.seed, this.identifier, this.configurations);
+			ConfigurationLearningCurveExtrapolator extrapolator = new ConfigurationLearningCurveExtrapolator(classifier, this.dataset, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed,
+					this.identifier, this.configurations);
 
 			// Create the extrapolator and calculate the accuracy the classifier would have
 			// if it was trained on the complete dataset.

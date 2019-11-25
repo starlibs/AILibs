@@ -17,21 +17,21 @@ import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
 public class ExecutionBasedClassifierEvaluator implements ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> {
 
-	private final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator;
-	private final SupervisedLearnerExecutor<ILabeledDataset<?>> executor = new SupervisedLearnerExecutor<>();
+	private final IFixedDatasetSplitSetGenerator<ILabeledDataset<ILabeledInstance>> splitGenerator;
+	private final SupervisedLearnerExecutor<ILabeledDataset<? extends ILabeledInstance>> executor = new SupervisedLearnerExecutor<>();
 	private final ISupervisedLearnerMetric metric;
 
 	@Override
-	public Double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>> learner) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner) throws InterruptedException, ObjectEvaluationFailedException {
 		try {
-			IDatasetSplitSet<ILabeledDataset<?>> splitSet = this.splitGenerator.nextSplitSet();
+			IDatasetSplitSet<ILabeledDataset<ILabeledInstance>> splitSet = this.splitGenerator.nextSplitSet();
 			if (splitSet.getNumberOfFoldsPerSplit() != 2) {
 				throw new IllegalStateException("Number of folds for each split should be 2 but is " + splitSet.getNumberOfFoldsPerSplit() + "!");
 			}
 			int n = splitSet.getNumberOfSplits();
 			List<ILearnerRunReport> reports = new ArrayList<>(n);
 			for (int i = 0; i < n; i++) {
-				List<ILabeledDataset<?>> folds = splitSet.getFolds(i);
+				List<ILabeledDataset<ILabeledInstance>> folds = splitSet.getFolds(i);
 				reports.add(this.executor.execute(learner, folds.get(0), folds.get(1)));
 			}
 			return this.metric.evaluate(reports);
@@ -40,7 +40,7 @@ public class ExecutionBasedClassifierEvaluator implements ISupervisedLearnerEval
 		}
 	}
 
-	public ExecutionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final ISupervisedLearnerMetric metric) {
+	public ExecutionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<ILabeledInstance>> splitGenerator, final ISupervisedLearnerMetric metric) {
 		super();
 		this.splitGenerator = splitGenerator;
 		this.metric = metric;

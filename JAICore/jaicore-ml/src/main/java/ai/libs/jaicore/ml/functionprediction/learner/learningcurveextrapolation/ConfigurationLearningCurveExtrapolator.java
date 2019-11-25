@@ -17,10 +17,11 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
  * @author noni4
  */
 
-public class ConfigurationLearningCurveExtrapolator<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends LearningCurveExtrapolator<I, D> {
+public class ConfigurationLearningCurveExtrapolator extends LearningCurveExtrapolator {
 
-	public ConfigurationLearningCurveExtrapolator(final ISupervisedLearner<I, D> learner, final D dataset, final double trainsplit, final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ASamplingAlgorithm<D>> samplingAlgorithmFactory,
-			final long seed, final String identifier, final double[] configurations) throws DatasetCreationException, InterruptedException {
+	public ConfigurationLearningCurveExtrapolator(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner, final ILabeledDataset<ILabeledInstance> dataset, final double trainsplit,
+			final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> samplingAlgorithmFactory, final long seed,
+			final String identifier, final double[] configurations) throws DatasetCreationException, InterruptedException {
 		super(null, learner, dataset, trainsplit, anchorpoints, samplingAlgorithmFactory, seed);
 		this.extrapolationMethod = new LCNetExtrapolationMethod(identifier);
 		((LCNetExtrapolationMethod) this.extrapolationMethod).setConfigurations(configurations);

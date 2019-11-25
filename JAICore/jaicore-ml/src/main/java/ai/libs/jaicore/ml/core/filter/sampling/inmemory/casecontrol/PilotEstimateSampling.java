@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.sets.Pair;
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
-import weka.filters.unsupervised.attribute.NumericToNominal;
 
 public abstract class PilotEstimateSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends CaseControlLikeSampling<I, D> {
 
@@ -122,31 +121,30 @@ public abstract class PilotEstimateSampling<I extends ILabeledInstance, D extend
 					pilotEstimateSample.add(choosenInstance);
 				}
 
-				NumericToNominal numericToNominal = new NumericToNominal();
-				//				String[] options = new String[2];
-				//				options[0] = "-R";
-				//				options[1] = "last";
-				//				numericToNominal.setOptions(options);
-				//				numericToNominal.setInputFormat(pilotEstimateSample);
+				// String[] options = new String[2];
+				// options[0] = "-R";
+				// options[1] = "last";
+				// numericToNominal.setOptions(options);
+				// numericToNominal.setInputFormat(pilotEstimateSample);
 
-				//				pilotEstimateSample = Filter.useFilter(pilotEstimateSample, numericToNominal);
+				// pilotEstimateSample = Filter.useFilter(pilotEstimateSample, numericToNominal);
 
 				ArrayList<Pair<Double, Double>> classMapping = new ArrayList<>();
-				//				boolean classNotInMapping;
-				//				for (I in : pilotEstimateInstances) {
-				//					classNotInMapping = true;
-				//					for (Pair<Double, Double> classPair : classMapping) {
-				//						if (in.classValue() == classPair.getX().doubleValue()) {
-				//							classNotInMapping = false;
-				//						}
-				//					}
-				//					if (classNotInMapping) {
-				//						classMapping.add(new Pair<Double, Double>(in.classValue(), (double) classMapping.size()));
-				//					}
-				//				}
+				// boolean classNotInMapping;
+				// for (I in : pilotEstimateInstances) {
+				// classNotInMapping = true;
+				// for (Pair<Double, Double> classPair : classMapping) {
+				// if (in.classValue() == classPair.getX().doubleValue()) {
+				// classNotInMapping = false;
+				// }
+				// }
+				// if (classNotInMapping) {
+				// classMapping.add(new Pair<Double, Double>(in.classValue(), (double) classMapping.size()));
+				// }
+				// }
 
-				//				pilotEstimator.fit(pilotEstimateInstances);
-				//				this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
+				// pilotEstimator.fit(pilotEstimateInstances);
+				// this.probabilityBoundaries = this.calculateFinalInstanceBoundaries(sampleCopy, pilotEstimator);
 			}
 		} catch (DatasetCreationException e1) {
 			throw new AlgorithmException("Could not create a copy of the dataset.", e1);

@@ -32,7 +32,7 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
  *
  * @author Lukas Brandt
  */
-public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements ISupervisedLearnerEvaluator<I, D> {
+public class ExtrapolatedSaturationPointEvaluator implements ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(ExtrapolatedSaturationPointEvaluator.class);
 
@@ -40,15 +40,15 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D 
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
-	private D train;
+	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory;
+	private ILabeledDataset<ILabeledInstance> train;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
 
 	// Configuration for the measurement at the saturation point.
 	private double epsilon;
-	private D test;
+	private ILabeledDataset<ILabeledInstance> test;
 	private IMeasure measure;
 
 	/**
@@ -74,8 +74,9 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D 
 	 * @param test
 	 *            Test dataset to measure the accuracy.
 	 */
-	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<I, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final D train, final double trainSplitForAnchorpointsMeasurement,
-			final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final D test, final IMeasure measure) {
+	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints,
+			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory, final ILabeledDataset<ILabeledInstance> train,
+			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final ILabeledDataset<ILabeledInstance> test, final IMeasure measure) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -94,19 +95,18 @@ public class ExtrapolatedSaturationPointEvaluator<I extends ILabeledInstance, D 
 	}
 
 	@Override
-	public Double evaluate(final ISupervisedLearner<I, D> learner) throws InterruptedException, ObjectEvaluationFailedException {
+	public Double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner) throws InterruptedException, ObjectEvaluationFailedException {
 		// Create the learning curve extrapolator with the given configuration.
 		try {
-			LearningCurveExtrapolator<I, D> extrapolator = new LearningCurveExtrapolator<>(this.extrapolationMethod, learner, this.train, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory,
-					this.seed);
+			LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator(this.extrapolationMethod, learner, this.train, this.trainSplitForAnchorpointsMeasurement, this.anchorpoints, this.samplingAlgorithmFactory, this.seed);
 			// Create the extrapolator and calculate sample size of the saturation point
 			// with the given epsilon
 			IAnalyticalLearningCurve learningCurve = (IAnalyticalLearningCurve) extrapolator.extrapolateLearningCurve();
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
-			ASamplingAlgorithm<D> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
-			D saturationPointTrainSet = samplingAlgorithm.call();
+			ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
+			ILabeledDataset<ILabeledInstance> saturationPointTrainSet = samplingAlgorithm.call();
 
 			// Measure the accuracy with this subsample
 			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointTrainSet, this.test, this.measure);

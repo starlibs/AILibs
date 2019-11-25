@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.api4.java.ai.ml.core.dataset.descriptor.IDatasetDescriptor;
+import org.api4.java.ai.ml.core.dataset.descriptor.IFileDatasetDescriptor;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
@@ -47,11 +49,11 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	private static final String SEPARATOR_DENSE_INSTANCE_VALUES = ",";
 
 	private final boolean sparseMode;
-	private File datasetFile = null;
+	private IDatasetDescriptor datasetDescriptor = null;
 
-	public ArffDatasetAdapter(final boolean sparseMode, final File datasetFile) {
+	public ArffDatasetAdapter(final boolean sparseMode, final IDatasetDescriptor datasetDescriptor) {
 		this(sparseMode);
-		this.datasetFile = datasetFile;
+		this.datasetDescriptor = datasetDescriptor;
 	}
 
 	public ArffDatasetAdapter(final boolean sparseMode) {
@@ -63,13 +65,18 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 	}
 
 	@Override
-	public ILabeledDataset<ILabeledInstance> deserializeDataset(final File datasetFile) throws DatasetDeserializationFailedException, InterruptedException {
-		Objects.requireNonNull(datasetFile, "No dataset has been configured.");
-		return readDataset(this.sparseMode, datasetFile);
+	public ILabeledDataset<ILabeledInstance> deserializeDataset(final IDatasetDescriptor datasetDescriptor) throws DatasetDeserializationFailedException, InterruptedException {
+		Objects.requireNonNull(datasetDescriptor, "No dataset has been configured.");
+
+		if (datasetDescriptor instanceof IFileDatasetDescriptor) {
+			return readDataset(this.sparseMode, ((IFileDatasetDescriptor) datasetDescriptor).getDatasetDescription());
+		} else {
+			throw new DatasetDeserializationFailedException("Cannot handle dataset descriptor of type " + datasetDescriptor.getClass().getName());
+		}
 	}
 
 	public ILabeledDataset<ILabeledInstance> deserializeDataset() throws InterruptedException, DatasetDeserializationFailedException {
-		return this.deserializeDataset(this.datasetFile);
+		return this.deserializeDataset(this.datasetDescriptor);
 	}
 
 	/**
@@ -114,8 +121,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		} else {
 			try {
 				attType = EArffAttributeType.valueOf(type.toUpperCase());
-			}
-			catch (IllegalArgumentException e) {
+			} catch (IllegalArgumentException e) {
 				throw new UnsupportedAttributeTypeException("The attribute type " + type.toUpperCase() + " is not supported in the EArffAttributeType ENUM.");
 			}
 		}
@@ -143,7 +149,8 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 
 		if (!sparseData) {
 			if (lineSplit.length != attributes.size()) {
-				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: " + lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
+				throw new IllegalArgumentException("Cannot parse instance as this is not a sparse instance but has less columns than there are attributes defined. Expected values: " + attributes.size() + ". Actual number of values: "
+						+ lineSplit.length + ". Values: " + Arrays.toString(lineSplit));
 			}
 
 			Object[] parsedDenseInstance = new Object[lineSplit.length];

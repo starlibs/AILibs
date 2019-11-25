@@ -1,7 +1,5 @@
 package ai.libs.jaicore.ml.classification.singlelabel.timeseries.dataset;
 
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.TimeSeriesTreeClassifier;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.trees.TimeSeriesTreeLearningAlgorithm;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
 
 /**
@@ -43,8 +41,7 @@ public class TimeSeriesFeature {
 	 *         {@link TimeSeriesTreeLearningAlgorithm#NUM_FEATURE_TYPES} storing the
 	 *         generated feature values.
 	 */
-	public static double[] getFeatures(final double[] vector, final int t1, final int t2,
-			final boolean useBiasCorrection) {
+	public static double[] getFeatures(final double[] vector, final int t1, final int t2, final boolean useBiasCorrection) {
 		double[] result = new double[NUM_FEATURE_TYPES];
 
 		if (t1 >= vector.length || t2 >= vector.length) {
@@ -108,8 +105,7 @@ public class TimeSeriesFeature {
 	 *            for the standard deviation calculation
 	 * @return Returns the calculated feature for the specific instance and interval
 	 */
-	public static double calculateFeature(final FeatureType fType, final double[] vector, final int t1, final int t2,
-			final boolean useBiasCorrection) {
+	public static double calculateFeature(final FeatureType fType, final double[] vector, final int t1, final int t2, final boolean useBiasCorrection) {
 		switch (fType) {
 		case MEAN:
 			return MathUtil.mean(vector, t1, t2);

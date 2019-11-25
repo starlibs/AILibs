@@ -14,7 +14,7 @@ public class OpenMLDatasetAdapterTest {
 	public void testReading() throws DatasetDeserializationFailedException, InterruptedException, DatasetCreationException {
 
 		/* read the krvskp dataset */
-		ILabeledDataset<ILabeledInstance> data = OpenMLDatasetReader.readDataset(3);
+		ILabeledDataset<ILabeledInstance> data = new OpenMLDatasetReader().deserializeDataset(3);
 		assertEquals("Incorrect number of instances.", 3196, data.size());
 		assertEquals("Incorrect number of attributes.", 36, data.getNumAttributes());
 	}

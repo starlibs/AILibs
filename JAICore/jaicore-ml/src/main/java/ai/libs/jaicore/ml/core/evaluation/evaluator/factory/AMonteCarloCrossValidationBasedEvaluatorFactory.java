@@ -11,7 +11,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
  * @author fmohr
  *
  */
-public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> {
+public abstract class AMonteCarloCrossValidationBasedEvaluatorFactory<F extends AMonteCarloCrossValidationBasedEvaluatorFactory<F>> implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>> {
 
 	private IDatasetSplitter<ILabeledDataset<?>> datasetSplitter;
 	private int seed;

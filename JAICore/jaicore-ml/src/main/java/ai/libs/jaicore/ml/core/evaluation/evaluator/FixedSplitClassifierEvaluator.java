@@ -12,7 +12,8 @@ import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.ConstantSplitSetGene
 
 public class FixedSplitClassifierEvaluator extends ExecutionBasedClassifierEvaluator {
 
-	public <I extends ILabeledInstance, D extends ILabeledDataset<I>> FixedSplitClassifierEvaluator(final D train, final D validate, final IMeasure lossFunction) {
-		super(new ConstantSplitSetGenerator<>(new DatasetSplitSet<>(Arrays.asList(Arrays.asList(train, validate)))), new SingleSplitEvaluationMetric(lossFunction));
+	public FixedSplitClassifierEvaluator(final ILabeledDataset<ILabeledInstance> train, final ILabeledDataset<ILabeledInstance> validate, final IMeasure lossFunction) {
+		super(new ConstantSplitSetGenerator<ILabeledInstance, ILabeledDataset<ILabeledInstance>>(new DatasetSplitSet<ILabeledDataset<ILabeledInstance>>(Arrays.asList(Arrays.asList(train, validate)))),
+				new SingleSplitEvaluationMetric(lossFunction));
 	}
 }

@@ -38,16 +38,16 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISa
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolator<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements ILoggingCustomizable {
+public class LearningCurveExtrapolator implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolator.class);
 
-	protected ISupervisedLearner<I, D> learner;
-	protected D dataset;
-	protected D train;
-	protected D test;
-	protected ISamplingAlgorithmFactory<?, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory;
-	protected ASamplingAlgorithm<D> samplingAlgorithm;
+	protected ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner;
+	protected ILabeledDataset<ILabeledInstance> dataset;
+	protected ILabeledDataset<ILabeledInstance> train;
+	protected ILabeledDataset<ILabeledInstance> test;
+	protected ISamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory;
+	protected ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>> samplingAlgorithm;
 	protected Random random;
 	protected LearningCurveExtrapolationMethod extrapolationMethod;
 	private final int[] anchorPoints;
@@ -70,8 +70,10 @@ public class LearningCurveExtrapolator<I extends ILabeledInstance, D extends ILa
 	 * @throws DatasetCreationException
 	 * @throws InterruptedException
 	 */
-	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final ISupervisedLearner<I, D> learner, final D dataset, final double trainsplit, final int[] anchorPoints,
-			final ISamplingAlgorithmFactory<?, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final long seed) throws DatasetCreationException, InterruptedException {
+	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner,
+			final ILabeledDataset<ILabeledInstance> dataset, final double trainsplit, final int[] anchorPoints,
+			final ISamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory, final long seed)
+			throws DatasetCreationException, InterruptedException {
 		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;
@@ -102,19 +104,19 @@ public class LearningCurveExtrapolator<I extends ILabeledInstance, D extends ILa
 	@SuppressWarnings("unchecked")
 	public ILearningCurve extrapolateLearningCurve() throws InvalidAnchorPointsException, AlgorithmException, InterruptedException {
 		try {
-			D testInstances = this.test;
+			ILabeledDataset<? extends ILabeledInstance> testInstances = this.test;
 
 			// Create subsamples at the anchorpoints and measure the accuracy there.
-			SupervisedLearnerExecutor<D> learnerExecutor = new SupervisedLearnerExecutor<>();
+			SupervisedLearnerExecutor<ILabeledDataset<? extends ILabeledInstance>> learnerExecutor = new SupervisedLearnerExecutor<>();
 			ILossFunction metric = new ErrorRate();
 			for (int i = 0; i < this.anchorPoints.length; i++) {
 
 				// If it is a rerunnable factory, set the previous run.
 				if (this.samplingAlgorithmFactory instanceof IRerunnableSamplingAlgorithmFactory && this.samplingAlgorithm != null) {
-					((IRerunnableSamplingAlgorithmFactory<?, D, ASamplingAlgorithm<D>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
+					((IRerunnableSamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
 				}
 				this.samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(this.anchorPoints[i], this.train, this.random);
-				D subsampledDataset = this.samplingAlgorithm.call();
+				ILabeledDataset<? extends ILabeledInstance> subsampledDataset = this.samplingAlgorithm.call();
 
 				// Train classifier on subsample.
 				this.logger.debug("Running classifier with {} data points.", this.anchorPoints[i]);
@@ -146,7 +148,7 @@ public class LearningCurveExtrapolator<I extends ILabeledInstance, D extends ILa
 		this.logger.debug("Creating split with training portion {} and seed {}", trainsplit, seed);
 		Random r = new Random(seed);
 		try {
-			List<D> folds = new FilterBasedDatasetSplitter<I, D>(new LabelBasedStratifiedSamplingFactory<I, D>(), trainsplit, r).split(this.dataset);
+			List<ILabeledDataset<ILabeledInstance>> folds = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), trainsplit, r).split(this.dataset);
 			this.train = folds.get(0);
 			this.test = folds.get(1);
 
@@ -161,11 +163,11 @@ public class LearningCurveExtrapolator<I extends ILabeledInstance, D extends ILa
 
 	}
 
-	public ISupervisedLearner<I, D> getLearner() {
+	public ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getLearner() {
 		return this.learner;
 	}
 
-	public D getDataset() {
+	public ILabeledDataset<ILabeledInstance> getDataset() {
 		return this.dataset;
 	}
 

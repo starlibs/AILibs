@@ -1,11 +1,12 @@
 package ai.libs.jaicore.ml.experiments;
 
+import org.api4.java.ai.ml.core.dataset.serialization.DatasetDeserializationFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.openml.apiconnector.io.OpenmlConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetDescriptor;
 import ai.libs.jaicore.ml.core.dataset.serialization.OpenMLDatasetReader;
 
 public class OpenMLProblemSet extends MLProblemSet {
@@ -24,7 +25,7 @@ public class OpenMLProblemSet extends MLProblemSet {
 	}
 
 	@Override
-	public ILabeledDataset<?> getDataset() throws DatasetCreationException {
-		return OpenMLDatasetReader.readDataset(this.id);
+	public ILabeledDataset<?> getDataset() throws DatasetDeserializationFailedException, InterruptedException {
+		return new OpenMLDatasetReader().deserializeDataset(new OpenMLDatasetDescriptor(this.id));
 	}
 }
