@@ -242,7 +242,7 @@ public class TimeSeriesDataset extends ADataset<ITimeSeriesInstance> implements 
 	}
 
 	@Override
-	public ILabeledDataset<ITimeSeriesInstance> createEmptyCopy() throws DatasetCreationException, InterruptedException {
+	public TimeSeriesDataset createEmptyCopy() throws DatasetCreationException, InterruptedException {
 		return new TimeSeriesDataset(this.getInstanceSchema());
 	}
 
@@ -254,6 +254,15 @@ public class TimeSeriesDataset extends ADataset<ITimeSeriesInstance> implements 
 	@Override
 	public Object[] getLabelVector() {
 		return this.targets.toArray();
+	}
+
+	@Override
+	public TimeSeriesDataset createCopy() throws DatasetCreationException, InterruptedException {
+		TimeSeriesDataset copy = this.createEmptyCopy();
+		for (ITimeSeriesInstance i : this) {
+			copy.add(i);
+		}
+		return copy;
 	}
 
 }

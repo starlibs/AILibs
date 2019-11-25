@@ -25,7 +25,7 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedL
 
 	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints,
 			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> subsamplingAlgorithmFactory,
-			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.subsamplingAlgorithmFactory = subsamplingAlgorithmFactory;

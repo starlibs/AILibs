@@ -30,8 +30,17 @@ public class ClusterableDataset extends ADataset<IClusterableInstance> implement
 	}
 
 	@Override
-	public ILabeledDataset<IClusterableInstance> createEmptyCopy() throws DatasetCreationException, InterruptedException {
+	public ClusterableDataset createEmptyCopy() throws DatasetCreationException, InterruptedException {
 		return new ClusterableDataset(this.getInstanceSchema());
+	}
+
+	@Override
+	public ClusterableDataset createCopy() throws DatasetCreationException, InterruptedException {
+		ClusterableDataset copy = this.createEmptyCopy();
+		for (IClusterableInstance i : this) {
+			copy.add(i);
+		}
+		return copy;
 	}
 
 }

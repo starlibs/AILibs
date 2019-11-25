@@ -12,8 +12,10 @@ import java.util.List;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
+import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyad;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingDataset;
 import org.api4.java.ai.ml.ranking.dyad.dataset.IDyadRankingInstance;
@@ -49,29 +51,29 @@ public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankin
 		this("");
 	}
 
-	public DyadRankingDataset(String relationName) {
-		createInstanceSchema(relationName);
-		setInternalDataset(new Dataset(this.labeledInstanceSchema));
+	public DyadRankingDataset(final String relationName) {
+		this.createInstanceSchema(relationName);
+		this.setInternalDataset(new Dataset(this.labeledInstanceSchema));
 	}
 
-	public DyadRankingDataset(LabeledInstanceSchema labeledInstanceSchema) {
+	public DyadRankingDataset(final LabeledInstanceSchema labeledInstanceSchema) {
 		this.labeledInstanceSchema = labeledInstanceSchema.getCopy();
-		setInternalDataset(new Dataset(this.labeledInstanceSchema));
+		this.setInternalDataset(new Dataset(this.labeledInstanceSchema));
 	}
 
-	public DyadRankingDataset(String relationName, final Collection<IDyadRankingInstance> c) {
+	public DyadRankingDataset(final String relationName, final Collection<IDyadRankingInstance> c) {
 		this(relationName);
-		addAll(c);
+		this.addAll(c);
 	}
 
 	public DyadRankingDataset(final Collection<IDyadRankingInstance> c) {
 		this("", c);
 	}
 
-	private void createInstanceSchema(String relationName) {
+	private void createInstanceSchema(final String relationName) {
 		IAttribute dyadSetAttribute = new SetOfObjectsAttribute<>("dyads", IDyad.class);
 		IAttribute dyadRankingAttribute = new DyadRankingAttribute("ranking");
-		labeledInstanceSchema = new LabeledInstanceSchema(relationName, Arrays.asList(dyadSetAttribute), dyadRankingAttribute);
+		this.labeledInstanceSchema = new LabeledInstanceSchema(relationName, Arrays.asList(dyadSetAttribute), dyadRankingAttribute);
 	}
 
 	public void serialize(final OutputStream out) {
@@ -209,37 +211,46 @@ public class DyadRankingDataset extends AGeneralDatasetBackedDataset<IDyadRankin
 
 	@Override
 	public ILabeledInstanceSchema getInstanceSchema() {
-		return labeledInstanceSchema;
+		return this.labeledInstanceSchema;
 	}
 
 	@Override
 	public Object[] getLabelVector() {
-		return getInternalDataset().getLabelVector();
+		return this.getInternalDataset().getLabelVector();
 	}
 
 	@Override
 	public DyadRankingDataset createEmptyCopy() {
-		return new DyadRankingDataset(labeledInstanceSchema);
+		return new DyadRankingDataset(this.labeledInstanceSchema);
 	}
 
 	@Override
 	public Object[][] getFeatureMatrix() {
-		return getInternalDataset().getFeatureMatrix();
+		return this.getInternalDataset().getFeatureMatrix();
 	}
 
 	@Override
-	public void removeColumn(int columnPos) {
+	public void removeColumn(final int columnPos) {
 		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
 	}
 
 	@Override
-	public void removeColumn(String columnName) {
+	public void removeColumn(final String columnName) {
 		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
 	}
 
 	@Override
-	public void removeColumn(IAttribute attribute) {
+	public void removeColumn(final IAttribute attribute) {
 		throw new UnsupportedOperationException("Cannot remove a column for dyad DyadRankingDataset.");
+	}
+
+	@Override
+	public IDataset<IDyadRankingInstance> createCopy() throws DatasetCreationException, InterruptedException {
+		DyadRankingDataset copy = this.createEmptyCopy();
+		for (IDyadRankingInstance i : this) {
+			copy.add(i);
+		}
+		return copy;
 	}
 
 }

@@ -7,6 +7,7 @@ import java.util.ListIterator;
 
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -199,6 +200,12 @@ public class SingleLabelClassificationDataset implements ISingleLabelClassificat
 
 	@Override
 	public List<ISingleLabelClassificationInstance> subList(final int fromIndex, final int toIndex) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IDataset<ISingleLabelClassificationInstance> createCopy() throws DatasetCreationException, InterruptedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

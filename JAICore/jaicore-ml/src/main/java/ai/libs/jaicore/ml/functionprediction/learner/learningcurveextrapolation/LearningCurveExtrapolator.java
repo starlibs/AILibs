@@ -73,7 +73,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner,
 			final ILabeledDataset<ILabeledInstance> dataset, final double trainsplit, final int[] anchorPoints,
 			final ISamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory, final long seed)
-			throws DatasetCreationException, InterruptedException {
+					throws DatasetCreationException, InterruptedException {
 		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
 		this.dataset = dataset;

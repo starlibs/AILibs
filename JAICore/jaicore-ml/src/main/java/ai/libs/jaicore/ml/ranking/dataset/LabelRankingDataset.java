@@ -1,7 +1,8 @@
 package ai.libs.jaicore.ml.ranking.dataset;
 
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingDataset;
 import org.api4.java.ai.ml.ranking.label.dataset.ILabelRankingInstance;
@@ -20,13 +21,22 @@ public class LabelRankingDataset extends ADataset<ILabelRankingInstance> impleme
 	}
 
 	@Override
-	public ILabeledDataset<ILabelRankingInstance> createEmptyCopy() throws DatasetCreationException, InterruptedException {
+	public LabelRankingDataset createEmptyCopy() throws DatasetCreationException, InterruptedException {
 		return new LabelRankingDataset(this.getInstanceSchema());
 	}
 
 	@Override
 	public void removeColumn(final int columnPos) {
 		throw new UnsupportedOperationException("Not yet implemented.");
+	}
+
+	@Override
+	public IDataset<ILabelRankingInstance> createCopy() throws DatasetCreationException, InterruptedException {
+		LabelRankingDataset copy = this.createEmptyCopy();
+		for (ILabeledInstance i : this) {
+			copy.add(i);
+		}
+		return copy;
 	}
 
 }

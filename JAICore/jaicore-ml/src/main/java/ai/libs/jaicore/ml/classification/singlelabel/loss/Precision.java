@@ -2,8 +2,6 @@ package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-
 public class Precision extends ASingleLabelClassificationMeasure {
 
 	private final int positiveClass;
@@ -13,13 +11,13 @@ public class Precision extends ASingleLabelClassificationMeasure {
 	}
 
 	@Override
-	public double score(final List<ISingleLabelClassification> expected, final List<ISingleLabelClassification> actual) {
+	public double score(final List<Object> expected, final List<Object> actual) {
 		int tp = 0;
 		int fp = 0;
 
 		for (int i = 0; i < actual.size(); i++) {
-			int actualValue = actual.get(i).getPrediction();
-			int expectedValue = expected.get(i).getPrediction();
+			int actualValue = (int)actual.get(i);
+			int expectedValue = (int)expected.get(i);
 			if (actualValue == this.positiveClass) {
 				if (actualValue == expectedValue) {
 					tp++;
