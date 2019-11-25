@@ -4,16 +4,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
 import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassificationPredictionBatch;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 
 import ai.libs.jaicore.ml.classification.singlelabel.SingleLabelClassificationPredictionBatch;
 import ai.libs.jaicore.ml.core.learner.ASupervisedLearner;
 
-public abstract class ASingleLabelClassifier extends ASupervisedLearner<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> {
+public abstract class ASingleLabelClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> {
 
 	protected ASingleLabelClassifier(final Map<String, Object> config) {
 		super(config);
@@ -24,9 +24,9 @@ public abstract class ASingleLabelClassifier extends ASupervisedLearner<ISingleL
 	}
 
 	@Override
-	public ISingleLabelClassificationPredictionBatch predict(final ISingleLabelClassificationInstance[] dTest) throws PredictionException, InterruptedException {
+	public ISingleLabelClassificationPredictionBatch predict(final ILabeledInstance[] dTest) throws PredictionException, InterruptedException {
 		List<ISingleLabelClassification> batchList = new LinkedList<>();
-		for (ISingleLabelClassificationInstance i : dTest) {
+		for (ILabeledInstance i : dTest) {
 			batchList.add(this.predict(i));
 		}
 		return new SingleLabelClassificationPredictionBatch(batchList);
