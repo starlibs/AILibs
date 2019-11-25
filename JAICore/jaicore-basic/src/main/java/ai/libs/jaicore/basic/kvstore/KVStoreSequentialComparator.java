@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author mwever
  */
-public class KVStoreSequentialComparator implements Comparator<KVStore> {
+public class KVStoreSequentialComparator implements Comparator<IKVStore> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(KVStoreSequentialComparator.class);
 
@@ -27,7 +27,7 @@ public class KVStoreSequentialComparator implements Comparator<KVStore> {
 	}
 
 	@Override
-	public int compare(final KVStore arg0, final KVStore arg1) {
+	public int compare(final IKVStore arg0, final IKVStore arg1) {
 		for (String sortKey : this.sortKeys) {
 			Integer compare = null;
 
