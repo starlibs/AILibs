@@ -53,8 +53,8 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
  *
  * @author mwever, fmohr
  */
-public abstract class AbstractMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>, B extends AbstractMLPlanBuilder<I, D, L, B>>
-implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
+public abstract class AbstractMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, B extends AbstractMLPlanBuilder<L, B>>
+implements IMLPlanBuilder<L, B>, ILoggingCustomizable {
 
 	/* Logging */
 	private Logger logger = LoggerFactory.getLogger(AbstractMLPlanBuilder.class);
@@ -81,12 +81,12 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	private ISupervisedLearnerMetric performanceMeasure = ClassifierMetric.MEAN_ERRORRATE;
 
 	private IPathEvaluator<TFDNode, String, Double> preferredNodeEvaluator = null;
-	private PipelineValidityCheckingNodeEvaluator<D> pipelineValidityCheckingNodeEvaluator;
+	private PipelineValidityCheckingNodeEvaluator pipelineValidityCheckingNodeEvaluator;
 
 	/* The splitter is used to create the split for separating search and selection data */
-	private IFoldSizeConfigurableRandomDatasetSplitter<D> searchSelectionDatasetSplitter;
-	private ISupervisedLearnerEvaluatorFactory<I, D> factoryForPipelineEvaluationInSearchPhase = null;
-	private ISupervisedLearnerEvaluatorFactory<I, D> factoryForPipelineEvaluationInSelectionPhase = null;
+	private IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> searchSelectionDatasetSplitter;
+	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSearchPhase = null;
+	private ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> factoryForPipelineEvaluationInSelectionPhase = null;
 
 	private Collection<Component> components = new LinkedList<>();
 
@@ -94,7 +94,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	private boolean useCache;
 
 	/* The problem input for ML-Plan. */
-	private D dataset;
+	private ILabeledDataset<?> dataset;
 
 	protected AbstractMLPlanBuilder() {
 		super();
@@ -183,7 +183,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	 * @param dataset The dataset for which ML-Plan is to be run.
 	 * @return The builder object.
 	 */
-	public B withDataset(final D dataset) {
+	public B withDataset(final ILabeledDataset<?> dataset) {
 		this.dataset = dataset;
 		return this.getSelf();
 	}
@@ -220,7 +220,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	 * @param datasetSplitter The dataset splitter to be used.
 	 * @return The builder obect.
 	 */
-	public B withDatasetSplitterForSearchSelectionSplit(final IFoldSizeConfigurableRandomDatasetSplitter<D> datasetSplitter) {
+	public B withDatasetSplitterForSearchSelectionSplit(final IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> datasetSplitter) {
 		this.searchSelectionDatasetSplitter = datasetSplitter;
 		return this.getSelf();
 	}
@@ -282,22 +282,22 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	}
 
 	@Override
-	public PipelineEvaluator<I, D> getClassifierEvaluationInSearchPhase(final D data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(final ILabeledDataset<?> data, final int seed, final int fullDatasetSize) throws LearnerEvaluatorConstructionFailedException {
 		Objects.requireNonNull(this.factoryForPipelineEvaluationInSearchPhase, "No factory for pipeline evaluation in search phase has been set!");
-		ISupervisedLearnerEvaluator<I, D> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
+		ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> evaluator = this.factoryForPipelineEvaluationInSearchPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed));
 		if (evaluator instanceof LearningCurveExtrapolationEvaluator) {
 			((LearningCurveExtrapolationEvaluator) evaluator).setFullDatasetSize(fullDatasetSize);
 		}
 
-		return new PipelineEvaluator<>(this.getLearnerFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
+		return new PipelineEvaluator(this.getLearnerFactory(), evaluator, this.getAlgorithmConfig().timeoutForCandidateEvaluation());
 	}
 
 	@Override
-	public PipelineEvaluator<I, D> getClassifierEvaluationInSelectionPhase(final D data, final int seed) throws LearnerEvaluatorConstructionFailedException {
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(final ILabeledDataset<?> data, final int seed) throws LearnerEvaluatorConstructionFailedException {
 		if (this.factoryForPipelineEvaluationInSelectionPhase == null) {
 			throw new IllegalStateException("No factory for pipeline evaluation in selection phase has been set!");
 		}
-		return new PipelineEvaluator<>(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed)), Integer.MAX_VALUE);
+		return new PipelineEvaluator(this.getLearnerFactory(), this.factoryForPipelineEvaluationInSelectionPhase.getDataspecificRandomizedLearnerEvaluator(data, ClassifierMetric.MEAN_ERRORRATE, new Random(seed)), Integer.MAX_VALUE);
 	}
 
 	/**
@@ -306,14 +306,14 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	 * @param evaluatorFactory The evaluator factory for the search phase.
 	 * @return The builder object.
 	 */
-	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<I, D> evaluatorFactory) {
+	public void withSearchPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSearchPhase = evaluatorFactory;
 	}
 
 	/**
 	 * @return The factory for the classifier evaluator of the search phase.
 	 */
-	protected ISupervisedLearnerEvaluatorFactory<I, D> getSearchEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> getSearchEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSearchPhase;
 	}
 
@@ -323,7 +323,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	 * @param evaluatorFactory The evaluator factory for the selection phase.
 	 * @return The builder object.
 	 */
-	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<I, D> evaluatorFactory) {
+	public B withSelectionPhaseEvaluatorFactory(final ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> evaluatorFactory) {
 		this.factoryForPipelineEvaluationInSelectionPhase = evaluatorFactory;
 		return this.getSelf();
 	}
@@ -353,7 +353,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	/**
 	 * @return The factory for the classifier evaluator of the selection phase.
 	 */
-	protected ISupervisedLearnerEvaluatorFactory<I, D> getSelectionEvaluatorFactory() {
+	protected ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> getSelectionEvaluatorFactory() {
 		return this.factoryForPipelineEvaluationInSelectionPhase;
 	}
 
@@ -390,7 +390,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	}
 
 	@Override
-	public IFoldSizeConfigurableRandomDatasetSplitter<D> getSearchSelectionDatasetSplitter() {
+	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter() {
 		return this.searchSelectionDatasetSplitter;
 	}
 
@@ -410,7 +410,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	}
 
 	@Override
-	public void prepareNodeEvaluatorInFactoryWithData(final D data) {
+	public void prepareNodeEvaluatorInFactoryWithData(final ILabeledDataset<?> data) {
 		if (!(this.hascoFactory instanceof HASCOViaFDAndBestFirstFactory)) {
 			return;
 		}
@@ -456,7 +456,7 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	 * @param dataset The dataset for which an ML-Plan object is to be built.
 	 * @return The ML-Plan object configured with this builder.
 	 */
-	public MLPlan<I, D, L> build(final D dataset) {
+	public MLPlan<L> build(final ILabeledDataset<?> dataset) {
 		this.dataset = dataset;
 		return this.build();
 	}
@@ -466,11 +466,11 @@ implements IMLPlanBuilder<I, D, L, B>, ILoggingCustomizable {
 	 *
 	 * @return The ML-Plan object configured with this builder.
 	 */
-	public MLPlan<I, D, L> build() {
+	public MLPlan<L> build() {
 		Objects.requireNonNull(this.dataset, "A dataset needs to be provided as input to ML-Plan");
 		Objects.requireNonNull(this.searchSelectionDatasetSplitter, "Dataset splitter for search phase must be set!");
 		Objects.requireNonNull(this.requestedHASCOInterface, "No requested HASCO interface defined!");
-		MLPlan<I, D, L> mlplan = new MLPlan<>(this, this.dataset);
+		MLPlan<L> mlplan = new MLPlan<>(this, this.dataset);
 		mlplan.setTimeout(this.getTimeOut());
 		return mlplan;
 	}

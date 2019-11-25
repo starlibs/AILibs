@@ -23,13 +23,13 @@ import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
  * @author fmohr
  *
  */
-public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>, B extends IMLPlanBuilder<I, D, L, B>> {
+public interface IMLPlanBuilder<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>, B extends IMLPlanBuilder<L, B>> {
 
-	public IFoldSizeConfigurableRandomDatasetSplitter<D> getSearchSelectionDatasetSplitter();
+	public IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> getSearchSelectionDatasetSplitter();
 
-	public PipelineEvaluator<I, D> getClassifierEvaluationInSearchPhase(D dataShownToSearch, int randomSeed, int size) throws LearnerEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSearchPhase(ILabeledDataset<?> dataShownToSearch, int randomSeed, int size) throws LearnerEvaluatorConstructionFailedException;
 
-	public PipelineEvaluator<I, D> getClassifierEvaluationInSelectionPhase(D dataShownToSearch, int randomSeed) throws LearnerEvaluatorConstructionFailedException;
+	public PipelineEvaluator getClassifierEvaluationInSelectionPhase(ILabeledDataset<?> dataShownToSearch, int randomSeed) throws LearnerEvaluatorConstructionFailedException;
 
 	public ISupervisedLearnerMetric getPerformanceMeasure();
 
@@ -43,7 +43,7 @@ public interface IMLPlanBuilder<I extends ILabeledInstance, D extends ILabeledDa
 
 	public MLPlanClassifierConfig getAlgorithmConfig();
 
-	public void prepareNodeEvaluatorInFactoryWithData(D data);
+	public void prepareNodeEvaluatorInFactoryWithData(ILabeledDataset<?> data);
 
 	public boolean getUseCache();
 

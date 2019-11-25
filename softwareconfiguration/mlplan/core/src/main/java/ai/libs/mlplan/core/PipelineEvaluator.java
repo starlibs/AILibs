@@ -26,17 +26,17 @@ import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
  *
  * @author fmohr
  */
-public class PipelineEvaluator<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
+public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, Double> implements IInformedObjectEvaluatorExtension<Double>, ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(PipelineEvaluator.class);
 
 	private final EventBus eventBus = new EventBus();
-	private final ILearnerFactory<? extends ISupervisedLearner<I, D>> learnerFactory;
-	private final ISupervisedLearnerEvaluator<I, D> benchmark;
+	private final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> learnerFactory;
+	private final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> benchmark;
 	private final int timeoutForEvaluation;
 	private Double bestScore = 1.0;
 
-	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<I, D>> learnerFactory, final ISupervisedLearnerEvaluator<I, D> benchmark, final int timeoutForEvaluation) {
+	public PipelineEvaluator(final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> learnerFactory, final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> benchmark, final int timeoutForEvaluation) {
 		super();
 		this.learnerFactory = learnerFactory;
 		this.benchmark = benchmark;
@@ -71,7 +71,7 @@ public class PipelineEvaluator<I extends ILabeledInstance, D extends ILabeledDat
 			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
 				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).updateBestScore(this.bestScore);
 			}
-			ISupervisedLearner<I, D> learner = this.learnerFactory.getComponentInstantiation(c);
+			ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>> learner = this.learnerFactory.getComponentInstantiation(c);
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());
@@ -101,7 +101,7 @@ public class PipelineEvaluator<I extends ILabeledInstance, D extends ILabeledDat
 		return "Pipeline evaluation phase";
 	}
 
-	public ISupervisedLearnerEvaluator<I, D> getBenchmark() {
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getBenchmark() {
 		return this.benchmark;
 	}
 

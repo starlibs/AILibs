@@ -43,7 +43,7 @@ import ai.libs.mlplan.core.events.ClassifierFoundEvent;
 import ai.libs.mlplan.core.events.SupervisedLearnerCreatedEvent;
 import ai.libs.mlplan.multiclass.MLPlanClassifierConfig;
 
-public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L extends ISupervisedLearner<I, D>> extends AAlgorithm<D, L> implements ILoggingCustomizable {
+public class MLPlan<L extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> extends AAlgorithm<ILabeledDataset<?>, L> implements ILoggingCustomizable {
 
 	/** Logger for controlled output. */
 	private Logger logger = LoggerFactory.getLogger(MLPlan.class);
@@ -53,14 +53,14 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 	private double internalValidationErrorOfSelectedClassifier;
 	private ComponentInstance componentInstanceOfSelectedClassifier;
 
-	private final IMLPlanBuilder<I, D, L, ?> builder;
-	private final D data;
+	private final IMLPlanBuilder<L, ?> builder;
+	private final ILabeledDataset<?> data;
 	private TwoPhaseHASCOFactory<GraphSearchWithPathEvaluationsInput<TFDNode, String, Double>, TFDNode, String> twoPhaseHASCOFactory;
 	private OptimizingFactory<TwoPhaseSoftwareConfigurationProblem, L, HASCOSolutionCandidate<Double>, Double> optimizingFactory;
 
 	private boolean buildSelectedClasifierOnGivenData = true;
 
-	public MLPlan(final IMLPlanBuilder<I, D, L, ?> builder, final D data) {
+	public MLPlan(final IMLPlanBuilder<L, ?> builder, final ILabeledDataset<?> data) {
 		super(builder.getAlgorithmConfig(), data);
 		builder.prepareNodeEvaluatorInFactoryWithData(data);
 
@@ -94,11 +94,11 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 			/* set up exact splits */
 			final double dataPortionUsedForSelection = this.getConfig().dataPortionForSelection();
 			this.logger.debug("Splitting given {} data points into search data ({}%) and selection data ({}%).", this.data.size(), MathExt.round((1 - dataPortionUsedForSelection) * 100, 2), MathExt.round(dataPortionUsedForSelection, 2));
-			D dataShownToSearch;
+			ILabeledDataset<?> dataShownToSearch;
 			if (dataPortionUsedForSelection > 0) {
 				try {
 					int seed = this.getConfig().randomSeed();
-					IFoldSizeConfigurableRandomDatasetSplitter<D> splitter = this.builder.getSearchSelectionDatasetSplitter();
+					IFoldSizeConfigurableRandomDatasetSplitter<ILabeledDataset<?>> splitter = this.builder.getSearchSelectionDatasetSplitter();
 					if (splitter == null) {
 						throw new IllegalArgumentException("The builder does not specify a dataset splitter");
 					}
@@ -130,8 +130,8 @@ public class MLPlan<I extends ILabeledInstance, D extends ILabeledDataset<I>, L 
 
 			/* setup the pipeline evaluators */
 			this.logger.debug("Setting up the pipeline evaluators.");
-			PipelineEvaluator<I, D> classifierEvaluatorForSearch;
-			PipelineEvaluator<I, D> classifierEvaluatorForSelection;
+			PipelineEvaluator classifierEvaluatorForSearch;
+			PipelineEvaluator classifierEvaluatorForSelection;
 			try {
 				classifierEvaluatorForSearch = this.builder.getClassifierEvaluationInSearchPhase(dataShownToSearch, this.getConfig().randomSeed(), MLPlan.this.getInput().size());
 				classifierEvaluatorForSelection = this.builder.getClassifierEvaluationInSelectionPhase(dataShownToSearch, this.getConfig().randomSeed());
