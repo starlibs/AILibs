@@ -193,7 +193,11 @@
   </logger>
   
   <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator">
-    <level value="info" />
+    <level value="debug" />
+  </logger>
+  
+  <logger name="testedalgorithm.optimizingfactory.optAlgo.hasco.search.nodeevaluator.randomsearch">
+  	<level value="debug" />
   </logger>
   
   <!-- configuration for ML-Plan 4 big data Test logging -->

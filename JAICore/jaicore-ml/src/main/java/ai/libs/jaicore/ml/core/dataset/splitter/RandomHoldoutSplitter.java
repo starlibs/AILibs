@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.classification.execution.IDatasetSplitSetGenerator;
@@ -13,7 +11,19 @@ import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.splitter.IRandomDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
+import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.SimpleRandomSampling;
+
+/**
+ * This splitter just creates random split without looking at the data.
+ *
+ * @author fmohr
+ *
+ * @param <D>
+ */
 public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomDatasetSplitter<D>, IDatasetSplitSetGenerator<D> {
 
 	private final Random rand;
@@ -31,24 +41,46 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 		}
 		this.portionSum = portionSum;
 		this.rand = rand;
-		this.portions = portions;
+		if (portionSum == 1) {
+			this.portions = portions;
+		}
+		else {
+			this.portions = new double[portions.length + 1];
+			for (int i = 0; i < portions.length; i++) {
+				this.portions[i] = portions[i];
+			}
+			this.portions[portions.length] = 1 - portionSum;
+		}
 	}
 
 	@Override
 	public List<D> split(final D data, final Random random) throws SplitFailedException, InterruptedException {
-		List<D> holdOutSplits = new ArrayList<>();
+		List<D> holdOutSplits = new ArrayList<>(this.portions.length);
 
+		/* create sub-indices for the respective folds */
+		D copy;
+		int totalItems = data.size();
 		try {
-			for (int i = 0; i < ((this.portionSum < 1.0) ? this.portions.length + 1 : this.portions.length); i++) {
-				holdOutSplits.add((D) data.createEmptyCopy());
+			copy = (D)data.createCopy();
+			int index = 0;
+			double remainingMass = 1;
+			for (int i = 0; i < this.portions.length; i++) {
+				double portion = i < this.portions.length ? this.portions[i] : remainingMass;
+				remainingMass -= portion;
+				SimpleRandomSampling subSampler = new SimpleRandomSampling(random, copy);
+				subSampler.setSampleSize((int)Math.round(portion * totalItems));
+				holdOutSplits.add((D)subSampler.call());
+				copy = (D)subSampler.getComplement();
+
 			}
-		} catch (DatasetCreationException e) {
-			throw new SplitFailedException("Could not create empty hold out buckets.", e);
+		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {
+			throw new SplitFailedException(e);
 		}
+		if (holdOutSplits.size() != this.portions.length) {
+			throw new IllegalStateException("Needed to generate " + this.portions.length + " folds, but only produced " + holdOutSplits.size());
+		}
+		return holdOutSplits;
 
-		List<Integer> indices = IntStream.range(0, data.size()).mapToObj(x -> Integer.valueOf(x)).collect(Collectors.toList());
-
-		throw new UnsupportedOperationException("Not implemented");
 	}
 
 	@Override

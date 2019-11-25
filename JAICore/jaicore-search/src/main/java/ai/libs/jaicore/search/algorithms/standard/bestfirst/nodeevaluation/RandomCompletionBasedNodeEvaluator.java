@@ -75,6 +75,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	protected Map<String, Integer> plFails = new ConcurrentHashMap<>();
 	protected Map<String, Integer> plSuccesses = new ConcurrentHashMap<>();
 
+	protected T root;
 	protected IGraphGenerator<T, A> generator;
 	protected PathGoalTester<T, A> goalTester;
 	protected long timestampOfFirstEvaluation;
@@ -238,6 +239,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 					}
 					final IPath<T, A> completedPath = tmpCompletedPath;
 					completedPaths.add(completedPath);
+					this.logger.debug("Identified complete path {}. Now evaluating the path.", completedPath);
 
 					/* evaluate the found solution and update internal value model */
 					try {
@@ -279,6 +281,9 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 				V best = this.bestKnownScoreUnderNodeInCompleterGraph.get(n.getNodes());
 				this.logger.debug("Finished sampling. {} samples were drawn, {} were successful. Best seen score is {}", drawnSamples, successfulSamples, best);
 				if (best == null) {
+					if (n.getHead().equals(this.root)) {
+						this.logger.error("No completion could be drawn for the root. Apparently there is no solution in this graph!");
+					}
 					this.checkInterruption();
 					if (countedExceptions > 0) {
 						throw new NoSuchElementException("Among " + drawnSamples + " evaluated candidates, we could not identify any candidate that did not throw an exception.");
@@ -480,6 +485,7 @@ implements IPotentiallyGraphDependentPathEvaluator<T, A, V>, IPotentiallySolutio
 	@Override
 	public void setGenerator(final IGraphGenerator<T, A> generator, final PathGoalTester<T, A> goalTester) {
 		this.generator = generator;
+		this.root = generator.getRootGenerator().getRoots().iterator().next();
 		this.goalTester = goalTester;
 
 		/* create the completion algorithm and initialize it */

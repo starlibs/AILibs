@@ -2,14 +2,12 @@ package ai.libs.jaicore.ml.classification.singlelabel.loss;
 
 import java.util.List;
 
-import org.api4.java.ai.ml.classification.singlelabel.evaluation.ISingleLabelClassification;
-
 public class ErrorRate extends ASingleLabelClassificationMeasure {
 
 	private final ZeroOneLoss zeroOneLoss = new ZeroOneLoss();
 
 	@Override
-	public double loss(final List<ISingleLabelClassification> expected, final List<ISingleLabelClassification> actual) {
+	public double loss(final List<Object> expected, final List<Object> actual) {
 		this.checkConsistency(expected, actual);
 
 		double sumOfZOLoss = 0.0;

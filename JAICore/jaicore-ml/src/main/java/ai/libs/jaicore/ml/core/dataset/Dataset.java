@@ -35,7 +35,7 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 	}
 
 	@Override
-	public ILabeledDataset<ILabeledInstance> createEmptyCopy() throws DatasetCreationException, InterruptedException {
+	public Dataset createEmptyCopy() throws DatasetCreationException, InterruptedException {
 		return new Dataset(this.schema);
 	}
 
@@ -73,6 +73,15 @@ public class Dataset extends ArrayList<ILabeledInstance> implements ILabeledData
 		} else {
 			throw new IllegalArgumentException("There is no such attribute with name " + attribute.getName() + " to remove.");
 		}
+	}
+
+	@Override
+	public Dataset createCopy() throws DatasetCreationException, InterruptedException {
+		Dataset ds = this.createEmptyCopy();
+		for (ILabeledInstance i : this) {
+			ds.add(i);
+		}
+		return ds;
 	}
 
 }

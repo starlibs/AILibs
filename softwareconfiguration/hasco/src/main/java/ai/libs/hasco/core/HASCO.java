@@ -1,6 +1,7 @@
 package ai.libs.hasco.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -112,6 +113,14 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 			}
 		}
 
+		/* check whether there is a component that satisfies the query */
+		final String requiredInterface = configurationProblem.getRequiredInterface();
+		Collection<Component> rootComponents = configurationProblem.getComponents().stream().filter(c -> c.getProvidedInterfaces().contains(requiredInterface)).collect(Collectors.toList());
+		if (rootComponents.isEmpty()) {
+			throw new IllegalArgumentException("There is no component that provides the required interface \"" + requiredInterface + "\"");
+		}
+		this.logger.info("Identified {} components that can be used to resolve the query.", rootComponents.size());
+
 		/* derive planning problem and search problem */
 		this.logger.debug("Deriving search problem");
 		RefinementConfiguredSoftwareConfigurationProblem<V> refConfigSoftwareConfigurationProblem = new RefinementConfiguredSoftwareConfigurationProblem<>(
@@ -208,11 +217,16 @@ public class HASCO<S extends GraphSearchWithPathEvaluationsInput<N, A, V>, N, A,
 
 			/* now initialize the search */
 			this.logger.debug("Initializing the search");
-			AlgorithmEvent searchInitializationEvent = this.search.nextWithException();
-			assert searchInitializationEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the search was not the initialization event but " + searchInitializationEvent + "!";
-			this.logger.debug("Search has been initialized.");
-			this.logger.info("HASCO initialization completed.");
-			return event;
+			try {
+				AlgorithmEvent searchInitializationEvent = this.search.nextWithException();
+				assert searchInitializationEvent instanceof AlgorithmInitializedEvent : "The first event emitted by the search was not the initialization event but " + searchInitializationEvent + "!";
+				this.logger.debug("Search has been initialized.");
+				this.logger.info("HASCO initialization completed.");
+				return event;
+			}
+			catch (AlgorithmException e) {
+				throw new AlgorithmException("HASCO initialization failed.\nOne possible reason is that the graph has no solution.", e);
+			}
 
 		case ACTIVE:
 

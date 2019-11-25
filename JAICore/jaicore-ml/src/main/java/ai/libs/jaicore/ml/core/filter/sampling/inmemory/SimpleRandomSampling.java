@@ -2,15 +2,15 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
+import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 
-public class SimpleRandomSampling<I extends ILabeledInstance, D extends ILabeledDataset<I>> extends ASamplingAlgorithm<D> {
+public class SimpleRandomSampling<I extends IInstance, D extends IDataset<I>> extends ASamplingAlgorithm<D> {
 
 	private Random random;
 

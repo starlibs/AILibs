@@ -2,6 +2,7 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 
 
-public class PredictionDiff<T> implements IPredictionAndGroundTruthTable {
+public class PredictionDiff<T> implements IPredictionAndGroundTruthTable<T> {
 
 	private final Class<?> classInGeneric;
 	private final List<T> predictions = new ArrayList<>();
@@ -17,7 +18,8 @@ public class PredictionDiff<T> implements IPredictionAndGroundTruthTable {
 
 	public PredictionDiff() {
 		super();
-		this.classInGeneric = ((ParameterizedType)this.getClass().getGenericSuperclass()).getActualTypeArguments()[0].getClass();
+		Type genericSuperClass = this.getClass().getGenericSuperclass();
+		this.classInGeneric = (genericSuperClass instanceof ParameterizedType) ? (Class<T>)((ParameterizedType)genericSuperClass).getActualTypeArguments()[0].getClass() : Object.class;
 	}
 
 	public PredictionDiff(final List<? extends T> predictions, final List<? extends T> groundTruths) {
@@ -40,12 +42,12 @@ public class PredictionDiff<T> implements IPredictionAndGroundTruthTable {
 	}
 
 	@Override
-	public Object getPrediction(final int instance) {
+	public T getPrediction(final int instance) {
 		return this.predictions.get(instance);
 	}
 
 	@Override
-	public Object getGroundTruth(final int instance) {
+	public T getGroundTruth(final int instance) {
 		return this.groundTruths.get(instance);
 	}
 

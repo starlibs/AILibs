@@ -32,7 +32,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 
 	private final EventBus eventBus = new EventBus();
 	private final ILearnerFactory<? extends ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>>> learnerFactory;
-	private final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> benchmark;
+	private final ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> benchmark;
 	private final int timeoutForEvaluation;
 	private Double bestScore = 1.0;
 
@@ -71,7 +71,7 @@ public class PipelineEvaluator extends TimedObjectEvaluator<ComponentInstance, D
 			if (this.benchmark instanceof IInformedObjectEvaluatorExtension) {
 				((IInformedObjectEvaluatorExtension<Double>) this.benchmark).updateBestScore(this.bestScore);
 			}
-			ISupervisedLearner<ILabeledInstance, ILabeledDataset<?>> learner = this.learnerFactory.getComponentInstantiation(c);
+			ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner = this.learnerFactory.getComponentInstantiation(c);
 			this.eventBus.post(new SupervisedLearnerCreatedEvent(c, learner)); // inform listeners about the creation of the classifier
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Starting benchmark {} for classifier {}", this.benchmark, (learner instanceof ScikitLearnWrapper) ? learner.toString() : learner.getClass().getName());

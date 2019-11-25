@@ -4,12 +4,11 @@ import java.util.List;
 import java.util.OptionalDouble;
 import java.util.stream.IntStream;
 
-import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.evaluation.IPredictionAndGroundTruthTable;
 import org.api4.java.ai.ml.core.evaluation.loss.IInstanceMeasure;
 import org.api4.java.ai.ml.core.evaluation.loss.IMeasure;
 
-public abstract class AMeasure<O extends IPrediction, T extends IPredictionAndGroundTruthTable<O>> implements IMeasure<O, T> {
+public abstract class AMeasure<O, T extends IPredictionAndGroundTruthTable<O>> implements IMeasure<O, T> {
 
 	protected void checkConsistency(final List<O> expected, final List<O> actual) {
 		if (expected.size() != actual.size()) {

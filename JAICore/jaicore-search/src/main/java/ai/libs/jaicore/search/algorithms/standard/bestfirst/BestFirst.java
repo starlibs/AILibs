@@ -32,7 +32,6 @@ import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPathEvalu
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyGraphDependentPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallySolutionReportingPathEvaluator;
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IPotentiallyUncertaintyAnnotatingPathEvaluator;
-import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.PathEvaluationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.events.AlgorithmInitializedEvent;
 import org.api4.java.algorithm.events.SolutionCandidateFoundEvent;
@@ -67,7 +66,6 @@ import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RemovedGoalNo
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.RolloutEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.SolutionAnnotationEvent;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.events.SuccessorComputationCompletedEvent;
-import ai.libs.jaicore.search.algorithms.standard.bestfirst.exceptions.ControlledNodeEvaluationException;
 import ai.libs.jaicore.search.algorithms.standard.bestfirst.nodeevaluation.DecoratingNodeEvaluator;
 import ai.libs.jaicore.search.core.interfaces.AOptimalPathInORGraphSearch;
 import ai.libs.jaicore.search.model.other.EvaluatedSearchGraphPath;
@@ -558,7 +556,11 @@ public class BestFirst<I extends GraphSearchWithSubpathEvaluationsInput<N, A, V>
 				if (root == null) {
 					throw new IllegalArgumentException("Root cannot be null. Cannot add NULL as a node to OPEN");
 				}
-				this.labelNode(root);
+				try {
+					this.labelNode(root);
+				} catch (AlgorithmException e) {
+					throw new AlgorithmException("Graph initialization failed: Could not compute the label for the root node due to an exception.", e);
+				}
 				this.logger.debug("Labeled root with {}", root.getScore());
 				this.checkAndConductTermination();
 				if (root.getScore() == null) {

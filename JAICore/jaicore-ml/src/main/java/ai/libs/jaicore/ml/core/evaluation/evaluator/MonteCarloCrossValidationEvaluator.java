@@ -14,16 +14,16 @@ import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValid
 
 public class MonteCarloCrossValidationEvaluator extends ExecutionBasedClassifierEvaluator {
 
-	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random) {
+	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random) {
 		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, ClassifierMetric.MEAN_ERRORRATE);
 	}
 
-	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random, final ISupervisedLearnerMetric metric) {
+	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random, final ISupervisedLearnerMetric metric) {
 		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, metric);
 	}
 
-	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats, final Random random,
+	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final IRandomDatasetSplitter<ILabeledDataset<ILabeledInstance>> datasetSplitter, final int repeats, final Random random,
 			final ISupervisedLearnerMetric metric) {
-		super(new FixedDataSplitSetGenerator<ILabeledDataset<ILabeledInstance>>(data, new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random)), metric);
+		super(new FixedDataSplitSetGenerator(data, new MonteCarloCrossValidationSplitSetGenerator<>(datasetSplitter, repeats, random)), metric);
 	}
 }

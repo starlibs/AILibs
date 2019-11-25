@@ -32,7 +32,7 @@ import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.
  *
  * @author Lukas Brandt
  */
-public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>>, ILoggingCustomizable, IEventEmitter {
+public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator, ILoggingCustomizable, IEventEmitter {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolationEvaluator.class);
 

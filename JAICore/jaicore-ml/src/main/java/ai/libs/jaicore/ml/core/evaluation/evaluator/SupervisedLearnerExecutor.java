@@ -6,14 +6,16 @@ import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
 import org.api4.java.ai.ml.classification.execution.ISupervisedLearnerExecutor;
 import org.api4.java.ai.ml.classification.execution.LearnerExecutionFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.evaluation.IPrediction;
 import org.api4.java.ai.ml.core.exception.PredictionException;
 import org.api4.java.ai.ml.core.exception.TrainingException;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
-public class SupervisedLearnerExecutor<D extends ILabeledDataset<?>> implements ISupervisedLearnerExecutor<D> {
+public class SupervisedLearnerExecutor<D extends ILabeledDataset<? extends ILabeledInstance>> implements ISupervisedLearnerExecutor<D> {
 
 	@Override
-	public ILearnerRunReport execute(final ISupervisedLearner<?, D> learner, final D train, final D test) throws LearnerExecutionFailedException {
+	public ILearnerRunReport execute(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D train, final D test) throws LearnerExecutionFailedException {
 		try {
 			long startTrainTime = System.currentTimeMillis();
 			learner.fit(train);
@@ -25,7 +27,7 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<?>> implements 
 	}
 
 	@Override
-	public ILearnerRunReport execute(final ISupervisedLearner<?, D> learner, final D test) throws LearnerExecutionFailedException {
+	public ILearnerRunReport execute(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D test) throws LearnerExecutionFailedException {
 		try {
 			return this.getReportForTrainedLearner(learner, test, -1);
 		} catch (PredictionException | InterruptedException e) {
@@ -33,16 +35,16 @@ public class SupervisedLearnerExecutor<D extends ILabeledDataset<?>> implements 
 		}
 	}
 
-	private ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<?, D> learner, final D test, final int trainingTime) throws PredictionException, InterruptedException {
+	private ILearnerRunReport getReportForTrainedLearner(final ISupervisedLearner<? extends ILabeledInstance, D> learner, final D test, final int trainingTime) throws PredictionException, InterruptedException {
 		long start = System.currentTimeMillis();
-		List<?> predictions = learner.predict(test).getPredictions();
+		List<? extends IPrediction> predictions = learner.predict(test).getPredictions();
 		long endTestTime = System.currentTimeMillis();
 
 		/* create difference table */
 		int numTestInstances = test.size();
 		PredictionDiff<Object> diff = new PredictionDiff<>();
 		for (int j = 0; j < numTestInstances; j++) {
-			diff.addPair(predictions.get(j), test.get(j).getLabel());
+			diff.addPair(predictions.get(j).getPrediction(), test.get(j).getLabel());
 		}
 		return new LearnerRunReport(trainingTime, (int) (endTestTime - start), diff);
 	}

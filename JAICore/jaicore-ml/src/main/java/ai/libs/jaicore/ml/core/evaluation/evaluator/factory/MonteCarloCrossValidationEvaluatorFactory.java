@@ -18,7 +18,7 @@ import ai.libs.jaicore.ml.core.evaluation.evaluator.MonteCarloCrossValidationEva
 public class MonteCarloCrossValidationEvaluatorFactory extends AMonteCarloCrossValidationBasedEvaluatorFactory<MonteCarloCrossValidationEvaluatorFactory> {
 
 	@Override
-	public MonteCarloCrossValidationEvaluator getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<ILabeledInstance> dataset, final ISupervisedLearnerMetric metric, final Random random) {
+	public MonteCarloCrossValidationEvaluator getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<? extends ILabeledInstance> dataset, final ISupervisedLearnerMetric metric, final Random random) {
 		if (this.getTrainFoldSize() <= 0 || this.getTrainFoldSize() >= 1) {
 			throw new IllegalStateException("Train fold size is configured to " + this.getTrainFoldSize() + " but must be strictly greater than 0 and strictly smaller than 1.");
 		}

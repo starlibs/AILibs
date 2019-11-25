@@ -291,7 +291,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 					this.logger.debug("Detected a dead-end in {}.", head);
 					this.exhausted.add(head);
 					this.prioritizedNodes.remove(head); // remove prioritized node from list if it is in
-					if (cPath.isPoint()) {
+					if (this.isExhausted()) {
 						this.logger.debug("The graph has been exhausted.");
 						return null;
 					}
@@ -327,6 +327,7 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 		this.exhausted.add(head);
 		this.prioritizedNodes.remove(head);
 		this.updateExhaustedAndPrioritizedState(head);
+		this.logger.debug("Returning next solution path {}", cPath);
 		return head == this.root ? null : cPath;
 	}
 
@@ -382,6 +383,10 @@ public class RandomSearch<N, A> extends AAnyPathInORGraphSearch<GraphSearchInput
 				}
 			}
 		}
+	}
+
+	public boolean isExhausted() {
+		return this.exhausted.contains(this.root.getHead());
 	}
 
 	public Graph<N> getExploredGraph() {

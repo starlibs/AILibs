@@ -73,4 +73,9 @@ public class MonteCarloCrossValidationSplitSetGenerator<D extends ILabeledDatase
 		}
 		return new DatasetSplitSet<>(splits);
 	}
+
+	@Override
+	public String toString() {
+		return "MonteCarloCrossValidationSplitSetGenerator [datasetSplitter=" + this.datasetSplitter + ", repeats=" + this.repeats + ", seed=" + this.seed + "]";
+	}
 }

@@ -1,5 +1,6 @@
 package ai.libs.jaicore.ml.core.learner;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +46,9 @@ public abstract class ASupervisedLearner<I extends ILabeledInstance, D extends I
 	@SuppressWarnings("unchecked")
 	@Override
 	public B predict(final D dTest) throws PredictionException, InterruptedException {
-		return this.predict((I[]) dTest.stream().toArray());
+		Class<I> clazz = (Class<I>)dTest.iterator().next().getClass();
+		I[] instancesAsArray = (I[])Array.newInstance(clazz, dTest.size());
+		return this.predict(instancesAsArray);
 	}
 
 	@Override

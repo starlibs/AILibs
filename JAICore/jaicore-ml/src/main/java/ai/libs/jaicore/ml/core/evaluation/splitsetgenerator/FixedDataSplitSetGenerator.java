@@ -46,4 +46,8 @@ public class FixedDataSplitSetGenerator<D extends IDataset<?>> implements IFixed
 		return this.data;
 	}
 
+	@Override
+	public String toString() {
+		return "FixedDataSplitSetGenerator [data=" + this.data + ", generator=" + this.generator + "]";
+	}
 }
