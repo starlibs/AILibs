@@ -120,6 +120,13 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		this.sampleSize = size;
 	}
 
+	public void setSampleSize(final double relativeSize) {
+		if (relativeSize <= 0 || relativeSize >= 1) {
+			throw new IllegalArgumentException("Illegal relative sample size " + relativeSize + ". Must be between 0 and 1 (both exclusive).");
+		}
+		this.setSampleSize((int)Math.round(this.getInput().size() * relativeSize));
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public D call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
