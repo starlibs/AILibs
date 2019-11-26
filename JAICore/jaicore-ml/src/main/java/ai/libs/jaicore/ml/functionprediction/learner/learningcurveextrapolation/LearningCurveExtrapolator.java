@@ -37,17 +37,18 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISa
  * extrapolation can be applied.
  *
  * @author Lukas Brandt
+ * @author Felix Mohr
  */
 public class LearningCurveExtrapolator implements ILoggingCustomizable {
 
 	private Logger logger = LoggerFactory.getLogger(LearningCurveExtrapolator.class);
 
 	protected ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner;
-	protected ILabeledDataset<ILabeledInstance> dataset;
-	protected ILabeledDataset<ILabeledInstance> train;
-	protected ILabeledDataset<ILabeledInstance> test;
-	protected ISamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory;
-	protected ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>> samplingAlgorithm;
+	protected ILabeledDataset<? extends ILabeledInstance> dataset;
+	protected ILabeledDataset<? extends ILabeledInstance> train;
+	protected ILabeledDataset<? extends ILabeledInstance> test;
+	protected ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory;
+	protected ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>> samplingAlgorithm;
 	protected Random random;
 	protected LearningCurveExtrapolationMethod extrapolationMethod;
 	private final int[] anchorPoints;
@@ -71,8 +72,8 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 	 * @throws InterruptedException
 	 */
 	public LearningCurveExtrapolator(final LearningCurveExtrapolationMethod extrapolationMethod, final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner,
-			final ILabeledDataset<ILabeledInstance> dataset, final double trainsplit, final int[] anchorPoints,
-			final ISamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory, final long seed)
+			final ILabeledDataset<?> dataset, final double trainsplit, final int[] anchorPoints,
+			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory, final long seed)
 					throws DatasetCreationException, InterruptedException {
 		this.extrapolationMethod = extrapolationMethod;
 		this.learner = learner;
@@ -113,7 +114,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 
 				// If it is a rerunnable factory, set the previous run.
 				if (this.samplingAlgorithmFactory instanceof IRerunnableSamplingAlgorithmFactory && this.samplingAlgorithm != null) {
-					((IRerunnableSamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
+					((IRerunnableSamplingAlgorithmFactory<ILabeledDataset<?>, ASamplingAlgorithm<ILabeledDataset<?>>>) this.samplingAlgorithmFactory).setPreviousRun(this.samplingAlgorithm);
 				}
 				this.samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(this.anchorPoints[i], this.train, this.random);
 				ILabeledDataset<? extends ILabeledInstance> subsampledDataset = this.samplingAlgorithm.call();
@@ -148,7 +149,8 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 		this.logger.debug("Creating split with training portion {} and seed {}", trainsplit, seed);
 		Random r = new Random(seed);
 		try {
-			List<ILabeledDataset<ILabeledInstance>> folds = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), trainsplit, r).split(this.dataset);
+			FilterBasedDatasetSplitter<ILabeledDataset<?>> splitter = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<>(), trainsplit, r);
+			List<ILabeledDataset<?>> folds = splitter.split(this.dataset);
 			this.train = folds.get(0);
 			this.test = folds.get(1);
 
@@ -167,7 +169,7 @@ public class LearningCurveExtrapolator implements ILoggingCustomizable {
 		return this.learner;
 	}
 
-	public ILabeledDataset<ILabeledInstance> getDataset() {
+	public ILabeledDataset<?> getDataset() {
 		return this.dataset;
 	}
 

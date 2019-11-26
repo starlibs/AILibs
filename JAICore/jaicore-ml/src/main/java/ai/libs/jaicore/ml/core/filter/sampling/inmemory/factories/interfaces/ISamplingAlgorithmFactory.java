@@ -3,7 +3,6 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IInstance;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 
@@ -11,10 +10,9 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
  * Interface for a factory, which creates a sampling algorithm.
  *
  * @author Lukas Brandt
- * @param <I> Type of the dataset instances.
  * @param <A> Type of the sampling algorithm that will be created.
  */
-public interface ISamplingAlgorithmFactory<I extends IInstance, D extends IDataset<? extends I>, A extends ASamplingAlgorithm<D>> {
+public interface ISamplingAlgorithmFactory<D extends IDataset<?>, A extends ASamplingAlgorithm<D>> {
 
 	/**
 	 * After the necessary config is done, this method returns a fully configured

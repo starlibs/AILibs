@@ -12,16 +12,16 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.ASamplingAlgorithm;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 
-public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>> {
+public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> {
 
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> subsamplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 
 	public LearningCurveExtrapolationEvaluatorFactory(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> subsamplingAlgorithmFactory,
-			final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
+			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
+					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.subsamplingAlgorithmFactory = subsamplingAlgorithmFactory;
@@ -30,7 +30,7 @@ public class LearningCurveExtrapolationEvaluatorFactory implements ISupervisedLe
 	}
 
 	@Override
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<ILabeledInstance> dataset, final ISupervisedLearnerMetric metric,
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final ISupervisedLearnerMetric metric,
 			final Random random) throws LearnerEvaluatorConstructionFailedException {
 		return new LearningCurveExtrapolationEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, dataset, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, random.nextLong());
 	}

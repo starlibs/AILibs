@@ -68,7 +68,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratiAmountSelectorAndAssigner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(1);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.setDataset(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
@@ -95,7 +95,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		Integer[] attributeIndices = { 2 };
 		AttributeBasedStratiAmountSelectorAndAssigner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices));
 		selectorAndAssigner.setNumCPUs(4);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.setDataset(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
@@ -167,7 +167,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		AttributeBasedStratiAmountSelectorAndAssigner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(1);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.setDataset(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));
@@ -193,7 +193,7 @@ public class AttributeBasedStratiAmountSelectorAndAssignerTester {
 		AttributeBasedStratiAmountSelectorAndAssigner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(Arrays.asList(attributeIndices),
 				DiscretizationStrategy.EQUAL_SIZE, 2);
 		selectorAndAssigner.setNumCPUs(4);
-		selectorAndAssigner.init(dataset);
+		selectorAndAssigner.setDataset(dataset);
 		Map<ILabeledInstance, Integer> stratiAssignment = new HashMap<>();
 		for (ILabeledInstance i : dataset) {
 			stratiAssignment.put(i, selectorAndAssigner.assignToStrati(i));

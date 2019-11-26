@@ -2,38 +2,28 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.IStratiAmountSelector;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.IStratiAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSamplingFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, StratifiedSampling<I, D>> {
+public class StratifiedSamplingFactory<D extends IDataset<?>> implements ISamplingAlgorithmFactory<D, StratifiedSampling<D>> {
 
-	private IStratiAmountSelector<I, D> stratiAmountSelector;
-	private IStratiAssigner<I, D> stratiAssigner;
-	private StratifiedSampling<I, D> previousRun = null;
+	private IStratiAmountSelector stratiAmountSelector;
+	private IStratiAssigner stratiAssigner;
 
-	public StratifiedSamplingFactory(final IStratiAmountSelector<I, D> stratiAmountSelector, final IStratiAssigner<I, D> stratiAssigner) {
+	public StratifiedSamplingFactory(final IStratiAmountSelector stratiAmountSelector, final IStratiAssigner stratiAssigner) {
 		this.stratiAmountSelector = stratiAmountSelector;
 		this.stratiAssigner = stratiAssigner;
 	}
 
 	@Override
-	public void setPreviousRun(final StratifiedSampling<I, D> previousRun) {
-		this.previousRun = previousRun;
-	}
-
-	@Override
-	public StratifiedSampling<I, D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
-		StratifiedSampling<I, D> stratifiedSampling = new StratifiedSampling<I, D>(this.stratiAmountSelector, this.stratiAssigner, random, inputDataset);
+	public StratifiedSampling<D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {
+		StratifiedSampling<D> stratifiedSampling = new StratifiedSampling<D>(this.stratiAmountSelector, this.stratiAssigner, random, inputDataset);
 
 		stratifiedSampling.setSampleSize(sampleSize);
-		if (this.previousRun != null && this.previousRun.getStrati() != null) {
-			stratifiedSampling.setStrati(this.previousRun.getStrati());
-		}
 		return stratifiedSampling;
 	}
 

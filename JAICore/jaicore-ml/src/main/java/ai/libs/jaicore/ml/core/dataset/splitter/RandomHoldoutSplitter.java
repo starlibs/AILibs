@@ -70,7 +70,7 @@ public class RandomHoldoutSplitter<D extends IDataset<?>> implements IRandomData
 				SimpleRandomSampling subSampler = new SimpleRandomSampling(random, copy);
 				subSampler.setSampleSize((int)Math.round(portion * totalItems));
 				holdOutSplits.add((D)subSampler.call());
-				copy = (D)subSampler.getComplement();
+				copy = (D)subSampler.getComplementOfLastSample();
 
 			}
 		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException e) {

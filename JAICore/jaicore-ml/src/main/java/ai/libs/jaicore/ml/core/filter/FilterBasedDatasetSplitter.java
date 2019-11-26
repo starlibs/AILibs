@@ -5,25 +5,20 @@ import java.util.List;
 import java.util.Random;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.ai.ml.core.dataset.splitter.IDatasetSplitter;
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.ai.ml.core.filter.unsupervised.sampling.ISamplingAlgorithm;
-import org.api4.java.algorithm.exceptions.AlgorithmException;
-import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
-import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
-import ai.libs.jaicore.ml.core.filter.sampling.inmemory.SampleComplementComputer;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
-public class FilterBasedDatasetSplitter<I extends IInstance, D extends IDataset<I>> implements IDatasetSplitter<D> {
+public class FilterBasedDatasetSplitter<D extends IDataset<?>> implements IDatasetSplitter<D> {
 
-	private final ISamplingAlgorithmFactory<I, D, ?> samplerFactory;
+	private final ISamplingAlgorithmFactory<D, ?> samplerFactory;
 	private double relSampleSize;
 	private Random random;
 
-	public FilterBasedDatasetSplitter(final ISamplingAlgorithmFactory<I, D, ?> samplerFactory, final double relSampleSize, final Random random) {
+	public FilterBasedDatasetSplitter(final ISamplingAlgorithmFactory<D, ?> samplerFactory, final double relSampleSize, final Random random) {
 		super();
 		this.samplerFactory = samplerFactory;
 		this.relSampleSize = relSampleSize;
@@ -35,10 +30,10 @@ public class FilterBasedDatasetSplitter<I extends IInstance, D extends IDataset<
 		int size = (int) Math.round(data.size() * this.relSampleSize);
 		ISamplingAlgorithm<D> sampler = this.samplerFactory.getAlgorithm(size, data, this.random);
 		try {
-			D firstFold = sampler.call();
-			D secondFold = new SampleComplementComputer().getComplement(data, firstFold);
+			D firstFold = sampler.nextSample();
+			D secondFold = sampler.getComplementOfLastSample();
 			return Arrays.asList(firstFold, secondFold);
-		} catch (DatasetCreationException | AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
+		} catch (DatasetCreationException e) {
 			throw new SplitFailedException(e);
 		}
 	}

@@ -60,7 +60,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 			if (ASamplingAlgorithm.this.sampleSize == 0) {
 				LOG.warn("Sample size is 0, so an empty data set is returned!");
 				try {
-					this.dataForSample = (IDataset<I>)ASamplingAlgorithm.this.getInput().createEmptyCopy();
+					this.dataForSample = (IDataset<I>) ASamplingAlgorithm.this.getInput().createEmptyCopy();
 					return;
 				} catch (DatasetCreationException e) {
 					throw new AlgorithmException("Could not create a copy of the dataset.", e);
@@ -76,7 +76,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 				LOG.warn("Sample size and data set size are equal. Returning the original data set");
 				// The dataset size is exactly the specified sample size, so just return the
 				// whole dataset.
-				this.dataForSample = (IDataset<I>)dataset;
+				this.dataForSample = (IDataset<I>) dataset;
 				return;
 			} else {
 				// Working configuration, so create the actual sample.
@@ -95,7 +95,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 						ASamplingAlgorithm.this.nextWithException();
 					}
 				}
-				this.dataForSample = (IDataset<I>)ASamplingAlgorithm.this.sample;
+				this.dataForSample = (IDataset<I>) ASamplingAlgorithm.this.sample;
 			}
 		}
 
@@ -107,14 +107,12 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 	private final Caps<?> caps;
 
 	protected ASamplingAlgorithm(final D input) {
-		this(input, (Class<? extends IInstance>)input.get(0).getClass());
+		this(input, (Class<? extends IInstance>) input.get(0).getClass());
 	}
-
-
 
 	protected <I extends IInstance> ASamplingAlgorithm(final D input, final Class<I> instanceClass) {
 		super(input);
-		IDataset<I> dsCopy = (IDataset<I>)input;
+		IDataset<I> dsCopy = (IDataset<I>) input;
 		this.caps = new Caps<>(dsCopy);
 	}
 
@@ -126,7 +124,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 	@Override
 	public D call() throws InterruptedException, AlgorithmExecutionCanceledException, AlgorithmException, AlgorithmTimeoutedException {
 		this.caps.computeSample();
-		return (D)this.caps.dataForSample;
+		return (D) this.caps.dataForSample;
 	}
 
 	protected AlgorithmEvent doInactiveStep() throws AlgorithmException {
@@ -137,13 +135,24 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 		}
 	}
 
+	@Override
+	public D nextSample() throws InterruptedException, DatasetCreationException {
+		try {
+			return this.call();
+		} catch (AlgorithmTimeoutedException | AlgorithmExecutionCanceledException | AlgorithmException e) {
+			throw new DatasetCreationException(e);
+		}
+	}
+
 	/**
 	 * Gets the data point contained in the original data that are not part of the
+	 *
 	 * @return
 	 * @throws DatasetCreationException
 	 * @throws InterruptedException
 	 */
-	public D getComplement() throws DatasetCreationException, InterruptedException {
-		return (D)this.caps.getComplement();
+	@Override
+	public D getComplementOfLastSample() throws DatasetCreationException, InterruptedException {
+		return (D) this.caps.getComplement();
 	}
 }

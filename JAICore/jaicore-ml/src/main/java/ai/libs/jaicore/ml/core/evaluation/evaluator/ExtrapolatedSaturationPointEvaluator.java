@@ -40,15 +40,15 @@ public class ExtrapolatedSaturationPointEvaluator implements ISupervisedLearnerE
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> samplingAlgorithmFactory;
-	private ILabeledDataset<? extends ILabeledInstance> train;
+	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory;
+	private ILabeledDataset<?> train;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
 
 	// Configuration for the measurement at the saturation point.
 	private double epsilon;
-	private ILabeledDataset<? extends ILabeledInstance> test;
+	private ILabeledDataset<?> test;
 	private IMeasure measure;
 
 	/**
@@ -75,8 +75,8 @@ public class ExtrapolatedSaturationPointEvaluator implements ISupervisedLearnerE
 	 *            Test dataset to measure the accuracy.
 	 */
 	public ExtrapolatedSaturationPointEvaluator(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> samplingAlgorithmFactory, final ILabeledDataset<? extends ILabeledInstance> train,
-					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final ILabeledDataset<ILabeledInstance> test, final IMeasure measure) {
+			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory, final ILabeledDataset<?> train,
+					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed, final ILabeledDataset<?> test, final IMeasure measure) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;
@@ -105,8 +105,8 @@ public class ExtrapolatedSaturationPointEvaluator implements ISupervisedLearnerE
 			int optimalSampleSize = Math.min(this.train.size(), (int) learningCurve.getSaturationPoint(this.epsilon));
 
 			// Create a subsample with this size
-			ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
-			ILabeledDataset<ILabeledInstance> saturationPointTrainSet = samplingAlgorithm.call();
+			ASamplingAlgorithm<ILabeledDataset<?>> samplingAlgorithm = this.samplingAlgorithmFactory.getAlgorithm(optimalSampleSize, this.train, new Random(this.seed));
+			ILabeledDataset<?> saturationPointTrainSet = samplingAlgorithm.call();
 
 			// Measure the accuracy with this subsample
 			FixedSplitClassifierEvaluator evaluator = new FixedSplitClassifierEvaluator(saturationPointTrainSet, this.test, this.measure);

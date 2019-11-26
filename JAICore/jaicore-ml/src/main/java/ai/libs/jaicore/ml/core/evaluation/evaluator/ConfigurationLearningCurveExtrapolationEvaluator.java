@@ -30,8 +30,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements ISuperv
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> samplingAlgorithmFactory;
-	private ILabeledDataset<ILabeledInstance> dataset;
+	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory;
+	private ILabeledDataset<?> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private long seed;
 	private String identifier;
@@ -39,8 +39,8 @@ public class ConfigurationLearningCurveExtrapolationEvaluator implements ISuperv
 	private int fullDatasetSize = -1;
 
 	public ConfigurationLearningCurveExtrapolationEvaluator(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> samplingAlgorithmFactory,
-			final ILabeledDataset<ILabeledInstance> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
+			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory,
+			final ILabeledDataset<?> dataset, final double trainSplitForAnchorpointsMeasurement, final long seed, final String identifier, final double[] configurations) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;

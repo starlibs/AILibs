@@ -50,14 +50,14 @@ public class StratifiedSplitSubsetInstruction extends SplitInstruction {
 
 		/* compute sub-sample, which constitutes the first fold of a two-fold split (the second is the complement) */
 		ILabeledDataset<ILabeledInstance> input = (ILabeledDataset<ILabeledInstance>) inputs.get(0);
-		AttributeBasedStratiAmountSelectorAndAssigner<ILabeledInstance, ILabeledDataset<ILabeledInstance>> stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner<>();
-		StratifiedSampling<ILabeledInstance, ILabeledDataset<ILabeledInstance>> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, new Random(this.seed), input);
+		AttributeBasedStratiAmountSelectorAndAssigner stratiBuilder = new AttributeBasedStratiAmountSelectorAndAssigner();
+		StratifiedSampling<ILabeledDataset<ILabeledInstance>> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, new Random(this.seed), input);
 		sampler.setSampleSize((int) Math.ceil(input.size() * this.getPortionOfFirstFold()));
 		List<IDataset<?>> output = new ArrayList<>(2);
 		try {
 			IDataset<?> subsample = sampler.call();
 			output.add(subsample);
-			output.add(sampler.getComplement());
+			output.add(sampler.getComplementOfLastSample());
 			return output;
 		} catch (AlgorithmExecutionCanceledException | AlgorithmException | DatasetCreationException | AlgorithmTimeoutedException e) {
 			throw new DatasetTraceInstructionFailedException(e);

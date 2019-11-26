@@ -8,7 +8,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol.CaseControlSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class CaseControlSamplingFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IRerunnableSamplingAlgorithmFactory<I, D, CaseControlSampling<I, D>> {
+public class CaseControlSamplingFactory<I extends ILabeledInstance, D extends ILabeledDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, CaseControlSampling<I, D>> {
 
 	private CaseControlSampling<I, D> previousRun = null;
 

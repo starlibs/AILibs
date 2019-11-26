@@ -16,15 +16,15 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.LabelBasedStra
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolationMethod;
 
-public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>> {
+public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedLearnerEvaluatorFactory<ILabeledInstance, ILabeledDataset<?>> {
 
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> subsamplingAlgorithmFactory;
+	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 
 	public ExtrapolatedSaturationPointEvaluatorFactory(final int[] anchorpoints,
-			final ISamplingAlgorithmFactory<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<? extends ILabeledInstance>>> subsamplingAlgorithmFactory,
+			final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> subsamplingAlgorithmFactory,
 					final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod) {
 		super();
 		this.anchorpoints = anchorpoints;
@@ -34,12 +34,12 @@ public class ExtrapolatedSaturationPointEvaluatorFactory implements ISupervisedL
 	}
 
 	@Override
-	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<ILabeledInstance> dataset, final ISupervisedLearnerMetric metric,
+	public ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> getDataspecificRandomizedLearnerEvaluator(final ILabeledDataset<?> dataset, final ISupervisedLearnerMetric metric,
 			final Random random) throws LearnerEvaluatorConstructionFailedException {
 		try {
-			List<ILabeledDataset<ILabeledInstance>> split = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<ILabeledInstance, ILabeledDataset<ILabeledInstance>>(), .7f, random).split(dataset);
-			ILabeledDataset<ILabeledInstance> train = split.get(0);
-			ILabeledDataset<ILabeledInstance> test = split.get(1);
+			List<ILabeledDataset<?>> split = new FilterBasedDatasetSplitter<>(new LabelBasedStratifiedSamplingFactory<ILabeledDataset<?>>(), .7f, random).split(dataset);
+			ILabeledDataset<?> train = split.get(0);
+			ILabeledDataset<?> test = split.get(1);
 			return new ExtrapolatedSaturationPointEvaluator(this.anchorpoints, this.subsamplingAlgorithmFactory, train, this.trainSplitForAnchorpointsMeasurement, this.extrapolationMethod, random.nextLong(), test, metric.getMeasure());
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();

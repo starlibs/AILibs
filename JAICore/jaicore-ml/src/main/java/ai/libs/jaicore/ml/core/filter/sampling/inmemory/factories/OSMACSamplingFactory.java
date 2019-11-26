@@ -3,12 +3,11 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories;
 import java.util.Random;
 
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol.OSMAC;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class OSMACSamplingFactory implements IRerunnableSamplingAlgorithmFactory<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, OSMAC<ISingleLabelClassificationDataset>> {
+public class OSMACSamplingFactory implements IRerunnableSamplingAlgorithmFactory<ISingleLabelClassificationDataset, OSMAC<ISingleLabelClassificationDataset>> {
 
 	private OSMAC<ISingleLabelClassificationDataset> previousRun;
 	private int preSampleSize = -1;

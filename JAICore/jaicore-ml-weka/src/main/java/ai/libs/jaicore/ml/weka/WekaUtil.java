@@ -471,7 +471,7 @@ public class WekaUtil {
 			StratifiedSampling<IWekaInstance, IWekaInstances> sampler = new StratifiedSampling<>(stratiBuilder, stratiBuilder, random, data);
 			sampler.setSampleSize((int) Math.ceil(portionOfFirstFold * data.size()));
 			split.add(sampler.call().getList());
-			split.add(sampler.getComplement().getList());
+			split.add(sampler.getComplementOfLastSample().getList());
 			if (split.get(0).size() + split.get(1).size() != data.size()) {
 				throw new IllegalStateException("The sum of fold sizes does not correspond to the size of the original dataset!");
 			}

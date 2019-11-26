@@ -36,7 +36,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.Disc
  * @author Felix Weiland
  *
  */
-public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, D extends IDataset<I>> implements IStratiAmountSelector<I, D>, IStratiAssigner<I, D> {
+public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmountSelector, IStratiAssigner {
 
 	private static final Logger LOG = LoggerFactory.getLogger(AttributeBasedStratiAmountSelectorAndAssigner.class);
 
@@ -61,7 +61,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 	private int numCPUs = 1;
 
 	/** The data set which has to be sampled */
-	private D dataset;
+	private IDataset<?> dataset;
 
 	/** Policies for discretization */
 	private Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies;
@@ -110,7 +110,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 	}
 
 	@Override
-	public int selectStratiAmount(final D dataset) {
+	public int selectStratiAmount(final IDataset<?> dataset) {
 		this.dataset = dataset;
 
 		// Compute attribute values from data set
@@ -173,7 +173,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 			LOG.info(String.format("Starting %d threads for computation..", this.numCPUs));
 		}
 		int listSize = this.dataset.size() / this.numCPUs;
-		for (List<I> sublist : Lists.partition(this.dataset, listSize)) {
+		for (List<? extends IInstance> sublist : Lists.partition(this.dataset, listSize)) {
 			futures.add(threadPool.submit(new ListProcessor<>(sublist, new HashSet<>(this.attributeIndices), this.dataset)));
 		}
 
@@ -197,7 +197,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 		threadPool.shutdown();
 
 		// Discretize
-		DiscretizationHelper<D> discretizationHelper = new DiscretizationHelper<>();
+		DiscretizationHelper<IDataset<?>> discretizationHelper = new DiscretizationHelper<>();
 
 		if (this.discretizationPolicies == null) {
 			LOG.info("No discretization policies provided. Computing defaults..");
@@ -228,7 +228,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 	}
 
 	@Override
-	public void init(final D dataset, final int stratiAmount) {
+	public void init(final IDataset<?> dataset, final int stratiAmount) {
 		// stratiAmount is not used here since it is computed dynamically
 		this.init(dataset);
 	}
@@ -238,7 +238,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 	 *
 	 * @param dataset
 	 */
-	public void init(final D dataset) {
+	public void init(final IDataset<?> dataset) {
 		LOG.debug("init(): enter");
 
 		if (this.dataset != null && this.dataset.equals(dataset) && this.attributeValues != null) {
@@ -288,7 +288,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 	}
 
 	@Override
-	public int assignToStrati(final I datapoint) {
+	public int assignToStrati(final IInstance datapoint) {
 
 		if (this.stratumAssignments == null || this.stratumAssignments.isEmpty()) {
 			throw new IllegalStateException("StratiAssigner has not been initialized!");
@@ -296,7 +296,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
 
 		// Compute concrete attribute values for the particular instance
 		Object[] instanceAttributeValues = new Object[this.attributeIndices.size()];
-		DiscretizationHelper<D> discretizationHelper = new DiscretizationHelper<>();
+		DiscretizationHelper<IDataset<?>> discretizationHelper = new DiscretizationHelper<>();
 		for (int i = 0; i < this.attributeIndices.size(); i++) {
 			int attributeIndex = this.attributeIndices.get(i);
 
@@ -349,17 +349,17 @@ public class AttributeBasedStratiAmountSelectorAndAssigner<I extends IInstance, 
  * @author Felix Weiland
  *
  */
-class ListProcessor<I extends IInstance, D extends IDataset<I>> implements Callable<Map<Integer, Set<Object>>> {
+class ListProcessor<D extends IDataset<?>> implements Callable<Map<Integer, Set<Object>>> {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ListProcessor.class);
 
-	private List<I> list;
+	private List<? extends IInstance> list;
 
 	private Set<Integer> attributeIndices;
 
 	private D dataset;
 
-	public ListProcessor(final List<I> list, final Set<Integer> attributeIndices, final D dataset) {
+	public ListProcessor(final List<? extends IInstance> list, final Set<Integer> attributeIndices, final D dataset) {
 		super();
 		this.list = list;
 		this.attributeIndices = attributeIndices;
@@ -381,7 +381,7 @@ class ListProcessor<I extends IInstance, D extends IDataset<I>> implements Calla
 		}
 
 		// Collect attribute values
-		for (I instance : this.list) {
+		for (IInstance instance : this.list) {
 			for (int attributeIndex : this.attributeIndices) {
 				if (attributeIndex == this.dataset.getNumAttributes()) {
 					// Attribute index describes target attribute

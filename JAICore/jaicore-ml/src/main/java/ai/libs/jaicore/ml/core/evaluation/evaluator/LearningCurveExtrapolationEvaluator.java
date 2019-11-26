@@ -38,8 +38,8 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 
 	// Configuration for the learning curve extrapolator.
 	private int[] anchorpoints;
-	private ISamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory;
-	private ILabeledDataset<ILabeledInstance> dataset;
+	private ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory;
+	private ILabeledDataset<?> dataset;
 	private double trainSplitForAnchorpointsMeasurement;
 	private LearningCurveExtrapolationMethod extrapolationMethod;
 	private long seed;
@@ -62,8 +62,8 @@ public class LearningCurveExtrapolationEvaluator implements IClassifierEvaluator
 	 *            measurements at the anchorpoints.
 	 * @param seed Random seed.
 	 */
-	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<?, ILabeledDataset<ILabeledInstance>, ? extends ASamplingAlgorithm<ILabeledDataset<ILabeledInstance>>> samplingAlgorithmFactory,
-			final ILabeledDataset<ILabeledInstance> dataset, final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed) {
+	public LearningCurveExtrapolationEvaluator(final int[] anchorpoints, final ISamplingAlgorithmFactory<ILabeledDataset<?>, ? extends ASamplingAlgorithm<ILabeledDataset<?>>> samplingAlgorithmFactory,
+			final ILabeledDataset<?> dataset, final double trainSplitForAnchorpointsMeasurement, final LearningCurveExtrapolationMethod extrapolationMethod, final long seed) {
 		super();
 		this.anchorpoints = anchorpoints;
 		this.samplingAlgorithmFactory = samplingAlgorithmFactory;

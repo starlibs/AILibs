@@ -9,20 +9,20 @@ import org.api4.java.common.parallelization.IParallelizable;
  *
  * @author Lukas Brandt
  */
-public interface IStratiAssigner<I extends IInstance, D extends IDataset<I>> extends IParallelizable {
+public interface IStratiAssigner extends IParallelizable {
 
 	/**
 	 * Initialize custom assigner if necessary.
 	 * @param dataset The dataset the datapoints will be sampled from.
 	 * @param stratiAmount The predetermined amount of strati the dataset will be stratified into.
 	 */
-	public void init(D dataset, int stratiAmount);
+	public void init(IDataset<?> dataset, int stratiAmount);
 
 	/**
 	 * Custom logic for assigning datapoints into strati.
 	 * @param datapoint The datapoint that has to be assigned.
 	 * @return The index of the strati the datapoint will be assigned into.
 	 */
-	public int assignToStrati(I datapoint);
+	public int assignToStrati(IInstance datapoint);
 
 }

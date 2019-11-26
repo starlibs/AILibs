@@ -1,7 +1,6 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling;
 
 import org.api4.java.ai.ml.core.dataset.IDataset;
-import org.api4.java.ai.ml.core.dataset.IInstance;
 import org.api4.java.common.parallelization.IParallelizable;
 
 /**
@@ -10,7 +9,7 @@ import org.api4.java.common.parallelization.IParallelizable;
  *
  * @author Lukas Brandt
  */
-public interface IStratiAmountSelector<I extends IInstance, D extends IDataset<I>> extends IParallelizable {
+public interface IStratiAmountSelector extends IParallelizable {
 
 	/**
 	 * Select a suitable amount of strati for a Dataset.
@@ -19,6 +18,6 @@ public interface IStratiAmountSelector<I extends IInstance, D extends IDataset<I
 	 *            The dataset that will be stratified.
 	 * @return The determined amount of strati.
 	 */
-	public int selectStratiAmount(D dataset);
+	public int selectStratiAmount(IDataset<?> dataset);
 
 }

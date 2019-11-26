@@ -3,12 +3,11 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories;
 import java.util.Random;
 
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol.LocalCaseControlSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class LocalCaseControlSamplingFactory implements IRerunnableSamplingAlgorithmFactory<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset, LocalCaseControlSampling> {
+public class LocalCaseControlSamplingFactory implements IRerunnableSamplingAlgorithmFactory<ISingleLabelClassificationDataset, LocalCaseControlSampling> {
 
 	private LocalCaseControlSampling previousRun = null;
 	private int preSampleSize = -1;
