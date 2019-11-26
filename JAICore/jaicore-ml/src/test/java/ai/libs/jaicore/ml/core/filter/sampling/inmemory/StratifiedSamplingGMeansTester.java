@@ -17,8 +17,8 @@ public class StratifiedSamplingGMeansTester extends GeneralSamplingTester<Object
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
-		GMeansStratiAmountSelectorAndAssigner<IClusterableInstance, ILabeledDataset<IClusterableInstance>> g = new GMeansStratiAmountSelectorAndAssigner<>(RANDOM_SEED);
-		StratifiedSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new StratifiedSamplingFactory<>(g, g);
+		GMeansStratiAmountSelectorAndAssigner g = new GMeansStratiAmountSelectorAndAssigner(RANDOM_SEED);
+		StratifiedSamplingFactory<ILabeledDataset<?>> factory = new StratifiedSamplingFactory<>(g, g);
 		if (dataset != null) {
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * @param <I>
  *            The instance type
  */
-public class DiscretizationHelper<D extends IDataset<?>> {
+public class DiscretizationHelper {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DiscretizationHelper.class);
 
@@ -57,7 +57,7 @@ public class DiscretizationHelper<D extends IDataset<?>> {
 	 *            assigned
 	 * @return
 	 */
-	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(final D dataset, final List<Integer> indices, final Map<Integer, Set<Object>> attributeValues, final DiscretizationStrategy discretizationStrategy,
+	public Map<Integer, AttributeDiscretizationPolicy> createDefaultDiscretizationPolicies(final IDataset<?> dataset, final List<Integer> indices, final Map<Integer, Set<Object>> attributeValues, final DiscretizationStrategy discretizationStrategy,
 			final int numberOfCategories) {
 		Map<Integer, AttributeDiscretizationPolicy> discretizationPolicies = new HashMap<>();
 
@@ -65,6 +65,7 @@ public class DiscretizationHelper<D extends IDataset<?>> {
 		Set<Integer> indicesToConsider = this.getNumericIndicesFromDataset(dataset);
 		indicesToConsider.retainAll(indices);
 		for (int index : indicesToConsider) {
+
 			// Get the (distinct) values in sorted order
 			List<Double> numericValues = this.getSortedNumericValues(attributeValues, index);
 
@@ -174,10 +175,10 @@ public class DiscretizationHelper<D extends IDataset<?>> {
 	 * @param dataset
 	 * @return
 	 */
-	private Set<Integer> getNumericIndicesFromDataset(final D dataset) {
+	private Set<Integer> getNumericIndicesFromDataset(final IDataset<?> dataset) {
 		Set<Integer> numericAttributes = new HashSet<>();
 		List<IAttribute> attributeTypes = new ArrayList<>(dataset.getListOfAttributes());
-		if (dataset instanceof ILabeledDataset) {
+		if (dataset instanceof ILabeledDataset && ((ILabeledDataset<?>) dataset).getLabelAttribute() instanceof INumericAttribute) {
 			attributeTypes.add(((ILabeledDataset<?>)dataset).getLabelAttribute());
 		}
 		for (int i = 0; i < attributeTypes.size(); i++) {

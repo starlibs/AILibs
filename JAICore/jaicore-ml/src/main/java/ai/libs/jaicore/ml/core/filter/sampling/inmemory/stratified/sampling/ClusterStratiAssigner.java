@@ -27,8 +27,8 @@ public abstract class ClusterStratiAssigner implements IStratiAssigner {
 		if (dataset.isEmpty()) {
 			throw new IllegalArgumentException("Cannot compute strati for empty dataset.");
 		}
-		if (!dataset.getClassOfInstances().isAssignableFrom(Clusterable.class)) {
-			throw new IllegalArgumentException("Dataset does not contain clusterable elements.");
+		if (!Clusterable.class.isAssignableFrom(dataset.getClassOfInstances())) {
+			throw new IllegalArgumentException("Dataset does not contain clusterable elements, but elements of class " + dataset.getClassOfInstances() + ".");
 		}
 		this.dataset = dataset;
 	}
@@ -39,7 +39,7 @@ public abstract class ClusterStratiAssigner implements IStratiAssigner {
 			throw new IllegalStateException("ClusterStratiAssigner has not been initialized!");
 		}
 		if (!this.dataset.contains(datapoint)) {
-			throw new IllegalArgumentException("Given datapoint is not in the original dataset.");
+			throw new IllegalArgumentException("Given datapoint " + datapoint + " is not in the original dataset with " + this.dataset.size() + " entries.");
 		}
 
 		for (int i = 0; i < this.clusters.size(); i++) {

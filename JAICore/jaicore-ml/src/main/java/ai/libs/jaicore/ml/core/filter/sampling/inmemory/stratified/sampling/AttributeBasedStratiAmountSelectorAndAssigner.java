@@ -19,6 +19,7 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.IInstance;
+import org.api4.java.ai.ml.core.dataset.schema.attribute.IAttribute;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.slf4j.Logger;
@@ -53,6 +54,8 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 	 * assignment
 	 */
 	private List<Integer> attributeIndices;
+
+	private int targetIndex = -1;
 
 	/** Map from attribute values to stratum id */
 	private MultiKeyMap<Object, Integer> stratumAssignments;
@@ -137,13 +140,15 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 		LOG.info("computeAttributeValues(): enter");
 
 		// SCALE-54: Use target attribute only if no attribute indices are provided
-		if (this.attributeIndices == null || this.attributeIndices.isEmpty()) {
+		if (this.dataset instanceof ILabeledDataset<?>) {
 			// We assume that the last attribute is the target attribute
-			int targetIndex = this.dataset.getNumAttributes();
-			if (LOG.isInfoEnabled()) {
-				LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d", targetIndex));
+			this.targetIndex = this.dataset.getNumAttributes();
+			if ((this.attributeIndices == null || this.attributeIndices.isEmpty())) {
+				if (LOG.isInfoEnabled()) {
+					LOG.info(String.format("No attribute indices provided. Working with target attribute only (index: %d", this.targetIndex));
+				}
+				this.attributeIndices = Collections.singletonList(this.targetIndex);
 			}
-			this.attributeIndices = Collections.singletonList(targetIndex);
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Computing attribute values for attribute indices {}", this.attributeIndices);
@@ -183,6 +188,13 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 				// Merge locally computed attribute values into the global list
 				Map<Integer, Set<Object>> localAttributeValues = future.get();
 				for (Entry<Integer, Set<Object>> entry : this.attributeValues.entrySet()) {
+					IAttribute att = entry.getKey() == this.targetIndex ? ((ILabeledDataset<?>)this.dataset).getLabelAttribute() : this.dataset.getAttribute(entry.getKey());
+					for (Object o : entry.getValue()) {
+						System.out.println("Considering value " + o);
+						if (!att.isValidValue(o)) {
+							throw new IllegalStateException("Collecting invalid value " + o + " for attribute " + att);
+						}
+					}
 					this.attributeValues.get(entry.getKey()).addAll(localAttributeValues.get(entry.getKey()));
 				}
 			} catch (ExecutionException e) {
@@ -197,7 +209,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 		threadPool.shutdown();
 
 		// Discretize
-		DiscretizationHelper<IDataset<?>> discretizationHelper = new DiscretizationHelper<>();
+		DiscretizationHelper discretizationHelper = new DiscretizationHelper();
 
 		if (this.discretizationPolicies == null) {
 			LOG.info("No discretization policies provided. Computing defaults..");
@@ -230,7 +242,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 	@Override
 	public void init(final IDataset<?> dataset, final int stratiAmount) {
 		// stratiAmount is not used here since it is computed dynamically
-		this.init(dataset);
+		this.setDataset(dataset);
 	}
 
 	/**
@@ -238,7 +250,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 	 *
 	 * @param dataset
 	 */
-	public void init(final IDataset<?> dataset) {
+	public void setDataset(final IDataset<?> dataset) {
 		LOG.debug("init(): enter");
 
 		if (this.dataset != null && this.dataset.equals(dataset) && this.attributeValues != null) {
@@ -296,7 +308,7 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 
 		// Compute concrete attribute values for the particular instance
 		Object[] instanceAttributeValues = new Object[this.attributeIndices.size()];
-		DiscretizationHelper<IDataset<?>> discretizationHelper = new DiscretizationHelper<>();
+		DiscretizationHelper discretizationHelper = new DiscretizationHelper();
 		for (int i = 0; i < this.attributeIndices.size(); i++) {
 			int attributeIndex = this.attributeIndices.get(i);
 

@@ -67,7 +67,7 @@ public class StratifiedSampling<D extends IDataset<?>> extends ASamplingAlgorith
 					for (int i = 0; i < this.stratiBuilder.length; i++) {
 						this.stratiBuilder[i] = new DatasetDeriver<>(this.getInput());
 					}
-					this.stratiAssigner.init(this.datasetCopy, this.stratiBuilder.length);
+					this.stratiAssigner.init(this.getInput(), this.stratiBuilder.length);
 				}
 				this.simpleRandomSamplingStarted = false;
 			} catch (DatasetCreationException e) {
