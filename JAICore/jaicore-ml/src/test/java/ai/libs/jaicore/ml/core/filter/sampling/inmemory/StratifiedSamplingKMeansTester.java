@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory;
 import java.util.Random;
 
 import org.apache.commons.math3.ml.distance.ManhattanDistance;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
@@ -19,14 +20,15 @@ public class StratifiedSamplingKMeansTester extends GeneralSamplingTester<Object
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
-		KMeansStratiAssigner<IClusterableInstance, ILabeledDataset<IClusterableInstance>> k = new KMeansStratiAssigner<>(new ManhattanDistance(), RANDOM_SEED);
-		StratifiedSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new StratifiedSamplingFactory<>(new IStratiAmountSelector<IClusterableInstance, ILabeledDataset<IClusterableInstance>>() {
+		KMeansStratiAssigner k = new KMeansStratiAssigner(new ManhattanDistance(), RANDOM_SEED);
+		StratifiedSamplingFactory<ILabeledDataset<?>> factory = new StratifiedSamplingFactory<>(new IStratiAmountSelector() {
+
 			@Override
 			public void setNumCPUs(final int numberOfCPUs) {
 			}
 
 			@Override
-			public int selectStratiAmount(final ILabeledDataset<IClusterableInstance> dataset) {
+			public int selectStratiAmount(final IDataset<?> dataset) {
 				return dataset.getNumAttributes() * 2;
 			}
 

@@ -13,8 +13,6 @@ import ai.libs.jaicore.ml.core.dataset.serialization.ArffDatasetAdapter;
 
 public class SamplingAlgorithmTestProblemSet extends AAlgorithmTestProblemSet<ILabeledDataset<ILabeledInstance>> {
 
-	private static final String OPENML_API_KEY = "4350e421cdc16404033ef1812ea38c01";
-
 	public SamplingAlgorithmTestProblemSet() {
 		super("Sampling");
 	}

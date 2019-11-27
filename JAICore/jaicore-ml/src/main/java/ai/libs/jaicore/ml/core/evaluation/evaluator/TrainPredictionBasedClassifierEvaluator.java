@@ -3,6 +3,7 @@ package ai.libs.jaicore.ml.core.evaluation.evaluator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.api4.java.ai.ml.classification.IClassifierEvaluator;
 import org.api4.java.ai.ml.classification.execution.IDatasetSplitSet;
 import org.api4.java.ai.ml.classification.execution.IFixedDatasetSplitSetGenerator;
 import org.api4.java.ai.ml.classification.execution.ILearnerRunReport;
@@ -11,15 +12,20 @@ import org.api4.java.ai.ml.classification.execution.LearnerExecutionFailedExcept
 import org.api4.java.ai.ml.core.dataset.splitter.SplitFailedException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
-import org.api4.java.ai.ml.core.evaluation.ISupervisedLearnerEvaluator;
 import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 import org.api4.java.common.attributedobjects.ObjectEvaluationFailedException;
 
-public class ExecutionBasedClassifierEvaluator implements ISupervisedLearnerEvaluator<ILabeledInstance, ILabeledDataset<?>> {
+public class TrainPredictionBasedClassifierEvaluator implements IClassifierEvaluator {
 
 	private final IFixedDatasetSplitSetGenerator<ILabeledDataset<? extends ILabeledInstance>> splitGenerator;
 	private final SupervisedLearnerExecutor<ILabeledDataset<? extends ILabeledInstance>> executor = new SupervisedLearnerExecutor<>();
 	private final ISupervisedLearnerMetric metric;
+
+	public TrainPredictionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final ISupervisedLearnerMetric metric) {
+		super();
+		this.splitGenerator = splitGenerator;
+		this.metric = metric;
+	}
 
 	@Override
 	public Double evaluate(final ISupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>> learner) throws InterruptedException, ObjectEvaluationFailedException {
@@ -38,11 +44,5 @@ public class ExecutionBasedClassifierEvaluator implements ISupervisedLearnerEval
 		} catch (LearnerExecutionFailedException | SplitFailedException e) {
 			throw new ObjectEvaluationFailedException(e);
 		}
-	}
-
-	public ExecutionBasedClassifierEvaluator(final IFixedDatasetSplitSetGenerator<ILabeledDataset<?>> splitGenerator, final ISupervisedLearnerMetric metric) {
-		super();
-		this.splitGenerator = splitGenerator;
-		this.metric = metric;
 	}
 }

@@ -129,6 +129,7 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 		switch (attType) {
 		case NUMERIC:
 		case REAL:
+		case INTEGER:
 			return new NumericAttribute(name);
 		case NOMINAL:
 			if (values != null) {

@@ -25,9 +25,9 @@ public class AttributeBasedStratifiedSamplingTester extends GeneralSamplingTeste
 		// We assume that the target is the last attribute
 		attributeIndices.add(dataset.getNumAttributes());
 
-		AttributeBasedStratiAmountSelectorAndAssigner<IClusterableInstance, ILabeledDataset<IClusterableInstance>> selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner<>(attributeIndices,
+		AttributeBasedStratiAmountSelectorAndAssigner selectorAndAssigner = new AttributeBasedStratiAmountSelectorAndAssigner(attributeIndices,
 				DiscretizationStrategy.EQUAL_SIZE, 10);
-		StratifiedSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new StratifiedSamplingFactory<>(selectorAndAssigner, selectorAndAssigner);
+		StratifiedSamplingFactory<ILabeledDataset<?>> factory = new StratifiedSamplingFactory<>(selectorAndAssigner, selectorAndAssigner);
 		int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 		return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
 

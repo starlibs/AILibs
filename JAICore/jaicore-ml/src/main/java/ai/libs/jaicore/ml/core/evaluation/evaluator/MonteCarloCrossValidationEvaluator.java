@@ -12,7 +12,7 @@ import ai.libs.jaicore.ml.core.evaluation.ClassifierMetric;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.FixedDataSplitSetGenerator;
 import ai.libs.jaicore.ml.core.evaluation.splitsetgenerator.MonteCarloCrossValidationSplitSetGenerator;
 
-public class MonteCarloCrossValidationEvaluator extends ExecutionBasedClassifierEvaluator {
+public class MonteCarloCrossValidationEvaluator extends TrainPredictionBasedClassifierEvaluator {
 
 	public MonteCarloCrossValidationEvaluator(final ILabeledDataset<? extends ILabeledInstance> data, final int repeats, final double trainingPortion, final Random random) {
 		this(data, new RandomHoldoutSplitter<>(trainingPortion), repeats, random, ClassifierMetric.MEAN_ERRORRATE);
