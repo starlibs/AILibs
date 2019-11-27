@@ -67,14 +67,14 @@ allprojects {
 	    // graphstream
 	    gsCore = 'com.github.mwever:gs-core:2.0.2-synchrofix'
 	    gsUIJavaFX = 'com.github.graphstream:gs-ui-javafx:2.0-alpha'
-	    gsAlgo = 'com.github.grapshtream:gs-algo:2.0-alpha'
+	    gsAlgo = 'com.github.graphstream:gs-algo:2.0-alpha'
 	    
 	    // ProtoBuf
 	    grpcAPI = 'io.grpc:grpc-api:1.24.1'
 	    grpcCore = 'io.grpc:grpc-core:1.24.1'
 	    grpcStub = 'io.grpc:grpc-stub:1.24.1'
 	    grpcPB = 'io.grpc:grpc-protobuf:1.24.1'
-	    protoBuf = 'com.google.protobuf:protobuf-java:3.10.'
+	    protoBuf = 'com.google.protobuf:protobuf-java:3.11.0'
 	    
 	    // Common utilities
 	    jsonDatabind = 'com.fasterxml.jackson.core:jackson-databind:2.9.7'
@@ -124,9 +124,9 @@ allprojects {
 	dependencies {
 		
 		// configuration
-		compile ("$owner")
+		compile ('org.aeonbits.owner:owner-java8:1.0.10')
 		// event bus
-		compile("$guava")
+		compile('com.google.guava:guava:27.0-jre')
 	
 		//Logger
 		compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
