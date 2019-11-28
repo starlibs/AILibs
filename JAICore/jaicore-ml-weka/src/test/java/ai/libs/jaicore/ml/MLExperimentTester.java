@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.aeonbits.owner.ConfigCache;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -56,7 +57,7 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 			Map<String, Object> results = new HashMap<>();
 
 			ILabeledDataset<? extends ILabeledInstance> dataset = new WekaInstances(data);
-			SingleRandomSplitClassifierEvaluator eval = new SingleRandomSplitClassifierEvaluator(dataset);
+			SingleRandomSplitClassifierEvaluator eval = new SingleRandomSplitClassifierEvaluator(dataset, .7, new Random(seed));
 			double loss = eval.evaluate(new WekaClassifier(c));
 
 			results.put("loss", loss);

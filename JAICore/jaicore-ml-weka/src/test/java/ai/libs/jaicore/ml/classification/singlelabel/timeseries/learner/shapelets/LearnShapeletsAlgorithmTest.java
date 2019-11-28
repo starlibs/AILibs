@@ -11,8 +11,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets.LearnShapeletsClassifier;
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.learner.shapelets.LearnShapeletsLearningAlgorithm;
 import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.MathUtil;
 import junit.framework.Assert;
 

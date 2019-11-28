@@ -16,7 +16,7 @@ public class SystematicSamplingTester extends GeneralSamplingTester<Object> {
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
-		SystematicSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new SystematicSamplingFactory<>();
+		SystematicSamplingFactory<ILabeledDataset<IClusterableInstance>> factory = new SystematicSamplingFactory<>();
 		if (dataset != null) {
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));

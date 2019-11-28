@@ -45,7 +45,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		this.createSplit(new WekaInstances(dataset), 0.8, 123l);
 
 		// Test classifier evaluation at saturation point
-		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<IWekaInstance, IWekaInstances>(), this.train, 0.7,
+		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), this.train, 0.7,
 				new InversePowerLawExtrapolationMethod(), 123l, this.test, new ErrorRate());
 		evaluator.setEpsilon(0.0005d);
 		double evaluationResult = evaluator.evaluate(new WekaClassifier(new SMO()));

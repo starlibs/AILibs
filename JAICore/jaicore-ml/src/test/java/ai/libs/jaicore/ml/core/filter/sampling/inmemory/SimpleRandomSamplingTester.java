@@ -16,7 +16,7 @@ public class SimpleRandomSamplingTester extends GeneralSamplingTester<Object> {
 
 	@Override
 	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
-		SimpleRandomSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new SimpleRandomSamplingFactory<>();
+		SimpleRandomSamplingFactory<ILabeledDataset<?>> factory = new SimpleRandomSamplingFactory<>();
 		if (dataset != null) {
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));
