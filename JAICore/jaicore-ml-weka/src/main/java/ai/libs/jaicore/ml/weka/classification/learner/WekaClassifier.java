@@ -25,7 +25,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.OptionHandler;
 
-public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> implements IWekaClassifier {
+public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabeledDataset<? extends ILabeledInstance>, ISingleLabelClassification, ISingleLabelClassificationPredictionBatch> implements IWekaClassifier {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WekaClassifier.class);
 
 	private final String name;
@@ -58,7 +58,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	}
 
 	@Override
-	public void fit(final ILabeledDataset<ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
+	public void fit(final ILabeledDataset<? extends ILabeledInstance> dTrain) throws TrainingException, InterruptedException {
 		WekaInstances data = new WekaInstances(dTrain);
 
 		try {
@@ -90,7 +90,7 @@ public class WekaClassifier extends ASupervisedLearner<ILabeledInstance, ILabele
 	}
 
 	@Override
-	public ISingleLabelClassificationPredictionBatch predict(final ILabeledDataset<ILabeledInstance> dTest) throws PredictionException, InterruptedException {
+	public ISingleLabelClassificationPredictionBatch predict(final ILabeledDataset<? extends ILabeledInstance> dTest) throws PredictionException, InterruptedException {
 		return this.predict((ILabeledInstance[]) dTest.stream().toArray());
 	}
 

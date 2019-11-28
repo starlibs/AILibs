@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,7 +45,7 @@ public class ExtrapolatedSaturationPointEvaluationTester {
 		this.createSplit(new WekaInstances(dataset), 0.8, 123l);
 
 		// Test classifier evaluation at saturation point
-		ExtrapolatedSaturationPointEvaluator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> evaluator = new ExtrapolatedSaturationPointEvaluator<>(new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<>(), this.train, 0.7,
+		ExtrapolatedSaturationPointEvaluator evaluator = new ExtrapolatedSaturationPointEvaluator(new int[] { 8, 16, 64, 128 }, new SystematicSamplingFactory<IWekaInstance, IWekaInstances>(), this.train, 0.7,
 				new InversePowerLawExtrapolationMethod(), 123l, this.test, new ErrorRate());
 		evaluator.setEpsilon(0.0005d);
 		double evaluationResult = evaluator.evaluate(new WekaClassifier(new SMO()));

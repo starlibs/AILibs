@@ -28,6 +28,7 @@ import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.IPLDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.algorithm.PLNetDyadRanker;
 import ai.libs.jaicore.ml.ranking.dyad.learner.util.DyadStandardScaler;
 import ai.libs.jaicore.ml.ranking.loss.KendallsTauDyadRankingLoss;
+import weka.clusterers.SimpleKMeans;
 
 /**
  * This is a test based on Dirk Schäfers dyad ranking dataset based on

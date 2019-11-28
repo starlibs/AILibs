@@ -15,7 +15,7 @@ dependencies {
 	compile ("$wekaRotationForest") {
 		exclude group: 'weka-dev'
 	}
-	
+	compile ('org.openml:EvaluationEngine:0.1.0')
 	testCompile project(path:':JAICore:jaicore-basic', configuration:'testArtifacts')
 }
 

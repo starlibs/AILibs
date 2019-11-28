@@ -7,6 +7,8 @@ import org.api4.java.ai.ml.core.learner.ISupervisedLearner;
 
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper;
 import ai.libs.jaicore.ml.scikitwrapper.ScikitLearnWrapper.ProblemType;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
+import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.core.Instances;
 import weka.filters.Filter;

@@ -5,6 +5,7 @@ import static ai.libs.jaicore.ml.weka.dataset.WekaInstancesUtil.extractSchema;
 import java.lang.reflect.Constructor;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.api4.java.ai.ml.core.dataset.IDataset;
 import org.api4.java.ai.ml.core.dataset.schema.ILabeledInstanceSchema;
 import org.api4.java.ai.ml.core.dataset.serialization.UnsupportedAttributeTypeException;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
@@ -122,6 +123,11 @@ public class WekaInstances extends ADataset<IWekaInstance> implements IWekaInsta
 	@Override
 	public Instances getList() {
 		return this.dataset;
+	}
+
+	@Override
+	public IDataset<IWekaInstance> createCopy() throws DatasetCreationException, InterruptedException {
+		return new WekaInstances(this);
 	}
 
 }

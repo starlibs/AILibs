@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aeonbits.owner.ConfigCache;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,8 @@ import ai.libs.jaicore.experiments.databasehandle.ExperimenterMySQLHandle;
 import ai.libs.jaicore.experiments.exceptions.ExperimentDBInteractionFailedException;
 import ai.libs.jaicore.experiments.exceptions.ExperimentEvaluationFailedException;
 import ai.libs.jaicore.ml.core.evaluation.evaluator.SingleRandomSplitClassifierEvaluator;
+import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Instances;
@@ -37,25 +41,23 @@ public class MLExperimentTester implements IExperimentSetEvaluator {
 	private boolean conductedExperiment = false;
 
 	@Override
-	public void evaluate(final ExperimentDBEntry experimentEntry,
-			final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
+	public void evaluate(final ExperimentDBEntry experimentEntry, final IExperimentIntermediateResultProcessor processor) throws ExperimentEvaluationFailedException {
 		try {
 			if (config.getDatasetFolder() == null || (!config.getDatasetFolder().exists())) {
-				throw new IllegalArgumentException(
-						"config specifies invalid dataset folder " + config.getDatasetFolder());
+				throw new IllegalArgumentException("config specifies invalid dataset folder " + config.getDatasetFolder());
 			}
 			Map<String, String> description = experimentEntry.getExperiment().getValuesOfKeyFields();
 			Classifier c = AbstractClassifier.forName(description.get("classifier"), null);
-			Instances data = new Instances(new BufferedReader(new FileReader(
-					new File(config.getDatasetFolder() + File.separator + description.get("dataset") + ".arff"))));
+			Instances data = new Instances(new BufferedReader(new FileReader(new File(config.getDatasetFolder() + File.separator + description.get("dataset") + ".arff"))));
 			data.setClassIndex(data.numAttributes() - 1);
 			int seed = Integer.parseInt(description.get("seed"));
 
 			logger.info("Testing classifier {}", c.getClass().getName());
 			Map<String, Object> results = new HashMap<>();
-			SingleRandomSplitClassifierEvaluator eval = new SingleRandomSplitClassifierEvaluator(data);
-			eval.setSeed(seed);
-			double loss = eval.evaluate(c);
+
+			ILabeledDataset<? extends ILabeledInstance> dataset = new WekaInstances(data);
+			SingleRandomSplitClassifierEvaluator eval = new SingleRandomSplitClassifierEvaluator(dataset);
+			double loss = eval.evaluate(new WekaClassifier(c));
 
 			results.put("loss", loss);
 			processor.processResults(results);

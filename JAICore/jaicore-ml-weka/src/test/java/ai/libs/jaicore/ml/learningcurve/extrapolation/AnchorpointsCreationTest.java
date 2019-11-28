@@ -3,8 +3,6 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 import java.io.File;
 import java.io.IOException;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
 import org.junit.Assert;
@@ -45,7 +43,7 @@ public class AnchorpointsCreationTest {
 		// final ISamplingAlgorithmFactory<?, D, ? extends ASamplingAlgorithm<D>> samplingAlgorithmFactory, final long seed
 
 		WekaInstances simpleDataset = new WekaInstances(dataset);
-		LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> extrapolator = new LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>>((x, y, ds) -> {
+		LearningCurveExtrapolator extrapolator = new LearningCurveExtrapolator((x, y, ds) -> {
 			Assert.assertArrayEquals(x, xValues);
 			for (int i = 0; i < y.length; i++) {
 				Assert.assertTrue(y[i] > 0.0d);

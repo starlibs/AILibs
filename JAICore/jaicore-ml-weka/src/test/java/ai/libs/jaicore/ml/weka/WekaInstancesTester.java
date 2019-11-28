@@ -23,7 +23,6 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
 
-import ai.libs.jaicore.ml.classification.singlelabel.timeseries.util.WekaTimeseriesUtil;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstance;
 import ai.libs.jaicore.ml.weka.dataset.IWekaInstances;
 import ai.libs.jaicore.ml.weka.dataset.WekaInstance;
@@ -93,19 +92,19 @@ public class WekaInstancesTester {
 						String expectedValue = data.attribute(j).value((int) data.get(i).value(j));
 
 						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getListOfAttributes().get(j);
-						String wrappedValue = type.decodeToString(value);
+						String wrappedValue = type.serializeAttributeValue(value);
 						assertEquals("Attribute \"" + data.get(i).attribute(j).name() + "\" has value " + wrappedValue + " but should have " + expectedValue, expectedValue, wrappedValue);
 					} else {
 						fail("Unsupported attribute value type " + value.getClass());
 					}
 				} else {
 					if (wrapped.getLabelAttribute() instanceof INumericAttribute) {
-						assertEquals("Class has value " + inst.getLabel() + " but should have" + data.get(i).classValue(), data.get(i).classValue(), inst.getLabel(), 0.0);
+						assertEquals("Class has value " + inst.getLabel() + " but should have" + data.get(i).classValue(), data.get(i).classValue(), (Double) inst.getLabel(), 0.0);
 					} else {
 						String expectedValue = data.attribute(j).value((int) data.get(i).value(j));
 						ICategoricalAttribute type = (ICategoricalAttribute) wrapped.getListOfAttributes().get(j);
 						String wrappedValue = type.serializeAttributeValue(inst.getLabel());
-						assertEquals("Class has value " + wrappedValue + " but should have " + WekaTimeseriesUtil.getClassName(data.get(i)), expectedValue);
+						assertEquals("Class has value " + wrappedValue + " but should have " + WekaUtil.getClassName(data.get(i)), expectedValue);
 					}
 				}
 			}

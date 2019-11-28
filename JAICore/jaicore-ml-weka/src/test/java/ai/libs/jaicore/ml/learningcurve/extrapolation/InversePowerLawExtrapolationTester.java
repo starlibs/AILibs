@@ -3,8 +3,6 @@ package ai.libs.jaicore.ml.learningcurve.extrapolation;
 import java.io.File;
 import java.io.IOException;
 
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
-import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.junit.Assert;
 import org.junit.Test;
 import org.openml.apiconnector.io.OpenmlConnector;
@@ -12,12 +10,13 @@ import org.openml.apiconnector.xml.DataSetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ai.libs.jaicore.ml.core.dataset.Dataset;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SimpleRandomSamplingFactory;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.InvalidAnchorPointsException;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.LearningCurveExtrapolator;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawExtrapolationMethod;
 import ai.libs.jaicore.ml.functionprediction.learner.learningcurveextrapolation.ipl.InversePowerLawLearningCurve;
+import ai.libs.jaicore.ml.weka.classification.learner.WekaClassifier;
+import ai.libs.jaicore.ml.weka.dataset.WekaInstances;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -28,13 +27,13 @@ public class InversePowerLawExtrapolationTester {
 
 	@Test(expected = InvalidAnchorPointsException.class)
 	public void testExceptionForIncorrectAnchorpoints() throws Exception {
-		LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> extrapolator = this.createExtrapolationMethod(new int[] { 1, 2, 3 });
+		LearningCurveExtrapolator extrapolator = this.createExtrapolationMethod(new int[] { 1, 2, 3 });
 		extrapolator.extrapolateLearningCurve();
 	}
 
 	@Test
 	public void testInversePowerLawParameterCreation() throws Exception {
-		LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> extrapolator = this.createExtrapolationMethod(new int[] { 8, 16, 64, 128 });
+		LearningCurveExtrapolator extrapolator = this.createExtrapolationMethod(new int[] { 8, 16, 64, 128 });
 		InversePowerLawLearningCurve curve = (InversePowerLawLearningCurve) extrapolator.extrapolateLearningCurve();
 		Assert.assertNotNull(curve);
 		for (int i = 5; i < 20; i++) {
@@ -45,7 +44,7 @@ public class InversePowerLawExtrapolationTester {
 		}
 	}
 
-	private LearningCurveExtrapolator<ILabeledInstance, ILabeledDataset<ILabeledInstance>> createExtrapolationMethod(final int[] xValues) throws Exception {
+	private LearningCurveExtrapolator createExtrapolationMethod(final int[] xValues) throws Exception {
 		Instances dataset = null;
 		OpenmlConnector client = new OpenmlConnector();
 		try {
@@ -60,7 +59,7 @@ public class InversePowerLawExtrapolationTester {
 			throw new IOException("Could not load data set from OpenML!", e);
 		}
 
-		return new LearningCurveExtrapolator<>(new InversePowerLawExtrapolationMethod(), new J48(), new Dataset(dataset), 0.7d, xValues, new SimpleRandomSamplingFactory<>(), 1l);
+		return new LearningCurveExtrapolator(new InversePowerLawExtrapolationMethod(), new WekaClassifier(new J48()), new WekaInstances(dataset), 0.7d, xValues, new SimpleRandomSamplingFactory<>(), 1l);
 	}
 
 }
