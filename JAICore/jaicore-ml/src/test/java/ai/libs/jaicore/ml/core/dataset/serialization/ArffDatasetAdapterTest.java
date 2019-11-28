@@ -85,6 +85,7 @@ public class ArffDatasetAdapterTest {
 		for (int i = 0; i < TEST_INSTANCE.length; i++) {
 			assertEquals("Attribute value at position " + i + " " + parsedDenseInstance[i] + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedDenseInstance[i]);
 		}
+		assertTrue("Numeric attribute is not a Number object but of type " + parsedDenseInstance[0].getClass().getName(), parsedDenseInstance[0] instanceof Number);
 	}
 
 	@Test
@@ -97,6 +98,7 @@ public class ArffDatasetAdapterTest {
 		for (int i = 0; i < TEST_INSTANCE.length; i++) {
 			assertEquals("Attribute value at position " + i + " " + parsedSparseInstance.get(i) + " is not equal to the expected value " + TEST_INSTANCE[i], TEST_INSTANCE[i], parsedSparseInstance.get(i));
 		}
+		assertTrue("Numeric attribute is not a Number object but of type " + parsedSparseInstance.get(0).getClass().getName(), parsedSparseInstance.get(0) instanceof Number);
 	}
 
 	@Test

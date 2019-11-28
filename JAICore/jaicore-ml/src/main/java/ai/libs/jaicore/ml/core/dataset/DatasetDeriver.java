@@ -65,6 +65,10 @@ public class DatasetDeriver<D extends IDataset<?>> {
 		}
 	}
 
+	public boolean contains(final IInstance inst) {
+		return this.caps.itemsToCopy.contains(inst);
+	}
+
 	public D build() throws InterruptedException, DatasetCreationException {
 		return (D)this.caps.getCopyBasedOnDefinedLines();
 	}

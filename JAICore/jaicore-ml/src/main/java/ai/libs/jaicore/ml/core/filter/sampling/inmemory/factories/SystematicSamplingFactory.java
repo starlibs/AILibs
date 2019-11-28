@@ -9,7 +9,7 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.SystematicSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class SystematicSamplingFactory<D extends ILabeledDataset<?>> implements IRerunnableSamplingAlgorithmFactory<D, SystematicSampling<D>> {
+public class SystematicSamplingFactory<D extends ILabeledDataset<?>> extends ASampleAlgorithmFactory<D, SystematicSampling<D>> implements IRerunnableSamplingAlgorithmFactory<D, SystematicSampling<D>> {
 
 	private Comparator<IInstance> datapointComparator = null;
 	private SystematicSampling<D> previousRun = null;

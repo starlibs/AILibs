@@ -111,7 +111,7 @@ public abstract class GeneralFileSamplingTester extends GeneralAlgorithmTester {
 				continue;
 			} else {
 				if (set.contains(line.trim())) {
-					System.out.println("Duplicate line: " + line.trim());
+					System.err.println("Duplicate line: " + line.trim());
 				}
 				set.add(line.trim());
 			}

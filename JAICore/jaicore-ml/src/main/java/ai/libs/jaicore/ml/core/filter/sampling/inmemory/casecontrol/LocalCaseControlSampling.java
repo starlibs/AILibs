@@ -1,29 +1,30 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationDataset;
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
+import org.api4.java.ai.ml.classification.IClassifier;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.basic.sets.Pair;
 
-public class LocalCaseControlSampling extends PilotEstimateSampling<ISingleLabelClassificationInstance, ISingleLabelClassificationDataset> {
+public class LocalCaseControlSampling extends PilotEstimateSampling<ILabeledDataset<?>> {
 
-	public LocalCaseControlSampling(final Random rand, final int preSampleSize, final ISingleLabelClassificationDataset input) {
-		super(input);
+	public LocalCaseControlSampling(final Random rand, final int preSampleSize, final ILabeledDataset<?> input, final IClassifier pilot) {
+		super(input, pilot);
 		this.rand = rand;
 		this.preSampleSize = preSampleSize;
 	}
 
 	@Override
-	public ArrayList<Pair<ISingleLabelClassificationInstance, Double>> calculateFinalInstanceBoundaries(final ISingleLabelClassificationDataset instances, final ISingleLabelClassifier pilotEstimator) {
+	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final ILabeledDataset<?> instances, final IClassifier pilotEstimator) {
 		double boundaryOfCurrentInstance = 0.0;
-		ArrayList<Pair<ISingleLabelClassificationInstance, Double>> instanceProbabilityBoundaries = new ArrayList<>();
+		ArrayList<Pair<ILabeledInstance, Double>> instanceProbabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;
 		double loss;
-		for (ISingleLabelClassificationInstance instance : instances) {
+		for (ILabeledInstance instance : instances) {
 			try {
 				loss = 1 - pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());// .distributionForInstance(wekaInstance)[(int) wekaInstance.classValue()];
 			} catch (Exception e) {
@@ -31,19 +32,19 @@ public class LocalCaseControlSampling extends PilotEstimateSampling<ISingleLabel
 			}
 			sumOfDistributionLosses += loss;
 		}
-		for (ISingleLabelClassificationInstance instance : instances) {
+		for (ILabeledInstance instance : instances) {
 			try {
-				loss = 1 - pilotEstimator.predict(instance).getClassDistribution().get(instance.getIntLabel());
+				loss = 1 - pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());
 			} catch (Exception e) {
 				loss = 1;
 			}
 			boundaryOfCurrentInstance += loss / sumOfDistributionLosses;
-			instanceProbabilityBoundaries.add(new Pair<ISingleLabelClassificationInstance, Double>(instance, boundaryOfCurrentInstance));
+			instanceProbabilityBoundaries.add(new Pair<>(instance, boundaryOfCurrentInstance));
 		}
-		ArrayList<Pair<ISingleLabelClassificationInstance, Double>> probabilityBoundaries = new ArrayList<>();
+		ArrayList<Pair<ILabeledInstance, Double>> probabilityBoundaries = new ArrayList<>();
 		int iterator = 0;
-		for (ISingleLabelClassificationInstance instance : instances) {
-			probabilityBoundaries.add(new Pair<ISingleLabelClassificationInstance, Double>(instance, instanceProbabilityBoundaries.get(iterator).getY()));
+		for (ILabeledInstance instance : instances) {
+			probabilityBoundaries.add(new Pair<>(instance, instanceProbabilityBoundaries.get(iterator).getY()));
 			iterator++;
 		}
 		return probabilityBoundaries;

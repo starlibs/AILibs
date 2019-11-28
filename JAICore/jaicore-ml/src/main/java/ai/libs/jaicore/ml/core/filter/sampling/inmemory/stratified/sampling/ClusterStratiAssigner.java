@@ -23,7 +23,7 @@ public abstract class ClusterStratiAssigner implements IStratiAssigner {
 	private List<CentroidCluster<Clusterable>> clusters;
 
 	public void setDataset(final IDataset<?> dataset) {
-		Objects.nonNull(dataset);
+		Objects.requireNonNull(dataset);
 		if (dataset.isEmpty()) {
 			throw new IllegalArgumentException("Cannot compute strati for empty dataset.");
 		}

@@ -30,7 +30,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 
 	private static final Logger LOG = LoggerFactory.getLogger(ASamplingAlgorithm.class);
 
-	protected Integer sampleSize = null;
+	protected int sampleSize = -1;
 	protected D sample = null;
 
 	private class Caps<I extends IInstance> {
@@ -54,7 +54,7 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 				}
 			}
 			// Check missing or invalid configuration.
-			if (ASamplingAlgorithm.this.sampleSize == null) {
+			if (ASamplingAlgorithm.this.sampleSize == -1) {
 				throw new AlgorithmException("No valid sample size specified");
 			}
 			if (ASamplingAlgorithm.this.sampleSize == 0) {
@@ -161,5 +161,9 @@ public abstract class ASamplingAlgorithm<D extends IDataset<?>> extends AAlgorit
 	@Override
 	public D getComplementOfLastSample() throws DatasetCreationException, InterruptedException {
 		return (D) this.caps.getComplement();
+	}
+
+	public int getSampleSize() {
+		return this.sampleSize;
 	}
 }

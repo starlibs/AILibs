@@ -25,4 +25,13 @@ public interface ISamplingAlgorithmFactory<D extends IDataset<?>, A extends ASam
 	 */
 	public A getAlgorithm(int sampleSize, D inputDataset, Random random);
 
+
+	/**
+	 * After the necessary config is done, this method returns a fully configured
+	 * instance of a sampling algorithm.
+	 *
+	 * Here, it is assumed that random aspects or sample sizes have already been defined before
+	 **/
+	public A getAlgorithm(D inputDataset);
+
 }

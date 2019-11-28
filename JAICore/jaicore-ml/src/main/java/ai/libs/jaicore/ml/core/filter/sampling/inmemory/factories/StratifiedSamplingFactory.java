@@ -9,7 +9,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.IStr
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.IStratiAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
-public class StratifiedSamplingFactory<D extends IDataset<?>> implements ISamplingAlgorithmFactory<D, StratifiedSampling<D>> {
+public class StratifiedSamplingFactory<D extends IDataset<?>> extends ASampleAlgorithmFactory<D, StratifiedSampling<D>> implements ISamplingAlgorithmFactory<D, StratifiedSampling<D>> {
 
 	private IStratiAmountSelector stratiAmountSelector;
 	private IStratiAssigner stratiAssigner;
