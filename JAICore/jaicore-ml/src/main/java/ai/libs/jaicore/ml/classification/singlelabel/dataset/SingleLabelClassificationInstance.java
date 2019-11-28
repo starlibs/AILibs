@@ -1,58 +1,57 @@
 package ai.libs.jaicore.ml.classification.singlelabel.dataset;
 
 import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 public class SingleLabelClassificationInstance implements ISingleLabelClassificationInstance {
 
-	public SingleLabelClassificationInstance() {
-		// TODO Auto-generated constructor stub
+	private ILabeledInstance inst;
+
+	public SingleLabelClassificationInstance(final ILabeledInstance inst) {
+		this.inst = inst;
 	}
 
 	@Override
 	public void setLabel(final Object obj) {
-
+		if (!(obj instanceof Integer)) {
+			throw new IllegalArgumentException("Unexpected type for label value. Expecting Integer, got: " + obj.getClass().getName());
+		}
+		this.inst.setLabel(obj);
 	}
 
 	@Override
 	public void setAttributeValue(final int pos, final Object value) {
-		// TODO Auto-generated method stub
-
+		this.inst.setAttributeValue(pos, value);
 	}
 
 	@Override
 	public Object getAttributeValue(final int pos) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.inst.getAttributeValue(pos);
 	}
 
 	@Override
 	public Object[] getAttributes() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.inst.getAttributes();
 	}
 
 	@Override
 	public double[] getPoint() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.inst.getPoint();
 	}
 
 	@Override
 	public double getPointValue(final int pos) {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.inst.getPointValue(pos);
 	}
 
 	@Override
 	public void removeColumn(final int columnPos) {
-		// TODO Auto-generated method stub
-
+		throw new UnsupportedOperationException("Not yet implemented!");
 	}
 
 	@Override
 	public int getIntLabel() {
-		// TODO Auto-generated method stub
-		return 0;
+		return (Integer) this.inst.getLabel();
 	}
 
 }

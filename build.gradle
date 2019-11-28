@@ -37,8 +37,8 @@ allprojects {
 	apply plugin: 'nebula.maven-base-publish'
 
 	//Java version
-	sourceCompatibility = 11
-	targetCompatibility = 11
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
 
 	//Project properties
 	project.group = 'ai.libs'
