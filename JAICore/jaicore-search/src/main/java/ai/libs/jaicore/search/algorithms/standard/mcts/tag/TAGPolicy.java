@@ -106,7 +106,7 @@ public class TAGPolicy<T, A> implements IPathUpdatablePolicy<T, A, Double>, IGra
 			this.visitsPerNode.put(node, this.visitsPerNode.computeIfAbsent(node, n -> 0) + 1);
 
 			/* update list of best observed scores */
-			PriorityQueue<Double> bestScores = this.statsPerNode.computeIfAbsent(node, n -> this.isMaximize ? new PriorityQueue<>() : new PriorityQueue<>((c1,c2) -> Double.compare(c2, c1)));
+			PriorityQueue<Double> bestScores = this.statsPerNode.computeIfAbsent(node, n -> this.isMaximize ? new PriorityQueue<>((c1,c2) -> Double.compare(c2, c1)) : new PriorityQueue<>());
 			if (bestScores.size() < this.s) {
 				bestScores.add(playout);
 			}

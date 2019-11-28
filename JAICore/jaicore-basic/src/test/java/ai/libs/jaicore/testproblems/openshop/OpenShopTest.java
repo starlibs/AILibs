@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import ai.libs.jaicore.problems.scheduling.openshop.Job;
 import ai.libs.jaicore.problems.scheduling.openshop.Machine;
 import ai.libs.jaicore.problems.scheduling.openshop.OpenShopMetric;
 import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblem;
@@ -18,7 +19,6 @@ import ai.libs.jaicore.problems.scheduling.openshop.OpenShopProblemBuilder;
 import ai.libs.jaicore.problems.scheduling.openshop.Operation;
 import ai.libs.jaicore.problems.scheduling.openshop.Schedule;
 import ai.libs.jaicore.problems.scheduling.openshop.ScheduleBuilder;
-import ai.libs.jaicore.problems.scheduling.openshop.Job;
 
 public class OpenShopTest {
 	private static final String W_1 = "W1";
@@ -88,6 +88,9 @@ public class OpenShopTest {
 	@Test
 	public void testProblemBuildship() {
 		OpenShopProblem problem = problemBuilder.fork().withMetric(OpenShopMetric.TOTALFLOWTIME).build();
+		problem.printWorkcenters();
+		problem.printJobs();
+		System.out.println(solution.getGanttAsString());
 		assertEquals(7, problem.getOperations().size());
 		assertEquals(5, problem.getMachines().size());
 		assertEquals(3, problem.getJobs().size());
