@@ -28,12 +28,24 @@ public class GMeansSamplingTester extends GeneralSamplingTester<Number> {
 	}
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
+	public void testNoDuplicatesSmallProblem() {
+		// GMeansSampling cannot be used for too large problems, because it is too slow
+		assertTrue(true);
+	}
+
+	@Override
+	public void testNoDuplicatesLargeProblem() {
+		// GMeansSampling cannot be used for too large problems, because it is too slow
+		assertTrue(true);
+	}
+
+	@Override
+	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<?> dataset) {
 		GmeansSamplingFactory<IClusterableInstance, ILabeledDataset<IClusterableInstance>> factory = new GmeansSamplingFactory<>();
 		if (dataset != null) {
 			factory.setClusterSeed(SEED);
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
-			return factory.getAlgorithm(sampleSize, dataset, new Random(SEED));
+			return factory.getAlgorithm(sampleSize, (ILabeledDataset<IClusterableInstance>)dataset, new Random(SEED));
 		}
 		return null;
 	}

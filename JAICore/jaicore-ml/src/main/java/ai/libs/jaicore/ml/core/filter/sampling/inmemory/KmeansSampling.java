@@ -9,6 +9,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 /**
  * Implementation of a sampling method using kmeans-clustering. This algorithm
@@ -36,6 +38,9 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 	public KmeansSampling(final long seed, final int k, final D input) {
 		super(seed, input);
 		this.k = k;
+		if (input.size() > 1000) {
+			throw new IllegalArgumentException("KMeansSampling does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
+		}
 	}
 
 	/**
@@ -50,7 +55,9 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 	public KmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
 		this.k = -1;
-
+		if (input.size() > 1000) {
+			throw new IllegalArgumentException("KMeansSampling does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
+		}
 	}
 
 	/**
@@ -71,7 +78,7 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables
@@ -90,20 +97,16 @@ public class KmeansSampling<I extends ILabeledInstance & Clusterable, D extends 
 			}
 			if (this.clusterResults == null) {
 				KMeansPlusPlusClusterer<I> kMeansCluster = new KMeansPlusPlusClusterer<>(this.k, -1, this.distanceMeassure, r);
-				this.clusterResults = kMeansCluster.cluster(this.getInput());
+				this.clusterResults = kMeansCluster.cluster(this.getInput()); // this is not interruptible!!
 			}
 
 			return this.activate();
 		case ACTIVE:
 			this.doAlgorithmStep();
-			break;
-		case INACTIVE:
-			this.doInactiveStep();
-			break;
+			return this.doInactiveStep();
 		default:
 			throw new IllegalStateException("Unknown algorithm state " + this.getState());
 		}
-		return null;
 	}
 
 }

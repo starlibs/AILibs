@@ -2,7 +2,7 @@ package ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories;
 
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
+import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol.LocalCaseControlSampling;
@@ -12,7 +12,7 @@ public class LocalCaseControlSamplingFactory extends ASampleAlgorithmFactory<ILa
 
 	private LocalCaseControlSampling previousRun = null;
 	private int preSampleSize = -1;
-	private ISingleLabelClassifier pilot;
+	private IClassifier pilot;
 
 	@Override
 	public void setPreviousRun(final LocalCaseControlSampling previousRun) {
@@ -29,16 +29,22 @@ public class LocalCaseControlSamplingFactory extends ASampleAlgorithmFactory<ILa
 		this.preSampleSize = preSampleSize;
 	}
 
-	public ISingleLabelClassifier getPilot() {
+	public IClassifier getPilot() {
 		return this.pilot;
 	}
 
-	public void setPilot(final ISingleLabelClassifier pilot) {
+	public void setPilot(final IClassifier pilot) {
 		this.pilot = pilot;
 	}
 
 	@Override
 	public LocalCaseControlSampling getAlgorithm(final int sampleSize, final ILabeledDataset<?> inputDataset, final Random random) {
+		if (this.pilot == null) {
+			throw new IllegalStateException("No pilot has been defined.");
+		}
+		if (this.preSampleSize == -1) {
+			throw new IllegalStateException("No sample size has been defined for the pilot.");
+		}
 		LocalCaseControlSampling localCaseControlSampling = new LocalCaseControlSampling(random, this.preSampleSize, inputDataset, this.pilot);
 		if (this.previousRun != null && this.previousRun.getAcceptanceThresholds() != null) {
 			localCaseControlSampling.setAcceptanceTresholds(this.previousRun.getAcceptanceThresholds());

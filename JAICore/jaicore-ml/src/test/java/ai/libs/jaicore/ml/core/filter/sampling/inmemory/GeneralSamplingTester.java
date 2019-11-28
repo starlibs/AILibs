@@ -67,7 +67,14 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 		return this.getAlgorithm(dataset);
 	}
 
-	public abstract IAlgorithm<?, ?> getAlgorithm(ILabeledDataset<IClusterableInstance> dataset);
+	public abstract IAlgorithm<?, ?> getAlgorithm(ILabeledDataset<?> dataset);
+
+	@Test
+	public void testSampleSizeTinyProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
+		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+		ILabeledDataset<?> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
+		this.testSampleSize(dataset, DEFAULT_SAMPLE_FRACTION);
+	}
 
 	/**
 	 * This test verifies that the produced samples have the desired size.
@@ -115,6 +122,25 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 		if (sample != null) {
 			assertEquals(sampleSize, sample.size());
 		}
+	}
+
+
+	/**
+	 * This test verifies that the produced samples do not contain duplicates.
+	 *
+	 * This test executes the test on a tiny problem/data set. This is useful to test algorithms with quadratic runtime.
+	 *
+	 * @throws AlgorithmCreationException
+	 * @throws InterruptedException
+	 *
+	 * @throws Exception
+	 *
+	 */
+	@Test
+	public void testNoDuplicatesTinyProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException, InterruptedException {
+		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
+		ILabeledDataset<?> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
+		this.testNoDuplicates(dataset);
 	}
 
 	/**
@@ -183,12 +209,13 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	@Test
 	public <I extends ILabeledInstance> void checkOriginalDataSetNotModified() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
-		ILabeledDataset<ILabeledInstance> dataset = problemSet.getSimpleProblemInputForGeneralTestPurposes();
+		ILabeledDataset<ILabeledInstance> dataset = problemSet.getTinyProblemInputForGeneralTestPurposes();
 		int hashCode = dataset.hashCode();
 		@SuppressWarnings("unchecked")
 		ASamplingAlgorithm<ILabeledDataset<I>> samplingAlgorithm = (ASamplingAlgorithm<ILabeledDataset<I>>) this.getAlgorithm(dataset);
 		int sampleSize = (int) (dataset.size() * DEFAULT_SAMPLE_FRACTION);
 		samplingAlgorithm.setSampleSize(sampleSize);
+		this.logger.debug("Drawing sample of size {} for dataset of size {}", sampleSize, dataset.size());
 		this.getSample(samplingAlgorithm);
 		assertEquals(hashCode, dataset.hashCode());
 	}
