@@ -207,7 +207,8 @@ allprojects {
 
 
 dependencies{
-	compile project(":hasco")
+	compile project(":hasco-core")
+	compile project(":hasco-fanova")
 	compile project(":hyperopt")
 	//compile project(":autofe")
 	//compile project(":autofe-reldata")

@@ -9,7 +9,7 @@ sourceSets {
 
 dependencies {
   	// basic dependencies
-	compile project(':hasco')
+	compile project(':hasco-core')
 
 	// JAICore dependencies
 	compile project(':JAICore:jaicore-basic')

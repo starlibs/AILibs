@@ -20,8 +20,11 @@ include ":JAICore:jaicore-search"
 
 
 // Software-Configuration
-include 'hasco'
-project(":hasco").projectDir = new File(configPrefix,"hasco")
+include 'hasco-core'
+project(":hasco-core").projectDir = new File(configPrefix,"hasco/core")
+
+include 'hasco-fanova'
+project(":hasco-fanova").projectDir = new File(configPrefix,"hasco/extensions/fanova")
 
 include 'hyperopt'
 project(":hyperopt").projectDir = new File(configPrefix,"hyperopt")

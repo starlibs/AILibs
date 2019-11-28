@@ -8,26 +8,7 @@ sourceSets {
 
 
 dependencies {
-  	// basic dependencies
-	compile project(':hasco')
-
-	// JAICore dependencies
-	compile project(':JAICore:jaicore-basic')
-	compile project(':JAICore:jaicore-experiments')
-	compile project(':JAICore:jaicore-logic') 
-	compile project(':JAICore:jaicore-planning')
-	compile project(':JAICore:jaicore-search')
-	compile project(':JAICore:jaicore-ml')
-	compile project(':JAICore:jaicore-ml-weka')
-	
-	compile ('org.api4:ai-ml')
-
-
-	// OWL API
-	compile 'net.sourceforge.owlapi:owlapi-distribution:5.1.9'
-	// TreeMiner
-	compile 'com.github.helegraf:TreeMiner:ed1071c4ef'
-    compile 'com.github.helegraf:data-handling:bd4f875ad5'
+	compile project(':mlplan-core')
 	
 	// linear algebra
 	compile group: 'org.nd4j', name: 'nd4j-native-platform', version: '1.0.0-beta2'
@@ -47,10 +28,6 @@ dependencies {
 
 	//testCompile project(path: ':JAICore:jaicore-basic', configuration: 'testArtifacts')
 	//testCompile project(path: ':JAICore:jaicore-search', configuration: 'testArtifacts')
-}
-
-configurations.all {
-    exclude module: 'weka-dev'
 }
 
 uploadArchives {

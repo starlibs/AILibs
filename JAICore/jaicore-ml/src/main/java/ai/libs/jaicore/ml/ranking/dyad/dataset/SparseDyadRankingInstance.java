@@ -46,7 +46,7 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance {
 	@Override
 	public Set<IDyad> getAttributeValue(final int position) {
 		if (position == 0) {
-			return new HashSet<>(alternatives.stream().map(y -> new Dyad(this.context, y)).collect(Collectors.toList()));
+			return new HashSet<>(this.alternatives.stream().map(y -> new Dyad(this.context, y)).collect(Collectors.toList()));
 		}
 		throw new IllegalArgumentException("No attribute at position " + position + ".");
 	}
@@ -58,14 +58,14 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance {
 
 	@Override
 	public Iterator<IDyad> iterator() {
-		return new Iterator<>() {
+		return new Iterator<IDyad>() {
 
 			private int index = 0;
-			private List<IDyad> dyads = new ArrayList<>(getAttributeValue(0));
+			private List<IDyad> dyads = new ArrayList<>(SparseDyadRankingInstance.this.getAttributeValue(0));
 
 			@Override
 			public boolean hasNext() {
-				return this.index < getNumberOfRankedElements();
+				return this.index < SparseDyadRankingInstance.this.getNumberOfRankedElements();
 			}
 
 			@Override
@@ -74,13 +74,13 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance {
 					throw new NoSuchElementException();
 				}
 
-				return dyads.get(this.index++);
+				return this.dyads.get(this.index++);
 			}
 		};
 	}
 
 	public IVector getContext() {
-		return context;
+		return this.context;
 	}
 
 	@Override
@@ -136,22 +136,22 @@ public class SparseDyadRankingInstance extends ADyadRankingInstance {
 
 	@Override
 	public int getNumberOfRankedElements() {
-		return alternatives.size();
+		return this.alternatives.size();
 	}
 
 	@Override
-	public void setDyads(Set<IDyad> dyads) {
-		assertThatAllContextsAreIdentical(dyads);
+	public void setDyads(final Set<IDyad> dyads) {
+		this.assertThatAllContextsAreIdentical(dyads);
 		this.context = dyads.stream().findAny().get().getContext();
 		this.alternatives = dyads.stream().map(d -> d.getAlternative()).collect(Collectors.toSet());
 	}
 
 	@Override
-	public void setRanking(Ranking<IDyad> ranking) {
-		assertThatAllContextsAreIdentical(ranking);
+	public void setRanking(final Ranking<IDyad> ranking) {
+		this.assertThatAllContextsAreIdentical(ranking);
 	}
 
-	private void assertThatAllContextsAreIdentical(Collection<IDyad> dyads) {
+	private void assertThatAllContextsAreIdentical(final Collection<IDyad> dyads) {
 		IDyad anyDyad = dyads.stream().findAny().get();
 		boolean allContextsIdentical = dyads.stream().allMatch(d -> d.getContext().equals(anyDyad.getContext()));
 		if (!allContextsIdentical) {

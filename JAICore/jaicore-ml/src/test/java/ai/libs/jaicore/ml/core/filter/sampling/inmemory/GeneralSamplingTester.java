@@ -61,6 +61,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	public final IAlgorithm<?, ?> getAlgorithm(final Object problem) {
 		@SuppressWarnings("unchecked")
 		ILabeledDataset<IClusterableInstance> dataset = new ClusterableDataset((ILabeledDataset<ILabeledInstance>) problem);
+		System.out.println(dataset);
 		return this.getAlgorithm(dataset);
 	}
 
@@ -143,6 +144,7 @@ public abstract class GeneralSamplingTester<L> extends GeneralAlgorithmTester {
 	public void testNoDuplicatesLargeProblem() throws AlgorithmTestProblemSetCreationException, AlgorithmCreationException {
 		SamplingAlgorithmTestProblemSet problemSet = this.getProblemSet();
 		ILabeledDataset<?> dataset = problemSet.getDifficultProblemInputForGeneralTestPurposes();
+		assertNotNull(dataset);
 		this.testNoDuplicates(dataset);
 	}
 

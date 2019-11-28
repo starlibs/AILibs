@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    compile project(':hasco')
+    compile project(':hasco-core')
     compile project(':mlplan-core')
     compile project(':mlplan-weka')
     
