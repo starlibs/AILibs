@@ -18,6 +18,8 @@ implements AlgorithmicProblemReduction<EnhancedTTSP, ShortList, GraphSearchWithS
 
 	@Override
 	public ShortList decodeSolution(final IPath<EnhancedTTSPNode, String> solution) {
+		System.out.println(solution.getClass());
+		System.out.println(solution.getHead().getClass());
 		ShortList tour = solution.getHead().getCurTour();
 		return tour.subList(0, tour.size() - 1); // remove trailing 0
 	}

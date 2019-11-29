@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import org.api4.java.ai.graphsearch.problem.pathsearch.pathevaluation.IEvaluatedPath;
+import org.api4.java.datastructure.graph.IPath;
 
+import ai.libs.jaicore.graph.ReadOnlyPathAccessor;
 import ai.libs.jaicore.logging.ToJSONStringUtil;
 
 public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluatedPath<N, A, V> {
@@ -185,5 +187,25 @@ public class BackPointerPath<N, A, V extends Comparable<V>> implements IEvaluate
 	@Override
 	public boolean containsNode(final N node) {
 		return this.nodeLabel.equals(node) || (this.parent != null && this.parent.containsNode(node));
+	}
+
+	@Override
+	public IPath<N, A> getUnmodifiableAccessor() {
+		return new ReadOnlyPathAccessor<>(this);
+	}
+
+	@Override
+	public N getParentOfHead() {
+		return this.parent.getHead();
+	}
+
+	@Override
+	public void extend(final N newHead, final A arcToNewHead) {
+		throw new UnsupportedOperationException("To assure consistency, back-pointer paths do not support modifications.");
+	}
+
+	@Override
+	public void cutHead() {
+		throw new UnsupportedOperationException("To assure consistency, back-pointer paths do not support modifications.");
 	}
 }

@@ -31,7 +31,7 @@ public class BestFirstSearchRuntimeTest {
 	public static Collection<Object[]> data() {
 		List<Object> problemSets = new ArrayList<>();
 		NQueensToGraphSearchReducer nQueensReducer = new NQueensToGraphSearchReducer();
-		for (int i = 4; i < 16; i++) {
+		for (int i = 4; i <= 10; i++) {
 			problemSets.add(nQueensReducer.encodeProblem(new NQueensProblem(i)));
 		}
 
