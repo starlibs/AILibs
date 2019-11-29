@@ -3,8 +3,10 @@ package ai.libs.jaicore.search.algorithms.standard.lds;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.api4.java.ai.graphsearch.problem.implicit.graphgenerator.PathGoalTester;
@@ -44,6 +46,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 
 	/* communication */
 	protected TreeNode<T> traversalTree;
+	protected Map<T, A> actionToNode = new HashMap<>();
 	protected Collection<TreeNode<T>> expanded = new HashSet<>();
 	protected Collection<TreeNode<T>> exhausted = new HashSet<>();
 
@@ -134,7 +137,8 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 		if (this.pathGoalTester.isGoal(this.getPathForGoalCheck(node.getValue()))) {
 			this.updateExhaustMap(node);
 			List<T> path = node.getValuesOnPathFromRoot();
-			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, null, null);
+			List<A> actions = path.stream().map(n -> this.actionToNode.get(n)).filter(a -> a != null).collect(Collectors.toList());
+			EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(path, actions, null);
 			this.updateBestSeenSolution(solution);
 			this.logger.debug("Found solution {}.", node.getValue());
 			return new ASolutionCandidateFoundEvent<>(this.getId(), solution);
@@ -161,6 +165,7 @@ public class LimitedDiscrepancySearch<T, A, V extends Comparable<V>> extends AOp
 					lastCheck = System.currentTimeMillis();
 				}
 				TreeNode<T> newNode = this.newNode(node, successorDescription.getTo());
+				this.actionToNode.put(successorDescription.getTo(), successorDescription.getAction());
 				generatedNodes.add(newNode);
 			}
 			this.logger.debug("Local model updated.");
