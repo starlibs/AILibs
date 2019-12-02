@@ -52,6 +52,7 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 	private final Map<N, Double> beta = new HashMap<>();
 	private final Map<N, Double> mu = new HashMap<>();
 	private final Map<N, Double> lambda = new HashMap<>();
+	private final boolean metricTracking = false;
 	private final Map<N, DescriptiveStatistics> statsPerNode = new HashMap<>();
 	private final Map<String, Integer> winsPerMetric = new HashMap<>();
 
@@ -96,7 +97,9 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 			this.mu.put(node, (muOfN * lambdaOfN + playoutScore) / (lambdaOfN + 1));
 			this.lambda.put(node, lambdaOfN + 1);
 			this.eventBus.post(new DNGBeliefUpdateEvent<N>("", node, this.mu.get(node), this.alpha.get(node), this.beta.get(node), this.lambda.get(node)));
-			this.statsPerNode.computeIfAbsent(node, n -> new DescriptiveStatistics()).addValue(playoutScore);
+			if (this.metricTracking) {
+				this.statsPerNode.computeIfAbsent(node, n -> new DescriptiveStatistics()).addValue(playoutScore);
+			}
 		}
 	}
 
@@ -114,28 +117,32 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 		double bestScore = Double.MAX_VALUE;
 
 		/* prepare metrics for analysis */
-		Map<String, Function<DescriptiveStatistics, Double>> metrics = new HashMap<>();
-		metrics.put("avg", d -> d.getMean());;
-		metrics.put("avg-std", d -> d.getMean() - d.getStandardDeviation());
-		metrics.put("geomean", d -> d.getGeometricMean());
-		metrics.put("n", d -> (double)d.getN());
-		metrics.put("min", d -> d.getMin());
-		metrics.put(".25p", d -> d.getPercentile(25));
-		metrics.put(".5p", d -> d.getPercentile(50));
-		metrics.put(".75p", d -> d.getPercentile(75));
-		metrics.put("max", d -> d.getMax());
-		Map<String, List<A>> successorOrderingByMetrics = new HashMap<>();
-		for (Entry<String, Function<DescriptiveStatistics, Double>> metricEntry : metrics.entrySet()) {
-			successorOrderingByMetrics.put(metricEntry.getKey(), actions.keySet().stream().sorted((v1, v2) -> {
-				return Double.compare(metricEntry.getValue().apply(this.statsPerNode.get(actions.get(v1))), metricEntry.getValue().apply(this.statsPerNode.get(actions.get(v2))));
-			}).collect(Collectors.toList()));
+		if (this.metricTracking) {
+			Map<String, Function<DescriptiveStatistics, Double>> metrics = new HashMap<>();
+			metrics.put("avg", d -> d.getMean());;
+			metrics.put("avg-std", d -> d.getMean() - d.getStandardDeviation());
+			metrics.put("geomean", d -> d.getGeometricMean());
+			metrics.put("n", d -> (double)d.getN());
+			metrics.put("min", d -> d.getMin());
+			metrics.put(".25p", d -> d.getPercentile(25));
+			metrics.put(".5p", d -> d.getPercentile(50));
+			metrics.put(".75p", d -> d.getPercentile(75));
+			metrics.put("max", d -> d.getMax());
+			Map<String, List<A>> successorOrderingByMetrics = new HashMap<>();
+			for (Entry<String, Function<DescriptiveStatistics, Double>> metricEntry : metrics.entrySet()) {
+				successorOrderingByMetrics.put(metricEntry.getKey(), actions.keySet().stream().sorted((v1, v2) -> {
+					return Double.compare(metricEntry.getValue().apply(this.statsPerNode.get(actions.get(v1))), metricEntry.getValue().apply(this.statsPerNode.get(actions.get(v2))));
+				}).collect(Collectors.toList()));
+			}
 		}
 
 		for (Entry<A, N> actionStatePair : actions.entrySet()) {
 			double score = this.getQValue(state, actionStatePair.getValue());
+			if (metricTracking) {
 			DescriptiveStatistics stats = this.statsPerNode.get(actionStatePair.getValue());
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Sampled score {} for action {} with successor {}. Stats for this node is min/mean (believed)/max {}/{} ({})/{} with {} visits. Deviation in estimation: {}", score, actionStatePair.getKey(), actionStatePair.getValue(), stats.getMin(), stats.getMean(), this.mu.get(actionStatePair.getValue()), stats.getMax(), stats.getN(), this.mu.get(actionStatePair.getValue()) - stats.getMean());
+			}
 			}
 			this.eventBus.post(new DNGQSampleEvent<N, A>("", state, actionStatePair.getValue(), actionStatePair.getKey(), score));
 			if (score < bestScore) {
@@ -145,21 +152,23 @@ public class DNGPolicy<N, A> implements IPathUpdatablePolicy<N, A, Double>, ILog
 		}
 
 		/* log metrics about this choice */
-		String bestMetric = null;
-		int bestRank = 10000;
-		for (Entry<String, List<A>> metricOrderingPair : successorOrderingByMetrics.entrySet()) {
-			A bestActionForThisMetric = metricOrderingPair.getValue().get(0);
-			int rankOfChoiceForThisMetric = metricOrderingPair.getValue().indexOf(bestAction);
-			if (rankOfChoiceForThisMetric < bestRank) {
-				bestRank = rankOfChoiceForThisMetric;
-				bestMetric = metricOrderingPair.getKey();
-			}
-			double scoreOfBest = metrics.get(metricOrderingPair.getKey()).apply(this.statsPerNode.get(actions.get(bestActionForThisMetric)));
-			double scoreOfChosen = metrics.get(metricOrderingPair.getKey()).apply(this.statsPerNode.get(actions.get(bestAction)));
-			this.logger.debug("Choice for metric {}: {}/{}. Epsilon to optimum: {}", metricOrderingPair.getKey(), rankOfChoiceForThisMetric, actions.size(), Math.abs(scoreOfChosen - scoreOfBest));
-		}
-		this.winsPerMetric.put(bestMetric, this.winsPerMetric.computeIfAbsent(bestMetric, m -> 0) + 1);
-		this.logger.debug("Wins per metric: {}", this.winsPerMetric);
+		//		if (this.metricTracking) {
+		//			String bestMetric = null;
+		//			int bestRank = 10000;
+		//			for (Entry<String, List<A>> metricOrderingPair : successorOrderingByMetrics.entrySet()) {
+		//				A bestActionForThisMetric = metricOrderingPair.getValue().get(0);
+		//				int rankOfChoiceForThisMetric = metricOrderingPair.getValue().indexOf(bestAction);
+		//				if (rankOfChoiceForThisMetric < bestRank) {
+		//					bestRank = rankOfChoiceForThisMetric;
+		//					bestMetric = metricOrderingPair.getKey();
+		//				}
+		//				double scoreOfBest = metrics.get(metricOrderingPair.getKey()).apply(this.statsPerNode.get(actions.get(bestActionForThisMetric)));
+		//				double scoreOfChosen = metrics.get(metricOrderingPair.getKey()).apply(this.statsPerNode.get(actions.get(bestAction)));
+		//				this.logger.debug("Choice for metric {}: {}/{}. Epsilon to optimum: {}", metricOrderingPair.getKey(), rankOfChoiceForThisMetric, actions.size(), Math.abs(scoreOfChosen - scoreOfBest));
+		//			}
+		//			this.winsPerMetric.put(bestMetric, this.winsPerMetric.computeIfAbsent(bestMetric, m -> 0) + 1);
+		//			this.logger.debug("Wins per metric: {}", this.winsPerMetric);
+		//		}
 		return bestAction;
 	}
 
