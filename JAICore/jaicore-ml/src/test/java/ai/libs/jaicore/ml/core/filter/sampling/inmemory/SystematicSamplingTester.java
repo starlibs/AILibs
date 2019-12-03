@@ -5,7 +5,6 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
-import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.SystematicSamplingFactory;
 
 public class SystematicSamplingTester extends GeneralSamplingTester<Object> {
@@ -15,8 +14,8 @@ public class SystematicSamplingTester extends GeneralSamplingTester<Object> {
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
-		SystematicSamplingFactory<ILabeledDataset<IClusterableInstance>> factory = new SystematicSamplingFactory<>();
+	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<?> dataset) {
+		SystematicSamplingFactory<ILabeledDataset<?>> factory = new SystematicSamplingFactory<>();
 		if (dataset != null) {
 			int sampleSize = (int) (DEFAULT_SAMPLE_FRACTION * dataset.size());
 			return factory.getAlgorithm(sampleSize, dataset, new Random(RANDOM_SEED));

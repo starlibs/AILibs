@@ -1,6 +1,7 @@
 dependencies {
   compile ("$api4common")
   compile ("$api4algorithm")
+  compile ("$api4datastructure")
   
   compile ("$apacheCommonsMath")
   compile ("$apacheCommonsLang")

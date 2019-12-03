@@ -5,6 +5,8 @@ import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.exception.DatasetCreationException;
 import org.api4.java.algorithm.events.AlgorithmEvent;
 import org.api4.java.algorithm.exceptions.AlgorithmException;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.clustering.learner.GMeans;
 import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
@@ -24,15 +26,21 @@ public class GmeansSampling<I extends IClusterableInstance, D extends ILabeledDa
 
 	public GmeansSampling(final long seed, final DistanceMeasure dist, final D input) {
 		super(seed, dist, input);
+		if (input.size() > 1000) {
+			throw new IllegalArgumentException("GMeans does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
+		}
 	}
 
 	public GmeansSampling(final long seed, final D input) {
 		super(seed, input);
+		if (input.size() > 1000) {
+			throw new IllegalArgumentException("GMeans does not support datasets with more than 1000 points, because it has quadratic (non-interruptible) runtime.");
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException {
+	public AlgorithmEvent nextWithException() throws AlgorithmException, InterruptedException, AlgorithmTimeoutedException, AlgorithmExecutionCanceledException {
 		switch (this.getState()) {
 		case CREATED:
 			// Initialize variables
@@ -45,7 +53,7 @@ public class GmeansSampling<I extends IClusterableInstance, D extends ILabeledDa
 			if (this.clusterResults == null) {
 				// create cluster
 				GMeans<I> gMeansCluster = new GMeans<>(this.getInput(), this.distanceMeassure, this.seed);
-				this.clusterResults = gMeansCluster.cluster();
+				this.clusterResults = gMeansCluster.cluster(); // this is not interruptible!!
 			}
 
 			return this.activate();

@@ -68,15 +68,15 @@ public class LDSRelationComputerTester extends RelationComputerTester {
 		return defficiency;
 	}
 
-	public RelationComputationProblem<Object> getCartesianProductProblem() throws AlgorithmTestProblemSetCreationException {
+	public RelationComputationProblem<Object> getCartesianProductProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets()); // remove the filter condition
 	}
 
-	public RelationComputationProblem<Object> getInfeasibleRelationProblem() throws AlgorithmTestProblemSetCreationException {
+	public RelationComputationProblem<Object> getInfeasibleRelationProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> t.size() < 3); // all full tuples are forbidden
 	}
 
-	public RelationComputationProblem<Object> getInfeasibleCompletelyPrunedRelationProblem() throws AlgorithmTestProblemSetCreationException {
+	public RelationComputationProblem<Object> getInfeasibleCompletelyPrunedRelationProblem() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		return new RelationComputationProblem<>(this.getProblemSet().getSimpleProblemInputForGeneralTestPurposes().getSets(), t -> false); // all tuples are forbidden
 	}
 

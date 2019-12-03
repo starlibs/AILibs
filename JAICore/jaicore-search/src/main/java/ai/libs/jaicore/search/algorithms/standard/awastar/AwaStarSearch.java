@@ -137,8 +137,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 
 				/* determine whether this is a goal node */
 				if (nPrime.isGoal()) {
-					List<T> newSolution = nPrime.getNodes();
-					EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(newSolution, null, nPrimeScore);
+					EvaluatedSearchGraphPath<T, A, V> solution = new EvaluatedSearchGraphPath<>(nPrime, nPrimeScore);
 					this.registerNewSolutionCandidate(solution);
 				}
 
@@ -235,7 +234,7 @@ public class AwaStarSearch<I extends GraphSearchWithSubpathEvaluationsInput<T, A
 			}
 		}
 		catch (PathEvaluationException e) {
-			throw new AlgorithmException("Algorithm failed due to path evaluation exception.", e); 
+			throw new AlgorithmException("Algorithm failed due to path evaluation exception.", e);
 		}
 		finally {
 			this.unregisterActiveThread();

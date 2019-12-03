@@ -45,7 +45,7 @@ public class SingleLabelClassification extends Prediction implements ISingleLabe
 	}
 
 	@Override
-	public int getLabelWithHighestProbability() {
+	public Integer getLabelWithHighestProbability() {
 		return this.getIntPrediction();
 	}
 

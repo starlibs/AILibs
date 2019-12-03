@@ -7,7 +7,6 @@ import java.util.Random;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.algorithm.IAlgorithm;
 
-import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.StratifiedSamplingFactory;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.AttributeBasedStratiAmountSelectorAndAssigner;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.DiscretizationHelper.DiscretizationStrategy;
@@ -19,7 +18,7 @@ public class AttributeBasedStratifiedSamplingTester extends GeneralSamplingTeste
 	private static final double DEFAULT_SAMPLE_FRACTION = 0.1;
 
 	@Override
-	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<IClusterableInstance> dataset) {
+	public IAlgorithm<?, ?> getAlgorithm(final ILabeledDataset<?> dataset) {
 
 		List<Integer> attributeIndices = new ArrayList<>();
 		// We assume that the target is the last attribute

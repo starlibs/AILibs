@@ -22,12 +22,12 @@ public class ReductionBasedAlgorithmTestProblemSet<I1, O1, I2, O2> extends AAlgo
 	}
 
 	@Override
-	public I1 getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
+	public I1 getSimpleProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		return this.reduction.encodeProblem(this.mainProblemSet.getSimpleProblemInputForGeneralTestPurposes());
 	}
 
 	@Override
-	public I1 getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException {
+	public I1 getDifficultProblemInputForGeneralTestPurposes() throws AlgorithmTestProblemSetCreationException, InterruptedException {
 		return this.reduction.encodeProblem(this.mainProblemSet.getDifficultProblemInputForGeneralTestPurposes());
 	}
 }

@@ -158,7 +158,6 @@ public class ArffDatasetAdapter implements IDatasetDeserializer<ILabeledDataset<
 			for (int i = 0; i < lineSplit.length; i++) {
 				parsedDenseInstance[i] = attributes.get(i).deserializeAttributeValue(lineSplit[i]);
 			}
-
 			return parsedDenseInstance;
 		} else {
 			Map<Integer, Object> parsedSparseInstance = new HashMap<>();

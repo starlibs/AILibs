@@ -9,6 +9,8 @@ import org.apache.commons.math3.ml.distance.ManhattanDistance;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 import org.api4.java.algorithm.events.AlgorithmEvent;
+import org.api4.java.algorithm.exceptions.AlgorithmExecutionCanceledException;
+import org.api4.java.algorithm.exceptions.AlgorithmTimeoutedException;
 
 import ai.libs.jaicore.ml.core.filter.sampling.SampleElementAddedEvent;
 
@@ -42,11 +44,15 @@ public abstract class ClusterSampling<I extends ILabeledInstance & Clusterable, 
 		this.distanceMeassure = distanceMeassure;
 	}
 
-	public AlgorithmEvent doAlgorithmStep() {
+	public AlgorithmEvent doAlgorithmStep() throws AlgorithmTimeoutedException, InterruptedException, AlgorithmExecutionCanceledException {
 		if (this.currentCluster < this.clusterResults.size()) {
 			CentroidCluster<I> cluster = this.clusterResults.get(this.currentCluster++);
 			boolean same = true;
-			for (int i = 1; i < cluster.getPoints().size(); i++) {
+			int n = cluster.getPoints().size();
+			for (int i = 1; i < n; i++) {
+				if (i % 1000 == 0) {
+					this.checkAndConductTermination();
+				}
 				if (!cluster.getPoints().get(i - 1).getLabel().equals(cluster.getPoints().get(i).getLabel())) {
 					same = false;
 					break;

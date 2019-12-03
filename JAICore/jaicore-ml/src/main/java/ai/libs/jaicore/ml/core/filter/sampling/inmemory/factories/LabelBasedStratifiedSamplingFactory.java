@@ -8,7 +8,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRe
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.LabelBasedStratifiedSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.stratified.sampling.StratifiedSampling;
 
-public class LabelBasedStratifiedSamplingFactory<D extends ILabeledDataset<?>> implements IRerunnableSamplingAlgorithmFactory<D, StratifiedSampling<D>> {
+public class LabelBasedStratifiedSamplingFactory<D extends ILabeledDataset<?>> extends ASampleAlgorithmFactory<D, StratifiedSampling<D>> implements IRerunnableSamplingAlgorithmFactory<D, StratifiedSampling<D>> {
 
 	@Override
 	public StratifiedSampling<D> getAlgorithm(final int sampleSize, final D inputDataset, final Random random) {

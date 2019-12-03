@@ -1,59 +1,60 @@
 package ai.libs.jaicore.ml.core.filter.sampling.inmemory.casecontrol;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import org.api4.java.ai.ml.classification.singlelabel.dataset.ISingleLabelClassificationInstance;
-import org.api4.java.ai.ml.classification.singlelabel.learner.ISingleLabelClassifier;
+import org.api4.java.ai.ml.classification.IClassifier;
 import org.api4.java.ai.ml.core.dataset.supervised.ILabeledDataset;
+import org.api4.java.ai.ml.core.dataset.supervised.ILabeledInstance;
 
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.ISamplingAlgorithmFactory;
 
-public class OSMAC<D extends ILabeledDataset<ISingleLabelClassificationInstance>> extends PilotEstimateSampling<ISingleLabelClassificationInstance, D> {
+public class OSMAC<D extends ILabeledDataset<?>> extends PilotEstimateSampling<D> {
 
-	public OSMAC(final Random rand, final int preSampleSize, final D input) {
-		super(input);
+	public OSMAC(final Random rand, final D input, final IClassifier pilot) {
+		super(input, pilot);
 		this.rand = rand;
-		this.preSampleSize = preSampleSize;
+	}
+
+	public OSMAC(final Random rand, final D input, final ISamplingAlgorithmFactory<D, ?> subSamplingFactory, final int preSampleSize, final IClassifier pilot) {
+		super(input, subSamplingFactory, preSampleSize, pilot);
+		this.rand = rand;
 	}
 
 	@Override
-	protected ArrayList<Pair<ISingleLabelClassificationInstance, Double>> calculateFinalInstanceBoundaries(final D instances, final ISingleLabelClassifier pilotEstimator) {
+	public List<Pair<ILabeledInstance, Double>> calculateAcceptanceThresholdsWithTrainedPilot(final D instances, final IClassifier pilotEstimator) {
 		double boundaryOfCurrentInstance = 0.0;
-		ArrayList<Pair<ISingleLabelClassificationInstance, Double>> probabilityBoundaries = new ArrayList<>();
-		ArrayList<Pair<ISingleLabelClassificationInstance, Double>> instanceProbabilityBoundaries = new ArrayList<>();
+		ArrayList<Pair<ILabeledInstance, Double>> probabilityBoundaries = new ArrayList<>();
 		double sumOfDistributionLosses = 0;
 		int vectorLength;
-		double loss;
-		for (ISingleLabelClassificationInstance instance : instances) {
+		int n = instances.size();
+		double[] normalizedLosses = new double[n];
+		for (int i = 0; i < n; i++) {
+			ILabeledInstance instance = instances.get(i);
 			vectorLength = 0;
-			for (double dimensionLength : (Double[]) instance.getAttributes()) {
-				vectorLength += dimensionLength;
+			for (Object attributeVal : instance.getAttributes()) {
+				if (!attributeVal.equals("?")) { // just ignore missing values
+					if (!(attributeVal instanceof Number)) {
+						throw new IllegalArgumentException("Illegal non-double attribute value " + attributeVal);
+					}
+					vectorLength += Double.valueOf(attributeVal.toString());
+				}
 			}
+			double loss;
 			try {
-				loss = 1 - pilotEstimator.predict(instance).getClassDistribution().get(instance.getIntLabel());
+				loss = 1 - pilotEstimator.predict(instance).getProbabilityOfLabel(instance.getLabel());
 			} catch (Exception e) {
 				loss = 1;
 			}
-			sumOfDistributionLosses += loss * vectorLength;
+			normalizedLosses[i] = loss * vectorLength;
+			sumOfDistributionLosses += normalizedLosses[i];
 		}
-		for (ISingleLabelClassificationInstance instance : instances) {
-			vectorLength = 0;
-			for (double dimensionLength : (Double[]) instance.getAttributes()) {
-				vectorLength += dimensionLength;
-			}
-			try {
-				loss = 1 - pilotEstimator.predict(instance).getClassDistribution().get(instance.getIntLabel());
-			} catch (Exception e) {
-				loss = 1;
-			}
-			boundaryOfCurrentInstance += loss * vectorLength / sumOfDistributionLosses;
-			instanceProbabilityBoundaries.add(new Pair<ISingleLabelClassificationInstance, Double>(instance, boundaryOfCurrentInstance));
-		}
-		int iterator = 0;
-		for (ISingleLabelClassificationInstance instance : instances) {
-			probabilityBoundaries.add(new Pair<>(instance, instanceProbabilityBoundaries.get(iterator).getY()));
-			iterator++;
+
+		for (int i = 0; i < n; i++) {
+			boundaryOfCurrentInstance += normalizedLosses[i] / sumOfDistributionLosses;
+			probabilityBoundaries.add(new Pair<>(instances.get(i), boundaryOfCurrentInstance));
 		}
 		return probabilityBoundaries;
 	}

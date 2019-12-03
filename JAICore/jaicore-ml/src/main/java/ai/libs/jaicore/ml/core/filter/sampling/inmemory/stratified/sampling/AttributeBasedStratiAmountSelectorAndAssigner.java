@@ -190,7 +190,6 @@ public class AttributeBasedStratiAmountSelectorAndAssigner implements IStratiAmo
 				for (Entry<Integer, Set<Object>> entry : this.attributeValues.entrySet()) {
 					IAttribute att = entry.getKey() == this.targetIndex ? ((ILabeledDataset<?>)this.dataset).getLabelAttribute() : this.dataset.getAttribute(entry.getKey());
 					for (Object o : entry.getValue()) {
-						System.out.println("Considering value " + o);
 						if (!att.isValidValue(o)) {
 							throw new IllegalStateException("Collecting invalid value " + o + " for attribute " + att);
 						}

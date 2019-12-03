@@ -1,15 +1,17 @@
 package ai.libs.jaicore.search.model.other;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.api4.java.datastructure.graph.IPath;
+
+import ai.libs.jaicore.graph.ReadOnlyPathAccessor;
 
 public class SearchGraphPath<N, A> implements IPath<N, A> {
 	private final List<N> nodes;
@@ -42,7 +44,7 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 	}
 
 	public SearchGraphPath(final N node) {
-		this(Arrays.asList(node), new ArrayList<>(), new HashMap<>());
+		this(new ArrayList<>(Collections.singletonList(node)), new ArrayList<>(), new HashMap<>());
 	}
 
 	public SearchGraphPath(final List<N> nodes, final List<A> edges) {
@@ -155,5 +157,30 @@ public class SearchGraphPath<N, A> implements IPath<N, A> {
 	@Override
 	public boolean containsNode(final N node) {
 		return this.nodes.contains(node);
+	}
+
+	@Override
+	public IPath<N, A> getUnmodifiableAccessor() {
+		return new ReadOnlyPathAccessor<>(this);
+	}
+
+	@Override
+	public N getParentOfHead() {
+		return this.nodes.get(this.nodes.size() - 2);
+	}
+
+	@Override
+	public void extend(final N newHead, final A arcToNewHead) {
+		this.nodes.add(newHead);
+		this.edges.add(arcToNewHead);
+	}
+
+	@Override
+	public void cutHead() {
+		if (this.isPoint()) {
+			throw new NoSuchElementException("The path consists only of one point, which cannot be removed.");
+		}
+		this.nodes.remove(this.nodes.size() - 1);
+		this.edges.remove(this.edges.size() - 1);
 	}
 }

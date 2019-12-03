@@ -10,7 +10,7 @@ import ai.libs.jaicore.ml.core.filter.sampling.IClusterableInstance;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.GmeansSampling;
 import ai.libs.jaicore.ml.core.filter.sampling.inmemory.factories.interfaces.IRerunnableSamplingAlgorithmFactory;
 
-public class GmeansSamplingFactory<I extends IClusterableInstance, D extends ILabeledDataset<I>> implements IRerunnableSamplingAlgorithmFactory<D, GmeansSampling<I, D>> {
+public class GmeansSamplingFactory<I extends IClusterableInstance, D extends ILabeledDataset<I>> extends ASampleAlgorithmFactory<D, GmeansSampling<I, D>> implements IRerunnableSamplingAlgorithmFactory<D, GmeansSampling<I, D>> {
 
 	private GmeansSampling<I, D> previousRun;
 	private long clusterSeed = System.currentTimeMillis();
