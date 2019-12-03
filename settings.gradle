@@ -56,8 +56,8 @@ project(":mlplan-ext-metalearning").projectDir = new File(configPrefix, "mlplan/
 include 'mlplan-full'
 project(":mlplan-full").projectDir = new File(configPrefix, "mlplan/full")
 
-include 'autofe'
-project(":autofe").projectDir = new File(configPrefix,"autofe")
+//include 'autofe'
+//project(":autofe").projectDir = new File(configPrefix,"autofe")
 
-include 'autofe-reldata'
-project(":autofe-reldata").projectDir = new File(configPrefix,"autofe-reldata")
+//include 'autofe-reldata'
+//project(":autofe-reldata").projectDir = new File(configPrefix,"autofe-reldata")

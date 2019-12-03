@@ -1,7 +1,6 @@
 package ai.libs.jaicore.basic;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -18,12 +17,12 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import org.api4.java.common.control.ILoggingCustomizable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ai.libs.jaicore.basic.kvstore.IKVStore;
 import ai.libs.jaicore.basic.sets.Pair;
+import ai.libs.jaicore.db.IDatabaseAdapter;
 import ai.libs.jaicore.db.sql.ResultSetToKVStoreSerializer;
 
 /**
@@ -34,7 +33,7 @@ import ai.libs.jaicore.db.sql.ResultSetToKVStoreSerializer;
  *
  */
 @SuppressWarnings("serial")
-public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomizable {
+public class SQLAdapter implements IDatabaseAdapter {
 
 	private transient Logger logger = LoggerFactory.getLogger(SQLAdapter.class);
 
@@ -190,6 +189,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * Checks whether the connection to the database is still alive and re-establishs the connection if it is not.
 	 * @throws SQLException Thrown, if there was an issue with reconnecting to the database server.
 	 */
+	@Override
 	public synchronized void checkConnection() throws SQLException {
 		int renewAfterSeconds = 5 * 60;
 		if (this.timestampOfLastAction + renewAfterSeconds * 1000 < System.currentTimeMillis()) {
@@ -205,6 +205,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return A list of {@link IKVStore}s containing the data of the table.
 	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
 	 */
+	@Override
 	public List<IKVStore> getRowsOfTable(final String table) throws SQLException {
 		return this.getRowsOfTable(table, new HashMap<>());
 	}
@@ -216,6 +217,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return A list of {@link IKVStore}s containing the data of the table.
 	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
 	 */
+	@Override
 	public List<IKVStore> getRowsOfTable(final String table, final Map<String, String> conditions) throws SQLException {
 		StringBuilder conditionSB = new StringBuilder();
 		List<String> values = new ArrayList<>();
@@ -237,6 +239,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return A list of {@link IKVStore}s containing the result data of the query.
 	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
 	 */
+	@Override
 	public List<IKVStore> getResultsOfQuery(final String query) throws SQLException {
 		return this.getResultsOfQuery(query, new ArrayList<>());
 	}
@@ -248,6 +251,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return A list of {@link IKVStore}s containing the result data of the query.
 	 * @throws SQLException Thrown, if there was an issue with the connection to the database.
 	 */
+	@Override
 	public List<IKVStore> getResultsOfQuery(final String query, final String[] values) throws SQLException {
 		return this.getResultsOfQuery(query, Arrays.asList(values));
 	}
@@ -259,6 +263,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return A list of {@link IKVStore}s containing the result data of the query.
 	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
 	 */
+	@Override
 	public List<IKVStore> getResultsOfQuery(final String query, final List<String> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement statement = this.connect.prepareStatement(query)) {
@@ -278,6 +283,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return An array of the row ids of the inserted entries.
 	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
 	 */
+	@Override
 	public int[] insert(final String sql, final String[] values) throws SQLException {
 		return this.insert(sql, Arrays.asList(values));
 	}
@@ -289,6 +295,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return An array of the row ids of the inserted entries.
 	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
 	 */
+	@Override
 	public int[] insert(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -313,6 +320,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return An array of the row ids of the inserted entries.
 	 * @throws SQLException Thrown, if there was an issue with the query format or the connection to the database.
 	 */
+	@Override
 	public int[] insert(final String table, final Map<String, ? extends Object> map) throws SQLException {
 		Pair<String, List<Object>> insertStatement = this.buildInsertStatement(table, map);
 		return this.insert(insertStatement.getX(), insertStatement.getY());
@@ -326,6 +334,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return An array of row id's of the inserted rows.
 	 * @throws SQLException Thrown, if the sql statement was malformed, could not be executed, or the connection to the database failed.
 	 */
+	@Override
 	public int[] insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows) throws SQLException {
 		return this.insertMultiple(table, keys, datarows, 10000);
 	}
@@ -339,6 +348,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return An array of row id's of the inserted rows.
 	 * @throws SQLException Thrown, if the sql statement was malformed, could not be executed, or the connection to the database failed.
 	 */
+	@Override
 	public int[] insertMultiple(final String table, final List<String> keys, final List<List<? extends Object>> datarows, final int chunkSize) throws SQLException {
 		int n = datarows.size();
 		List<Integer> ids = new ArrayList<>(n);
@@ -442,6 +452,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return The number of rows affected by the update statement.
 	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
 	 */
+	@Override
 	public int update(final String sql) throws SQLException {
 		return this.update(sql, new ArrayList<String>());
 	}
@@ -453,6 +464,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return The number of rows affected by the update statement.
 	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
 	 */
+	@Override
 	public int update(final String sql, final String[] values) throws SQLException {
 		return this.update(sql, Arrays.asList(values));
 	}
@@ -464,6 +476,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return The number of rows affected by the update statement.
 	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
 	 */
+	@Override
 	public int update(final String sql, final List<? extends Object> values) throws SQLException {
 		this.checkConnection();
 		try (PreparedStatement stmt = this.connect.prepareStatement(sql)) {
@@ -482,6 +495,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @return The number of rows affected by the update statement.
 	 * @throws SQLException Thrown if the statement is malformed or an issue while executing the sql statement occurs.
 	 */
+	@Override
 	public int update(final String table, final Map<String, ? extends Object> updateValues, final Map<String, ? extends Object> conditions) throws SQLException {
 		this.checkConnection();
 
@@ -537,6 +551,7 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 	 * @throws SQLException
 	 *             If the status of the connection cannot be changed. If something goes wrong while executing the given statements, they are rolled back before they are committed.
 	 */
+	@Override
 	public void executeQueriesAtomically(final List<PreparedStatement> queries) throws SQLException {
 		this.checkConnection();
 		this.connect.setAutoCommit(false);
@@ -561,6 +576,19 @@ public class SQLAdapter implements Serializable, AutoCloseable, ILoggingCustomiz
 			}
 
 			this.connect.setAutoCommit(true);
+		}
+	}
+
+	@Override
+	public List<IKVStore> query(final String sqlStatement) throws SQLException, IOException {
+		this.checkConnection();
+		try (PreparedStatement ps = this.connect.prepareStatement(sqlStatement)) {
+			boolean success = ps.execute();
+			if (success) {
+				return new ResultSetToKVStoreSerializer().serialize(ps.getResultSet());
+			} else {
+				return new LinkedList<>();
+			}
 		}
 	}
 
